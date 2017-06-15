@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/java-lame.iml" filepath="$PROJECT_DIR$/java-lame.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java-lame_main.iml" filepath="$PROJECT_DIR$/.idea/modules/java-lame_main.iml" group="java-lame" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/java-lame_test.iml" filepath="$PROJECT_DIR$/.idea/modules/java-lame_test.iml" group="java-lame" />
     </modules>
   </component>
 </project>
