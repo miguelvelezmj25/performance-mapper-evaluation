@@ -11,6 +11,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Enconding (JDK)
+ * AudioFormat (JDK)
+ * Lame
+ * LameEncoder
+ * LameGlobalFlags
+ * LameInternalFlags
+ * MPEGMode
+ */
 public class Main {
 
     public static void main(String[] args) throws IOException {
