@@ -46,6 +46,13 @@ public class PngColorCounter extends PngProcessor {
 	public PngColorCounter(String logLevel, double distThreshold, double freqThreshold, int minAlpha, long timeout) {
 		super(logLevel);
 
+//		if(useFreqThreshold) {
+//			freqThreshold = 1.0D;
+//		}
+//		else {
+//			freqThreshold = 0.0D;
+//		}
+
 		this.distThreshold = distThreshold;
 		this.freqThreshold = freqThreshold;
 		this.minAlpha = minAlpha;
@@ -56,6 +63,12 @@ public class PngColorCounter extends PngProcessor {
 
 	/** */
 	public void count(PngImage image) throws IOException {
+//		if(useFreqThreshold) {
+//			double ifreqThreshold = 1.0D;
+//		}
+//		else {
+//			double ifreqThreshold = 0.0D;
+//		}
 		log.debug("=== COUNTING ===");
 
 		// FIXME: support low bit depth interlaced images
@@ -169,6 +182,13 @@ public class PngColorCounter extends PngProcessor {
 			y++;
 		}
 		log.debug("Full color count=%d", colors.size());
+
+//		if(useFreqThreshold) {
+//			double ifreqThreshold = 1.0D;
+//		}
+//		else {
+//			double ifreqThreshold = 0.0D;
+//		}
 
 		if (freqThreshold > 0) {
 			final int minFreq = (int) (original.getWidth() * original.getHeight() * freqThreshold);

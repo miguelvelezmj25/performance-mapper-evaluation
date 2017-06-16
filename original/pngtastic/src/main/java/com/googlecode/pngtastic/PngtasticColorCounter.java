@@ -15,6 +15,10 @@ import java.util.Map;
  * @author rayvanderborght
  */
 public class PngtasticColorCounter {
+
+	public static boolean useDistThreshold = false;
+	public static double useFreqThreshold = 5;
+
 	/** */
 	private static final String HELP = "java -jar pngtastic-x.x.jar com.googlecode.pngtastic.PngtasticColorCounter [options] file1 [file2 ..]\n"
 			+ "Options:\n"
@@ -27,6 +31,21 @@ public class PngtasticColorCounter {
 	/** */
 	public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
 			int minAlpha, long timeout) {
+
+//		if(useFreqThreshold) {
+//			freqThreshold = 1.0D;
+//		}
+//		else {
+//			freqThreshold = 0.0D;
+//		}
+
+		if(freqThreshold > 0.0D) {
+			int i =0;
+		}
+
+		if(freqThreshold > 0) {
+			int i =0;
+		}
 
 		long start = System.currentTimeMillis();
 		PngColorCounter counter = new PngColorCounter(logLevel, distThreshold, freqThreshold, minAlpha, timeout);
@@ -75,6 +94,12 @@ public class PngtasticColorCounter {
 		Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
 		Integer timeout = safeInteger(options.get("--timeout"), 0);
 		String logLevel = options.get("--logLevel");
+
+		freqThreshold = useFreqThreshold;
+
+		if(freqThreshold > 0) {
+			int i =0;
+		}
 
 		new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
 	}
