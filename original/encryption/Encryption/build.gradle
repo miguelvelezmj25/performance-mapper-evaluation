@@ -1,0 +1,33 @@
+apply plugin: 'java'
+
+group 'se.simbio.encryption'
+version '2.0.0'
+
+sourceCompatibility = 1.6
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'main'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
+}
+
+test {
+    testLogging {
+        events 'started', 'passed', 'skipped', 'failed'
+    }
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
