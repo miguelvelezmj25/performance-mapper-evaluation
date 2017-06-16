@@ -28,7 +28,7 @@ import org.apache.commons.compress.compressors.CompressorException;
  * Decorates an {@link Archiver} with a {@link Compressor}, s.t. it is able to compress the archives it generates and
  * decompress the archives it extracts.
  */
-class ArchiverCompressorDecorator implements Archiver {
+public class ArchiverCompressorDecorator implements Archiver {
 
     private CommonsArchiver archiver;
     private CommonsCompressor compressor;
@@ -39,7 +39,7 @@ class ArchiverCompressorDecorator implements Archiver {
      * @param archiver the archiver to decorate
      * @param compressor the compressor used for compression
      */
-    ArchiverCompressorDecorator(CommonsArchiver archiver, CommonsCompressor compressor) {
+    public ArchiverCompressorDecorator(CommonsArchiver archiver, CommonsCompressor compressor) {
         this.archiver = archiver;
         this.compressor = compressor;
     }

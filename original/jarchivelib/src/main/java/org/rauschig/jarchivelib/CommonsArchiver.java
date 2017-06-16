@@ -31,11 +31,11 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
  * archiver name passed when creating the {@code GenericArchiver}. Thus, it can be used for all archive formats the
  * {@code org.apache.commons.compress} library supports.
  */
-class CommonsArchiver implements Archiver {
+public class CommonsArchiver implements Archiver {
 
     private final ArchiveFormat archiveFormat;
 
-    CommonsArchiver(ArchiveFormat archiveFormat) {
+    public CommonsArchiver(ArchiveFormat archiveFormat) {
         this.archiveFormat = archiveFormat;
     }
 

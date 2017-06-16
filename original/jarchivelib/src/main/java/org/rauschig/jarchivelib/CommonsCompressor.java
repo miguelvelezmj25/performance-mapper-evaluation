@@ -35,11 +35,11 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
  * compressor name passed when creating the GenericCompressor. Thus, it can be used for all compression algorithms the
  * {@code org.apache.commons.compress} library supports.
  */
-class CommonsCompressor implements Compressor {
+public class CommonsCompressor implements Compressor {
 
     private final CompressionType compressionType;
 
-    CommonsCompressor(CompressionType type) {
+    public CommonsCompressor(CompressionType type) {
         this.compressionType = type;
     }
 

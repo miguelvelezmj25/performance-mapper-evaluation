@@ -69,15 +69,18 @@ public class LameEncoder {
    * In VBR mode, bit rate is ignored.
    */
   public static int DEFAULT_BITRATE = BITRATE_AUTO;
-  private int bitRate = DEFAULT_BITRATE;
+//  private int bitRate = DEFAULT_BITRATE;
+  public int bitRate = DEFAULT_BITRATE; // TODO MV
   /**
    * suggested maximum buffer size for an mpeg frame
    */
   private static final int DEFAULT_PCM_BUFFER_SIZE = 2048 * 16;
   public static int DEFAULT_QUALITY = Lame.QUALITY_MIDDLE;
-  private int quality = DEFAULT_QUALITY;
+//  private int quality = DEFAULT_QUALITY;
+  public int quality = DEFAULT_QUALITY; // TODO MV
   public static boolean DEFAULT_VBR = false;
-  private boolean vbrMode = DEFAULT_VBR;
+//  private boolean vbrMode = DEFAULT_VBR;
+  public boolean vbrMode = DEFAULT_VBR; // TODO MV
   /**
    * MP3 encoder.
    */
@@ -86,7 +89,8 @@ public class LameEncoder {
   // encoding values
   private int sampleSizeInBits;
   private ByteOrder byteOrder;
-  private MPEGMode chMode;
+//  private MPEGMode chMode;
+  public MPEGMode chMode; // TODO MV
 
   // these fields are set upon successful initialization to show effective
   // values.
@@ -144,7 +148,7 @@ public class LameEncoder {
     }
   }
 
-  private void initParams(AudioFormat sourceFormat) {
+  public void initParams(AudioFormat sourceFormat) { // TODO MV
     sampleSizeInBits = sourceFormat.getSampleSizeInBits();
     byteOrder = sourceFormat.isBigEndian() ? ByteOrder.BIG_ENDIAN
         : ByteOrder.LITTLE_ENDIAN;
