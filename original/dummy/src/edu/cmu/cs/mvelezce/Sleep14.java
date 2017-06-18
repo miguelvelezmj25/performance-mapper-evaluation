@@ -47,7 +47,7 @@ public class Sleep14 {
             d=1;
         } else if(IA > 4 && DA > 2) {
             integer(1);
-            Thread.sleep(500);
+            Thread.sleep(300);
         }
 
         doubleNumber(d);
@@ -55,14 +55,14 @@ public class Sleep14 {
 
     private static void doubleNumber(double d) throws InterruptedException {
         if (d > 0) {
-            Thread.sleep(600);
+            Thread.sleep(400);
         }
 
     }
 
     private static void integer(int i) throws InterruptedException {
         if (i > 0) {
-            Thread.sleep(700);
+            Thread.sleep(500);
         }
     }
 }
