@@ -5,13 +5,13 @@ package edu.cmu.cs.mvelezce;
  */
 public class Feature {
 
-    public static boolean USE_WHEEL = false;
+    public static boolean ONE = false;
 
     public static void main(String[] args) {
-        USE_WHEEL = true;
+        ONE = true;
         int i = 0;
 
-        if(USE_WHEEL) {
+        if(ONE) {
             i = 1;
         }
         else {
