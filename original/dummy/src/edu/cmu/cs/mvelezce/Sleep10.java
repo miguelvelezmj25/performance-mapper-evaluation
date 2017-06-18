@@ -25,10 +25,10 @@ public class Sleep10 {
             // Region A end
         }
         else if(b){ // 42
-            // Region B start
+            // Region IA start
             Thread.sleep(700);
             Sleep10.method2(b);
-            // Region B end
+            // Region IA end
         }
         Thread.sleep(100);
         // Region program end
@@ -53,11 +53,11 @@ public class Sleep10 {
         boolean b = B;
         Thread.sleep(300);
 
-        // Region B start
+        // Region IA start
         if(b) { // 16
             Thread.sleep(600);
         }
-        // Region B end
+        // Region IA end
 
         Thread.sleep(200);
     }

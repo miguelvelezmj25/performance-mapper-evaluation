@@ -55,10 +55,10 @@ public class Dummy4 {
 //
 //        integer(i);
 
-//        int i = integerFeature;
+//        int i = IA;
 //        integer(i);
 
-//        double d = doubleFeature;
+//        double d = DA;
 //        doubleNumber(d);
     }
 
