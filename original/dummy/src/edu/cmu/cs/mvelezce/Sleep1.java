@@ -15,7 +15,6 @@ public class Sleep1 {
     public static void main(String[] args) throws InterruptedException {
         // Region program start
         System.out.println("main");
-        boolean a = Boolean.valueOf(args[0]);
 
         if(Boolean.valueOf(args[0])) {
             A =  true;

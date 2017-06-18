@@ -5,6 +5,8 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep2 {
 
+    public static boolean A = false;
+
     public static final String FILENAME = Sleep2.class.getCanonicalName();
     public static final String PACKAGE = Sleep2.class.getPackage().getName();
     public static final String CLASS = Sleep2.class.getSimpleName();
@@ -14,18 +16,27 @@ public class Sleep2 {
     public static void main(String[] args) throws InterruptedException {
         // Region program start
         System.out.println("main");
-        boolean a = Boolean.valueOf(args[0]);
+
+
+        if(Boolean.valueOf(args[0])) {
+            A =  true;
+        }
+        else {
+            A = false;
+        }
+
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 20
+        if(A) { // 20
             Thread.sleep(600);
-            Sleep2.method1(a);
+            Sleep2.method1(A);
         }
         // Region A end
 
         Thread.sleep(100);
-        Sleep2.method1(a);
+        // TODO Lotrack cannot analyze if I pass the actual value true
+        Sleep2.method1(true);
         Thread.sleep(150);
 
         // Region program end
