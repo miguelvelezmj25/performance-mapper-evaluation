@@ -16,16 +16,21 @@ public class Sleep1 {
         // Region program start
         System.out.println("main");
 
-        if(Boolean.valueOf(args[0])) {
-            A =  true;
+//        boolean a = Boolean.valueOf(args[0]);
+        A = Boolean.valueOf(args[0]);
+
+        boolean a;
+
+        if(A) {
+            a = true;
         }
         else {
-            A = false;
+            a = false;
         }
 
         Thread.sleep(200);
         // Region A start
-        if(A) { // 20
+        if(a) { // 20
             Thread.sleep(600);
         }
         // Region A end

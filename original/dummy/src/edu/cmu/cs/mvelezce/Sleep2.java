@@ -17,18 +17,22 @@ public class Sleep2 {
         // Region program start
         System.out.println("main");
 
+//        boolean a = Boolean.valueOf(args[0]);
+        A = Boolean.valueOf(args[0]);
 
-        if(Boolean.valueOf(args[0])) {
-            A =  true;
+        boolean a;
+
+        if(A) {
+            a = true;
         }
         else {
-            A = false;
+            a = false;
         }
 
         Thread.sleep(200);
 
         // Region A start
-        if(A) { // 20
+        if(a) { // 20
             Thread.sleep(600);
             Sleep2.method1(A);
         }
@@ -36,7 +40,7 @@ public class Sleep2 {
 
         Thread.sleep(100);
         // TODO Lotrack cannot analyze if I pass the actual value true
-        Sleep2.method1(true);
+        Sleep2.method1(a);
         Thread.sleep(150);
 
         // Region program end
