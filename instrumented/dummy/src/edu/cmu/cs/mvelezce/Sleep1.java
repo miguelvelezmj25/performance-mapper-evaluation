@@ -5,6 +5,8 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep1 {
 
+    public static boolean A = false;
+
     public static final String FILENAME = Sleep1.class.getCanonicalName();
     public static final String PACKAGE = Sleep1.class.getPackage().getName();
     public static final String CLASS = Sleep1.class.getSimpleName();
@@ -14,9 +16,17 @@ public class Sleep1 {
         // Region program start
         System.out.println("main");
         boolean a = Boolean.valueOf(args[0]);
+
+        if(Boolean.valueOf(args[0])) {
+            A =  true;
+        }
+        else {
+            A = false;
+        }
+
         Thread.sleep(200);
         // Region A start
-        if(a) { // 20
+        if(A) { // 20
             Thread.sleep(600);
         }
         // Region A end
