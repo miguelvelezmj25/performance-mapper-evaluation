@@ -5,6 +5,9 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep10 {
 
+    public static boolean A = false;
+    public static boolean B = false;
+
     public static final String FILENAME = Sleep10.class.getCanonicalName();
     public static final String PACKAGE = Sleep10.class.getPackage().getName();
     public static final String CLASS = Sleep10.class.getSimpleName();
@@ -15,29 +18,52 @@ public class Sleep10 {
     public static void main(String[] args) throws InterruptedException {
         // Region program start
         System.out.println("main");
-        boolean a = Boolean.valueOf(args[0]);
-        boolean b = Boolean.valueOf(args[1]);
-        Thread.sleep(200);
+
+//        boolean a = Boolean.valueOf(args[0]);
+//        boolean b = Boolean.valueOf(args[1]);
+        A = Boolean.valueOf(args[0]);
+        B = Boolean.valueOf(args[1]);
+
+        boolean a;
+
+        if(A) {
+            a = true;
+        }
+        else {
+            a = false;
+        }
+
+        boolean b;
+
+        if(B) {
+            b = true;
+        }
+        else {
+            b = false;
+        }
+
+        Thread.sleep(100);
         if(a) { // 28
             // Region A start
-            Thread.sleep(600);
+            Thread.sleep(200);
             Sleep10.method1(a);
             // Region A end
         }
         else if(b){ // 42
-            // Region IA start
-            Thread.sleep(700);
+            // Region B start
+            Thread.sleep(300);
             Sleep10.method2(b);
-            // Region IA end
+            // Region B end
         }
-        Thread.sleep(100);
+
+        Thread.sleep(400);
         // Region program end
     }
 
     public static void method1(boolean A) throws InterruptedException {
         System.out.println("method1");
         boolean a = A;
-        Thread.sleep(200);
+        Thread.sleep(500);
 
         // Region A start
         if(a) { // 16
@@ -45,21 +71,21 @@ public class Sleep10 {
         }
         // Region A end 20
 
-        Thread.sleep(100);
+        Thread.sleep(700);
     }
 
     public static void method2(boolean B) throws InterruptedException {
         System.out.println("method2");
         boolean b = B;
-        Thread.sleep(300);
+        Thread.sleep(800);
 
-        // Region IA start
+        // Region B start
         if(b) { // 16
-            Thread.sleep(600);
+            Thread.sleep(900);
         }
-        // Region IA end
+        // Region B end
 
-        Thread.sleep(200);
+        Thread.sleep(1000);
     }
 
 }
