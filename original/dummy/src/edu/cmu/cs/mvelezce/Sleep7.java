@@ -33,7 +33,7 @@ public class Sleep7 {
         // Region A start
         int repeat;
         if(a) { // 20
-            repeat = 0;
+            repeat = 5;
         }
         else {
             repeat = 10;
