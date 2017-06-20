@@ -16,8 +16,7 @@ import java.util.Map;
  */
 public class PngtasticColorCounter {
 
-	public static boolean useDistThreshold = false;
-	public static double useFreqThreshold = 5;
+//	public static boolean FREQTHRESHOLD = false;
 
 	/** */
 	private static final String HELP = "java -jar pngtastic-x.x.jar com.googlecode.pngtastic.PngtasticColorCounter [options] file1 [file2 ..]\n"
@@ -32,19 +31,8 @@ public class PngtasticColorCounter {
 	public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
 			int minAlpha, long timeout) {
 
-//		if(useFreqThreshold) {
-//			freqThreshold = 1.0D;
-//		}
-//		else {
-//			freqThreshold = 0.0D;
-//		}
-
-		if(freqThreshold > 0.0D) {
-			int i =0;
-		}
-
-		if(freqThreshold > 0) {
-			int i =0;
+		if(freqThreshold == 0) {
+			int i = 0;
 		}
 
 		long start = System.currentTimeMillis();
@@ -64,45 +52,48 @@ public class PngtasticColorCounter {
 		System.out.println(String.format("Processed in %d milliseconds", System.currentTimeMillis() - start));
 	}
 
-	/** */
-	public static void main(String[] args) {
-		Map<String, String> options = new HashMap<>();
-		int last = 0;
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			if (arg.startsWith("--")) {
-				int next = i + 1;
-				if (next < args.length) {
-					options.put(arg, args[next]);
-					last = next + 1;
-				} else {
-					options.put(arg, null);
-					last = next;
-				}
-			}
-		}
-		String[] files = Arrays.copyOfRange(args, last, args.length);
-
-		if (files.length == 0) {
-			System.out.println("No files to process");
-			System.out.println(HELP);
-			return;
-		}
-
-		Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
-		Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
-		Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
-		Integer timeout = safeInteger(options.get("--timeout"), 0);
-		String logLevel = options.get("--logLevel");
-
-		freqThreshold = useFreqThreshold;
-
-		if(freqThreshold > 0) {
-			int i =0;
-		}
-
-		new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
-	}
+//	/** */
+//	public static void main(String[] args) {
+//		Map<String, String> options = new HashMap<>();
+//		int last = 0;
+//		for (int i = 0; i < args.length; i++) {
+//			String arg = args[i];
+//			if (arg.startsWith("--")) {
+//				int next = i + 1;
+//				if (next < args.length) {
+//					options.put(arg, args[next]);
+//					last = next + 1;
+//				} else {
+//					options.put(arg, null);
+//					last = next;
+//				}
+//			}
+//		}
+//		String[] files = Arrays.copyOfRange(args, last, args.length);
+//
+//		if (files.length == 0) {
+//			System.out.println("No files to process");
+//			System.out.println(HELP);
+//			return;
+//		}
+//
+//		Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
+////		Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
+//		Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
+//		Integer timeout = safeInteger(options.get("--timeout"), 0);
+//		String logLevel = options.get("--logLevel");
+//
+//		Double freqThreshold;
+//
+//		if(FREQTHRESHOLD) {
+//			freqThreshold = 0.0D;
+//		}
+//		else {
+//			freqThreshold = 1.0D;
+//		}
+//
+//		new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
+//	}
 
 	private static Integer safeInteger(String input, Integer dflt) {
 		try {
