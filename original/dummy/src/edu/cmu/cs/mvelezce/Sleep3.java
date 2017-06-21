@@ -27,24 +27,22 @@ public class Sleep3 {
         boolean a;
         boolean b;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
-        if(B) {
+        if (B) {
             b = true;
-        }
-        else {
+        } else {
             b = false;
         }
 
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 28
+        if (a) { // 28
             Thread.sleep(600);
             Sleep3.method1(a);
         }
@@ -53,7 +51,7 @@ public class Sleep3 {
         Thread.sleep(100);
 
         // Region IA start
-        if(b) { // 45
+        if (b) { // 45
             Thread.sleep(600);
             Sleep3.method2(b);
         }
@@ -68,7 +66,7 @@ public class Sleep3 {
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 16
+        if (a) { // 16
             Thread.sleep(600);
         }
         // Region A end
@@ -82,7 +80,7 @@ public class Sleep3 {
         Thread.sleep(300);
 
         // Region IA start
-        if(b) { // 16
+        if (b) { // 16
             Thread.sleep(600);
         }
         // Region IA end

@@ -21,10 +21,9 @@ public class Sleep8 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
@@ -32,10 +31,9 @@ public class Sleep8 {
 
         // Region A start
         int repeat;
-        if(a) { // 20
+        if (a) { // 20
             repeat = 5;
-        }
-        else {
+        } else {
             repeat = 10;
         }
         // Region A end
@@ -43,7 +41,7 @@ public class Sleep8 {
         int i = 0;
 
         // Region A start
-        while(i < repeat) { // 42
+        while (i < repeat) { // 42
             Thread.sleep(100);
             i++;
         }

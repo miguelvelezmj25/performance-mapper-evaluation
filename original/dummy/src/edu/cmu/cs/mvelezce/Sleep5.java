@@ -22,19 +22,17 @@ public class Sleep5 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         Thread.sleep(200);
-        if(a) {
+        if (a) {
             Thread.sleep(600);
             return;
-        }
-        else {
+        } else {
             Thread.sleep(700);
         }
 

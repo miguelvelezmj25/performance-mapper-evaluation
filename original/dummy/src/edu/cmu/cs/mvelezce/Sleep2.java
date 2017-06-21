@@ -22,37 +22,67 @@ public class Sleep2 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 20
-            Thread.sleep(600);
-            Sleep2.method1(A);
-        }
+//        if(a) { // 20
+//            Thread.sleep(600);
+        new Sleep2(a);
+//            sleep2(a);
+//        }
         // Region A end
-
         Thread.sleep(100);
-        // TODO Lotrack cannot analyze if I pass the actual value true
-        Sleep2.method1(a);
+//        Sleep2.method1(true);
         Thread.sleep(150);
 
         // Region program end
     }
 
-    public static void method1(boolean A) throws InterruptedException {
+//    public static void method1(boolean A, boolean X) throws InterruptedException {
+//        System.out.println("method12");
+//        boolean a = A;
+//        Thread.sleep(200);
+//
+//        if(X) {
+//            int i = 9;
+//        }
+//
+//        // Region A start
+//        if(a) { // 16
+//            Thread.sleep(600);
+//        }
+//        // Region A end
+//
+//        Thread.sleep(100);
+//    }
+
+    public Sleep2(boolean A) throws InterruptedException {
         System.out.println("method12");
         boolean a = A;
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 16
+        if (a) { // 16
+            Thread.sleep(600);
+        }
+        // Region A end
+
+        Thread.sleep(100);
+    }
+
+    public static void sleep2(boolean A) throws InterruptedException {
+        System.out.println("method12");
+        boolean a = A;
+        Thread.sleep(200);
+
+        // Region A start
+        if (a) { // 16
             Thread.sleep(600);
         }
         // Region A end

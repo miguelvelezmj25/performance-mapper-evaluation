@@ -21,10 +21,9 @@ public class Sleep9 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
@@ -34,16 +33,15 @@ public class Sleep9 {
 
         // Region A start
         int repeat;
-        if(a) { // 24
+        if (a) { // 24
             repeat = 5;
-        }
-        else {
+        } else {
             repeat = 10;
         }
         // Region A end
 
         // Region A start
-        while(i < repeat) { // 41
+        while (i < repeat) { // 41
             Thread.sleep(100);
             i++;
         }

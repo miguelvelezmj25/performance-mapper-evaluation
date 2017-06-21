@@ -6,6 +6,8 @@ package edu.cmu.cs.mvelezce;
 public class Sleep14 {
 
     public static boolean A = false;
+    public static boolean B = false;
+    public static boolean C = false;
     public static int IA = 5;
     public static double DA = 5;
 
@@ -17,35 +19,46 @@ public class Sleep14 {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("main");
 
-        if(Boolean.valueOf(args[0])) {
-            A =  true;
+//        boolean a = Boolean.valueOf(args[0]);
+//        int ia = Boolean.valueOf(args[4]);
+//        double da = Boolean.valueOf(args[5]);
+        A = Boolean.valueOf(args[0]);
+        B = Boolean.valueOf(args[4]);
+        C = Boolean.valueOf(args[5]);
+
+        boolean a;
+        int b;
+        double c;
+
+        if(A) {
+            a =  true;
         }
         else {
-            A = false;
+            a = false;
         }
 
-        if(Boolean.valueOf(args[4])) {
-            IA = 0;
+        if(B) {
+            b = 0;
         }
         else {
-            IA = 5;
+            b = 5;
         }
 
-        if(Boolean.valueOf(args[5])) {
-            DA = 0;
+        if(C) {
+            c = 0;
         }
         else {
-            DA = 5;
+            c = 5;
         }
 
         integer(2);
         Thread.sleep(100);
         double d = 0;
 
-        if(A) {
+        if(a) {
             Thread.sleep(200);
-            d=1;
-        } else if(IA > 4 && DA > 2) {
+            d = 1;
+        } else if(b > 4 && c > 2) {
             integer(1);
             Thread.sleep(300);
         }

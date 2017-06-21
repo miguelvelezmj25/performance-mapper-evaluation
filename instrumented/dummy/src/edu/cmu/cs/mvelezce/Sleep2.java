@@ -23,7 +23,7 @@ public class Sleep2 {
         boolean a;
 
         if(A) {
-            a =  true;
+            a = true;
         }
         else {
             a = false;
@@ -34,13 +34,11 @@ public class Sleep2 {
         // Region A start
         if(a) { // 20
             Thread.sleep(600);
-            Sleep2.method1(A);
+            Sleep2.method1(a);
         }
         // Region A end
-
         Thread.sleep(100);
-        // TODO Lotrack cannot analyze if I pass the actual value true
-        Sleep2.method1(a);
+        Sleep2.method1(true);
         Thread.sleep(150);
 
         // Region program end

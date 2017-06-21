@@ -21,10 +21,9 @@ public class Sleep7 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
@@ -32,16 +31,15 @@ public class Sleep7 {
 
         // Region A start
         int repeat;
-        if(a) { // 20
+        if (a) { // 20
             repeat = 5;
-        }
-        else {
+        } else {
             repeat = 10;
         }
         // Region A end
 
-        // Region A start
-        for(int i=0; i < repeat; i++) { // 41
+        // Not a region since this is always executed at least once
+        for (int i = 0; i < repeat; i++) { // 41
             Thread.sleep(100);
         }
         // Region A end

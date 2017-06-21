@@ -12,6 +12,10 @@ import java.util.Map;
 public class Entry {
 
     public static boolean FREQTHRESHOLD = false;
+    public static boolean DISTTHRESHOLD = false;
+    public static boolean MINALPHA = false;
+    public static boolean TIMEOUT = false;
+    public static boolean LOGLEVEL = false;
 
     /** */
     private static final String HELP = "java -jar pngtastic-x.x.jar com.googlecode.pngtastic.PngtasticColorCounter [options] file1 [file2 ..]\n"
@@ -48,12 +52,23 @@ public class Entry {
         }
 
 //            Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
-////		Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
+//      	  Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
 //            Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
 //            Integer timeout = safeInteger(options.get("--timeout"), 0);
 //            String logLevel = options.get("--logLevel");
 
         Double freqThreshold;
+        Double distThreshold;
+        Integer minAlpha;
+        Integer timeout;
+        String logLevel;
+
+        if(DISTTHRESHOLD) {
+            distThreshold = 0.0D;
+        }
+        else {
+            distThreshold = 1.0D;
+        }
 
         if(FREQTHRESHOLD) {
             freqThreshold = 0.0D;
@@ -62,7 +77,28 @@ public class Entry {
             freqThreshold = 1.0D;
         }
 
-        new PngtasticColorCounter(files, "none", 0.005D, freqThreshold, 30, 0);
+        if(MINALPHA) {
+            minAlpha = 10;
+        }
+        else {
+            minAlpha = 50;
+        }
+
+        if(TIMEOUT) {
+            timeout = 0;
+        }
+        else {
+            timeout = 1000;
+        }
+
+        if(LOGLEVEL) {
+            logLevel = "none";
+        }
+        else {
+            logLevel = "debug";
+        }
+
+        new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
     }
 
 }

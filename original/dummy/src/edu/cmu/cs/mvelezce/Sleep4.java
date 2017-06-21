@@ -21,20 +21,18 @@ public class Sleep4 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 20
+        if (a) { // 20
             Thread.sleep(600);
-        }
-        else {
+        } else {
             Thread.sleep(700);
         }
         // Region A end

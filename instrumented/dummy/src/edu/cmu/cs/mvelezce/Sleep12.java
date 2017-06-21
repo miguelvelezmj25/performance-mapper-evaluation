@@ -5,6 +5,8 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep12 {
 
+    public static boolean A = false;
+
     public static final String FILENAME = Sleep12.class.getCanonicalName();
     public static final String PACKAGE = Sleep12.class.getPackage().getName();
     public static final String CLASS = Sleep12.class.getSimpleName();
@@ -13,10 +15,22 @@ public class Sleep12 {
     public static void main(String[] args) throws InterruptedException {
         // Region program start
         System.out.println("main");
-        boolean a = Boolean.valueOf(args[0]);
+
+//        boolean a = Boolean.valueOf(args[0]);
+        A = Boolean.valueOf(args[0]);
+
+        boolean a;
+
+        if(A) {
+            a = true;
+        }
+        else {
+            a = false;
+        }
 
         int repeat;
         int i = 0;
+
         if(a) {
             // Region A start 19
             Thread.sleep(100);
@@ -32,10 +46,10 @@ public class Sleep12 {
 
 //        Region region = Regions.getRegion("ID");
 //        region.enter();
-        for(; i < repeat; i++) { // TODO do we make it run all executions?
-            // Region A start TODO where to instrument? It does not break before the i = 0 @ 39
+        for(; i < repeat; i++) {
+            // Region A start
             Thread.sleep(200);
-            // Region A end TODO where to instrument? 53
+            // Region A end
         }
 //        region.exit();
     }

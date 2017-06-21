@@ -21,22 +21,37 @@ public class Sleep1 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         Thread.sleep(200);
         // Region A start
-        if(a) { // 20
+        if (a) { // 20
             Thread.sleep(600);
         }
         // Region A end
 
         Thread.sleep(100);
         // Region program end
+    }
+
+    public void throwsMethod() throws InterruptedException {
+        int i = 0;
+        Thread.sleep(100);
+        i += 1;
+    }
+
+    public void tryMethof() {
+        int i = 0;
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        i += 1;
     }
 
 }

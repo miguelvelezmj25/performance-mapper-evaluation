@@ -40,7 +40,7 @@ public class Sleep7 {
         }
         // Region A end
 
-        // Region A start
+        // Not a region since this is always executed at least once
         for(int i=0; i < repeat; i++) { // 41
             Thread.sleep(100);
         }
