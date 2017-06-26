@@ -1,0 +1,22 @@
+# Lists all features from the model with manual (first digit) and automatic (second digit) selection
+# 0 = deselected, 1 = selected, 2 = undefined
+21GPL
+21MainGpl
+21Alg
+22NUMBER
+20CONNECTED
+21TRANSPOSE
+12STRONGLYCONNECTED
+22CYCLE
+20MSTPRIM
+20MSTKRUSKAL
+22SHORTEST
+21Src
+21SEARCH
+20BFS
+21DFS
+22WEIGHTED
+21Gtp
+21DIRECTED
+20UNDIRECTED
+21BASE

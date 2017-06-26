@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jpf-annotations">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/jpf-annotations.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

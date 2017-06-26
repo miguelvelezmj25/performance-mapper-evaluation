@@ -5,32 +5,34 @@ package edu.cmu.cs.mvelezce;
  */
 public class Dummy2 {
 
-    private static boolean X = true;
+    private static boolean A = true;
 
     public static void main(String[] args) {
-        int a = X ? 1 : 0;
+        int a = A ? 1 : 0;
 
         if (a == 0)
             System.out.println("foo");
 
 
-        new X(a);
-        new Y().foo(a);
+//        new X(a);
+//        new Y().foo(a);
+        new W(a);
+        new Z().foo(a);
     }
 
 
 }
 
-class X {
+class W {
 
-    public X(int a) {
+    public W(int a) {
 
-        if (a > -10)
+        if (a == 0)
             System.out.println("foo");
     }
 }
 
-class Y{
+class Z {
     public void foo(int a) {
         if (a == 0)
             System.out.println("foo");

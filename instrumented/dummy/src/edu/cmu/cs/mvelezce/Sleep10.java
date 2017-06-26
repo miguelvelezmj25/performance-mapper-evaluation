@@ -26,30 +26,27 @@ public class Sleep10 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         boolean b;
 
-        if(B) {
+        if (B) {
             b = true;
-        }
-        else {
+        } else {
             b = false;
         }
 
         Thread.sleep(100);
-        if(a) { // 28
+        if (a) { // 28
             // Region A start
             Thread.sleep(200);
             Sleep10.method1(a);
             // Region A end
-        }
-        else if(b){ // 42
+        } else if (b) { // 42
             // Region B start
             Thread.sleep(300);
             Sleep10.method2(b);
@@ -66,7 +63,7 @@ public class Sleep10 {
         Thread.sleep(500);
 
         // Region A start
-        if(a) { // 16
+        if (a) { // 16
             Thread.sleep(600);
         }
         // Region A end 20
@@ -80,7 +77,7 @@ public class Sleep10 {
         Thread.sleep(800);
 
         // Region B start
-        if(b) { // 16
+        if (b) { // 16
             Thread.sleep(900);
         }
         // Region B end

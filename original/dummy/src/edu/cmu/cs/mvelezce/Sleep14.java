@@ -8,8 +8,6 @@ public class Sleep14 {
     public static boolean A = false;
     public static boolean B = false;
     public static boolean C = false;
-    public static int IA = 5;
-    public static double DA = 5;
 
     public static final String FILENAME = Sleep14.class.getCanonicalName();
     public static final String PACKAGE = Sleep14.class.getPackage().getName();

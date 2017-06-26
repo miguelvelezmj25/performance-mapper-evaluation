@@ -21,15 +21,18 @@ public class Sleep13 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
 //        boolean b = Boolean.valueOf(args[1]);
-        Thread.sleep(100); if(a) { Thread.sleep(200); } /*if(b) { Thread.sleep(700); } */ Thread.sleep(400);
+        Thread.sleep(100);
+        if (a) {
+            Thread.sleep(200);
+        } /*if(b) { Thread.sleep(700); } */
+        Thread.sleep(400);
         // Region program end
     }
 

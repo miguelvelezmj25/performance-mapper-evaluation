@@ -57,7 +57,8 @@ public class PL_Interface_impl implements PL_Interface {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
-        } else {
+        }
+        else {
             // elevator from 4 going down
             e = new Elevator(env, verbose, 4, false);
             actionHistory.add("StartFromTop");
@@ -117,8 +118,9 @@ public class PL_Interface_impl implements PL_Interface {
             }
         }
         for (counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if (e.isIdle())
+            if (e.isIdle()) {
                 return;
+            }
             e.timeShift();
         }
     }
@@ -131,7 +133,8 @@ public class PL_Interface_impl implements PL_Interface {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
-        } else {
+        }
+        else {
             // elevator from 4 going down
             e = new Elevator(env, verbose, 4, false);
             actionHistory.add("StartFromTop");
@@ -201,8 +204,9 @@ public class PL_Interface_impl implements PL_Interface {
             }
         }
         for (counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if (e.isIdle())
+            if (e.isIdle()) {
                 return;
+            }
             e.timeShift();
         }
     }
@@ -230,9 +234,10 @@ public class PL_Interface_impl implements PL_Interface {
 
     public void start(int specification, int variation) throws Throwable {
         try {
-            if (verbose)
+            if (verbose) {
                 System.out
                         .print("Started Elevator PL with Specification " + specification + ", Variation: " + variation);
+            }
             test(specification, variation);
         } catch (Throwable e) {
             throw e;
@@ -283,7 +288,7 @@ public class PL_Interface_impl implements PL_Interface {
                     isAbortedRun = true;
                     break;
                 case -11:
-				/* Specification11(); */
+                /* Specification11(); */
                     isAbortedRun = true;
                     break;
                 case -13:
@@ -294,7 +299,8 @@ public class PL_Interface_impl implements PL_Interface {
                     break;
             }
 
-        } else {
+        }
+        else {
             randomSequenceOfActions(variation);
         }
     }
@@ -327,7 +333,7 @@ public class PL_Interface_impl implements PL_Interface {
         Elevator e = new Elevator(env, false, 4, false);
         Actions a = new Actions(env, e);
         for (int i = 0; i < 100; i++) {
-//            System.out.println("PL_Interface_impl.Specification3()" + i);
+            System.out.println("PL_Interface_impl.Specification3()" + i);
             Person bob = a.bobCall();
             // a.bigMacCall();
             while (env.getFloor(bob.getOrigin()).hasCall())

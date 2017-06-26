@@ -8,8 +8,6 @@ public class Sleep14 {
     public static boolean A = false;
     public static boolean B = false;
     public static boolean C = false;
-    public static int IA = 5;
-    public static double DA = 5;
 
     public static final String FILENAME = Sleep14.class.getCanonicalName();
     public static final String PACKAGE = Sleep14.class.getPackage().getName();
@@ -30,24 +28,21 @@ public class Sleep14 {
         int b;
         double c;
 
-        if(A) {
-            a =  true;
-        }
-        else {
+        if (A) {
+            a = true;
+        } else {
             a = false;
         }
 
-        if(B) {
+        if (B) {
             b = 0;
-        }
-        else {
+        } else {
             b = 5;
         }
 
-        if(C) {
+        if (C) {
             c = 0;
-        }
-        else {
+        } else {
             c = 5;
         }
 
@@ -55,10 +50,10 @@ public class Sleep14 {
         Thread.sleep(100);
         double d = 0;
 
-        if(a) {
+        if (a) {
             Thread.sleep(200);
             d = 1;
-        } else if(b > 4 && c > 2) {
+        } else if (b > 4 && c > 2) {
             integer(1);
             Thread.sleep(300);
         }

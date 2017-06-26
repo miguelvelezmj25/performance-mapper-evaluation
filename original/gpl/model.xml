@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel chosenLayoutAlgorithm="1">
+    <struct>
+        <alt abstract="true" mandatory="true" name="GPL">
+            <and abstract="true" mandatory="true" name="MainGpl">
+                <or abstract="true" mandatory="true" name="Alg">
+                    <feature mandatory="true" name="NUMBER"/>
+                    <feature mandatory="true" name="CONNECTED"/>
+                    <feature mandatory="true" name="TRANSPOSE"/>
+                    <feature mandatory="true" name="STRONGLYCONNECTED"/>
+                    <feature mandatory="true" name="CYCLE"/>
+                    <feature mandatory="true" name="MSTPRIM"/>
+                    <feature mandatory="true" name="MSTKRUSKAL"/>
+                    <feature mandatory="true" name="SHORTEST"/>
+                </or>
+                <and abstract="true" name="Src">
+                    <alt mandatory="true" name="SEARCH">
+                        <feature mandatory="true" name="BFS"/>
+                        <feature mandatory="true" name="DFS"/>
+                    </alt>
+                </and>
+                <feature name="WEIGHTED"/>
+                <alt abstract="true" mandatory="true" name="Gtp">
+                    <feature mandatory="true" name="DIRECTED"/>
+                    <feature mandatory="true" name="UNDIRECTED"/>
+                </alt>
+                <feature mandatory="true" name="BASE"/>
+            </and>
+        </alt>
+    </struct>
+    <constraints>
+        <rule>
+            <imp>
+                <var>NUMBER</var>
+                <var>Src</var>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <var>CONNECTED</var>
+                <conj>
+                    <var>UNDIRECTED</var>
+                    <var>Src</var>
+                </conj>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <var>STRONGLYCONNECTED</var>
+                <conj>
+                    <var>DIRECTED</var>
+                    <var>DFS</var>
+                </conj>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <var>CYCLE</var>
+                <var>DFS</var>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <disj>
+                    <var>MSTKRUSKAL</var>
+                    <var>MSTPRIM</var>
+                </disj>
+                <conj>
+                    <var>UNDIRECTED</var>
+                    <var>WEIGHTED</var>
+                </conj>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <disj>
+                    <var>MSTKRUSKAL</var>
+                    <var>MSTPRIM</var>
+                </disj>
+                <not>
+                    <conj>
+                        <var>MSTKRUSKAL</var>
+                        <var>MSTPRIM</var>
+                    </conj>
+                </not>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <var>SHORTEST</var>
+                <conj>
+                    <var>DIRECTED</var>
+                    <var>WEIGHTED</var>
+                </conj>
+            </imp>
+        </rule>
+        <rule>
+            <imp>
+                <var>STRONGLYCONNECTED</var>
+                <var>TRANSPOSE</var>
+            </imp>
+        </rule>
+    </constraints>
+    <calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+    <comments>
+        <c>hared</c>
+        <c>constraints</c>
+        <c>Implementation (safegen) constraints</c>
+        <c>Vertex.java</c>
+    </comments>
+    <featureOrder userDefined="false"/>
+</featureModel>

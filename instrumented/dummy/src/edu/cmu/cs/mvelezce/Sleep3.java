@@ -27,39 +27,32 @@ public class Sleep3 {
         boolean a;
         boolean b;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
-        if(B) {
+        if (B) {
             b = true;
-        }
-        else {
+        } else {
             b = false;
         }
 
         Thread.sleep(200);
 
-        // Region A start
-        if(a) { // 28
+        if (a) {
             Thread.sleep(600);
             Sleep3.method1(a);
         }
-        // Region A end
 
         Thread.sleep(100);
 
-        // Region IA start
-        if(b) { // 45
+        if (b) {
             Thread.sleep(600);
             Sleep3.method2(b);
         }
-        // Region IA start
 
-        // Region program end
     }
 
     public static void method1(boolean A) throws InterruptedException {
@@ -67,11 +60,9 @@ public class Sleep3 {
         boolean a = A;
         Thread.sleep(200);
 
-        // Region A start
-        if(a) { // 16
+        if (a) {
             Thread.sleep(600);
         }
-        // Region A end
 
         Thread.sleep(100);
     }
@@ -79,13 +70,10 @@ public class Sleep3 {
     public static void method2(boolean B) throws InterruptedException {
         System.out.println("method2");
         boolean b = B;
-        Thread.sleep(300);
 
-        // Region IA start
-        if(b) { // 16
+        if (b) {
             Thread.sleep(600);
         }
-        // Region IA end
 
         Thread.sleep(200);
     }

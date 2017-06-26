@@ -14,10 +14,10 @@ public class Dummy3 {
         Thread.sleep(100);
         double d = 0;
 
-        if(ON) {
+        if (ON) {
             Thread.sleep(200);
-            d=1;
-        } else if(integerFeature > 4 && doubleFeature > 2) {
+            d = 1;
+        } else if (integerFeature > 4 && doubleFeature > 2) {
             integer(1);
             Thread.sleep(500);
         }

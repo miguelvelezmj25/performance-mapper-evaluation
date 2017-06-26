@@ -21,33 +21,30 @@ public class Sleep11 {
 
         boolean a;
 
-        if(A) {
+        if (A) {
             a = true;
-        }
-        else {
+        } else {
             a = false;
         }
 
         int repeat;
         int i = 0;
 
-        if(a) {
+        if (a) {
             // Region A start 19
             Thread.sleep(100);
             repeat = 5;
             // Region A end 24
-        }
-        else {
+        } else {
             // Region !A start 30
             Thread.sleep(200);
             repeat = 10;
             // Region !A end 35
         }
 
-        // TODO lotrack's output is wrong
 //        Region region = Regions.getRegion("ID");
 //        region.enter();
-        for(; i < repeat; i++) {
+        for (; i < repeat; i++) {
             Thread.sleep(200);
         }
 //        region.exit();
