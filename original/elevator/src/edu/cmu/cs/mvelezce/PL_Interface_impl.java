@@ -31,23 +31,23 @@ public class PL_Interface_impl implements PL_Interface {
     @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static void main(String[] args) {
         try {
-//            FEATUREBASE = Boolean.valueOf(args[0]);
-//            FEATUREWEIGHT = Boolean.valueOf(args[1]);
-//            FEATUREEMPTY = Boolean.valueOf(args[2]);
-//            FEATURETWOTHIRDSFULL = Boolean.valueOf(args[3]);
-//            FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
-//            FEATUREOVERLOADED = Boolean.valueOf(args[5]);
-
-            FEATUREBASE = true;
-            FEATUREWEIGHT = true;
-            FEATUREEMPTY = true;
-            FEATURETWOTHIRDSFULL = true;
-            FEATUREEXECUTIVEFLOOR = true;
-            FEATUREOVERLOADED = true;
-
             FEATUREBASE = Boolean.valueOf(args[0]);
             FEATUREWEIGHT = Boolean.valueOf(args[1]);
             FEATUREEMPTY = Boolean.valueOf(args[2]);
+            FEATURETWOTHIRDSFULL = Boolean.valueOf(args[3]);
+            FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
+            FEATUREOVERLOADED = Boolean.valueOf(args[5]);
+
+//            FEATUREBASE = true;
+//            FEATUREWEIGHT = true;
+//            FEATUREEMPTY = true;
+//            FEATURETWOTHIRDSFULL = true;
+//            FEATUREEXECUTIVEFLOOR = true;
+//            FEATUREOVERLOADED = true;
+
+//            FEATUREBASE = Boolean.valueOf(args[0]);
+//            FEATUREWEIGHT = Boolean.valueOf(args[1]);
+//            FEATUREEMPTY = Boolean.valueOf(args[2]);
 
 //			verificationClasses.FeatureSwitches.select_features();
             PL_Interface_impl impl = new PL_Interface_impl();
