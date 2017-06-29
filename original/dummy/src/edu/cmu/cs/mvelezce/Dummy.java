@@ -1,9 +1,14 @@
 package edu.cmu.cs.mvelezce;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by mvelezce on 3/31/17.
  */
 public class Dummy {
+
+    private static boolean FEATURE_A;
 
     public static void main(String[] args) {
         try {
@@ -33,4 +38,36 @@ public class Dummy {
 //        System.out.println(result);
     }
 
+
+    public static List<String> test() throws InterruptedException {
+        return sleep(true);
+    }
+
+    public static List<String> test1() throws InterruptedException {
+        List<String> r = sleep(false);
+        return r;
+    }
+
+    public static StringBuilder test2() throws InterruptedException {
+        int i = 0;
+        StringBuilder s = new StringBuilder();
+
+        if(i >0) {
+            return s.append("SDF");
+        }
+        return s.append("DSFSF'");
+    }
+
+    public static List<String> sleep(boolean x) throws InterruptedException {
+        Thread.sleep(5);
+        return new ArrayList<>();
+    }
+
+    public static int integer() {
+        return 2123;
+    }
+
+    public static void m() {
+        System.out.println("ASFdsf");
+    }
 }

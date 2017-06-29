@@ -1,10 +1,14 @@
 package edu.cmu.cs.mvelezce.ElevatorSystem;
 
-import edu.cmu.cs.mvelezce.PL_Interface_impl;
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
+import edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static edu.cmu.cs.mvelezce.PL_Interface_impl.*;
+
 
 public class Elevator {
 
@@ -31,7 +35,7 @@ public class Elevator {
     private boolean blocked = false;
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Elevator(Environment env, boolean verbose) {
         this.verbose = verbose;
         this.currentHeading = Direction.up;
@@ -42,7 +46,7 @@ public class Elevator {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Elevator(Environment env, boolean verbose, int floor, boolean headingUp) {
         this.verbose = verbose;
         this.currentHeading = (headingUp ? Direction.up : Direction.down);
@@ -52,12 +56,12 @@ public class Elevator {
         this.floorButtons = new boolean[env.floors.length];
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean isBlocked__before__overloaded() {
         return false;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "overloaded")
+    @FeatureAnnotation(name = "overloaded")
     public boolean isBlocked__role__overloaded() {
         try {
             Thread.sleep(100);
@@ -68,11 +72,11 @@ public class Elevator {
         return blocked;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 7, thenFeature = "overloaded", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 7, thenFeature = "overloaded", elseFeature = "base")
     public boolean
     isBlocked() {
-        if (PL_Interface_impl.FEATUREOVERLOADED) {
+        if (FEATUREOVERLOADED) {
             return isBlocked__role__overloaded();
         }
         else {
@@ -80,7 +84,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void enterElevator__before__weight(Person p) {
         persons.add(p);
         p.enterElevator(this);
@@ -89,7 +93,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "weight")
+    @FeatureAnnotation(name = "weight")
     public void enterElevator__role__weight(Person p) {
         try {
             Thread.sleep(100);
@@ -101,11 +105,11 @@ public class Elevator {
         weight += p.getWeight();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 0, thenFeature = "weight", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 0, thenFeature = "weight", elseFeature = "base")
     public void
     enterElevator(Person p) {
-        if (PL_Interface_impl.FEATUREWEIGHT) {
+        if (FEATUREWEIGHT) {
             enterElevator__role__weight(p);
         }
         else {
@@ -113,7 +117,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean leaveElevator__before__weight(Person p) {
         if (persons.contains(p)) {
             persons.remove(p);
@@ -128,7 +132,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "weight")
+    @FeatureAnnotation(name = "weight")
     public boolean leaveElevator__role__weight(Person p) {
         if (leaveElevator__before__weight(p)) {
             weight -= p.getWeight();
@@ -139,11 +143,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 1, thenFeature = "weight", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 1, thenFeature = "weight", elseFeature = "base")
     public boolean
     leaveElevator__before__empty(Person p) {
-        if (PL_Interface_impl.FEATUREWEIGHT) {
+        if (FEATUREWEIGHT) {
             return leaveElevator__role__weight(p);
         }
         else {
@@ -151,7 +155,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "empty")
+    @FeatureAnnotation(name = "empty")
     public boolean leaveElevator__role__empty(Person p) { // empty
         try {
             Thread.sleep(50);
@@ -170,10 +174,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 2, thenFeature = "empty", elseFeature = "featureSwitch")
-    public boolean leaveElevator(Person p) {
-        if (PL_Interface_impl.FEATUREEMPTY) {
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 2, thenFeature = "empty", elseFeature = "featureSwitch")
+    public boolean
+    leaveElevator(Person p) {
+        if (FEATUREEMPTY) {
             return leaveElevator__role__empty(p);
         }
         else {
@@ -199,13 +204,13 @@ public class Elevator {
         return currentFloorID;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean areDoorsOpen() {
         return doors == DoorState.open;
     }
 
     // pre: elevator arrived at the current floor, next actions to be done
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void timeShift__before__overloaded() {
         //System.out.println("--");
 
@@ -245,7 +250,7 @@ public class Elevator {
     }
 
     // pre: elevator arrived at the current floor, next actions to be done
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "overloaded")
+    @FeatureAnnotation(name = "overloaded")
     public void timeShift__role__overloaded() {
         if (areDoorsOpen() && weight > maximumWeight) {
             blocked = true;
@@ -259,11 +264,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 8, thenFeature = "overloaded", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 8, thenFeature = "overloaded", elseFeature = "base")
     public void
     timeShift() {
-        if (PL_Interface_impl.FEATUREOVERLOADED) {
+        if (FEATUREOVERLOADED) {
             timeShift__role__overloaded();
         }
         else {
@@ -271,13 +276,13 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     private boolean stopRequestedAtCurrentFloor__before__twothirdsfull() {
         return env.getFloor(currentFloorID).hasCall()
                 || floorButtons[currentFloorID] == true;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "twothirdsfull")
+    @FeatureAnnotation(name = "twothirdsfull")
     private boolean stopRequestedAtCurrentFloor__role__twothirdsfull() {
         if (weight > maximumWeight * 2 / 3) {
             return floorButtons[currentFloorID] == true;
@@ -287,11 +292,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 3, thenFeature = "twothirdsfull", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 3, thenFeature = "twothirdsfull", elseFeature = "base")
     private boolean
     stopRequestedAtCurrentFloor__before__executivefloor() {
-        if (PL_Interface_impl.FEATURETWOTHIRDSFULL) {
+        if (FEATURETWOTHIRDSFULL) {
             return stopRequestedAtCurrentFloor__role__twothirdsfull();
         }
         else {
@@ -299,7 +304,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "executivefloor")
+    @FeatureAnnotation(name = "executivefloor")
     private boolean stopRequestedAtCurrentFloor__role__executivefloor() { //executive
         try {
             Thread.sleep(10);
@@ -316,11 +321,11 @@ public class Elevator {
     }
 
     // alternative implementation: subclass of "ExecutiveFloor extends Floor"
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 5, thenFeature = "executivefloor", elseFeature = "featureSwitch")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 5, thenFeature = "executivefloor", elseFeature = "featureSwitch")
     private boolean
     stopRequestedAtCurrentFloor() {
-        if (PL_Interface_impl.FEATUREEXECUTIVEFLOOR) {
+        if (FEATUREEXECUTIVEFLOOR) {
             return stopRequestedAtCurrentFloor__role__executivefloor();
         }
         else {
@@ -350,7 +355,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     private boolean isAnyLiftButtonPressed() {
         for (int i = 0; i < this.floorButtons.length; i++) {
             if (floorButtons[i]) {
@@ -360,7 +365,7 @@ public class Elevator {
         return false;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     private boolean stopRequestedInDirection__before__twothirdsfull(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
         Floor[] floors = env.getFloors();
         if (dir == Direction.up) {
@@ -393,7 +398,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "twothirdsfull")
+    @FeatureAnnotation(name = "twothirdsfull")
     private boolean stopRequestedInDirection__role__twothirdsfull(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
         if (weight > maximumWeight * 2 / 3 && isAnyLiftButtonPressed()) {
             if (verbose) {
@@ -406,11 +411,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 4, thenFeature = "twothirdsfull", elseFeature = "base")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 4, thenFeature = "twothirdsfull", elseFeature = "base")
     private boolean
     stopRequestedInDirection__before__executivefloor(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (PL_Interface_impl.FEATURETWOTHIRDSFULL) {
+        if (FEATURETWOTHIRDSFULL) {
             return stopRequestedInDirection__role__twothirdsfull(dir, respectFloorCalls, respectInLiftCalls);
         }
         else {
@@ -418,7 +423,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "executivefloor")
+    @FeatureAnnotation(name = "executivefloor")
     private boolean stopRequestedInDirection__role__executivefloor(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
         if (isExecutiveFloorCalling()) {
             if (verbose) {
@@ -432,11 +437,11 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "featureSwitch")
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureSwitchID(id = 6, thenFeature = "executivefloor", elseFeature = "featureSwitch")
+    @FeatureAnnotation(name = "featureSwitch")
+    @FeatureSwitchID(id = 6, thenFeature = "executivefloor", elseFeature = "featureSwitch")
     private boolean
     stopRequestedInDirection(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (PL_Interface_impl.FEATUREEXECUTIVEFLOOR) {
+        if (FEATUREEXECUTIVEFLOOR) {
             return stopRequestedInDirection__role__executivefloor(dir, respectFloorCalls, respectInLiftCalls);
         }
         else {
@@ -444,7 +449,7 @@ public class Elevator {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     private boolean anyStopRequested() {
         Floor[] floors = env.getFloors();
         for (int i = 0; i < floors.length; i++) {
@@ -458,17 +463,17 @@ public class Elevator {
         return false;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean buttonForFloorIsPressed(int floorID) {
         return this.floorButtons[floorID];
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Direction getCurrentDirection() {
         return currentHeading;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Environment getEnv() {
         return env;
     }
@@ -477,18 +482,18 @@ public class Elevator {
         return this.persons.isEmpty();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean isIdle() {
         return !anyStopRequested();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Override
     public String toString() {
         return "Elevator " + (areDoorsOpen() ? "[_]" : "[] ") + " at " + currentFloorID + " heading " + currentHeading;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "executivefloor")
+    @FeatureAnnotation(name = "executivefloor")
     public boolean isExecutiveFloor(int floorID) {
         return floorID == executiveFloor;
     }
@@ -518,7 +523,7 @@ public class Elevator {
             }
         };
 
-        //        @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+        @FeatureAnnotation(name = "base")
         public abstract Direction reverse();
     }
 

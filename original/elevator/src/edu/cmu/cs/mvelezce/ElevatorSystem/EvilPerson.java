@@ -7,7 +7,7 @@ public class EvilPerson extends Person {
     private int[] additionalButtons;
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public EvilPerson(String name, int weight, int origin, int destination, int[] additionalButtons,
                       Environment env) {
         super(name, weight, origin, destination, env);
@@ -15,7 +15,7 @@ public class EvilPerson extends Person {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Override
     public void enterElevator(Elevator e) {
         super.enterElevator(e);

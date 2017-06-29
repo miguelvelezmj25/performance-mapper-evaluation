@@ -24,7 +24,7 @@ public class Person {
     private boolean destinationReached = false;
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public Person(String name, int weight, int origin, int destination, Environment env) {
         super();
         this.name = name;
@@ -38,7 +38,7 @@ public class Person {
         return weight;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public String getName() {
         return name;
     }
@@ -49,7 +49,7 @@ public class Person {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public int getDestination() {
         return destination;
     }
@@ -60,7 +60,7 @@ public class Person {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public boolean isDestinationReached() {
         return destinationReached;
     }

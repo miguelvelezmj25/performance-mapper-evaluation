@@ -17,7 +17,7 @@ public class JUnit_Scenario_Tests {
     /**
      * Hook for AbstractSpecification.aj (resets specifications at test start)
      */
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Before
     public void setup() {
 
@@ -28,13 +28,13 @@ public class JUnit_Scenario_Tests {
      * Hook for specifications with liveness properties. (indicator for
      * test-termination)
      */
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void testFinished() {
 
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification1() {
         SpecificationManager.checkOnlySpecification(1);
@@ -50,7 +50,7 @@ public class JUnit_Scenario_Tests {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification2() {
         SpecificationManager.checkOnlySpecification(2);
@@ -65,7 +65,7 @@ public class JUnit_Scenario_Tests {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification3() {
         SpecificationManager.checkOnlySpecification(3);
@@ -95,7 +95,7 @@ public class JUnit_Scenario_Tests {
     // "Feature integration using a Feature Construct")
 
     // copy of Spec2-Test because Spec9 is a near-copy of Spec2
-//    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification9() {
         SpecificationManager.checkOnlySpecification(9);
@@ -110,11 +110,11 @@ public class JUnit_Scenario_Tests {
     }
 
 
-    // Specifications 10 and 11 are never violated
+    // edu.cmu.cs.mvelezce.Specifications 10 and 11 are never violated
     // (see end of chapter 5 in Malte Plath and Mark Ryan
     // "Feature integration using a Feature Construct")
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification13() {
         SpecificationManager.checkOnlySpecification(13);
@@ -134,7 +134,7 @@ public class JUnit_Scenario_Tests {
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification14() {
         SpecificationManager.checkOnlySpecification(14);

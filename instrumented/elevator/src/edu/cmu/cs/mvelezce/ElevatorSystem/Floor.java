@@ -19,13 +19,13 @@ public class Floor {
     private List<Person> waiting = new ArrayList<Person>();
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public Floor(int id) {
         thisFloorID = id;
     }
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public int getFloorID() {
         return this.thisFloorID;
     }

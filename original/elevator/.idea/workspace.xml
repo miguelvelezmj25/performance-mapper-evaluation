@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="45a74a87-eb4a-44f5-9d64-2ff32c9c9695" name="Default" comment="" />
+    <list default="true" id="142cec26-ea61-4f23-ae25-de0c64665766" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -13,11 +13,21 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PL_Interface_impl.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Elevator.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="153" column="23" lean-forward="false" selection-start-line="153" selection-start-column="23" selection-end-line="153" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PL_Interface_impl.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
+            <state relative-caret-position="247">
+              <caret line="349" column="30" lean-forward="false" selection-start-line="349" selection-start-column="30" selection-end-line="349" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -26,50 +36,8 @@
       <file leaf-file-name="Elevator.class" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5340">
-              <caret line="385" column="21" lean-forward="false" selection-start-line="385" selection-start-column="21" selection-end-line="385" selection-end-column="21" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Elevator.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3750">
-              <caret line="264" column="13" lean-forward="false" selection-start-line="264" selection-start-column="4" selection-end-line="264" selection-end-column="13" />
-              <folding>
-                <element signature="e#732#740#0" expanded="false" />
-                <element signature="e#1717#1718#0" expanded="false" />
-                <element signature="e#1745#1746#0" expanded="false" />
-                <element signature="e#6220#6221#0" expanded="false" />
-                <element signature="e#6265#6266#0" expanded="false" />
-                <element signature="e#6303#6304#0" expanded="false" />
-                <element signature="e#6340#6341#0" expanded="false" />
-                <element signature="e#6454#6455#0" expanded="false" />
-                <element signature="e#6500#6501#0" expanded="false" />
-                <element signature="e#17046#17047#0" expanded="false" />
-                <element signature="e#17095#17096#0" expanded="false" />
-                <element signature="e#17425#17426#0" expanded="false" />
-                <element signature="e#17470#17471#0" expanded="false" />
-                <element signature="e#17578#17579#0" expanded="false" />
-                <element signature="e#17620#17621#0" expanded="false" />
-                <element signature="e#18008#18009#0" expanded="false" />
-                <element signature="e#18056#18057#0" expanded="false" />
-                <element signature="e#18484#18485#0" expanded="false" />
-                <element signature="e#18527#18528#0" expanded="false" />
-                <element signature="e#18616#18617#0" expanded="false" />
-                <element signature="e#18657#18658#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PL_Interface_impl.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/PL_Interface_impl.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="803">
-              <caret line="314" column="16" lean-forward="false" selection-start-line="314" selection-start-column="16" selection-end-line="314" selection-end-column="16" />
+            <state relative-caret-position="127">
+              <caret line="171" column="45" lean-forward="false" selection-start-line="171" selection-start-column="45" selection-end-line="171" selection-end-column="45" />
               <folding />
             </state>
           </provider>
@@ -77,19 +45,36 @@
       </file>
     </leaf>
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>leaveElevator__before__empty</find>
+      <find>leaveelevator</find>
+      <find>enterelevator(</find>
+      <find>leaveelevator(</find>
+      <find>stopRequestedInDirection</find>
       <find>isBlocked</find>
-      <find>stopRequestedInDirection__before__twothirdsfull</find>
-      <find>leaveElevator__before__weight</find>
+      <find>stopRequestedAtCurrentFloor</find>
+      <find>leaveElevator__before__empty</find>
+      <find>enterElevator</find>
+      <find>enterElevator(</find>
+      <find>leaveElevator__role__empty</find>
+      <find>isbl</find>
+      <find>isBlocked(</find>
+      <find>isblocke</find>
+      <find>isblocked</find>
+      <find>times</find>
+      <find>timeshi</find>
+      <find>return</find>
+      <find>time</find>
+      <find>heloo</find>
+      <find>&quot;1&quot;</find>
+      <find>&quot;2&quot;</find>
+      <find>&quot;3&quot;</find>
+      <find>&quot;4&quot;</find>
+      <find>&quot;5&quot;</find>
+      <find>&quot;6&quot;</find>
+      <find>&quot;7&quot;</find>
+      <find>&quot;8&quot;</find>
+      <find>&quot;9&quot;</find>
     </findStrings>
   </component>
   <component name="GradleLocalSettings">
@@ -100,11 +85,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/DoorState.java" />
+        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/verificationClasses/SPLModelChecker.java" />
+        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/verificationClasses/FeatureSwitches.java" />
+        <option value="$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Environment.class" />
         <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java" />
-        <option value="$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/PL_Interface_impl.class" />
+        <option value="$PROJECT_DIR$/sources.txt" />
         <option value="$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class" />
-        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/ElevatorLOTRACK.java" />
         <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java" />
       </list>
     </option>
@@ -116,10 +102,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1979" />
+    <option name="x" value="1953" />
     <option name="y" value="23" />
     <option name="width" value="1887" />
-    <option name="height" value="1014" />
+    <option name="height" value="1028" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -129,175 +115,7 @@
             <id />
           </State>
           <State>
-            <id>Android &gt; Lint &gt; Correctness</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Correctness &gt; Messages</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Internationalization</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Performance</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Security</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Usability &gt; Icons</id>
-          </State>
-          <State>
-            <id>Android Lint for Kotlin</id>
-          </State>
-          <State>
-            <id>Assignment issuesJavaScript</id>
-          </State>
-          <State>
-            <id>Bitwise operation issuesJava</id>
-          </State>
-          <State>
-            <id>Bitwise operation issuesJavaScript</id>
-          </State>
-          <State>
-            <id>CSS</id>
-          </State>
-          <State>
-            <id>Code style issuesJava</id>
-          </State>
-          <State>
-            <id>CoffeeScript</id>
-          </State>
-          <State>
-            <id>CollectionsScala</id>
-          </State>
-          <State>
-            <id>Control FlowGroovy</id>
-          </State>
-          <State>
-            <id>Control flow issuesJava</id>
-          </State>
-          <State>
-            <id>Control flow issuesJavaScript</id>
-          </State>
-          <State>
-            <id>DOM issuesJavaScript</id>
-          </State>
-          <State>
-            <id>Declaration redundancyJava</id>
-          </State>
-          <State>
-            <id>FreeMarker inspections</id>
-          </State>
-          <State>
-            <id>GPath inspectionsGroovy</id>
-          </State>
-          <State>
-            <id>General</id>
-          </State>
-          <State>
-            <id>GeneralScala</id>
-          </State>
-          <State>
-            <id>Groovy</id>
-          </State>
-          <State>
-            <id>HTML</id>
-          </State>
-          <State>
-            <id>Ignore</id>
-          </State>
-          <State>
-            <id>Internationalization issuesJava</id>
-          </State>
-          <State>
-            <id>J2ME issuesJava</id>
-          </State>
-          <State>
-            <id>JUnit issuesJava</id>
-          </State>
-          <State>
-            <id>Java</id>
-          </State>
-          <State>
-            <id>Java 5Java language level migration aidsJava</id>
-          </State>
-          <State>
-            <id>Java language level migration aidsJava</id>
-          </State>
-          <State>
-            <id>JavaScript</id>
-          </State>
-          <State>
-            <id>Javadoc issuesJava</id>
-          </State>
-          <State>
-            <id>Kotlin</id>
-          </State>
-          <State>
-            <id>Method signatureScala</id>
-          </State>
-          <State>
-            <id>Naming ConventionsGroovy</id>
-          </State>
-          <State>
-            <id>Naming conventionsJava</id>
-          </State>
-          <State>
-            <id>Naming conventionsJavaScript</id>
-          </State>
-          <State>
-            <id>Numeric issuesJava</id>
-          </State>
-          <State>
-            <id>OtherCollectionsScala</id>
-          </State>
-          <State>
-            <id>Performance issuesJava</id>
-          </State>
-          <State>
             <id>Plugin DevKit</id>
-          </State>
-          <State>
-            <id>Probable bugsCoffeeScript</id>
-          </State>
-          <State>
-            <id>Probable bugsGroovy</id>
-          </State>
-          <State>
-            <id>Probable bugsJava</id>
-          </State>
-          <State>
-            <id>Probable bugsJavaScript</id>
-          </State>
-          <State>
-            <id>Properties Files</id>
-          </State>
-          <State>
-            <id>Python</id>
-          </State>
-          <State>
-            <id>Scala</id>
-          </State>
-          <State>
-            <id>Struts</id>
-          </State>
-          <State>
-            <id>Struts 1Struts</id>
-          </State>
-          <State>
-            <id>TestNGJava</id>
-          </State>
-          <State>
-            <id>Threading issuesJava</id>
-          </State>
-          <State>
-            <id>UI Form Problems</id>
-          </State>
-          <State>
-            <id>Velocity inspections</id>
-          </State>
-          <State>
-            <id>WebSocket issues</id>
           </State>
         </expanded-state>
         <selected-state>
@@ -323,6 +141,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
@@ -376,89 +195,8 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="out" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="production" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="edu" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cmu" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="mvelezce" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="out" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="production" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="elevator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="edu" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cmu" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="mvelezce" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ElevatorSystem" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -466,7 +204,7 @@
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Java" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
   </component>
@@ -1208,65 +946,61 @@
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
-  <component name="StructureViewFactory">
-    <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
-  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="45a74a87-eb4a-44f5-9d64-2ff32c9c9695" name="Default" comment="" />
-      <created>1498000233446</created>
+      <changelist id="142cec26-ea61-4f23-ae25-de0c64665766" name="Default" comment="" />
+      <created>1498591815895</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1498000233446</updated>
-      <workItem from="1498000234859" duration="146000" />
-      <workItem from="1498001672089" duration="5012000" />
-      <workItem from="1498046850627" duration="2015000" />
-      <workItem from="1498048968787" duration="8298000" />
-      <workItem from="1498063192055" duration="1945000" />
+      <updated>1498591815895</updated>
+      <workItem from="1498591817977" duration="2851000" />
+      <workItem from="1498651706055" duration="10173000" />
+      <workItem from="1498689202395" duration="4724000" />
+      <workItem from="1498742245165" duration="5389000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17416000" />
+    <option name="totallyTimeSpent" value="23137000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1979" y="23" width="1887" height="1014" extended-state="0" />
+    <frame x="1953" y="23" width="1887" height="1028" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32924107" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32924107" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2607046" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295393" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2498645" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39955357" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29593495" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2579946" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="12" side_tool="false" content_ui="combo" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32924107" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32924107" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1276,7 +1010,9 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="antWorkspaceConfiguration">
@@ -1284,133 +1020,73 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="18" column="32" lean-forward="true" selection-start-line="18" selection-start-column="26" selection-end-line="18" selection-end-column="43" />
+        <state relative-caret-position="1080">
+          <caret line="81" column="14" lean-forward="false" selection-start-line="81" selection-start-column="14" selection-end-line="81" selection-end-column="14" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5340">
-          <caret line="385" column="21" lean-forward="false" selection-start-line="385" selection-start-column="21" selection-end-line="385" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3750">
-          <caret line="264" column="13" lean-forward="false" selection-start-line="264" selection-start-column="4" selection-end-line="264" selection-end-column="13" />
-          <folding>
-            <element signature="e#732#740#0" expanded="false" />
-            <element signature="e#1717#1718#0" expanded="false" />
-            <element signature="e#1745#1746#0" expanded="false" />
-            <element signature="e#6220#6221#0" expanded="false" />
-            <element signature="e#6265#6266#0" expanded="false" />
-            <element signature="e#6303#6304#0" expanded="false" />
-            <element signature="e#6340#6341#0" expanded="false" />
-            <element signature="e#6454#6455#0" expanded="false" />
-            <element signature="e#6500#6501#0" expanded="false" />
-            <element signature="e#17046#17047#0" expanded="false" />
-            <element signature="e#17095#17096#0" expanded="false" />
-            <element signature="e#17425#17426#0" expanded="false" />
-            <element signature="e#17470#17471#0" expanded="false" />
-            <element signature="e#17578#17579#0" expanded="false" />
-            <element signature="e#17620#17621#0" expanded="false" />
-            <element signature="e#18008#18009#0" expanded="false" />
-            <element signature="e#18056#18057#0" expanded="false" />
-            <element signature="e#18484#18485#0" expanded="false" />
-            <element signature="e#18527#18528#0" expanded="false" />
-            <element signature="e#18616#18617#0" expanded="false" />
-            <element signature="e#18657#18658#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/PL_Interface_impl.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4425">
-          <caret line="314" column="16" lean-forward="false" selection-start-line="314" selection-start-column="16" selection-end-line="314" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1020">
-          <caret line="74" column="13" lean-forward="false" selection-start-line="74" selection-start-column="4" selection-end-line="74" selection-end-column="13" />
-          <folding>
-            <element signature="e#732#740#0" expanded="false" />
-            <element signature="e#1717#1718#0" expanded="false" />
-            <element signature="e#1745#1746#0" expanded="false" />
-            <element signature="e#6220#6221#0" expanded="false" />
-            <element signature="e#6265#6266#0" expanded="false" />
-            <element signature="e#6303#6304#0" expanded="false" />
-            <element signature="e#6340#6341#0" expanded="false" />
-            <element signature="e#6454#6455#0" expanded="false" />
-            <element signature="e#6500#6501#0" expanded="false" />
-            <element signature="e#17046#17047#0" expanded="false" />
-            <element signature="e#17095#17096#0" expanded="false" />
-            <element signature="e#17425#17426#0" expanded="false" />
-            <element signature="e#17470#17471#0" expanded="false" />
-            <element signature="e#17578#17579#0" expanded="false" />
-            <element signature="e#17620#17621#0" expanded="false" />
-            <element signature="e#18008#18009#0" expanded="false" />
-            <element signature="e#18056#18057#0" expanded="false" />
-            <element signature="e#18484#18485#0" expanded="false" />
-            <element signature="e#18527#18528#0" expanded="false" />
-            <element signature="e#18616#18617#0" expanded="false" />
-            <element signature="e#18657#18658#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5340">
-          <caret line="385" column="21" lean-forward="true" selection-start-line="385" selection-start-column="21" selection-end-line="385" selection-end-column="21" />
+        <state relative-caret-position="2415">
+          <caret line="172" column="66" lean-forward="false" selection-start-line="172" selection-start-column="66" selection-end-line="172" selection-end-column="66" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="21" column="13" lean-forward="false" selection-start-line="21" selection-start-column="13" selection-end-line="21" selection-end-column="13" />
+        <state relative-caret-position="150">
+          <caret line="17" column="32" lean-forward="false" selection-start-line="17" selection-start-column="26" selection-end-line="17" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Floor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="50" column="14" lean-forward="false" selection-start-line="50" selection-start-column="14" selection-end-line="50" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Person.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="840">
+          <caret line="68" column="16" lean-forward="false" selection-start-line="68" selection-start-column="16" selection-end-line="68" selection-end-column="16" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding>
-            <element signature="e#732#740#0" expanded="false" />
-            <element signature="e#1717#1718#0" expanded="false" />
-            <element signature="e#1745#1746#0" expanded="false" />
-            <element signature="e#6220#6221#0" expanded="false" />
-            <element signature="e#6265#6266#0" expanded="false" />
-            <element signature="e#6303#6304#0" expanded="false" />
-            <element signature="e#6340#6341#0" expanded="false" />
-            <element signature="e#6454#6455#0" expanded="false" />
-            <element signature="e#6500#6501#0" expanded="false" />
-            <element signature="e#17046#17047#0" expanded="false" />
-            <element signature="e#17095#17096#0" expanded="false" />
-            <element signature="e#17425#17426#0" expanded="false" />
-            <element signature="e#17470#17471#0" expanded="false" />
-            <element signature="e#17578#17579#0" expanded="false" />
-            <element signature="e#17620#17621#0" expanded="false" />
-            <element signature="e#18008#18009#0" expanded="false" />
-            <element signature="e#18056#18057#0" expanded="false" />
-            <element signature="e#18484#18485#0" expanded="false" />
-            <element signature="e#18527#18528#0" expanded="false" />
-            <element signature="e#18616#18617#0" expanded="false" />
-            <element signature="e#18657#18658#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="2625">
+          <caret line="184" column="29" lean-forward="false" selection-start-line="184" selection-start-column="29" selection-end-line="184" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="17" lean-forward="false" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/featureHouse/FeatureAnnotation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="11" column="1" lean-forward="false" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/verificationClasses/SPLModelChecker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1422,94 +1098,108 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/EvilPerson.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="58" column="19" lean-forward="false" selection-start-line="58" selection-start-column="19" selection-end-line="58" selection-end-column="19" />
+        <state relative-caret-position="45">
+          <caret line="3" column="13" lean-forward="false" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/Actions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-894">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/verificationClasses/FeatureSwitches.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="2" selection-end-line="12" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Person.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="840">
+          <caret line="68" column="16" lean-forward="false" selection-start-line="68" selection-start-column="16" selection-end-line="68" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Floor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="50" column="14" lean-forward="false" selection-start-line="50" selection-start-column="14" selection-end-line="50" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/TestSpecifications/SpecificationManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="32" column="23" lean-forward="false" selection-start-line="32" selection-start-column="23" selection-end-line="32" selection-end-column="23" />
+          <folding>
+            <element signature="e#924#925#0" expanded="true" />
+            <element signature="e#970#971#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/Actions.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Environment.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="15" column="34" lean-forward="false" selection-start-line="15" selection-start-column="34" selection-end-line="15" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sources.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Direction.java" />
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/DoorState.java" />
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Environment.java">
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/JUnit_Scenario_Tests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="13" lean-forward="false" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/EnvironmentLOTRACK.java" />
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/EvilPersonLOTRACK.java" />
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/FloorLOTRACK.java" />
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/PersonLOTRACK.java" />
-    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5340">
-          <caret line="385" column="21" lean-forward="false" selection-start-line="385" selection-start-column="21" selection-end-line="385" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3750">
-          <caret line="264" column="13" lean-forward="false" selection-start-line="264" selection-start-column="4" selection-end-line="264" selection-end-column="13" />
+        <state relative-caret-position="1320">
+          <caret line="88" column="23" lean-forward="false" selection-start-line="88" selection-start-column="23" selection-end-line="88" selection-end-column="23" />
           <folding>
-            <element signature="e#732#740#0" expanded="false" />
-            <element signature="e#1717#1718#0" expanded="false" />
-            <element signature="e#1745#1746#0" expanded="false" />
-            <element signature="e#6220#6221#0" expanded="false" />
-            <element signature="e#6265#6266#0" expanded="false" />
-            <element signature="e#6303#6304#0" expanded="false" />
-            <element signature="e#6340#6341#0" expanded="false" />
-            <element signature="e#6454#6455#0" expanded="false" />
-            <element signature="e#6500#6501#0" expanded="false" />
-            <element signature="e#17046#17047#0" expanded="false" />
-            <element signature="e#17095#17096#0" expanded="false" />
-            <element signature="e#17425#17426#0" expanded="false" />
-            <element signature="e#17470#17471#0" expanded="false" />
-            <element signature="e#17578#17579#0" expanded="false" />
-            <element signature="e#17620#17621#0" expanded="false" />
-            <element signature="e#18008#18009#0" expanded="false" />
-            <element signature="e#18056#18057#0" expanded="false" />
-            <element signature="e#18484#18485#0" expanded="false" />
-            <element signature="e#18527#18528#0" expanded="false" />
-            <element signature="e#18616#18617#0" expanded="false" />
-            <element signature="e#18657#18658#0" expanded="false" />
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/PL_Interface_impl.class">
+    <entry file="file://$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="803">
-          <caret line="314" column="16" lean-forward="false" selection-start-line="314" selection-start-column="16" selection-end-line="314" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/ElevatorLOTRACK.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="26" column="14" lean-forward="false" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="14" />
+        <state relative-caret-position="127">
+          <caret line="171" column="45" lean-forward="false" selection-start-line="171" selection-start-column="45" selection-end-line="171" selection-end-column="45" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
+        <state relative-caret-position="247">
+          <caret line="349" column="30" lean-forward="false" selection-start-line="349" selection-start-column="30" selection-end-line="349" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="153" column="23" lean-forward="false" selection-start-line="153" selection-start-column="23" selection-end-line="153" selection-end-column="23" />
           <folding />
         </state>
       </provider>

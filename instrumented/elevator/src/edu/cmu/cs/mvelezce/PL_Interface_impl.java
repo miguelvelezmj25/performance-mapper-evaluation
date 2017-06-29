@@ -4,11 +4,13 @@ import edu.cmu.cs.mvelezce.ElevatorSystem.Elevator;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Environment;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Person;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationManager;
+import edu.cmu.cs.mvelezce.verificationClasses.SPLModelChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PL_Interface_impl implements PL_Interface {
+
 
     private static final int NUM_FLOORS = 50000;
     public static boolean FEATUREBASE = true;
@@ -22,17 +24,30 @@ public class PL_Interface_impl implements PL_Interface {
     private static int cleanupTimeShifts = 24;
     private static boolean verbose = false;
 
+
     private static boolean isAbortedRun = false;
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static void main(String[] args) {
         try {
+//            FEATUREBASE = Boolean.valueOf(args[0]);
+//            FEATUREWEIGHT = Boolean.valueOf(args[1]);
+//            FEATUREEMPTY = Boolean.valueOf(args[2]);
+//            FEATURETWOTHIRDSFULL = Boolean.valueOf(args[3]);
+//            FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
+//            FEATUREOVERLOADED = Boolean.valueOf(args[5]);
+
+            FEATUREBASE = true;
+            FEATUREWEIGHT = true;
+            FEATUREEMPTY = true;
+            FEATURETWOTHIRDSFULL = true;
+            FEATUREEXECUTIVEFLOOR = true;
+            FEATUREOVERLOADED = true;
+
             FEATUREBASE = Boolean.valueOf(args[0]);
             FEATUREWEIGHT = Boolean.valueOf(args[1]);
             FEATUREEMPTY = Boolean.valueOf(args[2]);
-            FEATURETWOTHIRDSFULL = Boolean.valueOf(args[3]);
-            FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
-            FEATUREOVERLOADED = Boolean.valueOf(args[5]);
 
 //			verificationClasses.FeatureSwitches.select_features();
             PL_Interface_impl impl = new PL_Interface_impl();
@@ -42,15 +57,15 @@ public class PL_Interface_impl implements PL_Interface {
             impl.start(-3, -1);
             System.out.println("no Exception");
         } catch (Throwable e) {
-            System.out.println("Caught Exception: " + e.getClass() + " " + e.getMessage());
+            System.out.println("Caught Exception: " + e.getClass() + " "
+                    + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static void randomSequenceOfActions(int maxLength) {
-        cleanupTimeShifts = 6 * maxLength; // tests have shown that this is
-        // enough
+        cleanupTimeShifts = 6 * maxLength; // tests have shown that this is enough
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
         if (getBoolean()) {
@@ -107,13 +122,13 @@ public class PL_Interface_impl implements PL_Interface {
                     // nobody calls
                     break;
                 default:
-                    throw new InternalError("getIntegerMinMax produced illegal value:" + action);
+                    throw new InternalError(
+                            "getIntegerMinMax produced illegal value:" + action);
             }
             actionHistory.add(actionName);
-            // System.out.println(listToString(actionHistory));
+            //System.out.println(listToString(actionHistory));
             if (e.isBlocked()) {
-                // System.out.println("Stopping Simulation path because Elevator
-                // is stuck (overloaded)");
+                //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
@@ -125,7 +140,7 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static void modifiedrandomSequenceOfActions(int maxLength) {
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
@@ -155,6 +170,7 @@ public class PL_Interface_impl implements PL_Interface {
             boolean action5 = getBoolean();
             boolean action6 = getBoolean();
             boolean action7 = action6 ? false : getBoolean();
+
 
             if (counter < maxLength && action0) {
                 a.bobCall();
@@ -198,8 +214,7 @@ public class PL_Interface_impl implements PL_Interface {
                 }
             }
             if (e.isBlocked()) {
-                // System.out.println("Stopping Simulation path because Elevator
-                // is stuck (overloaded)");
+                //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
@@ -211,19 +226,20 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static int getIntegerMinMax(int min, int max) {
-        return min;
+        return SPLModelChecker.getIntMinMax(min, max);
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static boolean getBoolean() {
-        return true;
+        return SPLModelChecker.getBoolean();
     }
+
 
     // this method is used as hook for the liveness properties.
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     static String listToString(List<String> list) {
         String ret = "";
         for (String s : list) {
@@ -235,31 +251,33 @@ public class PL_Interface_impl implements PL_Interface {
     public void start(int specification, int variation) throws Throwable {
         try {
             if (verbose) {
-                System.out
-                        .print("Started Elevator PL with Specification " + specification + ", Variation: " + variation);
+                System.out.print("Started Elevator PL with Specification " + specification + ", Variation: " + variation);
             }
             test(specification, variation);
         } catch (Throwable e) {
             throw e;
         } finally {
-            /*
-             * System.out.println("Penalty"); if (!isAbortedRun) { int x = 1;
-			 * for (int i = 0; i < 6000000; i++) { x = i / x + 10; } }
-			 */
+        /*System.out.println("Penalty");
+		if (!isAbortedRun) {
+			int x = 1;
+			for (int i = 0; i < 6000000; i++) {
+				x = i / x + 10;
+			}
+		}*/
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void checkOnlySpecification(int specID) {
         SpecificationManager.checkOnlySpecification(specID);
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public List<String> getExecutedActions() {
         return actionHistory;
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public boolean isAbortedRun() {
         return isAbortedRun;
     }
@@ -276,19 +294,16 @@ public class PL_Interface_impl implements PL_Interface {
                 case -3:
                     Specification3();
                     break;
-                case -8:
-                /* Specification8(); */
+                case -8: /*Specification8();*/
                     isAbortedRun = true;
                     break;
                 case -9:
                     Specification9();
                     break;
-                case -10:
-                /* Specification10(); */
+                case -10: /*Specification10();*/
                     isAbortedRun = true;
                     break;
-                case -11:
-                /* Specification11(); */
+                case -11: /*Specification11();*/
                     isAbortedRun = true;
                     break;
                 case -13:
@@ -305,7 +320,7 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void Specification1() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -317,7 +332,7 @@ public class PL_Interface_impl implements PL_Interface {
             e.timeShift();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void Specification2() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -332,10 +347,10 @@ public class PL_Interface_impl implements PL_Interface {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false, 4, false);
         Actions a = new Actions(env, e);
-        for (int i = 0; i < 100; i++) {
-            System.out.println("PL_Interface_impl.Specification3()" + i);
+        for (int i = 0; i < 10; i++) {
+            e.isBlocked();
             Person bob = a.bobCall();
-            // a.bigMacCall();
+            //a.bigMacCall();
             while (env.getFloor(bob.getOrigin()).hasCall())
                 e.timeShift();
             // bob has been picked up in executive Suite
@@ -347,14 +362,13 @@ public class PL_Interface_impl implements PL_Interface {
             // direction, is active)
             a.bobCall();
 
-            while (!e.isEmpty())
-                e.timeShift();
+            while (!e.isEmpty()) e.timeShift();
         }
         for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void Specification9() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -365,7 +379,7 @@ public class PL_Interface_impl implements PL_Interface {
             e.timeShift();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void Specification13() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -381,7 +395,7 @@ public class PL_Interface_impl implements PL_Interface {
             e.timeShift();
     }
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public void Specification14() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -396,5 +410,6 @@ public class PL_Interface_impl implements PL_Interface {
         for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
+
 
 }

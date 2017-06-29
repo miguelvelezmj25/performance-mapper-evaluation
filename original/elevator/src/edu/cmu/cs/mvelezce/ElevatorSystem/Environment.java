@@ -8,7 +8,7 @@ public class Environment {
     Floor[] floors;
 
 
-    //    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public Environment(int numFloors) {
         floors = new Floor[numFloors];
         for (int i = 0; i < numFloors; i++) {
