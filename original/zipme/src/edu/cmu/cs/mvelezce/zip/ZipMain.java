@@ -47,7 +47,6 @@ public class ZipMain implements PL_Interface {
 			FEATUREGZIP = true;
 			FEATUREAdler32Checksum = true;
 			FEATURECompress = true;
-			FEATUREExtract = true;
 			FEATUREDerivativeGZIPCRC = true;
 			FEATUREDerivativeCompressCRC = true;
 			FEATUREDerivativeExtractCRC = true;
@@ -55,8 +54,14 @@ public class ZipMain implements PL_Interface {
 			FEATUREDerivativeCompressAdler32Checksum = true;
 			FEATUREDerivativeCompressGZIPCRC = true;
 
-//            FEATUREArchiveCheck = Boolean.valueOf(args[0]);
-//            FEATUREGZIP = Boolean.valueOf(args[1]);
+            FEATUREArchiveCheck = Boolean.valueOf(args[0]);
+            FEATUREGZIP = Boolean.valueOf(args[1]);
+            FEATUREAdler32Checksum = Boolean.valueOf(args[2]);
+			FEATURECompress = Boolean.valueOf(args[3]);
+			FEATUREExtract = Boolean.valueOf(args[4]);
+			FEATUREDerivativeGZIPCRC = Boolean.valueOf(args[5]);
+			FEATUREDerivativeCompressCRC = Boolean.valueOf(args[6]);
+			FEATUREDerivativeExtractCRC = Boolean.valueOf(args[7]);
 
             ZipMain impl = new ZipMain();
             args = new String[1];

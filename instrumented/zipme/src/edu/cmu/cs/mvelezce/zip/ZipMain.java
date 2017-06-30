@@ -47,7 +47,6 @@ public class ZipMain implements PL_Interface {
             FEATUREGZIP = true;
             FEATUREAdler32Checksum = true;
             FEATURECompress = true;
-            FEATUREExtract = true;
             FEATUREDerivativeGZIPCRC = true;
             FEATUREDerivativeCompressCRC = true;
             FEATUREDerivativeExtractCRC = true;
@@ -57,6 +56,12 @@ public class ZipMain implements PL_Interface {
 
             FEATUREArchiveCheck = Boolean.valueOf(args[0]);
             FEATUREGZIP = Boolean.valueOf(args[1]);
+            FEATUREAdler32Checksum = Boolean.valueOf(args[2]);
+            FEATURECompress = Boolean.valueOf(args[3]);
+            FEATUREExtract = Boolean.valueOf(args[4]);
+            FEATUREDerivativeGZIPCRC = Boolean.valueOf(args[5]);
+            FEATUREDerivativeCompressCRC = Boolean.valueOf(args[6]);
+            FEATUREDerivativeExtractCRC = Boolean.valueOf(args[7]);
 
             ZipMain impl = new ZipMain();
             args = new String[1];
@@ -132,13 +137,13 @@ public class ZipMain implements PL_Interface {
 
 
         args[0] = "irrelevant";
-        ZipTest.fileToZip = new File("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/zipme/uiq2testfile");
+        ZipTest.fileToZip = new File("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/zipme/uiq2testfile");
         //edu.cmu.cs.mvelezce.zip.ZipTest.fileToZip = new File("testfile.c");
         try {
             ZipTest.main(args);
         } catch (Throwable e) {
-            ZipMain.println("Caught Exception: " + e.getClass() + " "
-                    + e.getMessage());
+//            ZipMain.println("Caught Exception: " + e.getClass() + " "
+//                    + e.getMessage());
             e.printStackTrace();
             throw e;
         }
