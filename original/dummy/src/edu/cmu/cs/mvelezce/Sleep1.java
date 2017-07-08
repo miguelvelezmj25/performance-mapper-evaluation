@@ -6,7 +6,6 @@ package edu.cmu.cs.mvelezce;
 public class Sleep1 {
 
     public static boolean A = false;
-    public static boolean B = false;
 
     public static final String FILENAME = Sleep1.class.getCanonicalName();
     public static final String PACKAGE = Sleep1.class.getPackage().getName();
@@ -14,22 +13,45 @@ public class Sleep1 {
     public static final String MAIN_METHOD = "main";
 
     public static void main(String[] args) throws InterruptedException {
-        A = Boolean.valueOf(args[0]);
-        B = Boolean.valueOf(args[1]);
+        // Region program start
+        System.out.println("main");
 
-        A=foo(A);
+//        boolean a = Boolean.valueOf(args[0]);
+        A = Boolean.valueOf(args[0]);
+
+        boolean a;
 
         if (A) {
-            System.out.println(0);
+            a = true;
+        } else {
+            a = false;
         }
 
-        if(B) {
-            System.out.println(1);
+        Thread.sleep(200);
+        // Region A start
+        if (a) { // 20
+            Thread.sleep(600);
         }
+        // Region A end
 
-
+        Thread.sleep(100);
+        // Region program end
     }
 
-    static boolean foo(boolean x) { return x; }
+    public void throwsMethod() throws InterruptedException {
+        int i = 0;
+        Thread.sleep(100);
+        i += 1;
+    }
+
+    public void tryMethof() {
+        int i = 0;
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        i += 1;
+    }
 
 }

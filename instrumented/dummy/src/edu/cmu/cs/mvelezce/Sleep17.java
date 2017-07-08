@@ -73,6 +73,8 @@ public class Sleep17 {
         if (c) {
             Thread.sleep(i * 100);
         }
+
+        method1(false, "false");
     }
 
     public static void method1(boolean A) throws InterruptedException {
@@ -87,6 +89,10 @@ public class Sleep17 {
         // Region A end 20
 
         Thread.sleep(700);
+    }
+
+    public static void method1(boolean A, String check) throws InterruptedException {
+        Thread.sleep(500);
     }
 
     public static void method2(boolean B) throws InterruptedException {

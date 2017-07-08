@@ -17,5 +17,11 @@ public class Sleep19 {
         } else {
             a = false;
         }
+
+        boolean x = a;
+
+        if(x) {
+            x = !x;
+        }
     }
 }

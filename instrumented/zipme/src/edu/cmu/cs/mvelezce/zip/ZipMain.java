@@ -1,6 +1,7 @@
 package edu.cmu.cs.mvelezce.zip;
 
 import edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation;
+import edu.cmu.cs.mvelezce.zip.verificationClasses.FeatureSwitches;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,14 +9,16 @@ import java.util.List;
 
 public class ZipMain implements PL_Interface {
 
-    public static boolean FEATUREBase;
+    public static boolean FEATUREBase = true;
+    public static boolean FEATUREZipMeTest = true;
+    public static boolean FEATURECompress = true;
+    public static boolean FEATUREExtract = true;
+
+    public static boolean FEATUREGZIP = true;
+
     public static boolean FEATURECRC;
     public static boolean FEATUREArchiveCheck;
-    public static boolean FEATUREZipMeTest;
-    public static boolean FEATUREGZIP;
     public static boolean FEATUREAdler32Checksum;
-    public static boolean FEATURECompress;
-    public static boolean FEATUREExtract;
     public static boolean FEATUREDerivativeGZIPCRC;
     public static boolean FEATUREDerivativeCompressCRC;
     public static boolean FEATUREDerivativeExtractCRC;
@@ -40,13 +43,9 @@ public class ZipMain implements PL_Interface {
         try {
 //			edu.cmu.cs.mvelezce.zip.verificationClasses.FeatureSwitches.select_features();
 
-            FEATUREBase = true;
             FEATURECRC = true;
             FEATUREArchiveCheck = true;
-            FEATUREZipMeTest = true;
-            FEATUREGZIP = true;
             FEATUREAdler32Checksum = true;
-            FEATURECompress = true;
             FEATUREDerivativeGZIPCRC = true;
             FEATUREDerivativeCompressCRC = true;
             FEATUREDerivativeExtractCRC = true;
@@ -54,14 +53,19 @@ public class ZipMain implements PL_Interface {
             FEATUREDerivativeCompressAdler32Checksum = true;
             FEATUREDerivativeCompressGZIPCRC = true;
 
-            FEATUREArchiveCheck = Boolean.valueOf(args[0]);
-            FEATUREGZIP = Boolean.valueOf(args[1]);
+            FEATURECRC = Boolean.valueOf(args[0]);
+            FEATUREArchiveCheck = Boolean.valueOf(args[1]);
             FEATUREAdler32Checksum = Boolean.valueOf(args[2]);
-            FEATURECompress = Boolean.valueOf(args[3]);
-            FEATUREExtract = Boolean.valueOf(args[4]);
-            FEATUREDerivativeGZIPCRC = Boolean.valueOf(args[5]);
-            FEATUREDerivativeCompressCRC = Boolean.valueOf(args[6]);
-            FEATUREDerivativeExtractCRC = Boolean.valueOf(args[7]);
+            FEATUREDerivativeGZIPCRC = Boolean.valueOf(args[4]);
+            FEATUREDerivativeCompressCRC = Boolean.valueOf(args[5]);
+            FEATUREDerivativeExtractCRC = Boolean.valueOf(args[5]);
+            FEATUREDerivativeCompressGZIP = Boolean.valueOf(args[6]);
+            FEATUREDerivativeCompressAdler32Checksum = Boolean.valueOf(args[7]);
+            FEATUREDerivativeCompressGZIPCRC = Boolean.valueOf(args[8]);
+
+            if(!FeatureSwitches.valid_product()) {
+                throw new RuntimeException("Illegal config");
+            }
 
             ZipMain impl = new ZipMain();
             args = new String[1];
@@ -78,26 +82,26 @@ public class ZipMain implements PL_Interface {
     @FeatureAnnotation(name = "Base")
     static String listToString(List<String> list) {
         String ret = "";
-        for (String s : list) {
+        for(String s : list) {
             ret = ret + " " + s;
         }
         return ret;
     }
 
     public static void println(String s) {
-        if (ZipMain.verbose) {
+        if(ZipMain.verbose) {
             System.out.println(s);
         }
     }
 
     public static void println() {
-        if (ZipMain.verbose) {
+        if(ZipMain.verbose) {
             System.out.println();
         }
     }
 
     public static void print(String s) {
-        if (ZipMain.verbose) {
+        if(ZipMain.verbose) {
             System.out.print(s);
         }
     }
@@ -107,7 +111,7 @@ public class ZipMain implements PL_Interface {
 
     public void start(int specification, int variation) throws Throwable {
         try {
-            if (verbose) {
+            if(verbose) {
                 ZipMain.print("Started with Specification " + specification + ", Variation: " + variation);
             }
             test(specification, variation);
