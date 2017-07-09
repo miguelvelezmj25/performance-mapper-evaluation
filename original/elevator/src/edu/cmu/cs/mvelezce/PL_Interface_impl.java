@@ -347,7 +347,7 @@ public class PL_Interface_impl implements PL_Interface {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false, 4, false);
         Actions a = new Actions(env, e);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             e.isBlocked();
             Person bob = a.bobCall();
             //a.bigMacCall();

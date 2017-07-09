@@ -16,8 +16,8 @@
       <file leaf-file-name="PL_Interface_impl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5054">
-              <caret line="354" column="22" lean-forward="false" selection-start-line="354" selection-start-column="22" selection-end-line="354" selection-end-column="22" />
+            <state relative-caret-position="279">
+              <caret line="354" column="30" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="415" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -89,6 +89,7 @@
       <find>enterElevator(</find>
       <find>enter</find>
       <find>leaveElevator__before__empty</find>
+      <find>specification3</find>
     </findStrings>
   </component>
   <component name="GradleLocalSettings">
@@ -104,8 +105,8 @@
         <option value="$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Environment.class" />
         <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.java" />
         <option value="$PROJECT_DIR$/sources.txt" />
-        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java" />
         <option value="$PROJECT_DIR$/out/production/elevator/edu/cmu/cs/mvelezce/ElevatorSystem/Elevator.class" />
+        <option value="$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java" />
       </list>
     </option>
   </component>
@@ -116,8 +117,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="2439" />
-    <option name="y" value="23" />
+    <option name="x" value="2180" />
+    <option name="y" value="30" />
     <option name="width" value="1440" />
     <option name="height" value="873" />
   </component>
@@ -980,15 +981,15 @@
       <workItem from="1499269306071" duration="570000" />
       <workItem from="1499435945273" duration="1990000" />
       <workItem from="1499438967978" duration="89000" />
-      <workItem from="1499554263639" duration="316000" />
+      <workItem from="1499554263639" duration="996000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29540000" />
+    <option name="totallyTimeSpent" value="30220000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="2439" y="23" width="1440" height="873" extended-state="0" />
+    <frame x="2180" y="30" width="1440" height="873" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1002,7 +1003,7 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32847682" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23891273" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1330,8 +1331,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/edu/cmu/cs/mvelezce/PL_Interface_impl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5054">
-          <caret line="354" column="22" lean-forward="false" selection-start-line="354" selection-start-column="22" selection-end-line="354" selection-end-column="22" />
+        <state relative-caret-position="279">
+          <caret line="354" column="30" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="415" selection-end-column="0" />
           <folding />
         </state>
       </provider>
