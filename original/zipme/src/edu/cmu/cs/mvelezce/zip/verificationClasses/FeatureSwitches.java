@@ -12,24 +12,24 @@ public class FeatureSwitches {
 //    public static boolean FEATUREArchiveCheck;
 //    public static boolean FEATUREZipMeTest;
 //    public static boolean FEATUREGZIP;
-//    public static boolean FEATUREAdler32Checksum;
+//    public static boolean FEATUREAdlerThreeTwoChecksum;
 //    public static boolean FEATURECompress;
 //    public static boolean FEATUREExtract;
 //    public static boolean FEATUREDerivativeGZIPCRC;
 //    public static boolean FEATUREDerivativeCompressCRC;
 //    public static boolean FEATUREDerivativeExtractCRC;
 //    public static boolean FEATUREDerivativeCompressGZIP;
-//    public static boolean FEATUREDerivativeCompressAdler32Checksum;
+//    public static boolean FEATUREDerivativeCompressAdlerThreeTwoChecksum;
 //    public static boolean FEATUREDerivativeCompressGZIPCRC;
 //    public static String getSelectedFeaturesAsNames() {
 //        StringBuilder sb = new StringBuilder();
 //        if (FEATUREBase) sb.append("Base;");
-//        if (FEATUREDerivativeCompressAdler32Checksum) sb.append("DerivativeCompressAdler32Checksum;");
+//        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) sb.append("DerivativeCompressAdler32Checksum;");
 //        if (FEATUREDerivativeCompressCRC) sb.append("DerivativeCompressCRC;");
 //        if (FEATUREDerivativeCompressGZIP) sb.append("DerivativeCompressGZIP;");
 //        if (FEATUREDerivativeCompressGZIPCRC) sb.append("DerivativeCompressGZIPCRC;");
 //        if (FEATUREDerivativeGZIPCRC) sb.append("DerivativeGZIPCRC;");
-//        if (FEATUREAdler32Checksum) sb.append("Adler32Checksum;");
+//        if (FEATUREAdlerThreeTwoChecksum) sb.append("Adler32Checksum;");
 //        if (FEATUREArchiveCheck) sb.append("ArchiveCheck;");
 //        if (FEATUREZipMeTest) sb.append("ZipMeTest;");
 //        if (FEATUREGZIP) sb.append("GZIP;");
@@ -41,12 +41,12 @@ public class FeatureSwitches {
 //    }
 //    public static void select_features() {
 //        FEATUREBase = verificationClasses.SPLModelChecker.getBoolean();
-//        FEATUREDerivativeCompressAdler32Checksum = verificationClasses.SPLModelChecker.getBoolean();
+//        FEATUREDerivativeCompressAdlerThreeTwoChecksum = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREDerivativeCompressCRC = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREDerivativeCompressGZIP = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREDerivativeCompressGZIPCRC = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREDerivativeGZIPCRC = verificationClasses.SPLModelChecker.getBoolean();
-//        FEATUREAdler32Checksum = verificationClasses.SPLModelChecker.getBoolean();
+//        FEATUREAdlerThreeTwoChecksum = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREArchiveCheck = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREZipMeTest = verificationClasses.SPLModelChecker.getBoolean();
 //        FEATUREGZIP = verificationClasses.SPLModelChecker.getBoolean();
@@ -63,7 +63,7 @@ public class FeatureSwitches {
     }
 
     public static boolean valid_product() {
-        if ( ( FEATUREBase ) && ( FEATUREZipMeTest ) &&  ( FEATURECompress ) && ( FEATUREExtract ) &&  ( !FEATUREGZIP || FEATURECRC ) && ( FEATURECRC || FEATUREAdler32Checksum ) &&  ( !( FEATURECompress && FEATUREAdler32Checksum ) ^ FEATUREDerivativeCompressAdler32Checksum ) && ( !( FEATURECompress && FEATURECRC ) ^ FEATUREDerivativeCompressCRC ) && ( !( FEATURECompress && FEATUREGZIP ) ^ FEATUREDerivativeCompressGZIP ) && ( !( FEATURECompress && FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeCompressGZIPCRC ) && ( !( FEATUREExtract && FEATURECRC ) ^ FEATUREDerivativeExtractCRC ) && ( !( FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeGZIPCRC ))
+        if ( ( FEATUREBase ) && ( FEATUREZipMeTest ) &&  ( FEATURECompress ) && ( FEATUREExtract ) &&  ( !FEATUREGZIP || FEATURECRC ) && ( FEATURECRC || FEATUREAdlerThreeTwoChecksum) &&  ( !( FEATURECompress && FEATUREAdlerThreeTwoChecksum) ^ FEATUREDerivativeCompressAdlerThreeTwoChecksum) && ( !( FEATURECompress && FEATURECRC ) ^ FEATUREDerivativeCompressCRC ) && ( !( FEATURECompress && FEATUREGZIP ) ^ FEATUREDerivativeCompressGZIP ) && ( !( FEATURECompress && FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeCompressGZIPCRC ) && ( !( FEATUREExtract && FEATURECRC ) ^ FEATUREDerivativeExtractCRC ) && ( !( FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeGZIPCRC ))
             return true;
         else
             return false;

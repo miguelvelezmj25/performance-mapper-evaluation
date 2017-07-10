@@ -2,7 +2,7 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
-import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdler32Checksum;
+import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdlerThreeTwoChecksum;
 
 class DeflaterEngine implements DeflaterConstants {
 
@@ -542,7 +542,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 29, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook26() {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook26__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -564,7 +564,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 30, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook27() {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook27__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -586,7 +586,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 31, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook28(int more) {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook28__role__DerivativeCompressAdler32Checksum(more);
         }
         else {
@@ -608,7 +608,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 32, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook29(byte[] buffer, int offset, int length) {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook29__role__DerivativeCompressAdler32Checksum(buffer, offset, length);
         }
         else {
