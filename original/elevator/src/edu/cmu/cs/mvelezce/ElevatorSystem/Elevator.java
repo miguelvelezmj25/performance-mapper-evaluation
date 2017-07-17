@@ -76,7 +76,7 @@ public class Elevator {
     @FeatureSwitchID(id = 7, thenFeature = "overloaded", elseFeature = "base")
     public boolean
     isBlocked() {
-        if (FEATUREOVERLOADED) {
+        if(FEATUREOVERLOADED) {
             return isBlocked__role__overloaded();
         }
         else {
@@ -88,7 +88,7 @@ public class Elevator {
     public void enterElevator__before__weight(Person p) {
         persons.add(p);
         p.enterElevator(this);
-        if (verbose) {
+        if(verbose) {
             System.out.println(p.getName() + " entered the Elevator at Landing " + this.getCurrentFloorID() + ", going to " + p.getDestination());
         }
     }
@@ -109,7 +109,7 @@ public class Elevator {
     @FeatureSwitchID(id = 0, thenFeature = "weight", elseFeature = "base")
     public void
     enterElevator(Person p) {
-        if (FEATUREWEIGHT) {
+        if(FEATUREWEIGHT) {
             enterElevator__role__weight(p);
         }
         else {
@@ -119,10 +119,10 @@ public class Elevator {
 
     @FeatureAnnotation(name = "base")
     public boolean leaveElevator__before__weight(Person p) {
-        if (persons.contains(p)) {
+        if(persons.contains(p)) {
             persons.remove(p);
             p.leaveElevator();
-            if (verbose) {
+            if(verbose) {
                 System.out.println(p.getName() + " left the Elevator at Landing " + currentFloorID);
             }
             return true;
@@ -134,7 +134,7 @@ public class Elevator {
 
     @FeatureAnnotation(name = "weight")
     public boolean leaveElevator__role__weight(Person p) {
-        if (leaveElevator__before__weight(p)) {
+        if(leaveElevator__before__weight(p)) {
             weight -= p.getWeight();
             return true;
         }
@@ -147,7 +147,7 @@ public class Elevator {
     @FeatureSwitchID(id = 1, thenFeature = "weight", elseFeature = "base")
     public boolean
     leaveElevator__before__empty(Person p) {
-        if (FEATUREWEIGHT) {
+        if(FEATUREWEIGHT) {
             return leaveElevator__role__weight(p);
         }
         else {
@@ -163,8 +163,8 @@ public class Elevator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (leaveElevator__before__empty(p)) {
-            if (this.persons.isEmpty()) {
+        if(leaveElevator__before__empty(p)) {
+            if(this.persons.isEmpty()) {
                 Arrays.fill(this.floorButtons, false);
             }
             return true;
@@ -178,7 +178,7 @@ public class Elevator {
     @FeatureSwitchID(id = 2, thenFeature = "empty", elseFeature = "featureSwitch")
     public boolean
     leaveElevator(Person p) {
-        if (FEATUREEMPTY) {
+        if(FEATUREEMPTY) {
             return leaveElevator__role__empty(p);
         }
         else {
@@ -214,12 +214,12 @@ public class Elevator {
     public void timeShift__before__overloaded() {
         //System.out.println("--");
 
-        if (stopRequestedAtCurrentFloor()) {
+        if(stopRequestedAtCurrentFloor()) {
             //System.out.println("Arriving at " +  currentFloorID + ", Doors opening");
             doors = DoorState.open;
             // iterate over a copy of the original list, avoids concurrent modification exception
-            for (Person p : new ArrayList<Person>(persons)) {
-                if (p.getDestination() == currentFloorID) {
+            for(Person p : new ArrayList<Person>(persons)) {
+                if(p.getDestination() == currentFloorID) {
                     leaveElevator(p);
                 }
             }
@@ -227,16 +227,16 @@ public class Elevator {
             resetFloorButton(currentFloorID);
         }
         else {
-            if (doors == DoorState.open) {
+            if(doors == DoorState.open) {
                 doors = DoorState.close;
                 //System.out.println("Doors Closing");
             }
-            if (stopRequestedInDirection(currentHeading, true, true)) {
+            if(stopRequestedInDirection(currentHeading, true, true)) {
                 //System.out.println("Arriving at " + currentFloorID + ", continuing");
                 // continue
                 continueInDirection(currentHeading);
             }
-            else if (stopRequestedInDirection(currentHeading.reverse(), true, true)) {
+            else if(stopRequestedInDirection(currentHeading.reverse(), true, true)) {
                 //System.out.println("Arriving at " + currentFloorID + ", reversing direction because of call in other direction");
                 // revert direction
                 continueInDirection(currentHeading.reverse());
@@ -252,9 +252,9 @@ public class Elevator {
     // pre: elevator arrived at the current floor, next actions to be done
     @FeatureAnnotation(name = "overloaded")
     public void timeShift__role__overloaded() {
-        if (areDoorsOpen() && weight > maximumWeight) {
+        if(areDoorsOpen() && weight > maximumWeight) {
             blocked = true;
-            if (verbose) {
+            if(verbose) {
                 System.out.println("Elevator blocked due to overloading (weight:" + weight + " > maximumWeight:" + maximumWeight + ")");
             }
         }
@@ -268,7 +268,7 @@ public class Elevator {
     @FeatureSwitchID(id = 8, thenFeature = "overloaded", elseFeature = "base")
     public void
     timeShift() {
-        if (FEATUREOVERLOADED) {
+        if(FEATUREOVERLOADED) {
             timeShift__role__overloaded();
         }
         else {
@@ -284,7 +284,7 @@ public class Elevator {
 
     @FeatureAnnotation(name = "twothirdsfull")
     private boolean stopRequestedAtCurrentFloor__role__twothirdsfull() {
-        if (weight > maximumWeight * 2 / 3) {
+        if(weight > maximumWeight * 2 / 3) {
             return floorButtons[currentFloorID] == true;
         }
         else {
@@ -296,7 +296,7 @@ public class Elevator {
     @FeatureSwitchID(id = 3, thenFeature = "twothirdsfull", elseFeature = "base")
     private boolean
     stopRequestedAtCurrentFloor__before__executivefloor() {
-        if (FEATURETWOTHIRDSFULL) {
+        if(FEATURETWOTHIRDSFULL) {
             return stopRequestedAtCurrentFloor__role__twothirdsfull();
         }
         else {
@@ -312,7 +312,7 @@ public class Elevator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (isExecutiveFloorCalling() && !isExecutiveFloor(currentFloorID)) {
+        if(isExecutiveFloorCalling() && !isExecutiveFloor(currentFloorID)) {
             return false;
         }
         else {
@@ -325,7 +325,7 @@ public class Elevator {
     @FeatureSwitchID(id = 5, thenFeature = "executivefloor", elseFeature = "featureSwitch")
     private boolean
     stopRequestedAtCurrentFloor() {
-        if (FEATUREEXECUTIVEFLOOR) {
+        if(FEATUREEXECUTIVEFLOOR) {
             return stopRequestedAtCurrentFloor__role__executivefloor();
         }
         else {
@@ -335,19 +335,19 @@ public class Elevator {
 
     private void continueInDirection(Direction dir) {
         currentHeading = dir;
-        if (currentHeading == Direction.up) {
-            if (env.isTopFloor(currentFloorID)) {
+        if(currentHeading == Direction.up) {
+            if(env.isTopFloor(currentFloorID)) {
                 //System.out.println("Reversing at Top Floor");
                 currentHeading = currentHeading.reverse();
             }
         }
         else {
-            if (currentFloorID == 0) {
+            if(currentFloorID == 0) {
                 //System.out.println("Reversing at Basement Floor");
                 currentHeading = currentHeading.reverse();
             }
         }
-        if (currentHeading == Direction.up) {
+        if(currentHeading == Direction.up) {
             currentFloorID = currentFloorID + 1;
         }
         else {
@@ -357,8 +357,8 @@ public class Elevator {
 
     @FeatureAnnotation(name = "base")
     private boolean isAnyLiftButtonPressed() {
-        for (int i = 0; i < this.floorButtons.length; i++) {
-            if (floorButtons[i]) {
+        for(int i = 0; i < this.floorButtons.length; i++) {
+            if(floorButtons[i]) {
                 return true;
             }
         }
@@ -368,29 +368,29 @@ public class Elevator {
     @FeatureAnnotation(name = "base")
     private boolean stopRequestedInDirection__before__twothirdsfull(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
         Floor[] floors = env.getFloors();
-        if (dir == Direction.up) {
-            if (env.isTopFloor(currentFloorID)) {
+        if(dir == Direction.up) {
+            if(env.isTopFloor(currentFloorID)) {
                 return false;
             }
-            for (int i = currentFloorID + 1; i < floors.length; i++) {
-                if (respectFloorCalls && floors[i].hasCall()) {
+            for(int i = currentFloorID + 1; i < floors.length; i++) {
+                if(respectFloorCalls && floors[i].hasCall()) {
                     return true;
                 }
-                if (respectInLiftCalls && this.floorButtons[i]) {
+                if(respectInLiftCalls && this.floorButtons[i]) {
                     return true;
                 }
             }
             return false;
         }
         else {
-            if (currentFloorID == 0) {
+            if(currentFloorID == 0) {
                 return false;
             }
-            for (int i = currentFloorID - 1; i >= 0; i--) {
-                if (respectFloorCalls && floors[i].hasCall()) {
+            for(int i = currentFloorID - 1; i >= 0; i--) {
+                if(respectFloorCalls && floors[i].hasCall()) {
                     return true;
                 }
-                if (respectInLiftCalls && this.floorButtons[i]) {
+                if(respectInLiftCalls && this.floorButtons[i]) {
                     return true;
                 }
             }
@@ -400,8 +400,8 @@ public class Elevator {
 
     @FeatureAnnotation(name = "twothirdsfull")
     private boolean stopRequestedInDirection__role__twothirdsfull(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (weight > maximumWeight * 2 / 3 && isAnyLiftButtonPressed()) {
-            if (verbose) {
+        if(weight > maximumWeight * 2 / 3 && isAnyLiftButtonPressed()) {
+            if(verbose) {
                 System.out.println("over 2/3 threshold, ignoring calls from FloorButtons until weight is below 2/3*threshold");
             }
             return stopRequestedInDirection__before__twothirdsfull(dir, false, respectInLiftCalls);
@@ -415,7 +415,7 @@ public class Elevator {
     @FeatureSwitchID(id = 4, thenFeature = "twothirdsfull", elseFeature = "base")
     private boolean
     stopRequestedInDirection__before__executivefloor(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (FEATURETWOTHIRDSFULL) {
+        if(FEATURETWOTHIRDSFULL) {
             return stopRequestedInDirection__role__twothirdsfull(dir, respectFloorCalls, respectInLiftCalls);
         }
         else {
@@ -425,8 +425,8 @@ public class Elevator {
 
     @FeatureAnnotation(name = "executivefloor")
     private boolean stopRequestedInDirection__role__executivefloor(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (isExecutiveFloorCalling()) {
-            if (verbose) {
+        if(isExecutiveFloorCalling()) {
+            if(verbose) {
                 System.out.println("Giving Priority to Executive Floor");
             }
             return ((this.currentFloorID < executiveFloor) == (dir == Direction.up));
@@ -441,7 +441,7 @@ public class Elevator {
     @FeatureSwitchID(id = 6, thenFeature = "executivefloor", elseFeature = "featureSwitch")
     private boolean
     stopRequestedInDirection(Direction dir, boolean respectFloorCalls, boolean respectInLiftCalls) {
-        if (FEATUREEXECUTIVEFLOOR) {
+        if(FEATUREEXECUTIVEFLOOR) {
             return stopRequestedInDirection__role__executivefloor(dir, respectFloorCalls, respectInLiftCalls);
         }
         else {
@@ -452,11 +452,11 @@ public class Elevator {
     @FeatureAnnotation(name = "base")
     private boolean anyStopRequested() {
         Floor[] floors = env.getFloors();
-        for (int i = 0; i < floors.length; i++) {
-            if (floors[i].hasCall()) {
+        for(int i = 0; i < floors.length; i++) {
+            if(floors[i].hasCall()) {
                 return true;
             }
-            else if (this.floorButtons[i]) {
+            else if(this.floorButtons[i]) {
                 return true;
             }
         }
@@ -499,8 +499,8 @@ public class Elevator {
     }
 
     public boolean isExecutiveFloorCalling() {
-        for (Floor f : env.floors)
-            if (f.getFloorID() == executiveFloor && f.hasCall()) {
+        for(Floor f : env.floors)
+            if(f.getFloorID() == executiveFloor && f.hasCall()) {
                 return true;
             }
         return false;

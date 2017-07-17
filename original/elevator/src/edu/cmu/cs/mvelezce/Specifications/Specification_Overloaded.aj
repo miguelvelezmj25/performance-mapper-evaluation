@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce.Specifications;
 
+
 import edu.cmu.cs.mvelezce.ElevatorSystem.Elevator;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationException;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationManager;
@@ -9,12 +10,12 @@ public privileged aspect Specification_Overloaded extends AbstractSpecification 
 	/* Original: The Doors of the lift cannot be closed when the lift is overloaded.
 	 * MyVersion: The doors are never closed when the lift is overloaded.
 	 */
-    //pointcut allPublicElevatorMethods(Elevator e) : execution(public * edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.*(..)) && target(e);
+    //pointcut allPublicElevatorMethods(Elevator e) : execution(public * ElevatorSystem.Elevator.*(..)) && target(e);
 
     after(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(10)) {
-            if (e.weight > Elevator.maximumWeight && !e.areDoorsOpen()) {
-                if (SpecificationManager.checkSpecification(10)) {
+        if(SpecificationManager.checkSpecification(10)) {
+            if(e.weight > Elevator.maximumWeight && !e.areDoorsOpen()) {
+                if(SpecificationManager.checkSpecification(10)) {
                     failure(new SpecificationException("Spec10", "(Spec10) Doors are closed even though the Elevator is overloaded (" + e.weight + ">" + Elevator.maximumWeight + ")"));
                 }
             }
@@ -23,11 +24,11 @@ public privileged aspect Specification_Overloaded extends AbstractSpecification 
     // specification 11
 	 /* Elevator must not move while it is overloaded.
 	  */
-    pointcut timeShift(Elevator e): execution(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e);
+    pointcut timeShift(Elevator e): execution(public void ElevatorSystem.Elevator.timeShift()) && target(e);
     int stayAt = -1000;
     before(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(11)) {
-            if (e.weight > Elevator.maximumWeight) {
+        if(SpecificationManager.checkSpecification(11)) {
+            if(e.weight > Elevator.maximumWeight) {
                 stayAt = e.getCurrentFloorID();
             }
             else {
@@ -36,9 +37,9 @@ public privileged aspect Specification_Overloaded extends AbstractSpecification 
         }
     }
     after(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(11)) {
-            if (stayAt != -1000 && stayAt != e.getCurrentFloorID()) {
-                if (SpecificationManager.checkSpecification(11)) {
+        if(SpecificationManager.checkSpecification(11)) {
+            if(stayAt != -1000 && stayAt != e.getCurrentFloorID()) {
+                if(SpecificationManager.checkSpecification(11)) {
                     failure(new SpecificationException("Spec11", "(Spec11) Elevator moved from " + stayAt + " to " + e.getCurrentFloorID() + " even though it is overloaded."));
                 }
             }

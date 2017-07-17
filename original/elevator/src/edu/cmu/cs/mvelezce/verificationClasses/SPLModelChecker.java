@@ -2,6 +2,8 @@ package edu.cmu.cs.mvelezce.verificationClasses;
 
 //import gov.nasa.jpf.jvm.Verify;
 
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
+
 public class SPLModelChecker {
 
 
@@ -18,7 +20,7 @@ public class SPLModelChecker {
         return x;
 	}*/
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public static int getIntMinMax(int min, int max) {
         //return(new java.util.Random()).nextInt(max - min + 1)+min;
 //        return Verify.getInt(min, max);

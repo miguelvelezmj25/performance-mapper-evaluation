@@ -16,27 +16,27 @@ public class FileTestUtils {
     }
 
     public static final File getTestFile(Class<?> testClass, String testMethod, String fileName, String defaultFileName) {
-        return(getTestFile(getTestDir(testClass), testMethod, fileName, defaultFileName));
+        return (getTestFile(getTestDir(testClass), testMethod, fileName, defaultFileName));
     }
 
     public static final File getTestFile(File parentDir, String testMethod, String fileName, String defaultFileName) {
         File file = new File(parentDir, fileName);
-        if (!file.exists()) {
-            if (defaultFileName == null) {
+        if(!file.exists()) {
+            if(defaultFileName == null) {
                 throw new IllegalArgumentException("test file for " + parentDir.getName() + "." + testMethod + " not found, expected file: " + fileName);
             }
             file = new File(parentDir, defaultFileName);
-            if (!file.exists()) {
+            if(!file.exists()) {
                 throw new IllegalArgumentException("test file for " + parentDir.getName() + "." + testMethod + " not found, expected file: " + fileName + " or default file: " + defaultFileName);
             }
         }
         return file;
     }
 
-    public static File getTestDir(Class<?> testClass){
+    public static File getTestDir(Class<?> testClass) {
         final String testDir = "/" + getTestDirRelativeToPackageDir(testClass);
         URL fileURL = testClass.getResource(testDir);
-        if(fileURL == null){
+        if(fileURL == null) {
             throw new IllegalArgumentException("Test directory does not exist.  Please ensure it exists at [" + testDir + "]");
         }
         return new File(fileURL.getFile());

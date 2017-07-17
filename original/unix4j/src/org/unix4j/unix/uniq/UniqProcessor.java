@@ -7,15 +7,15 @@ import org.unix4j.processor.LineProcessor;
 
 abstract class UniqProcessor extends AbstractLineProcessor<UniqArguments> {
 
-	public UniqProcessor(UniqCommand command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-	}
+    public UniqProcessor(UniqCommand command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+    }
 
-	@Override
-	public final boolean processLine(Line line) {
-		return processLine(line, getOutput());
-	}
+    @Override
+    public final boolean processLine(Line line) {
+        return processLine(line, getOutput());
+    }
 
-	abstract protected boolean processLine(Line line, LineProcessor output);
+    abstract protected boolean processLine(Line line, LineProcessor output);
 
 }

@@ -12,99 +12,98 @@ import org.unix4j.processor.LineProcessor;
  */
 public class AdHocCommand extends AbstractCommand<Args> {
 
-	/**
-	 * The "adhoc" name for this command.
-	 */
-	public static final String NAME = "adhoc";
+    /**
+     * The "adhoc" name for this command.
+     */
+    public static final String NAME = "adhoc";
 
-	public AdHocCommand(LineOperation operation) {
-		super(NAME, new Args(operation));
-	}
+    public AdHocCommand(LineOperation operation) {
+        super(NAME, new Args(operation));
+    }
 
-	/**
-	 * Arguments for {@link AdHocCommand}.
-	 */
-	public static final class Args implements Arguments<Args> {
-		private final LineOperation operation;
+    @Override
+    public LineProcessor execute(final ExecutionContext context, final LineProcessor output) {
+        return new LineProcessor() {
+            final OperationOutput operationOutput = new OperationOutput(output);
+            final LineOperation operation = getArguments(context).getOperation();
 
-		/**
-		 * Constructor with the single operation argument passed to the
-		 * constructor of {@link AdHocCommand}.
-		 * 
-		 * @param operation
-		 *            the operation argument
-		 */
-		public Args(LineOperation operation) {
-			if (operation == null) {
-				throw new NullPointerException("operation cannot be null");
-			}
-			this.operation = operation;
-		}
+            @Override
+            public boolean processLine(Line line) {
+                operation.operate(context, line, operationOutput);
+                return operationOutput.isOpen();
+            }
 
-		public final LineOperation getOperation() {
-			return operation;
-		}
+            @Override
+            public void finish() {
+                operationOutput.close();
+            }
+        };
+    }
 
-		@Override
-		public Args getForContext(ExecutionContext context) {
-			return this;// no variable args, hence the same for all contexts
-		}
+    /**
+     * Arguments for {@link AdHocCommand}.
+     */
+    public static final class Args implements Arguments<Args> {
+        private final LineOperation operation;
 
-		@Override
-		public String toString() {
-			return "--operation " + operation;
-		}
-	}
+        /**
+         * Constructor with the single operation argument passed to the
+         * constructor of {@link AdHocCommand}.
+         *
+         * @param operation the operation argument
+         */
+        public Args(LineOperation operation) {
+            if(operation == null) {
+                throw new NullPointerException("operation cannot be null");
+            }
+            this.operation = operation;
+        }
 
-	@Override
-	public LineProcessor execute(final ExecutionContext context, final LineProcessor output) {
-		return new LineProcessor() {
-			final OperationOutput operationOutput = new OperationOutput(output);
-			final LineOperation operation = getArguments(context).getOperation();
+        public final LineOperation getOperation() {
+            return operation;
+        }
 
-			@Override
-			public boolean processLine(Line line) {
-				operation.operate(context, line, operationOutput);
-				return operationOutput.isOpen();
-			}
+        @Override
+        public Args getForContext(ExecutionContext context) {
+            return this;// no variable args, hence the same for all contexts
+        }
 
-			@Override
-			public void finish() {
-				operationOutput.close();
-			}
-		};
-	}
+        @Override
+        public String toString() {
+            return "--operation " + operation;
+        }
+    }
 
-	private static class OperationOutput implements LineProcessor {
-		private final LineProcessor output;
-		private boolean open = true;
+    private static class OperationOutput implements LineProcessor {
+        private final LineProcessor output;
+        private boolean open = true;
 
-		public OperationOutput(LineProcessor output) {
-			this.output = output;
-		}
+        public OperationOutput(LineProcessor output) {
+            this.output = output;
+        }
 
-		@Override
-		public boolean processLine(Line line) {
-			if (open) {
-				open = output.processLine(line);
-				return open;
-			}
-			return false;
-		}
+        @Override
+        public boolean processLine(Line line) {
+            if(open) {
+                open = output.processLine(line);
+                return open;
+            }
+            return false;
+        }
 
-		@Override
-		public void finish() {
-			open = false;
-		}
+        @Override
+        public void finish() {
+            open = false;
+        }
 
-		public boolean isOpen() {
-			return open;
-		}
+        public boolean isOpen() {
+            return open;
+        }
 
-		public void close() {
-			finish();
-			output.finish();
-		}
-	}
+        public void close() {
+            finish();
+            output.finish();
+        }
+    }
 
 }

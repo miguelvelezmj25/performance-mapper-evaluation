@@ -10,8 +10,8 @@ public aspect Specification_Base extends AbstractSpecification {
     int numFloors = 0;
     // initialization
     before(int numFloors):
-            call(edu.cmu.cs.mvelezce.ElevatorSystem.Environment.new(int)) && args(numFloors) {
-        if (SpecificationManager.checkSpecification(1)) {
+            call(ElevatorSystem.Environment.new(int)) && args(numFloors) {
+        if(SpecificationManager.checkSpecification(1)) {
             calledAt_Spec1 = new boolean[numFloors];
             this.numFloors = numFloors;
         }
@@ -24,26 +24,26 @@ public aspect Specification_Base extends AbstractSpecification {
 
     // collect all pressed buttons
     before(Floor floor):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Floor.callElevator()) && target(floor) {
-        if (SpecificationManager.checkSpecification(1)) {
+            call(public void ElevatorSystem.Floor.callElevator()) && target(floor) {
+        if(SpecificationManager.checkSpecification(1)) {
             calledAt_Spec1[floor.getFloorID()] = true;
         }
     }
     // monitor if the floors are visited
     after(Elevator e):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e) {
-        if (SpecificationManager.checkSpecification(1)) {
+            call(public void ElevatorSystem.Elevator.timeShift()) && target(e) {
+        if(SpecificationManager.checkSpecification(1)) {
             int floor = e.getCurrentFloorID();
-            if (calledAt_Spec1[floor] && e.areDoorsOpen()) {
+            if(calledAt_Spec1[floor] && e.areDoorsOpen()) {
                 calledAt_Spec1[floor] = false; // reset
             }
         }
     }
     // fail if some floors were not visited in the end
     after(): programTermination() {
-        if (SpecificationManager.checkSpecification(1)) {
-            for (int i = 0; i < calledAt_Spec1.length; i++) {
-                if (calledAt_Spec1[i] == true) {
+        if(SpecificationManager.checkSpecification(1)) {
+            for(int i = 0; i < calledAt_Spec1.length; i++) {
+                if(calledAt_Spec1[i] == true) {
                     failure(new SpecificationException("Spec1", "(Spec1) Elevator did not stop at Floor" + i + " as requested (from outside)"));
                 }
             }
@@ -56,33 +56,33 @@ public aspect Specification_Base extends AbstractSpecification {
     boolean[] calledAt_Spec2;
     // initialization
     before(int numFloors):
-            call(edu.cmu.cs.mvelezce.ElevatorSystem.Environment.new(int)) && args(numFloors) {
-        if (SpecificationManager.checkSpecification(2)) {
+            call(ElevatorSystem.Environment.new(int)) && args(numFloors) {
+        if(SpecificationManager.checkSpecification(2)) {
             calledAt_Spec2 = new boolean[numFloors];
         }
     }
     // collect all pressed buttons
     before(int floorID):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.pressInLiftFloorButton(int)) && args(floorID) {
-        if (SpecificationManager.checkSpecification(2)) {
+            call(public void ElevatorSystem.Elevator.pressInLiftFloorButton(int)) && args(floorID) {
+        if(SpecificationManager.checkSpecification(2)) {
             calledAt_Spec2[floorID] = true;
         }
     }
     // monitor if the floors are visited
     after(Elevator e):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e) {
+            call(public void ElevatorSystem.Elevator.timeShift()) && target(e) {
         int floor = e.getCurrentFloorID();
-        if (SpecificationManager.checkSpecification(2)) {
-            if (calledAt_Spec2[floor] && e.areDoorsOpen()) {
+        if(SpecificationManager.checkSpecification(2)) {
+            if(calledAt_Spec2[floor] && e.areDoorsOpen()) {
                 calledAt_Spec2[floor] = false; // reset
             }
         }
     }
     // fail if some floors were not visited in the end
     after(): programTermination() {
-        if (SpecificationManager.checkSpecification(2)) {
-            for (int i = 0; i < calledAt_Spec2.length; i++) {
-                if (calledAt_Spec2[i] == true) {
+        if(SpecificationManager.checkSpecification(2)) {
+            for(int i = 0; i < calledAt_Spec2.length; i++) {
+                if(calledAt_Spec2[i] == true) {
                     failure(new SpecificationException("Spec2", "(Spec2) Elevator did not stop at Floor" + i + " as requested (from inside)"));
                 }
             }
@@ -91,22 +91,22 @@ public aspect Specification_Base extends AbstractSpecification {
     /*Specification 3:
      * The Lift will not change direction while there are calls in the direction it is traveling.
      */
-    pointcut timeShift(Elevator e): execution(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e);
+    pointcut timeShift(Elevator e): execution(public void ElevatorSystem.Elevator.timeShift()) && target(e);
     byte expectedDirection = 0; // 0=unknown, 1=up, -1=down
     before(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(3)) {
+        if(SpecificationManager.checkSpecification(3)) {
             expectedDirection = 0;
-            if (e.getCurrentDirection() == Direction.up) {
-                for (int i = e.getCurrentFloorID() + 1; i < numFloors; i++) {
-                    if (e.buttonForFloorIsPressed(i)) {
+            if(e.getCurrentDirection() == Direction.up) {
+                for(int i = e.getCurrentFloorID() + 1; i < numFloors; i++) {
+                    if(e.buttonForFloorIsPressed(i)) {
                         expectedDirection = 1;
                         break;
                     }
                 }
             }
             else {
-                for (int i = e.getCurrentFloorID() - 1; i >= 0; i--) {
-                    if (e.buttonForFloorIsPressed(i)) {
+                for(int i = e.getCurrentFloorID() - 1; i >= 0; i--) {
+                    if(e.buttonForFloorIsPressed(i)) {
                         expectedDirection = -1;
                         break;
                     }
@@ -115,11 +115,11 @@ public aspect Specification_Base extends AbstractSpecification {
         }
     }
     after(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(3)) {
-            if (expectedDirection == -1 && e.getCurrentDirection() == Direction.up) {
+        if(SpecificationManager.checkSpecification(3)) {
+            if(expectedDirection == -1 && e.getCurrentDirection() == Direction.up) {
                 failure(new SpecificationException("Spec3", "(Spec3) Elevator changed directions even though there were still calls in the old direction."));
             }
-            else if (expectedDirection == 1 && e.getCurrentDirection() == Direction.down) {
+            else if(expectedDirection == 1 && e.getCurrentDirection() == Direction.down) {
                 failure(new SpecificationException("Spec3", "(Spec3) Elevator changed directions even though there were still calls in the old direction."));
             }
         }
@@ -127,7 +127,7 @@ public aspect Specification_Base extends AbstractSpecification {
 
     //utility method
     static void printArrayReverse(boolean[] arr) {
-        for (int i = arr.length - 1; i >= 0; i--) {
+        for(int i = arr.length - 1; i >= 0; i--) {
             System.out.println(i + " : " + arr[i]);
         }
     }

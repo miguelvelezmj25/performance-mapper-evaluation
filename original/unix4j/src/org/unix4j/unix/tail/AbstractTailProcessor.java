@@ -8,13 +8,13 @@ import org.unix4j.processor.LineProcessor;
  * Base class for the line processors used by the {@link TailCommand}.
  */
 abstract class AbstractTailProcessor extends AbstractLineProcessor<TailArguments> {
-	protected final long count;
+    protected final long count;
+
+    public AbstractTailProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+        final TailArguments args = getArguments();
+        this.count = args.isCountSet() ? args.getCount() : 10;
+    }
 
     public abstract void resetCountersAndFlush();
-
-	public AbstractTailProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-		final TailArguments args = getArguments();
-		this.count = args.isCountSet() ? args.getCount() : 10;
-	}
 }

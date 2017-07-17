@@ -8,38 +8,40 @@ import org.unix4j.util.Counter;
 
 class TailCharsFromStartProcessor extends AbstractTailProcessor {
 
-	private final Counter counter = new Counter();
+    private final Counter counter = new Counter();
+
+    public TailCharsFromStartProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+    }
 
     @Override
     public void resetCountersAndFlush() {
         counter.reset();
     }
 
-    public TailCharsFromStartProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-	}
+    @Override
+    public boolean processLine(Line line) {
+        final long before = counter.getCount();
+        if(before >= count) {
+            return getOutput().processLine(line);
+        }
+        else {
+            final long after = counter.increment(line.length());
+            if(after >= count) {
+                final int lineLen = line.length();
+                final int charsFromEnd = (int) (after - count + 1);
+                final Line cutLine = SimpleLine.subLine(line, lineLen - charsFromEnd, lineLen, false);
+                return getOutput().processLine(cutLine);
+            }
+            else {
+                return true;//we want more lines
+            }
+        }
+    }
 
-	@Override
-	public boolean processLine(Line line) {
-		final long before = counter.getCount();
-		if (before >= count) {
-			return getOutput().processLine(line);
-		} else {
-			final long after = counter.increment(line.length());
-			if (after >= count) {
-				final int lineLen = line.length();
-				final int charsFromEnd = (int)(after - count + 1);
-				final Line cutLine = SimpleLine.subLine(line, lineLen - charsFromEnd, lineLen, false);
-				return getOutput().processLine(cutLine);
-			} else {
-				return true;//we want more lines
-			}
-		}
-	}
-
-	@Override
-	public void finish() {
+    @Override
+    public void finish() {
         resetCountersAndFlush();
-		getOutput().finish();
-	}
+        getOutput().finish();
+    }
 }

@@ -12,65 +12,58 @@ import java.util.List;
  */
 public final class CompositeComparator<T> implements Comparator<T> {
 
-	private final List<Comparator<? super T>> comparators;
+    private final List<Comparator<? super T>> comparators;
 
-	/**
-	 * Constructs a comparator based on the specified underlying comparators.
-	 * 
-	 * @param comparators
-	 *            the underlying comparators
-	 */
-	@SuppressWarnings("unchecked")
-	public CompositeComparator(Comparator<? super T>... comparators) {
-		this(Arrays.asList(comparators));
-	}
+    /**
+     * Constructs a comparator based on the specified underlying comparators.
+     *
+     * @param comparators the underlying comparators
+     */
+    @SuppressWarnings("unchecked")
+    public CompositeComparator(Comparator<? super T>... comparators) {
+        this(Arrays.asList(comparators));
+    }
 
-	/**
-	 * Constructs a comparator based on the specified underlying comparators.
-	 * 
-	 * @param comparator1
-	 *            the first underlying comparators
-	 * @param comparator2
-	 *            the second underlying comparators
-	 */
-	@SuppressWarnings("unchecked")
-	public CompositeComparator(Comparator<? super T> comparator1, Comparator<? super T> comparator2) {
-		this(new Comparator[] { comparator1, comparator2 });
-	}
+    /**
+     * Constructs a comparator based on the specified underlying comparators.
+     *
+     * @param comparator1 the first underlying comparators
+     * @param comparator2 the second underlying comparators
+     */
+    @SuppressWarnings("unchecked")
+    public CompositeComparator(Comparator<? super T> comparator1, Comparator<? super T> comparator2) {
+        this(new Comparator[]{comparator1, comparator2});
+    }
 
-	/**
-	 * Constructs a comparator based on the specified underlying comparators.
-	 * 
-	 * @param comparator1
-	 *            the first underlying comparators
-	 * @param comparator2
-	 *            the second underlying comparators
-	 * @param comparator3
-	 *            the third underlying comparators
-	 */
-	@SuppressWarnings("unchecked")
-	public CompositeComparator(Comparator<? super T> comparator1, Comparator<? super T> comparator2, Comparator<? super T> comparator3) {
-		this(new Comparator[] { comparator1, comparator2, comparator3 });
-	}
+    /**
+     * Constructs a comparator based on the specified underlying comparators.
+     *
+     * @param comparator1 the first underlying comparators
+     * @param comparator2 the second underlying comparators
+     * @param comparator3 the third underlying comparators
+     */
+    @SuppressWarnings("unchecked")
+    public CompositeComparator(Comparator<? super T> comparator1, Comparator<? super T> comparator2, Comparator<? super T> comparator3) {
+        this(new Comparator[]{comparator1, comparator2, comparator3});
+    }
 
-	/**
-	 * Constructs a comparator based on the specified underlying comparators.
-	 * 
-	 * @param comparators
-	 *            the underlying comparators
-	 */
-	public CompositeComparator(List<Comparator<? super T>> comparators) {
-		this.comparators = comparators;
-	}
+    /**
+     * Constructs a comparator based on the specified underlying comparators.
+     *
+     * @param comparators the underlying comparators
+     */
+    public CompositeComparator(List<Comparator<? super T>> comparators) {
+        this.comparators = comparators;
+    }
 
-	@Override
-	public int compare(T o1, T o2) {
-		for (final Comparator<? super T> comparator : comparators) {
-			final int cmp = comparator.compare(o1, o2);
-			if (cmp != 0) {
-				return cmp;
-			}
-		}
-		return 0;
-	}
+    @Override
+    public int compare(T o1, T o2) {
+        for(final Comparator<? super T> comparator : comparators) {
+            final int cmp = comparator.compare(o1, o2);
+            if(cmp != 0) {
+                return cmp;
+            }
+        }
+        return 0;
+    }
 }

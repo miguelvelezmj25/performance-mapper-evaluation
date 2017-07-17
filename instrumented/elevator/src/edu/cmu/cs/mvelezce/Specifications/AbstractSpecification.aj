@@ -7,13 +7,13 @@ public abstract aspect AbstractSpecification {
 
     pointcut programTermination():
             (
-                    execution(public void edu.cmu.cs.mvelezce.PL_Interface_impl.test(int, int)) ||
-                            execution(public void edu.cmu.cs.mvelezce.JUnit_Scenario_Tests.testFinished())
+                    execution(public void PL_Interface_impl.test(int, int)) ||
+                            execution(public void JUnit_Scenario_Tests.testFinished())
                     );
     pointcut programStart():
             (
-                    execution(public void edu.cmu.cs.mvelezce.PL_Interface_impl.test(int, int)) ||
-                            execution(public void edu.cmu.cs.mvelezce.JUnit_Scenario_Tests.setup())
+                    execution(public void PL_Interface_impl.test(int, int)) ||
+                            execution(public void JUnit_Scenario_Tests.setup())
                     );
     before(): programStart() {
         reset();
@@ -23,7 +23,7 @@ public abstract aspect AbstractSpecification {
         // omit following errors.
         // This might be liveness properties that cannot be fulfilled because the program
         // terminates because of another error.
-        if (errorFound) {
+        if(errorFound) {
             //System.out.println("omit error: " +specificationException.getMessage());
             return;
         }

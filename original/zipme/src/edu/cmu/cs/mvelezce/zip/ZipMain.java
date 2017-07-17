@@ -43,16 +43,6 @@ public class ZipMain implements PL_Interface {
         try {
 //			edu.cmu.cs.mvelezce.zip.verificationClasses.FeatureSwitches.select_features();
 
-            FEATURECRC = true;
-            FEATUREArchiveCheck = true;
-            FEATUREAdler32Checksum = true;
-            FEATUREDerivativeGZIPCRC = true;
-            FEATUREDerivativeCompressCRC = true;
-            FEATUREDerivativeExtractCRC = true;
-            FEATUREDerivativeCompressGZIP = true;
-            FEATUREDerivativeCompressAdler32Checksum = true;
-            FEATUREDerivativeCompressGZIPCRC = true;
-
             FEATURECRC = Boolean.valueOf(args[0]);
             FEATUREArchiveCheck = Boolean.valueOf(args[1]);
             FEATUREAdler32Checksum = Boolean.valueOf(args[2]);
@@ -63,8 +53,19 @@ public class ZipMain implements PL_Interface {
             FEATUREDerivativeCompressAdler32Checksum = Boolean.valueOf(args[7]);
             FEATUREDerivativeCompressGZIPCRC = Boolean.valueOf(args[8]);
 
+//            FEATURECRC = true;
+//            FEATUREArchiveCheck = true;
+//            FEATUREAdler32Checksum = true;
+//            FEATUREDerivativeGZIPCRC = true;
+//            FEATUREDerivativeCompressCRC = true;
+//            FEATUREDerivativeExtractCRC = true;
+//            FEATUREDerivativeCompressGZIP = true;
+//            FEATUREDerivativeCompressAdler32Checksum = true;
+//            FEATUREDerivativeCompressGZIPCRC = true;
+
             if(!FeatureSwitches.valid_product()) {
-                throw new RuntimeException("Illegal config");
+//                throw new RuntimeException("Illegal config");
+                System.out.println("Illegal config");
             }
 
             ZipMain impl = new ZipMain();

@@ -2,16 +2,18 @@ package edu.cmu.cs.mvelezce.ElevatorSystem;
 
 //import gov.nasa.jpf.symbc.Symbolic;
 
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
+
 public class Environment {
 
     //@Symbolic("false")
     Floor[] floors;
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Environment(int numFloors) {
         floors = new Floor[numFloors];
-        for (int i = 0; i < numFloors; i++) {
+        for(int i = 0; i < numFloors; i++) {
             floors[i] = new Floor(i);
         }
     }

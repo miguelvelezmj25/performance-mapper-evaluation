@@ -8,16 +8,16 @@ import java.net.URL;
  * Input device based on a {@link URL}.
  */
 public class URLInput extends StreamInput {
-	
-	public URLInput(URL url) {
-		super(openStream(url));
-	}
 
-	private static InputStream openStream(URL url) {
-		try {
-			return url.openStream();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public URLInput(URL url) {
+        super(openStream(url));
+    }
+
+    private static InputStream openStream(URL url) {
+        try {
+            return url.openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

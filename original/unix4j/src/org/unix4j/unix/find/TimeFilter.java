@@ -9,85 +9,86 @@ import java.util.Date;
  * file.
  */
 class TimeFilter implements FileFilter {
-	public static enum TimeType implements Optionable<FindOption> {
-		Create(FindOption.timeCreate) {
-			@Override
-			public long getTime(File file) {
-				return FileAttributes.INSTANCE.getCreationTime(file);
-			}
-		},
-		Access(FindOption.timeAccess) {
-			@Override
-			public long getTime(File file) {
-				return FileAttributes.INSTANCE.getLastAccessedTime(file);
-			}
-		},
-		Modified(FindOption.timeModified) {
-			@Override
-			public long getTime(File file) {
-				return FileAttributes.INSTANCE.getLastModifiedTime(file);
-			}
-		};
-		abstract public long getTime(File file);
+    private final Date time;
+    private final TimeType timeType;
+    private final TimeComparator comparator;
+    public TimeFilter(Date time, FindOptions options) {
+        this(time,
+                OptionableUtil.findFirstEnumByOptionInSet(TimeType.class, options, TimeType.Modified),
+                OptionableUtil.findFirstEnumByOptionInSet(TimeComparator.class, options, TimeComparator.Newer));
+    }
+    ;
+    public TimeFilter(Date time, TimeType timeType, TimeComparator comparator) {
+        this.time = time;
+        this.timeType = timeType;
+        this.comparator = comparator;
+    }
 
-		private final FindOption option;
+    @Override
+    public boolean accept(File file) {
+        return comparator.accept(file, timeType, time);
+    }
 
-		private TimeType(FindOption option) {
-			this.option = option;
-		}
+    public static enum TimeType implements Optionable<FindOption> {
+        Create(FindOption.timeCreate) {
+            @Override
+            public long getTime(File file) {
+                return FileAttributes.INSTANCE.getCreationTime(file);
+            }
+        },
+        Access(FindOption.timeAccess) {
+            @Override
+            public long getTime(File file) {
+                return FileAttributes.INSTANCE.getLastAccessedTime(file);
+            }
+        },
+        Modified(FindOption.timeModified) {
+            @Override
+            public long getTime(File file) {
+                return FileAttributes.INSTANCE.getLastModifiedTime(file);
+            }
+        };
 
-		@Override
-		public FindOption getOption() {
-			return option;
-		}
-	}
+        private final FindOption option;
 
-	public static enum TimeComparator implements Optionable<FindOption> {
-		Older(FindOption.timeOlder) {
-			@Override
-			public boolean accept(File file, TimeType timeType, Date time) {
-				return timeType.getTime(file) <= time.getTime();
-			}
-		},
-		Newer(FindOption.timeNewer) {
-			@Override
-			public boolean accept(File file, TimeType timeType, Date time) {
-				return timeType.getTime(file) >= time.getTime();
-			}
-		};
-		abstract public boolean accept(File file, TimeType timeType, Date time);
+        private TimeType(FindOption option) {
+            this.option = option;
+        }
 
-		private final FindOption option;
+        abstract public long getTime(File file);
 
-		private TimeComparator(FindOption option) {
-			this.option = option;
-		}
+        @Override
+        public FindOption getOption() {
+            return option;
+        }
+    }
 
-		@Override
-		public FindOption getOption() {
-			return option;
-		}
-	}
+    public static enum TimeComparator implements Optionable<FindOption> {
+        Older(FindOption.timeOlder) {
+            @Override
+            public boolean accept(File file, TimeType timeType, Date time) {
+                return timeType.getTime(file) <= time.getTime();
+            }
+        },
+        Newer(FindOption.timeNewer) {
+            @Override
+            public boolean accept(File file, TimeType timeType, Date time) {
+                return timeType.getTime(file) >= time.getTime();
+            }
+        };
 
-	private final Date time;
-	private final TimeType timeType;;
-	private final TimeComparator comparator;
+        private final FindOption option;
 
-	public TimeFilter(Date time, FindOptions options) {
-		this(time,
-				OptionableUtil.findFirstEnumByOptionInSet(TimeType.class, options, TimeType.Modified),
-				OptionableUtil.findFirstEnumByOptionInSet(TimeComparator.class, options, TimeComparator.Newer));
-	}
+        private TimeComparator(FindOption option) {
+            this.option = option;
+        }
 
-	public TimeFilter(Date time, TimeType timeType, TimeComparator comparator) {
-		this.time = time;
-		this.timeType = timeType;
-		this.comparator = comparator;
-	}
+        abstract public boolean accept(File file, TimeType timeType, Date time);
 
-	@Override
-	public boolean accept(File file) {
-		return comparator.accept(file, timeType, time);
-	}
+        @Override
+        public FindOption getOption() {
+            return option;
+        }
+    }
 
 }

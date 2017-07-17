@@ -14,48 +14,49 @@ import org.unix4j.processor.LineProcessor;
  * to the constructor.
  */
 final class WriteFilesWithMatchingLinesProcessor extends DefaultInputProcessor implements LineProcessor {
-	
-	private final ExecutionContext context;
-	private final LineMatcher matcher;
-	private boolean matches = false;
-	private final LineProcessor output;
 
-	public WriteFilesWithMatchingLinesProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
-		this.context = context;
-		this.matcher = matcher;
-		this.output = output;
-	}
+    private final ExecutionContext context;
+    private final LineMatcher matcher;
+    private final LineProcessor output;
+    private boolean matches = false;
 
-	@Override
-	public void begin(Input input, LineProcessor output) {
-		matches = false;
-	}
-	
-	@Override
-	public boolean processLine(Line line) {
-		if (matcher.matches(line)) {
-			matches = true;
-			return false;//the first match is good enough
-		}
-		return true;// we want more lines, maybe another one matches
-	}
-	@Override
-	public boolean processLine(Input input, Line line, LineProcessor output) {
-		return processLine(line);
-	}
+    public WriteFilesWithMatchingLinesProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
+        this.context = context;
+        this.matcher = matcher;
+        this.output = output;
+    }
 
-	@Override
-	public void finish(Input input, LineProcessor output) {
-		if (matches) {
-			final String fileInfo = input instanceof FileInput ? ((FileInput)input).getFileInfo(context.getCurrentDirectory()) : input.toString();
-			output.processLine(new SimpleLine(fileInfo));
-		}
-	}
-	
-	@Override
-	public void finish() {
-		if (matches) {
-			output.processLine(new SimpleLine("(standard input)"));
-		}
-	}
+    @Override
+    public void begin(Input input, LineProcessor output) {
+        matches = false;
+    }
+
+    @Override
+    public boolean processLine(Line line) {
+        if(matcher.matches(line)) {
+            matches = true;
+            return false;//the first match is good enough
+        }
+        return true;// we want more lines, maybe another one matches
+    }
+
+    @Override
+    public boolean processLine(Input input, Line line, LineProcessor output) {
+        return processLine(line);
+    }
+
+    @Override
+    public void finish(Input input, LineProcessor output) {
+        if(matches) {
+            final String fileInfo = input instanceof FileInput ? ((FileInput) input).getFileInfo(context.getCurrentDirectory()) : input.toString();
+            output.processLine(new SimpleLine(fileInfo));
+        }
+    }
+
+    @Override
+    public void finish() {
+        if(matches) {
+            output.processLine(new SimpleLine("(standard input)"));
+        }
+    }
 }

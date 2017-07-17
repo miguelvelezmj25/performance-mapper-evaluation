@@ -9,21 +9,24 @@ import org.unix4j.processor.LineProcessor;
  * after all invocations.
  */
 class XargsOutput implements LineProcessor {
-	
-	private final LineProcessor delegate;
-	
-	public XargsOutput(LineProcessor delegate) {
-		this.delegate = delegate;
-	}
-	@Override
-	public boolean processLine(Line line) {
-		return delegate.processLine(line);
-	}
-	@Override
-	public void finish() {
-		//do nothing here, forward finish call in finishAll() 
-	}
-	public void finishAll() {
-		delegate.finish();
-	}
+
+    private final LineProcessor delegate;
+
+    public XargsOutput(LineProcessor delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public boolean processLine(Line line) {
+        return delegate.processLine(line);
+    }
+
+    @Override
+    public void finish() {
+        //do nothing here, forward finish call in finishAll()
+    }
+
+    public void finishAll() {
+        delegate.finish();
+    }
 }

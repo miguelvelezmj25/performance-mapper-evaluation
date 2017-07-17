@@ -8,17 +8,17 @@ import org.unix4j.processor.LineProcessor;
 
 class CatProcessor extends AbstractLineProcessor<CatArguments> {
 
-	public CatProcessor(Command<CatArguments> command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-	}
+    public CatProcessor(Command<CatArguments> command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+    }
 
-	@Override
-	public boolean processLine(Line line) {
-		return getOutput().processLine(line);
-	}
+    @Override
+    public boolean processLine(Line line) {
+        return getOutput().processLine(line);
+    }
 
-	@Override
-	public void finish() {
-		getOutput().finish();
-	}
+    @Override
+    public void finish() {
+        getOutput().finish();
+    }
 }

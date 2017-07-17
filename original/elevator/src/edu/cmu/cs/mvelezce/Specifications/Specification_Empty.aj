@@ -13,7 +13,7 @@ public privileged aspect Specification_Empty extends AbstractSpecification {
 	/* Original: The Lift will not arrive empty at a floor unless the button on that landing was pressed.
 	 * MyVersion: The Lift will not arrive empty at a floor and open its doors unless the button on that landing was pressed.
 	 */
-    pointcut timeShift(Elevator e): execution(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e);
+    pointcut timeShift(Elevator e): execution(public void ElevatorSystem.Elevator.timeShift()) && target(e);
 
     boolean floorButtonPressed[];
     boolean wasEmptyBeforeTimeStep = false;
@@ -25,13 +25,13 @@ public privileged aspect Specification_Empty extends AbstractSpecification {
     boolean[] calledAt_Spec9;
 
     before(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(8)) {
+        if(SpecificationManager.checkSpecification(8)) {
             Floor[] floors = e.getEnv().getFloors();
-            if (floorButtonPressed == null || floors.length != floorButtonPressed.length) {
+            if(floorButtonPressed == null || floors.length != floorButtonPressed.length) {
                 floorButtonPressed = new boolean[floors.length];
             }
-            for (int i = 0; i < floors.length; i++) {
-                if (floors[i].hasCall()) {
+            for(int i = 0; i < floors.length; i++) {
+                if(floors[i].hasCall()) {
                     floorButtonPressed[i] = true;
                 }
                 else {
@@ -42,8 +42,8 @@ public privileged aspect Specification_Empty extends AbstractSpecification {
         }
     }
     after(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(8)) {
-            if (e.areDoorsOpen() && wasEmptyBeforeTimeStep && !floorButtonPressed[e.getCurrentFloorID()]) {
+        if(SpecificationManager.checkSpecification(8)) {
+            if(e.areDoorsOpen() && wasEmptyBeforeTimeStep && !floorButtonPressed[e.getCurrentFloorID()]) {
                 failure(new SpecificationException("Spec8", "(Spec8) Empty Lift stopped at Floor " + e.getCurrentFloorID() + " although the FloorButton was not pressed."));
             }
         }
@@ -52,34 +52,34 @@ public privileged aspect Specification_Empty extends AbstractSpecification {
     @Override
     public void reset() {
         super.reset();
-        if (SpecificationManager.checkSpecification(8)) {
+        if(SpecificationManager.checkSpecification(8)) {
             floorButtonPressed = null;
             wasEmptyBeforeTimeStep = false;
         }
     }
     // initialization
     before(int numFloors):
-            call(edu.cmu.cs.mvelezce.ElevatorSystem.Environment.new(int)) && args(numFloors) {
-        if (SpecificationManager.checkSpecification(9)) {
+            call(ElevatorSystem.Environment.new(int)) && args(numFloors) {
+        if(SpecificationManager.checkSpecification(9)) {
             calledAt_Spec9 = new boolean[numFloors];
         }
     }
     // collect all pressed buttons
     before(int floorID):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.pressInLiftFloorButton(int)) && args(floorID) {
-        if (SpecificationManager.checkSpecification(9)) {
+            call(public void ElevatorSystem.Elevator.pressInLiftFloorButton(int)) && args(floorID) {
+        if(SpecificationManager.checkSpecification(9)) {
             calledAt_Spec9[floorID] = true;
         }
     }
     // monitor if the floors are visited
     after(Elevator e):
-            call(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e) {
-        if (SpecificationManager.checkSpecification(9)) {
+            call(public void ElevatorSystem.Elevator.timeShift()) && target(e) {
+        if(SpecificationManager.checkSpecification(9)) {
             int floor = e.getCurrentFloorID();
-            if (e.isEmpty()) {
+            if(e.isEmpty()) {
                 Arrays.fill(calledAt_Spec9, false); // this is the difference to Spec2
             }
-            else if (calledAt_Spec9[floor] && e.areDoorsOpen()) {
+            else if(calledAt_Spec9[floor] && e.areDoorsOpen()) {
                 calledAt_Spec9[floor] = false; // reset
             }
         }
@@ -87,9 +87,9 @@ public privileged aspect Specification_Empty extends AbstractSpecification {
     // fail if some floors were not visited in the end
     after(): programTermination() {
         //printArrayReverse(calledAt_Spec9);
-        if (SpecificationManager.checkSpecification(9)) {
-            for (int i = 0; i < calledAt_Spec9.length; i++) {
-                if (calledAt_Spec9[i] == true) {
+        if(SpecificationManager.checkSpecification(9)) {
+            for(int i = 0; i < calledAt_Spec9.length; i++) {
+                if(calledAt_Spec9[i] == true) {
                     failure(new SpecificationException("Spec9", "(Spec9) (not-empty) Elevator did not stop at Floor" + i + " as requested (from inside, not empty)"));
                 }
             }

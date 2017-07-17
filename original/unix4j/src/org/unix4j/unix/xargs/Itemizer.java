@@ -7,21 +7,18 @@ import org.unix4j.line.Line;
  * {@link ItemStorage}.
  */
 interface Itemizer {
-	/**
-	 * Itemize the given line and stores all found items in the item storage. 
-	 * 
-	 * @param line
-	 *            the line to itemize
-	 * @param itemStorage
-	 *            the storage for the found items
-	 */
-	void itemizeLine(Line line, ItemStorage itemStorage);
-	
-	/**
-	 * Called after the last line to flush remaining items.
-	 * 
-	 * @param itemStorage
-	 *            the storage for the found items
-	 */
-	void finish(ItemStorage itemStorage);
+    /**
+     * Itemize the given line and stores all found items in the item storage.
+     *
+     * @param line        the line to itemize
+     * @param itemStorage the storage for the found items
+     */
+    void itemizeLine(Line line, ItemStorage itemStorage);
+
+    /**
+     * Called after the last line to flush remaining items.
+     *
+     * @param itemStorage the storage for the found items
+     */
+    void finish(ItemStorage itemStorage);
 }

@@ -11,13 +11,13 @@ public privileged aspect Specification_ExecutiveFloor extends AbstractSpecificat
 	 * My Version: While there is a request from the executive Floor the lift will not open its doors somewhere else.
 	 * 
 	 */
-    pointcut timeShift(Elevator e): execution(public void edu.cmu.cs.mvelezce.ElevatorSystem.Elevator.timeShift()) && target(e);
+    pointcut timeShift(Elevator e): execution(public void ElevatorSystem.Elevator.timeShift()) && target(e);
 
     after(Elevator e): timeShift(e) {
-        if (SpecificationManager.checkSpecification(14)) {
-            if (e.isExecutiveFloorCalling()) {
-                if (!e.isExecutiveFloor(e.getCurrentFloorID()) && e.areDoorsOpen()) {
-                    if (SpecificationManager.checkSpecification(14)) {
+        if(SpecificationManager.checkSpecification(14)) {
+            if(e.isExecutiveFloorCalling()) {
+                if(!e.isExecutiveFloor(e.getCurrentFloorID()) && e.areDoorsOpen()) {
+                    if(SpecificationManager.checkSpecification(14)) {
                         failure(new SpecificationException("Spec14", "(Spec14) Opened the Doors at " + e.getCurrentFloorID() + " although there was a call from the executive Suite."));
                     }
                 }

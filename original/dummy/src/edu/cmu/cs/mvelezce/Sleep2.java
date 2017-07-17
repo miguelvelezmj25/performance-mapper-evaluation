@@ -20,21 +20,12 @@ public class Sleep2 {
 //        boolean a = Boolean.valueOf(args[0]);
         A = Boolean.valueOf(args[0]);
 
-        boolean a;
-
-        if(A) {
-            a = true;
-        }
-        else {
-            a = false;
-        }
-
         Thread.sleep(200);
 
         // Region A start
-        if(a) { // 20
+        if(A) { // 20
             Thread.sleep(600);
-            Sleep2.method1(a);
+            Sleep2.method1(A);
         }
         // Region A end
         Thread.sleep(100);

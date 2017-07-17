@@ -7,30 +7,31 @@ import org.unix4j.util.Counter;
 
 class TailLinesFromStartProcessor extends AbstractTailProcessor {
 
-	private final Counter counter = new Counter();
+    private final Counter counter = new Counter();
+
+    public TailLinesFromStartProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+    }
 
     @Override
     public void resetCountersAndFlush() {
         counter.reset();
     }
 
-    public TailLinesFromStartProcessor(TailCommand command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-	}
+    @Override
+    public boolean processLine(Line line) {
+        if(counter.increment() >= count) {
+            return getOutput().processLine(line);
+        }
+        else {
+            return true;//we want more lines
+        }
+    }
 
-	@Override
-	public boolean processLine(Line line) {
-		if (counter.increment() >= count) {
-			return getOutput().processLine(line);
-		} else {
-			return true;//we want more lines
-		}
-	}
-
-	@Override
-	public void finish() {
+    @Override
+    public void finish() {
         resetCountersAndFlush();
-		getOutput().finish();
-	}
+        getOutput().finish();
+    }
 
 }

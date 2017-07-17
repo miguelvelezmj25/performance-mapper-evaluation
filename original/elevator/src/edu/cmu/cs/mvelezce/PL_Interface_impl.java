@@ -4,13 +4,13 @@ import edu.cmu.cs.mvelezce.ElevatorSystem.Elevator;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Environment;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Person;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationManager;
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
 import edu.cmu.cs.mvelezce.verificationClasses.SPLModelChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PL_Interface_impl implements PL_Interface {
-
 
     private static final int NUM_FLOORS = 50000;
     public static boolean FEATUREBASE = true;
@@ -38,16 +38,12 @@ public class PL_Interface_impl implements PL_Interface {
             FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
             FEATUREOVERLOADED = Boolean.valueOf(args[5]);
 
-//            FEATUREBASE = true;
-//            FEATUREWEIGHT = true;
-//            FEATUREEMPTY = true;
-//            FEATURETWOTHIRDSFULL = true;
-//            FEATUREEXECUTIVEFLOOR = true;
-//            FEATUREOVERLOADED = true;
-
-//            FEATUREBASE = Boolean.valueOf(args[0]);
-//            FEATUREWEIGHT = Boolean.valueOf(args[1]);
-//            FEATUREEMPTY = Boolean.valueOf(args[2]);
+//            FEATUREBASE = false;
+//            FEATUREWEIGHT = false;
+//            FEATUREEMPTY = false;
+//            FEATURETWOTHIRDSFULL = false;
+//            FEATUREEXECUTIVEFLOOR = false;
+//            FEATUREOVERLOADED = false;
 
 //			verificationClasses.FeatureSwitches.select_features();
             PL_Interface_impl impl = new PL_Interface_impl();
@@ -63,12 +59,12 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public static void randomSequenceOfActions(int maxLength) {
         cleanupTimeShifts = 6 * maxLength; // tests have shown that this is enough
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
-        if (getBoolean()) {
+        if(getBoolean()) {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
@@ -116,7 +112,7 @@ public class PL_Interface_impl implements PL_Interface {
                     break; // execute one timestep
                 case 7:
                     actionName = "3TS";// execute three timesteps
-                    for (int i = 0; i < 3; i++) {
+                    for(int i = 0; i < 3; i++) {
                         e.timeShift();
                     }
                     // nobody calls
@@ -127,24 +123,24 @@ public class PL_Interface_impl implements PL_Interface {
             }
             actionHistory.add(actionName);
             //System.out.println(listToString(actionHistory));
-            if (e.isBlocked()) {
+            if(e.isBlocked()) {
                 //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
-        for (counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if (e.isIdle()) {
+        for(counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
+            if(e.isIdle()) {
                 return;
             }
             e.timeShift();
         }
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public static void modifiedrandomSequenceOfActions(int maxLength) {
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
-        if (getBoolean()) {
+        if(getBoolean()) {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
@@ -172,66 +168,66 @@ public class PL_Interface_impl implements PL_Interface {
             boolean action7 = action6 ? false : getBoolean();
 
 
-            if (counter < maxLength && action0) {
+            if(counter < maxLength && action0) {
                 a.bobCall();
                 actionHistory.add("bobCall");
                 counter++;
             }
-            if (counter < maxLength && action1) {
+            if(counter < maxLength && action1) {
                 a.aliceCall();
                 actionHistory.add("aliceCall");
                 counter++;
             }
-            if (counter < maxLength && action2) {
+            if(counter < maxLength && action2) {
                 a.angelinaCall();
                 actionHistory.add("angelinaCall");
                 counter++;
             }
-            if (counter < maxLength && action3) {
+            if(counter < maxLength && action3) {
                 a.chuckCall();
                 actionHistory.add("chuckCall");
                 counter++;
             }
-            if (counter < maxLength && action4) {
+            if(counter < maxLength && action4) {
                 a.monicaCall();
                 actionHistory.add("monicaCall");
                 counter++;
             }
-            if (counter < maxLength && action5) {
+            if(counter < maxLength && action5) {
                 a.bigMacCall();
                 actionHistory.add("bigMacCall");
                 counter++;
             }
-            if (counter < maxLength && action6) {
+            if(counter < maxLength && action6) {
                 e.timeShift();
                 actionHistory.add("1TS");
                 counter++;
             } // execute one timestep
-            if (counter < maxLength && action7) {
+            if(counter < maxLength && action7) {
                 actionHistory.add("3TS");// execute three timesteps
-                for (int i = 0; i < 3; i++) {
+                for(int i = 0; i < 3; i++) {
                     e.timeShift();
                 }
             }
-            if (e.isBlocked()) {
+            if(e.isBlocked()) {
                 //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
-        for (counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if (e.isIdle()) {
+        for(counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
+            if(e.isIdle()) {
                 return;
             }
             e.timeShift();
         }
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public static int getIntegerMinMax(int min, int max) {
         return SPLModelChecker.getIntMinMax(min, max);
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public static boolean getBoolean() {
         return SPLModelChecker.getBoolean();
     }
@@ -239,10 +235,10 @@ public class PL_Interface_impl implements PL_Interface {
 
     // this method is used as hook for the liveness properties.
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     static String listToString(List<String> list) {
         String ret = "";
-        for (String s : list) {
+        for(String s : list) {
             ret = ret + " " + s;
         }
         return ret;
@@ -250,7 +246,7 @@ public class PL_Interface_impl implements PL_Interface {
 
     public void start(int specification, int variation) throws Throwable {
         try {
-            if (verbose) {
+            if(verbose) {
                 System.out.print("Started Elevator PL with Specification " + specification + ", Variation: " + variation);
             }
             test(specification, variation);
@@ -258,7 +254,7 @@ public class PL_Interface_impl implements PL_Interface {
             throw e;
         } finally {
         /*System.out.println("Penalty");
-		if (!isAbortedRun) {
+        if (!isAbortedRun) {
 			int x = 1;
 			for (int i = 0; i < 6000000; i++) {
 				x = i / x + 10;
@@ -267,23 +263,23 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void checkOnlySpecification(int specID) {
         SpecificationManager.checkOnlySpecification(specID);
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public List<String> getExecutedActions() {
         return actionHistory;
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean isAbortedRun() {
         return isAbortedRun;
     }
 
     public void test(int specification, int variation) {
-        if (variation < 0) {
+        if(variation < 0) {
             switch (specification) {
                 case -1:
                     Specification1();
@@ -320,7 +316,7 @@ public class PL_Interface_impl implements PL_Interface {
         }
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void Specification1() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -328,18 +324,18 @@ public class PL_Interface_impl implements PL_Interface {
 
         a.bigMacCall();
         a.angelinaCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void Specification2() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
         Actions a = new Actions(env, e);
 
         a.bigMacCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
@@ -347,8 +343,7 @@ public class PL_Interface_impl implements PL_Interface {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false, 4, false);
         Actions a = new Actions(env, e);
-        for (int i = 0; i < 100; i++) {
-            e.isBlocked();
+        for(int i = 0; i < 100; i++) {
             Person bob = a.bobCall();
             //a.bigMacCall();
             while (env.getFloor(bob.getOrigin()).hasCall())
@@ -364,22 +359,22 @@ public class PL_Interface_impl implements PL_Interface {
 
             while (!e.isEmpty()) e.timeShift();
         }
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void Specification9() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
         Actions a = new Actions(env, e);
 
         a.bigMacCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void Specification13() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -391,11 +386,11 @@ public class PL_Interface_impl implements PL_Interface {
             e.timeShift();
         }
         a.bobCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void Specification14() {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false);
@@ -407,7 +402,7 @@ public class PL_Interface_impl implements PL_Interface {
             e.timeShift();
         }
         a.bobCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }
 

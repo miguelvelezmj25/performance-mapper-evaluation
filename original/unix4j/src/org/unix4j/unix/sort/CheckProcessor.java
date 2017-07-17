@@ -11,33 +11,33 @@ import org.unix4j.processor.LineProcessor;
  */
 class CheckProcessor extends AbstractSortProcessor {
 
-	private Line lastLine = null;
-	
-	public CheckProcessor(SortCommand command, ExecutionContext context, LineProcessor output) {
-		super(command, context, output);
-	}
+    private Line lastLine = null;
 
-	@Override
-	public boolean processLine(Line line) {
-		if (lastLine != null) {
-			if (getComparator().compare(lastLine, line) > 0) {
-				throw new ExitValueException("file is not sorted, line: " + line, 1);
-			}
-		}
-		lastLine = line;
-		return true;//we want all lines
-	}
+    public CheckProcessor(SortCommand command, ExecutionContext context, LineProcessor output) {
+        super(command, context, output);
+    }
 
-	@Override
-	public void finish() {
-		getOutput().finish();
-	}
-	
-	/**
-	 * Resets the last line, for instance when a new file should be checked.
-	 */
-	public void reset() {
-		lastLine = null;
-	}
+    @Override
+    public boolean processLine(Line line) {
+        if(lastLine != null) {
+            if(getComparator().compare(lastLine, line) > 0) {
+                throw new ExitValueException("file is not sorted, line: " + line, 1);
+            }
+        }
+        lastLine = line;
+        return true;//we want all lines
+    }
+
+    @Override
+    public void finish() {
+        getOutput().finish();
+    }
+
+    /**
+     * Resets the last line, for instance when a new file should be checked.
+     */
+    public void reset() {
+        lastLine = null;
+    }
 
 }

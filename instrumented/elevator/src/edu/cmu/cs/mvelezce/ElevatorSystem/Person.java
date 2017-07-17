@@ -2,6 +2,8 @@ package edu.cmu.cs.mvelezce.ElevatorSystem;
 
 //import gov.nasa.jpf.symbc.Symbolic;
 
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
+
 public class Person {
 
     //@Symbolic("false")
@@ -24,7 +26,7 @@ public class Person {
     private boolean destinationReached = false;
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public Person(String name, int weight, int origin, int destination, Environment env) {
         super();
         this.name = name;
@@ -38,7 +40,7 @@ public class Person {
         return weight;
     }
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public String getName() {
         return name;
     }
@@ -49,7 +51,7 @@ public class Person {
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public int getDestination() {
         return destination;
     }
@@ -60,7 +62,7 @@ public class Person {
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public boolean isDestinationReached() {
         return destinationReached;
     }

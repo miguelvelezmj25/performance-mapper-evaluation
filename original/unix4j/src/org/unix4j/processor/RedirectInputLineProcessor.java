@@ -1,9 +1,9 @@
 package org.unix4j.processor;
 
+import org.unix4j.io.Input;
+
 import java.util.Collections;
 import java.util.List;
-
-import org.unix4j.io.Input;
 
 /**
  * A line processor redirects a given {@link Input} stream to the standard input
@@ -17,35 +17,31 @@ import org.unix4j.io.Input;
  */
 public class RedirectInputLineProcessor extends MultipleInputLineProcessor {
 
-	/**
-	 * Constructor with input object (usually a file operand of the command) and
-	 * the command processor that reads from the standard input.
-	 * 
-	 * @param input
-	 *            the input device, usually a file operand of the command
-	 * @param standardInputProcessor
-	 *            the processor performing the command operation based on lines
-	 *            from the standard input
-	 */
-	public RedirectInputLineProcessor(Input input, LineProcessor standardInputProcessor) {
-		this(Collections.singletonList(input), standardInputProcessor);
-	}
+    /**
+     * Constructor with input object (usually a file operand of the command) and
+     * the command processor that reads from the standard input.
+     *
+     * @param input                  the input device, usually a file operand of the command
+     * @param standardInputProcessor the processor performing the command operation based on lines
+     *                               from the standard input
+     */
+    public RedirectInputLineProcessor(Input input, LineProcessor standardInputProcessor) {
+        this(Collections.singletonList(input), standardInputProcessor);
+    }
 
-	/**
-	 * Constructor with multiple input objects (usually file operands of the
-	 * command) and the command processor that reads from the standard input.
-	 * The given input objects are processed in the given sequence; the
-	 * {@code finish()} method of the {@code standardInputProcessor} is called
-	 * after completing the last line of the last input.
-	 * 
-	 * @param inputs
-	 *            the input devices, usually file operands of the command
-	 * @param standardInputProcessor
-	 *            the processor performing the command operation based on lines
-	 *            from the standard input
-	 */
-	public RedirectInputLineProcessor(List<? extends Input> inputs, LineProcessor standardInputProcessor) {
-		super(inputs, new DefaultInputProcessor(), standardInputProcessor);
-	}
+    /**
+     * Constructor with multiple input objects (usually file operands of the
+     * command) and the command processor that reads from the standard input.
+     * The given input objects are processed in the given sequence; the
+     * {@code finish()} method of the {@code standardInputProcessor} is called
+     * after completing the last line of the last input.
+     *
+     * @param inputs                 the input devices, usually file operands of the command
+     * @param standardInputProcessor the processor performing the command operation based on lines
+     *                               from the standard input
+     */
+    public RedirectInputLineProcessor(List<? extends Input> inputs, LineProcessor standardInputProcessor) {
+        super(inputs, new DefaultInputProcessor(), standardInputProcessor);
+    }
 
 }

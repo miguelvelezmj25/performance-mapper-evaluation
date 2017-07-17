@@ -5,6 +5,7 @@ import edu.cmu.cs.mvelezce.ElevatorSystem.Environment;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Person;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationException;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationManager;
+import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ public class JUnit_Scenario_Tests {
     /**
      * Hook for AbstractSpecification.aj (resets specifications at test start)
      */
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Before
     public void setup() {
 
@@ -28,13 +29,13 @@ public class JUnit_Scenario_Tests {
      * Hook for specifications with liveness properties. (indicator for
      * test-termination)
      */
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     public void testFinished() {
 
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification1() {
         SpecificationManager.checkOnlySpecification(1);
@@ -44,13 +45,13 @@ public class JUnit_Scenario_Tests {
 
         a.bigMacCall();
         a.angelinaCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification2() {
         SpecificationManager.checkOnlySpecification(2);
@@ -59,13 +60,13 @@ public class JUnit_Scenario_Tests {
         Actions a = new Actions(env, e);
 
         a.bigMacCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification3() {
         SpecificationManager.checkOnlySpecification(3);
@@ -84,7 +85,7 @@ public class JUnit_Scenario_Tests {
         // destination is still pressed)
         // direction, is active)
         a.bobCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
@@ -95,7 +96,7 @@ public class JUnit_Scenario_Tests {
     // "Feature integration using a Feature Construct")
 
     // copy of Spec2-Test because Spec9 is a near-copy of Spec2
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification9() {
         SpecificationManager.checkOnlySpecification(9);
@@ -104,17 +105,17 @@ public class JUnit_Scenario_Tests {
         Actions a = new Actions(env, e);
 
         a.bigMacCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
 
 
-    // edu.cmu.cs.mvelezce.Specifications 10 and 11 are never violated
+    // Specifications 10 and 11 are never violated
     // (see end of chapter 5 in Malte Plath and Mark Ryan
     // "Feature integration using a Feature Construct")
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification13() {
         SpecificationManager.checkOnlySpecification(13);
@@ -128,13 +129,13 @@ public class JUnit_Scenario_Tests {
             e.timeShift();
         }
         a.bobCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
 
 
-    @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
+    @FeatureAnnotation(name = "base")
     @Test(expected = SpecificationException.class)
     public void Specification14() {
         SpecificationManager.checkOnlySpecification(14);
@@ -148,7 +149,7 @@ public class JUnit_Scenario_Tests {
             e.timeShift();
         }
         a.bobCall();
-        for (int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
+        for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
         testFinished();
     }
