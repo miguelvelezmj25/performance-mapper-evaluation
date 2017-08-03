@@ -2,7 +2,7 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
-import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREAdler32Checksum;
+import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREAdlerThreeTwoChecksum;
 
 public class Inflater {
 
@@ -198,7 +198,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 3, thenFeature = "Adler32Checksum", elseFeature = "Base")
     public void
     end() {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             end__role__Adler32Checksum();
         }
         else {
@@ -379,7 +379,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 4, thenFeature = "Adler32Checksum", elseFeature = "Base")
     public void
     reset() {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             reset__role__Adler32Checksum();
         }
         else {
@@ -720,7 +720,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 5, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook32() {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             hook32__role__Adler32Checksum();
         }
         else {
@@ -742,7 +742,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 6, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook33(byte[] buf, int off, int more) throws DataFormatException {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             hook33__role__Adler32Checksum(buf, off, more);
         }
         else {
@@ -768,7 +768,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 7, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook34(byte[] buffer, int off, int len) {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             hook34__role__Adler32Checksum(buffer, off, len);
         }
         else {
@@ -792,7 +792,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 8, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook35() throws DataFormatException {
-        if (FEATUREAdler32Checksum) {
+        if (FEATUREAdlerThreeTwoChecksum) {
             hook35__role__Adler32Checksum();
         }
         else {

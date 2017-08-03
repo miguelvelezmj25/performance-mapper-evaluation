@@ -2,7 +2,7 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
-import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdler32Checksum;
+import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdlerThreeTwoChecksum;
 
 class Deflater_deflate2 {
 
@@ -102,7 +102,7 @@ class Deflater_deflate2 {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 33, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook22() {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook22__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -129,7 +129,7 @@ class Deflater_deflate2 {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 34, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook23() {
-        if (FEATUREDerivativeCompressAdler32Checksum) {
+        if (FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
             hook23__role__DerivativeCompressAdler32Checksum();
         }
         else {

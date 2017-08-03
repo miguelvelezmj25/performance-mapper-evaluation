@@ -18,12 +18,12 @@ public class ZipMain implements PL_Interface {
 
     public static boolean FEATURECRC;
     public static boolean FEATUREArchiveCheck;
-    public static boolean FEATUREAdler32Checksum;
+    public static boolean FEATUREAdlerThreeTwoChecksum;
     public static boolean FEATUREDerivativeGZIPCRC;
     public static boolean FEATUREDerivativeCompressCRC;
     public static boolean FEATUREDerivativeExtractCRC;
     public static boolean FEATUREDerivativeCompressGZIP;
-    public static boolean FEATUREDerivativeCompressAdler32Checksum;
+    public static boolean FEATUREDerivativeCompressAdlerThreeTwoChecksum;
     public static boolean FEATUREDerivativeCompressGZIPCRC;
 
 
@@ -45,12 +45,12 @@ public class ZipMain implements PL_Interface {
 
             FEATURECRC = Boolean.valueOf(args[0]);
             FEATUREArchiveCheck = Boolean.valueOf(args[1]);
-            FEATUREAdler32Checksum = Boolean.valueOf(args[2]);
+            FEATUREAdlerThreeTwoChecksum = Boolean.valueOf(args[2]);
             FEATUREDerivativeGZIPCRC = Boolean.valueOf(args[4]);
             FEATUREDerivativeCompressCRC = Boolean.valueOf(args[5]);
             FEATUREDerivativeExtractCRC = Boolean.valueOf(args[5]);
             FEATUREDerivativeCompressGZIP = Boolean.valueOf(args[6]);
-            FEATUREDerivativeCompressAdler32Checksum = Boolean.valueOf(args[7]);
+            FEATUREDerivativeCompressAdlerThreeTwoChecksum = Boolean.valueOf(args[7]);
             FEATUREDerivativeCompressGZIPCRC = Boolean.valueOf(args[8]);
 
 //            FEATURECRC = true;
