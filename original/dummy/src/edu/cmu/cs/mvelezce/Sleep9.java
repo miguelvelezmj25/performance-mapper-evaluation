@@ -5,12 +5,11 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep9 {
 
-    public static boolean A = false;
-
     public static final String FILENAME = Sleep9.class.getCanonicalName();
     public static final String PACKAGE = Sleep9.class.getPackage().getName();
     public static final String CLASS = Sleep9.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
 
     public static void main(String[] args) throws InterruptedException {
         // Region program start
@@ -21,9 +20,10 @@ public class Sleep9 {
 
         boolean a;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
 
@@ -33,9 +33,10 @@ public class Sleep9 {
 
         // Region A start
         int repeat;
-        if (a) { // 24
+        if(a) { // 24
             repeat = 5;
-        } else {
+        }
+        else {
             repeat = 10;
         }
         // Region A end

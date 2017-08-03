@@ -8,9 +8,10 @@ public class Dummy6 {
     public int one(boolean a) {
         int i = 0;
 
-        if (a) {
+        if(a) {
             return 1;
-        } else {
+        }
+        else {
             i = 0;
         }
 
@@ -18,9 +19,10 @@ public class Dummy6 {
     }
 
     public int two(boolean a) {
-        if (a) {
+        if(a) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -28,9 +30,10 @@ public class Dummy6 {
     public int three(boolean a) {
         int i = 0;
 
-        if (a) {
+        if(a) {
             i = 1;
-        } else {
+        }
+        else {
             i = 0;
         }
 
@@ -40,9 +43,10 @@ public class Dummy6 {
     public int four(boolean a, boolean b) {
         int i = 0;
 
-        if (a) {
+        if(a) {
             i = 1;
-        } else {
+        }
+        else {
             if(b) {
                 i = 3;
             }

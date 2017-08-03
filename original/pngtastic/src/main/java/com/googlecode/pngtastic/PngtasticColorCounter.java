@@ -196,7 +196,7 @@ public class PngtasticColorCounter {
         String[] files = Arrays.copyOfRange(args, last, args.length);
 
         files = new String[1];
-        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic/images/optimizer/us.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic/images/optimizer/1px.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");
@@ -214,7 +214,7 @@ public class PngtasticColorCounter {
 //        DISTTHRESHOLD = true;
 //        MINALPHA = true;
 //        TIMEOUT = true;
-//        LOGLEVEL = true;
+//        LOGLEVEL = false;
 
 //		Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
 //		Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
@@ -257,10 +257,10 @@ public class PngtasticColorCounter {
         }
 
         if(LOGLEVEL) {
-            logLevel = "none";
+            logLevel = "debug";
         }
         else {
-            logLevel = "debug";
+            logLevel = "none";
         }
 
 //        new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);

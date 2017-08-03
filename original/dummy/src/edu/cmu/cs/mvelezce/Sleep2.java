@@ -5,13 +5,12 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep2 {
 
-    public static boolean A = false;
-
     public static final String FILENAME = Sleep2.class.getCanonicalName();
     public static final String PACKAGE = Sleep2.class.getPackage().getName();
     public static final String CLASS = Sleep2.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
     public static final String METHOD_1 = "method1";
+    public static boolean A = false;
 
     public static void main(String[] args) throws InterruptedException {
         // Region program start

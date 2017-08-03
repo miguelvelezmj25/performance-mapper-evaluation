@@ -11,9 +11,10 @@ public class Feature {
         ONE = true;
         int i = 0;
 
-        if (ONE) {
+        if(ONE) {
             i = 1;
-        } else {
+        }
+        else {
             i = 2;
         }
 

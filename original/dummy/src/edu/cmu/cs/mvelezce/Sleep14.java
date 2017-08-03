@@ -5,14 +5,13 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep14 {
 
-    public static boolean A = false;
-    public static boolean B = false;
-    public static boolean C = false;
-
     public static final String FILENAME = Sleep14.class.getCanonicalName();
     public static final String PACKAGE = Sleep14.class.getPackage().getName();
     public static final String CLASS = Sleep14.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
+    public static boolean B = false;
+    public static boolean C = false;
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("main");
@@ -28,21 +27,24 @@ public class Sleep14 {
         int b;
         double c;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
 
-        if (B) {
+        if(B) {
             b = 0;
-        } else {
+        }
+        else {
             b = 5;
         }
 
-        if (C) {
+        if(C) {
             c = 0;
-        } else {
+        }
+        else {
             c = 5;
         }
 
@@ -50,10 +52,11 @@ public class Sleep14 {
         Thread.sleep(100);
         double d = 0;
 
-        if (a) {
+        if(a) {
             Thread.sleep(200);
             d = 1;
-        } else if (b > 4 && c > 2) {
+        }
+        else if(b > 4 && c > 2) {
             integer(1);
             Thread.sleep(300);
         }
@@ -62,14 +65,14 @@ public class Sleep14 {
     }
 
     private static void doubleNumber(double d) throws InterruptedException {
-        if (d > 0) {
+        if(d > 0) {
             Thread.sleep(400);
         }
 
     }
 
     private static void integer(int i) throws InterruptedException {
-        if (i > 0) {
+        if(i > 0) {
             Thread.sleep(500);
         }
     }

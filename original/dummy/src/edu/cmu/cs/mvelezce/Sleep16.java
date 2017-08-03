@@ -5,14 +5,13 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep16 {
 
-    public static boolean A = false;
-    public static boolean B = false;
-
     public static final String FILENAME = Sleep16.class.getCanonicalName();
     public static final String PACKAGE = Sleep16.class.getPackage().getName();
     public static final String CLASS = Sleep16.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
     public static final String METHOD_1 = "method1";
+    public static boolean A = false;
+    public static boolean B = false;
 
     public static void main(String[] args) throws InterruptedException {
         // Region program start
@@ -25,24 +24,26 @@ public class Sleep16 {
         boolean a;
         boolean b;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
 
         B = Boolean.valueOf(args[1]);
 
-        if (B) {
+        if(B) {
             b = true;
-        } else {
+        }
+        else {
             b = false;
         }
 
         Thread.sleep(200);
 
         // Region A start
-        if (a) { // 20
+        if(a) { // 20
             Thread.sleep(600);
             Sleep16.method1(a, b);
         }
@@ -58,11 +59,11 @@ public class Sleep16 {
         System.out.println("method12");
         Thread.sleep(200);
 
-        if (a || b) {
+        if(a || b) {
             Thread.sleep(600);
         }
 
-        if (a && b) {
+        if(a && b) {
             Thread.sleep(600);
         }
 

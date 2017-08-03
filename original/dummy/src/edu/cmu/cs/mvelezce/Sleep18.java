@@ -5,14 +5,13 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep18 {
 
-    public static boolean A = false;
-    public static boolean B = false;
-    public static boolean C = false;
-
     public static final String FILENAME = Sleep3.class.getCanonicalName();
     public static final String PACKAGE = Sleep3.class.getPackage().getName();
     public static final String CLASS = Sleep3.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
+    public static boolean B = false;
+    public static boolean C = false;
 
     public static void main(String[] args) throws InterruptedException {
         A = Boolean.valueOf(args[0]);

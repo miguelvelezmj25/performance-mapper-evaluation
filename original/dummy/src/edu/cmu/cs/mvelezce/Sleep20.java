@@ -29,7 +29,7 @@ public class Sleep20 {
     }
 
     public static void method(boolean fail) {
-        if (fail) {
+        if(fail) {
             throw new IllegalArgumentException("You failed in life");
         }
 

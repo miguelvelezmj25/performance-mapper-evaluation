@@ -5,14 +5,13 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep15 {
 
-    public static boolean A = false;
-    public static boolean B = false;
-    public static boolean C = false;
-
     public static final String FILENAME = Sleep15.class.getCanonicalName();
     public static final String PACKAGE = Sleep15.class.getPackage().getName();
     public static final String CLASS = Sleep15.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
+    public static boolean B = false;
+    public static boolean C = false;
 
     public static void main(String[] args) throws InterruptedException {
 //        System.out.println("main");
@@ -65,14 +64,14 @@ public class Sleep15 {
     }
 
     private static void doubleNumber(double d) throws InterruptedException {
-        if (d > 0) {
+        if(d > 0) {
             Thread.sleep(400);
         }
 
     }
 
     private static void integer(int i) throws InterruptedException {
-        if (i > 0) {
+        if(i > 0) {
             Thread.sleep(500);
         }
     }

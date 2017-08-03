@@ -52,7 +52,7 @@ public class Dummy {
         int i = 0;
         StringBuilder s = new StringBuilder();
 
-        if(i >0) {
+        if(i > 0) {
             return s.append("SDF");
         }
         return s.append("DSFSF'");

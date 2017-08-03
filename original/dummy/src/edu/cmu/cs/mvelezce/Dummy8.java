@@ -12,10 +12,10 @@ public class Dummy8 {
         A = Boolean.valueOf(args[0]);
         B = Boolean.valueOf(args[1]);
 
-        A=foo(A);
-        B=foo(B);
+        A = foo(A);
+        B = foo(B);
 
-        if (A) {
+        if(A) {
             System.out.println(0);
         }
 
@@ -26,5 +26,7 @@ public class Dummy8 {
 
     }
 
-    static boolean foo(boolean x) { return x; }
+    static boolean foo(boolean x) {
+        return x;
+    }
 }

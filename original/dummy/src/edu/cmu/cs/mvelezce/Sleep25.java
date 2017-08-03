@@ -16,7 +16,7 @@ public class Sleep25 {
         if(A) {
             Thread.sleep(300);
 
-            if(B)  {
+            if(B) {
                 Thread.sleep(400);
             }
         }

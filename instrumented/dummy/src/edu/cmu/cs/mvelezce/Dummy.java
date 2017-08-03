@@ -10,7 +10,7 @@ public class Dummy {
 
     private static boolean FEATURE_A;
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -52,7 +52,7 @@ public class Dummy {
         int i = 0;
         StringBuilder s = new StringBuilder();
 
-        if(i >0) {
+        if(i > 0) {
             return s.append("SDF");
         }
         return s.append("DSFSF'");
@@ -63,11 +63,16 @@ public class Dummy {
         return new ArrayList<>();
     }
 
-    public static int integer() {
+    static int integer() {
         return 2123;
     }
 
-    public static void m() {
+    static void m() {
         System.out.println("ASFdsf");
+    }
+
+    static void asdf(boolean a, boolean b,
+                     boolean c) {
+
     }
 }
