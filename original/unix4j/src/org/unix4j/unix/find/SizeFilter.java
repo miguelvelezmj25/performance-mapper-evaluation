@@ -9,9 +9,11 @@ import java.io.FileFilter;
 class SizeFilter implements FileFilter {
     private final long size;
     private final SizeComparator comparator;
+
     public SizeFilter(long size) {
         this(size, size > 0 ? SizeComparator.AtLeast : SizeComparator.AtMost);
     }
+
     ;
 
     public SizeFilter(long size, SizeComparator comparator) {

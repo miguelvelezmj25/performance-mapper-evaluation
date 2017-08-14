@@ -12,12 +12,15 @@ class TimeFilter implements FileFilter {
     private final Date time;
     private final TimeType timeType;
     private final TimeComparator comparator;
+
     public TimeFilter(Date time, FindOptions options) {
         this(time,
                 OptionableUtil.findFirstEnumByOptionInSet(TimeType.class, options, TimeType.Modified),
                 OptionableUtil.findFirstEnumByOptionInSet(TimeComparator.class, options, TimeComparator.Newer));
     }
+
     ;
+
     public TimeFilter(Date time, TimeType timeType, TimeComparator comparator) {
         this.time = time;
         this.timeType = timeType;

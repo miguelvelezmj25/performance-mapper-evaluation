@@ -23,7 +23,7 @@ public enum GrepOptionSet_Fcilnvx implements GrepOptions {
     Active_Fcilnvx(
         /*c:*/null /*already set*/, /*count:*/null /*already set*/, /*F:*/null /*already set*/, /*fixedStrings:*/null /*already set*/, /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*v:*/null /*already set*/, /*invertMatch:*/null /*already set*/, /*n:*/null /*already set*/, /*lineNumber:*/null /*already set*/, /*l:*/null /*already set*/, /*matchingFiles:*/null /*already set*/, /*x:*/null /*already set*/, /*wholeLine:*/null /*already set*/,
             true,
-		/*active:*/GrepOption.count, GrepOption.fixedStrings, GrepOption.ignoreCase, GrepOption.invertMatch, GrepOption.lineNumber, GrepOption.matchingFiles, GrepOption.wholeLine
+        /*active:*/GrepOption.count, GrepOption.fixedStrings, GrepOption.ignoreCase, GrepOption.invertMatch, GrepOption.lineNumber, GrepOption.matchingFiles, GrepOption.wholeLine
     ),
     /**
      * Option set with the following active options: {@link #count c}, {@link #fixedStrings F}, {@link #ignoreCase i}, {@link #invertMatch v}, {@link #lineNumber n}, {@link #matchingFiles l}, {@link #wholeLine x}.
@@ -2238,6 +2238,7 @@ public enum GrepOptionSet_Fcilnvx implements GrepOptions {
     public final GrepOptionSet_Fcilnvx wholeLine;
     private final boolean useAcronym;
     private final EnumSet<GrepOption> options;
+
     private GrepOptionSet_Fcilnvx(
             GrepOptionSet_Fcilnvx c, GrepOptionSet_Fcilnvx count, GrepOptionSet_Fcilnvx F, GrepOptionSet_Fcilnvx fixedStrings, GrepOptionSet_Fcilnvx i, GrepOptionSet_Fcilnvx ignoreCase, GrepOptionSet_Fcilnvx v, GrepOptionSet_Fcilnvx invertMatch, GrepOptionSet_Fcilnvx n, GrepOptionSet_Fcilnvx lineNumber, GrepOptionSet_Fcilnvx l, GrepOptionSet_Fcilnvx matchingFiles, GrepOptionSet_Fcilnvx x, GrepOptionSet_Fcilnvx wholeLine,
             boolean useAcronym,

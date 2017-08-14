@@ -23,7 +23,7 @@ public enum FindOptionSet_acfimnorz implements FindOptions {
     Active_finorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/FindOptionSet_afinorz.Active_afinorz, /*timeAccess:*/FindOptionSet_afinorz.Active_afinorz_long, /*c:*/FindOptionSet_cfinorz.Active_cfinorz, /*timeCreate:*/FindOptionSet_cfinorz.Active_cfinorz_long, /*m:*/FindOptionSet_fimnorz.Active_fimnorz, /*timeModified:*/FindOptionSet_fimnorz.Active_fimnorz_long, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*f:*/null /*already set*/, /*typeFile:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeFile
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeFile
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeFile f}.
@@ -776,6 +776,7 @@ public enum FindOptionSet_acfimnorz implements FindOptions {
     public final FindOptionSet_acfimnorz typeFile;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_acfimnorz(
             FindOptionSet_acfimnorz i, FindOptionSet_acfimnorz ignoreCase, FindOptionSet_acfimnorz z, FindOptionSet_acfimnorz print0, FindOptionSet_acfimnorz r, FindOptionSet_acfimnorz regex, FindOptionSet_afinorz a, FindOptionSet_afinorz timeAccess, FindOptionSet_cfinorz c, FindOptionSet_cfinorz timeCreate, FindOptionSet_fimnorz m, FindOptionSet_fimnorz timeModified, FindOptionSet_acfimnorz n, FindOptionSet_acfimnorz timeNewer, FindOptionSet_acfimnorz o, FindOptionSet_acfimnorz timeOlder, FindOptionSet_acfimnorz f, FindOptionSet_acfimnorz typeFile,
             boolean useAcronym,

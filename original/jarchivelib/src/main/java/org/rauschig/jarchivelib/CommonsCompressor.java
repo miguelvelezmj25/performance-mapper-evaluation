@@ -1,45 +1,41 @@
 /**
- *    Copyright 2013 Thomas Rausch
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2013 Thomas Rausch
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.rauschig.jarchivelib;
 
-import static org.rauschig.jarchivelib.CommonsStreamFactory.createCompressorInputStream;
-import static org.rauschig.jarchivelib.CommonsStreamFactory.createCompressorOutputStream;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+
+import java.io.*;
+
+import static org.rauschig.jarchivelib.CommonsStreamFactory.createCompressorInputStream;
+import static org.rauschig.jarchivelib.CommonsStreamFactory.createCompressorOutputStream;
 
 /**
  * Implementation of a compressor that uses {@link CompressorStreamFactory} to generate compressor streams by a given
  * compressor name passed when creating the GenericCompressor. Thus, it can be used for all compression algorithms the
  * {@code org.apache.commons.compress} library supports.
  */
-public class CommonsCompressor implements Compressor {
+class CommonsCompressor implements Compressor {
 
     private final CompressionType compressionType;
 
-    public CommonsCompressor(CompressionType type) {
+    CommonsCompressor(CompressionType type) {
         this.compressionType = type;
     }
 
@@ -52,7 +48,7 @@ public class CommonsCompressor implements Compressor {
         assertSource(source);
         assertDestination(destination);
 
-        if (destination.isDirectory()) {
+        if(Sink.getDecision(destination.isDirectory())) {
             destination = new File(destination, getCompressedFilename(source));
         }
 
@@ -76,7 +72,7 @@ public class CommonsCompressor implements Compressor {
         assertSource(source);
         assertDestination(destination);
 
-        if (destination.isDirectory()) {
+        if(Sink.getDecision(destination.isDirectory())) {
             destination = new File(destination, getDecompressedFilename(source));
         }
 
@@ -95,6 +91,15 @@ public class CommonsCompressor implements Compressor {
     }
 
     @Override
+    public InputStream decompressingStream(InputStream compressedStream) throws IOException {
+        try {
+            return CommonsStreamFactory.createCompressorInputStream(getCompressionType(), compressedStream);
+        } catch (CompressorException e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
     public String getFilenameExtension() {
         return getCompressionType().getDefaultFileExtension();
     }
@@ -106,7 +111,7 @@ public class CommonsCompressor implements Compressor {
     private String getDecompressedFilename(File source) {
         FileType fileType = FileType.get(source);
 
-        if (compressionType != fileType.getCompressionType()) {
+        if(Sink.getDecision(compressionType != fileType.getCompressionType())) {
             throw new IllegalArgumentException(source + " is not of type " + compressionType);
         }
 
@@ -114,25 +119,30 @@ public class CommonsCompressor implements Compressor {
     }
 
     private void assertSource(File source) throws IllegalArgumentException, FileNotFoundException {
-        if (source == null) {
+        if(Sink.getDecision(source == null)) {
             throw new IllegalArgumentException("Source is null");
-        } else if (source.isDirectory()) {
+        }
+        else if(Sink.getDecision(source.isDirectory())) {
             throw new IllegalArgumentException("Source " + source + " is a directory.");
-        } else if (!source.exists()) {
+        }
+        else if(Sink.getDecision(!source.exists())) {
             throw new FileNotFoundException(source.getName());
-        } else if (!source.canRead()) {
+        }
+        else if(Sink.getDecision(!source.canRead())) {
             throw new IllegalArgumentException("Can not read from source " + source);
         }
     }
 
     private void assertDestination(File destination) {
-        if (destination == null) {
+        if(Sink.getDecision(destination == null)) {
             throw new IllegalArgumentException("Destination is null");
-        } else if (destination.isDirectory()) {
-            if (!destination.canWrite()) {
+        }
+        else if(Sink.getDecision(destination.isDirectory())) {
+            if(Sink.getDecision(!destination.canWrite())) {
                 throw new IllegalArgumentException("Can not write to destination " + destination);
             }
-        } else if (destination.exists() && !destination.canWrite()) {
+        }
+        else if(Sink.getDecision(destination.exists() && !destination.canWrite())) {
             throw new IllegalArgumentException("Can not write to destination " + destination);
         }
     }

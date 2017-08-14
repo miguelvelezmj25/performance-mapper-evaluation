@@ -18,43 +18,41 @@ package kanzi.filter.seam;
 
 // 'Container' class encapsulating a path of pixels in an image.
 // Used by ContextResizer.
-public class Geodesic implements Comparable<Geodesic>
-{
-   public int cost;
-   public final int[] positions;
-   public final int direction;
+public class Geodesic implements Comparable<Geodesic> {
+    public final int[] positions;
+    public final int direction;
+    public int cost;
 
 
-   public Geodesic(int direction, int length)
-   {
-      this.direction = direction;
-      this.positions = new int[length];
-   }
+    public Geodesic(int direction, int length) {
+        this.direction = direction;
+        this.positions = new int[length];
+    }
 
 
-   @Override
-   public int compareTo(Geodesic geo)
-   {
-      return this.cost - geo.cost;
-   }
+    @Override
+    public int compareTo(Geodesic geo) {
+        return this.cost - geo.cost;
+    }
 
 
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder(200);
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(200);
 
-      if (this.direction == 1)
-          builder.append("[dir=HORIZONTAL");
-       else
-          builder.append("[dir=VERTICAL");
+        if(this.direction == 1) {
+            builder.append("[dir=HORIZONTAL");
+        }
+        else {
+            builder.append("[dir=VERTICAL");
+        }
 
-      builder.append(", cost=");
-      builder.append(this.cost);
-      builder.append(", start=");
-      builder.append(this.positions[0]);
-      builder.append("]");
-      return builder.toString();
-   }
-  
+        builder.append(", cost=");
+        builder.append(this.cost);
+        builder.append(", start=");
+        builder.append(this.positions[0]);
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

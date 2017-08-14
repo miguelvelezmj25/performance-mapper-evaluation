@@ -18,24 +18,20 @@ package kanzi.test;
 import kanzi.util.HilbertCurveGenerator;
 
 
+public class TestHilbertCurveGenerator {
+    public static void main(String[] args) {
+        int[] hilbert = new int[64 * 64];
 
-public class TestHilbertCurveGenerator
-{
-    public static void main(String[] args)
-    {
-        int[] hilbert = new int[64*64];
-
-        for (int d=2; d<=64; d<<=1)
-        {
+        for(int d = 2; d <= 64; d <<= 1) {
             new HilbertCurveGenerator(d).generate(hilbert);
-            System.out.println("Dimension "+d+"\n");
+            System.out.println("Dimension " + d + "\n");
 
-            for (int i=0; i<d*d; i++)
-            {
-                System.out.print(hilbert[i]+" ");
+            for(int i = 0; i < d * d; i++) {
+                System.out.print(hilbert[i] + " ");
 
-                if ((i & 63) == 63)
+                if((i & 63) == 63) {
                     System.out.println("");
+                }
             }
 
             System.out.println("");

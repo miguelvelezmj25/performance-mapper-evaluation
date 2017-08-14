@@ -16,13 +16,12 @@ limitations under the License.
 package kanzi;
 
 
-public interface OutputBitStream
-{
+public interface OutputBitStream {
     // Write the least significant bit of the input integer
     public void writeBit(int bit) throws BitStreamException;
 
     public int writeBits(long bits, int length) throws BitStreamException;
-    
+
     public void close() throws BitStreamException;
 
     // Number of bits written

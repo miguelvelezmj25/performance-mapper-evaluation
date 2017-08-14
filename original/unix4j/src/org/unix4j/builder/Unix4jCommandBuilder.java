@@ -66,7 +66,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -89,7 +89,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             command. Options can be specified by acronym (with a leading dash
      *             "-") or by long name (with two leading dashes "--"). File arguments
      *             are expanded if wildcards are used.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -108,7 +108,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files to be printed; relative paths are not resolved (use
      *              the string path argument to enable relative path resolving based on
      *              the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -126,7 +126,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options Options for the cat command.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -147,7 +147,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be printed; relative paths are not resolved (use
      *                the string path argument to enable relative path resolving based on
      *                the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -169,7 +169,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be printed; wildcards * and ? are
      *                supported; relative paths are resolved on the basis of the current
      *                working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -188,7 +188,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -210,7 +210,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param file the file to use as input; relative paths are not resolved (use the
      *             string path argument to enable relative path resolving based on the
      *             current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -232,7 +232,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param path the directory to become the new current working directory;
      *             wildcards * and ? are supported; relative paths are resolved on the
      *             basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -256,7 +256,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--range" operand have to be prefixed with the operand name
      *             (e.g. "--indexes" for subsequent index operand values).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -274,7 +274,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options options for the cut command
      * @param range   select only these fields
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -292,7 +292,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options options for the cut command
      * @param indexes select these chars/field based on the given indexes. Indexes are 1 based.  i.e. the first character/field on a line has an index of 1.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -311,7 +311,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options   options for the cut command
      * @param delimiter use as the output delimiter the default is to use the input delimiter
      * @param range     select only these fields
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -330,7 +330,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options   options for the cut command
      * @param delimiter use as the output delimiter the default is to use the input delimiter
      * @param indexes   select these chars/field based on the given indexes. Indexes are 1 based.  i.e. the first character/field on a line has an index of 1.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -350,7 +350,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param delimiter       use as the output delimiter the default is to use the input delimiter
      * @param outputDelimiter use as the output delimiter the default is to use the input delimiter
      * @param range           select only these fields
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -370,7 +370,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param delimiter       use as the output delimiter the default is to use the input delimiter
      * @param outputDelimiter use as the output delimiter the default is to use the input delimiter
      * @param indexes         select these chars/field based on the given indexes. Indexes are 1 based.  i.e. the first character/field on a line has an index of 1.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -393,7 +393,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             strings to be written to the output. Options can be specified by
      *             acronym (with a leading dash "-") or by long name (with two leading
      *             dashes "--").
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -412,7 +412,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options Options for the echo command.
      * @param string  A string to be written to standard output.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -432,7 +432,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options Options for the echo command.
      * @param strings Strings to be written to standard output, separated by single blank
      *                characters.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -463,7 +463,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--path" operand have to be prefixed with the operand name
      *             (e.g. "--name" for subsequent path operand values).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -485,7 +485,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param path Starting point for the search in the directory hierarchy;
      *             wildcards * and ? are supported; relative paths are resolved on the
      *             basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -512,7 +512,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             leading directories; wildcards * and ? are supported, or full
      *             regular expressions if either of the options {@code -regex (-r)} or
      *             {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -537,7 +537,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param size Consider only files using at least {@code size} bytes if {@code size}
      *             is positive, or at most {@code abs(size)} bytes if {@code size} is zero
      *             or negative.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -565,7 +565,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param size Consider only files using at least {@code size} bytes if {@code size}
      *             is positive, or at most {@code abs(size)} bytes if {@code size} is zero
      *             or negative.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -595,7 +595,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             leading directories; wildcards * and ? are supported, or full
      *             regular expressions if either of the options {@code -regex (-r)} or
      *             {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -628,7 +628,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             leading directories; wildcards * and ? are supported, or full
      *             regular expressions if either of the options {@code -regex (-r)} or
      *             {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -653,7 +653,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -681,7 +681,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -707,7 +707,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param size    Consider only files using at least {@code size} bytes if {@code size}
      *                is positive, or at most {@code abs(size)} bytes if {@code size} is zero
      *                or negative.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -736,7 +736,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param size    Consider only files using at least {@code size} bytes if {@code size}
      *                is positive, or at most {@code abs(size)} bytes if {@code size} is zero
      *                or negative.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -762,7 +762,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param time    Consider only files that have been created, modified or accessed
      *                before or after the specified {@code time} operand; consider the
      *                {@code -time...} options for details of the comparison.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -791,7 +791,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param time    Consider only files that have been created, modified or accessed
      *                before or after the specified {@code time} operand; consider the
      *                {@code -time...} options for details of the comparison.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -821,7 +821,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -855,7 +855,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -885,7 +885,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -918,7 +918,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -955,7 +955,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -995,7 +995,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                leading directories; wildcards * and ? are supported, or full
      *                regular expressions if either of the options {@code -regex (-r)} or
      *                {@code -iregex (-i)} is specified.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1015,7 +1015,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param string the string to use as input
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1034,7 +1034,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param strings the input lines
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1054,7 +1054,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param lines collection with input lines
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1073,7 +1073,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param path the file to use as input; wildcards * and ? are supported; relative
      *             paths are resolved on the basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1093,7 +1093,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param file the file to use as input; relative paths are not resolved (use the
      *             string path argument to enable relative path resolving based on the
      *             current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1120,7 +1120,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                 prefixed with a forward slash, and with each dot "." replaced with a
      *                 forward slash. e.g.:
      *                 {@code "/org/company/mypackage/test-file.txt"}
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1137,7 +1137,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param stream the input stream to read from
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1154,7 +1154,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param reader the reader used to read the input
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1171,7 +1171,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param url the URL to read from
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1188,7 +1188,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param input the input object to read from
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1218,7 +1218,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--pattern" and "--paths" operands have to be prefixed with
      *             the operand name (e.g. "--files" for subsequent file operand values).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1240,7 +1240,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *               the {@code --wholeLine} option is specified. If the
      *               {@code --fixedStrings} option is used, plain string comparison is
      *               used instead of regular expression matching.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1266,7 +1266,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files  The input files to be searched for the pattern; relative paths are
      *               not resolved (use the string paths argument to enable relative path
      *               resolving based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1285,7 +1285,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param pattern Lines will be printed which match the given pattern.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1307,7 +1307,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be searched for the pattern; relative paths are
      *                not resolved (use the string paths argument to enable relative path
      *                resolving based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1329,7 +1329,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be searched for the pattern;
      *                wildcards * and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1353,7 +1353,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                the {@code --wholeLine} option is specified. If the
      *                {@code --fixedStrings} option is used, plain string comparison is
      *                used instead of regular expression matching.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1373,7 +1373,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options The options defining the types of patterns and command behavior.
      * @param pattern Lines will be printed which match the given pattern.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1400,7 +1400,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be searched for the pattern; relative paths are
      *                not resolved (use the string paths argument to enable relative path
      *                resolving based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1427,7 +1427,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be searched for the pattern;
      *                wildcards * and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1451,7 +1451,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be searched for the pattern; relative paths are
      *                not resolved (use the string paths argument to enable relative path
      *                resolving based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1475,7 +1475,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be searched for the pattern;
      *                wildcards * and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1493,7 +1493,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1522,7 +1522,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--paths" operand have to be prefixed with the operand
      *             name (e.g. "--count" for a subsequent count operand value).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1544,7 +1544,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *              integer or an exception is thrown. If {@code count} is greater than
      *              the number number of lines (characters) in the input, the
      *              application will not error and send the whole file to the output.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1567,7 +1567,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                integer or an exception is thrown. If {@code count} is greater than
      *                the number number of lines (characters) in the input, the
      *                application will not error and send the whole file to the output.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1589,7 +1589,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files to be filtered; relative paths are not resolved (use
      *              the string paths argument to enable relative path resolving based on
      *              the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1617,7 +1617,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files to be filtered; relative paths are not resolved (use
      *              the string paths argument to enable relative path resolving based on
      *              the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1645,7 +1645,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths Pathnames of the input files to be filtered; wildcards * and ? are
      *              supported; relative paths are resolved on the basis of the current
      *              working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1675,7 +1675,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be filtered; relative paths are not resolved (use
      *                the string paths argument to enable relative path resolving based on
      *                the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1705,7 +1705,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be filtered; wildcards * and ? are
      *                supported; relative paths are resolved on the basis of the current
      *                working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1723,7 +1723,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1749,7 +1749,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--paths" operand have to be prefixed with the operand
      *             name (e.g. "--count" for a subsequent count operand value).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1769,7 +1769,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *              relative paths are not resolved (use the string path argument to
      *              enable relative path resolving based on the current working
      *              directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1787,7 +1787,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options The options defining the output format.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1809,7 +1809,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                relative paths are not resolved (use the string path argument to
      *                enable relative path resolving based on the current working
      *                directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1830,7 +1830,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   The files or directories used as starting point for the listing;
      *                wildcards * and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1857,7 +1857,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--script" operand have to be prefixed with the operand name
      *             (e.g. "--occurrence" for subsequent occurrence indices).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1873,7 +1873,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param script Sed script as one string, such as "s/original/replacement/g".
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1907,7 +1907,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                    digit, are replaced by the text matched by the corresponding
      *                    backreference expression. The special meaning of '&' and "\n" in
      *                    this context can be suppressed by preceding it by a backslash.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1948,7 +1948,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                    <p>
      *                    (This operand only applies to the substitute command and is ignored
      *                    by all other commands).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -1966,7 +1966,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options Sed options and commands
      * @param regexp  Regular expression matched against a line.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2000,7 +2000,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                <p>
      *                (This operand only applies to the commands s, a, i, c and y and is
      *                ignored by all other commands).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2050,7 +2050,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                   <p>
      *                   (This operand only applies to the substitute command and is ignored
      *                   by all other commands).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2075,7 +2075,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2106,7 +2106,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--paths" operand have to be prefixed with the operand
      *             name (e.g. "--comparator" for a subsequent comparator operand value).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2134,7 +2134,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The files to be sorted or merged; relative paths are not resolved
      *              (use the string paths argument to enable relative path resolving
      *              based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2156,7 +2156,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param comparator The comparator to use for the line comparisons.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2183,7 +2183,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files      The files to be sorted or merged; relative paths are not resolved
      *                   (use the string paths argument to enable relative path resolving
      *                   based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2210,7 +2210,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths      Pathnames of the files to be sorted, merged, or checked; wildcards *
      *                   and ? are supported; relative paths are resolved on the
      *                   basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2234,7 +2234,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options The options for the sort command.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2264,7 +2264,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The files to be sorted or merged; relative paths are not resolved
      *                (use the string paths argument to enable relative path resolving
      *                based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2294,7 +2294,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the files to be sorted, merged, or checked; wildcards *
      *                and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2319,7 +2319,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options    The options for the sort command.
      * @param comparator The comparator to use for the line comparisons.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2350,7 +2350,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files      The files to be sorted or merged; relative paths are not resolved
      *                   (use the string paths argument to enable relative path resolving
      *                   based on the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2381,7 +2381,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths      Pathnames of the files to be sorted, merged, or checked; wildcards *
      *                   and ? are supported; relative paths are resolved on the
      *                   basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2399,7 +2399,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2428,7 +2428,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--paths" operand have to be prefixed with the operand
      *             name (e.g. "--count" for a subsequent count operand value).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2451,7 +2451,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *              integer or an exception is thrown. If {@code count} is greater than
      *              the number number of lines (characters) in the input, the
      *              application will not error and send the whole file to the output.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2475,7 +2475,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                integer or an exception is thrown. If {@code count} is greater than
      *                the number number of lines (characters) in the input, the
      *                application will not error and send the whole file to the output.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2497,7 +2497,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files to be filtered; relative paths are not resolved (use
      *              the string paths argument to enable relative path resolving based on
      *              the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2526,7 +2526,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files to be filtered; relative paths are not resolved (use
      *              the string paths argument to enable relative path resolving based on
      *              the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2555,7 +2555,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths Pathnames of the input files to be filtered; wildcards * and ? are
      *              supported; relative paths are resolved on the basis of the current
      *              working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2586,7 +2586,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files to be filtered; relative paths are not resolved (use
      *                the string paths argument to enable relative path resolving based on
      *                the current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2617,7 +2617,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files to be filtered; wildcards * and ? are
      *                supported; relative paths are resolved on the basis of the current
      *                working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2641,7 +2641,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2672,7 +2672,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--path" operand have to be prefixed with the operand
      *             name.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2698,7 +2698,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             relative paths are not resolved (use the string path argument to
      *             enable relative path resolving based on the current working
      *             directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2723,7 +2723,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param path The files or directories used as starting point for the listing;
      *             wildcards * and ? are supported; relative paths are resolved on the
      *             basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2747,7 +2747,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options The options defining the uniqueness details for the output lines.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2775,7 +2775,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                relative paths are not resolved (use the string path argument to
      *                enable relative path resolving based on the current working
      *                directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2802,7 +2802,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param path    The files or directories used as starting point for the listing;
      *                wildcards * and ? are supported; relative paths are resolved on the
      *                basis of the current working directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2820,7 +2820,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2849,7 +2849,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--paths" operand have to be prefixed with the operand
      *             name.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2870,7 +2870,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files The input files; relative paths are not resolved (use the string
      *              paths argument to enable relative path resolving based on the
      *              current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2887,7 +2887,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options The options defining command behavior.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2910,7 +2910,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param files   The input files; relative paths are not resolved (use the string
      *                paths argument to enable relative path resolving based on the
      *                current working directory).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2933,7 +2933,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param paths   Pathnames of the input files; wildcards * and ? are supported;
      *                relative paths are resolved on the basis of the current working
      *                directory.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2955,7 +2955,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * chaining. The command itself is returned by the {@link #build()} method.
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -2985,7 +2985,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *             long name (with two leading dashes "--"). Operands other than the
      *             default "--maxArgs" operand have to be prefixed with the operand
      *             name (e.g. "--maxLines" for a subsequent line count operand value).
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3005,7 +3005,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param delimiter Input items are terminated by the specified characters.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3028,7 +3028,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param maxLines Use at most maxLines nonblank input lines per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3051,7 +3051,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param maxArgs Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3076,7 +3076,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param maxLines Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs  Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3099,7 +3099,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3122,7 +3122,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3147,7 +3147,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3175,7 +3175,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                  input is ignored.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3196,7 +3196,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * See {@link Unix4jCommandBuilder class comments} for more information.
      *
      * @param options The options defining command behavior.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3217,7 +3217,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options   The options defining command behavior.
      * @param delimiter Input items are terminated by the specified characters.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3241,7 +3241,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options  The options defining command behavior.
      * @param maxLines Use at most maxLines nonblank input lines per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3265,7 +3265,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *
      * @param options The options defining command behavior.
      * @param maxArgs Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3291,7 +3291,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options  The options defining command behavior.
      * @param maxLines Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs  Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3315,7 +3315,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options   The options defining command behavior.
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3339,7 +3339,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param options   The options defining command behavior.
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3365,7 +3365,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      * @param delimiter Input items are terminated by the specified characters.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)
@@ -3394,7 +3394,7 @@ public interface Unix4jCommandBuilder extends CommandBuilder,
      *                  input is ignored.
      * @param maxLines  Use at most maxLines nonblank input lines per command invocation.
      * @param maxArgs   Use at most maxArgs arguments per command invocation.
-     * @return    {@code this} builder to allow for method chaining; method
+     * @return {@code this} builder to allow for method chaining; method
      * chaining is used here to create command chains; adding a command
      * to the chain usually means that the previous command <i>pipes</i>
      * its output to the next command (the pipe symbol in unix)

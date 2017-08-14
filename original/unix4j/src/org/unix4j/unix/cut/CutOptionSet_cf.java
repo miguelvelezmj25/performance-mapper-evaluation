@@ -23,7 +23,7 @@ public enum CutOptionSet_cf implements CutOptions {
     Active_cf(
         /*c:*/null /*already set*/, /*chars:*/null /*already set*/, /*f:*/null /*already set*/, /*fields:*/null /*already set*/,
             true,
-		/*active:*/CutOption.chars, CutOption.fields
+        /*active:*/CutOption.chars, CutOption.fields
     ),
     /**
      * Option set with the following active options: {@link #chars c}, {@link #fields f}.
@@ -116,6 +116,7 @@ public enum CutOptionSet_cf implements CutOptions {
     public final CutOptionSet_cf fields;
     private final boolean useAcronym;
     private final EnumSet<CutOption> options;
+
     private CutOptionSet_cf(
             CutOptionSet_cf c, CutOptionSet_cf chars, CutOptionSet_cf f, CutOptionSet_cf fields,
             boolean useAcronym,

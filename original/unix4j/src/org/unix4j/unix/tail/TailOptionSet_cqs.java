@@ -23,7 +23,7 @@ public enum TailOptionSet_cqs implements TailOptions {
     Active_cqs(
         /*c:*/null /*already set*/, /*chars:*/null /*already set*/, /*s:*/null /*already set*/, /*countFromStart:*/null /*already set*/, /*q:*/null /*already set*/, /*suppressHeaders:*/null /*already set*/,
             true,
-		/*active:*/TailOption.chars, TailOption.countFromStart, TailOption.suppressHeaders
+        /*active:*/TailOption.chars, TailOption.countFromStart, TailOption.suppressHeaders
     ),
     /**
      * Option set with the following active options: {@link #chars c}, {@link #countFromStart s}, {@link #suppressHeaders q}.
@@ -208,6 +208,7 @@ public enum TailOptionSet_cqs implements TailOptions {
     public final TailOptionSet_cqs suppressHeaders;
     private final boolean useAcronym;
     private final EnumSet<TailOption> options;
+
     private TailOptionSet_cqs(
             TailOptionSet_cqs c, TailOptionSet_cqs chars, TailOptionSet_cqs s, TailOptionSet_cqs countFromStart, TailOptionSet_cqs q, TailOptionSet_cqs suppressHeaders,
             boolean useAcronym,

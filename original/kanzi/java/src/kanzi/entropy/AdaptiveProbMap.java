@@ -24,39 +24,35 @@ import kanzi.Global;
 // a.get(y, pr, cx) returned adjusted probability in context cx (0 to
 //   N-1).  rate determines the learning rate (smaller = faster, default 8).
 //////////////////////////////////////////////////////////////////
-/*package*/ class AdaptiveProbMap
-{
-   private int index;        // last p, context
-   private final int rate;   // update rate 
-   private final int[] data; // [NbCtx][33]:  p, context -> p
+/*package*/ class AdaptiveProbMap {
+    private final int rate;   // update rate
+    private final int[] data; // [NbCtx][33]:  p, context -> p
+    private int index;        // last p, context
 
 
-   AdaptiveProbMap(int n, int rate)
-   {
-      this.data = new int[n*33];
-      this.rate = rate;
+    AdaptiveProbMap(int n, int rate) {
+        this.data = new int[n * 33];
+        this.rate = rate;
 
-      for (int i=0, k=0; i<n; i++, k+=33)
-      {
-         for (int j=0; j<33; j++)
-            this.data[k+j] = (i == 0) ? Global.squash((j-16)<<7) << 4 : this.data[j];
-      }
-   }
+        for(int i = 0, k = 0; i < n; i++, k += 33) {
+            for(int j = 0; j < 33; j++)
+                this.data[k + j] = (i == 0) ? Global.squash((j - 16) << 7) << 4 : this.data[j];
+        }
+    }
 
 
-   int get(int bit, int pr, int ctx)
-   {
-      // Update probability based on error and learning rate
-      final int g = (bit<<16) + (bit<<this.rate) - (bit<<1);
-      this.data[this.index] += ((g-this.data[this.index]) >> this.rate);
-      this.data[this.index+1] += ((g-this.data[this.index+1]) >> this.rate);
-      pr = Global.STRETCH[pr];
+    int get(int bit, int pr, int ctx) {
+        // Update probability based on error and learning rate
+        final int g = (bit << 16) + (bit << this.rate) - (bit << 1);
+        this.data[this.index] += ((g - this.data[this.index]) >> this.rate);
+        this.data[this.index + 1] += ((g - this.data[this.index + 1]) >> this.rate);
+        pr = Global.STRETCH[pr];
 
-      // Find new context
-      this.index = ((pr+2048)>>7) + (ctx<<5) + ctx;
+        // Find new context
+        this.index = ((pr + 2048) >> 7) + (ctx << 5) + ctx;
 
-      // Return interpolated probability
-      final int w = pr & 127;
-      return (this.data[this.index]*(128-w) + this.data[this.index+1]*w) >> 11;
-   }
+        // Return interpolated probability
+        final int w = pr & 127;
+        return (this.data[this.index] * (128 - w) + this.data[this.index + 1] * w) >> 11;
+    }
 }

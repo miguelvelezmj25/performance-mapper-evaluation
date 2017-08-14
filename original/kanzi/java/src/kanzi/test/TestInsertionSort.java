@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.InsertionSort;
 
 
-public class TestInsertionSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestInsertionSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("InsertionSort", new InsertionSort(), 20);
         testSpeed("InsertionSort", new InsertionSort(), 2000);
-    }    
+    }
 }

@@ -15,19 +15,18 @@ limitations under the License.
 
 package kanzi.function.wavelet;
 
-import kanzi.SliceIntArray;
 import kanzi.IntTransform;
+import kanzi.SliceIntArray;
 
 
 // Contrast Sensitivity Function (CSF) used to model the Human Visual System (HVS)
 // applied in the wavelet domain
 // Other model available (for Y channel) in [Wavelet-based Image Compression
 // Using Human Visual System Models] by Andrew Beegan
-public class WaveletCSFFilter implements IntTransform
-{
-   public static final int  Y_CHANNEL = 0;
-   public static final int Cb_CHANNEL = 1;
-   public static final int Cr_CHANNEL = 2;
+public class WaveletCSFFilter implements IntTransform {
+    public static final int Y_CHANNEL = 0;
+    public static final int Cb_CHANNEL = 1;
+    public static final int Cr_CHANNEL = 2;
 
     // ----- JPEG 2000 model -----
     //   Recommended color frequency weighting for Y CbCr in JPEG2000
@@ -59,40 +58,40 @@ public class WaveletCSFFilter implements IntTransform
     // Values for other number of levels are approximates.
 
     private static final CSF[][] Y_BAND_CSF_WEIGHTS_32 =
-    {
-       { new CSF(32, 32) },
-       { new CSF(32, 32) },
-       { new CSF(32, 32), new CSF(32, 32) },
-       { new CSF(32, 32), new CSF(32, 32), new CSF(32, 32) },
-       { new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22) },
-       { new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3) },
-       { new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3),   new CSF(3, 1) },
-       { new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3), new CSF(3, 1) }
-    };
+            {
+                    {new CSF(32, 32)},
+                    {new CSF(32, 32)},
+                    {new CSF(32, 32), new CSF(32, 32)},
+                    {new CSF(32, 32), new CSF(32, 32), new CSF(32, 32)},
+                    {new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22)},
+                    {new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3)},
+                    {new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3), new CSF(3, 1)},
+                    {new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(32, 32), new CSF(27, 22), new CSF(9, 3), new CSF(3, 1)}
+            };
 
     private static final CSF[][] Cr_BAND_CSF_WEIGHTS_32 =
-    {
-       { new CSF(26, 24) },
-       { new CSF(26, 24) },
-       { new CSF(26, 24), new CSF(26, 24) },
-       { new CSF(26, 24), new CSF(26, 24), new CSF(22, 18) },
-       { new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11) },
-       { new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF( 9,  5), new CSF(3, 1) },
-       { new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF( 9,  5), new CSF(3, 1) },
-       { new CSF(26, 24), new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF(9, 5), new CSF(3, 1) }
-    };
+            {
+                    {new CSF(26, 24)},
+                    {new CSF(26, 24)},
+                    {new CSF(26, 24), new CSF(26, 24)},
+                    {new CSF(26, 24), new CSF(26, 24), new CSF(22, 18)},
+                    {new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11)},
+                    {new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF(9, 5), new CSF(3, 1)},
+                    {new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF(9, 5), new CSF(3, 1)},
+                    {new CSF(26, 24), new CSF(26, 24), new CSF(26, 24), new CSF(22, 18), new CSF(16, 11), new CSF(9, 5), new CSF(3, 1)}
+            };
 
     private static final CSF[][] Cb_BAND_CSF_WEIGHTS_32 =
-    {
-       { new CSF(27, 25) },
-       { new CSF(27, 25) },
-       { new CSF(27, 25), new CSF(27, 25) },
-       { new CSF(27, 25), new CSF(27, 25), new CSF(24, 21) },
-       { new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12,  8) },
-       { new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12,  8), new CSF(5, 2) },
-       { new CSF(27, 25), new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12,  8), new CSF(5,  2) },
-       { new CSF(27, 25), new CSF(27, 25), new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12, 8), new CSF(5, 2) }
-    };
+            {
+                    {new CSF(27, 25)},
+                    {new CSF(27, 25)},
+                    {new CSF(27, 25), new CSF(27, 25)},
+                    {new CSF(27, 25), new CSF(27, 25), new CSF(24, 21)},
+                    {new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12, 8)},
+                    {new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12, 8), new CSF(5, 2)},
+                    {new CSF(27, 25), new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12, 8), new CSF(5, 2)},
+                    {new CSF(27, 25), new CSF(27, 25), new CSF(27, 25), new CSF(24, 21), new CSF(19, 15), new CSF(12, 8), new CSF(5, 2)}
+            };
 
 //    // ----- Other model -----
 //    // Highest value adjusted to scaling of 1 (x32)
@@ -116,23 +115,27 @@ public class WaveletCSFFilter implements IntTransform
     private int channelType;
 
 
-    public WaveletCSFFilter(int width, int height, int levels, int channelType)
-    {
-        if (width < 8)
+    public WaveletCSFFilter(int width, int height, int levels, int channelType) {
+        if(width < 8) {
             throw new IllegalArgumentException("The width of the image must be at least 8");
+        }
 
-        if (height < 8)
+        if(height < 8) {
             throw new IllegalArgumentException("The height of the image must be at least 8");
+        }
 
-        if (levels < 2)
+        if(levels < 2) {
             throw new IllegalArgumentException("The number of wavelet sub-band levels must be at least 2");
+        }
 
-        if (levels >= 8)
-           throw new IllegalArgumentException("The number of wavelet sub-band levels must be at most 7");
+        if(levels >= 8) {
+            throw new IllegalArgumentException("The number of wavelet sub-band levels must be at most 7");
+        }
 
-       if ((channelType != Y_CHANNEL) && (channelType != Cb_CHANNEL)
-               && (channelType != Cr_CHANNEL))
-           throw new IllegalArgumentException("The channel must be of type Y or Cr or Cb");
+        if((channelType != Y_CHANNEL) && (channelType != Cb_CHANNEL)
+                && (channelType != Cr_CHANNEL)) {
+            throw new IllegalArgumentException("The channel must be of type Y or Cr or Cb");
+        }
 
         this.width = width;
         this.height = height;
@@ -143,133 +146,32 @@ public class WaveletCSFFilter implements IntTransform
 
 
     // Not thread safe
-    public boolean setChannelType(int channelType)
-    {
-       if ((channelType != Y_CHANNEL) && (channelType != Cb_CHANNEL)
-               && (channelType != Cr_CHANNEL))
-          return false;
+    public boolean setChannelType(int channelType) {
+        if((channelType != Y_CHANNEL) && (channelType != Cb_CHANNEL)
+                && (channelType != Cr_CHANNEL)) {
+            return false;
+        }
 
-       this.channelType = channelType;
-       return true;
+        this.channelType = channelType;
+        return true;
     }
 
 
-    public int getChannelType()
-    {
-       return this.channelType;
+    public int getChannelType() {
+        return this.channelType;
     }
 
 
     // Apply Contrast Sensitivy Function weights to wavelet coefficients
     @Override
-    public boolean forward(SliceIntArray source, SliceIntArray destination)
-    {
+    public boolean forward(SliceIntArray source, SliceIntArray destination) {
         final int srcIdx = source.index;
         final int dstIdx = destination.index;
         final int[] src = source.array;
         final int[] dst = destination.array;
 
         WaveletBandScanner sc = new WaveletBandScanner(this.width,
-                 this.height, WaveletBandScanner.ALL_BANDS, this.levels);
-
-        final int channel = this.channelType; // protection from concurrent access
-        int level = 0;
-        int levelSize = 3 * this.width * this.height;
-        int startHHBand = (levelSize + levelSize) / 3;
-        int read = 0;
-        int length = levelSize;
-        CSF[] csfWeights;
-        
-        if (channel == Y_CHANNEL)
-           csfWeights = Y_BAND_CSF_WEIGHTS_32[this.levels];
-        else if (channel == Cr_CHANNEL)
-           csfWeights = Cr_BAND_CSF_WEIGHTS_32[this.levels];
-        else
-           csfWeights = Cb_BAND_CSF_WEIGHTS_32[this.levels];
-
-        // Process LL0 band
-        int csfWeight = csfWeights[level].HL_LH_bands;
-        int offset = 0;
-
-        for (int j=0; j<this.height; j++)
-        {
-           for (int i=0; i<this.width; i++)
-           {
-              int idx = offset + i;
-              int val = src[srcIdx+idx];
-              dst[dstIdx+idx] = ((csfWeight * val) + 16); // value multiplied by 32S
-           }
-
-           offset += this.width;
-        }
-
-        level++;
-        csfWeight = csfWeights[level].HL_LH_bands;
-        int processed = 0;
-
-        // Process sub-bands
-        while (processed < sc.getSize())
-        {
-           final int l = sc.getIndexes(this.buffer, length, read);
-           processed += l;
-           read += l;
-           int n;
-           int part1 = (startHHBand < length) ? startHHBand : length;
-
-           // Process LH, HL and HH bands
-           for (n=0; n<part1; n++)
-           {
-               final int idx = this.buffer[n];
-               final int val = src[srcIdx+idx];
-               dst[dstIdx+idx] = ((csfWeight * val) + 16) >> 2; // range x8 to x1/4
-           }
-
-           if (n == startHHBand)
-           {
-              csfWeight = csfWeights[level].HH_band;
-           }
-
-           for ( ; n<length; n++)
-           {
-              final int idx = this.buffer[n];
-              final int val = src[srcIdx+idx];
-              dst[dstIdx+idx] = ((csfWeight * val) + 16) >> 2; // range x8 to x1/4
-           }
-
-           if (read == levelSize)
-           {
-              levelSize <<= 2;
-              read = 0;
-              level++;
-              startHHBand = (levelSize + levelSize) / 3;
-
-              if (level < this.levels)
-                 csfWeight = csfWeights[level].HL_LH_bands;
-          }
-
-           length = levelSize - read;
-
-           if (length > this.buffer.length)
-               length = this.buffer.length;
-        }
-
-        source.index = this.width * this.height;
-        destination.index =  this.width * this.height;
-        return true;
-    }
-
-
-    // Revert Contrast Sensitivy Function weights on wavelet coefficients
-    @Override
-    public boolean inverse(SliceIntArray source, SliceIntArray destination)
-    {
-        final int srcIdx = source.index;
-        final int dstIdx = destination.index;
-        final int[] src = source.array;
-        final int[] dst = destination.array;
-
-        WaveletBandScanner sc = new WaveletBandScanner(this.width,
-                 this.height, WaveletBandScanner.ALL_BANDS, this.levels);
+                this.height, WaveletBandScanner.ALL_BANDS, this.levels);
 
         final int channel = this.channelType; // protection from concurrent access
         int level = 0;
@@ -279,27 +181,28 @@ public class WaveletCSFFilter implements IntTransform
         int length = levelSize;
         CSF[] csfWeights;
 
-        if (channel == Y_CHANNEL)
-           csfWeights = Y_BAND_CSF_WEIGHTS_32[this.levels];
-        else if (channel == Cr_CHANNEL)
-           csfWeights = Cr_BAND_CSF_WEIGHTS_32[this.levels];
-        else
-           csfWeights = Cb_BAND_CSF_WEIGHTS_32[this.levels];
+        if(channel == Y_CHANNEL) {
+            csfWeights = Y_BAND_CSF_WEIGHTS_32[this.levels];
+        }
+        else if(channel == Cr_CHANNEL) {
+            csfWeights = Cr_BAND_CSF_WEIGHTS_32[this.levels];
+        }
+        else {
+            csfWeights = Cb_BAND_CSF_WEIGHTS_32[this.levels];
+        }
 
         // Process LL0 band
         int csfWeight = csfWeights[level].HL_LH_bands;
         int offset = 0;
 
-        for (int j=0; j<this.height; j++)
-        {
-           for (int i=0; i<this.width; i++)
-           {
-              int idx = this.buffer[offset+i];
-              int val = src[srcIdx+idx];
-              dst[dstIdx+idx] = val / csfWeight;
-           }
+        for(int j = 0; j < this.height; j++) {
+            for(int i = 0; i < this.width; i++) {
+                int idx = offset + i;
+                int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = ((csfWeight * val) + 16); // value multiplied by 32S
+            }
 
-           offset += this.width;
+            offset += this.width;
         }
 
         level++;
@@ -307,47 +210,46 @@ public class WaveletCSFFilter implements IntTransform
         int processed = 0;
 
         // Process sub-bands
-        while (processed < sc.getSize())
-        {
-           final int l = sc.getIndexes(this.buffer, length, read);
-           processed += l;
-           read += l;
-           int n;
-           int part1 = (startHHBand < length) ? startHHBand : length;
+        while (processed < sc.getSize()) {
+            final int l = sc.getIndexes(this.buffer, length, read);
+            processed += l;
+            read += l;
+            int n;
+            int part1 = (startHHBand < length) ? startHHBand : length;
 
-           // Process LH, HL and HH bands
-           for (n=0; n<part1; n++)
-           {
-              final int idx = this.buffer[n];
-              final int val = src[srcIdx+idx];
-              dst[dstIdx+idx] = (val << 2) / csfWeight;
-           }
+            // Process LH, HL and HH bands
+            for(n = 0; n < part1; n++) {
+                final int idx = this.buffer[n];
+                final int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = ((csfWeight * val) + 16) >> 2; // range x8 to x1/4
+            }
 
-           if (n == startHHBand)
-           {
-              csfWeight = csfWeights[level].HH_band;
-           }
+            if(n == startHHBand) {
+                csfWeight = csfWeights[level].HH_band;
+            }
 
-           for ( ; n<length; n++)
-           {
-              final int idx = this.buffer[n];
-              final int val = src[srcIdx+idx];
-              dst[dstIdx+idx] = (val << 2) / csfWeight;
-           }
+            for(; n < length; n++) {
+                final int idx = this.buffer[n];
+                final int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = ((csfWeight * val) + 16) >> 2; // range x8 to x1/4
+            }
 
-           if (read == levelSize)
-           {
-              levelSize <<= 2;
-              read = 0;
-              level++;
-              csfWeight = csfWeights[level].HL_LH_bands;
-              startHHBand = (levelSize + levelSize) / 3;
-          }
+            if(read == levelSize) {
+                levelSize <<= 2;
+                read = 0;
+                level++;
+                startHHBand = (levelSize + levelSize) / 3;
 
-           length = levelSize - read;
+                if(level < this.levels) {
+                    csfWeight = csfWeights[level].HL_LH_bands;
+                }
+            }
 
-           if (length > this.buffer.length)
-               length = this.buffer.length;
+            length = levelSize - read;
+
+            if(length > this.buffer.length) {
+                length = this.buffer.length;
+            }
         }
 
         source.index = this.width * this.height;
@@ -356,15 +258,106 @@ public class WaveletCSFFilter implements IntTransform
     }
 
 
-    private static class CSF
-    {
-       final int HL_LH_bands;
-       final int HH_band;
+    // Revert Contrast Sensitivy Function weights on wavelet coefficients
+    @Override
+    public boolean inverse(SliceIntArray source, SliceIntArray destination) {
+        final int srcIdx = source.index;
+        final int dstIdx = destination.index;
+        final int[] src = source.array;
+        final int[] dst = destination.array;
 
-       CSF(int HL_LH_bands, int HH_band)
-       {
-          this.HL_LH_bands = HL_LH_bands;
-          this.HH_band = HH_band;
-       }
+        WaveletBandScanner sc = new WaveletBandScanner(this.width,
+                this.height, WaveletBandScanner.ALL_BANDS, this.levels);
+
+        final int channel = this.channelType; // protection from concurrent access
+        int level = 0;
+        int levelSize = 3 * this.width * this.height;
+        int startHHBand = (levelSize + levelSize) / 3;
+        int read = 0;
+        int length = levelSize;
+        CSF[] csfWeights;
+
+        if(channel == Y_CHANNEL) {
+            csfWeights = Y_BAND_CSF_WEIGHTS_32[this.levels];
+        }
+        else if(channel == Cr_CHANNEL) {
+            csfWeights = Cr_BAND_CSF_WEIGHTS_32[this.levels];
+        }
+        else {
+            csfWeights = Cb_BAND_CSF_WEIGHTS_32[this.levels];
+        }
+
+        // Process LL0 band
+        int csfWeight = csfWeights[level].HL_LH_bands;
+        int offset = 0;
+
+        for(int j = 0; j < this.height; j++) {
+            for(int i = 0; i < this.width; i++) {
+                int idx = this.buffer[offset + i];
+                int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = val / csfWeight;
+            }
+
+            offset += this.width;
+        }
+
+        level++;
+        csfWeight = csfWeights[level].HL_LH_bands;
+        int processed = 0;
+
+        // Process sub-bands
+        while (processed < sc.getSize()) {
+            final int l = sc.getIndexes(this.buffer, length, read);
+            processed += l;
+            read += l;
+            int n;
+            int part1 = (startHHBand < length) ? startHHBand : length;
+
+            // Process LH, HL and HH bands
+            for(n = 0; n < part1; n++) {
+                final int idx = this.buffer[n];
+                final int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = (val << 2) / csfWeight;
+            }
+
+            if(n == startHHBand) {
+                csfWeight = csfWeights[level].HH_band;
+            }
+
+            for(; n < length; n++) {
+                final int idx = this.buffer[n];
+                final int val = src[srcIdx + idx];
+                dst[dstIdx + idx] = (val << 2) / csfWeight;
+            }
+
+            if(read == levelSize) {
+                levelSize <<= 2;
+                read = 0;
+                level++;
+                csfWeight = csfWeights[level].HL_LH_bands;
+                startHHBand = (levelSize + levelSize) / 3;
+            }
+
+            length = levelSize - read;
+
+            if(length > this.buffer.length) {
+                length = this.buffer.length;
+            }
+        }
+
+        source.index = this.width * this.height;
+        destination.index = this.width * this.height;
+        return true;
+    }
+
+
+    private static class CSF {
+        final int HL_LH_bands;
+        final int HH_band;
+
+        CSF(int HL_LH_bands, int HH_band) {
+            this.HL_LH_bands = HL_LH_bands;
+            this.HH_band = HH_band;
+        }
     }
 }

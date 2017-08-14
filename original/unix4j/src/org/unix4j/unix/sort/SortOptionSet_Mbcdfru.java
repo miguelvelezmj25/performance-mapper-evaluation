@@ -23,7 +23,7 @@ public enum SortOptionSet_Mbcdfru implements SortOptions {
     Active_Mbcdfru(
         /*c:*/null /*already set*/, /*check:*/null /*already set*/, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*M:*/null /*already set*/, /*monthSort:*/null /*already set*/, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.check, SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.monthSort, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.check, SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.monthSort, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #check c}, {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #monthSort M}, {@link #reverse r}, {@link #unique u}.
@@ -710,6 +710,7 @@ public enum SortOptionSet_Mbcdfru implements SortOptions {
     public final SortOptionSet_Mbcdfru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_Mbcdfru(
             SortOptionSet_Mbcdfru c, SortOptionSet_Mbcdfru check, SortOptionSet_Mbcdfru d, SortOptionSet_Mbcdfru dictionaryOrder, SortOptionSet_Mbcdfru f, SortOptionSet_Mbcdfru ignoreCase, SortOptionSet_Mbcdfru b, SortOptionSet_Mbcdfru ignoreLeadingBlanks, SortOptionSet_Mbcdfru M, SortOptionSet_Mbcdfru monthSort, SortOptionSet_Mbcdfru r, SortOptionSet_Mbcdfru reverse, SortOptionSet_Mbcdfru u, SortOptionSet_Mbcdfru unique,
             boolean useAcronym,

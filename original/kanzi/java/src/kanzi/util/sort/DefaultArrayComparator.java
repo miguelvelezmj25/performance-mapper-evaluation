@@ -18,30 +18,28 @@ package kanzi.util.sort;
 import kanzi.ArrayComparator;
 
 
-public final class DefaultArrayComparator implements ArrayComparator
-{
+public final class DefaultArrayComparator implements ArrayComparator {
     private final int[] array;
-    
-    
-    public DefaultArrayComparator(int[] array)
-    {
-        if (array == null)
+
+
+    public DefaultArrayComparator(int[] array) {
+        if(array == null) {
             throw new NullPointerException("Invalid null array parameter");
-        
+        }
+
         this.array = array;
     }
-    
-    
-    
-   @Override
-    public int compare(int lidx, int ridx)
-    {
+
+
+    @Override
+    public int compare(int lidx, int ridx) {
         int res = this.array[lidx] - this.array[ridx];
-        
+
         // Make the sort stable
-        if (res == 0)
-           res = lidx - ridx;
-        
+        if(res == 0) {
+            res = lidx - ridx;
+        }
+
         return res;
     }
 }

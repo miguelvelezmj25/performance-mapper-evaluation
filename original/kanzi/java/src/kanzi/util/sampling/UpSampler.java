@@ -16,8 +16,7 @@ limitations under the License.
 package kanzi.util.sampling;
 
 
-public interface UpSampler
-{
+public interface UpSampler {
     public void superSampleHorizontal(int[] input, int[] output);
 
 

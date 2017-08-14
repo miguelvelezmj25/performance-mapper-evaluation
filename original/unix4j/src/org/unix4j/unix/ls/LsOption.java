@@ -29,7 +29,7 @@ import java.util.Iterator;
  * </table>
  */
 public enum LsOption implements Option, LsOptions {
-	/**
+    /**
      * Option <b>{@code --allFiles}</b>, <b>{@code -a}</b>:
      * Lists all files in the given directory, including hidden files
      * (those whose names start with \".\" in Unix). By default, these
@@ -82,9 +82,9 @@ public enum LsOption implements Option, LsOptions {
      */
     public static LsOption findByAcronym(char acronym) {
         for(final LsOption opt : values()) {
-			if(opt.acronym() == acronym) {
-				return opt;
-			}
+            if(opt.acronym() == acronym) {
+                return opt;
+            }
         }
         return null;
     }

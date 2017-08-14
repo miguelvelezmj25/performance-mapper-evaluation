@@ -23,7 +23,7 @@ public enum SortOptionSet_bcdfmnru implements SortOptions {
     Active_bdfnru(
         /*c:*/SortOptionSet_bcdfnru.Active_bcdfnru, /*check:*/SortOptionSet_bcdfnru.Active_bcdfnru_long, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/SortOptionSet_bdfmnru.Active_bdfmnru, /*merge:*/SortOptionSet_bdfmnru.Active_bdfmnru_long, /*n:*/null /*already set*/, /*numericSort:*/null /*already set*/, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.numericSort, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.numericSort, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #numericSort n}, {@link #reverse r}, {@link #unique u}.
@@ -752,6 +752,7 @@ public enum SortOptionSet_bcdfmnru implements SortOptions {
     public final SortOptionSet_bcdfmnru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_bcdfmnru(
             SortOptionSet_bcdfnru c, SortOptionSet_bcdfnru check, SortOptionSet_bcdfmnru d, SortOptionSet_bcdfmnru dictionaryOrder, SortOptionSet_bcdfmnru f, SortOptionSet_bcdfmnru ignoreCase, SortOptionSet_bcdfmnru b, SortOptionSet_bcdfmnru ignoreLeadingBlanks, SortOptionSet_bdfmnru m, SortOptionSet_bdfmnru merge, SortOptionSet_bcdfmnru n, SortOptionSet_bcdfmnru numericSort, SortOptionSet_bcdfmnru r, SortOptionSet_bcdfmnru reverse, SortOptionSet_bcdfmnru u, SortOptionSet_bcdfmnru unique,
             boolean useAcronym,

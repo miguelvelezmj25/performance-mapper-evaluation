@@ -22,109 +22,103 @@ import java.lang.management.ThreadMXBean;
 // Based on code located here:
 // http://nadeausoftware.com/articles/2008/03/java_tip_how_get_cpu_and_user_time_benchmarking
 
-public class Timing
-{
-   public static final Timing instance  = new Timing();
+public class Timing {
+    public static final Timing instance = new Timing();
 
 
-   private Timing()
-   {
-   }
+    private Timing() {
+    }
 
 
-   // Get CPU time in nanoseconds.
-   public long getCpuTime()
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-      return bean.isCurrentThreadCpuTimeSupported() ? bean.getCurrentThreadCpuTime() : 0L;
-   }
+    // Get CPU time in nanoseconds.
+    public long getCpuTime() {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        return bean.isCurrentThreadCpuTimeSupported() ? bean.getCurrentThreadCpuTime() : 0L;
+    }
 
 
-   // Get user time in nanoseconds.
-   public long getUserTime()
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-      return bean.isCurrentThreadCpuTimeSupported() ? bean.getCurrentThreadUserTime() : 0L;
-   }
+    // Get user time in nanoseconds.
+    public long getUserTime() {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        return bean.isCurrentThreadCpuTimeSupported() ? bean.getCurrentThreadUserTime() : 0L;
+    }
 
 
-   // Get system time in nanoseconds.
-   public long getSystemTime()
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    // Get system time in nanoseconds.
+    public long getSystemTime() {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
 
-      return bean.isCurrentThreadCpuTimeSupported() ? 
-         (bean.getCurrentThreadCpuTime() - bean.getCurrentThreadUserTime()) : 0L;
-   }
-
-
-   // Get CPU time in nanoseconds.
-   public long getCpuTime(long[] ids)
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-
-      if (bean.isThreadCpuTimeSupported() == false)
-         return 0L;
-
-      long time = 0L;
-
-      for (int i=0; i<ids.length; i++)
-      {
-         long t = bean.getThreadCpuTime(ids[i]);
-
-         if (t != -1)
-            time += t;
-      }
-
-      return time;
-   }
+        return bean.isCurrentThreadCpuTimeSupported() ?
+                (bean.getCurrentThreadCpuTime() - bean.getCurrentThreadUserTime()) : 0L;
+    }
 
 
-   // Get user time in nanoseconds.
-   public long getUserTime(long[] ids)
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    // Get CPU time in nanoseconds.
+    public long getCpuTime(long[] ids) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
 
-      if (bean.isThreadCpuTimeSupported() == false)
-         return 0L;
+        if(bean.isThreadCpuTimeSupported() == false) {
+            return 0L;
+        }
 
-      long time = 0L;
+        long time = 0L;
 
-      for (int i=0; i<ids.length; i++)
-      {
-         long t = bean.getThreadUserTime(ids[i]);
+        for(int i = 0; i < ids.length; i++) {
+            long t = bean.getThreadCpuTime(ids[i]);
 
-         if (t != -1)
-            time += t;
-      }
+            if(t != -1) {
+                time += t;
+            }
+        }
 
-      return time;
-   }
+        return time;
+    }
 
 
-   // Get system time in nanoseconds.
-   public long getSystemTime(long[] ids)
-   {
-      ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    // Get user time in nanoseconds.
+    public long getUserTime(long[] ids) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
 
-      if (bean.isThreadCpuTimeSupported() == false)
-         return 0L;
+        if(bean.isThreadCpuTimeSupported() == false) {
+            return 0L;
+        }
 
-      long time = 0L;
+        long time = 0L;
 
-      for (int i=0; i<ids.length; i++)
-      {
-         long tc = bean.getThreadCpuTime(ids[i]);
+        for(int i = 0; i < ids.length; i++) {
+            long t = bean.getThreadUserTime(ids[i]);
 
-         if (tc != -1)
-         {
-            long tu = bean.getThreadUserTime(ids[i]);
+            if(t != -1) {
+                time += t;
+            }
+        }
 
-            if (tu != -1)
-               time += (tc - tu);
-         }
-      }
+        return time;
+    }
 
-      return time;
-   }
+
+    // Get system time in nanoseconds.
+    public long getSystemTime(long[] ids) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+
+        if(bean.isThreadCpuTimeSupported() == false) {
+            return 0L;
+        }
+
+        long time = 0L;
+
+        for(int i = 0; i < ids.length; i++) {
+            long tc = bean.getThreadCpuTime(ids[i]);
+
+            if(tc != -1) {
+                long tu = bean.getThreadUserTime(ids[i]);
+
+                if(tu != -1) {
+                    time += (tc - tu);
+                }
+            }
+        }
+
+        return time;
+    }
 }

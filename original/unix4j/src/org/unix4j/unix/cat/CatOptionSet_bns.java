@@ -23,7 +23,7 @@ public enum CatOptionSet_bns implements CatOptions {
     Active_s(
         /*n:*/CatOptionSet_ns.Active_ns, /*numberLines:*/CatOptionSet_ns.Active_ns_long, /*b:*/CatOptionSet_bs.Active_bs, /*numberNonBlankLines:*/CatOptionSet_bs.Active_bs_long, /*s:*/null /*already set*/, /*squeezeEmptyLines:*/null /*already set*/,
             true,
-		/*active:*/CatOption.squeezeEmptyLines
+        /*active:*/CatOption.squeezeEmptyLines
     ),
     /**
      * Option set with the following active options: {@link #squeezeEmptyLines s}.
@@ -104,6 +104,7 @@ public enum CatOptionSet_bns implements CatOptions {
     public final CatOptionSet_bns squeezeEmptyLines;
     private final boolean useAcronym;
     private final EnumSet<CatOption> options;
+
     private CatOptionSet_bns(
             CatOptionSet_ns n, CatOptionSet_ns numberLines, CatOptionSet_bs b, CatOptionSet_bs numberNonBlankLines, CatOptionSet_bns s, CatOptionSet_bns squeezeEmptyLines,
             boolean useAcronym,

@@ -7,7 +7,7 @@ import org.unix4j.option.OptionSet;
 public class OptionSetConverters {
     private static <O extends Enum<O> & Option> OptionSet<O> toSingletonSet(O option) {
         if(option instanceof OptionSet) {
-            @SuppressWarnings("unchecked")            final OptionSet<O> set = (OptionSet<O>) option;
+            @SuppressWarnings("unchecked") final OptionSet<O> set = (OptionSet<O>) option;
             return set;
         }
         return new DefaultOptionSet<O>(option);

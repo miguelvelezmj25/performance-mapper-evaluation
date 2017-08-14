@@ -28,162 +28,160 @@ import kanzi.SliceByteArray;
 // SBR(0)= Move to Front Transform
 // SBR(1)= Time Stamp Transform
 // This code implements SBR(0), SBR(1/2) and SBR(1). Code derived from openBWT
-public class SBRT implements ByteTransform
-{
-   public static final int MODE_MTF = 1;       // alpha = 0
-   public static final int MODE_RANK = 2;      // alpha = 1/2
-   public static final int MODE_TIMESTAMP = 3; // alpha = 1
+public class SBRT implements ByteTransform {
+    public static final int MODE_MTF = 1;       // alpha = 0
+    public static final int MODE_RANK = 2;      // alpha = 1/2
+    public static final int MODE_TIMESTAMP = 3; // alpha = 1
 
-   private final int[] prev;
-   private final int[] curr;
-   private final int[] symbols;
-   private final int[] ranks;
-   private final int mode;
-   
-   
-   public SBRT()
-   {
-     this(MODE_RANK); 
-   }
-   
-   
-   public SBRT(int mode)
-   {
-     if ((mode != MODE_MTF) && (mode != MODE_RANK) && (mode != MODE_TIMESTAMP))
-        throw new IllegalArgumentException("Invalid mode parameter");
-    
-     this.prev = new int[256];
-     this.curr = new int[256];
-     this.symbols = new int[256];
-     this.ranks = new int[256];
-     this.mode = mode;
-   }
-   
-
-   @Override
-   public boolean forward(SliceByteArray input, SliceByteArray output) 
-   {
-      if ((!SliceByteArray.isValid(input)) || (!SliceByteArray.isValid(output)))
-          return false;
-
-      if (input.array == output.array)
-          return false;
-        
-      final int count = input.length;
-
-      if (output.length < count)
-         return false;
-
-      if (output.index + count > output.array.length)
-         return false;
-      
-      // Aliasing
-      final byte[] src = input.array;
-      final byte[] dst = output.array;
-      final int srcIdx = input.index;
-      final int dstIdx = output.index;
-      final int[] p = this.prev;
-      final int[] q = this.curr;
-      final int[] s2r = this.symbols;
-      final int[] r2s = this.ranks;
-
-      final int mask1 = (this.mode == MODE_TIMESTAMP) ? 0 : -1;
-      final int mask2 = (this.mode == MODE_MTF) ? 0 : -1;
-      final int shift = (this.mode == MODE_RANK) ? 1 : 0;
-
-      for (int i=0; i<256; i++) 
-      { 
-         p[i] = 0;
-         q[i] = 0;
-         s2r[i] = i;
-         r2s[i] = i; 
-      }
-  
-      for (int i=0; i<count; i++)
-      {
-         final int c = src[srcIdx+i] & 0xFF;
-         int r = s2r[c];
-         dst[dstIdx+i] = (byte) r;
-         q[c] = ((i & mask1) + (p[c] & mask2)) >> shift;
-         p[c] = i;
-         final int curVal = q[c];
-
-         // Move up symbol to correct rank 
-         while ((r > 0) && (q[r2s[r-1]] <= curVal))
-         { 
-            r2s[r] = r2s[r-1];
-            s2r[r2s[r]] = r; 
-            r--;
-         }
-
-         r2s[r] = c;
-         s2r[c] = r;
-      }
-      
-      input.index += count;
-      output.index += count;  
-      return true;
-   }
+    private final int[] prev;
+    private final int[] curr;
+    private final int[] symbols;
+    private final int[] ranks;
+    private final int mode;
 
 
-   @Override
-   public boolean inverse(SliceByteArray input, SliceByteArray output) 
-   {
-      if ((!SliceByteArray.isValid(input)) || (!SliceByteArray.isValid(output)))
-          return false;
+    public SBRT() {
+        this(MODE_RANK);
+    }
 
-      if (input.array == output.array)
-          return false;
-        
-      final int count = input.length;
-      
-      if (output.length < count)
-         return false;
 
-      if (output.index + count > output.array.length)
-         return false;
+    public SBRT(int mode) {
+        if((mode != MODE_MTF) && (mode != MODE_RANK) && (mode != MODE_TIMESTAMP)) {
+            throw new IllegalArgumentException("Invalid mode parameter");
+        }
 
-      // Aliasing
-      final byte[] src = input.array;
-      final byte[] dst = output.array;
-      final int srcIdx = input.index;
-      final int dstIdx = output.index;
-      final int[] p = this.prev;
-      final int[] q = this.curr;
-      final int[] r2s = this.ranks;
+        this.prev = new int[256];
+        this.curr = new int[256];
+        this.symbols = new int[256];
+        this.ranks = new int[256];
+        this.mode = mode;
+    }
 
-      final int mask1 = (this.mode == MODE_TIMESTAMP) ? 0 : -1;
-      final int mask2 = (this.mode == MODE_MTF) ? 0 : -1;
-      final int shift = (this.mode == MODE_RANK) ? 1 : 0;
 
-      for (int i=0; i<256; i++) 
-      {
-         p[i] = 0;
-         q[i] = 0;
-         r2s[i] = i;
-      }
+    @Override
+    public boolean forward(SliceByteArray input, SliceByteArray output) {
+        if((!SliceByteArray.isValid(input)) || (!SliceByteArray.isValid(output))) {
+            return false;
+        }
 
-      for (int i=0; i<count; i++)
-      {
-         int r = src[srcIdx+i] & 0xFF;
-         final int c = r2s[r];
-         dst[dstIdx+i] = (byte) c;
-         q[c] = ((i & mask1) + (p[c] & mask2)) >> shift;
-         p[c] = i;
-         final int curVal = q[c];
+        if(input.array == output.array) {
+            return false;
+        }
 
-         // Move up symbol to correct rank 
-         while ((r > 0) && (q[r2s[r-1]] <= curVal)) 
-         {
-            r2s[r] = r2s[r-1];
-            r--;
-         }
+        final int count = input.length;
 
-         r2s[r] = c;
-      }
-      
-      input.index += count;
-      output.index += count;
-      return true;
-   }
+        if(output.length < count) {
+            return false;
+        }
+
+        if(output.index + count > output.array.length) {
+            return false;
+        }
+
+        // Aliasing
+        final byte[] src = input.array;
+        final byte[] dst = output.array;
+        final int srcIdx = input.index;
+        final int dstIdx = output.index;
+        final int[] p = this.prev;
+        final int[] q = this.curr;
+        final int[] s2r = this.symbols;
+        final int[] r2s = this.ranks;
+
+        final int mask1 = (this.mode == MODE_TIMESTAMP) ? 0 : -1;
+        final int mask2 = (this.mode == MODE_MTF) ? 0 : -1;
+        final int shift = (this.mode == MODE_RANK) ? 1 : 0;
+
+        for(int i = 0; i < 256; i++) {
+            p[i] = 0;
+            q[i] = 0;
+            s2r[i] = i;
+            r2s[i] = i;
+        }
+
+        for(int i = 0; i < count; i++) {
+            final int c = src[srcIdx + i] & 0xFF;
+            int r = s2r[c];
+            dst[dstIdx + i] = (byte) r;
+            q[c] = ((i & mask1) + (p[c] & mask2)) >> shift;
+            p[c] = i;
+            final int curVal = q[c];
+
+            // Move up symbol to correct rank
+            while ((r > 0) && (q[r2s[r - 1]] <= curVal)) {
+                r2s[r] = r2s[r - 1];
+                s2r[r2s[r]] = r;
+                r--;
+            }
+
+            r2s[r] = c;
+            s2r[c] = r;
+        }
+
+        input.index += count;
+        output.index += count;
+        return true;
+    }
+
+
+    @Override
+    public boolean inverse(SliceByteArray input, SliceByteArray output) {
+        if((!SliceByteArray.isValid(input)) || (!SliceByteArray.isValid(output))) {
+            return false;
+        }
+
+        if(input.array == output.array) {
+            return false;
+        }
+
+        final int count = input.length;
+
+        if(output.length < count) {
+            return false;
+        }
+
+        if(output.index + count > output.array.length) {
+            return false;
+        }
+
+        // Aliasing
+        final byte[] src = input.array;
+        final byte[] dst = output.array;
+        final int srcIdx = input.index;
+        final int dstIdx = output.index;
+        final int[] p = this.prev;
+        final int[] q = this.curr;
+        final int[] r2s = this.ranks;
+
+        final int mask1 = (this.mode == MODE_TIMESTAMP) ? 0 : -1;
+        final int mask2 = (this.mode == MODE_MTF) ? 0 : -1;
+        final int shift = (this.mode == MODE_RANK) ? 1 : 0;
+
+        for(int i = 0; i < 256; i++) {
+            p[i] = 0;
+            q[i] = 0;
+            r2s[i] = i;
+        }
+
+        for(int i = 0; i < count; i++) {
+            int r = src[srcIdx + i] & 0xFF;
+            final int c = r2s[r];
+            dst[dstIdx + i] = (byte) c;
+            q[c] = ((i & mask1) + (p[c] & mask2)) >> shift;
+            p[c] = i;
+            final int curVal = q[c];
+
+            // Move up symbol to correct rank
+            while ((r > 0) && (q[r2s[r - 1]] <= curVal)) {
+                r2s[r] = r2s[r - 1];
+                r--;
+            }
+
+            r2s[r] = c;
+        }
+
+        input.index += count;
+        output.index += count;
+        return true;
+    }
 }

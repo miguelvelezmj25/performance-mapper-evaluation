@@ -23,7 +23,7 @@ public enum SortOptionSet_bcdfgmru implements SortOptions {
     Active_bdfgru(
         /*c:*/SortOptionSet_bcdfgru.Active_bcdfgru, /*check:*/SortOptionSet_bcdfgru.Active_bcdfgru_long, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*g:*/null /*already set*/, /*generalNumericSort:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/SortOptionSet_bdfgmru.Active_bdfgmru, /*merge:*/SortOptionSet_bdfgmru.Active_bdfgmru_long, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.generalNumericSort, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.dictionaryOrder, SortOption.generalNumericSort, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #generalNumericSort g}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #reverse r}, {@link #unique u}.
@@ -752,6 +752,7 @@ public enum SortOptionSet_bcdfgmru implements SortOptions {
     public final SortOptionSet_bcdfgmru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_bcdfgmru(
             SortOptionSet_bcdfgru c, SortOptionSet_bcdfgru check, SortOptionSet_bcdfgmru d, SortOptionSet_bcdfgmru dictionaryOrder, SortOptionSet_bcdfgmru g, SortOptionSet_bcdfgmru generalNumericSort, SortOptionSet_bcdfgmru f, SortOptionSet_bcdfgmru ignoreCase, SortOptionSet_bcdfgmru b, SortOptionSet_bcdfgmru ignoreLeadingBlanks, SortOptionSet_bdfgmru m, SortOptionSet_bdfgmru merge, SortOptionSet_bcdfgmru r, SortOptionSet_bcdfgmru reverse, SortOptionSet_bcdfgmru u, SortOptionSet_bcdfgmru unique,
             boolean useAcronym,

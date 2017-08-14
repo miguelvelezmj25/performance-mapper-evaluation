@@ -55,7 +55,7 @@ public class ZipEntry implements ZipConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public ZipEntry(String name) {
         int length = name.length();
-        if (length > 65535) {
+        if(length > 65535) {
             throw new IllegalArgumentException("name length is " + length);
         }
         this.name = name;
@@ -89,7 +89,7 @@ public class ZipEntry implements ZipConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     private static synchronized Calendar getCalendar() {
         //Alex: had to modify this method, because JPF breaks on the original Calendar creation method
-        if (cal == null) {
+        if(cal == null) {
             cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1"), Locale.GERMAN);
         }
         //if (cal == null)     cal=Calendar.getInstance();
@@ -98,7 +98,7 @@ public class ZipEntry implements ZipConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     final int getDOSTime() {
-        if ((known & KNOWN_TIME) == 0) {
+        if((known & KNOWN_TIME) == 0) {
             return 0;
         }
         else {
@@ -129,7 +129,7 @@ public class ZipEntry implements ZipConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public long getTime() {
         parseExtra();
-        if ((known & KNOWN_TIME) == 0) {
+        if((known & KNOWN_TIME) == 0) {
             return -1;
         }
         int sec = 2 * (dostime & 0x1f);
@@ -187,7 +187,7 @@ public class ZipEntry implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setSize(long size) {
-        if ((size & 0xffffffff00000000L) != 0) {
+        if((size & 0xffffffff00000000L) != 0) {
             throw new IllegalArgumentException();
         }
         this.size = (int) size;
@@ -229,7 +229,7 @@ public class ZipEntry implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setCrc(long crc) {
-        if ((crc & 0xffffffff00000000L) != 0) {
+        if((crc & 0xffffffff00000000L) != 0) {
             throw new IllegalArgumentException();
         }
         this.crc = (int) crc;
@@ -256,7 +256,7 @@ public class ZipEntry implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setMethod(int method) {
-        if (method != ZipOutputStream.STORED && method != ZipOutputStream.DEFLATED) {
+        if(method != ZipOutputStream.STORED && method != ZipOutputStream.DEFLATED) {
             throw new IllegalArgumentException();
         }
         this.method = (short) method;
@@ -264,10 +264,10 @@ public class ZipEntry implements ZipConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     private void parseExtra() {
-        if ((known & KNOWN_EXTRA) != 0) {
+        if((known & KNOWN_EXTRA) != 0) {
             return;
         }
-        if (extra == null) {
+        if(extra == null) {
             known |= KNOWN_EXTRA;
             return;
         }
@@ -276,9 +276,9 @@ public class ZipEntry implements ZipConstants {
             while (pos < extra.length) {
                 int sig = (extra[pos++] & 0xff) | (extra[pos++] & 0xff) << 8;
                 int len = (extra[pos++] & 0xff) | (extra[pos++] & 0xff) << 8;
-                if (sig == 0x5455) {
+                if(sig == 0x5455) {
                     int flags = extra[pos];
-                    if ((flags & 1) != 0) {
+                    if((flags & 1) != 0) {
                         long time = ((extra[pos + 1] & 0xff) | (extra[pos + 2] & 0xff) << 8 | (extra[pos + 3] & 0xff) << 16 | (extra[pos + 4] & 0xff) << 24);
                         setTime(time);
                     }
@@ -308,11 +308,11 @@ public class ZipEntry implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setExtra(byte[] extra) {
-        if (extra == null) {
+        if(extra == null) {
             this.extra = null;
             return;
         }
-        if (extra.length > 0xffff) {
+        if(extra.length > 0xffff) {
             throw new IllegalArgumentException();
         }
         this.extra = extra;
@@ -335,7 +335,7 @@ public class ZipEntry implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setComment(String comment) {
-        if (comment != null && comment.length() > 0xffff) {
+        if(comment != null && comment.length() > 0xffff) {
             throw new IllegalArgumentException();
         }
         this.comment = comment;

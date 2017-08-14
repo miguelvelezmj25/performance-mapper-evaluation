@@ -23,7 +23,7 @@ public enum FindOptionSet_acdimnorz implements FindOptions {
     Active_dinorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/FindOptionSet_adinorz.Active_adinorz, /*timeAccess:*/FindOptionSet_adinorz.Active_adinorz_long, /*c:*/FindOptionSet_cdinorz.Active_cdinorz, /*timeCreate:*/FindOptionSet_cdinorz.Active_cdinorz_long, /*m:*/FindOptionSet_dimnorz.Active_dimnorz, /*timeModified:*/FindOptionSet_dimnorz.Active_dimnorz_long, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*d:*/null /*already set*/, /*typeDirectory:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeDirectory
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeDirectory
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeDirectory d}.
@@ -776,6 +776,7 @@ public enum FindOptionSet_acdimnorz implements FindOptions {
     public final FindOptionSet_acdimnorz typeDirectory;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_acdimnorz(
             FindOptionSet_acdimnorz i, FindOptionSet_acdimnorz ignoreCase, FindOptionSet_acdimnorz z, FindOptionSet_acdimnorz print0, FindOptionSet_acdimnorz r, FindOptionSet_acdimnorz regex, FindOptionSet_adinorz a, FindOptionSet_adinorz timeAccess, FindOptionSet_cdinorz c, FindOptionSet_cdinorz timeCreate, FindOptionSet_dimnorz m, FindOptionSet_dimnorz timeModified, FindOptionSet_acdimnorz n, FindOptionSet_acdimnorz timeNewer, FindOptionSet_acdimnorz o, FindOptionSet_acdimnorz timeOlder, FindOptionSet_acdimnorz d, FindOptionSet_acdimnorz typeDirectory,
             boolean useAcronym,

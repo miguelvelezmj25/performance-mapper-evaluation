@@ -1,7 +1,9 @@
 jarchivelib
 ===========
 
-[![Build Status](https://travis-ci.org/thrau/jarchivelib.png?branch=master)](https://travis-ci.org/thrau/jarchivelib)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.rauschig/jarchivelib/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.rauschig/jarchivelib/)
+[![Build Status](https://travis-ci.org/thrau/jarchivelib.svg?branch=master)](https://travis-ci.org/thrau/jarchivelib)
+[![Coverage Status](https://coveralls.io/repos/thrau/jarchivelib/badge.svg)](https://coveralls.io/r/thrau/jarchivelib)
 
 A simple archiving and compression library for Java that provides a thin and easy-to-use API layer on top of the
 powerful and feature-rich [org.apache.commons.compress].
@@ -35,7 +37,7 @@ The ArchiveFactory can also detect archive types based on file extensions and ha
 example returns an Archiver instance that handles tar.gz files. (It would also recognize the `.tgz` extension)
 
 ```java
-Archiver archiver = ArchiveFactory.createArchiver(new File("archive.tar.gz"));
+Archiver archiver = ArchiverFactory.createArchiver(new File("archive.tar.gz"));
 ```
 
 ### Using Archivers
@@ -84,7 +86,7 @@ stream.close();
 Dependencies
 ------------
 
-* commons-compress(tm) 1.8
+* commons-compress(tm) 1.9
 
 
 Compatibility

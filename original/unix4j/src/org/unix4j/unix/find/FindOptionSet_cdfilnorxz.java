@@ -23,7 +23,7 @@ public enum FindOptionSet_cdfilnorxz implements FindOptions {
     Active_cinorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*c:*/null /*already set*/, /*timeCreate:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*d:*/FindOptionSet_cdinorz.Active_cdinorz, /*typeDirectory:*/FindOptionSet_cdinorz.Active_cdinorz_long, /*f:*/FindOptionSet_cfinorz.Active_cfinorz, /*typeFile:*/FindOptionSet_cfinorz.Active_cfinorz_long, /*x:*/FindOptionSet_cinorxz.Active_cinorxz, /*typeOther:*/FindOptionSet_cinorxz.Active_cinorxz_long, /*l:*/FindOptionSet_cilnorz.Active_cilnorz, /*typeSymlink:*/FindOptionSet_cilnorz.Active_cilnorz_long,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeCreate, FindOption.timeNewer, FindOption.timeOlder
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeCreate, FindOption.timeNewer, FindOption.timeOlder
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeCreate c}, {@link #timeNewer n}, {@link #timeOlder o}.
@@ -790,6 +790,7 @@ public enum FindOptionSet_cdfilnorxz implements FindOptions {
     public final FindOptionSet_cilnorz typeSymlink;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_cdfilnorxz(
             FindOptionSet_cdfilnorxz i, FindOptionSet_cdfilnorxz ignoreCase, FindOptionSet_cdfilnorxz z, FindOptionSet_cdfilnorxz print0, FindOptionSet_cdfilnorxz r, FindOptionSet_cdfilnorxz regex, FindOptionSet_cdfilnorxz c, FindOptionSet_cdfilnorxz timeCreate, FindOptionSet_cdfilnorxz n, FindOptionSet_cdfilnorxz timeNewer, FindOptionSet_cdfilnorxz o, FindOptionSet_cdfilnorxz timeOlder, FindOptionSet_cdinorz d, FindOptionSet_cdinorz typeDirectory, FindOptionSet_cfinorz f, FindOptionSet_cfinorz typeFile, FindOptionSet_cinorxz x, FindOptionSet_cinorxz typeOther, FindOptionSet_cilnorz l, FindOptionSet_cilnorz typeSymlink,
             boolean useAcronym,

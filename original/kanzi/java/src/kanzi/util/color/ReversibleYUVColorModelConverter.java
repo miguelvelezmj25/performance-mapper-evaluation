@@ -18,39 +18,42 @@ package kanzi.util.color;
 import kanzi.ColorModelType;
 
 // One pass reversible converter
-public final class ReversibleYUVColorModelConverter implements ColorModelConverter
-{
+public final class ReversibleYUVColorModelConverter implements ColorModelConverter {
     private final int height;
     private final int width;
     private final int rgbOffset;
     private final int stride;
 
 
-    public ReversibleYUVColorModelConverter(int width, int height)
-    {
+    public ReversibleYUVColorModelConverter(int width, int height) {
         this(width, height, 0, width);
     }
 
 
-    public ReversibleYUVColorModelConverter(int width, int height, int rgbOffset, int stride)
-    {
-        if (height < 8)
+    public ReversibleYUVColorModelConverter(int width, int height, int rgbOffset, int stride) {
+        if(height < 8) {
             throw new IllegalArgumentException("The height must be at least 8");
+        }
 
-        if (width < 8)
+        if(width < 8) {
             throw new IllegalArgumentException("The width must be at least 8");
+        }
 
-        if (stride < 8)
+        if(stride < 8) {
             throw new IllegalArgumentException("The stride must be at least 8");
+        }
 
-        if ((height & 7) != 0)
+        if((height & 7) != 0) {
             throw new IllegalArgumentException("The height must be a multiple of 8");
+        }
 
-        if ((width & 7) != 0)
+        if((width & 7) != 0) {
             throw new IllegalArgumentException("The width must be a multiple of 8");
+        }
 
-        if ((stride & 7) != 0)
+        if((stride & 7) != 0) {
             throw new IllegalArgumentException("The stride must be a multiple of 8");
+        }
 
         this.height = height;
         this.width = width;
@@ -61,26 +64,24 @@ public final class ReversibleYUVColorModelConverter implements ColorModelConvert
 
     // Only YUV444 supported. Other types cannot be exactly reversed
     @Override
-    public boolean convertRGBtoYUV(int[] rgb, int[] y, int[] u, int[] v, ColorModelType type)
-    {
-        if (type != ColorModelType.YUV444)
+    public boolean convertRGBtoYUV(int[] rgb, int[] y, int[] u, int[] v, ColorModelType type) {
+        if(type != ColorModelType.YUV444) {
             return false;
+        }
 
-        int startLine  = this.rgbOffset;
+        int startLine = this.rgbOffset;
         int startLine2 = 0;
 
-        for (int j=0; j<this.height; j++)
-        {
+        for(int j = 0; j < this.height; j++) {
             final int end = startLine + this.width;
 
-            for (int k=startLine, i=startLine2; k<end; i++)
-            {
+            for(int k = startLine, i = startLine2; k < end; i++) {
                 // ------- fromRGB 'Macro' (y, u, v sign must be preserved)
                 final int rgbVal = rgb[k++];
                 final int r = (rgbVal >> 16) & 0xFF;
                 final int g = (rgbVal >> 8) & 0xFF;
-                final int b =  rgbVal & 0xFF;
-                
+                final int b = rgbVal & 0xFF;
+
                 y[i] = (r + g + g + b) >> 2;
                 u[i] = r - g;
                 v[i] = b - g;
@@ -88,7 +89,7 @@ public final class ReversibleYUVColorModelConverter implements ColorModelConvert
             }
 
             startLine2 += this.width;
-            startLine  += this.stride;
+            startLine += this.stride;
         }
 
         return true;
@@ -97,40 +98,37 @@ public final class ReversibleYUVColorModelConverter implements ColorModelConvert
 
     // Only YUV444 supported. Other types cannot be exactly reversed
     @Override
-    public boolean convertYUVtoRGB(int[] y, int[] u, int[] v, int[] rgb, ColorModelType type)
-    {
-        if (type != ColorModelType.YUV444)
+    public boolean convertYUVtoRGB(int[] y, int[] u, int[] v, int[] rgb, ColorModelType type) {
+        if(type != ColorModelType.YUV444) {
             return false;
+        }
 
         int startLine = 0;
         int startLine2 = this.rgbOffset;
 
-        for (int j=0; j<this.height; j++)
-        {
+        for(int j = 0; j < this.height; j++) {
             final int end = startLine + this.width;
 
-            for (int i=startLine, k=startLine2; i<end; i++)
-            {
+            for(int i = startLine, k = startLine2; i < end; i++) {
                 // ------- toRGB 'Macro'
                 final int g = y[i] - ((u[i] + v[i]) >> 2);
                 final int r = u[i] + g;
                 final int b = v[i] + g;
-              
+
                 rgb[k++] = (r << 16) | (g << 8) | b;
                 // ------- toRGB 'Macro' END
             }
 
-            startLine  += this.width;
+            startLine += this.width;
             startLine2 += this.stride;
         }
 
         return true;
     }
-   
-    
+
+
     @Override
-    public String toString() 
-    {
-       return "Reversible YUV";
-    }    
+    public String toString() {
+        return "Reversible YUV";
+    }
 }

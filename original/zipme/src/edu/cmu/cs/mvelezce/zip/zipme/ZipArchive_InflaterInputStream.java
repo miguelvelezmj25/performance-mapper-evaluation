@@ -21,10 +21,10 @@ public class ZipArchive_InflaterInputStream extends InflaterInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public int available() throws IOException {
-        if (sz == -1) {
+        if(sz == -1) {
             return super.available();
         }
-        if (super.available() != 0) {
+        if(super.available() != 0) {
             return sz - inf.getTotalOut();
         }
         return 0;

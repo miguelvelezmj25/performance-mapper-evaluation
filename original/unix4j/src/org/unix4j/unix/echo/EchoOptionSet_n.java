@@ -23,7 +23,7 @@ public enum EchoOptionSet_n implements EchoOptions {
     Active_n(
         /*n:*/null /*already set*/, /*noNewline:*/null /*already set*/,
             true,
-		/*active:*/EchoOption.noNewline
+        /*active:*/EchoOption.noNewline
     ),
     /**
      * Option set with the following active options: {@link #noNewline n}.
@@ -58,6 +58,7 @@ public enum EchoOptionSet_n implements EchoOptions {
     public final EchoOptionSet_n noNewline;
     private final boolean useAcronym;
     private final EnumSet<EchoOption> options;
+
     private EchoOptionSet_n(
             EchoOptionSet_n n, EchoOptionSet_n noNewline,
             boolean useAcronym,

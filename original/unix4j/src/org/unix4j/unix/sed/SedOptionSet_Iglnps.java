@@ -23,7 +23,7 @@ public enum SedOptionSet_Iglnps implements SedOptions {
     Active_Iglnps(
         /*g:*/null /*already set*/, /*global:*/null /*already set*/, /*I:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*l:*/null /*already set*/, /*lineNumber:*/null /*already set*/, /*p:*/null /*already set*/, /*print:*/null /*already set*/, /*n:*/null /*already set*/, /*quiet:*/null /*already set*/, /*s:*/null /*already set*/, /*substitute:*/null /*already set*/,
             true,
-		/*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet, SedOption.substitute
+        /*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet, SedOption.substitute
     ),
     /**
      * Option set with the following active options: {@link #global g}, {@link #ignoreCase I}, {@link #lineNumber l}, {@link #print p}, {@link #quiet n}, {@link #substitute s}.
@@ -700,6 +700,7 @@ public enum SedOptionSet_Iglnps implements SedOptions {
     public final SedOptionSet_Iglnps substitute;
     private final boolean useAcronym;
     private final EnumSet<SedOption> options;
+
     private SedOptionSet_Iglnps(
             SedOptionSet_Iglnps g, SedOptionSet_Iglnps global, SedOptionSet_Iglnps I, SedOptionSet_Iglnps ignoreCase, SedOptionSet_Iglnps l, SedOptionSet_Iglnps lineNumber, SedOptionSet_Iglnps p, SedOptionSet_Iglnps print, SedOptionSet_Iglnps n, SedOptionSet_Iglnps quiet, SedOptionSet_Iglnps s, SedOptionSet_Iglnps substitute,
             boolean useAcronym,

@@ -20,8 +20,7 @@ package kanzi;
 // the result in the output byte array. The result may have a different size.
 // The function may fail if input and output array are the same array.
 // The index of input and output arrays are updated appropriately.
-public interface ByteFunction extends ByteTransform
-{
-   // Return the max size required for the encoding output buffer
-   public int getMaxEncodedLength(int srcLength);
+public interface ByteFunction extends ByteTransform {
+    // Return the max size required for the encoding output buffer
+    public int getMaxEncodedLength(int srcLength);
 }

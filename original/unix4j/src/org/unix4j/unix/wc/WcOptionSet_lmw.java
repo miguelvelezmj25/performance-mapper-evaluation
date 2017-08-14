@@ -23,7 +23,7 @@ public enum WcOptionSet_lmw implements WcOptions {
     Active_lmw(
         /*m:*/null /*already set*/, /*chars:*/null /*already set*/, /*l:*/null /*already set*/, /*lines:*/null /*already set*/, /*w:*/null /*already set*/, /*words:*/null /*already set*/,
             true,
-		/*active:*/WcOption.chars, WcOption.lines, WcOption.words
+        /*active:*/WcOption.chars, WcOption.lines, WcOption.words
     ),
     /**
      * Option set with the following active options: {@link #chars m}, {@link #lines l}, {@link #words w}.
@@ -202,6 +202,7 @@ public enum WcOptionSet_lmw implements WcOptions {
     public final WcOptionSet_lmw words;
     private final boolean useAcronym;
     private final EnumSet<WcOption> options;
+
     private WcOptionSet_lmw(
             WcOptionSet_lmw m, WcOptionSet_lmw chars, WcOptionSet_lmw l, WcOptionSet_lmw lines, WcOptionSet_lmw w, WcOptionSet_lmw words,
             boolean useAcronym,

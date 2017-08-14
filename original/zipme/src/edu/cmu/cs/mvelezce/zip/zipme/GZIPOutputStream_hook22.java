@@ -35,7 +35,7 @@ class GZIPOutputStream_hook22 {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 35, thenFeature = "DerivativeCompressGZIPCRC", elseFeature = "DerivativeCompressGZIP")
     void
     execute() {
-        if (FEATUREDerivativeCompressGZIPCRC) {
+        if(FEATUREDerivativeCompressGZIPCRC) {
             execute__role__DerivativeCompressGZIPCRC();
         }
         else {

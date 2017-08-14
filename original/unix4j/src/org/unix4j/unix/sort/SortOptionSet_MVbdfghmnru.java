@@ -23,7 +23,7 @@ public enum SortOptionSet_MVbdfghmnru implements SortOptions {
     Active_bdfmru(
         /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*g:*/SortOptionSet_bdfgmru.Active_bdfgmru, /*generalNumericSort:*/SortOptionSet_bdfgmru.Active_bdfgmru_long, /*h:*/SortOptionSet_bdfhmru.Active_bdfhmru, /*humanNumericSort:*/SortOptionSet_bdfhmru.Active_bdfhmru_long, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/null /*already set*/, /*merge:*/null /*already set*/, /*M:*/SortOptionSet_Mbdfmru.Active_Mbdfmru, /*monthSort:*/SortOptionSet_Mbdfmru.Active_Mbdfmru_long, /*n:*/SortOptionSet_bdfmnru.Active_bdfmnru, /*numericSort:*/SortOptionSet_bdfmnru.Active_bdfmnru_long, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/, /*V:*/SortOptionSet_Vbdfmru.Active_Vbdfmru, /*versionSort:*/SortOptionSet_Vbdfmru.Active_Vbdfmru_long,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.merge, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.merge, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #merge m}, {@link #reverse r}, {@link #unique u}.
@@ -886,6 +886,7 @@ public enum SortOptionSet_MVbdfghmnru implements SortOptions {
     public final SortOptionSet_Vbdfmru versionSort;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_MVbdfghmnru(
             SortOptionSet_MVbdfghmnru d, SortOptionSet_MVbdfghmnru dictionaryOrder, SortOptionSet_bdfgmru g, SortOptionSet_bdfgmru generalNumericSort, SortOptionSet_bdfhmru h, SortOptionSet_bdfhmru humanNumericSort, SortOptionSet_MVbdfghmnru f, SortOptionSet_MVbdfghmnru ignoreCase, SortOptionSet_MVbdfghmnru b, SortOptionSet_MVbdfghmnru ignoreLeadingBlanks, SortOptionSet_MVbdfghmnru m, SortOptionSet_MVbdfghmnru merge, SortOptionSet_Mbdfmru M, SortOptionSet_Mbdfmru monthSort, SortOptionSet_bdfmnru n, SortOptionSet_bdfmnru numericSort, SortOptionSet_MVbdfghmnru r, SortOptionSet_MVbdfghmnru reverse, SortOptionSet_MVbdfghmnru u, SortOptionSet_MVbdfghmnru unique, SortOptionSet_Vbdfmru V, SortOptionSet_Vbdfmru versionSort,
             boolean useAcronym,

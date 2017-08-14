@@ -18,9 +18,7 @@ package kanzi.util.color;
 import kanzi.ColorModelType;
 
 
-
-public interface ColorModelConverter
-{
+public interface ColorModelConverter {
     public boolean convertRGBtoYUV(int[] rgb, int[] y, int[] u, int[] v, ColorModelType type);
 
     public boolean convertYUVtoRGB(int[] y, int[] u, int[] v, int[] rgb, ColorModelType type);

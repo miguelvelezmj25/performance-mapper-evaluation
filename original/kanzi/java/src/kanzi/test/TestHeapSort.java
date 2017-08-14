@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.HeapSort;
 
 
-public class TestHeapSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestHeapSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("HeapSort", new HeapSort(), 20);
         testSpeed("HeapSort", new HeapSort(), 10000);
-    }    
+    }
 }

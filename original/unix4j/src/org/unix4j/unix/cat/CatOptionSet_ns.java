@@ -23,7 +23,7 @@ public enum CatOptionSet_ns implements CatOptions {
     Active_ns(
         /*n:*/null /*already set*/, /*numberLines:*/null /*already set*/, /*s:*/null /*already set*/, /*squeezeEmptyLines:*/null /*already set*/,
             true,
-		/*active:*/CatOption.numberLines, CatOption.squeezeEmptyLines
+        /*active:*/CatOption.numberLines, CatOption.squeezeEmptyLines
     ),
     /**
      * Option set with the following active options: {@link #numberLines n}, {@link #squeezeEmptyLines s}.
@@ -98,6 +98,7 @@ public enum CatOptionSet_ns implements CatOptions {
     public final CatOptionSet_ns squeezeEmptyLines;
     private final boolean useAcronym;
     private final EnumSet<CatOption> options;
+
     private CatOptionSet_ns(
             CatOptionSet_ns n, CatOptionSet_ns numberLines, CatOptionSet_ns s, CatOptionSet_ns squeezeEmptyLines,
             boolean useAcronym,

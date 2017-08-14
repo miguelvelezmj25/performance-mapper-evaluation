@@ -23,7 +23,7 @@ public enum SortOptionSet_bcdfnru implements SortOptions {
     Active_bcdfnru(
         /*c:*/null /*already set*/, /*check:*/null /*already set*/, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*n:*/null /*already set*/, /*numericSort:*/null /*already set*/, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.check, SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.numericSort, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.check, SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.numericSort, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #check c}, {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #numericSort n}, {@link #reverse r}, {@link #unique u}.
@@ -730,6 +730,7 @@ public enum SortOptionSet_bcdfnru implements SortOptions {
     public final SortOptionSet_bcdfnru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_bcdfnru(
             SortOptionSet_bcdfnru c, SortOptionSet_bcdfnru check, SortOptionSet_bcdfnru d, SortOptionSet_bcdfnru dictionaryOrder, SortOptionSet_bcdfnru f, SortOptionSet_bcdfnru ignoreCase, SortOptionSet_bcdfnru b, SortOptionSet_bcdfnru ignoreLeadingBlanks, SortOptionSet_bcdfnru n, SortOptionSet_bcdfnru numericSort, SortOptionSet_bcdfnru r, SortOptionSet_bcdfnru reverse, SortOptionSet_bcdfnru u, SortOptionSet_bcdfnru unique,
             boolean useAcronym,

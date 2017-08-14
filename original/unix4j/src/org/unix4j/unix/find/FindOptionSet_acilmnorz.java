@@ -23,7 +23,7 @@ public enum FindOptionSet_acilmnorz implements FindOptions {
     Active_ilnorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/FindOptionSet_ailnorz.Active_ailnorz, /*timeAccess:*/FindOptionSet_ailnorz.Active_ailnorz_long, /*c:*/FindOptionSet_cilnorz.Active_cilnorz, /*timeCreate:*/FindOptionSet_cilnorz.Active_cilnorz_long, /*m:*/FindOptionSet_ilmnorz.Active_ilmnorz, /*timeModified:*/FindOptionSet_ilmnorz.Active_ilmnorz_long, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*l:*/null /*already set*/, /*typeSymlink:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeSymlink
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeSymlink
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeSymlink l}.
@@ -776,6 +776,7 @@ public enum FindOptionSet_acilmnorz implements FindOptions {
     public final FindOptionSet_acilmnorz typeSymlink;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_acilmnorz(
             FindOptionSet_acilmnorz i, FindOptionSet_acilmnorz ignoreCase, FindOptionSet_acilmnorz z, FindOptionSet_acilmnorz print0, FindOptionSet_acilmnorz r, FindOptionSet_acilmnorz regex, FindOptionSet_ailnorz a, FindOptionSet_ailnorz timeAccess, FindOptionSet_cilnorz c, FindOptionSet_cilnorz timeCreate, FindOptionSet_ilmnorz m, FindOptionSet_ilmnorz timeModified, FindOptionSet_acilmnorz n, FindOptionSet_acilmnorz timeNewer, FindOptionSet_acilmnorz o, FindOptionSet_acilmnorz timeOlder, FindOptionSet_acilmnorz l, FindOptionSet_acilmnorz typeSymlink,
             boolean useAcronym,

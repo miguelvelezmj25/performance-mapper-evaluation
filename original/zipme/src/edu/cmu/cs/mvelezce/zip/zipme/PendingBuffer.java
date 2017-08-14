@@ -14,10 +14,11 @@ package edu.cmu.cs.mvelezce.zip.zipme;
 
 /**
  * This class is general purpose class for writing data to a buffer.
- * It allows you to write bits as well as bytes 
+ * It allows you to write bits as well as bytes
  * Based on DeflaterPending.java
+ *
  * @author Jochen Hoenicke
- * @date Jan 5, 2000 
+ * @date Jan 5, 2000
  */
 class PendingBuffer {
 
@@ -55,7 +56,7 @@ class PendingBuffer {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final void writeByte(int b) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
         buf[end++] = (byte) b;
@@ -64,7 +65,7 @@ class PendingBuffer {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final void writeShort(int s) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
         buf[end++] = (byte) s;
@@ -74,7 +75,7 @@ class PendingBuffer {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final void writeInt(int s) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
         buf[end++] = (byte) s;
@@ -86,7 +87,7 @@ class PendingBuffer {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final void writeBlock(byte[] block, int offset, int len) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
         System.arraycopy(block, offset, buf, end, len);
@@ -101,12 +102,12 @@ class PendingBuffer {
 
 
     public final void alignToByte() {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
-        if (bitCount > 0) {
+        if(bitCount > 0) {
             buf[end++] = (byte) bits;
-            if (bitCount > 8) {
+            if(bitCount > 8) {
                 buf[end++] = (byte) (bits >>> 8);
             }
         }
@@ -116,15 +117,15 @@ class PendingBuffer {
 
 
     public final void writeBits(int b, int count) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             System.err.println("writeBits(" + Integer.toHexString(b) + "," + count + ")");
         }
         bits |= b << bitCount;
         bitCount += count;
-        if (bitCount >= 16) {
+        if(bitCount >= 16) {
             buf[end++] = (byte) bits;
             buf[end++] = (byte) (bits >>> 8);
             bits >>>= 16;
@@ -135,7 +136,7 @@ class PendingBuffer {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final void writeShortMSB(int s) {
-        if (DeflaterConstants.DEBUGGING && start != 0) {
+        if(DeflaterConstants.DEBUGGING && start != 0) {
             throw new IllegalStateException();
         }
         buf[end++] = (byte) (s >> 8);
@@ -152,20 +153,21 @@ class PendingBuffer {
     /**
      * Flushes the pending buffer into the given output array.  If the
      * output array is to small, only a partial flush is done.
+     *
      * @param output the output array;
      * @param offset the offset into output array;
      * @param length the maximum number of bytes to store;
-     * @exception IndexOutOfBoundsException if offset or length are
-     * invalid.
+     * @throws IndexOutOfBoundsException if offset or length are
+     *                                   invalid.
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final int flush(byte[] output, int offset, int length) {
-        if (bitCount >= 8) {
+        if(bitCount >= 8) {
             buf[end++] = (byte) bits;
             bits >>>= 8;
             bitCount -= 8;
         }
-        if (length > end - start) {
+        if(length > end - start) {
             length = end - start;
             System.arraycopy(buf, start, output, offset, length);
             start = 0;
@@ -181,6 +183,7 @@ class PendingBuffer {
 
     /**
      * Flushes the pending buffer and returns that data in a new array
+     *
      * @return the output stream
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")

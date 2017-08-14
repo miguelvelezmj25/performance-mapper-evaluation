@@ -1,8 +1,8 @@
 package se.simbio.encryption;
 
-import java.security.NoSuchAlgorithmException;
-
 import third.part.android.util.Base64;
+
+import java.security.NoSuchAlgorithmException;
 
 /**
  * each method is an example of Encryption
@@ -60,7 +60,7 @@ final class Examples {
                     .setAlgorithm("AES/CBC/PKCS5Padding")
                     .setSecureRandomAlgorithm("SHA1PRNG")
                     .setSecretKeyType("PBKDF2WithHmacSHA1")
-                    .setIv(new byte[] { 29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30 })
+                    .setIv(new byte[]{29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30})
                     .build();
         } catch (NoSuchAlgorithmException e) {
             System.out.println("Something wrong: " + e);

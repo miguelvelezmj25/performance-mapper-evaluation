@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.BucketSort;
 
 
-public class TestBucketSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestBucketSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("BucketSort", new BucketSort(8), 20);
-        testSpeed("BucketSort", new BucketSort(16), 50000);
-    }    
+        testSpeed("BucketSort", new BucketSort(16), 50000, 0xFFFF);
+    }
 }

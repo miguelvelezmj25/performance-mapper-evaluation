@@ -20,20 +20,20 @@ import kanzi.InputBitStream;
 
 
 // Rice-Golomb Coder
-public final class RiceGolombDecoder implements EntropyDecoder
-{
+public final class RiceGolombDecoder implements EntropyDecoder {
     private final boolean signed;
     private final InputBitStream bitstream;
     private final int logBase;
 
-    
-    public RiceGolombDecoder(InputBitStream bitstream, boolean signed, int logBase)
-    {
-        if (bitstream == null)
-           throw new NullPointerException("Invalid null bitstream parameter");
 
-        if ((logBase < 1) || (logBase > 12))
-           throw new IllegalArgumentException("Invalid logBase value (must be in [1..12])");
+    public RiceGolombDecoder(InputBitStream bitstream, boolean signed, int logBase) {
+        if(bitstream == null) {
+            throw new NullPointerException("Invalid null bitstream parameter");
+        }
+
+        if((logBase < 1) || (logBase > 12)) {
+            throw new IllegalArgumentException("Invalid logBase value (must be in [1..12])");
+        }
 
         this.signed = signed;
         this.bitstream = bitstream;
@@ -41,57 +41,53 @@ public final class RiceGolombDecoder implements EntropyDecoder
     }
 
 
-    public boolean isSigned()
-    {
+    public boolean isSigned() {
         return this.signed;
     }
 
 
-    public byte decodeByte()
-    {
-       long q = 0;
+    public byte decodeByte() {
+        long q = 0;
 
-       // quotient is unary encoded
-       while (this.bitstream.readBit() == 0)
-          q++;
+        // quotient is unary encoded
+        while (this.bitstream.readBit() == 0)
+            q++;
 
-       // remainder is binary encoded
-       final long res = (q << this.logBase) | this.bitstream.readBits(this.logBase);
+        // remainder is binary encoded
+        final long res = (q << this.logBase) | this.bitstream.readBits(this.logBase);
 
-       if ((res != 0) && (this.signed == true))
-       {
-          if (this.bitstream.readBit() == 1)
-             return (byte) -res;
-       }
+        if((res != 0) && (this.signed == true)) {
+            if(this.bitstream.readBit() == 1) {
+                return (byte) -res;
+            }
+        }
 
-       return (byte) res;
+        return (byte) res;
     }
 
 
     @Override
-    public InputBitStream getBitStream()
-    {
-       return this.bitstream;
-    }
-
-    
-    @Override
-    public int decode(byte[] array, int blkptr, int len) 
-    {
-      if ((array == null) || (blkptr + len > array.length) || (blkptr < 0) || (len < 0))
-         return -1;
-
-      final int end = blkptr + len;
-
-      for (int i=blkptr; i<end; i++)
-         array[i] = this.decodeByte();
-
-      return len;
+    public InputBitStream getBitStream() {
+        return this.bitstream;
     }
 
 
     @Override
-    public void dispose() 
-    {
+    public int decode(byte[] array, int blkptr, int len) {
+        if((array == null) || (blkptr + len > array.length) || (blkptr < 0) || (len < 0)) {
+            return -1;
+        }
+
+        final int end = blkptr + len;
+
+        for(int i = blkptr; i < end; i++)
+            array[i] = this.decodeByte();
+
+        return len;
+    }
+
+
+    @Override
+    public void dispose() {
     }
 }

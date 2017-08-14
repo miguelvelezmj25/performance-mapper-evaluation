@@ -4,6 +4,8 @@ import edu.cmu.cs.mvelezce.ElevatorSystem.Elevator;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Environment;
 import edu.cmu.cs.mvelezce.ElevatorSystem.Person;
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationManager;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
 import edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation;
 import edu.cmu.cs.mvelezce.verificationClasses.SPLModelChecker;
 
@@ -31,12 +33,19 @@ public class PL_Interface_impl implements PL_Interface {
     @edu.cmu.cs.mvelezce.featureHouse.FeatureAnnotation(name = "base")
     public static void main(String[] args) {
         try {
-            FEATUREBASE = Boolean.valueOf(args[0]);
-            FEATUREWEIGHT = Boolean.valueOf(args[1]);
-            FEATUREEMPTY = Boolean.valueOf(args[2]);
-            FEATURETWOTHIRDSFULL = Boolean.valueOf(args[3]);
-            FEATUREEXECUTIVEFLOOR = Boolean.valueOf(args[4]);
-            FEATUREOVERLOADED = Boolean.valueOf(args[5]);
+            FEATUREBASE = Source.getOptionFEATUREBASE(Boolean.valueOf(args[0]));
+            FEATUREWEIGHT = Source.getOptionFEATUREWEIGHT(Boolean.valueOf(args[1]));
+            FEATUREEMPTY = Source.getOptionFEATUREEMPTY(Boolean.valueOf(args[2]));
+            FEATURETWOTHIRDSFULL = Source.getOptionFEATURETWOTHIRDSFULL(Boolean.valueOf(args[3]));
+            FEATUREEXECUTIVEFLOOR = Source.getOptionFEATUREEXECUTIVEFLOOR(Boolean.valueOf(args[4]));
+            FEATUREOVERLOADED = Source.getOptionFEATUREOVERLOADED(Boolean.valueOf(args[5]));
+
+//            FEATUREBASE = Source.getOptionFEATUREBASE(true);
+//            FEATUREWEIGHT = Source.getOptionFEATUREWEIGHT(true);
+//            FEATUREEMPTY = Source.getOptionFEATUREEMPTY(true);
+//            FEATURETWOTHIRDSFULL = Source.getOptionFEATURETWOTHIRDSFULL(true);
+//            FEATUREEXECUTIVEFLOOR = Source.getOptionFEATUREEXECUTIVEFLOOR(true);
+//            FEATUREOVERLOADED = Source.getOptionFEATUREOVERLOADED(true);
 
 //            FEATUREBASE = false;
 //            FEATUREWEIGHT = false;
@@ -64,7 +73,7 @@ public class PL_Interface_impl implements PL_Interface {
         cleanupTimeShifts = 6 * maxLength; // tests have shown that this is enough
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
-        if(getBoolean()) {
+        if(Sink.getDecision(getBoolean())) {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
@@ -123,13 +132,13 @@ public class PL_Interface_impl implements PL_Interface {
             }
             actionHistory.add(actionName);
             //System.out.println(listToString(actionHistory));
-            if(e.isBlocked()) {
+            if(Sink.getDecision(e.isBlocked())) {
                 //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
         for(counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if(e.isIdle()) {
+            if(Sink.getDecision(e.isIdle())) {
                 return;
             }
             e.timeShift();
@@ -140,7 +149,7 @@ public class PL_Interface_impl implements PL_Interface {
     public static void modifiedrandomSequenceOfActions(int maxLength) {
         Environment env = new Environment(NUM_FLOORS);
         Elevator e;
-        if(getBoolean()) {
+        if(Sink.getDecision(getBoolean())) {
             // elevator from 0 going up
             e = new Elevator(env, verbose);
             actionHistory.add("StartFromBottom");
@@ -168,54 +177,54 @@ public class PL_Interface_impl implements PL_Interface {
             boolean action7 = action6 ? false : getBoolean();
 
 
-            if(counter < maxLength && action0) {
+            if(Sink.getDecision(counter < maxLength && action0)) {
                 a.bobCall();
                 actionHistory.add("bobCall");
                 counter++;
             }
-            if(counter < maxLength && action1) {
+            if(Sink.getDecision(counter < maxLength && action1)) {
                 a.aliceCall();
                 actionHistory.add("aliceCall");
                 counter++;
             }
-            if(counter < maxLength && action2) {
+            if(Sink.getDecision(counter < maxLength && action2)) {
                 a.angelinaCall();
                 actionHistory.add("angelinaCall");
                 counter++;
             }
-            if(counter < maxLength && action3) {
+            if(Sink.getDecision(counter < maxLength && action3)) {
                 a.chuckCall();
                 actionHistory.add("chuckCall");
                 counter++;
             }
-            if(counter < maxLength && action4) {
+            if(Sink.getDecision(counter < maxLength && action4)) {
                 a.monicaCall();
                 actionHistory.add("monicaCall");
                 counter++;
             }
-            if(counter < maxLength && action5) {
+            if(Sink.getDecision(counter < maxLength && action5)) {
                 a.bigMacCall();
                 actionHistory.add("bigMacCall");
                 counter++;
             }
-            if(counter < maxLength && action6) {
+            if(Sink.getDecision(counter < maxLength && action6)) {
                 e.timeShift();
                 actionHistory.add("1TS");
                 counter++;
             } // execute one timestep
-            if(counter < maxLength && action7) {
+            if(Sink.getDecision(counter < maxLength && action7)) {
                 actionHistory.add("3TS");// execute three timesteps
                 for(int i = 0; i < 3; i++) {
                     e.timeShift();
                 }
             }
-            if(e.isBlocked()) {
+            if(Sink.getDecision(e.isBlocked())) {
                 //System.out.println("Stopping Simulation path because Elevator is stuck (overloaded)");
                 return;
             }
         }
         for(counter = 0; counter < cleanupTimeShifts && !e.isBlocked(); counter++) {
-            if(e.isIdle()) {
+            if(Sink.getDecision(e.isIdle())) {
                 return;
             }
             e.timeShift();
@@ -246,7 +255,7 @@ public class PL_Interface_impl implements PL_Interface {
 
     public void start(int specification, int variation) throws Throwable {
         try {
-            if(verbose) {
+            if(Sink.getDecision(verbose)) {
                 System.out.print("Started Elevator PL with Specification " + specification + ", Variation: " + variation);
             }
             test(specification, variation);
@@ -279,7 +288,7 @@ public class PL_Interface_impl implements PL_Interface {
     }
 
     public void test(int specification, int variation) {
-        if(variation < 0) {
+        if(Sink.getDecision(variation < 0)) {
             switch (specification) {
                 case -1:
                     Specification1();

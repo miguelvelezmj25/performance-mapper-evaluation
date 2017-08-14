@@ -23,7 +23,7 @@ public enum UniqOptionSet_dg implements UniqOptions {
     Active_dg(
         /*d:*/null /*already set*/, /*duplicatedOnly:*/null /*already set*/, /*g:*/null /*already set*/, /*global:*/null /*already set*/,
             true,
-		/*active:*/UniqOption.duplicatedOnly, UniqOption.global
+        /*active:*/UniqOption.duplicatedOnly, UniqOption.global
     ),
     /**
      * Option set with the following active options: {@link #duplicatedOnly d}, {@link #global g}.
@@ -100,6 +100,7 @@ public enum UniqOptionSet_dg implements UniqOptions {
     public final UniqOptionSet_dg global;
     private final boolean useAcronym;
     private final EnumSet<UniqOption> options;
+
     private UniqOptionSet_dg(
             UniqOptionSet_dg d, UniqOptionSet_dg duplicatedOnly, UniqOptionSet_dg g, UniqOptionSet_dg global,
             boolean useAcronym,

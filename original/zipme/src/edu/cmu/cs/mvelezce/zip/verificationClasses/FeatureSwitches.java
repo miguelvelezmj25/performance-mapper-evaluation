@@ -63,9 +63,11 @@ public class FeatureSwitches {
     }
 
     public static boolean valid_product() {
-        if ( ( FEATUREBase ) && ( FEATUREZipMeTest ) &&  ( FEATURECompress ) && ( FEATUREExtract ) &&  ( !FEATUREGZIP || FEATURECRC ) && ( FEATURECRC || FEATUREAdlerThreeTwoChecksum) &&  ( !( FEATURECompress && FEATUREAdlerThreeTwoChecksum) ^ FEATUREDerivativeCompressAdlerThreeTwoChecksum) && ( !( FEATURECompress && FEATURECRC ) ^ FEATUREDerivativeCompressCRC ) && ( !( FEATURECompress && FEATUREGZIP ) ^ FEATUREDerivativeCompressGZIP ) && ( !( FEATURECompress && FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeCompressGZIPCRC ) && ( !( FEATUREExtract && FEATURECRC ) ^ FEATUREDerivativeExtractCRC ) && ( !( FEATUREGZIP && FEATURECRC ) ^ FEATUREDerivativeGZIPCRC ))
+        if((FEATUREBase) && (FEATUREZipMeTest) && (FEATURECompress) && (FEATUREExtract) && (!FEATUREGZIP || FEATURECRC) && (FEATURECRC || FEATUREAdlerThreeTwoChecksum) && (!(FEATURECompress && FEATUREAdlerThreeTwoChecksum) ^ FEATUREDerivativeCompressAdlerThreeTwoChecksum) && (!(FEATURECompress && FEATURECRC) ^ FEATUREDerivativeCompressCRC) && (!(FEATURECompress && FEATUREGZIP) ^ FEATUREDerivativeCompressGZIP) && (!(FEATURECompress && FEATUREGZIP && FEATURECRC) ^ FEATUREDerivativeCompressGZIPCRC) && (!(FEATUREExtract && FEATURECRC) ^ FEATUREDerivativeExtractCRC) && (!(FEATUREGZIP && FEATURECRC) ^ FEATUREDerivativeGZIPCRC)) {
             return true;
-        else
+        }
+        else {
             return false;
+        }
     }
 }

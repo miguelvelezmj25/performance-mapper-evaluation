@@ -16,7 +16,6 @@ limitations under the License.
 package kanzi;
 
 
-public interface IntSorter
-{
+public interface IntSorter {
     public boolean sort(int[] array, int idx, int len);
 }

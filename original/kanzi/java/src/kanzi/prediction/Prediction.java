@@ -17,53 +17,51 @@ limitations under the License.
 package kanzi.prediction;
 
 
-public class Prediction
-{
-   public int blockDim;
-   public int sad;
-   public int[] frame;
-   public final int[] residue;
-   public int x;
-   public int y;
+public class Prediction {
+    public final int[] residue;
+    public int blockDim;
+    public int sad;
+    public int[] frame;
+    public int x;
+    public int y;
 
 
-   public Prediction(int maxBlockDim)
-   {
-      if ((maxBlockDim < 4) || (maxBlockDim > 64))
-         throw new IllegalArgumentException("The maximum block dimension must be in the [4..64] range"); // for now
+    public Prediction(int maxBlockDim) {
+        if((maxBlockDim < 4) || (maxBlockDim > 64)) {
+            throw new IllegalArgumentException("The maximum block dimension must be in the [4..64] range"); // for now
+        }
 
-      if ((maxBlockDim & 3) != 0)
-         throw new IllegalArgumentException("The maximum block dimension must be a multiple of 4");
+        if((maxBlockDim & 3) != 0) {
+            throw new IllegalArgumentException("The maximum block dimension must be a multiple of 4");
+        }
 
-      this.residue = new int[maxBlockDim*maxBlockDim];
-      this.blockDim = maxBlockDim;
-   }
+        this.residue = new int[maxBlockDim * maxBlockDim];
+        this.blockDim = maxBlockDim;
+    }
 
 
-   public Prediction(int[] frame, int x, int y, int blockDim)
-   {
-      this.frame = frame;
-      this.x = x;
-      this.y = y;
-      this.residue = new int[blockDim*blockDim];
-      this.blockDim = blockDim;
-   }
-   
-   
-   @Override
-   public String toString() 
-   {
-      StringBuilder sb = new StringBuilder(100);
-      sb.append("{ ");
-      sb.append("\"x\":");
-      sb.append(this.x);
-      sb.append(", \"y\":");
-      sb.append(this.y);
-      sb.append(", \"dim\":");
-      sb.append(this.blockDim);
-      sb.append(", \"SAD\":");
-      sb.append(this.sad);
-      sb.append(" }");
-      return sb.toString();
-   }
+    public Prediction(int[] frame, int x, int y, int blockDim) {
+        this.frame = frame;
+        this.x = x;
+        this.y = y;
+        this.residue = new int[blockDim * blockDim];
+        this.blockDim = blockDim;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(100);
+        sb.append("{ ");
+        sb.append("\"x\":");
+        sb.append(this.x);
+        sb.append(", \"y\":");
+        sb.append(this.y);
+        sb.append(", \"dim\":");
+        sb.append(this.blockDim);
+        sb.append(", \"SAD\":");
+        sb.append(this.sad);
+        sb.append(" }");
+        return sb.toString();
+    }
 }

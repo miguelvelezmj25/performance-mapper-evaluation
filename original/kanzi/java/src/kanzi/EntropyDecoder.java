@@ -16,8 +16,7 @@ limitations under the License.
 package kanzi;
 
 
-public interface EntropyDecoder
-{
+public interface EntropyDecoder {
     // Decode the next chunk of data from the bitstream and return in the
     // provided buffer.
     public int decode(byte[] buffer, int blkptr, int len);

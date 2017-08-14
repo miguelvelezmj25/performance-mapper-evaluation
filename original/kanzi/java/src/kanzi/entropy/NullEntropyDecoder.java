@@ -21,66 +21,61 @@ import kanzi.InputBitStream;
 
 // Null entropy encoder and decoder
 // Pass through that writes the data directly to the bitstream
-public final class NullEntropyDecoder implements EntropyDecoder
-{
+public final class NullEntropyDecoder implements EntropyDecoder {
     private final InputBitStream bitstream;
 
 
-    public NullEntropyDecoder(InputBitStream bitstream)
-    {
-       if (bitstream == null)
-          throw new NullPointerException("Invalid null bitstream parameter");
+    public NullEntropyDecoder(InputBitStream bitstream) {
+        if(bitstream == null) {
+            throw new NullPointerException("Invalid null bitstream parameter");
+        }
 
-       this.bitstream = bitstream;
-    }
-        
-     
-    @Override
-    public int decode(byte[] array, int blkptr, int len)
-    {
-       if ((array == null) || (blkptr + len > array.length) || (blkptr < 0) || (len < 0))
-          return -1;
-
-       final int len8 = len & -8;
-       final int end8 = blkptr + len8;
-       int i = blkptr;
-
-       while (i < end8)
-       {
-          this.decodeLong(array, i);
-          i += 8;
-       }
-
-       while (i < blkptr + len)
-          array[i++] = (byte) this.bitstream.readBits(8);
-
-       return len;
-    }
-
-
-    private void decodeLong(byte[] array, int offset)
-    {
-       final long val = this.bitstream.readBits(64);
-       array[offset]   = (byte) (val >>> 56);
-       array[offset+1] = (byte) (val >>> 48);
-       array[offset+2] = (byte) (val >>> 40);
-       array[offset+3] = (byte) (val >>> 32);
-       array[offset+4] = (byte) (val >>> 24);
-       array[offset+5] = (byte) (val >>> 16);
-       array[offset+6] = (byte) (val >>> 8);
-       array[offset+7] = (byte)  val;
+        this.bitstream = bitstream;
     }
 
 
     @Override
-    public InputBitStream getBitStream()
-    {
-       return this.bitstream;
+    public int decode(byte[] array, int blkptr, int len) {
+        if((array == null) || (blkptr + len > array.length) || (blkptr < 0) || (len < 0)) {
+            return -1;
+        }
+
+        final int len8 = len & -8;
+        final int end8 = blkptr + len8;
+        int i = blkptr;
+
+        while (i < end8) {
+            this.decodeLong(array, i);
+            i += 8;
+        }
+
+        while (i < blkptr + len)
+            array[i++] = (byte) this.bitstream.readBits(8);
+
+        return len;
+    }
+
+
+    private void decodeLong(byte[] array, int offset) {
+        final long val = this.bitstream.readBits(64);
+        array[offset] = (byte) (val >>> 56);
+        array[offset + 1] = (byte) (val >>> 48);
+        array[offset + 2] = (byte) (val >>> 40);
+        array[offset + 3] = (byte) (val >>> 32);
+        array[offset + 4] = (byte) (val >>> 24);
+        array[offset + 5] = (byte) (val >>> 16);
+        array[offset + 6] = (byte) (val >>> 8);
+        array[offset + 7] = (byte) val;
     }
 
 
     @Override
-    public void dispose() 
-    {
+    public InputBitStream getBitStream() {
+        return this.bitstream;
+    }
+
+
+    @Override
+    public void dispose() {
     }
 }

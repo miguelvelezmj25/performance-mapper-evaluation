@@ -15,29 +15,32 @@ limitations under the License.
 
 package kanzi.filter;
 
-import kanzi.SliceIntArray;
 import kanzi.IntFilter;
+import kanzi.SliceIntArray;
 
 
-public class JNI_VideoEffect implements IntFilter
-{
-    static { System.loadLibrary("jniVideoEffect"); }
+public class JNI_VideoEffect implements IntFilter {
+    static {
+        System.loadLibrary("jniVideoEffect");
+    }
 
     private final int width;
     private final int height;
     private final int stride;
 
 
-    public JNI_VideoEffect(int width, int height, int stride)
-    {
-        if (height < 8)
+    public JNI_VideoEffect(int width, int height, int stride) {
+        if(height < 8) {
             throw new IllegalArgumentException("The height must be at least 8");
+        }
 
-        if (width < 8)
+        if(width < 8) {
             throw new IllegalArgumentException("The width must be at least 8");
+        }
 
-        if (stride < 8)
+        if(stride < 8) {
             throw new IllegalArgumentException("The stride must be at least 8");
+        }
 
         this.height = height;
         this.width = width;
@@ -47,15 +50,15 @@ public class JNI_VideoEffect implements IntFilter
 
     // Implement the filter in C/C++/ASM
     public native boolean native_apply(int width, int height, int stride,
-            int[] src, int srcIdx, int[] dst, int dstIdx);
+                                       int[] src, int srcIdx, int[] dst, int dstIdx);
 
 
     @Override
-    public boolean apply(SliceIntArray input, SliceIntArray output)
-    {
-        if ((!SliceIntArray.isValid(input)) || (!SliceIntArray.isValid(output)))
-           return false;
-      
+    public boolean apply(SliceIntArray input, SliceIntArray output) {
+        if((!SliceIntArray.isValid(input)) || (!SliceIntArray.isValid(output))) {
+            return false;
+        }
+
         return native_apply(this.width, this.height, this.stride, input.array, input.index,
                 output.array, output.index);
     }

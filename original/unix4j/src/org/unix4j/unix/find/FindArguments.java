@@ -1,5 +1,6 @@
 package org.unix4j.unix.find;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.command.Arguments;
 import org.unix4j.context.ExecutionContext;
 import org.unix4j.convert.ValueConverter;
@@ -56,7 +57,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @throws NullPointerException if the argument is null
      */
     public FindArguments(FindOptions options) {
-        if(options == null) {
+        if(Sink.getDecision(options == null)) {
             throw new NullPointerException("options argument cannot be null");
         }
         this.options = options;
@@ -76,7 +77,7 @@ public final class FindArguments implements Arguments<FindArguments> {
     }
 
     private static String toString(Object value) {
-        if(value != null && value.getClass().isArray()) {
+        if(Sink.getDecision(value != null && value.getClass().isArray())) {
             return ArrayUtil.toString(value);
         }
         return String.valueOf(value);
@@ -96,7 +97,7 @@ public final class FindArguments implements Arguments<FindArguments> {
         final Object[] resolved = new Object[unresolved.length];
         for(int i = 0; i < resolved.length; i++) {
             final String expression = unresolved[i];
-            if(Arg.isVariable(expression)) {
+            if(Sink.getDecision(Arg.isVariable(expression))) {
                 resolved[i] = resolveVariable(context, expression);
             }
             else {
@@ -107,7 +108,7 @@ public final class FindArguments implements Arguments<FindArguments> {
     }
 
     private <V> V convertList(ExecutionContext context, String operandName, Class<V> operandType, List<Object> values) {
-        if(values.size() == 1) {
+        if(Sink.getDecision(values.size() == 1)) {
             final Object value = values.get(0);
             return convert(context, operandName, operandType, value);
         }
@@ -116,7 +117,7 @@ public final class FindArguments implements Arguments<FindArguments> {
 
     private Object resolveVariable(VariableContext context, String variable) {
         final Object value = context.getValue(variable);
-        if(value != null) {
+        if(Sink.getDecision(value != null)) {
             return value;
         }
         throw new IllegalArgumentException("cannot resolve variable " + variable +
@@ -126,18 +127,18 @@ public final class FindArguments implements Arguments<FindArguments> {
     private <V> V convert(ExecutionContext context, String operandName, Class<V> operandType, Object value) {
         final ValueConverter<V> converter = context.getValueConverterFor(operandType);
         final V convertedValue;
-        if(converter != null) {
+        if(Sink.getDecision(converter != null)) {
             convertedValue = converter.convert(value);
         }
         else {
-            if(FindOptions.class.equals(operandType)) {
+            if(Sink.getDecision(FindOptions.class.equals(operandType))) {
                 convertedValue = operandType.cast(FindOptions.CONVERTER.convert(value));
             }
             else {
                 convertedValue = null;
             }
         }
-        if(convertedValue != null) {
+        if(Sink.getDecision(convertedValue != null)) {
             return convertedValue;
         }
         throw new IllegalArgumentException("cannot convert --" + operandName +
@@ -147,10 +148,10 @@ public final class FindArguments implements Arguments<FindArguments> {
 
     @Override
     public FindArguments getForContext(ExecutionContext context) {
-        if(context == null) {
+        if(Sink.getDecision(context == null)) {
             throw new NullPointerException("context cannot be null");
         }
-        if(!argsIsSet || args.length == 0) {
+        if(Sink.getDecision(!argsIsSet || args.length == 0)) {
             //nothing to resolve
             return this;
         }
@@ -158,7 +159,7 @@ public final class FindArguments implements Arguments<FindArguments> {
         //check if there is at least one variable
         boolean hasVariable = false;
         for(final String arg : args) {
-            if(arg != null && arg.startsWith("$")) {
+            if(Sink.getDecision(arg != null && arg.startsWith("$"))) {
                 hasVariable = true;
                 break;
             }
@@ -172,30 +173,30 @@ public final class FindArguments implements Arguments<FindArguments> {
         final FindOptions.Default options = new FindOptions.Default();
         final FindArguments argsForContext = new FindArguments(options);
         for(final Map.Entry<String, List<Object>> e : map.entrySet()) {
-            if("path".equals(e.getKey())) {
+            if(Sink.getDecision("path".equals(e.getKey()))) {
 
                 final String value = convertList(context, "path", String.class, e.getValue());
                 argsForContext.setPath(value);
             }
-            else if("name".equals(e.getKey())) {
+            else if(Sink.getDecision("name".equals(e.getKey()))) {
 
                 final String value = convertList(context, "name", String.class, e.getValue());
                 argsForContext.setName(value);
             }
-            else if("size".equals(e.getKey())) {
+            else if(Sink.getDecision("size".equals(e.getKey()))) {
 
                 final long value = convertList(context, "size", long.class, e.getValue());
                 argsForContext.setSize(value);
             }
-            else if("time".equals(e.getKey())) {
+            else if(Sink.getDecision("time".equals(e.getKey()))) {
 
                 final java.util.Date value = convertList(context, "time", java.util.Date.class, e.getValue());
                 argsForContext.setTime(value);
             }
-            else if("args".equals(e.getKey())) {
+            else if(Sink.getDecision("args".equals(e.getKey()))) {
                 throw new IllegalStateException("invalid operand '" + e.getKey() + "' in find command args: " + Arrays.toString(args));
             }
-            else if("options".equals(e.getKey())) {
+            else if(Sink.getDecision("options".equals(e.getKey()))) {
 
                 final FindOptions value = convertList(context, "options", FindOptions.class, e.getValue());
                 options.setAll(value);
@@ -217,7 +218,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @see #getPath(ExecutionContext)
      */
     public String getPath() {
-        if(pathIsSet) {
+        if(Sink.getDecision(pathIsSet)) {
             return path;
         }
         throw new IllegalStateException("operand has not been set: " + path);
@@ -247,7 +248,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      */
     public String getPath(ExecutionContext context) {
         final String value = getPath();
-        if(Arg.isVariable(value)) {
+        if(Sink.getDecision(Arg.isVariable(value))) {
             final Object resolved = resolveVariable(context.getVariableContext(), value);
             final String converted = convert(context, "path", String.class, resolved);
             return converted;
@@ -279,7 +280,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @see #getName(ExecutionContext)
      */
     public String getName() {
-        if(nameIsSet) {
+        if(Sink.getDecision(nameIsSet)) {
             return name;
         }
         throw new IllegalStateException("operand has not been set: " + name);
@@ -311,7 +312,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      */
     public String getName(ExecutionContext context) {
         final String value = getName();
-        if(Arg.isVariable(value)) {
+        if(Sink.getDecision(Arg.isVariable(value))) {
             final Object resolved = resolveVariable(context.getVariableContext(), value);
             final String converted = convert(context, "name", String.class, resolved);
             return converted;
@@ -341,7 +342,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @throws IllegalStateException if this operand has never been set
      */
     public long getSize() {
-        if(sizeIsSet) {
+        if(Sink.getDecision(sizeIsSet)) {
             return size;
         }
         throw new IllegalStateException("operand has not been set: " + size);
@@ -381,7 +382,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @throws IllegalStateException if this operand has never been set
      */
     public java.util.Date getTime() {
-        if(timeIsSet) {
+        if(Sink.getDecision(timeIsSet)) {
             return time;
         }
         throw new IllegalStateException("operand has not been set: " + time);
@@ -423,7 +424,7 @@ public final class FindArguments implements Arguments<FindArguments> {
      * @throws IllegalStateException if this operand has never been set
      */
     public String[] getArgs() {
-        if(argsIsSet) {
+        if(Sink.getDecision(argsIsSet)) {
             return args;
         }
         throw new IllegalStateException("operand has not been set: " + args);
@@ -612,9 +613,9 @@ public final class FindArguments implements Arguments<FindArguments> {
         // ok, we have options or arguments or both
         final StringBuilder sb = new StringBuilder();
 
-        if(argsIsSet) {
+        if(Sink.getDecision(argsIsSet)) {
             for(String arg : args) {
-                if(sb.length() > 0) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append(arg);
@@ -623,44 +624,44 @@ public final class FindArguments implements Arguments<FindArguments> {
         else {
 
             // first the options
-            if(options.size() > 0) {
+            if(Sink.getDecision(options.size() > 0)) {
                 sb.append(DefaultOptionSet.toString(options));
             }
             // operand: <path>
-            if(pathIsSet) {
-                if(sb.length() > 0) {
+            if(Sink.getDecision(pathIsSet)) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append("--").append("path");
                 sb.append(" ").append(toString(getPath()));
             }
             // operand: <name>
-            if(nameIsSet) {
-                if(sb.length() > 0) {
+            if(Sink.getDecision(nameIsSet)) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append("--").append("name");
                 sb.append(" ").append(toString(getName()));
             }
             // operand: <size>
-            if(sizeIsSet) {
-                if(sb.length() > 0) {
+            if(Sink.getDecision(sizeIsSet)) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append("--").append("size");
                 sb.append(" ").append(toString(getSize()));
             }
             // operand: <time>
-            if(timeIsSet) {
-                if(sb.length() > 0) {
+            if(Sink.getDecision(timeIsSet)) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append("--").append("time");
                 sb.append(" ").append(toString(getTime()));
             }
             // operand: <args>
-            if(argsIsSet) {
-                if(sb.length() > 0) {
+            if(Sink.getDecision(argsIsSet)) {
+                if(Sink.getDecision(sb.length() > 0)) {
                     sb.append(' ');
                 }
                 sb.append("--").append("args");

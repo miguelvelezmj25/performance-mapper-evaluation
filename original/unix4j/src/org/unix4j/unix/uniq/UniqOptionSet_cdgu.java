@@ -23,7 +23,7 @@ public enum UniqOptionSet_cdgu implements UniqOptions {
     Active_g(
         /*c:*/UniqOptionSet_cg.Active_cg, /*count:*/UniqOptionSet_cg.Active_cg_long, /*d:*/UniqOptionSet_dg.Active_dg, /*duplicatedOnly:*/UniqOptionSet_dg.Active_dg_long, /*g:*/null /*already set*/, /*global:*/null /*already set*/, /*u:*/UniqOptionSet_gu.Active_gu, /*uniqueOnly:*/UniqOptionSet_gu.Active_gu_long,
             true,
-		/*active:*/UniqOption.global
+        /*active:*/UniqOption.global
     ),
     /**
      * Option set with the following active options: {@link #global g}.
@@ -130,6 +130,7 @@ public enum UniqOptionSet_cdgu implements UniqOptions {
     public final UniqOptionSet_gu uniqueOnly;
     private final boolean useAcronym;
     private final EnumSet<UniqOption> options;
+
     private UniqOptionSet_cdgu(
             UniqOptionSet_cg c, UniqOptionSet_cg count, UniqOptionSet_dg d, UniqOptionSet_dg duplicatedOnly, UniqOptionSet_cdgu g, UniqOptionSet_cdgu global, UniqOptionSet_gu u, UniqOptionSet_gu uniqueOnly,
             boolean useAcronym,

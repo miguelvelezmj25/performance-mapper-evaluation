@@ -23,7 +23,7 @@ public enum UniqOptionSet_gu implements UniqOptions {
     Active_gu(
         /*g:*/null /*already set*/, /*global:*/null /*already set*/, /*u:*/null /*already set*/, /*uniqueOnly:*/null /*already set*/,
             true,
-		/*active:*/UniqOption.global, UniqOption.uniqueOnly
+        /*active:*/UniqOption.global, UniqOption.uniqueOnly
     ),
     /**
      * Option set with the following active options: {@link #global g}, {@link #uniqueOnly u}.
@@ -100,6 +100,7 @@ public enum UniqOptionSet_gu implements UniqOptions {
     public final UniqOptionSet_gu uniqueOnly;
     private final boolean useAcronym;
     private final EnumSet<UniqOption> options;
+
     private UniqOptionSet_gu(
             UniqOptionSet_gu g, UniqOptionSet_gu global, UniqOptionSet_gu u, UniqOptionSet_gu uniqueOnly,
             boolean useAcronym,

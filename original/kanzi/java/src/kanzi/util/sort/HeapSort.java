@@ -21,95 +21,86 @@ import kanzi.IntSorter;
 
 // HeapSort is a comparison sort with O(n ln n) complexity. Practically, it is
 // usually slower than QuickSort.
-public final class HeapSort implements IntSorter
-{
+public final class HeapSort implements IntSorter {
     private final ArrayComparator cmp;
 
 
-    public HeapSort()
-    {
+    public HeapSort() {
         this(null);
     }
 
 
-    public HeapSort(ArrayComparator cmp)
-    {
+    public HeapSort(ArrayComparator cmp) {
         this.cmp = cmp;
     }
 
+    private static void doSort(int[] array, int blkptr, int idx, int count,
+                               ArrayComparator cmp) {
+        int k = idx;
+        final int temp = array[blkptr + k - 1];
+        final int n = count >> 1;
 
-    protected ArrayComparator getComparator()
-    {
+        if(cmp != null) {
+            while (k <= n) {
+                int j = k << 1;
+
+                if((j < count) && (cmp.compare(array[blkptr + j - 1], array[blkptr + j]) < 0)) {
+                    j++;
+                }
+
+                if(temp >= array[blkptr + j - 1]) {
+                    break;
+                }
+
+                array[blkptr + k - 1] = array[blkptr + j - 1];
+                k = j;
+            }
+        }
+        else {
+            while (k <= n) {
+                int j = k << 1;
+
+                if((j < count) && (array[blkptr + j - 1] < array[blkptr + j])) {
+                    j++;
+                }
+
+                if(temp >= array[blkptr + j - 1]) {
+                    break;
+                }
+
+                array[blkptr + k - 1] = array[blkptr + j - 1];
+                k = j;
+            }
+        }
+
+        array[blkptr + k - 1] = temp;
+    }
+
+    protected ArrayComparator getComparator() {
         return this.cmp;
     }
 
-    
     @Override
-    public boolean sort(int[] input, int blkptr, int len)
-    {
-        if ((blkptr < 0) || (len <= 0) || (blkptr+len > input.length))
+    public boolean sort(int[] input, int blkptr, int len) {
+        if((blkptr < 0) || (len <= 0) || (blkptr + len > input.length)) {
             return false;
+        }
 
-        if (len == 1)
-           return true;
-        
-        for (int k=len>>1; k>0; k--)
-        {
+        if(len == 1) {
+            return true;
+        }
+
+        for(int k = len >> 1; k > 0; k--) {
             doSort(input, blkptr, k, len, this.cmp);
         }
 
-        for (int i=len-1; i>0; i--)
-        {
+        for(int i = len - 1; i > 0; i--) {
             final int temp = input[blkptr];
-            input[blkptr] = input[blkptr+i];
-            input[blkptr+i] = temp;
+            input[blkptr] = input[blkptr + i];
+            input[blkptr + i] = temp;
             doSort(input, blkptr, 1, i, this.cmp);
         }
-        
+
         return true;
-    }
-
-
-    private static void doSort(int[] array, int blkptr, int idx, int count,
-            ArrayComparator cmp)
-    {
-        int k = idx;
-        final int temp = array[blkptr+k-1];
-        final int n = count >> 1;
-
-        if (cmp != null)
-        {
-           while (k <= n)
-           {
-               int j = k << 1;
-
-               if ((j < count) && (cmp.compare(array[blkptr+j-1], array[blkptr+j]) < 0))
-                   j++;
-
-               if (temp >= array[blkptr+j-1])
-                   break;
-
-               array[blkptr+k-1] = array[blkptr+j-1];
-               k = j;
-           }
-        }
-        else
-        {
-           while (k <= n)
-           {
-               int j = k << 1;
-
-               if ((j < count) && (array[blkptr+j-1] < array[blkptr+j]))
-                   j++;
-
-               if (temp >= array[blkptr+j-1])
-                   break;
-
-               array[blkptr+k-1] = array[blkptr+j-1];
-               k = j;
-           }
-        }
-
-        array[blkptr+k-1] = temp;
     }
 }

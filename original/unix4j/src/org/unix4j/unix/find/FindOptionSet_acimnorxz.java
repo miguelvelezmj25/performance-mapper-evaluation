@@ -23,7 +23,7 @@ public enum FindOptionSet_acimnorxz implements FindOptions {
     Active_inorxz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/FindOptionSet_ainorxz.Active_ainorxz, /*timeAccess:*/FindOptionSet_ainorxz.Active_ainorxz_long, /*c:*/FindOptionSet_cinorxz.Active_cinorxz, /*timeCreate:*/FindOptionSet_cinorxz.Active_cinorxz_long, /*m:*/FindOptionSet_imnorxz.Active_imnorxz, /*timeModified:*/FindOptionSet_imnorxz.Active_imnorxz_long, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*x:*/null /*already set*/, /*typeOther:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeOther
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeOther
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeOther x}.
@@ -778,6 +778,7 @@ public enum FindOptionSet_acimnorxz implements FindOptions {
     public final FindOptionSet_acimnorxz typeOther;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_acimnorxz(
             FindOptionSet_acimnorxz i, FindOptionSet_acimnorxz ignoreCase, FindOptionSet_acimnorxz z, FindOptionSet_acimnorxz print0, FindOptionSet_acimnorxz r, FindOptionSet_acimnorxz regex, FindOptionSet_ainorxz a, FindOptionSet_ainorxz timeAccess, FindOptionSet_cinorxz c, FindOptionSet_cinorxz timeCreate, FindOptionSet_imnorxz m, FindOptionSet_imnorxz timeModified, FindOptionSet_acimnorxz n, FindOptionSet_acimnorxz timeNewer, FindOptionSet_acimnorxz o, FindOptionSet_acimnorxz timeOlder, FindOptionSet_acimnorxz x, FindOptionSet_acimnorxz typeOther,
             boolean useAcronym,

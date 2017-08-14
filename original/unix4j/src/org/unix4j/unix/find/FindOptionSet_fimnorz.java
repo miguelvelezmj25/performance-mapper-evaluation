@@ -23,7 +23,7 @@ public enum FindOptionSet_fimnorz implements FindOptions {
     Active_fimnorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*m:*/null /*already set*/, /*timeModified:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*f:*/null /*already set*/, /*typeFile:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeModified, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeFile
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeModified, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeFile
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeModified m}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeFile f}.
@@ -724,6 +724,7 @@ public enum FindOptionSet_fimnorz implements FindOptions {
     public final FindOptionSet_fimnorz typeFile;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_fimnorz(
             FindOptionSet_fimnorz i, FindOptionSet_fimnorz ignoreCase, FindOptionSet_fimnorz z, FindOptionSet_fimnorz print0, FindOptionSet_fimnorz r, FindOptionSet_fimnorz regex, FindOptionSet_fimnorz m, FindOptionSet_fimnorz timeModified, FindOptionSet_fimnorz n, FindOptionSet_fimnorz timeNewer, FindOptionSet_fimnorz o, FindOptionSet_fimnorz timeOlder, FindOptionSet_fimnorz f, FindOptionSet_fimnorz typeFile,
             boolean useAcronym,

@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce.zip;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation;
 import edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID;
 import edu.cmu.cs.mvelezce.zip.zipme.*;
@@ -32,7 +33,7 @@ public class ZipTest {
     @FeatureAnnotation(name = "GZIP")
     private static DeflaterOutputStream getZipOutStream__role__GZIP(OutputStream out, File forFile) throws IOException {
         return new GZIPOutputStream(out);
-		/*
+        /*
 		ZipOutputStream zos = new ZipOutputStream(out);
 		zos.putNextEntry((new ZipEntry(forFile.getPath())));
 		return zos;*/
@@ -44,7 +45,7 @@ public class ZipTest {
     @FeatureSwitchID(id = 1, thenFeature = "GZIP", elseFeature = "ZipMeTest")
     private static DeflaterOutputStream
     getZipOutStream(OutputStream out, File forFile) throws IOException {
-        if (FEATUREGZIP) {
+        if(Sink.getDecision(FEATUREGZIP)) {
             return getZipOutStream__role__GZIP(out, forFile);
         }
         else {
@@ -58,7 +59,7 @@ public class ZipTest {
         //return new GZIPInputStream(in);
         ZipInputStream zi = new ZipInputStream(in);
         ZipEntry entry = zi.getNextEntry();
-        if (entry != null) {
+        if(Sink.getDecision(entry != null)) {
             //System.out.println("opening entry: " + entry.getName());
         }
         else {
@@ -79,7 +80,7 @@ public class ZipTest {
     @FeatureSwitchID(id = 2, thenFeature = "GZIP", elseFeature = "ZipMeTest")
     private static InflaterInputStream
     getZipInStream(InputStream in) throws IOException {
-        if (FEATUREGZIP) {
+        if(Sink.getDecision(FEATUREGZIP)) {
             return getZipInStream__role__GZIP(in);
         }
         else {
@@ -91,7 +92,7 @@ public class ZipTest {
     @FeatureAnnotation(name = "ZipMeTest")
     public static void main(String[] argv) throws IOException {
         String message = "Hallo\n";
-        if (argv.length > 0) {
+        if(Sink.getDecision(argv.length > 0)) {
             message = argv[0];
         }
         final ArrayList<Integer> fileBuffer = new ArrayList<Integer>(5000);
@@ -108,7 +109,7 @@ public class ZipTest {
 
                         @Override
                         public void write(byte[] b) throws IOException {
-                            for (int i = 0; i < b.length; i++) {
+                            for(int i = 0; i < b.length; i++) {
                                 int input = b[i];
                                 input = input & 0xff;
                                 fileBuffer.add(input);
@@ -116,7 +117,7 @@ public class ZipTest {
                         }
                     }, fileToZip);
             byte[] buffer1 = new byte[0xFFFF];
-            for (int len; (len = inStream1.read(buffer1)) != -1; ) {
+            for(int len; (len = inStream1.read(buffer1)) != -1; ) {
                 outStream1.write(buffer1, 0, len);
             }
             inStream1.close();
@@ -130,7 +131,7 @@ public class ZipTest {
 
                 @Override
                 public int read() throws IOException {
-                    if (index < fileBuffer.size()) {
+                    if(Sink.getDecision(index < fileBuffer.size())) {
                         int b = fileBuffer.get(index);
                         //System.out.println("index = " + index + " read byte " + b);
                         index++;
@@ -144,7 +145,7 @@ public class ZipTest {
             //System.out.println("before reading");
             String contents = "";
             byte[] buffer2 = new byte[0xFFFF];
-            for (int len; (len = inStream2.read(buffer2)) != -1; ) {
+            for(int len; (len = inStream2.read(buffer2)) != -1; ) {
 
                 contents += new String(buffer2, 0, len);
             }

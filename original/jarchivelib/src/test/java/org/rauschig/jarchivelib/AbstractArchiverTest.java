@@ -1,39 +1,41 @@
 /**
- *    Copyright 2013 Thomas Rausch
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2013 Thomas Rausch
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.rauschig.jarchivelib;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public abstract class AbstractArchiverTest extends AbstractResourceTest {
 
     private Archiver archiver;
 
     private File archive;
+
+    protected static void assertExtractionWasSuccessful() throws Exception {
+        assertDirectoryStructureEquals(ARCHIVE_DIR, ARCHIVE_EXTRACT_DIR);
+        assertFilesEquals(ARCHIVE_DIR, ARCHIVE_EXTRACT_DIR);
+    }
 
     @Before
     public void setUp() {
@@ -59,6 +61,18 @@ public abstract class AbstractArchiverTest extends AbstractResourceTest {
     }
 
     @Test
+    public void extract_properlyExtractsArchiveStream() throws Exception {
+        InputStream archiveAsStream = null;
+        try {
+            archiveAsStream = new FileInputStream(archive);
+            archiver.extract(archiveAsStream, ARCHIVE_EXTRACT_DIR);
+            assertExtractionWasSuccessful();
+        } finally {
+            IOUtils.closeQuietly(archiveAsStream);
+        }
+    }
+
+    @Test
     public void create_recursiveDirectory_withFileExtension_properlyCreatesArchive() throws Exception {
         String archiveName = archive.getName();
 
@@ -69,6 +83,19 @@ public abstract class AbstractArchiverTest extends AbstractResourceTest {
 
         archiver.extract(createdArchive, ARCHIVE_EXTRACT_DIR);
         assertExtractionWasSuccessful();
+    }
+
+    @Test
+    public void create_multipleSourceFiles_properlyCreatesArchive() throws Exception {
+        String archiveName = archive.getName();
+
+        File createdArchive = archiver.create(archiveName, ARCHIVE_CREATE_DIR, ARCHIVE_DIR.listFiles());
+
+        assertTrue(createdArchive.exists());
+        assertEquals(archiveName, createdArchive.getName());
+
+        archiver.extract(createdArchive, ARCHIVE_EXTRACT_DIR);
+        assertDirectoryStructureEquals(ARCHIVE_DIR, ARCHIVE_EXTRACT_DIR);
     }
 
     @Test
@@ -154,6 +181,68 @@ public abstract class AbstractArchiverTest extends AbstractResourceTest {
     }
 
     @Test
+    public void entry_isDirectory_behavesCorrectly() throws Exception {
+        ArchiveStream stream = null;
+        try {
+            stream = archiver.stream(archive);
+            ArchiveEntry entry;
+
+            while ((entry = stream.getNextEntry()) != null) {
+                String name = entry.getName().replaceAll("/$", ""); // remove trailing slashes for test compatibility
+
+                if(name.endsWith("folder") || name.endsWith("subfolder") || name.endsWith("permissions")
+                        || name.endsWith("private_folder")) {
+                    assertTrue(entry.getName() + " is a directory", entry.isDirectory());
+                }
+                else {
+                    assertFalse(entry.getName() + " is not a directory", entry.isDirectory());
+                }
+            }
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    @Test
+    public void entry_geSize_behavesCorrectly() throws Exception {
+        ArchiveStream stream = null;
+        try {
+            stream = archiver.stream(archive);
+            ArchiveEntry entry;
+
+            while ((entry = stream.getNextEntry()) != null) {
+                String name = entry.getName().replaceAll("/$", ""); // remove trailing slashes for test compatibility
+
+                if(name.endsWith("folder") || name.endsWith("subfolder") || name.endsWith("permissions")
+                        || name.endsWith("private_folder")) {
+                    assertEquals(0, entry.getSize());
+                }
+                else {
+                    assertNotEquals(0, entry.getSize());
+                }
+            }
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    @Test
+    public void entry_getLastModifiedDate_behavesCorrectly() throws Exception {
+        ArchiveStream stream = null;
+        try {
+            stream = archiver.stream(archive);
+            ArchiveEntry entry;
+
+            while ((entry = stream.getNextEntry()) != null) {
+                assertNotNull(entry.getLastModifiedDate());
+                assertTrue("modification date should be before now", new Date().after(entry.getLastModifiedDate()));
+            }
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    @Test
     public void stream_extractEveryEntryWorks() throws Exception {
         ArchiveStream stream = null;
         try {
@@ -204,11 +293,6 @@ public abstract class AbstractArchiverTest extends AbstractResourceTest {
         }
 
         entry.extract(ARCHIVE_EXTRACT_DIR);
-    }
-
-    protected static void assertExtractionWasSuccessful() throws Exception {
-        assertDirectoryStructureEquals(ARCHIVE_DIR, ARCHIVE_EXTRACT_DIR);
-        assertFilesEquals(ARCHIVE_DIR, ARCHIVE_EXTRACT_DIR);
     }
 
 }

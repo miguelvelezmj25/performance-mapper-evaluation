@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.QuickSort;
 
 
-public class TestQuickSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestQuickSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("QuickSort", new QuickSort(), 20);
         testSpeed("QuickSort", new QuickSort(), 10000);
-    }    
+    }
 }

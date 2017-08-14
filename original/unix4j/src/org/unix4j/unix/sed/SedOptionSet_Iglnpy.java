@@ -23,7 +23,7 @@ public enum SedOptionSet_Iglnpy implements SedOptions {
     Active_Iglnpy(
         /*g:*/null /*already set*/, /*global:*/null /*already set*/, /*I:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*l:*/null /*already set*/, /*lineNumber:*/null /*already set*/, /*p:*/null /*already set*/, /*print:*/null /*already set*/, /*n:*/null /*already set*/, /*quiet:*/null /*already set*/, /*y:*/null /*already set*/, /*translate:*/null /*already set*/,
             true,
-		/*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet, SedOption.translate
+        /*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet, SedOption.translate
     ),
     /**
      * Option set with the following active options: {@link #global g}, {@link #ignoreCase I}, {@link #lineNumber l}, {@link #print p}, {@link #quiet n}, {@link #translate y}.
@@ -682,6 +682,7 @@ public enum SedOptionSet_Iglnpy implements SedOptions {
     public final SedOptionSet_Iglnpy translate;
     private final boolean useAcronym;
     private final EnumSet<SedOption> options;
+
     private SedOptionSet_Iglnpy(
             SedOptionSet_Iglnpy g, SedOptionSet_Iglnpy global, SedOptionSet_Iglnpy I, SedOptionSet_Iglnpy ignoreCase, SedOptionSet_Iglnpy l, SedOptionSet_Iglnpy lineNumber, SedOptionSet_Iglnpy p, SedOptionSet_Iglnpy print, SedOptionSet_Iglnpy n, SedOptionSet_Iglnpy quiet, SedOptionSet_Iglnpy y, SedOptionSet_Iglnpy translate,
             boolean useAcronym,

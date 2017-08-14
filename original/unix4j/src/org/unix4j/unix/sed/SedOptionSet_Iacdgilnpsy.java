@@ -23,7 +23,7 @@ public enum SedOptionSet_Iacdgilnpsy implements SedOptions {
     Active_Iglnp(
         /*a:*/SedOptionSet_Iaglnp.Active_Iaglnp, /*append:*/SedOptionSet_Iaglnp.Active_Iaglnp_long, /*c:*/SedOptionSet_Icglnp.Active_Icglnp, /*change:*/SedOptionSet_Icglnp.Active_Icglnp_long, /*d:*/SedOptionSet_Idglnp.Active_Idglnp, /*delete:*/SedOptionSet_Idglnp.Active_Idglnp_long, /*g:*/null /*already set*/, /*global:*/null /*already set*/, /*I:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*i:*/SedOptionSet_Igilnp.Active_Igilnp, /*insert:*/SedOptionSet_Igilnp.Active_Igilnp_long, /*l:*/null /*already set*/, /*lineNumber:*/null /*already set*/, /*p:*/null /*already set*/, /*print:*/null /*already set*/, /*n:*/null /*already set*/, /*quiet:*/null /*already set*/, /*s:*/SedOptionSet_Iglnps.Active_Iglnps, /*substitute:*/SedOptionSet_Iglnps.Active_Iglnps_long, /*y:*/SedOptionSet_Iglnpy.Active_Iglnpy, /*translate:*/SedOptionSet_Iglnpy.Active_Iglnpy_long,
             true,
-		/*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet
+        /*active:*/SedOption.global, SedOption.ignoreCase, SedOption.lineNumber, SedOption.print, SedOption.quiet
     ),
     /**
      * Option set with the following active options: {@link #global g}, {@link #ignoreCase I}, {@link #lineNumber l}, {@link #print p}, {@link #quiet n}.
@@ -800,6 +800,7 @@ public enum SedOptionSet_Iacdgilnpsy implements SedOptions {
     public final SedOptionSet_Iglnpy translate;
     private final boolean useAcronym;
     private final EnumSet<SedOption> options;
+
     private SedOptionSet_Iacdgilnpsy(
             SedOptionSet_Iaglnp a, SedOptionSet_Iaglnp append, SedOptionSet_Icglnp c, SedOptionSet_Icglnp change, SedOptionSet_Idglnp d, SedOptionSet_Idglnp delete, SedOptionSet_Iacdgilnpsy g, SedOptionSet_Iacdgilnpsy global, SedOptionSet_Iacdgilnpsy I, SedOptionSet_Iacdgilnpsy ignoreCase, SedOptionSet_Igilnp i, SedOptionSet_Igilnp insert, SedOptionSet_Iacdgilnpsy l, SedOptionSet_Iacdgilnpsy lineNumber, SedOptionSet_Iacdgilnpsy p, SedOptionSet_Iacdgilnpsy print, SedOptionSet_Iacdgilnpsy n, SedOptionSet_Iacdgilnpsy quiet, SedOptionSet_Iglnps s, SedOptionSet_Iglnps substitute, SedOptionSet_Iglnpy y, SedOptionSet_Iglnpy translate,
             boolean useAcronym,

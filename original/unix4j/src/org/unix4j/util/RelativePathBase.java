@@ -125,6 +125,7 @@ public class RelativePathBase {
     };
     private final File base;
     private final Settings settings;
+
     /**
      * Constructor with base directory for relative paths using {@link #DEFAULT}
      * settings to construct relative paths.

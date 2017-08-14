@@ -1,6 +1,7 @@
 package com.googlecode.pngtastic.core;
 
 import com.googlecode.pngtastic.core.processing.*;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
@@ -37,7 +38,7 @@ public abstract class PngProcessor {
         final PngByteArrayOutputStream imageBytes = new PngByteArrayOutputStream(chunk == null ? 0 : chunk.getLength());
         try (final DataOutputStream imageData = new DataOutputStream(imageBytes)) {
             while (chunk != null) {
-                if(PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
+                if(Sink.getDecision1(PngChunk.IMAGE_DATA.equals(chunk.getTypeString()))) {
                     imageData.write(chunk.getData());
                 }
                 else {
@@ -92,17 +93,17 @@ public abstract class PngProcessor {
         PngChunk chunk = null;
         while (itChunks.hasNext()) {
             chunk = itChunks.next();
-            if(PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
+            if(Sink.getDecision1(PngChunk.IMAGE_DATA.equals(chunk.getTypeString()))) {
                 break;
             }
 
-            if(result != null && chunk.isRequired()) {
-                if(removeGamma && PngChunk.IMAGE_GAMA.equalsIgnoreCase(chunk.getTypeString())) {
+            if(Sink.getDecision1(result != null && chunk.isRequired())) {
+                if(Sink.getDecision1(removeGamma && PngChunk.IMAGE_GAMA.equalsIgnoreCase(chunk.getTypeString()))) {
                     continue;
                 }
 
                 PngChunk newChunk = new PngChunk(chunk.getType(), chunk.getData().clone());
-                if(PngChunk.IMAGE_HEADER.equals(chunk.getTypeString())) {
+                if(Sink.getDecision1(PngChunk.IMAGE_HEADER.equals(chunk.getTypeString()))) {
                     newChunk.setInterlace((byte) 0);
                 }
                 result.addChunk(newChunk);

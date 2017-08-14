@@ -1,5 +1,6 @@
 package org.unix4j.unix.find;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.option.Option;
 import org.unix4j.unix.Find;
 
@@ -23,7 +24,7 @@ public enum FindOptionSet_acdfilmnorxz implements FindOptions {
     Active_inorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/FindOptionSet_adfilnorxz.Active_ainorz, /*timeAccess:*/FindOptionSet_adfilnorxz.Active_ainorz_long, /*c:*/FindOptionSet_cdfilnorxz.Active_cinorz, /*timeCreate:*/FindOptionSet_cdfilnorxz.Active_cinorz_long, /*m:*/FindOptionSet_dfilmnorxz.Active_imnorz, /*timeModified:*/FindOptionSet_dfilmnorxz.Active_imnorz_long, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*d:*/FindOptionSet_acdimnorz.Active_dinorz, /*typeDirectory:*/FindOptionSet_acdimnorz.Active_dinorz_long, /*f:*/FindOptionSet_acfimnorz.Active_finorz, /*typeFile:*/FindOptionSet_acfimnorz.Active_finorz_long, /*x:*/FindOptionSet_acimnorxz.Active_inorxz, /*typeOther:*/FindOptionSet_acimnorxz.Active_inorxz_long, /*l:*/FindOptionSet_acilmnorz.Active_ilnorz, /*typeSymlink:*/FindOptionSet_acilmnorz.Active_ilnorz_long,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeNewer, FindOption.timeOlder
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeNewer n}, {@link #timeOlder o}.
@@ -828,6 +829,7 @@ public enum FindOptionSet_acdfilmnorxz implements FindOptions {
     public final FindOptionSet_acilmnorz typeSymlink;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_acdfilmnorxz(
             FindOptionSet_acdfilmnorxz i, FindOptionSet_acdfilmnorxz ignoreCase, FindOptionSet_acdfilmnorxz z, FindOptionSet_acdfilmnorxz print0, FindOptionSet_acdfilmnorxz r, FindOptionSet_acdfilmnorxz regex, FindOptionSet_adfilnorxz a, FindOptionSet_adfilnorxz timeAccess, FindOptionSet_cdfilnorxz c, FindOptionSet_cdfilnorxz timeCreate, FindOptionSet_dfilmnorxz m, FindOptionSet_dfilmnorxz timeModified, FindOptionSet_acdfilmnorxz n, FindOptionSet_acdfilmnorxz timeNewer, FindOptionSet_acdfilmnorxz o, FindOptionSet_acdfilmnorxz timeOlder, FindOptionSet_acdimnorz d, FindOptionSet_acdimnorz typeDirectory, FindOptionSet_acfimnorz f, FindOptionSet_acfimnorz typeFile, FindOptionSet_acimnorxz x, FindOptionSet_acimnorxz typeOther, FindOptionSet_acilmnorz l, FindOptionSet_acilmnorz typeSymlink,
             boolean useAcronym,
@@ -870,7 +872,7 @@ public enum FindOptionSet_acdfilmnorxz implements FindOptions {
      * @throws NullPointerException if {@code value==null}
      */
     private static <T> T notNull(T value) {
-        if(value != null) {
+        if(Sink.getDecision(value != null)) {
             return value;
         }
         throw new NullPointerException();

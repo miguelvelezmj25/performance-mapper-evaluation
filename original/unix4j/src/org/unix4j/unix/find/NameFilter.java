@@ -1,5 +1,7 @@
 package org.unix4j.unix.find;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.File;
 import java.io.FileFilter;
 
@@ -11,12 +13,15 @@ class NameFilter implements FileFilter {
     private final boolean ignoreCase;
 
     public NameFilter(String name, boolean ignoreCase) {
+        if(Sink.getDecision(ignoreCase)) {
+            System.out.println(";");
+        }
         this.name = name;
         this.ignoreCase = ignoreCase;
     }
 
     @Override
     public boolean accept(File file) {
-        return ignoreCase ? name.equalsIgnoreCase(file.getName()) : name.equals(file.getName());
+        return Sink.getDecision(ignoreCase) ? name.equalsIgnoreCase(file.getName()) : name.equals(file.getName());
     }
 }

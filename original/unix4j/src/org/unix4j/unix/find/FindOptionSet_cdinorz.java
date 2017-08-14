@@ -23,7 +23,7 @@ public enum FindOptionSet_cdinorz implements FindOptions {
     Active_cdinorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*c:*/null /*already set*/, /*timeCreate:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*d:*/null /*already set*/, /*typeDirectory:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeCreate, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeDirectory
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeCreate, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeDirectory
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeCreate c}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeDirectory d}.
@@ -722,6 +722,7 @@ public enum FindOptionSet_cdinorz implements FindOptions {
     public final FindOptionSet_cdinorz typeDirectory;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_cdinorz(
             FindOptionSet_cdinorz i, FindOptionSet_cdinorz ignoreCase, FindOptionSet_cdinorz z, FindOptionSet_cdinorz print0, FindOptionSet_cdinorz r, FindOptionSet_cdinorz regex, FindOptionSet_cdinorz c, FindOptionSet_cdinorz timeCreate, FindOptionSet_cdinorz n, FindOptionSet_cdinorz timeNewer, FindOptionSet_cdinorz o, FindOptionSet_cdinorz timeOlder, FindOptionSet_cdinorz d, FindOptionSet_cdinorz typeDirectory,
             boolean useAcronym,

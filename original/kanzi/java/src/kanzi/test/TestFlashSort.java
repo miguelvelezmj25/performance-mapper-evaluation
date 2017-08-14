@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.FlashSort;
 
 
-public class TestFlashSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestFlashSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("FlashSort", new FlashSort(), 20);
         testSpeed("FlashSort", new FlashSort(), 10000);
-    }    
+    }
 }

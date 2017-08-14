@@ -3,6 +3,8 @@ package com.googlecode.pngtastic;
 import com.googlecode.pngtastic.core.PngException;
 import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,13 @@ import java.util.Map;
  * @see <a href="http://www.schaik.com/pngsuite/">PNG reference images</a>
  */
 public class PngtasticOptimizer {
+
+    public static boolean REMOVEGAMMA;
+    public static boolean COMPRESSIONLEVEL;
+    public static boolean COMPRESSOR;
+    public static boolean ITERATIONS;
+    public static boolean LOGLEVEL;
+
     /** */
     private static final String HELP = "java -cp pngtastic-x.x.jar com.googlecode.pngtastic.PngtasticOptimizer [options] file1 [file2 ..]\n"
             + "Options:\n"
@@ -31,12 +40,43 @@ public class PngtasticOptimizer {
             + "  --logLevel         the level of logging output (none, debug, info, or error)\n";
 
     /** */
+//    public PngtasticOptimizer(String toDir, String[] fileNames, String fileSuffix, Boolean removeGamma,
+//                              Integer compressionLevel, String compressor, Integer iterations, String logLevel) {
+//
+//        long start = System.currentTimeMillis();
+//
+//        PngOptimizer optimizer = new PngOptimizer(logLevel);
+//
+//        Sink.getDecision(compressor == null);
+//        Sink.getDecision(iterations == 0);
+//
+//        optimizer.setCompressor(compressor, iterations);
+//
+//        for(String file : fileNames) {
+//            try {
+//                String outputPath = toDir + "/" + file;
+//                makeDirs(outputPath.substring(0, outputPath.lastIndexOf('/')));
+//
+//                PngImage image = new PngImage(file, logLevel);
+//                optimizer.optimize(image, outputPath + fileSuffix, removeGamma, compressionLevel);
+//
+//            } catch (PngException | IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        System.out.println(String.format("Processed %d files in %d milliseconds, saving %d bytes", optimizer.getResults().size(), System.currentTimeMillis() - start, optimizer.getTotalSavings()));
+//    }
+
     public PngtasticOptimizer(String toDir, String[] fileNames, String fileSuffix, Boolean removeGamma,
-                              Integer compressionLevel, String compressor, Integer iterations, String logLevel) {
+                              Integer compressionLevel, String compressor, Integer iterations, String logLevel, String s) {
 
         long start = System.currentTimeMillis();
 
         PngOptimizer optimizer = new PngOptimizer(logLevel);
+
+        Sink.getDecision(compressor == null);
+        Sink.getDecision(iterations == 0);
+
         optimizer.setCompressor(compressor, iterations);
 
         for(String file : fileNames) {
@@ -60,9 +100,9 @@ public class PngtasticOptimizer {
         int last = 0;
         for(int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if(arg.startsWith("--")) {
+            if(Sink.getDecision1(arg.startsWith("--"))) {
                 int next = i + 1;
-                if(next < args.length) {
+                if(Sink.getDecision1(next < args.length)) {
                     options.put(arg, args[next]);
                     last = next + 1;
                 }
@@ -74,9 +114,9 @@ public class PngtasticOptimizer {
         }
         String[] files = Arrays.copyOfRange(args, last, args.length);
         files = new String[1];
-        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic/images/optimizer/earth.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic/images/optimizer/1px.png";
 
-        if(files.length == 0) {
+        if(Sink.getDecision1(files.length == 0)) {
             System.out.println("No files to process");
             System.out.println(HELP);
             return;
@@ -84,13 +124,69 @@ public class PngtasticOptimizer {
 
         String toDir = (options.get("--toDir") == null) ? "." : options.get("--toDir");
         String fileSuffix = (options.get("--fileSuffix") == null) ? "" : options.get("--fileSuffix");
-        Boolean removeGamma = Boolean.valueOf(options.get("--removeGamma"));
-        Integer compressionLevel = safeInteger(options.get("--compressionLevel"));
-        String logLevel = options.get("--logLevel");
-        String compressor = options.get("--compressor");
-        Integer iterations = safeInteger(options.get("--iterations"));
+//        Boolean removeGamma = Boolean.valueOf(options.get("--removeGamma"));
+//        Integer compressionLevel = safeInteger(options.get("--compressionLevel"));
+//        String logLevel = options.get("--logLevel");
+//        String compressor = options.get("--compressor");
+//        Integer iterations = safeInteger(options.get("--iterations"));
 
-        new PngtasticOptimizer(toDir, files, fileSuffix, removeGamma, compressionLevel, compressor, iterations, logLevel);
+        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[0]));
+        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[1]));
+        COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[2]));
+        ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[3]));
+        LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[4]));
+
+//        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(true);
+//        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(true);
+//        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
+//        ITERATIONS = Source.getOptionITERATIONS(true);
+//        LOGLEVEL = Source.getOptionLOGLEVEL(true);
+
+        Boolean removeGamma;
+        Integer compressionLevel;
+        String logLevel;
+        String compressor;
+        Integer iterations;
+
+        if(Sink.getDecision1(REMOVEGAMMA)) {
+            removeGamma = true;
+        }
+        else {
+            removeGamma = false;
+        }
+
+        if(Sink.getDecision1(COMPRESSIONLEVEL)) {
+            compressionLevel = 9;
+        }
+        else {
+            compressionLevel = 0;
+        }
+
+        if(Sink.getDecision1(COMPRESSOR)) {
+            compressor = "zopfli";
+        }
+        else {
+            compressor = "none";
+        }
+
+        if(Sink.getDecision1(ITERATIONS)) {
+            iterations = 10;
+        }
+        else {
+            iterations = 0;
+        }
+
+        if(Sink.getDecision1(LOGLEVEL)) {
+            logLevel = "debug";
+        }
+        else {
+            logLevel = "none";
+        }
+
+        Sink.getDecision(compressor == null);
+        Sink.getDecision(iterations == 0);
+
+        new PngtasticOptimizer(toDir, files, fileSuffix, removeGamma, compressionLevel, compressor, iterations, logLevel, "");
     }
 
     /* */
@@ -105,8 +201,8 @@ public class PngtasticOptimizer {
     /* */
     private String makeDirs(String path) throws IOException {
         File out = new File(path);
-        if(!out.exists()) {
-            if(!out.mkdirs()) {
+        if(Sink.getDecision1(!out.exists())) {
+            if(Sink.getDecision1(!out.mkdirs())) {
                 throw new IOException("Couldn't create path: " + path);
             }
         }

@@ -1,5 +1,7 @@
 package com.googlecode.pngtastic.core;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void debug(String message, Object... args) {
-        if(DEBUG.equals(this.logLevel)) {
+        if(Sink.getDecision1(DEBUG.equals(this.logLevel))) {
             System.out.println(String.format(message, args));
         }
     }
@@ -39,7 +41,7 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void info(String message, Object... args) {
-        if(DEBUG.equals(this.logLevel) || INFO.equals(this.logLevel)) {
+        if(Sink.getDecision1(DEBUG.equals(this.logLevel) || INFO.equals(this.logLevel))) {
             System.out.println(String.format(message, args));
         }
     }
@@ -49,8 +51,8 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void error(String message, Object... args) {
-        if(!NONE.equals(this.logLevel)) {
-            System.out.println(String.format(message, args));
-        }
+//        if(Sink.getDecision1(!NONE.equals(this.logLevel))) {
+//            System.out.println(String.format(message, args));
+//        }
     }
 }

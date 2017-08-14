@@ -2,7 +2,23 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/demos/demos-parent.iml" filepath="$PROJECT_DIR$/demos/demos-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extras/extras-parent.iml" filepath="$PROJECT_DIR$/extras/extras-parent.iml" />
       <module fileurl="file://$PROJECT_DIR$/prevayler.iml" filepath="$PROJECT_DIR$/prevayler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/prevayler-core.iml" filepath="$PROJECT_DIR$/core/prevayler-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demos/demo1/prevayler-demo1.iml" filepath="$PROJECT_DIR$/demos/demo1/prevayler-demo1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extras/facade/prevayler-facade.iml" filepath="$PROJECT_DIR$/extras/facade/prevayler-facade.iml" />
+      <module fileurl="file://$PROJECT_DIR$/factory/prevayler-factory.iml" filepath="$PROJECT_DIR$/factory/prevayler-factory.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demos/jxpath/prevayler-jxpath.iml" filepath="$PROJECT_DIR$/demos/jxpath/prevayler-jxpath.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extras/log4j/prevayler-log4j.iml" filepath="$PROJECT_DIR$/extras/log4j/prevayler-log4j.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extras/memento/prevayler-memento.iml" filepath="$PROJECT_DIR$/extras/memento/prevayler-memento.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spikes/mirror/prevayler-mirror.iml" filepath="$PROJECT_DIR$/spikes/mirror/prevayler-mirror.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spikes/mirror-tests/prevayler-mirror-tests.iml" filepath="$PROJECT_DIR$/spikes/mirror-tests/prevayler-mirror-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demos/scalability/prevayler-scalability.iml" filepath="$PROJECT_DIR$/demos/scalability/prevayler-scalability.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tests/prevayler-tests.iml" filepath="$PROJECT_DIR$/tests/prevayler-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demos/tutorial/prevayler-tutorials.iml" filepath="$PROJECT_DIR$/demos/tutorial/prevayler-tutorials.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extras/xstream/prevayler-xstream.iml" filepath="$PROJECT_DIR$/extras/xstream/prevayler-xstream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spikes/spikes-parent.iml" filepath="$PROJECT_DIR$/spikes/spikes-parent.iml" />
     </modules>
   </component>
 </project>

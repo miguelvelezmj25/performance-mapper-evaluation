@@ -23,7 +23,7 @@ public enum LsOptionSet_Rahlrt implements LsOptions {
     Active_Rahlrt(
         /*a:*/null /*already set*/, /*allFiles:*/null /*already set*/, /*h:*/null /*already set*/, /*humanReadable:*/null /*already set*/, /*l:*/null /*already set*/, /*longFormat:*/null /*already set*/, /*R:*/null /*already set*/, /*recurseSubdirs:*/null /*already set*/, /*r:*/null /*already set*/, /*reverseOrder:*/null /*already set*/, /*t:*/null /*already set*/, /*timeSorted:*/null /*already set*/,
             true,
-		/*active:*/LsOption.allFiles, LsOption.humanReadable, LsOption.longFormat, LsOption.recurseSubdirs, LsOption.reverseOrder, LsOption.timeSorted
+        /*active:*/LsOption.allFiles, LsOption.humanReadable, LsOption.longFormat, LsOption.recurseSubdirs, LsOption.reverseOrder, LsOption.timeSorted
     ),
     /**
      * Option set with the following active options: {@link #allFiles a}, {@link #humanReadable h}, {@link #longFormat l}, {@link #recurseSubdirs R}, {@link #reverseOrder r}, {@link #timeSorted t}.
@@ -1172,6 +1172,7 @@ public enum LsOptionSet_Rahlrt implements LsOptions {
     public final LsOptionSet_Rahlrt timeSorted;
     private final boolean useAcronym;
     private final EnumSet<LsOption> options;
+
     private LsOptionSet_Rahlrt(
             LsOptionSet_Rahlrt a, LsOptionSet_Rahlrt allFiles, LsOptionSet_Rahlrt h, LsOptionSet_Rahlrt humanReadable, LsOptionSet_Rahlrt l, LsOptionSet_Rahlrt longFormat, LsOptionSet_Rahlrt R, LsOptionSet_Rahlrt recurseSubdirs, LsOptionSet_Rahlrt r, LsOptionSet_Rahlrt reverseOrder, LsOptionSet_Rahlrt t, LsOptionSet_Rahlrt timeSorted,
             boolean useAcronym,

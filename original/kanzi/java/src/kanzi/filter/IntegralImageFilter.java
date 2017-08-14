@@ -15,36 +15,37 @@ limitations under the License.
 
 package kanzi.filter;
 
-import kanzi.SliceIntArray;
 import kanzi.IntFilter;
+import kanzi.SliceIntArray;
 
 
-public class IntegralImageFilter implements IntFilter
-{
+public class IntegralImageFilter implements IntFilter {
     private final int width;
     private final int height;
     private final int stride;
 
 
-    public IntegralImageFilter(int width, int height)
-    {
-       this(width, height, width);
+    public IntegralImageFilter(int width, int height) {
+        this(width, height, width);
     }
 
 
-    public IntegralImageFilter(int width, int height, int stride)
-    {
-        if (height < 8)
+    public IntegralImageFilter(int width, int height, int stride) {
+        if(height < 8) {
             throw new IllegalArgumentException("The height must be at least 8");
+        }
 
-        if (width < 8)
+        if(width < 8) {
             throw new IllegalArgumentException("The width must be at least 8");
-        
-        if (stride < 8)
-            throw new IllegalArgumentException("The stride must be at least 8");
+        }
 
-        if (width*height >= 1<<23)
+        if(stride < 8) {
+            throw new IllegalArgumentException("The stride must be at least 8");
+        }
+
+        if(width * height >= 1 << 23) {
             throw new IllegalArgumentException("The image area is limited to 8388608 pixels");
+        }
 
         this.width = width;
         this.height = height;
@@ -52,49 +53,47 @@ public class IntegralImageFilter implements IntFilter
     }
 
 
-   @Override
-   public boolean apply(SliceIntArray input, SliceIntArray output)
-   {
-      if ((!SliceIntArray.isValid(input)) || (!SliceIntArray.isValid(output)))
-         return false;
+    @Override
+    public boolean apply(SliceIntArray input, SliceIntArray output) {
+        if((!SliceIntArray.isValid(input)) || (!SliceIntArray.isValid(output))) {
+            return false;
+        }
 
-      if (input.array == output.array)
-         return false;
-      
-      final int[] src = input.array;
-      final int[] dst = output.array;
-      int srcIdx = input.index;
-      int dstIdx = output.index;
-      final int w = this.width;
-      final int h = this.height;
-      final int st = this.stride;           
-		int sumRow = 0;
-         
-      // First row
-      for (int x=0; x<w; x++)
-      {
-         sumRow += src[srcIdx+x];
-         dst[dstIdx+x]= sumRow;
-      }
+        if(input.array == output.array) {
+            return false;
+        }
 
-      srcIdx += st;
-      dstIdx += st;
-         
-      // Other rows
-      for (int y=1; y<h; y++)
-      {
-         sumRow = 0;
+        final int[] src = input.array;
+        final int[] dst = output.array;
+        int srcIdx = input.index;
+        int dstIdx = output.index;
+        final int w = this.width;
+        final int h = this.height;
+        final int st = this.stride;
+        int sumRow = 0;
 
-         for (int x=0; x<w; x++)
-         {
-            sumRow += src[srcIdx+x];
-            dst[dstIdx+x] = dst[dstIdx+x-st] + sumRow;
-         }
+        // First row
+        for(int x = 0; x < w; x++) {
+            sumRow += src[srcIdx + x];
+            dst[dstIdx + x] = sumRow;
+        }
 
-         srcIdx += st;
-         dstIdx += st;
-      }   
-      
-      return true;
-   }   
+        srcIdx += st;
+        dstIdx += st;
+
+        // Other rows
+        for(int y = 1; y < h; y++) {
+            sumRow = 0;
+
+            for(int x = 0; x < w; x++) {
+                sumRow += src[srcIdx + x];
+                dst[dstIdx + x] = dst[dstIdx + x - st] + sumRow;
+            }
+
+            srcIdx += st;
+            dstIdx += st;
+        }
+
+        return true;
+    }
 }

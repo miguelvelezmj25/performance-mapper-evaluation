@@ -120,7 +120,7 @@ public class Adler32 implements Checksum {
         int s2 = checksum >>> 16;
         while (len > 0) {
             int n = 3800;
-            if (n > len) {
+            if(n > len) {
                 n = len;
             }
             len -= n;

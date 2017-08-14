@@ -1,19 +1,21 @@
 /**
- *    Copyright 2013 Thomas Rausch
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2013 Thomas Rausch
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.rauschig.jarchivelib;
+
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,9 +74,10 @@ class CommonsArchiveEntry implements ArchiveEntry {
 
         FileModeMapper.map(entry, file);
 
-        if (entry.isDirectory()) {
+        if(Sink.getDecision(entry.isDirectory())) {
             file.mkdirs();
-        } else {
+        }
+        else {
             file.getParentFile().mkdirs();
             IOUtils.copy(stream, file);
         }
@@ -83,10 +86,10 @@ class CommonsArchiveEntry implements ArchiveEntry {
     }
 
     private void assertState() {
-        if (stream.isClosed()) {
+        if(Sink.getDecision(stream.isClosed())) {
             throw new IllegalStateException("Stream has already been closed");
         }
-        if (this != stream.getCurrentEntry()) {
+        if(Sink.getDecision(this != stream.getCurrentEntry())) {
             throw new IllegalStateException("Illegal stream pointer");
         }
     }

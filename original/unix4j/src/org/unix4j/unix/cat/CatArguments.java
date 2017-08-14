@@ -23,7 +23,7 @@ public final class CatArguments implements Arguments<CatArguments> {
 
 
     // operand: <files>
-	private java.io.File[] files;
+    private java.io.File[] files;
     private boolean filesIsSet = false;
 
     // operand: <paths>
@@ -339,9 +339,9 @@ public final class CatArguments implements Arguments<CatArguments> {
 
         if(argsIsSet) {
             for(String arg : args) {
-				if(sb.length() > 0) {
-					sb.append(' ');
-				}
+                if(sb.length() > 0) {
+                    sb.append(' ');
+                }
                 sb.append(arg);
             }
         }
@@ -353,25 +353,25 @@ public final class CatArguments implements Arguments<CatArguments> {
             }
             // operand: <files>
             if(filesIsSet) {
-				if(sb.length() > 0) {
-					sb.append(' ');
-				}
+                if(sb.length() > 0) {
+                    sb.append(' ');
+                }
                 sb.append("--").append("files");
                 sb.append(" ").append(toString(getFiles()));
             }
             // operand: <paths>
             if(pathsIsSet) {
-				if(sb.length() > 0) {
-					sb.append(' ');
-				}
+                if(sb.length() > 0) {
+                    sb.append(' ');
+                }
                 sb.append("--").append("paths");
                 sb.append(" ").append(toString(getPaths()));
             }
             // operand: <args>
             if(argsIsSet) {
-				if(sb.length() > 0) {
-					sb.append(' ');
-				}
+                if(sb.length() > 0) {
+                    sb.append(' ');
+                }
                 sb.append("--").append("args");
                 sb.append(" ").append(toString(getArgs()));
             }

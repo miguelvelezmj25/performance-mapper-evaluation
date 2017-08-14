@@ -21,123 +21,104 @@ package kanzi.util.hash;
 import kanzi.Global;
 
 
-public class XXHash64
-{
-  private final static long PRIME64_1 = 0x9E3779B185EBCA87L;
-  private final static long PRIME64_2 = 0xC2B2AE3D27D4EB4FL;
-  private final static long PRIME64_3 = 0x165667B19E3779F9L;
-  private final static long PRIME64_4 = 0x85EBCA77C2b2AE63L;
-  private final static long PRIME64_5 = 0x27D4EB2F165667C5L;
+public class XXHash64 {
+    private final static long PRIME64_1 = 0x9E3779B185EBCA87L;
+    private final static long PRIME64_2 = 0xC2B2AE3D27D4EB4FL;
+    private final static long PRIME64_3 = 0x165667B19E3779F9L;
+    private final static long PRIME64_4 = 0x85EBCA77C2b2AE63L;
+    private final static long PRIME64_5 = 0x27D4EB2F165667C5L;
 
 
-  private long seed;
+    private long seed;
 
 
-  public XXHash64()
-  {
-     this(System.nanoTime());
-  }
+    public XXHash64() {
+        this(System.nanoTime());
+    }
 
 
-  public XXHash64(long seed)
-  {
-     this.seed = seed;
-  }
+    public XXHash64(long seed) {
+        this.seed = seed;
+    }
 
+    private static long round(long acc, long val) {
+        acc += (val * PRIME64_2);
+        return ((acc << 13) | (acc >>> 19)) * PRIME64_1;
+    }
 
-  public void setSeed(long seed)
-  {
-     this.seed = seed;
-  }
+    private static long mergeRound(long acc, long val) {
+        acc ^= round(0, val);
+        return acc * PRIME64_1 + PRIME64_4;
+    }
 
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
 
-  public long hash(byte[] data)
-  {
-     return this.hash(data, 0, data.length);
-  }
+    public long hash(byte[] data) {
+        return this.hash(data, 0, data.length);
+    }
 
+    public long hash(byte[] data, int offset, int length) {
+        final int end = offset + length;
+        long h64;
+        int idx = offset;
 
-  public long hash(byte[] data, int offset, int length)
-  {
-     final int end = offset + length;
-     long h64;
-     int idx = offset;
+        if(length >= 32) {
+            final int end32 = end - 32;
+            long v1 = this.seed + PRIME64_1 + PRIME64_2;
+            long v2 = this.seed + PRIME64_2;
+            long v3 = this.seed;
+            long v4 = this.seed - PRIME64_1;
 
-     if (length >= 32)
-     {
-        final int end32 = end - 32;
-        long v1 = this.seed + PRIME64_1 + PRIME64_2;
-        long v2 = this.seed + PRIME64_2;
-        long v3 = this.seed;
-        long v4 = this.seed - PRIME64_1;
+            do {
+                v1 = round(v1, Global.readLong64(data, idx));
+                v2 = round(v2, Global.readLong64(data, idx + 8));
+                v3 = round(v3, Global.readLong64(data, idx + 16));
+                v4 = round(v4, Global.readLong64(data, idx + 24));
+                idx += 32;
+            }
+            while (idx <= end32);
 
-        do
-        {
-           v1 = round(v1, Global.readLong64(data, idx));
-           v2 = round(v2, Global.readLong64(data, idx+8));
-           v3 = round(v3, Global.readLong64(data, idx+16));
-           v4 = round(v4, Global.readLong64(data, idx+24));
-           idx += 32;
+            h64 = ((v1 << 1) | (v1 >>> 31));
+            h64 += ((v2 << 7) | (v2 >>> 25));
+            h64 += ((v3 << 12) | (v3 >>> 20));
+            h64 += ((v4 << 18) | (v4 >>> 14));
+
+            h64 = mergeRound(h64, v1);
+            h64 = mergeRound(h64, v2);
+            h64 = mergeRound(h64, v3);
+            h64 = mergeRound(h64, v4);
         }
-        while (idx <= end32);
+        else {
+            h64 = this.seed + PRIME64_5;
+        }
 
-        h64  = ((v1 << 1)  | (v1 >>> 31));
-        h64 += ((v2 << 7)  | (v2 >>> 25));
-        h64 += ((v3 << 12) | (v3 >>> 20));
-        h64 += ((v4 << 18) | (v4 >>> 14));
+        h64 += length;
 
-        h64 = mergeRound(h64, v1);
-        h64 = mergeRound(h64, v2);
-        h64 = mergeRound(h64, v3);
-        h64 = mergeRound(h64, v4);
-      }
-      else
-      {
-         h64 = this.seed + PRIME64_5;
-      }
+        while (idx + 8 <= end) {
+            h64 ^= round(0, Global.readLong64(data, idx));
+            h64 = ((h64 << 27) | (h64 >>> 37)) * PRIME64_1 + PRIME64_4;
+            idx += 8;
+        }
 
-      h64 += length;
+        while (idx + 4 <= end) {
+            h64 ^= (Global.readInt32(data, idx) * PRIME64_1);
+            h64 = ((h64 << 23) | (h64 >>> 41)) * PRIME64_2 + PRIME64_3;
+            idx += 4;
+        }
 
-      while (idx+8 <= end)
-      {
-         h64 ^= round(0, Global.readLong64(data, idx));
-         h64 = ((h64 << 27) | (h64 >>> 37)) * PRIME64_1 + PRIME64_4;
-         idx += 8;
-      }
+        while (idx < end) {
+            h64 ^= ((data[idx] & 0xFF) * PRIME64_5);
+            h64 = ((h64 << 11) | (h64 >>> 53)) * PRIME64_1;
+            idx++;
+        }
 
-      while (idx+4 <= end)
-      {
-         h64 ^= (Global.readInt32(data, idx) * PRIME64_1);
-         h64 = ((h64 << 23) | (h64 >>> 41)) * PRIME64_2 + PRIME64_3;
-         idx += 4;
-      }
-
-      while (idx < end)
-      {
-         h64 ^= ((data[idx] & 0xFF) * PRIME64_5);
-         h64 = ((h64 << 11) | (h64 >>> 53)) * PRIME64_1;
-         idx++;
-      }
-
-      // Finalize
-      h64 ^= (h64 >>> 33);
-      h64 *= PRIME64_2;
-      h64 ^= (h64 >>> 29);
-      h64 *= PRIME64_3;
-      return h64 ^ (h64 >>> 32);
-   }
-
-  
-   private static long round(long acc, long val)
-   {
-      acc += (val*PRIME64_2);
-      return ((acc << 13) | (acc >>> 19)) * PRIME64_1;
-   }
-
-
-   private static long mergeRound(long acc, long val)
-   {
-      acc ^= round(0, val);
-      return acc*PRIME64_1 + PRIME64_4;
-   }
+        // Finalize
+        h64 ^= (h64 >>> 33);
+        h64 *= PRIME64_2;
+        h64 ^= (h64 >>> 29);
+        h64 *= PRIME64_3;
+        return h64 ^ (h64 >>> 32);
+    }
 }

@@ -6,10 +6,9 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import third.part.android.util.Base64;
 
 import java.security.NoSuchAlgorithmException;
-
-import third.part.android.util.Base64;
 
 /**
  * each click listener is an example of Encryption
@@ -86,7 +85,7 @@ public final class MainActivity extends AppCompatActivity {
                             .setAlgorithm("AES/CBC/PKCS5Padding")
                             .setSecureRandomAlgorithm("SHA1PRNG")
                             .setSecretKeyType("PBKDF2WithHmacSHA1")
-                            .setIv(new byte[] { 29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30 })
+                            .setIv(new byte[]{29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30})
                             .build();
                 } catch (NoSuchAlgorithmException e) {
                     log("Something wrong: " + e);

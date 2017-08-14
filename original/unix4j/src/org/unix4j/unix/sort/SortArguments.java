@@ -179,7 +179,7 @@ public final class SortArguments implements Arguments<SortArguments> {
                 argsForContext.setFiles(value);
             }
             else if("comparator".equals(e.getKey())) {
-                @SuppressWarnings("unchecked")                final java.util.Comparator<? super org.unix4j.line.Line> value = convertList(context, "comparator", (Class<java.util.Comparator<? super org.unix4j.line.Line>>) (Class<?>) java.util.Comparator.class, e.getValue());
+                @SuppressWarnings("unchecked") final java.util.Comparator<? super org.unix4j.line.Line> value = convertList(context, "comparator", (Class<java.util.Comparator<? super org.unix4j.line.Line>>) (Class<?>) java.util.Comparator.class, e.getValue());
                 argsForContext.setComparator(value);
             }
             else if("args".equals(e.getKey())) {

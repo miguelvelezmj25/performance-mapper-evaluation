@@ -24,9 +24,10 @@ package edu.cmu.cs.mvelezce.zip.zipme;
  * manipulation.  This guarantees that we can get at least 16 bits,
  * but we only need at most 15, so this is all safe.
  * There are some optimizations in this class, for example, you must
- * never peek more then 8 bits more than needed, and you must first 
+ * never peek more then 8 bits more than needed, and you must first
  * peek bits before you may drop them.  This is not a general purpose
  * class but optimized for the behaviour of the Inflater.
+ *
  * @author John Leuner, Jochen Hoenicke
  */
 class StreamManipulator {
@@ -54,12 +55,13 @@ class StreamManipulator {
      * Get the next n bits but don't increase input pointer.  n must be
      * less or equal 16 and if you if this call succeeds, you must drop
      * at least n-8 bits in the next call.
+     *
      * @return the value of the bits, or -1 if not enough bits available.
      */
 
     public final int peekBits(int n) {
-        if (bits_in_buffer < n) {
-            if (window_start == window_end) {
+        if(bits_in_buffer < n) {
+            if(window_start == window_end) {
                 return -1;
             }
             buffer |= (window[window_start++] & 0xff | (window[window_start++] & 0xff) << 8) << bits_in_buffer;
@@ -76,12 +78,13 @@ class StreamManipulator {
     /**
      * Gets the next n bits and increases input pointer.  This is equivalent
      * to peekBits followed by dropBits, except for correct error handling.
+     *
      * @return the value of the bits, or -1 if not enough bits available.
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final int getBits(int n) {
         int bits = peekBits(n);
-        if (bits >= 0) {
+        if(bits >= 0) {
             dropBits(n);
         }
         return bits;
@@ -90,6 +93,7 @@ class StreamManipulator {
     /**
      * Gets the number of bits available in the bit buffer.  This must be
      * only called when a previous peekBits() returned -1.
+     *
      * @return the number of bits available.
      */
 
@@ -99,6 +103,7 @@ class StreamManipulator {
 
     /**
      * Gets the number of bytes available.
+     *
      * @return the number of bytes available.
      */
 
@@ -121,10 +126,10 @@ class StreamManipulator {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public int copyBytes(byte[] output, int offset, int length) {
-        if (length < 0) {
+        if(length < 0) {
             throw new IllegalArgumentException("length negative");
         }
-        if ((bits_in_buffer & 7) != 0) {
+        if((bits_in_buffer & 7) != 0) {
             throw new IllegalStateException("Bit buffer is not aligned!");
         }
         int count = 0;
@@ -135,16 +140,16 @@ class StreamManipulator {
             length--;
             count++;
         }
-        if (length == 0) {
+        if(length == 0) {
             return count;
         }
         int avail = window_end - window_start;
-        if (length > avail) {
+        if(length > avail) {
             length = avail;
         }
         System.arraycopy(window, window_start, output, offset, length);
         window_start += length;
-        if (((window_start - window_end) & 1) != 0) {
+        if(((window_start - window_end) & 1) != 0) {
             buffer = (window[window_start++] & 0xff);
             bits_in_buffer = 8;
         }
@@ -158,14 +163,14 @@ class StreamManipulator {
 
 
     public void setInput(byte[] buf, int off, int len) {
-        if (window_start < window_end) {
+        if(window_start < window_end) {
             throw new IllegalStateException("Old input was not completely processed");
         }
         int end = off + len;
-        if (0 > off || off > end || end > buf.length) {
+        if(0 > off || off > end || end > buf.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        if ((len & 1) != 0) {
+        if((len & 1) != 0) {
             buffer |= (buf[off++] & 0xff) << bits_in_buffer;
             bits_in_buffer += 8;
         }

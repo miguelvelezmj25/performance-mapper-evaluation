@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -58,7 +60,7 @@ public class GZIPOutputStream extends DeflaterOutputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 36, thenFeature = "DerivativeCompressGZIPCRC", elseFeature = "DerivativeCompressGZIP")
     public void
     hook() {
-        if (FEATUREDerivativeCompressGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeCompressGZIPCRC)) {
             hook__role__DerivativeCompressGZIPCRC();
         }
         else {
@@ -119,7 +121,7 @@ public class GZIPOutputStream extends DeflaterOutputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 37, thenFeature = "DerivativeCompressGZIPCRC", elseFeature = "DerivativeCompressGZIP")
     protected void
     hook31(byte[] buf, int off, int len) throws IOException {
-        if (FEATUREDerivativeCompressGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeCompressGZIPCRC)) {
             hook31__role__DerivativeCompressGZIPCRC(buf, off, len);
         }
         else {

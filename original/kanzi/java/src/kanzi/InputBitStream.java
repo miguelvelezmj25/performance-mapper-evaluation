@@ -16,8 +16,7 @@ limitations under the License.
 package kanzi;
 
 
-public interface InputBitStream
-{
+public interface InputBitStream {
     // Returns 1 or 0
     public int readBit() throws BitStreamException;
 

@@ -23,7 +23,7 @@ public enum XargsOptionSet_rtxz implements XargsOptions {
     Active_rtxz(
         /*z:*/null /*already set*/, /*delimiter0:*/null /*already set*/, /*x:*/null /*already set*/, /*exactArgs:*/null /*already set*/, /*r:*/null /*already set*/, /*noRunIfEmpty:*/null /*already set*/, /*t:*/null /*already set*/, /*verbose:*/null /*already set*/,
             true,
-		/*active:*/XargsOption.delimiter0, XargsOption.exactArgs, XargsOption.noRunIfEmpty, XargsOption.verbose
+        /*active:*/XargsOption.delimiter0, XargsOption.exactArgs, XargsOption.noRunIfEmpty, XargsOption.verbose
     ),
     /**
      * Option set with the following active options: {@link #delimiter0 z}, {@link #exactArgs x}, {@link #noRunIfEmpty r}, {@link #verbose t}.
@@ -374,6 +374,7 @@ public enum XargsOptionSet_rtxz implements XargsOptions {
     public final XargsOptionSet_rtxz verbose;
     private final boolean useAcronym;
     private final EnumSet<XargsOption> options;
+
     private XargsOptionSet_rtxz(
             XargsOptionSet_rtxz z, XargsOptionSet_rtxz delimiter0, XargsOptionSet_rtxz x, XargsOptionSet_rtxz exactArgs, XargsOptionSet_rtxz r, XargsOptionSet_rtxz noRunIfEmpty, XargsOptionSet_rtxz t, XargsOptionSet_rtxz verbose,
             boolean useAcronym,

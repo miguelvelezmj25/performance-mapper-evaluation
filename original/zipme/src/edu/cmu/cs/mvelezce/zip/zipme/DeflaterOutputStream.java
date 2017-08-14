@@ -64,7 +64,7 @@ public class DeflaterOutputStream extends OutputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public DeflaterOutputStream(OutputStream out, Deflater defl, int bufsize) {
         this.out = out;
-        if (bufsize <= 0) {
+        if(bufsize <= 0) {
             throw new IllegalArgumentException("bufsize <= 0");
         }
         buf = new byte[bufsize];
@@ -81,12 +81,12 @@ public class DeflaterOutputStream extends OutputStream {
     protected void deflate() throws IOException {
         while (!def.needsInput()) {
             int len = def.deflate(buf, 0, buf.length);
-            if (len <= 0) {
+            if(len <= 0) {
                 break;
             }
             out.write(buf, 0, len);
         }
-        if (!def.needsInput()) {
+        if(!def.needsInput()) {
             throw new Error("Can't deflate all input?");
         }
     }
@@ -116,12 +116,12 @@ public class DeflaterOutputStream extends OutputStream {
         def.finish();
         while (!def.finished()) {
             int len = def.deflate(buf, 0, buf.length);
-            if (len <= 0) {
+            if(len <= 0) {
                 break;
             }
             out.write(buf, 0, len);
         }
-        if (!def.finished()) {
+        if(!def.finished()) {
             throw new Error("Can't deflate all input?");
         }
         out.flush();

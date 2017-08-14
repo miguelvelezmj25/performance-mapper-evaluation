@@ -3,6 +3,8 @@ package com.googlecode.pngtastic;
 import com.googlecode.pngtastic.core.PngColorCounter;
 import com.googlecode.pngtastic.core.PngException;
 import com.googlecode.pngtastic.core.PngImage;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,140 +25,18 @@ public class PngtasticColorCounter {
             + "  --minAlpha         the minimum alpha channel value a pixel must have\n"
             + "  --timeout          the number of milliseconds after which color counting will be aborted\n"
             + "  --logLevel         the level of logging output (none, debug, info, or error)\n";
+
+    /** */
+
+
     public static boolean FREQTHRESHOLD;
     public static boolean DISTTHRESHOLD;
     public static boolean MINALPHA;
     public static boolean TIMEOUT;
     public static boolean LOGLEVEL;
 
-//    /** */
-//    public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
-//                                 int minAlpha, long timeout) {
-//
-////        if(DISTTHRESHOLD) {
-////            distThreshold = 0.0D;
-////        }
-////        else {
-////            distThreshold = 1.0D;
-////        }
-////
-////        if(FREQTHRESHOLD) {
-////            freqThreshold = 0.0D;
-////        }
-////        else {
-////            freqThreshold = 1.0D;
-////        }
-////
-////        if(MINALPHA) {
-////            minAlpha = 10;
-////        }
-////        else {
-////            minAlpha = 50;
-////        }
-////
-////        if(TIMEOUT) {
-////            timeout = 0;
-////        }
-////        else {
-////            timeout = 1000;
-////        }
-////
-////        if(LOGLEVEL) {
-////            logLevel = "none";
-////        }
-////        else {
-////            logLevel = "debug";
-////        }
-//
-//        if(distThreshold > 0) {
-//            int isaf = 0;
-//        }
-//
-//        long start = System.currentTimeMillis();
-//        PngColorCounter counter = new PngColorCounter(logLevel, distThreshold, freqThreshold, minAlpha, timeout);
-//
-//        if(distThreshold > 0) {
-//            int isaf = 0;
-//        }
-//
-//        for(String file : fileNames) {
-//            try {
-//                PngImage image = new PngImage(file, logLevel);
-//                counter.count(image);
-//
-//                System.out.println(counter.getResult());
-//
-//            } catch (PngException | IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        System.out.println(String.format("Processed in %d milliseconds", System.currentTimeMillis() - start));
-//    }
-
     public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
                                  int minAlpha, long timeout) {
-        if(distThreshold > 0) {
-            int isaf = 0;
-        }
-
-        if(freqThreshold > 0) {
-            int isaf = 0;
-        }
-
-        if(minAlpha > 0) {
-            int isaf = 0;
-        }
-
-        if(timeout > 0) {
-            int isaf = 0;
-        }
-
-        if(logLevel != null) {
-            int isaf = 0;
-        }
-
-//        long start = System.currentTimeMillis();
-//        PngColorCounter counter = new PngColorCounter(logLevel, distThreshold, freqThreshold, minAlpha, timeout);
-//
-//        if(distThreshold > 0) {
-//            int isaf = 0;
-//        }
-//
-//        for(String file : fileNames) {
-//            try {
-//                PngImage image = new PngImage(file, logLevel);
-//                counter.count(image);
-//
-//                System.out.println(counter.getResult());
-//
-//            } catch (PngException | IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        System.out.println(String.format("Processed in %d milliseconds", System.currentTimeMillis() - start));
-    }
-
-    public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
-                                 int minAlpha, long timeout, String s) {
-        if(distThreshold > 0) {
-            int isaf = 0;
-        }
-
-        if(freqThreshold > 0) {
-            int isaf = 0;
-        }
-
-        if(minAlpha > 0) {
-            int isaf = 0;
-        }
-
-        if(timeout > 0) {
-            int isaf = 0;
-        }
-
-        if(logLevel != null) {
-            int isaf = 0;
-        }
 
         long start = System.currentTimeMillis();
         PngColorCounter counter = new PngColorCounter(logLevel, distThreshold, freqThreshold, minAlpha, timeout);
@@ -204,67 +84,66 @@ public class PngtasticColorCounter {
             return;
         }
 
-        FREQTHRESHOLD = Boolean.valueOf(args[0]);
-        DISTTHRESHOLD = Boolean.valueOf(args[1]);
-        MINALPHA = Boolean.valueOf(args[2]);
-        TIMEOUT = Boolean.valueOf(args[3]);
-        LOGLEVEL = Boolean.valueOf(args[4]);
+//        Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
+//        Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
+//        Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
+//        Integer timeout = safeInteger(options.get("--timeout"), 0);
+//        String logLevel = options.get("--logLevel");
 
-//        FREQTHRESHOLD = true;
-//        DISTTHRESHOLD = true;
-//        MINALPHA = true;
-//        TIMEOUT = true;
-//        LOGLEVEL = false;
+        FREQTHRESHOLD = Source.getOptionFreqThreshold(Boolean.valueOf(args[0]));
+        DISTTHRESHOLD = Source.getOptionDistThreshold(Boolean.valueOf(args[1]));
+        MINALPHA = Source.getOptionMinAlpha(Boolean.valueOf(args[2]));
+        TIMEOUT = Source.getOptionTimeout(Boolean.valueOf(args[3]));
+        LOGLEVEL = Source.getOptionLogLevel(Boolean.valueOf(args[4]));
 
-//		Double distThreshold = safeDouble(options.get("--distThreshold"), 0.005D);  // min @8bit: 0.000005
-//		Double freqThreshold = safeDouble(options.get("--freqThreshold"), 0.0005D);
-//		Integer minAlpha = safeInteger(options.get("--minAlpha"), 30);
-//		Integer timeout = safeInteger(options.get("--timeout"), 0);
-//		String logLevel = options.get("--logLevel");
+//        FREQTHRESHOLD = Source.getOptionFreqThreshold(true);
+//        DISTTHRESHOLD = Source.getOptionDistThreshold(true);
+//        MINALPHA = Source.getOptionMinAlpha(true);
+//        TIMEOUT = Source.getOptionTimeout(true);
+//        LOGLEVEL = Source.getOptionLogLevel(true);
 
-        Double distThreshold = null;
-        Double freqThreshold = null;
-        Integer minAlpha = null;
-        Integer timeout = null;
-        String logLevel = null;
+        Double distThreshold;
+        Double freqThreshold;
+        Integer minAlpha;
+        Integer timeout;
+        String logLevel;
 
-        if(DISTTHRESHOLD) {
+        if(Sink.getDecision1(DISTTHRESHOLD)) {
             distThreshold = 0.0D;
         }
         else {
             distThreshold = 1.0D;
         }
 
-        if(FREQTHRESHOLD) {
+        if(Sink.getDecision1(FREQTHRESHOLD)) {
             freqThreshold = 0.0D;
         }
         else {
             freqThreshold = 1.0D;
         }
 
-        if(MINALPHA) {
+        if(Sink.getDecision1(MINALPHA)) {
             minAlpha = 10;
         }
         else {
             minAlpha = 50;
         }
 
-        if(TIMEOUT) {
+        if(Sink.getDecision1(TIMEOUT)) {
             timeout = 0;
         }
         else {
-            timeout = 1000000000;
+            timeout = 1_000_000;
         }
 
-        if(LOGLEVEL) {
+        if(Sink.getDecision1(LOGLEVEL)) {
             logLevel = "debug";
         }
         else {
             logLevel = "none";
         }
 
-//        new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
-        new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout, "");
+        new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
     }
 
     private static Integer safeInteger(String input, Integer dflt) {

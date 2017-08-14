@@ -18,16 +18,14 @@ package kanzi.test;
 import kanzi.util.sort.RadixSort;
 
 
-public class TestRadixSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestRadixSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("RadixSort (radix 1)", new RadixSort(1), 5);
         testCorrectness("RadixSort (radix 2)", new RadixSort(2), 5);
         testCorrectness("RadixSort (radix 4)", new RadixSort(4), 5);
         testCorrectness("RadixSort (radix 8)", new RadixSort(8), 5);
         testSpeed("RadixSort (radix 4)", new RadixSort(4), 5000);
         testSpeed("RadixSort (radix 8)", new RadixSort(8), 5000);
-    }    
+    }
 }
 

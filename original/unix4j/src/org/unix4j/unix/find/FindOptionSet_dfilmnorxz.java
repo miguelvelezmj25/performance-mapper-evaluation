@@ -23,7 +23,7 @@ public enum FindOptionSet_dfilmnorxz implements FindOptions {
     Active_imnorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*m:*/null /*already set*/, /*timeModified:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*d:*/FindOptionSet_dimnorz.Active_dimnorz, /*typeDirectory:*/FindOptionSet_dimnorz.Active_dimnorz_long, /*f:*/FindOptionSet_fimnorz.Active_fimnorz, /*typeFile:*/FindOptionSet_fimnorz.Active_fimnorz_long, /*x:*/FindOptionSet_imnorxz.Active_imnorxz, /*typeOther:*/FindOptionSet_imnorxz.Active_imnorxz_long, /*l:*/FindOptionSet_ilmnorz.Active_ilmnorz, /*typeSymlink:*/FindOptionSet_ilmnorz.Active_ilmnorz_long,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeModified, FindOption.timeNewer, FindOption.timeOlder
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeModified, FindOption.timeNewer, FindOption.timeOlder
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeModified m}, {@link #timeNewer n}, {@link #timeOlder o}.
@@ -792,6 +792,7 @@ public enum FindOptionSet_dfilmnorxz implements FindOptions {
     public final FindOptionSet_ilmnorz typeSymlink;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_dfilmnorxz(
             FindOptionSet_dfilmnorxz i, FindOptionSet_dfilmnorxz ignoreCase, FindOptionSet_dfilmnorxz z, FindOptionSet_dfilmnorxz print0, FindOptionSet_dfilmnorxz r, FindOptionSet_dfilmnorxz regex, FindOptionSet_dfilmnorxz m, FindOptionSet_dfilmnorxz timeModified, FindOptionSet_dfilmnorxz n, FindOptionSet_dfilmnorxz timeNewer, FindOptionSet_dfilmnorxz o, FindOptionSet_dfilmnorxz timeOlder, FindOptionSet_dimnorz d, FindOptionSet_dimnorz typeDirectory, FindOptionSet_fimnorz f, FindOptionSet_fimnorz typeFile, FindOptionSet_imnorxz x, FindOptionSet_imnorxz typeOther, FindOptionSet_ilmnorz l, FindOptionSet_ilmnorz typeSymlink,
             boolean useAcronym,

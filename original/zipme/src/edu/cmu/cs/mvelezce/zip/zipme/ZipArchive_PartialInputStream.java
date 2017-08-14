@@ -20,7 +20,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     synchronized void setLength(int length) {
         count = pos + length;
-        if (count > buf.length) {
+        if(count > buf.length) {
             count = buf.length;
         }
     }
@@ -28,7 +28,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public synchronized int read() {
-        if (dummyByteCount > 0 && pos == count) {
+        if(dummyByteCount > 0 && pos == count) {
             dummyByteCount = 0;
             pos++;
             return 0;
@@ -40,13 +40,13 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public synchronized int read(byte[] buffer, int offset, int length) {
         int numBytes = super.read(buffer, offset, length);
-        if (dummyByteCount > 0 && numBytes < length) {
+        if(dummyByteCount > 0 && numBytes < length) {
             dummyByteCount = 0;
-            if (pos < count) {
+            if(pos < count) {
                 buffer[offset + numBytes++] = buf[pos++];
             }
-            else if (pos == count) {
-                if (numBytes == -1) {
+            else if(pos == count) {
+                if(numBytes == -1) {
                     numBytes = 0;
                 }
                 buffer[offset + numBytes++] = 0;
@@ -65,7 +65,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     void readFully(byte[] buf) throws EOFException {
-        if (read(buf, 0, buf.length) != buf.length) {
+        if(read(buf, 0, buf.length) != buf.length) {
             throw new EOFException();
         }
     }
@@ -73,7 +73,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     void readFully(byte[] buf, int off, int len) throws EOFException {
-        if (read(buf, off, len) != len) {
+        if(read(buf, off, len) != len) {
             throw new EOFException();
         }
     }
@@ -83,7 +83,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
     synchronized int readLeShort() throws EOFException {
         int b0 = read();
         int b1 = read();
-        if (b1 == -1) {
+        if(b1 == -1) {
             throw new EOFException();
         }
         return (b0 & 0xff) | (b1 & 0xff) << 8;
@@ -96,7 +96,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
         int b1 = read();
         int b2 = read();
         int b3 = read();
-        if (b3 == -1) {
+        if(b3 == -1) {
             throw new EOFException();
         }
         return ((b0 & 0xff) | (b1 & 0xff) << 8) | ((b2 & 0xff) | (b3 & 0xff) << 8) << 16;
@@ -105,7 +105,7 @@ public final class ZipArchive_PartialInputStream extends ByteArrayInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     synchronized String readString(int length) throws EOFException {
-        if (length > count - pos) {
+        if(length > count - pos) {
             throw new EOFException();
         }
         try {

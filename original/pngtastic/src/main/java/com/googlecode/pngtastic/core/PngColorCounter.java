@@ -3,6 +3,7 @@ package com.googlecode.pngtastic.core;
 import com.googlecode.pngtastic.core.processing.PngByteArrayOutputStream;
 import com.googlecode.pngtastic.core.processing.PngInterlaceHandler;
 import com.googlecode.pngtastic.core.processing.PngtasticInterlaceHandler;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -26,17 +27,21 @@ public class PngColorCounter extends PngProcessor {
 
     private ColorCounterResult colorCounterResult;
 
-//    public PngColorCounter() {
-//        this(Logger.NONE, 0.01D, 0.01D, 30, 0L);
-//    }
-//
-//    public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha) {
-//        this(Logger.NONE, distThreshold, freqThreshold, minAlpha, 0L);
-//    }
-//
-//    public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha, long timeout) {
-//        this(Logger.NONE, distThreshold, freqThreshold, minAlpha, timeout);
-//    }
+    public ColorCounterResult getResult() {
+        return colorCounterResult;
+    }
+
+    public PngColorCounter() {
+        this(Logger.NONE, 0.01D, 0.01D, 30, 0L);
+    }
+
+    public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha) {
+        this(Logger.NONE, distThreshold, freqThreshold, minAlpha, 0L);
+    }
+
+    public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha, long timeout) {
+        this(Logger.NONE, distThreshold, freqThreshold, minAlpha, timeout);
+    }
 
     public PngColorCounter(String logLevel, double distThreshold, double freqThreshold, int minAlpha, long timeout) {
         super(logLevel);
@@ -49,16 +54,12 @@ public class PngColorCounter extends PngProcessor {
         this.pngInterlaceHandler = new PngtasticInterlaceHandler(log, pngFilterHandler);
     }
 
-    public ColorCounterResult getResult() {
-        return colorCounterResult;
-    }
-
     /** */
     public void count(PngImage image) throws IOException {
         log.debug("=== COUNTING ===");
 
         // FIXME: support low bit depth interlaced images
-        if(image.getInterlace() == 1 && image.getSampleBitCount() < 8) {
+        if(Sink.getDecision1(image.getInterlace() == 1 && image.getSampleBitCount() < 8)) {
             log.debug("not supported");
             return;
         }
@@ -93,7 +94,7 @@ public class PngColorCounter extends PngProcessor {
 
         int y = 0;
         for(byte[] row : rows) {
-            if(timeout > 0 && (System.currentTimeMillis() - start > timeout)) {
+            if(Sink.getDecision1(timeout > 0 && (System.currentTimeMillis() - start > timeout))) {
                 throw new PngException("Reached " + timeout + "ms timeout");
             }
             final int sampleCount = ((row.length - 1) * 8) / sampleSize;
@@ -123,7 +124,7 @@ public class PngColorCounter extends PngProcessor {
 
                     case TRUECOLOR: {
                         final PngPixel pixel;
-                        if(original.getBitDepth() == 8) {
+                        if(Sink.getDecision1(original.getBitDepth() == 8)) {
                             final int r = dis.readUnsignedByte();
                             final int g = dis.readUnsignedByte();
                             final int b = dis.readUnsignedByte();
@@ -142,7 +143,7 @@ public class PngColorCounter extends PngProcessor {
 
                     case TRUECOLOR_ALPHA: {
                         final PngPixel pixel;
-                        if(original.getBitDepth() == 8) {
+                        if(Sink.getDecision1(original.getBitDepth() == 8)) {
                             final int r = dis.readUnsignedByte();
                             final int g = dis.readUnsignedByte();
                             final int b = dis.readUnsignedByte();
@@ -156,7 +157,7 @@ public class PngColorCounter extends PngProcessor {
                             final int a = dis.readUnsignedShort();
                             pixel = new PngPixel(x, y, r, g, b, a);
                         }
-                        if(pixel.getAlpha() > minAlpha) {
+                        if(Sink.getDecision1(pixel.getAlpha() > minAlpha)) {
                             final Integer count = colors.get(pixel);
                             colors.put(pixel, (count == null) ? 1 : (count + 1));
                         }
@@ -171,11 +172,11 @@ public class PngColorCounter extends PngProcessor {
         }
         log.debug("Full color count=%d", colors.size());
 
-        if(freqThreshold > 0) {
+        if(Sink.getDecision1(freqThreshold > 0)) {
             final int minFreq = (int) (original.getWidth() * original.getHeight() * freqThreshold);
             for(Iterator<Map.Entry<PngPixel, Integer>> it = colors.entrySet().iterator(); it.hasNext(); ) {
                 final Entry<PngPixel, Integer> entry = it.next();
-                if(entry.getValue() < minFreq) {
+                if(Sink.getDecision1(entry.getValue() < minFreq)) {
                     it.remove();
                 }
             }
@@ -195,20 +196,20 @@ public class PngColorCounter extends PngProcessor {
         final List<PngPixel> copy = new ArrayList<>(colors);
 
         for(PngPixel pa : colors) {
-            if(timeout > 0 && (System.currentTimeMillis() - start > timeout)) {
+            if(Sink.getDecision1(timeout > 0 && (System.currentTimeMillis() - start > timeout))) {
                 throw new PngException("Reached " + timeout + "ms timeout");
             }
 
-            if(!pa.isDuplicate()) {
+            if(Sink.getDecision1(!pa.isDuplicate())) {
                 for(Iterator<PngPixel> it = copy.iterator(); it.hasNext(); ) {
                     final PngPixel pb = it.next();
 
-                    if(pb.isDuplicate()) {
+                    if(Sink.getDecision1(pb.isDuplicate())) {
                         it.remove();
 
                     }
-                    else if(pa != pb && pa.rgbaDistance(pb, bits) < distThreshold) {
-                        if(pa.getFreq() > pb.getFreq()) {
+                    else if(Sink.getDecision1(pa != pb && pa.rgbaDistance(pb, bits) < distThreshold)) {
+                        if(Sink.getDecision1(pa.getFreq() > pb.getFreq())) {
                             pb.setDuplicate(true);
                             it.remove();
                         }
@@ -222,7 +223,7 @@ public class PngColorCounter extends PngProcessor {
 
         final List<PngPixel> results = new ArrayList<>();
         for(PngPixel p : colors) {
-            if(!p.isDuplicate()) {
+            if(Sink.getDecision1(!p.isDuplicate())) {
                 results.add(p);
             }
         }

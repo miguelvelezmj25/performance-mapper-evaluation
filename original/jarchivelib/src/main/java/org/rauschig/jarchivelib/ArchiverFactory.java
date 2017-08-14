@@ -1,19 +1,21 @@
 /**
- *    Copyright 2013 Thomas Rausch
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2013 Thomas Rausch
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.rauschig.jarchivelib;
+
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.File;
 
@@ -31,7 +33,7 @@ public final class ArchiverFactory {
      * Probes the given {@link File} for its file type and creates an {@link Archiver} based on this file type. If the
      * File has a composite file extension such as ".tar.gz", the created {@link Archiver} will also handle ".gz"
      * compression.
-     * 
+     *
      * @param archive the archive file to check.
      * @return a new Archiver instance (that may also handle compression)
      * @throws IllegalArgumentException if the given file is not a known archive
@@ -39,7 +41,7 @@ public final class ArchiverFactory {
     public static Archiver createArchiver(File archive) throws IllegalArgumentException {
         FileType fileType = FileType.get(archive);
 
-        if (fileType == FileType.UNKNOWN) {
+        if(Sink.getDecision(fileType == FileType.UNKNOWN)) {
             throw new IllegalArgumentException("Unknown file extension " + archive.getName());
         }
 
@@ -49,37 +51,39 @@ public final class ArchiverFactory {
     /**
      * Creates an Archiver that handles the given {@link FileType}. The Archiver may handle compression inherently, if
      * the {@link FileType} uses a compression type, such as ".tgz" might.
-     * 
+     *
      * @param fileType the file type
      * @return a new Archiver instance (that may also handle compression)
      */
     public static Archiver createArchiver(FileType fileType) {
-        if (fileType == FileType.UNKNOWN) {
+        if(Sink.getDecision(fileType == FileType.UNKNOWN)) {
             throw new IllegalArgumentException("Unknown file type");
         }
 
-        if (fileType.isArchive() && fileType.isCompressed()) {
+        if(Sink.getDecision(fileType.isArchive() && fileType.isCompressed())) {
             return createArchiver(fileType.getArchiveFormat(), fileType.getCompressionType());
-        } else if (fileType.isArchive()) {
+        }
+        else if(Sink.getDecision(fileType.isArchive())) {
             return createArchiver(fileType.getArchiveFormat());
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Unknown archive file extension " + fileType);
         }
     }
 
     /**
      * Creates an Archiver for the given archive format that uses compression.
-     * 
+     *
      * @param archiveFormat the archive format e.g. "tar" or "zip"
      * @param compression the compression algorithm name e.g. "gz"
      * @return a new Archiver instance that also handles compression
      * @throws IllegalArgumentException if the archive format or the compression type is unknown
      */
     public static Archiver createArchiver(String archiveFormat, String compression) throws IllegalArgumentException {
-        if (!ArchiveFormat.isValidArchiveFormat(archiveFormat)) {
+        if(Sink.getDecision(!ArchiveFormat.isValidArchiveFormat(archiveFormat))) {
             throw new IllegalArgumentException("Unknown archive format " + archiveFormat);
         }
-        if (!CompressionType.isValidCompressionType(compression)) {
+        if(Sink.getDecision(!CompressionType.isValidCompressionType(compression))) {
             throw new IllegalArgumentException("Unknown compression type " + compression);
         }
 
@@ -88,7 +92,7 @@ public final class ArchiverFactory {
 
     /**
      * Creates an Archiver for the given archive format that uses compression.
-     * 
+     *
      * @param archiveFormat the archive format
      * @param compression the compression algorithm
      * @return a new Archiver instance that also handles compression
@@ -102,13 +106,13 @@ public final class ArchiverFactory {
 
     /**
      * Creates an Archiver for the given archive format.
-     * 
+     *
      * @param archiveFormat the archive format e.g. "tar" or "zip"
      * @return a new Archiver instance
      * @throws IllegalArgumentException if the archive format is unknown
      */
     public static Archiver createArchiver(String archiveFormat) throws IllegalArgumentException {
-        if (!ArchiveFormat.isValidArchiveFormat(archiveFormat)) {
+        if(Sink.getDecision(!ArchiveFormat.isValidArchiveFormat(archiveFormat))) {
             throw new IllegalArgumentException("Unknown archive format " + archiveFormat);
         }
 
@@ -117,14 +121,15 @@ public final class ArchiverFactory {
 
     /**
      * Creates an Archiver for the given archive format.
-     * 
+     *
      * @param archiveFormat the archive format
      * @return a new Archiver instance
      */
     public static Archiver createArchiver(ArchiveFormat archiveFormat) {
-        if (archiveFormat == ArchiveFormat.SEVEN_Z) {
+        if(Sink.getDecision(archiveFormat == ArchiveFormat.SEVEN_Z)) {
             return new SevenZArchiver();
-        } else if (archiveFormat == ArchiveFormat.ZIP) {
+        }
+        else if(Sink.getDecision(archiveFormat == ArchiveFormat.ZIP)) {
             return new ZipFileArchiver();
         }
         return new CommonsArchiver(archiveFormat);

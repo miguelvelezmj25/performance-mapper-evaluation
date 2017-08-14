@@ -1,5 +1,7 @@
 package org.unix4j.option;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -192,7 +194,7 @@ public class DefaultOptionSet<E extends Enum<E> & Option> implements OptionSet<E
     @Override
     public DefaultOptionSet<E> clone() {
         try {
-            @SuppressWarnings("unchecked")            final DefaultOptionSet<E> clone = (DefaultOptionSet<E>) super.clone();
+            @SuppressWarnings("unchecked") final DefaultOptionSet<E> clone = (DefaultOptionSet<E>) super.clone();
             clone.options = clone.options.clone();
             clone.useAcronym = clone.useAcronym.clone();
             return clone;

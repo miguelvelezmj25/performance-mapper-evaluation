@@ -46,7 +46,7 @@ public class DefaultConverterRegistry implements ConverterRegistry {
 
     @Override
     public <V> ValueConverter<V> getValueConverterFor(Class<V> type) {
-        @SuppressWarnings("unchecked")        final ValueConverter<V> converter = (ValueConverter<V>) converterByType.get(type);
+        @SuppressWarnings("unchecked") final ValueConverter<V> converter = (ValueConverter<V>) converterByType.get(type);
         if(converter != null) {
             return converter;
         }
@@ -55,7 +55,7 @@ public class DefaultConverterRegistry implements ConverterRegistry {
 
     private <V> ValueConverter<V> getEnumConverterFor(Class<V> type) {
         if(type.isEnum()) {
-            @SuppressWarnings({"rawtypes", "unchecked"})            final ValueConverter<V> enumConverter = new StringToEnumConverter(type);
+            @SuppressWarnings({"rawtypes", "unchecked"}) final ValueConverter<V> enumConverter = new StringToEnumConverter(type);
             return enumConverter;
         }
         return null;

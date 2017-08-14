@@ -20,6 +20,7 @@ public class NoOp extends AbstractCommand<NoOp.Args> {
      * The singleton instance.
      */
     public static final NoOp INSTANCE = new NoOp();
+
     /**
      * Private constructor for singleton {@link #INSTANCE}.
      */

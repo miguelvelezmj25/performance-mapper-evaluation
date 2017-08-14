@@ -1,41 +1,36 @@
 /**
- *    Copyright 2013 Thomas Rausch
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2013 Thomas Rausch
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.rauschig.jarchivelib;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.*;
+
+import java.io.*;
 
 /**
  * Implementation of an {@link Archiver} that uses {@link ArchiveStreamFactory} to generate archive streams by a given
  * archiver name passed when creating the {@code GenericArchiver}. Thus, it can be used for all archive formats the
  * {@code org.apache.commons.compress} library supports.
  */
-public class CommonsArchiver implements Archiver {
+class CommonsArchiver implements Archiver {
 
     private final ArchiveFormat archiveFormat;
 
-    public CommonsArchiver(ArchiveFormat archiveFormat) {
+    CommonsArchiver(ArchiveFormat archiveFormat) {
         this.archiveFormat = archiveFormat;
     }
 
@@ -44,7 +39,13 @@ public class CommonsArchiver implements Archiver {
     }
 
     @Override
+    public File create(String archive, File destination, File source) throws IOException {
+        return create(archive, destination, IOUtils.filesContainedIn(source));
+    }
+
+    @Override
     public File create(String archive, File destination, File... sources) throws IOException {
+
         IOUtils.requireDirectory(destination);
 
         File archiveFile = createNewArchiveFile(archive, getFilenameExtension(), destination);
@@ -71,23 +72,33 @@ public class CommonsArchiver implements Archiver {
         ArchiveInputStream input = null;
         try {
             input = createArchiveInputStream(archive);
-
-            ArchiveEntry entry;
-            while ((entry = input.getNextEntry()) != null) {
-                File file = new File(destination, entry.getName());
-
-                if (entry.isDirectory()) {
-                    file.mkdirs();
-                } else {
-                    file.getParentFile().mkdirs();
-                    IOUtils.copy(input, file);
-                }
-
-                FileModeMapper.map(entry, file);
-            }
+            extract(input, destination);
 
         } finally {
             IOUtils.closeQuietly(input);
+        }
+    }
+
+    @Override
+    public void extract(InputStream archive, File destination) throws IOException {
+        ArchiveInputStream input = createArchiveInputStream(archive);
+        extract(input, destination);
+    }
+
+    private void extract(ArchiveInputStream input, File destination) throws IOException {
+        ArchiveEntry entry;
+        while ((entry = input.getNextEntry()) != null) {
+            File file = new File(destination, entry.getName());
+
+            if(Sink.getDecision(entry.isDirectory())) {
+                file.mkdirs();
+            }
+            else {
+                file.getParentFile().mkdirs();
+                IOUtils.copy(input, file);
+            }
+
+            FileModeMapper.map(entry, file);
         }
     }
 
@@ -104,7 +115,7 @@ public class CommonsArchiver implements Archiver {
     /**
      * Returns a new ArchiveInputStream for reading archives. Subclasses can override this to return their own custom
      * implementation.
-     * 
+     *
      * @param archive the archive file to stream from
      * @return a new ArchiveInputStream for the given archive file
      * @throws IOException propagated IO exceptions
@@ -118,9 +129,25 @@ public class CommonsArchiver implements Archiver {
     }
 
     /**
+     * Returns a new ArchiveInputStream for reading archives. Subclasses can override this to return their own custom
+     * implementation.
+     *
+     * @param archive the archive contents to stream from
+     * @return a new ArchiveInputStream for the given archive file
+     * @throws IOException propagated IO exceptions
+     */
+    protected ArchiveInputStream createArchiveInputStream(InputStream archive) throws IOException {
+        try {
+            return CommonsStreamFactory.createArchiveInputStream(archive);
+        } catch (ArchiveException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
      * Returns a new ArchiveOutputStream for creating archives. Subclasses can override this to return their own custom
      * implementation.
-     * 
+     *
      * @param archiveFile the archive file to stream to
      * @return a new ArchiveOutputStream for the given archive file.
      * @throws IOException propagated IO exceptions
@@ -135,17 +162,19 @@ public class CommonsArchiver implements Archiver {
 
     /**
      * Asserts that the given File object is a readable file that can be used to extract from.
-     * 
+     *
      * @param archive the file to check
      * @throws FileNotFoundException if the file does not exist
      * @throws IllegalArgumentException if the file is a directory or not readable
      */
     protected void assertExtractSource(File archive) throws FileNotFoundException, IllegalArgumentException {
-        if (archive.isDirectory()) {
+        if(Sink.getDecision(archive.isDirectory())) {
             throw new IllegalArgumentException("Can not extract " + archive + ". Source is a directory.");
-        } else if (!archive.exists()) {
+        }
+        else if(Sink.getDecision(!archive.exists())) {
             throw new FileNotFoundException(archive.getPath());
-        } else if (!archive.canRead()) {
+        }
+        else if(Sink.getDecision(!archive.canRead())) {
             throw new IllegalArgumentException("Can not extract " + archive + ". Can not read from source.");
         }
     }
@@ -153,7 +182,7 @@ public class CommonsArchiver implements Archiver {
     /**
      * Creates a new File in the given destination. The resulting name will always be "archive"."fileExtension". If the
      * archive name parameter already ends with the given file name extension, it is not additionally appended.
-     * 
+     *
      * @param archive the name of the archive
      * @param extension the file extension (e.g. ".tar")
      * @param destination the parent path
@@ -161,7 +190,7 @@ public class CommonsArchiver implements Archiver {
      * @throws IOException if an I/O error occurred while creating the file
      */
     protected File createNewArchiveFile(String archive, String extension, File destination) throws IOException {
-        if (!archive.endsWith(extension)) {
+        if(Sink.getDecision(!archive.endsWith(extension))) {
             archive += extension;
         }
 
@@ -175,43 +204,40 @@ public class CommonsArchiver implements Archiver {
      * Recursion entry point for {@link #writeToArchive(File, File[], ArchiveOutputStream)}.
      * <p/>
      * Recursively writes all given source {@link File}s into the given {@link ArchiveOutputStream}.
-     * 
+     *
      * @param sources the files to write in to the archive
      * @param archive the archive to write into
      * @throws IOException when an I/O error occurs
      */
     protected void writeToArchive(File[] sources, ArchiveOutputStream archive) throws IOException {
-        for (File source : sources) {
-            if (!source.exists()) {
+        for(File source : sources) {
+            if(Sink.getDecision(!source.exists())) {
                 throw new FileNotFoundException(source.getPath());
-            } else if (!source.canRead()) {
+            }
+            else if(Sink.getDecision(!source.canRead())) {
                 throw new FileNotFoundException(source.getPath() + " (Permission denied)");
             }
 
-            if (source.isFile()) {
-                writeToArchive(source.getParentFile(), new File[]{ source }, archive);
-            } else {
-                writeToArchive(source, source.listFiles(), archive);
-            }
+            writeToArchive(source.getParentFile(), new File[]{source}, archive);
         }
     }
 
     /**
      * Recursively writes all given source {@link File}s into the given {@link ArchiveOutputStream}. The paths of the
      * sources in the archive will be relative to the given parent {@code File}.
-     * 
+     *
      * @param parent the parent file node for computing a relative path (see {@link IOUtils#relativePath(File, File)})
      * @param sources the files to write in to the archive
      * @param archive the archive to write into
      * @throws IOException when an I/O error occurs
      */
     protected void writeToArchive(File parent, File[] sources, ArchiveOutputStream archive) throws IOException {
-        for (File source : sources) {
+        for(File source : sources) {
             String relativePath = IOUtils.relativePath(parent, source);
 
             createArchiveEntry(source, relativePath, archive);
 
-            if (source.isDirectory()) {
+            if(Sink.getDecision(source.isDirectory())) {
                 writeToArchive(parent, source.listFiles(), archive);
             }
         }
@@ -220,7 +246,7 @@ public class CommonsArchiver implements Archiver {
     /**
      * Creates a new {@link ArchiveEntry} in the given {@link ArchiveOutputStream}, and copies the given {@link File}
      * into the new entry.
-     * 
+     *
      * @param file the file to add to the archive
      * @param entryName the name of the archive entry
      * @param archive the archive to write to
@@ -231,7 +257,7 @@ public class CommonsArchiver implements Archiver {
         // TODO #23: read permission from file, write it to the ArchiveEntry
         archive.putArchiveEntry(entry);
 
-        if (!entry.isDirectory()) {
+        if(Sink.getDecision(!entry.isDirectory())) {
             FileInputStream input = null;
             try {
                 input = new FileInputStream(file);

@@ -23,7 +23,7 @@ public enum SortOptionSet_Vbdfmru implements SortOptions {
     Active_Vbdfmru(
         /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/null /*already set*/, /*merge:*/null /*already set*/, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/, /*V:*/null /*already set*/, /*versionSort:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.merge, SortOption.reverse, SortOption.unique, SortOption.versionSort
+        /*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.merge, SortOption.reverse, SortOption.unique, SortOption.versionSort
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #merge m}, {@link #reverse r}, {@link #unique u}, {@link #versionSort V}.
@@ -708,6 +708,7 @@ public enum SortOptionSet_Vbdfmru implements SortOptions {
     public final SortOptionSet_Vbdfmru versionSort;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_Vbdfmru(
             SortOptionSet_Vbdfmru d, SortOptionSet_Vbdfmru dictionaryOrder, SortOptionSet_Vbdfmru f, SortOptionSet_Vbdfmru ignoreCase, SortOptionSet_Vbdfmru b, SortOptionSet_Vbdfmru ignoreLeadingBlanks, SortOptionSet_Vbdfmru m, SortOptionSet_Vbdfmru merge, SortOptionSet_Vbdfmru r, SortOptionSet_Vbdfmru reverse, SortOptionSet_Vbdfmru u, SortOptionSet_Vbdfmru unique, SortOptionSet_Vbdfmru V, SortOptionSet_Vbdfmru versionSort,
             boolean useAcronym,

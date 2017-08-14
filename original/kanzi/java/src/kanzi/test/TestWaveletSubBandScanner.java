@@ -18,64 +18,62 @@ package kanzi.test;
 import kanzi.function.wavelet.WaveletBandScanner;
 
 
-public class TestWaveletSubBandScanner
-{
-    
-    public static void main(String[] args)
-    {
+public class TestWaveletSubBandScanner {
+
+    public static void main(String[] args) {
         int h = 256;
         int w = 512;
 //        int[] buffer = new int[size*size];
-        int[] output = new int[w*h];
-        
+        int[] output = new int[w * h];
+
 //        for (int i=0; i<buffer.length; i++)
 //            buffer[i] = i;
-        
+
         System.out.println("\nOne shot Scan");
         WaveletBandScanner scanner = new WaveletBandScanner(w, h, WaveletBandScanner.ALL_BANDS, 5);
         int maxLoop = 1;
         int n = 0;
         long before = System.nanoTime();
-        
-        for (int ii=0; ii<maxLoop; ii++)
-          n = scanner.getIndexes(output);       
-        
+
+        for(int ii = 0; ii < maxLoop; ii++)
+            n = scanner.getIndexes(output);
+
         long after = System.nanoTime();
-        
-        if (maxLoop > 1)
-            System.out.println("Elapsed [ms]: "+(after-before)/1000000);
-        
-        System.out.println(scanner.getSize()+" coefficients");
-        System.out.println(n+" read coefficients");
-        
-        for (int i=0; i<n; i+=100)
-        {
-            for (int j=i; j<i+100; j++)
-                System.out.print(output[j]+" ");
-            
+
+        if(maxLoop > 1) {
+            System.out.println("Elapsed [ms]: " + (after - before) / 1000000);
+        }
+
+        System.out.println(scanner.getSize() + " coefficients");
+        System.out.println(n + " read coefficients");
+
+        for(int i = 0; i < n; i += 100) {
+            for(int j = i; j < i + 100; j++)
+                System.out.print(output[j] + " ");
+
             System.out.println();
         }
-        
+
         System.out.println("\nPartial Scan");
         output = new int[100];
         int count = 0;
         n = 0;
-        
-        while (count < scanner.getSize())
-        {
-            if (count == 130900)
+
+        while (count < scanner.getSize()) {
+            if(count == 130900) {
                 System.out.println("");
-            
+            }
+
             int processed = scanner.getIndexes(output, output.length, count);
             count += processed;
-            System.out.println(processed+" coefficients (total="+count+")");
+            System.out.println(processed + " coefficients (total=" + count + ")");
             n++;
-            
-            for (int i=0; i<processed; i++)
-                System.out.print(output[i]+" ");
-            
+
+            for(int i = 0; i < processed; i++)
+                System.out.print(output[i] + " ");
+
             System.out.println();
         }
-        
+
     }
 }

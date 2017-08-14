@@ -145,10 +145,10 @@ public class Deflater {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public Deflater(int lvl, boolean nowrap) {
-        if (lvl == DEFAULT_COMPRESSION) {
+        if(lvl == DEFAULT_COMPRESSION) {
             lvl = 6;
         }
-        else if (lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION) {
+        else if(lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION) {
             throw new IllegalArgumentException();
         }
         pending = new DeflaterPending();
@@ -193,7 +193,7 @@ public class Deflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 9, thenFeature = "Compress", elseFeature = "Base")
     public void
     reset() {
-        if (FEATURECompress) {
+        if(FEATURECompress) {
             reset__role__Compress();
         }
         else {
@@ -244,7 +244,7 @@ public class Deflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 10, thenFeature = "Compress", elseFeature = "Base")
     public void
     end() {
-        if (FEATURECompress) {
+        if(FEATURECompress) {
             end__role__Compress();
         }
         else {
@@ -279,7 +279,7 @@ public class Deflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 11, thenFeature = "Compress", elseFeature = "Base")
     protected void
     hook24(int lvl) {
-        if (FEATURECompress) {
+        if(FEATURECompress) {
             hook24__role__Compress(lvl);
         }
         else {
@@ -304,7 +304,7 @@ public class Deflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 12, thenFeature = "Compress", elseFeature = "Base")
     protected void
     hook25() {
-        if (FEATURECompress) {
+        if(FEATURECompress) {
             hook25__role__Compress();
         }
         else {
@@ -422,7 +422,7 @@ public class Deflater {
      */
 
     public void setInput(byte[] input, int off, int len) {
-        if ((state & IS_FINISHING) != 0) {
+        if((state & IS_FINISHING) != 0) {
             throw new IllegalStateException("finish()/end() already called");
         }
         engine.setInput(input, off, len);
@@ -439,13 +439,13 @@ public class Deflater {
      */
 
     public void setLevel(int lvl) {
-        if (lvl == DEFAULT_COMPRESSION) {
+        if(lvl == DEFAULT_COMPRESSION) {
             lvl = 6;
         }
-        else if (lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION) {
+        else if(lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION) {
             throw new IllegalArgumentException();
         }
-        if (level != lvl) {
+        if(level != lvl) {
             level = lvl;
             engine.setLevel(lvl);
         }
@@ -462,7 +462,7 @@ public class Deflater {
      */
 
     public void setStrategy(int stgy) {
-        if (stgy != DEFAULT_STRATEGY && stgy != FILTERED && stgy != HUFFMAN_ONLY) {
+        if(stgy != DEFAULT_STRATEGY && stgy != FILTERED && stgy != HUFFMAN_ONLY) {
             throw new IllegalArgumentException();
         }
         engine.setStrategy(stgy);
@@ -531,7 +531,7 @@ public class Deflater {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void setDictionary(byte[] dict, int offset, int length) {
-        if (state != INIT_STATE) {
+        if(state != INIT_STATE) {
             throw new IllegalStateException();
         }
         state = SETDICT_STATE;

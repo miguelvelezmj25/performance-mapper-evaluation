@@ -18,11 +18,9 @@ package kanzi.test;
 import kanzi.util.sort.BitonicSort;
 
 
-public class TestBitonicSort extends TestAbstractSort
-{
-    public static void main(String[] args)
-    {
+public class TestBitonicSort extends TestAbstractSort {
+    public static void main(String[] args) {
         testCorrectness("BitonicSort", new BitonicSort(), 20);
         testSpeed("BitonicSort", new BitonicSort(), 4000);
-    }    
+    }
 }

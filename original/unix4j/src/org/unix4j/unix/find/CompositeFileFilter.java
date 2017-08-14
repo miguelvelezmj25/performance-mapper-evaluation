@@ -1,5 +1,7 @@
 package org.unix4j.unix.find;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ class CompositeFileFilter implements FileFilter {
     }
 
     public void addIfNotNull(FileFilter filter) {
-        if(filter != null) {
+        if(Sink.getDecision(filter != null)) {
             add(filter);
         }
     }
@@ -29,7 +31,7 @@ class CompositeFileFilter implements FileFilter {
     }
 
     public FileFilter simplify() {
-        if(componentFilters.isEmpty()) {
+        if(Sink.getDecision(componentFilters.isEmpty())) {
             return new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
@@ -37,7 +39,7 @@ class CompositeFileFilter implements FileFilter {
                 }
             };
         }
-        if(componentFilters.size() == 1) {
+        if(Sink.getDecision(componentFilters.size() == 1)) {
             return componentFilters.get(0);
         }
         return this;
@@ -46,7 +48,7 @@ class CompositeFileFilter implements FileFilter {
     @Override
     public boolean accept(File file) {
         for(final FileFilter filter : componentFilters) {
-            if(!filter.accept(file)) {
+            if(Sink.getDecision(!filter.accept(file))) {
                 return false;
             }
         }

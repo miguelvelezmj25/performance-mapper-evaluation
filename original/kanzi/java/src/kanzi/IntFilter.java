@@ -16,8 +16,7 @@ limitations under the License.
 package kanzi;
 
 
-public interface IntFilter
-{
+public interface IntFilter {
     // Apply filter on src and put result in dst
     // The dst array must have enough space
     // If the filter fails, it returns false.

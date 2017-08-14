@@ -1,11 +1,14 @@
 package org.unix4j;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.builder.DefaultUnix4jCommandBuilder;
 import org.unix4j.builder.Unix4jCommandBuilder;
 import org.unix4j.command.NoOp;
 import org.unix4j.context.ExecutionContextFactory;
+import org.unix4j.option.DefaultOptionSet;
 import org.unix4j.unix.cat.CatOptions;
 import org.unix4j.unix.echo.EchoOptions;
+import org.unix4j.unix.find.FindOption;
 import org.unix4j.unix.find.FindOptions;
 import org.unix4j.unix.grep.GrepOptions;
 import org.unix4j.unix.head.HeadOptions;
@@ -770,6 +773,16 @@ public final class Unix4j {
      * its output to the added command (the pipe symbol in unix)
      */
     public static Unix4jCommandBuilder find(FindOptions options, String path, java.util.Date time, String name) {
+        DefaultOptionSet s = (DefaultOptionSet) options;
+        if(Sink.getDecision(s == null)) {
+            System.out.println(";");
+        }
+        if(Sink.getDecision(options == null)) {
+            System.out.println(";");
+        }
+        if(Sink.getDecision(options.isSet(FindOption.ignoreCase))) {
+            System.out.println(";");
+        }
         return builder().find(options, path, time, name);
     }
 

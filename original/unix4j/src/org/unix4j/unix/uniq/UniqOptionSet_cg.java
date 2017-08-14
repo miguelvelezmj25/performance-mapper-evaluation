@@ -23,7 +23,7 @@ public enum UniqOptionSet_cg implements UniqOptions {
     Active_cg(
         /*c:*/null /*already set*/, /*count:*/null /*already set*/, /*g:*/null /*already set*/, /*global:*/null /*already set*/,
             true,
-		/*active:*/UniqOption.count, UniqOption.global
+        /*active:*/UniqOption.count, UniqOption.global
     ),
     /**
      * Option set with the following active options: {@link #count c}, {@link #global g}.
@@ -102,6 +102,7 @@ public enum UniqOptionSet_cg implements UniqOptions {
     public final UniqOptionSet_cg global;
     private final boolean useAcronym;
     private final EnumSet<UniqOption> options;
+
     private UniqOptionSet_cg(
             UniqOptionSet_cg c, UniqOptionSet_cg count, UniqOptionSet_cg g, UniqOptionSet_cg global,
             boolean useAcronym,

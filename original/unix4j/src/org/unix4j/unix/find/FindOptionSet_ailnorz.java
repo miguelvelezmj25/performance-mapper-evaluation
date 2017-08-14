@@ -23,7 +23,7 @@ public enum FindOptionSet_ailnorz implements FindOptions {
     Active_ailnorz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/null /*already set*/, /*timeAccess:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*l:*/null /*already set*/, /*typeSymlink:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeAccess, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeSymlink
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeAccess, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeSymlink
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeAccess a}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeSymlink l}.
@@ -722,6 +722,7 @@ public enum FindOptionSet_ailnorz implements FindOptions {
     public final FindOptionSet_ailnorz typeSymlink;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_ailnorz(
             FindOptionSet_ailnorz i, FindOptionSet_ailnorz ignoreCase, FindOptionSet_ailnorz z, FindOptionSet_ailnorz print0, FindOptionSet_ailnorz r, FindOptionSet_ailnorz regex, FindOptionSet_ailnorz a, FindOptionSet_ailnorz timeAccess, FindOptionSet_ailnorz n, FindOptionSet_ailnorz timeNewer, FindOptionSet_ailnorz o, FindOptionSet_ailnorz timeOlder, FindOptionSet_ailnorz l, FindOptionSet_ailnorz typeSymlink,
             boolean useAcronym,

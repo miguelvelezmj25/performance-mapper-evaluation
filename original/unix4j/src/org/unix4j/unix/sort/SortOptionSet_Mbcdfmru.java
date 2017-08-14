@@ -23,7 +23,7 @@ public enum SortOptionSet_Mbcdfmru implements SortOptions {
     Active_Mbdfru(
         /*c:*/SortOptionSet_Mbcdfru.Active_Mbcdfru, /*check:*/SortOptionSet_Mbcdfru.Active_Mbcdfru_long, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/SortOptionSet_Mbdfmru.Active_Mbdfmru, /*merge:*/SortOptionSet_Mbdfmru.Active_Mbdfmru_long, /*M:*/null /*already set*/, /*monthSort:*/null /*already set*/, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.monthSort, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.monthSort, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #monthSort M}, {@link #reverse r}, {@link #unique u}.
@@ -732,6 +732,7 @@ public enum SortOptionSet_Mbcdfmru implements SortOptions {
     public final SortOptionSet_Mbcdfmru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_Mbcdfmru(
             SortOptionSet_Mbcdfru c, SortOptionSet_Mbcdfru check, SortOptionSet_Mbcdfmru d, SortOptionSet_Mbcdfmru dictionaryOrder, SortOptionSet_Mbcdfmru f, SortOptionSet_Mbcdfmru ignoreCase, SortOptionSet_Mbcdfmru b, SortOptionSet_Mbcdfmru ignoreLeadingBlanks, SortOptionSet_Mbdfmru m, SortOptionSet_Mbdfmru merge, SortOptionSet_Mbcdfmru M, SortOptionSet_Mbcdfmru monthSort, SortOptionSet_Mbcdfmru r, SortOptionSet_Mbcdfmru reverse, SortOptionSet_Mbcdfmru u, SortOptionSet_Mbcdfmru unique,
             boolean useAcronym,

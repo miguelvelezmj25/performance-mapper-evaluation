@@ -1,0 +1,33 @@
+package org.prevayler.demos.demo1;
+
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * The NumberKeeper and all its references are the prevalent system.
+ * i.e: They are the "business objects" and will be transparently persisted by Prevayler.
+ */
+class NumberKeeper implements java.io.Serializable {
+
+    private static final long serialVersionUID = 2253937139530882022L;
+    private final List numbers = new ArrayList();
+
+
+    void keep(int nextNumber) {
+        numbers.add(new Integer(nextNumber));
+    }
+
+    List numbers() {
+        return numbers;
+    }
+
+    int lastNumber() {
+        return Sink.getDecision(numbers.isEmpty())
+                ? 0
+                : ((Integer) numbers.get(numbers.size() - 1)).intValue();
+    }
+
+}

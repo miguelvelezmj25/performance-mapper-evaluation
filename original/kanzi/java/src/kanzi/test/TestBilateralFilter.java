@@ -15,42 +15,35 @@ limitations under the License.
 
 package kanzi.test;
 
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import kanzi.SliceIntArray;
 import kanzi.IntFilter;
+import kanzi.SliceIntArray;
 import kanzi.filter.BilateralFilter;
 import kanzi.filter.FastBilateralFilter;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
-public class TestBilateralFilter
-{
 
-    public static void main(String[] args) throws Exception
-    {
+public class TestBilateralFilter {
+
+    public static void main(String[] args) throws Exception {
         String fileName = (args.length > 0) ? args[0] : "C:\\temp\\lena.jpg";
         Image image = ImageIO.read(new File(fileName));
         int w = image.getWidth(null);
         int h = image.getHeight(null);
-        System.out.println(w+"x"+h);
+        System.out.println(w + "x" + h);
         GraphicsDevice gs = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
         GraphicsConfiguration gc = gs.getDefaultConfiguration();
         BufferedImage img = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
         img.getGraphics().drawImage(image, 0, 0, null);
         BufferedImage img2 = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
         BufferedImage img3 = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
-        SliceIntArray src = new SliceIntArray(new int[w*h], 0);
-        SliceIntArray dst1 = new SliceIntArray(new int[w*h], 0);
-        SliceIntArray dst2 = new SliceIntArray(new int[w*h], 0);
+        SliceIntArray src = new SliceIntArray(new int[w * h], 0);
+        SliceIntArray dst1 = new SliceIntArray(new int[w * h], 0);
+        SliceIntArray dst2 = new SliceIntArray(new int[w * h], 0);
 
         // Do NOT use img.getRGB(): it is more than 10 times slower than
         // img.getRaster().getDataElements()
@@ -80,44 +73,39 @@ public class TestBilateralFilter
         frame3.setVisible(true);
 
         {
-           int iters = 1500;
-           System.out.println("Fast Bilateral: speed test ("+iters+" iterations)");
-           long before = System.nanoTime();
+            int iters = 1500;
+            System.out.println("Fast Bilateral: speed test (" + iters + " iterations)");
+            long before = System.nanoTime();
 
-           for (int ii=0; ii<iters; ii++)
-           {
-               fbf.apply(src, dst1);
-           }
+            for(int ii = 0; ii < iters; ii++) {
+                fbf.apply(src, dst1);
+            }
 
-           long after = System.nanoTime();
-           System.out.println("Elapsed [ms]: "+(after-before)/1000000L);
-           System.out.println("");
-        }
-        
-        {
-           int iters = 10;
-           System.out.println("Full Bilateral: speed test ("+iters+" iterations)");
-           long before = System.nanoTime();
-
-           for (int ii=0; ii<iters; ii++)
-           {
-               bf.apply(src, dst2);
-           }
-
-           long after = System.nanoTime();
-           System.out.println("Elapsed [ms]: "+(after-before)/1000000L);
-           System.out.println("");
+            long after = System.nanoTime();
+            System.out.println("Elapsed [ms]: " + (after - before) / 1000000L);
+            System.out.println("");
         }
 
-        try
         {
+            int iters = 10;
+            System.out.println("Full Bilateral: speed test (" + iters + " iterations)");
+            long before = System.nanoTime();
+
+            for(int ii = 0; ii < iters; ii++) {
+                bf.apply(src, dst2);
+            }
+
+            long after = System.nanoTime();
+            System.out.println("Elapsed [ms]: " + (after - before) / 1000000L);
+            System.out.println("");
+        }
+
+        try {
             Thread.sleep(40000);
-        }
-        catch (Exception e)
-        {
-           e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         System.exit(0);
-    }  
+    }
 }

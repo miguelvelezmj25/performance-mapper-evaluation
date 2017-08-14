@@ -43,45 +43,45 @@ class InflaterHuffmanTree {
     private void buildTree(byte[] codeLengths) throws DataFormatException {
         int[] blCount = new int[MAX_BITLEN + 1];
         int[] nextCode = new int[MAX_BITLEN + 1];
-        for (int i = 0; i < codeLengths.length; i++) {
+        for(int i = 0; i < codeLengths.length; i++) {
             int bits = codeLengths[i];
-            if (bits > 0) {
+            if(bits > 0) {
                 blCount[bits]++;
             }
         }
         int code = 0;
         int treeSize = 512;
-        for (int bits = 1; bits <= MAX_BITLEN; bits++) {
+        for(int bits = 1; bits <= MAX_BITLEN; bits++) {
             nextCode[bits] = code;
             code += blCount[bits] << (16 - bits);
-            if (bits >= 10) {
+            if(bits >= 10) {
                 int start = nextCode[bits] & 0x1ff80;
                 int end = code & 0x1ff80;
                 treeSize += (end - start) >> (16 - bits);
             }
         }
-        if (code != 65536) {
+        if(code != 65536) {
             throw new DataFormatException("Code lengths don't add up properly.");
         }
         tree = new short[treeSize];
         int treePtr = 512;
-        for (int bits = MAX_BITLEN; bits >= 10; bits--) {
+        for(int bits = MAX_BITLEN; bits >= 10; bits--) {
             int end = code & 0x1ff80;
             code -= blCount[bits] << (16 - bits);
             int start = code & 0x1ff80;
-            for (int i = start; i < end; i += 1 << 7) {
+            for(int i = start; i < end; i += 1 << 7) {
                 tree[DeflaterHuffman.bitReverse(i)] = (short) ((-treePtr << 4) | bits);
                 treePtr += 1 << (bits - 9);
             }
         }
-        for (int i = 0; i < codeLengths.length; i++) {
+        for(int i = 0; i < codeLengths.length; i++) {
             int bits = codeLengths[i];
-            if (bits == 0) {
+            if(bits == 0) {
                 continue;
             }
             code = nextCode[bits];
             int revcode = DeflaterHuffman.bitReverse(code);
-            if (bits <= 9) {
+            if(bits <= 9) {
                 do {
                     tree[revcode] = (short) ((i << 4) | bits);
                     revcode += 1 << bits;
@@ -113,14 +113,14 @@ class InflaterHuffmanTree {
 
     int getSymbol(StreamManipulator input) throws DataFormatException {
         int lookahead, symbol;
-        if ((lookahead = input.peekBits(9)) >= 0) {
-            if ((symbol = tree[lookahead]) >= 0) {
+        if((lookahead = input.peekBits(9)) >= 0) {
+            if((symbol = tree[lookahead]) >= 0) {
                 input.dropBits(symbol & 15);
                 return symbol >> 4;
             }
             int subtree = -(symbol >> 4);
             int bitlen = symbol & 15;
-            if ((lookahead = input.peekBits(bitlen)) >= 0) {
+            if((lookahead = input.peekBits(bitlen)) >= 0) {
                 symbol = tree[subtree | (lookahead >> 9)];
                 input.dropBits(symbol & 15);
                 return symbol >> 4;
@@ -129,7 +129,7 @@ class InflaterHuffmanTree {
                 int bits = input.getAvailableBits();
                 lookahead = input.peekBits(bits);
                 symbol = tree[subtree | (lookahead >> 9)];
-                if ((symbol & 15) <= bits) {
+                if((symbol & 15) <= bits) {
                     input.dropBits(symbol & 15);
                     return symbol >> 4;
                 }
@@ -142,7 +142,7 @@ class InflaterHuffmanTree {
             int bits = input.getAvailableBits();
             lookahead = input.peekBits(bits);
             symbol = tree[lookahead];
-            if (symbol >= 0 && (symbol & 15) <= bits) {
+            if(symbol >= 0 && (symbol & 15) <= bits) {
                 input.dropBits(symbol & 15);
                 return symbol >> 4;
             }

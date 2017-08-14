@@ -16,7 +16,6 @@ limitations under the License.
 package kanzi;
 
 
-public interface ByteSorter
-{
+public interface ByteSorter {
     public boolean sort(byte[] array, int idx, int len);
 }

@@ -16,8 +16,7 @@ limitations under the License.
 package kanzi.util.sampling;
 
 
-public interface DownSampler
-{
+public interface DownSampler {
     public void subSampleHorizontal(int[] input, int[] output);
 
 
@@ -26,7 +25,7 @@ public interface DownSampler
 
     public void subSample(int[] input, int[] output);
 
-    
+
     // An implementation can support a fixed scaling factor or a range of
     // scaling factors.
     public boolean supportsScalingFactor(int factor);

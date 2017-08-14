@@ -13,6 +13,7 @@ public class TrimBlanksStringComparator implements Comparator<String> {
 
     private final Mode mode;
     private final Comparator<? super CharSequence> comparator;
+
     /**
      * Constructor with mode and delegate comparator performing the actual
      * string comparison on the trimmed strings or character sequences.

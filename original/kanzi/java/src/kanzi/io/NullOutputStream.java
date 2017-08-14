@@ -18,10 +18,8 @@ package kanzi.io;
 import java.io.OutputStream;
 
 
-public class NullOutputStream extends OutputStream
-{
-   @Override
-   public void write(int b) 
-   {
-   }   
+public class NullOutputStream extends OutputStream {
+    @Override
+    public void write(int b) {
+    }
 }

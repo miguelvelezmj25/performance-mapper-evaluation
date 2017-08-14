@@ -421,7 +421,7 @@ public class StringUtil {
                     ;
 
                 if(j == end) {
-					/* Found whole string. */
+                    /* Found whole string. */
                     return i;
                 }
             }

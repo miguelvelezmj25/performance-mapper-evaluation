@@ -23,7 +23,7 @@ public enum HeadOptionSet_cq implements HeadOptions {
     Active_cq(
         /*c:*/null /*already set*/, /*chars:*/null /*already set*/, /*q:*/null /*already set*/, /*suppressHeaders:*/null /*already set*/,
             true,
-		/*active:*/HeadOption.chars, HeadOption.suppressHeaders
+        /*active:*/HeadOption.chars, HeadOption.suppressHeaders
     ),
     /**
      * Option set with the following active options: {@link #chars c}, {@link #suppressHeaders q}.
@@ -116,6 +116,7 @@ public enum HeadOptionSet_cq implements HeadOptions {
     public final HeadOptionSet_cq suppressHeaders;
     private final boolean useAcronym;
     private final EnumSet<HeadOption> options;
+
     private HeadOptionSet_cq(
             HeadOptionSet_cq c, HeadOptionSet_cq chars, HeadOptionSet_cq q, HeadOptionSet_cq suppressHeaders,
             boolean useAcronym,

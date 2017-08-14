@@ -16,16 +16,15 @@ limitations under the License.
 package kanzi;
 
 
-public interface IntTransform
-{
-   // Read src.length ints from src.array[src.index], process them and
-   // write them to dst.array[dst.index]. The index of each slice is updated
-   // with the number of ints respectively read from and written to.  
-   public boolean forward(SliceIntArray src, SliceIntArray dst);
+public interface IntTransform {
+    // Read src.length ints from src.array[src.index], process them and
+    // write them to dst.array[dst.index]. The index of each slice is updated
+    // with the number of ints respectively read from and written to.
+    public boolean forward(SliceIntArray src, SliceIntArray dst);
 
 
-   // Read src.length ints from src.array[src.index], process them and
-   // write them to dst.array[dst.index]. The index of each slice is updated
-   // with the number of ints respectively read from and written to.  
-   public boolean inverse(SliceIntArray src, SliceIntArray dst);
+    // Read src.length ints from src.array[src.index], process them and
+    // write them to dst.array[dst.index]. The index of each slice is updated
+    // with the number of ints respectively read from and written to.
+    public boolean inverse(SliceIntArray src, SliceIntArray dst);
 }

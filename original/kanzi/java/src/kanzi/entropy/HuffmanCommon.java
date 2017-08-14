@@ -20,61 +20,55 @@ import kanzi.util.sort.QuickSort;
 
 
 // Utility class for a canonical implementation of Huffman codec
-public final class HuffmanCommon
-{
+public final class HuffmanCommon {
     // Return the number of codes generated
-    public static int generateCanonicalCodes(short[] sizes, int[] codes, int[] ranks, int count)
-    {
-       // Sort by increasing size (first key) and increasing value (second key)
-       if (count > 1)
-       {
-          QuickSort sorter = new QuickSort(new CodeLengthArrayComparator(sizes));
-          sorter.sort(ranks, 0, count);
-       }
+    public static int generateCanonicalCodes(short[] sizes, int[] codes, int[] ranks, int count) {
+        // Sort by increasing size (first key) and increasing value (second key)
+        if(count > 1) {
+            QuickSort sorter = new QuickSort(new CodeLengthArrayComparator(sizes));
+            sorter.sort(ranks, 0, count);
+        }
 
-       int code = 0;
-       int len = sizes[ranks[0]];
+        int code = 0;
+        int len = sizes[ranks[0]];
 
-       for (int i=0; i<count; i++)
-       {
-          final int r = ranks[i];
+        for(int i = 0; i < count; i++) {
+            final int r = ranks[i];
 
-          if (sizes[r] > len)
-          {
-             code <<= (sizes[r] - len);
-             len = sizes[r];
+            if(sizes[r] > len) {
+                code <<= (sizes[r] - len);
+                len = sizes[r];
 
-             // Max length reached
-             if (len > 24)
-                return -1;
-          }
+                // Max length reached
+                if(len > 24) {
+                    return -1;
+                }
+            }
 
-          codes[r] = code;
-          code++;
-       }
+            codes[r] = code;
+            code++;
+        }
 
-       return count;
+        return count;
     }
 
 
     // Array comparator used to sort keys and values to generate canonical codes
-    private static class CodeLengthArrayComparator implements ArrayComparator
-    {
+    private static class CodeLengthArrayComparator implements ArrayComparator {
         private final short[] array;
 
 
-        public CodeLengthArrayComparator(short[] sizes)
-        {
-            if (sizes == null)
+        public CodeLengthArrayComparator(short[] sizes) {
+            if(sizes == null) {
                 throw new NullPointerException("Invalid null array parameter");
+            }
 
             this.array = sizes;
         }
 
 
         @Override
-        public int compare(int lidx, int ridx)
-        {
+        public int compare(int lidx, int ridx) {
             // Check size (natural order) as first key
             final int res = this.array[lidx] - this.array[ridx];
 
@@ -82,30 +76,28 @@ public final class HuffmanCommon
             return (res != 0) ? res : lidx - ridx;
         }
     }
-    
-    
-    public static class FrequencyArrayComparator implements ArrayComparator
-    {
+
+
+    public static class FrequencyArrayComparator implements ArrayComparator {
         private final int[] array;
 
 
-        public FrequencyArrayComparator(int[] frequencies)
-        {
-            if (frequencies == null)
+        public FrequencyArrayComparator(int[] frequencies) {
+            if(frequencies == null) {
                 throw new NullPointerException("Invalid null array parameter");
+            }
 
             this.array = frequencies;
         }
 
 
         @Override
-        public int compare(int lidx, int ridx)
-        {
+        public int compare(int lidx, int ridx) {
             // Check size (natural order) as first key
             final int res = this.array[lidx] - this.array[ridx];
 
             // Check index (natural order) as second key
             return (res != 0) ? res : lidx - ridx;
         }
-    }   
+    }
 }

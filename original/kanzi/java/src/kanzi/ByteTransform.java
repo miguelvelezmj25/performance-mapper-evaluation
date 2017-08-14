@@ -18,17 +18,16 @@ package kanzi;
 
 // A byte transform is an operation that takes an array of bytes as input and
 // turns it into another array of bytes of the same size.
-public interface ByteTransform
-{
-   // Read src.length bytes from src.array[src.index], process them and
-   // write them to dst.array[dst.index]. The index of each slice is updated
-   // with the number of bytes respectively read from and written to.   
-   public boolean forward(SliceByteArray src, SliceByteArray dst);
+public interface ByteTransform {
+    // Read src.length bytes from src.array[src.index], process them and
+    // write them to dst.array[dst.index]. The index of each slice is updated
+    // with the number of bytes respectively read from and written to.
+    public boolean forward(SliceByteArray src, SliceByteArray dst);
 
 
-   // Read src.length bytes from src.array[src.index], process them and
-   // write them to dst.array[dst.index]. The index of each slice is updated
-   // with the number of bytes respectively read from and written to.  
-   public boolean inverse(SliceByteArray src, SliceByteArray dst);
+    // Read src.length bytes from src.array[src.index], process them and
+    // write them to dst.array[dst.index]. The index of each slice is updated
+    // with the number of bytes respectively read from and written to.
+    public boolean inverse(SliceByteArray src, SliceByteArray dst);
 }
 

@@ -17,237 +17,210 @@ package kanzi.filter.seam;
 
 // Not thread safe
 // Tree based sorted queue of geodesics
-/*package*/ class GeodesicSortedQueue
-{
+/*package*/ class GeodesicSortedQueue {
     private final int maxSize;
+    private final Node[] nodes;
     private int size;
     private Node head;
     private Node tail;
-    private final Node[] nodes;
     private int freeNodeIdx;
 
 
-    public GeodesicSortedQueue(int maxSize)
-    {
+    public GeodesicSortedQueue(int maxSize) {
         this.maxSize = maxSize;
-        this.nodes = new Node[maxSize+1];
+        this.nodes = new Node[maxSize + 1];
 
         // Pre-allocate
-        for (int i=0; i<this.nodes.length; i++)
-           this.nodes[i] = new Node(null, null, i);
+        for(int i = 0; i < this.nodes.length; i++)
+            this.nodes[i] = new Node(null, null, i);
     }
 
+    private static int scan(Node n, Geodesic[] array, int idx) {
+        if(n.left != null) {
+            idx = scan(n.left, array, idx);
+        }
+
+        array[idx++] = n.value;
+
+        if(n.right != null) {
+            idx = scan(n.right, array, idx);
+        }
+
+        return idx;
+    }
 
     // Grow queue until maxSize is reached
     // Return last value (geodesic with highest cost) in ordered collection
     // Null input value is not allowed
-    public Geodesic add(Geodesic value)
-    {
-        if (this.size == 0)
-        {
-           Node node = this.nodes[this.freeNodeIdx++];
-           node.value = value;
-           this.head = node;
-           this.tail = node;
-           this.size++;
-           return this.tail.value;
+    public Geodesic add(Geodesic value) {
+        if(this.size == 0) {
+            Node node = this.nodes[this.freeNodeIdx++];
+            node.value = value;
+            this.head = node;
+            this.tail = node;
+            this.size++;
+            return this.tail.value;
         }
 
         final int cost = value.cost; // aliasing
 
-        if (cost >= this.tail.value.cost)
-        {
-           // Cost too high, do not add
-           if (this.size == this.maxSize)
-             return this.tail.value;
+        if(cost >= this.tail.value.cost) {
+            // Cost too high, do not add
+            if(this.size == this.maxSize) {
+                return this.tail.value;
+            }
 
-           // New node is tail
-           Node node = this.nodes[this.freeNodeIdx++];
-           node.value = value;
-           node.parent = this.tail;
-           this.tail.right = node;
-           node.right = null;
-           this.tail = node;
+            // New node is tail
+            Node node = this.nodes[this.freeNodeIdx++];
+            node.value = value;
+            node.parent = this.tail;
+            this.tail.right = node;
+            node.right = null;
+            this.tail = node;
         }
-        else if (cost < this.head.value.cost)
-        {
-           // New node is head
-           Node node = this.nodes[this.freeNodeIdx++];
-           node.value = value;
-           this.head.parent = node;
-           node.right = this.head;
-           node.left = null;
-           this.head = node;
+        else if(cost < this.head.value.cost) {
+            // New node is head
+            Node node = this.nodes[this.freeNodeIdx++];
+            node.value = value;
+            this.head.parent = node;
+            node.right = this.head;
+            node.left = null;
+            this.head = node;
         }
-        else
-        {
-           // New node is not an extremity
-           Node current = this.head;
+        else {
+            // New node is not an extremity
+            Node current = this.head;
 
-           // Locate appropriate position in tree
-           while (true)
-           {
-              if (cost > current.value.cost)
-              {
-                 if (current.right != null)
-                    current = current.right;
-                 else
-                 {
-                    Node node = this.nodes[this.freeNodeIdx++];
-                    node.value = value;
-                    node.parent = current;
-                    current.right = node;
-                    break;
-                 }
-              }
-              else
-              {
-                 if (current.left != null)
-                    current = current.left;
-                 else
-                 {
-                    Node node = this.nodes[this.freeNodeIdx++];
-                    node.value = value;
-                    node.parent = current;
-                    current.left = node;
-                    break;
-                 }
-              }
-           } 
+            // Locate appropriate position in tree
+            while (true) {
+                if(cost > current.value.cost) {
+                    if(current.right != null) {
+                        current = current.right;
+                    }
+                    else {
+                        Node node = this.nodes[this.freeNodeIdx++];
+                        node.value = value;
+                        node.parent = current;
+                        current.right = node;
+                        break;
+                    }
+                }
+                else {
+                    if(current.left != null) {
+                        current = current.left;
+                    }
+                    else {
+                        Node node = this.nodes[this.freeNodeIdx++];
+                        node.value = value;
+                        node.parent = current;
+                        current.left = node;
+                        break;
+                    }
+                }
+            }
         }
 
-        if (this.size >= this.maxSize)
-        {
-           // Need to recompute tail
-           Node last = this.tail;
+        if(this.size >= this.maxSize) {
+            // Need to recompute tail
+            Node last = this.tail;
 
-           // Recycle evicted node
-           this.freeNodeIdx = last.idx;
+            // Recycle evicted node
+            this.freeNodeIdx = last.idx;
 
-           if (last.left != null)
-           {
-               final Node left = last.left;
-               final Node parent = last.parent;
-               left.parent = parent;
+            if(last.left != null) {
+                final Node left = last.left;
+                final Node parent = last.parent;
+                left.parent = parent;
 
-               if (parent != null)
-                  parent.right = left;
-               
-               last.parent = null;
-               last.left = null;
-               last = left;
+                if(parent != null) {
+                    parent.right = left;
+                }
 
-               while (last.right != null)
-                   last = last.right;
+                last.parent = null;
+                last.left = null;
+                last = left;
 
-               // Set new tail to rightmost descendant of 'left'
-               this.tail = last;
-           }
-           else
-           {
-              // Set new tail to parent of current tail
-              this.tail = last.parent;
-              this.tail.right = null;
-              last.parent = null;
-           }
+                while (last.right != null)
+                    last = last.right;
+
+                // Set new tail to rightmost descendant of 'left'
+                this.tail = last;
+            }
+            else {
+                // Set new tail to parent of current tail
+                this.tail = last.parent;
+                this.tail.right = null;
+                last.parent = null;
+            }
         }
-        else
-        {
-           this.size++;
+        else {
+            this.size++;
         }
 
         return this.tail.value;
     }
 
-
-    public boolean isFull()
-    {
+    public boolean isFull() {
         return (this.size == this.maxSize);
     }
 
-
-    public Geodesic getLast()
-    {
+    public Geodesic getLast() {
         return (this.tail == null) ? null : this.tail.value;
     }
 
-
-    public Geodesic getFirst()
-    {
+    public Geodesic getFirst() {
         return (this.head == null) ? null : this.head.value;
     }
 
-
-    public int size()
-    {
+    public int size() {
         return this.size;
     }
 
+    public Geodesic[] toArray(Geodesic[] array) {
+        if(this.size == 0) {
+            return new Geodesic[0];
+        }
 
-    public Geodesic[] toArray(Geodesic[] array)
-    {
-        if (this.size == 0)
-           return new Geodesic[0];
-
-        if (array.length < this.size)
-           array = new Geodesic[this.size];
+        if(array.length < this.size) {
+            array = new Geodesic[this.size];
+        }
 
         scan(this.head, array, 0);
         return array;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder((1 + this.size) * 8);
+        Geodesic[] array = this.toArray(new Geodesic[this.size]);
 
-    private static int scan(Node n, Geodesic[] array, int idx)
-    {
-       if (n.left != null)
-          idx = scan(n.left, array, idx);
+        builder.append("Size=");
+        builder.append(this.size);
+        builder.append("\n");
 
-       array[idx++] = n.value;
+        for(int i = 0; i < array.length; i++) {
+            if(i != 0) {
+                builder.append(",\n");
+            }
 
-       if (n.right != null)
-          idx = scan(n.right, array, idx);
+            builder.append(array[i]);
+        }
 
-       return idx;
+        return builder.toString();
     }
 
-
-
-    private static class Node
-    {
+    private static class Node {
+        final int idx;
         Node left;
         Node right;
         Node parent;
         Geodesic value;
-        final int idx;
 
-        Node(Node parent, Geodesic value, int idx)
-        {
+        Node(Node parent, Geodesic value, int idx) {
             this.parent = parent;
             this.value = value;
             this.idx = idx;
         }
-    }
-
-
-    @Override
-    public String toString()
-    {
-       StringBuilder builder = new StringBuilder((1+this.size)*8);
-       Geodesic[] array = this.toArray(new Geodesic[this.size]);
-
-       builder.append("Size=");
-       builder.append(this.size);
-       builder.append("\n");
-
-       for (int i=0; i<array.length; i++)
-       {
-          if (i != 0)
-             builder.append(",\n");
-
-          builder.append(array[i]);
-       }
-
-       return builder.toString();
     }
 
 }

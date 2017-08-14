@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 /**
  * Computes CRC32 data checksum of a data stream.
  * The actual CRC32 algorithm is described in RFC 1952
@@ -31,10 +33,10 @@ public class CRC32 implements Checksum {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "CRC")
     private static int[] make_crc_table() {
         int[] crc_table = new int[256];
-        for (int n = 0; n < 256; n++) {
+        for(int n = 0; n < 256; n++) {
             int c = n;
-            for (int k = 8; --k >= 0; ) {
-                if ((c & 1) != 0) {
+            for(int k = 8; --k >= 0; ) {
+                if(Sink.getDecision((c & 1) != 0)) {
                     c = 0xedb88320 ^ (c >>> 1);
                 }
                 else {

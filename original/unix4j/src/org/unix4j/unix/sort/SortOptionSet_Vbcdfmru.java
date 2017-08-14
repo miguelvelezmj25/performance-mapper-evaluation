@@ -23,7 +23,7 @@ public enum SortOptionSet_Vbcdfmru implements SortOptions {
     Active_Vbdfru(
         /*c:*/SortOptionSet_Vbcdfru.Active_Vbcdfru, /*check:*/SortOptionSet_Vbcdfru.Active_Vbcdfru_long, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/SortOptionSet_Vbdfmru.Active_Vbdfmru, /*merge:*/SortOptionSet_Vbdfmru.Active_Vbdfmru_long, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/, /*V:*/null /*already set*/, /*versionSort:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique, SortOption.versionSort
+        /*active:*/SortOption.dictionaryOrder, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique, SortOption.versionSort
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #reverse r}, {@link #unique u}, {@link #versionSort V}.
@@ -734,6 +734,7 @@ public enum SortOptionSet_Vbcdfmru implements SortOptions {
     public final SortOptionSet_Vbcdfmru versionSort;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_Vbcdfmru(
             SortOptionSet_Vbcdfru c, SortOptionSet_Vbcdfru check, SortOptionSet_Vbcdfmru d, SortOptionSet_Vbcdfmru dictionaryOrder, SortOptionSet_Vbcdfmru f, SortOptionSet_Vbcdfmru ignoreCase, SortOptionSet_Vbcdfmru b, SortOptionSet_Vbcdfmru ignoreLeadingBlanks, SortOptionSet_Vbdfmru m, SortOptionSet_Vbdfmru merge, SortOptionSet_Vbcdfmru r, SortOptionSet_Vbcdfmru reverse, SortOptionSet_Vbcdfmru u, SortOptionSet_Vbcdfmru unique, SortOptionSet_Vbcdfmru V, SortOptionSet_Vbcdfmru versionSort,
             boolean useAcronym,

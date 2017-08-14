@@ -16,8 +16,9 @@ package edu.cmu.cs.mvelezce.zip.zipme;
  * This is the DeflaterHuffman class.
  * This class is <i>not</i> thread safe.  This is inherent in the API, due
  * to the split of deflate and setInput.
+ *
  * @author Jochen Hoenicke
- * @date Jan 6, 2000 
+ * @date Jan 6, 2000
  */
 class DeflaterHuffman {
 
@@ -76,7 +77,7 @@ class DeflaterHuffman {
         }
         staticDCodes = new short[DIST_NUM];
         staticDLength = new byte[DIST_NUM];
-        for (i = 0; i < DIST_NUM; i++) {
+        for(i = 0; i < DIST_NUM; i++) {
             staticDCodes[i] = bitReverse(i << 11);
             staticDLength[i] = 5;
         }
@@ -118,7 +119,7 @@ class DeflaterHuffman {
     }
 
     private int l_code(int len) {
-        if (len == 255) {
+        if(len == 255) {
             return 285;
         }
         int code = 257;
@@ -145,38 +146,38 @@ class DeflaterHuffman {
         pending.writeBits(literalTree.numCodes - 257, 5);
         pending.writeBits(distTree.numCodes - 1, 5);
         pending.writeBits(blTreeCodes - 4, 4);
-        for (int rank = 0; rank < blTreeCodes; rank++) pending.writeBits(blTree.length[BL_ORDER[rank]], 3);
+        for(int rank = 0; rank < blTreeCodes; rank++) pending.writeBits(blTree.length[BL_ORDER[rank]], 3);
         literalTree.writeTree(blTree);
         distTree.writeTree(blTree);
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             blTree.checkEmpty();
         }
     }
 
     public void compressBlock() {
-        for (int i = 0; i < last_lit; i++) {
+        for(int i = 0; i < last_lit; i++) {
             int litlen = l_buf[i] & 0xff;
             int dist = d_buf[i];
-            if (dist-- != 0) {
-                if (DeflaterConstants.DEBUGGING) {
+            if(dist-- != 0) {
+                if(DeflaterConstants.DEBUGGING) {
                     System.err.print("[" + (dist + 1) + "," + (litlen + 3) + "]: ");
                 }
                 int lc = l_code(litlen);
                 literalTree.writeSymbol(lc);
                 int bits = (lc - 261) / 4;
-                if (bits > 0 && bits <= 5) {
+                if(bits > 0 && bits <= 5) {
                     pending.writeBits(litlen & ((1 << bits) - 1), bits);
                 }
                 int dc = d_code(dist);
                 distTree.writeSymbol(dc);
                 bits = dc / 2 - 1;
-                if (bits > 0) {
+                if(bits > 0) {
                     pending.writeBits(dist & ((1 << bits) - 1), bits);
                 }
             }
             else {
-                if (DeflaterConstants.DEBUGGING) {
-                    if (litlen > 32 && litlen < 127) {
+                if(DeflaterConstants.DEBUGGING) {
+                    if(litlen > 32 && litlen < 127) {
                         System.err.print("(" + (char) litlen + "): ");
                     }
                     else {
@@ -186,11 +187,11 @@ class DeflaterHuffman {
                 literalTree.writeSymbol(litlen);
             }
         }
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             System.err.print("EOF: ");
         }
         literalTree.writeSymbol(EOF_SYMBOL);
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             literalTree.checkEmpty();
             distTree.checkEmpty();
         }
@@ -198,7 +199,7 @@ class DeflaterHuffman {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void flushStoredBlock(byte[] stored, int stored_offset, int stored_len, boolean lastBlock) {
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             System.err.println("Flushing stored block " + stored_len);
         }
         pending.writeBits((DeflaterConstants.STORED_BLOCK << 1) + (lastBlock ? 1 : 0), 3);
@@ -217,25 +218,25 @@ class DeflaterHuffman {
         distTree.calcBLFreq(blTree);
         blTree.buildTree();
         int blTreeCodes = 4;
-        for (int i = 18; i > blTreeCodes; i--) {
-            if (blTree.length[BL_ORDER[i]] > 0) {
+        for(int i = 18; i > blTreeCodes; i--) {
+            if(blTree.length[BL_ORDER[i]] > 0) {
                 blTreeCodes = i + 1;
             }
         }
         int opt_len = 14 + blTreeCodes * 3 + blTree.getEncodedLength() + literalTree.getEncodedLength() + distTree.getEncodedLength() + extra_bits;
         int static_len = extra_bits;
-        for (int i = 0; i < LITERAL_NUM; i++) static_len += literalTree.freqs[i] * staticLLength[i];
-        for (int i = 0; i < DIST_NUM; i++) static_len += distTree.freqs[i] * staticDLength[i];
-        if (opt_len >= static_len) {
+        for(int i = 0; i < LITERAL_NUM; i++) static_len += literalTree.freqs[i] * staticLLength[i];
+        for(int i = 0; i < DIST_NUM; i++) static_len += distTree.freqs[i] * staticDLength[i];
+        if(opt_len >= static_len) {
             opt_len = static_len;
         }
-        if (stored_offset >= 0 && stored_len + 4 < opt_len >> 3) {
-            if (DeflaterConstants.DEBUGGING) {
+        if(stored_offset >= 0 && stored_len + 4 < opt_len >> 3) {
+            if(DeflaterConstants.DEBUGGING) {
                 System.err.println("Storing, since " + stored_len + " < " + opt_len + " <= " + static_len);
             }
             flushStoredBlock(stored, stored_offset, stored_len, lastBlock);
         }
-        else if (opt_len == static_len) {
+        else if(opt_len == static_len) {
             pending.writeBits((DeflaterConstants.STATIC_TREES << 1) + (lastBlock ? 1 : 0), 3);
             literalTree.setStaticCodes(staticLCodes, staticLLength);
             distTree.setStaticCodes(staticDCodes, staticDLength);
@@ -257,8 +258,8 @@ class DeflaterHuffman {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final boolean tallyLit(int lit) {
-        if (DeflaterConstants.DEBUGGING) {
-            if (lit > 32 && lit < 127) {
+        if(DeflaterConstants.DEBUGGING) {
+            if(lit > 32 && lit < 127) {
                 System.err.println("(" + (char) lit + ")");
             }
             else {
@@ -273,19 +274,19 @@ class DeflaterHuffman {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public final boolean tallyDist(int dist, int len) {
-        if (DeflaterConstants.DEBUGGING) {
+        if(DeflaterConstants.DEBUGGING) {
             System.err.println("[" + dist + "," + len + "]");
         }
         d_buf[last_lit] = (short) dist;
         l_buf[last_lit++] = (byte) (len - 3);
         int lc = l_code(len - 3);
         literalTree.freqs[lc]++;
-        if (lc >= 265 && lc < 285) {
+        if(lc >= 265 && lc < 285) {
             extra_bits += (lc - 261) / 4;
         }
         int dc = d_code(dist - 1);
         distTree.freqs[dc]++;
-        if (dc >= 4) {
+        if(dc >= 4) {
             extra_bits += dc / 2 - 1;
         }
         return last_lit == BUFSIZE;
@@ -322,7 +323,7 @@ class DeflaterHuffman {
 
         @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
         void reset() {
-            for (int i = 0; i < freqs.length; i++) freqs[i] = 0;
+            for(int i = 0; i < freqs.length; i++) freqs[i] = 0;
             codes = null;
             length = null;
         }
@@ -330,7 +331,7 @@ class DeflaterHuffman {
 
         @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
         final void writeSymbol(int code) {
-            if (DeflaterConstants.DEBUGGING) {
+            if(DeflaterConstants.DEBUGGING) {
                 freqs[code]--;
             }
             pending.writeBits(codes[code] & 0xffff, length[code]);
@@ -340,12 +341,12 @@ class DeflaterHuffman {
         @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
         final void checkEmpty() {
             boolean empty = true;
-            for (int i = 0; i < freqs.length; i++)
-                if (freqs[i] != 0) {
+            for(int i = 0; i < freqs.length; i++)
+                if(freqs[i] != 0) {
                     System.err.println("freqs[" + i + "] == " + freqs[i]);
                     empty = false;
                 }
-            if (!empty) {
+            if(!empty) {
                 throw new Error();
             }
             System.err.println("checkEmpty suceeded!");
@@ -364,23 +365,23 @@ class DeflaterHuffman {
             int[] nextCode = new int[maxLength];
             int code = 0;
             codes = new short[freqs.length];
-            if (DeflaterConstants.DEBUGGING) {
+            if(DeflaterConstants.DEBUGGING) {
                 System.err.println("buildCodes: " + freqs.length);
             }
-            for (int bits = 0; bits < maxLength; bits++) {
+            for(int bits = 0; bits < maxLength; bits++) {
                 nextCode[bits] = code;
                 code += bl_counts[bits] << (15 - bits);
-                if (DeflaterConstants.DEBUGGING) {
+                if(DeflaterConstants.DEBUGGING) {
                     System.err.println("bits: " + (bits + 1) + " count: " + bl_counts[bits] + " nextCode: " + Integer.toHexString(code));
                 }
             }
-            if (DeflaterConstants.DEBUGGING && code != 65536) {
+            if(DeflaterConstants.DEBUGGING && code != 65536) {
                 throw new RuntimeException("Inconsistent bl_counts!");
             }
-            for (int i = 0; i < numCodes; i++) {
+            for(int i = 0; i < numCodes; i++) {
                 int bits = length[i];
-                if (bits > 0) {
-                    if (DeflaterConstants.DEBUGGING) {
+                if(bits > 0) {
+                    if(DeflaterConstants.DEBUGGING) {
                         System.err.println("codes[" + i + "] = rev(" + Integer.toHexString(nextCode[bits - 1]) + ")," + bits);
                     }
                     codes[i] = bitReverse(nextCode[bits - 1]);
@@ -396,13 +397,13 @@ class DeflaterHuffman {
             int numNodes = childs.length / 2;
             int numLeafs = (numNodes + 1) / 2;
             int overflow = 0;
-            for (int i = 0; i < maxLength; i++) bl_counts[i] = 0;
+            for(int i = 0; i < maxLength; i++) bl_counts[i] = 0;
             int lengths[] = new int[numNodes];
             lengths[numNodes - 1] = 0;
-            for (int i = numNodes - 1; i >= 0; i--) {
-                if (childs[2 * i + 1] != -1) {
+            for(int i = numNodes - 1; i >= 0; i--) {
+                if(childs[2 * i + 1] != -1) {
                     int bitLength = lengths[i] + 1;
-                    if (bitLength > maxLength) {
+                    if(bitLength > maxLength) {
                         bitLength = maxLength;
                         overflow++;
                     }
@@ -414,12 +415,12 @@ class DeflaterHuffman {
                     this.length[childs[2 * i]] = (byte) lengths[i];
                 }
             }
-            if (DeflaterConstants.DEBUGGING) {
+            if(DeflaterConstants.DEBUGGING) {
                 System.err.println("Tree " + freqs.length + " lengths:");
-                for (int i = 0; i < numLeafs; i++)
+                for(int i = 0; i < numLeafs; i++)
                     System.err.println("Node " + childs[2 * i] + " freq: " + freqs[childs[2 * i]] + " len: " + length[childs[2 * i]]);
             }
-            if (overflow == 0) {
+            if(overflow == 0) {
                 return;
             }
             int incrBitLen = maxLength - 1;
@@ -436,19 +437,19 @@ class DeflaterHuffman {
             bl_counts[maxLength - 1] += overflow;
             bl_counts[maxLength - 2] -= overflow;
             int nodePtr = 2 * numLeafs;
-            for (int bits = maxLength; bits != 0; bits--) {
+            for(int bits = maxLength; bits != 0; bits--) {
                 int n = bl_counts[bits - 1];
                 while (n > 0) {
                     int childPtr = 2 * childs[nodePtr++];
-                    if (childs[childPtr + 1] == -1) {
+                    if(childs[childPtr + 1] == -1) {
                         length[childs[childPtr]] = (byte) bits;
                         n--;
                     }
                 }
             }
-            if (DeflaterConstants.DEBUGGING) {
+            if(DeflaterConstants.DEBUGGING) {
                 System.err.println("*** After overflow elimination. ***");
-                for (int i = 0; i < numLeafs; i++)
+                for(int i = 0; i < numLeafs; i++)
                     System.err.println("Node " + childs[2 * i] + " freq: " + freqs[childs[2 * i]] + " len: " + length[childs[2 * i]]);
             }
         }
@@ -460,9 +461,9 @@ class DeflaterHuffman {
             int[] heap = new int[numSymbols];
             int heapLen = 0;
             int maxCode = 0;
-            for (int n = 0; n < numSymbols; n++) {
+            for(int n = 0; n < numSymbols; n++) {
                 int freq = freqs[n];
-                if (freq != 0) {
+                if(freq != 0) {
                     int pos = heapLen++;
                     int ppos;
                     while (pos > 0 && freqs[heap[ppos = (pos - 1) / 2]] > freq) {
@@ -482,7 +483,7 @@ class DeflaterHuffman {
             int[] childs = new int[4 * heapLen - 2];
             int[] values = new int[2 * heapLen - 1];
             int numNodes = numLeafs;
-            for (int i = 0; i < heapLen; i++) {
+            for(int i = 0; i < heapLen; i++) {
                 int node = heap[i];
                 childs[2 * i] = node;
                 childs[2 * i + 1] = -1;
@@ -495,7 +496,7 @@ class DeflaterHuffman {
                 int ppos = 0;
                 int path = 1;
                 while (path < heapLen) {
-                    if (path + 1 < heapLen && values[heap[path]] > values[heap[path + 1]]) {
+                    if(path + 1 < heapLen && values[heap[path]] > values[heap[path + 1]]) {
                         path++;
                     }
                     heap[ppos] = heap[path];
@@ -514,7 +515,7 @@ class DeflaterHuffman {
                 ppos = 0;
                 path = 1;
                 while (path < heapLen) {
-                    if (path + 1 < heapLen && values[heap[path]] > values[heap[path + 1]]) {
+                    if(path + 1 < heapLen && values[heap[path]] > values[heap[path + 1]]) {
                         path++;
                     }
                     heap[ppos] = heap[path];
@@ -525,7 +526,7 @@ class DeflaterHuffman {
                 heap[path] = last;
             }
             while (heapLen > 1);
-            if (heap[0] != childs.length / 2 - 1) {
+            if(heap[0] != childs.length / 2 - 1) {
                 throw new RuntimeException("Weird!");
             }
             buildLength(childs);
@@ -535,7 +536,7 @@ class DeflaterHuffman {
         @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
         int getEncodedLength() {
             int len = 0;
-            for (int i = 0; i < freqs.length; i++) len += freqs[i] * length[i];
+            for(int i = 0; i < freqs.length; i++) len += freqs[i] * length[i];
             return len;
         }
 
@@ -550,14 +551,14 @@ class DeflaterHuffman {
             while (i < numCodes) {
                 count = 1;
                 int nextlen = length[i];
-                if (nextlen == 0) {
+                if(nextlen == 0) {
                     max_count = 138;
                     min_count = 3;
                 }
                 else {
                     max_count = 6;
                     min_count = 3;
-                    if (curlen != nextlen) {
+                    if(curlen != nextlen) {
                         blTree.freqs[nextlen]++;
                         count = 0;
                     }
@@ -566,17 +567,17 @@ class DeflaterHuffman {
                 i++;
                 while (i < numCodes && curlen == length[i]) {
                     i++;
-                    if (++count >= max_count) {
+                    if(++count >= max_count) {
                         break;
                     }
                 }
-                if (count < min_count) {
+                if(count < min_count) {
                     blTree.freqs[curlen] += count;
                 }
-                else if (curlen != 0) {
+                else if(curlen != 0) {
                     blTree.freqs[REP_3_6]++;
                 }
-                else if (count <= 10) {
+                else if(count <= 10) {
                     blTree.freqs[REP_3_10]++;
                 }
                 else {
@@ -596,14 +597,14 @@ class DeflaterHuffman {
             while (i < numCodes) {
                 count = 1;
                 int nextlen = length[i];
-                if (nextlen == 0) {
+                if(nextlen == 0) {
                     max_count = 138;
                     min_count = 3;
                 }
                 else {
                     max_count = 6;
                     min_count = 3;
-                    if (curlen != nextlen) {
+                    if(curlen != nextlen) {
                         blTree.writeSymbol(nextlen);
                         count = 0;
                     }
@@ -612,18 +613,18 @@ class DeflaterHuffman {
                 i++;
                 while (i < numCodes && curlen == length[i]) {
                     i++;
-                    if (++count >= max_count) {
+                    if(++count >= max_count) {
                         break;
                     }
                 }
-                if (count < min_count) {
+                if(count < min_count) {
                     while (count-- > 0) blTree.writeSymbol(curlen);
                 }
-                else if (curlen != 0) {
+                else if(curlen != 0) {
                     blTree.writeSymbol(REP_3_6);
                     pending.writeBits(count - 3, 2);
                 }
-                else if (count <= 10) {
+                else if(count <= 10) {
                     blTree.writeSymbol(REP_3_10);
                     pending.writeBits(count - 3, 3);
                 }

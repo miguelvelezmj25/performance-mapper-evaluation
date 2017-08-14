@@ -25,113 +25,94 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class TestContextResizer
-{
-    public static void main(String[] args)
-    {
-        try
-        {
-            String fileName = "/Users/miguelvelez/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/java/resources/test.png";
+public class TestContextResizer {
+    public static void main(String[] args) {
+        try {
+            String fileName = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/java/resources/test.png";
             boolean debug = false;
             boolean vertical = false;
             boolean horizontal = false;
             int tests = 0;
             int effectPerMil = 100;
             boolean fileProvided = false;
-            
-            for (String arg : args)
-            {
-               arg = arg.trim();
-               
-               if (arg.equals("-help"))
-               {
-                   System.out.println("-help               : display this message");
-                   System.out.println("-debug              : display the computed geodesics");
-                   System.out.println("-file=<filename>    : load image file with provided name");
-                   System.out.println("-strength=<percent> : number of geodesics to create (in percent of dimension)");
-                   System.out.println("-vertical           : process vertical geodesics");
-                   System.out.println("-horizontal         : process horizontal geodesics");
-                   System.out.println("-speedtest=<steps>  : run an extra speed test");
-                   System.exit(0);
-               }
-               else if (arg.equals("-debug"))
-               {
-                   debug = true;
-                   System.out.println("Debug set to true");
-               }
-               else if (arg.startsWith("-file="))
-               {
-                  fileName = arg.substring(6);
-                  fileProvided = true;
-               }
-               else if (arg.equals("-vertical"))
-               {
-                   vertical = true;
-                   System.out.println("Vertical set to true");
-               }
-               else if (arg.equals("-horizontal"))
-               {
-                   horizontal = true;
-                   System.out.println("Horizontal set to true");
-               }
-               else if (arg.startsWith("-strength="))
-               {
-                  arg = arg.substring(10);
-                  
-                  try
-                  {
-                     effectPerMil = 10*Integer.parseInt(arg);                   
-                  }
-                  catch (NumberFormatException e)
-                  {
-                     System.err.println("Invalid effect strength (percentage) provided on command line: "+arg);
-                  }
-               }
-               else if (arg.startsWith("-speedtest="))
-               {
-                  arg = arg.substring(11);
-                  
-                  try
-                  {
-                     tests = Integer.parseInt(arg);                   
-                  }
-                  catch (NumberFormatException e)
-                  {
-                     System.err.println("Invalid number of speed tests provided on command line: "+arg);
-                  }
-                  
-                  System.out.println("Speed test set to " + tests);
-               }
-               else
-               {
-                   System.out.println("Warning: unknown option: ["+ arg + "]");
-               }
+
+            for(String arg : args) {
+                arg = arg.trim();
+
+                if(arg.equals("-help")) {
+                    System.out.println("-help               : display this message");
+                    System.out.println("-debug              : display the computed geodesics");
+                    System.out.println("-file=<filename>    : load image file with provided name");
+                    System.out.println("-strength=<percent> : number of geodesics to create (in percent of dimension)");
+                    System.out.println("-vertical           : process vertical geodesics");
+                    System.out.println("-horizontal         : process horizontal geodesics");
+                    System.out.println("-speedtest=<steps>  : run an extra speed test");
+                    System.exit(0);
+                }
+                else if(arg.equals("-debug")) {
+                    debug = true;
+                    System.out.println("Debug set to true");
+                }
+                else if(arg.startsWith("-file=")) {
+                    fileName = arg.substring(6);
+                    fileProvided = true;
+                }
+                else if(arg.equals("-vertical")) {
+                    vertical = true;
+                    System.out.println("Vertical set to true");
+                }
+                else if(arg.equals("-horizontal")) {
+                    horizontal = true;
+                    System.out.println("Horizontal set to true");
+                }
+                else if(arg.startsWith("-strength=")) {
+                    arg = arg.substring(10);
+
+                    try {
+                        effectPerMil = 10 * Integer.parseInt(arg);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid effect strength (percentage) provided on command line: " + arg);
+                    }
+                }
+                else if(arg.startsWith("-speedtest=")) {
+                    arg = arg.substring(11);
+
+                    try {
+                        tests = Integer.parseInt(arg);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid number of speed tests provided on command line: " + arg);
+                    }
+
+                    System.out.println("Speed test set to " + tests);
+                }
+                else {
+                    System.out.println("Warning: unknown option: [" + arg + "]");
+                }
             }
 
-            if ((vertical == false) && (horizontal == false))
-            {
-               System.out.println("Warning: no direction has been selected, selecting both");
-               vertical = true;
-               horizontal = true;
+            if((vertical == false) && (horizontal == false)) {
+                System.out.println("Warning: no direction has been selected, selecting both");
+                vertical = true;
+                horizontal = true;
             }
 
-            if (fileProvided == false)
+            if(fileProvided == false) {
                 System.out.println("No image file name provided on command line, using default value");
+            }
 
             System.out.println("File name set to '" + fileName + "'");
-            System.out.println("Strength set to "+(effectPerMil/10)+"%");
+            System.out.println("Strength set to " + (effectPerMil / 10) + "%");
             ImageIcon icon = new ImageIcon(fileName);
             Image image = icon.getImage();
             int w = image.getWidth(null);
             int h = image.getHeight(null);
-            
-            if ((w<0) || (h<0))
-            {
-                System.err.println("Cannot read or decode input file '"+fileName+"'");
+
+            if((w < 0) || (h < 0)) {
+                System.err.println("Cannot read or decode input file '" + fileName + "'");
                 System.exit(1);
             }
-            
-            System.out.println("Image dimensions: "+w+"x"+h);
+
+            System.out.println("Image dimensions: " + w + "x" + h);
             GraphicsDevice gs = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
             GraphicsConfiguration gc = gs.getDefaultConfiguration();
             BufferedImage img = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
@@ -140,9 +121,9 @@ public class TestContextResizer
             frame.setBounds(50, 50, w, h);
             frame.add(new JLabel(icon));
             frame.setVisible(true);
-            SliceIntArray src = new SliceIntArray(new int[w*h], 0);
-            SliceIntArray tmp = new SliceIntArray(new int[w*h], 0);
-            SliceIntArray dst = new SliceIntArray(new int[w*h], 0);
+            SliceIntArray src = new SliceIntArray(new int[w * h], 0);
+            SliceIntArray tmp = new SliceIntArray(new int[w * h], 0);
+            SliceIntArray dst = new SliceIntArray(new int[w * h], 0);
 
             // Do NOT use img.getRGB(): it is more than 10 times slower than
             // img.getRaster().getDataElements()
@@ -150,28 +131,29 @@ public class TestContextResizer
             ContextResizer effect;
 
             int dir = 0;
-            
-            if (vertical == true) 
-                dir |= ContextResizer.VERTICAL;
-            
-            if (horizontal == true)
-                dir |= ContextResizer.HORIZONTAL;
 
-            effect = new ContextResizer(w, h,  w, dir, -effectPerMil, false, debug, null);            
+            if(vertical == true) {
+                dir |= ContextResizer.VERTICAL;
+            }
+
+            if(horizontal == true) {
+                dir |= ContextResizer.HORIZONTAL;
+            }
+
+            effect = new ContextResizer(w, h, w, dir, -effectPerMil, false, debug, null);
             effect.apply(src, tmp);
 
             Rectangle bounds = gs.getDefaultConfiguration().getBounds();
             BufferedImage img2 = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
             img2.getRaster().setDataElements(0, 0, w, h, tmp.array);
             JFrame frame2 = new JFrame("Filter");
-            frame2.setBounds(Math.max(10, Math.min(w+50,bounds.width-5*w/4)), 80, w, h);
+            frame2.setBounds(Math.max(10, Math.min(w + 50, bounds.width - 5 * w / 4)), 80, w, h);
             ImageIcon icon2 = new ImageIcon(img2);
             frame2.add(new JLabel(icon2));
             frame2.setVisible(true);
 
             // Speed test
-            if (tests > 0)
-            {
+            if(tests > 0) {
                 ExecutorService pool = Executors.newFixedThreadPool(4);
                 System.out.println("Speed test");
                 long sum = 0;
@@ -179,39 +161,38 @@ public class TestContextResizer
                 System.out.print("Accurate mode");
                 effect = new ContextResizer(w, h, w, dir, -effectPerMil, false, false, pool);
 
-                for (int ii=0; ii<iter; ii++)
-                {
-                   if ((ii % (iter/10)) == (iter/10) - 1)
-                      System.out.print(".");
-                   
-                   img.getRaster().getDataElements(0, 0, w, h, src);
-                   long before = System.nanoTime();
-                   effect.apply(src, tmp);
-                   long after = System.nanoTime();
-                   sum += (after - before);
+                for(int ii = 0; ii < iter; ii++) {
+                    if((ii % (iter / 10)) == (iter / 10) - 1) {
+                        System.out.print(".");
+                    }
+
+                    img.getRaster().getDataElements(0, 0, w, h, src);
+                    long before = System.nanoTime();
+                    effect.apply(src, tmp);
+                    long after = System.nanoTime();
+                    sum += (after - before);
                 }
 
-                System.out.println("\nElapsed [ms]: "+ sum/1000000+" ("+iter+" iterations)"); 
-                System.out.println(1000000000*(long)iter/sum+" FPS");
+                System.out.println("\nElapsed [ms]: " + sum / 1000000 + " (" + iter + " iterations)");
+                System.out.println(1000000000 * (long) iter / sum + " FPS");
                 System.out.println("Fast mode");
                 sum = 0;
                 effect = new ContextResizer(w, h, w, dir, -effectPerMil, true, false, pool);
 
-                for (int ii=0; ii<iter; ii++)
-                {
-                   img.getRaster().getDataElements(0, 0, w, h, src);
-                   long before = System.nanoTime();
-                   effect.apply(src, tmp);
-                   long after = System.nanoTime();
-                   sum += (after - before);
+                for(int ii = 0; ii < iter; ii++) {
+                    img.getRaster().getDataElements(0, 0, w, h, src);
+                    long before = System.nanoTime();
+                    effect.apply(src, tmp);
+                    long after = System.nanoTime();
+                    sum += (after - before);
                 }
 
-                System.out.println("Elapsed [ms]: "+ sum/1000000+" ("+iter+" iterations)");
-                System.out.println(1000000000*(long)iter/sum+" FPS");
+                System.out.println("Elapsed [ms]: " + sum / 1000000 + " (" + iter + " iterations)");
+                System.out.println(1000000000 * (long) iter / sum + " FPS");
             }
 
             Thread.sleep(4000);
-                        
+
             JFrame frame3 = new JFrame("Animation");
             frame3.setBounds(700, 150, w, h);
             frame3.setResizable(true);
@@ -270,11 +251,9 @@ public class TestContextResizer
 //               img.getRaster().getDataElements(0, 0, w0, h, src.array);             
 //               Thread.sleep(15000);
 //            }
-            
-            Thread.sleep(1000);
-        }
-        catch (Exception e)
-        {
+
+            Thread.sleep(99000);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

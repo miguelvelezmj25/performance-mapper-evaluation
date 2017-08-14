@@ -23,7 +23,7 @@ public enum SortOptionSet_bcdfhmru implements SortOptions {
     Active_bdfhru(
         /*c:*/SortOptionSet_bcdfhru.Active_bcdfhru, /*check:*/SortOptionSet_bcdfhru.Active_bcdfhru_long, /*d:*/null /*already set*/, /*dictionaryOrder:*/null /*already set*/, /*h:*/null /*already set*/, /*humanNumericSort:*/null /*already set*/, /*f:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*b:*/null /*already set*/, /*ignoreLeadingBlanks:*/null /*already set*/, /*m:*/SortOptionSet_bdfhmru.Active_bdfhmru, /*merge:*/SortOptionSet_bdfhmru.Active_bdfhmru_long, /*r:*/null /*already set*/, /*reverse:*/null /*already set*/, /*u:*/null /*already set*/, /*unique:*/null /*already set*/,
             true,
-		/*active:*/SortOption.dictionaryOrder, SortOption.humanNumericSort, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique
+        /*active:*/SortOption.dictionaryOrder, SortOption.humanNumericSort, SortOption.ignoreCase, SortOption.ignoreLeadingBlanks, SortOption.reverse, SortOption.unique
     ),
     /**
      * Option set with the following active options: {@link #dictionaryOrder d}, {@link #humanNumericSort h}, {@link #ignoreCase f}, {@link #ignoreLeadingBlanks b}, {@link #reverse r}, {@link #unique u}.
@@ -758,6 +758,7 @@ public enum SortOptionSet_bcdfhmru implements SortOptions {
     public final SortOptionSet_bcdfhmru unique;
     private final boolean useAcronym;
     private final EnumSet<SortOption> options;
+
     private SortOptionSet_bcdfhmru(
             SortOptionSet_bcdfhru c, SortOptionSet_bcdfhru check, SortOptionSet_bcdfhmru d, SortOptionSet_bcdfhmru dictionaryOrder, SortOptionSet_bcdfhmru h, SortOptionSet_bcdfhmru humanNumericSort, SortOptionSet_bcdfhmru f, SortOptionSet_bcdfhmru ignoreCase, SortOptionSet_bcdfhmru b, SortOptionSet_bcdfhmru ignoreLeadingBlanks, SortOptionSet_bdfhmru m, SortOptionSet_bdfhmru merge, SortOptionSet_bcdfhmru r, SortOptionSet_bcdfhmru reverse, SortOptionSet_bcdfhmru u, SortOptionSet_bcdfhmru unique,
             boolean useAcronym,

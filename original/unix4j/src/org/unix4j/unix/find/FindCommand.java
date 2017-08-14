@@ -1,5 +1,6 @@
 package org.unix4j.unix.find;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.command.AbstractCommand;
 import org.unix4j.context.ExecutionContext;
 import org.unix4j.line.Line;
@@ -33,8 +34,8 @@ class FindCommand extends AbstractCommand<FindArguments> {
     }
 
     private RegexFilter createRegexFilterFromArgs(FindArguments args) {
-        if(args.isNameSet()) {
-            if(args.isRegex()) {
+        if(Sink.getDecision(args.isNameSet())) {
+            if(Sink.getDecision(args.isRegex())) {
                 return new RegexFilter(args.getName(), args.isIgnoreCase());
             }
         }
@@ -44,10 +45,10 @@ class FindCommand extends AbstractCommand<FindArguments> {
 
     private FileFilter createFileFilterFromArgs(FindArguments args) {
         final CompositeFileFilter filter = new CompositeFileFilter();
-        if(args.isNameSet()) {
+        if(Sink.getDecision(args.isNameSet())) {
             final String name = args.getName();
-            if(!args.isRegex()) {
-                if(name.contains("*") || name.contains("?")) {
+            if(Sink.getDecision(!args.isRegex())) {
+                if(Sink.getDecision(name.contains("*") || name.contains("?"))) {
                     final String pattern = name.replace(".", "\\.").replace('?', '.').replace("*", ".*");
                     filter.add(new RegexFilter(pattern, args.isIgnoreCase()));
                 }
@@ -56,10 +57,10 @@ class FindCommand extends AbstractCommand<FindArguments> {
                 }
             }
         }
-        if(args.isSizeSet()) {
+        if(Sink.getDecision(args.isSizeSet())) {
             filter.add(new SizeFilter(args.getSize()));
         }
-        if(args.isTimeSet()) {
+        if(Sink.getDecision(args.isTimeSet())) {
             filter.add(new TimeFilter(args.getTime(), args.getOptions()));
         }
         filter.addIfNotNull(TypeFilter.valueOf(args.getOptions()));
@@ -67,7 +68,7 @@ class FindCommand extends AbstractCommand<FindArguments> {
     }
 
     private List<File> getArgumentPaths(ExecutionContext context, FindArguments args) {
-        if(args.isPathSet()) {
+        if(Sink.getDecision(args.isPathSet())) {
             return FileUtil.expandFiles(context.getCurrentDirectory(), args.getPath());
         }
         else {
@@ -96,16 +97,16 @@ class FindCommand extends AbstractCommand<FindArguments> {
                     final boolean keepGoing;
 
                     path = context.getRelativeToCurrentDirectory(path);
-                    if(!path.exists()) {
+                    if(Sink.getDecision(!path.exists())) {
                         keepGoing = output.processLine(new SimpleLine(format("find: `%s': No such file or directory", path), lineEnding));
                     }
-                    else if(path.isDirectory()) {
+                    else if(Sink.getDecision(path.isDirectory())) {
                         keepGoing = listFiles(fileFilter, base, path, output, args);
                     }
                     else {
                         keepGoing = outputFileLine(fileFilter, output, base, path);
                     }
-                    if(!keepGoing) {
+                    if(Sink.getDecision(!keepGoing)) {
                         break;
                     }
                 }
@@ -113,7 +114,7 @@ class FindCommand extends AbstractCommand<FindArguments> {
             }
 
             private FileFilter getFileFilterFor(RelativePathBase base) {
-                if(regexFilter == null) {
+                if(Sink.getDecision(regexFilter == null)) {
                     return staticFileFilter;
                 }
                 final CompositeFileFilter compositeFilter = new CompositeFileFilter();
@@ -126,17 +127,17 @@ class FindCommand extends AbstractCommand<FindArguments> {
 
     private boolean listFiles(FileFilter fileFilter, RelativePathBase relativeTo, File parent, LineProcessor output, FindArguments args) {
         //print directory files and recurse
-        if(outputFileLine(fileFilter, output, relativeTo, parent)) {
+        if(Sink.getDecision(outputFileLine(fileFilter, output, relativeTo, parent))) {
             final List<File> files = FileUtil.toList(parent.listFiles());
             for(File file : files) {
                 //System.out.println("Examining file: " + file.getAbsolutePath());
-                if(file.isDirectory()) {
-                    if(!listFiles(fileFilter, relativeTo, file, output, args)) {
+                if(Sink.getDecision(file.isDirectory())) {
+                    if(Sink.getDecision(!listFiles(fileFilter, relativeTo, file, output, args))) {
                         return false;
                     }
                 }
                 else {
-                    if(!outputFileLine(fileFilter, output, relativeTo, file)) {
+                    if(Sink.getDecision(!outputFileLine(fileFilter, output, relativeTo, file))) {
                         return false;
                     }
                 }
@@ -146,7 +147,7 @@ class FindCommand extends AbstractCommand<FindArguments> {
     }
 
     private boolean outputFileLine(FileFilter fileFilter, LineProcessor output, RelativePathBase relativeTo, File file) {
-        if(fileFilter.accept(file)) {
+        if(Sink.getDecision(fileFilter.accept(file))) {
             final String filePath = relativeTo.getRelativePathFor(file);
             return output.processLine(new SimpleLine(filePath, lineEnding));
         }

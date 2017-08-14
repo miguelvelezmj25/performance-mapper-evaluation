@@ -16,9 +16,8 @@ limitations under the License.
 package kanzi;
 
 
-public interface Sizeable 
-{
-   public int size();
-   
-   boolean setSize(int size); 
+public interface Sizeable {
+    public int size();
+
+    boolean setSize(int size);
 }

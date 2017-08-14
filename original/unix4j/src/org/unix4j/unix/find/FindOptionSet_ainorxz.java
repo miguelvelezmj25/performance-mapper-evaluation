@@ -23,7 +23,7 @@ public enum FindOptionSet_ainorxz implements FindOptions {
     Active_ainorxz(
         /*i:*/null /*already set*/, /*ignoreCase:*/null /*already set*/, /*z:*/null /*already set*/, /*print0:*/null /*already set*/, /*r:*/null /*already set*/, /*regex:*/null /*already set*/, /*a:*/null /*already set*/, /*timeAccess:*/null /*already set*/, /*n:*/null /*already set*/, /*timeNewer:*/null /*already set*/, /*o:*/null /*already set*/, /*timeOlder:*/null /*already set*/, /*x:*/null /*already set*/, /*typeOther:*/null /*already set*/,
             true,
-		/*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeAccess, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeOther
+        /*active:*/FindOption.ignoreCase, FindOption.print0, FindOption.regex, FindOption.timeAccess, FindOption.timeNewer, FindOption.timeOlder, FindOption.typeOther
     ),
     /**
      * Option set with the following active options: {@link #ignoreCase i}, {@link #print0 z}, {@link #regex r}, {@link #timeAccess a}, {@link #timeNewer n}, {@link #timeOlder o}, {@link #typeOther x}.
@@ -724,6 +724,7 @@ public enum FindOptionSet_ainorxz implements FindOptions {
     public final FindOptionSet_ainorxz typeOther;
     private final boolean useAcronym;
     private final EnumSet<FindOption> options;
+
     private FindOptionSet_ainorxz(
             FindOptionSet_ainorxz i, FindOptionSet_ainorxz ignoreCase, FindOptionSet_ainorxz z, FindOptionSet_ainorxz print0, FindOptionSet_ainorxz r, FindOptionSet_ainorxz regex, FindOptionSet_ainorxz a, FindOptionSet_ainorxz timeAccess, FindOptionSet_ainorxz n, FindOptionSet_ainorxz timeNewer, FindOptionSet_ainorxz o, FindOptionSet_ainorxz timeOlder, FindOptionSet_ainorxz x, FindOptionSet_ainorxz typeOther,
             boolean useAcronym,
