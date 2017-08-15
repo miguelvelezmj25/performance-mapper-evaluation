@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -51,13 +53,13 @@ public class ZipArchive implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public ZipArchive(byte[] b, int off, int len) throws ZipException {
-        if(off < 0 || len < 0 || off > b.length) {
+        if(Sink.getDecision(off < 0 || len < 0 || off > b.length)) {
             throw new IllegalArgumentException();
         }
         buf = b;
         this.off = off;
         this.len = len;
-        if(this.len > buf.length - this.off) {
+        if(Sink.getDecision(this.len > buf.length - this.off)) {
             this.len = buf.length - this.off;
         }
         hook1();
@@ -99,7 +101,7 @@ public class ZipArchive implements ZipConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 0, thenFeature = "ArchiveCheck", elseFeature = "Base")
     public void
     hook1() throws ZipException {
-        if(FEATUREArchiveCheck) {
+        if(Sink.getDecision(FEATUREArchiveCheck)) {
             hook1__role__ArchiveCheck();
         }
         else {
@@ -121,24 +123,24 @@ public class ZipArchive implements ZipConstants {
         int pos = len - ENDHDR;
         int top = Math.max(0, pos - 65536);
         do {
-            if(pos < top) {
+            if(Sink.getDecision(pos < top)) {
                 throw new ZipException("central directory not found, probably not a zip archive");
             }
             inp.seek(off + pos--);
         }
         while (inp.readLeInt() != ENDSIG);
-        if(inp.skip(ENDTOT - ENDNRD) != ENDTOT - ENDNRD) {
+        if(Sink.getDecision(inp.skip(ENDTOT - ENDNRD) != ENDTOT - ENDNRD)) {
             throw new EOFException();
         }
         int count = inp.readLeShort();
-        if(inp.skip(ENDOFF - ENDSIZ) != ENDOFF - ENDSIZ) {
+        if(Sink.getDecision(inp.skip(ENDOFF - ENDSIZ) != ENDOFF - ENDSIZ)) {
             throw new EOFException();
         }
         int centralOffset = inp.readLeInt();
         entries = new Hashtable(count + count / 2);
         inp.seek(off + centralOffset);
         for(int i = 0; i < count; i++) {
-            if(inp.readLeInt() != CENSIG) {
+            if(Sink.getDecision(inp.readLeInt() != CENSIG)) {
                 throw new ZipException("Wrong Central Directory signature");
             }
             inp.skip(6);
@@ -159,12 +161,12 @@ public class ZipArchive implements ZipConstants {
             entry.setSize(size & 0xffffffffL);
             entry.setCompressedSize(csize & 0xffffffffL);
             entry.setDOSTime(dostime);
-            if(extraLen > 0) {
+            if(Sink.getDecision(extraLen > 0)) {
                 byte[] extra = new byte[extraLen];
                 inp.readFully(extra);
                 entry.setExtra(extra);
             }
-            if(commentLen > 0) {
+            if(Sink.getDecision(commentLen > 0)) {
                 entry.setComment(inp.readString(commentLen));
             }
             entry.offset = offset;
@@ -193,7 +195,7 @@ public class ZipArchive implements ZipConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     private Hashtable getEntries() throws IOException {
-        if(entries == null) {
+        if(Sink.getDecision(entries == null)) {
             readEntries();
         }
         return entries;
@@ -212,7 +214,7 @@ public class ZipArchive implements ZipConstants {
         try {
             Hashtable entries = getEntries();
             ZipEntry entry = (ZipEntry) entries.get(name);
-            if(entry == null && !name.endsWith("/")) {
+            if(Sink.getDecision(entry == null && !name.endsWith("/"))) {
                 entry = (ZipEntry) entries.get(name + '/');
             }
             return entry != null ? new ZipEntry(entry, name) : null;
@@ -237,11 +239,11 @@ public class ZipArchive implements ZipConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "ArchiveCheck")
     private void checkZipArchive() throws ZipException {
-        if(len < 4) {
+        if(Sink.getDecision(len < 4)) {
             throw new ZipException("Not a valid zip archive");
         }
         int sig = buf[off] & 0xFF | ((buf[off + 1] & 0xFF) << 8) | ((buf[off + 2] & 0xFF) << 16) | ((buf[off + 3] & 0xFF) << 24);
-        if(sig != LOCSIG) {
+        if(Sink.getDecision(sig != LOCSIG)) {
             throw new ZipException("Not a valid zip archive");
         }
     }
@@ -271,16 +273,16 @@ public class ZipArchive implements ZipConstants {
         Hashtable entries = getEntries();
         String name = entry.getName();
         ZipEntry zipEntry = (ZipEntry) entries.get(name);
-        if(zipEntry == null) {
+        if(Sink.getDecision(zipEntry == null)) {
             return null;
         }
         ZipArchive_PartialInputStream inp = new ZipArchive_PartialInputStream(buf, off, len);
         inp.seek(off + zipEntry.offset);
-        if(inp.readLeInt() != LOCSIG) {
+        if(Sink.getDecision(inp.readLeInt() != LOCSIG)) {
             throw new ZipException("Wrong Local header signature: " + name);
         }
         inp.skip(4);
-        if(zipEntry.getMethod() != inp.readLeShort()) {
+        if(Sink.getDecision(zipEntry.getMethod() != inp.readLeShort())) {
             throw new ZipException("Compression method mismatch: " + name);
         }
         inp.skip(16);

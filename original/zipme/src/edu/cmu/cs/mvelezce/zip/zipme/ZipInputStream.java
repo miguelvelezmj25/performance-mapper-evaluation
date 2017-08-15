@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,13 +49,13 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     private int readBuf(byte[] out, int offset, int length) throws IOException {
-        if(avail <= 0) {
+        if(Sink.getDecision(avail <= 0)) {
             fillBuf();
-            if(avail <= 0) {
+            if(Sink.getDecision(avail <= 0)) {
                 return -1;
             }
         }
-        if(length > avail) {
+        if(Sink.getDecision(length > avail)) {
             length = avail;
         }
         System.arraycopy(buf, len - avail, out, offset, length);
@@ -67,7 +69,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         int len = out.length;
         while (len > 0) {
             int count = readBuf(out, off, len);
-            if(count == -1) {
+            if(Sink.getDecision(count == -1)) {
                 throw new EOFException();
             }
             off += count;
@@ -77,9 +79,9 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     private int readLeByte() throws IOException {
-        if(avail <= 0) {
+        if(Sink.getDecision(avail <= 0)) {
             fillBuf();
-            if(avail <= 0) {
+            if(Sink.getDecision(avail <= 0)) {
                 throw new ZipException("EOF in header");
             }
         }
@@ -108,15 +110,15 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     public ZipEntry getNextEntry__before__DerivativeExtractCRC() throws IOException {
-        if(entry != null) {
+        if(Sink.getDecision(entry != null)) {
             closeEntry();
         }
         int header = readLeInt();
-        if(header == CENSIG) {
+        if(Sink.getDecision(header == CENSIG)) {
             close();
             return null;
         }
-        if(header != LOCSIG) {
+        if(Sink.getDecision(header != LOCSIG)) {
             throw new ZipException("Wrong Local header signature: " + Integer.toHexString(header));
         }
         readLeShort();
@@ -128,7 +130,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         size = readLeInt();
         int nameLen = readLeShort();
         int extraLen = readLeShort();
-        if(method == ZipOutputStream.STORED && csize != size) {
+        if(Sink.getDecision(method == ZipOutputStream.STORED && csize != size)) {
             throw new ZipException("Stored, but compressed != uncompressed");
         }
         byte[] buffer = new byte[nameLen];
@@ -144,18 +146,18 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         entry = createZipEntry(name);
         entryAtEOF = false;
         entry.setMethod(method);
-        if((flags & 8) == 0) {
+        if(Sink.getDecision((flags & 8) == 0)) {
             entry.setCrc(crc & 0xffffffffL);
             entry.setSize(size & 0xffffffffL);
             entry.setCompressedSize(csize & 0xffffffffL);
         }
         entry.setDOSTime(dostime);
-        if(extraLen > 0) {
+        if(Sink.getDecision(extraLen > 0)) {
             byte[] extra = new byte[extraLen];
             readFully(extra);
             entry.setExtra(extra);
         }
-        if(method == ZipOutputStream.DEFLATED && avail > 0) {
+        if(Sink.getDecision(method == ZipOutputStream.DEFLATED && avail > 0)) {
             System.arraycopy(buf, len - avail, buf, 0, avail);
             len = avail;
             avail = 0;
@@ -170,7 +172,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeExtractCRC")
     public ZipEntry getNextEntry__role__DerivativeExtractCRC() throws IOException {
-        if(crc == null) {
+        if(Sink.getDecision(crc == null)) {
             throw new IOException("Stream closed.");
         }
         return getNextEntry__before__DerivativeExtractCRC();
@@ -184,7 +186,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 22, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     public ZipEntry
     getNextEntry() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             return getNextEntry__role__DerivativeExtractCRC();
         }
         else {
@@ -194,7 +196,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     private void readDataDescr() throws IOException {
-        if(readLeInt() != EXTSIG) {
+        if(Sink.getDecision(readLeInt() != EXTSIG)) {
             throw new ZipException("Data descriptor signature not found");
         }
         entry.setCrc(readLeInt() & 0xffffffffL);
@@ -209,11 +211,11 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     public void closeEntry__before__DerivativeExtractCRC() throws IOException {
-        if(entry == null) {
+        if(Sink.getDecision(entry == null)) {
             return;
         }
-        if(method == ZipOutputStream.DEFLATED) {
-            if((flags & 8) != 0) {
+        if(Sink.getDecision(method == ZipOutputStream.DEFLATED)) {
+            if(Sink.getDecision((flags & 8) != 0)) {
                 byte[] tmp = new byte[2048];
                 while (read(tmp) > 0) ;
                 return;
@@ -221,7 +223,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
             csize -= inf.getTotalIn();
             avail = inf.getRemaining();
         }
-        if(avail > csize && csize >= 0) {
+        if(Sink.getDecision(avail > csize && csize >= 0)) {
             avail -= csize;
         }
         else {
@@ -229,7 +231,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
             avail = 0;
             while (csize != 0) {
                 long skipped = in.skip(csize & 0xffffffffL);
-                if(skipped <= 0) {
+                if(Sink.getDecision(skipped <= 0)) {
                     throw new ZipException("zip archive ends early.");
                 }
                 csize -= skipped;
@@ -237,7 +239,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         }
         size = 0;
         this.hook36();
-        if(method == ZipOutputStream.DEFLATED) {
+        if(Sink.getDecision(method == ZipOutputStream.DEFLATED)) {
             inf.reset();
         }
         entry = null;
@@ -249,7 +251,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeExtractCRC")
     public void closeEntry__role__DerivativeExtractCRC() throws IOException {
-        if(crc == null) {
+        if(Sink.getDecision(crc == null)) {
             throw new IOException("Stream closed.");
         }
         closeEntry__before__DerivativeExtractCRC();
@@ -262,7 +264,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 23, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     public void
     closeEntry() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             closeEntry__role__DerivativeExtractCRC();
         }
         else {
@@ -285,7 +287,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     public int read() throws IOException {
         byte[] b = new byte[1];
-        if(read(b, 0, 1) <= 0) {
+        if(Sink.getDecision(read(b, 0, 1) <= 0)) {
             return -1;
         }
         return b[0] & 0xff;
@@ -301,26 +303,26 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Extract")
     public int read(byte[] b, int off, int len) throws IOException {
-        if(len == 0) {
+        if(Sink.getDecision(len == 0)) {
             return 0;
         }
         this.hook38();
-        if(entry == null) {
+        if(Sink.getDecision(entry == null)) {
             return -1;
         }
         boolean finished = false;
         switch (method) {
             case ZipOutputStream.DEFLATED:
                 len = super.read(b, off, len);
-                if(len < 0) {
-                    if(!inf.finished()) {
+                if(Sink.getDecision(len < 0)) {
+                    if(Sink.getDecision(!inf.finished())) {
                         throw new ZipException("Inflater not finished!?");
                     }
                     avail = inf.getRemaining();
-                    if((flags & 8) != 0) {
+                    if(Sink.getDecision((flags & 8) != 0)) {
                         readDataDescr();
                     }
-                    if(inf.getTotalIn() != csize || inf.getTotalOut() != size) {
+                    if(Sink.getDecision(inf.getTotalIn() != csize || inf.getTotalOut() != size)) {
                         throw new ZipException("size mismatch: " + csize + ";" + size + " <-> " + inf.getTotalIn() + ";" + inf.getTotalOut());
                     }
                     inf.reset();
@@ -328,24 +330,24 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
                 }
                 break;
             case ZipOutputStream.STORED:
-                if(len > csize && csize >= 0) {
+                if(Sink.getDecision(len > csize && csize >= 0)) {
                     len = csize;
                 }
                 len = readBuf(b, off, len);
-                if(len > 0) {
+                if(Sink.getDecision(len > 0)) {
                     csize -= len;
                     size -= len;
                 }
-                if(csize == 0) {
+                if(Sink.getDecision(csize == 0)) {
                     finished = true;
                 }
-                else if(len < 0) {
+                else if(Sink.getDecision(len < 0)) {
                     throw new ZipException("EOF in stored block");
                 }
                 break;
         }
         this.hook37(b, off, len);
-        if(finished) {
+        if(Sink.getDecision(finished)) {
             this.hook39();
             entry = null;
             entryAtEOF = true;
@@ -391,7 +393,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 24, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     protected void
     hook36() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             hook36__role__DerivativeExtractCRC();
         }
         else {
@@ -405,7 +407,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeExtractCRC")
     protected void hook37__role__DerivativeExtractCRC(byte[] b, int off, int len) throws IOException {
-        if(len > 0) {
+        if(Sink.getDecision(len > 0)) {
             crc.update(b, off, len);
         }
         hook37__before__DerivativeExtractCRC(b, off, len);
@@ -415,7 +417,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 25, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     protected void
     hook37(byte[] b, int off, int len) throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             hook37__role__DerivativeExtractCRC(b, off, len);
         }
         else {
@@ -429,7 +431,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeExtractCRC")
     protected void hook38__role__DerivativeExtractCRC() throws IOException {
-        if(crc == null) {
+        if(Sink.getDecision(crc == null)) {
             throw new IOException("Stream closed.");
         }
         hook38__before__DerivativeExtractCRC();
@@ -439,7 +441,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 26, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     protected void
     hook38() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             hook38__role__DerivativeExtractCRC();
         }
         else {
@@ -453,7 +455,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeExtractCRC")
     protected void hook39__role__DerivativeExtractCRC() throws IOException {
-        if((crc.getValue() & 0xffffffffL) != entry.getCrc()) {
+        if(Sink.getDecision((crc.getValue() & 0xffffffffL) != entry.getCrc())) {
             throw new ZipException("CRC mismatch");
         }
         crc.reset();
@@ -464,7 +466,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 27, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     protected void
     hook39() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             hook39__role__DerivativeExtractCRC();
         }
         else {
@@ -486,7 +488,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 28, thenFeature = "DerivativeExtractCRC", elseFeature = "Extract")
     protected void
     hook40() throws IOException {
-        if(FEATUREDerivativeExtractCRC) {
+        if(Sink.getDecision(FEATUREDerivativeExtractCRC)) {
             hook40__role__DerivativeExtractCRC();
         }
         else {

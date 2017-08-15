@@ -108,40 +108,42 @@ public class PngtasticColorCounter {
         Integer timeout;
         String logLevel;
 
-        if(Sink.getDecision1(DISTTHRESHOLD)) {
+        if(DISTTHRESHOLD) {
             distThreshold = 0.0D;
         }
         else {
             distThreshold = 1.0D;
         }
 
-        if(Sink.getDecision1(FREQTHRESHOLD)) {
+        if(FREQTHRESHOLD) {
             freqThreshold = 0.0D;
         }
         else {
             freqThreshold = 1.0D;
         }
 
-        if(Sink.getDecision1(MINALPHA)) {
+        if(MINALPHA) {
             minAlpha = 10;
         }
         else {
             minAlpha = 50;
         }
 
-        if(Sink.getDecision1(TIMEOUT)) {
+        if(TIMEOUT) {
             timeout = 0;
         }
         else {
             timeout = 1_000_000;
         }
 
-        if(Sink.getDecision1(LOGLEVEL)) {
+        if(LOGLEVEL) {
             logLevel = "debug";
         }
         else {
             logLevel = "none";
         }
+
+        Sink.getDecision(minAlpha == null);
 
         new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
     }

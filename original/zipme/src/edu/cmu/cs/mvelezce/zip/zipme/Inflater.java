@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREAdlerThreeTwoChecksum;
 
 public class Inflater {
@@ -198,7 +200,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 3, thenFeature = "Adler32Checksum", elseFeature = "Base")
     public void
     end() {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             end__role__Adler32Checksum();
         }
         else {
@@ -302,23 +304,23 @@ public class Inflater {
      */
 
     public int inflate(byte[] buf, int off, int len) throws DataFormatException {
-        if(len == 0) {
+        if(Sink.getDecision(len == 0)) {
             return 0;
         }
-        if(0 > off || off > off + len || off + len > buf.length) {
+        if(Sink.getDecision(0 > off || off > off + len || off + len > buf.length)) {
             throw new ArrayIndexOutOfBoundsException();
         }
         int count = 0;
         int more;
         do {
-            if(mode != DECODE_CHKSUM) {
+            if(Sink.getDecision(mode != DECODE_CHKSUM)) {
                 more = outputWindow.copyOutput(buf, off, len);
                 this.hook33(buf, off, more);
                 off += more;
                 count += more;
                 totalOut += more;
                 len -= more;
-                if(len == 0) {
+                if(Sink.getDecision(len == 0)) {
                     return count;
                 }
             }
@@ -379,7 +381,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 4, thenFeature = "Adler32Checksum", elseFeature = "Base")
     public void
     reset() {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             reset__role__Adler32Checksum();
         }
         else {
@@ -419,7 +421,7 @@ public class Inflater {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Base")
     public void setDictionary(byte[] buffer, int off, int len) {
-        if(!needsDictionary()) {
+        if(Sink.getDecision(!needsDictionary())) {
             throw new IllegalStateException();
         }
         this.hook34(buffer, off, len);
@@ -464,18 +466,18 @@ public class Inflater {
 
     private boolean decodeHeader() throws DataFormatException {
         int header = input.peekBits(16);
-        if(header < 0) {
+        if(Sink.getDecision(header < 0)) {
             return false;
         }
         input.dropBits(16);
         header = ((header << 8) | (header >> 8)) & 0xffff;
-        if(header % 31 != 0) {
+        if(Sink.getDecision(header % 31 != 0)) {
             throw new DataFormatException("Header checksum illegal");
         }
-        if((header & 0x0f00) != (Deflater.DEFLATED << 8)) {
+        if(Sink.getDecision((header & 0x0f00) != (Deflater.DEFLATED << 8))) {
             throw new DataFormatException("Compression Method unknown");
         }
-        if((header & 0x0020) == 0) {
+        if(Sink.getDecision((header & 0x0020) == 0)) {
             mode = DECODE_BLOCKS;
         }
         else {
@@ -494,7 +496,7 @@ public class Inflater {
     private boolean decodeDict() {
         while (neededBits > 0) {
             int dictByte = input.peekBits(8);
-            if(dictByte < 0) {
+            if(Sink.getDecision(dictByte < 0)) {
                 return false;
             }
             input.dropBits(8);
@@ -520,12 +522,12 @@ public class Inflater {
                 case DECODE_HUFFMAN:
                     while (((symbol = litlenTree.getSymbol(input)) & ~0xff) == 0) {
                         outputWindow.write(symbol);
-                        if(--free < 258) {
+                        if(Sink.getDecision(--free < 258)) {
                             return true;
                         }
                     }
-                    if(symbol < 257) {
-                        if(symbol < 0) {
+                    if(Sink.getDecision(symbol < 257)) {
+                        if(Sink.getDecision(symbol < 0)) {
                             return false;
                         }
                         else {
@@ -542,10 +544,10 @@ public class Inflater {
                         throw new DataFormatException("Illegal rep length code");
                     }
                 case DECODE_HUFFMAN_LENBITS:
-                    if(neededBits > 0) {
+                    if(Sink.getDecision(neededBits > 0)) {
                         mode = DECODE_HUFFMAN_LENBITS;
                         int i = input.peekBits(neededBits);
-                        if(i < 0) {
+                        if(Sink.getDecision(i < 0)) {
                             return false;
                         }
                         input.dropBits(neededBits);
@@ -554,7 +556,7 @@ public class Inflater {
                     mode = DECODE_HUFFMAN_DIST;
                 case DECODE_HUFFMAN_DIST:
                     symbol = distTree.getSymbol(input);
-                    if(symbol < 0) {
+                    if(Sink.getDecision(symbol < 0)) {
                         return false;
                     }
                     try {
@@ -564,10 +566,10 @@ public class Inflater {
                         throw new DataFormatException("Illegal rep dist code");
                     }
                 case DECODE_HUFFMAN_DISTBITS:
-                    if(neededBits > 0) {
+                    if(Sink.getDecision(neededBits > 0)) {
                         mode = DECODE_HUFFMAN_DISTBITS;
                         int i = input.peekBits(neededBits);
-                        if(i < 0) {
+                        if(Sink.getDecision(i < 0)) {
                             return false;
                         }
                         input.dropBits(neededBits);
@@ -594,7 +596,7 @@ public class Inflater {
     private boolean decodeChksum() throws DataFormatException {
         while (neededBits > 0) {
             int chkByte = input.peekBits(8);
-            if(chkByte < 0) {
+            if(Sink.getDecision(chkByte < 0)) {
                 return false;
             }
             input.dropBits(8);
@@ -622,8 +624,8 @@ public class Inflater {
             case DECODE_CHKSUM:
                 return decodeChksum();
             case DECODE_BLOCKS:
-                if(isLastBlock) {
-                    if(nowrap) {
+                if(Sink.getDecision(isLastBlock)) {
+                    if(Sink.getDecision(nowrap)) {
                         mode = FINISHED;
                         return false;
                     }
@@ -635,11 +637,11 @@ public class Inflater {
                     }
                 }
                 int type = input.peekBits(3);
-                if(type < 0) {
+                if(Sink.getDecision(type < 0)) {
                     return false;
                 }
                 input.dropBits(3);
-                if((type & 1) != 0) {
+                if(Sink.getDecision((type & 1) != 0)) {
                     isLastBlock = true;
                 }
                 switch (type >> 1) {
@@ -661,7 +663,7 @@ public class Inflater {
                 }
                 return true;
             case DECODE_STORED_LEN1: {
-                if((uncomprLen = input.peekBits(16)) < 0) {
+                if(Sink.getDecision((uncomprLen = input.peekBits(16)) < 0)) {
                     return false;
                 }
                 input.dropBits(16);
@@ -669,11 +671,11 @@ public class Inflater {
             }
             case DECODE_STORED_LEN2: {
                 int nlen = input.peekBits(16);
-                if(nlen < 0) {
+                if(Sink.getDecision(nlen < 0)) {
                     return false;
                 }
                 input.dropBits(16);
-                if(nlen != (uncomprLen ^ 0xffff)) {
+                if(Sink.getDecision(nlen != (uncomprLen ^ 0xffff))) {
                     throw new DataFormatException("broken uncompressed block");
                 }
                 mode = DECODE_STORED;
@@ -681,14 +683,14 @@ public class Inflater {
             case DECODE_STORED: {
                 int more = outputWindow.copyStored(input, uncomprLen);
                 uncomprLen -= more;
-                if(uncomprLen == 0) {
+                if(Sink.getDecision(uncomprLen == 0)) {
                     mode = DECODE_BLOCKS;
                     return true;
                 }
                 return !input.needsInput();
             }
             case DECODE_DYN_HEADER:
-                if(!dynHeader.decode(input)) {
+                if(Sink.getDecision(!dynHeader.decode(input))) {
                     return false;
                 }
                 litlenTree = dynHeader.buildLitLenTree();
@@ -720,7 +722,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 5, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook32() {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             hook32__role__Adler32Checksum();
         }
         else {
@@ -742,7 +744,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 6, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook33(byte[] buf, int off, int more) throws DataFormatException {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             hook33__role__Adler32Checksum(buf, off, more);
         }
         else {
@@ -757,7 +759,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Adler32Checksum")
     protected void hook34__role__Adler32Checksum(byte[] buffer, int off, int len) {
         adler.update(buffer, off, len);
-        if((int) adler.getValue() != readAdler) {
+        if(Sink.getDecision((int) adler.getValue() != readAdler)) {
             throw new IllegalArgumentException("Wrong adler checksum");
         }
         adler.reset();
@@ -768,7 +770,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 7, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook34(byte[] buffer, int off, int len) {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             hook34__role__Adler32Checksum(buffer, off, len);
         }
         else {
@@ -782,7 +784,7 @@ public class Inflater {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Adler32Checksum")
     protected void hook35__role__Adler32Checksum() throws DataFormatException {
-        if((int) adler.getValue() != readAdler) {
+        if(Sink.getDecision((int) adler.getValue() != readAdler)) {
             throw new DataFormatException("Adler chksum doesn't match: " + Integer.toHexString((int) adler.getValue()) + " vs. " + Integer.toHexString(readAdler));
         }
         hook35__before__Adler32Checksum();
@@ -792,7 +794,7 @@ public class Inflater {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 8, thenFeature = "Adler32Checksum", elseFeature = "Base")
     protected void
     hook35() throws DataFormatException {
-        if(FEATUREAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREAdlerThreeTwoChecksum)) {
             hook35__role__Adler32Checksum();
         }
         else {

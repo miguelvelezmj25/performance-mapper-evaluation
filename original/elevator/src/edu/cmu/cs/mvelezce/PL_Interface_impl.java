@@ -352,6 +352,7 @@ public class PL_Interface_impl implements PL_Interface {
         Environment env = new Environment(5);
         Elevator e = new Elevator(env, false, 4, false);
         Actions a = new Actions(env, e);
+
         for(int i = 0; i < 100; i++) {
             Person bob = a.bobCall();
             //a.bigMacCall();
@@ -365,9 +366,9 @@ public class PL_Interface_impl implements PL_Interface {
             // destination is still pressed)
             // direction, is active)
             a.bobCall();
-
             while (!e.isEmpty()) e.timeShift();
         }
+
         for(int i = 0; i < cleanupTimeShifts && !e.isBlocked(); i++)
             e.timeShift();
     }

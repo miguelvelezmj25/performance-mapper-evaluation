@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdlerThreeTwoChecksum;
 
 class DeflaterEngine implements DeflaterConstants {
@@ -142,29 +144,29 @@ class DeflaterEngine implements DeflaterConstants {
         max_lazy = DeflaterConstants.MAX_LAZY[lvl];
         niceLength = DeflaterConstants.NICE_LENGTH[lvl];
         max_chain = DeflaterConstants.MAX_CHAIN[lvl];
-        if(DeflaterConstants.COMPR_FUNC[lvl] != comprFunc) {
-            if(DeflaterConstants.DEBUGGING) {
+        if(Sink.getDecision(DeflaterConstants.COMPR_FUNC[lvl] != comprFunc)) {
+            if(Sink.getDecision(DeflaterConstants.DEBUGGING)) {
                 System.err.println("Change from " + comprFunc + " to " + DeflaterConstants.COMPR_FUNC[lvl]);
             }
             switch (comprFunc) {
                 case DEFLATE_STORED:
-                    if(strstart > blockStart) {
+                    if(Sink.getDecision(strstart > blockStart)) {
                         huffman.flushStoredBlock(window, blockStart, strstart - blockStart, false);
                         blockStart = strstart;
                     }
                     updateHash();
                     break;
                 case DEFLATE_FAST:
-                    if(strstart > blockStart) {
+                    if(Sink.getDecision(strstart > blockStart)) {
                         huffman.flushBlock(window, blockStart, strstart - blockStart, false);
                         blockStart = strstart;
                     }
                     break;
                 case DEFLATE_SLOW:
-                    if(prevAvailable) {
+                    if(Sink.getDecision(prevAvailable)) {
                         huffman.tallyLit(window[strstart - 1] & 0xff);
                     }
-                    if(strstart > blockStart) {
+                    if(Sink.getDecision(strstart > blockStart)) {
                         huffman.flushBlock(window, blockStart, strstart - blockStart, false);
                         blockStart = strstart;
                     }
@@ -177,7 +179,7 @@ class DeflaterEngine implements DeflaterConstants {
     }
 
     private void updateHash() {
-        if(DEBUGGING) {
+        if(Sink.getDecision(DEBUGGING)) {
             System.err.println("updateHash: " + strstart);
         }
         ins_h = (window[strstart] << HASH_SHIFT) ^ window[strstart + 1];
@@ -191,8 +193,8 @@ class DeflaterEngine implements DeflaterConstants {
     private int insertString() {
         short match;
         int hash = ((ins_h << HASH_SHIFT) ^ window[strstart + (MIN_MATCH - 1)]) & HASH_MASK;
-        if(DEBUGGING) {
-            if(hash != (((window[strstart] << (2 * HASH_SHIFT)) ^ (window[strstart + 1] << HASH_SHIFT) ^ (window[strstart + 2])) & HASH_MASK)) {
+        if(Sink.getDecision(DEBUGGING)) {
+            if(Sink.getDecision(hash != (((window[strstart] << (2 * HASH_SHIFT)) ^ (window[strstart + 1] << HASH_SHIFT) ^ (window[strstart + 2])) & HASH_MASK))) {
                 throw new Error("hash inconsistent: " + hash + "/" + window[strstart] + "," + window[strstart + 1] + "," + window[strstart + 2] + "," + HASH_SHIFT);
             }
         }
@@ -226,12 +228,12 @@ class DeflaterEngine implements DeflaterConstants {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     private void fillWindow() {
-        if(strstart >= WSIZE + MAX_DIST) {
+        if(Sink.getDecision(strstart >= WSIZE + MAX_DIST)) {
             slideWindow();
         }
         while (lookahead < DeflaterConstants.MIN_LOOKAHEAD && inputOff < inputEnd) {
             int more = 2 * WSIZE - lookahead - strstart;
-            if(more > inputEnd - inputOff) {
+            if(Sink.getDecision(more > inputEnd - inputOff)) {
                 more = inputEnd - inputOff;
             }
             System.arraycopy(inputBuf, inputOff, window, strstart + lookahead, more);
@@ -240,7 +242,7 @@ class DeflaterEngine implements DeflaterConstants {
             totalIn += more;
             lookahead += more;
         }
-        if(lookahead >= MIN_MATCH) {
+        if(Sink.getDecision(lookahead >= MIN_MATCH)) {
             updateHash();
         }
     }
@@ -266,31 +268,31 @@ class DeflaterEngine implements DeflaterConstants {
         int strend = scan + MAX_MATCH - 1;
         byte scan_end1 = window[best_end - 1];
         byte scan_end = window[best_end];
-        if(best_len >= this.goodLength) {
+        if(Sink.getDecision(best_len >= this.goodLength)) {
             chainLength >>= 2;
         }
-        if(niceLength > lookahead) {
+        if(Sink.getDecision(niceLength > lookahead)) {
             niceLength = lookahead;
         }
-        if(DeflaterConstants.DEBUGGING && strstart > 2 * WSIZE - MIN_LOOKAHEAD) {
+        if(Sink.getDecision(DeflaterConstants.DEBUGGING && strstart > 2 * WSIZE - MIN_LOOKAHEAD)) {
             throw new Error("need lookahead");
         }
         do {
-            if(DeflaterConstants.DEBUGGING && curMatch >= strstart) {
+            if(Sink.getDecision(DeflaterConstants.DEBUGGING && curMatch >= strstart)) {
                 throw new Error("future match");
             }
-            if(window[curMatch + best_len] != scan_end || window[curMatch + best_len - 1] != scan_end1 || window[curMatch] != window[scan] || window[curMatch + 1] != window[scan + 1]) {
+            if(Sink.getDecision(window[curMatch + best_len] != scan_end || window[curMatch + best_len - 1] != scan_end1 || window[curMatch] != window[scan] || window[curMatch + 1] != window[scan + 1])) {
                 continue;
             }
             match = curMatch + 2;
             scan += 2;
             while (window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && scan < strend)
                 ;
-            if(scan > best_end) {
+            if(Sink.getDecision(scan > best_end)) {
                 matchStart = curMatch;
                 best_end = scan;
                 best_len = scan - strstart;
-                if(best_len >= niceLength) {
+                if(Sink.getDecision(best_len >= niceLength)) {
                     break;
                 }
                 scan_end1 = window[best_end - 1];
@@ -305,14 +307,14 @@ class DeflaterEngine implements DeflaterConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     void setDictionary(byte[] buffer, int offset, int length) {
-        if(DeflaterConstants.DEBUGGING && strstart != 1) {
+        if(Sink.getDecision(DeflaterConstants.DEBUGGING && strstart != 1)) {
             throw new IllegalStateException("strstart not 1");
         }
         this.hook29(buffer, offset, length);
-        if(length < MIN_MATCH) {
+        if(Sink.getDecision(length < MIN_MATCH)) {
             return;
         }
-        if(length > MAX_DIST) {
+        if(Sink.getDecision(length > MAX_DIST)) {
             offset += length - MAX_DIST;
             length = MAX_DIST;
         }
@@ -329,19 +331,19 @@ class DeflaterEngine implements DeflaterConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     private boolean deflateStored(boolean flush, boolean finish) {
-        if(!flush && lookahead == 0) {
+        if(Sink.getDecision(!flush && lookahead == 0)) {
             return false;
         }
         strstart += lookahead;
         lookahead = 0;
         int storedLen = strstart - blockStart;
-        if((storedLen >= DeflaterConstants.MAX_BLOCK_SIZE) || (blockStart < WSIZE && storedLen >= MAX_DIST) || flush) {
+        if(Sink.getDecision((storedLen >= DeflaterConstants.MAX_BLOCK_SIZE) || (blockStart < WSIZE && storedLen >= MAX_DIST) || flush)) {
             boolean lastBlock = finish;
-            if(storedLen > DeflaterConstants.MAX_BLOCK_SIZE) {
+            if(Sink.getDecision(storedLen > DeflaterConstants.MAX_BLOCK_SIZE)) {
                 storedLen = DeflaterConstants.MAX_BLOCK_SIZE;
                 lastBlock = false;
             }
-            if(DeflaterConstants.DEBUGGING) {
+            if(Sink.getDecision(DeflaterConstants.DEBUGGING)) {
                 System.err.println("storedBlock[" + storedLen + "," + lastBlock + "]");
             }
             huffman.flushStoredBlock(window, blockStart, storedLen, lastBlock);
@@ -353,30 +355,30 @@ class DeflaterEngine implements DeflaterConstants {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     private boolean deflateFast(boolean flush, boolean finish) {
-        if(lookahead < MIN_LOOKAHEAD && !flush) {
+        if(Sink.getDecision(lookahead < MIN_LOOKAHEAD && !flush)) {
             return false;
         }
         while (lookahead >= MIN_LOOKAHEAD || flush) {
-            if(lookahead == 0) {
+            if(Sink.getDecision(lookahead == 0)) {
                 huffman.flushBlock(window, blockStart, strstart - blockStart, finish);
                 blockStart = strstart;
                 return false;
             }
-            if(strstart > 2 * WSIZE - MIN_LOOKAHEAD) {
+            if(Sink.getDecision(strstart > 2 * WSIZE - MIN_LOOKAHEAD)) {
                 slideWindow();
             }
             int hashHead;
-            if(lookahead >= MIN_MATCH && (hashHead = insertString()) != 0 && strategy != Deflater.HUFFMAN_ONLY && strstart - hashHead <= MAX_DIST && findLongestMatch(hashHead)) {
-                if(DeflaterConstants.DEBUGGING) {
+            if(Sink.getDecision(lookahead >= MIN_MATCH && (hashHead = insertString()) != 0 && strategy != Deflater.HUFFMAN_ONLY && strstart - hashHead <= MAX_DIST && findLongestMatch(hashHead))) {
+                if(Sink.getDecision(DeflaterConstants.DEBUGGING)) {
                     for(int i = 0; i < matchLen; i++) {
-                        if(window[strstart + i] != window[matchStart + i]) {
+                        if(Sink.getDecision(window[strstart + i] != window[matchStart + i])) {
                             throw new Error();
                         }
                     }
                 }
                 boolean full = huffman.tallyDist(strstart - matchStart, matchLen);
                 lookahead -= matchLen;
-                if(matchLen <= max_lazy && lookahead >= MIN_MATCH) {
+                if(Sink.getDecision(matchLen <= max_lazy && lookahead >= MIN_MATCH)) {
                     while (--matchLen > 0) {
                         strstart++;
                         insertString();
@@ -385,12 +387,12 @@ class DeflaterEngine implements DeflaterConstants {
                 }
                 else {
                     strstart += matchLen;
-                    if(lookahead >= MIN_MATCH - 1) {
+                    if(Sink.getDecision(lookahead >= MIN_MATCH - 1)) {
                         updateHash();
                     }
                 }
                 matchLen = MIN_MATCH - 1;
-                if(!full) {
+                if(Sink.getDecision(!full)) {
                     continue;
                 }
             }
@@ -399,7 +401,7 @@ class DeflaterEngine implements DeflaterConstants {
                 strstart++;
                 lookahead--;
             }
-            if(huffman.isFull()) {
+            if(Sink.getDecision(huffman.isFull())) {
                 boolean lastBlock = finish && lookahead == 0;
                 huffman.flushBlock(window, blockStart, strstart - blockStart, lastBlock);
                 blockStart = strstart;
@@ -410,39 +412,39 @@ class DeflaterEngine implements DeflaterConstants {
     }
 
     private boolean deflateSlow(boolean flush, boolean finish) {
-        if(lookahead < MIN_LOOKAHEAD && !flush) {
+        if(Sink.getDecision(lookahead < MIN_LOOKAHEAD && !flush)) {
             return false;
         }
         while (lookahead >= MIN_LOOKAHEAD || flush) {
-            if(lookahead == 0) {
-                if(prevAvailable) {
+            if(Sink.getDecision(lookahead == 0)) {
+                if(Sink.getDecision(prevAvailable)) {
                     huffman.tallyLit(window[strstart - 1] & 0xff);
                 }
                 prevAvailable = false;
-                if(DeflaterConstants.DEBUGGING && !flush) {
+                if(Sink.getDecision(DeflaterConstants.DEBUGGING && !flush)) {
                     throw new Error("Not flushing, but no lookahead");
                 }
                 huffman.flushBlock(window, blockStart, strstart - blockStart, finish);
                 blockStart = strstart;
                 return false;
             }
-            if(strstart >= 2 * WSIZE - MIN_LOOKAHEAD) {
+            if(Sink.getDecision(strstart >= 2 * WSIZE - MIN_LOOKAHEAD)) {
                 slideWindow();
             }
             int prevMatch = matchStart;
             int prevLen = matchLen;
-            if(lookahead >= MIN_MATCH) {
+            if(Sink.getDecision(lookahead >= MIN_MATCH)) {
                 int hashHead = insertString();
-                if(strategy != Deflater.HUFFMAN_ONLY && hashHead != 0 && strstart - hashHead <= MAX_DIST && findLongestMatch(hashHead)) {
-                    if(matchLen <= 5 && (strategy == Deflater.FILTERED || (matchLen == MIN_MATCH && strstart - matchStart > TOO_FAR))) {
+                if(Sink.getDecision(strategy != Deflater.HUFFMAN_ONLY && hashHead != 0 && strstart - hashHead <= MAX_DIST && findLongestMatch(hashHead))) {
+                    if(Sink.getDecision(matchLen <= 5 && (strategy == Deflater.FILTERED || (matchLen == MIN_MATCH && strstart - matchStart > TOO_FAR)))) {
                         matchLen = MIN_MATCH - 1;
                     }
                 }
             }
-            if(prevLen >= MIN_MATCH && matchLen <= prevLen) {
-                if(DeflaterConstants.DEBUGGING) {
+            if(Sink.getDecision(prevLen >= MIN_MATCH && matchLen <= prevLen)) {
+                if(Sink.getDecision(DeflaterConstants.DEBUGGING)) {
                     for(int i = 0; i < matchLen; i++) {
-                        if(window[strstart - 1 + i] != window[prevMatch + i]) {
+                        if(Sink.getDecision(window[strstart - 1 + i] != window[prevMatch + i])) {
                             throw new Error();
                         }
                     }
@@ -452,7 +454,7 @@ class DeflaterEngine implements DeflaterConstants {
                 do {
                     strstart++;
                     lookahead--;
-                    if(lookahead >= MIN_MATCH) {
+                    if(Sink.getDecision(lookahead >= MIN_MATCH)) {
                         insertString();
                     }
                 }
@@ -463,16 +465,16 @@ class DeflaterEngine implements DeflaterConstants {
                 matchLen = MIN_MATCH - 1;
             }
             else {
-                if(prevAvailable) {
+                if(Sink.getDecision(prevAvailable)) {
                     huffman.tallyLit(window[strstart - 1] & 0xff);
                 }
                 prevAvailable = true;
                 strstart++;
                 lookahead--;
             }
-            if(huffman.isFull()) {
+            if(Sink.getDecision(huffman.isFull())) {
                 int len = strstart - blockStart;
-                if(prevAvailable) {
+                if(Sink.getDecision(prevAvailable)) {
                     len--;
                 }
                 boolean lastBlock = (finish && lookahead == 0 && !prevAvailable);
@@ -490,7 +492,7 @@ class DeflaterEngine implements DeflaterConstants {
         do {
             fillWindow();
             boolean canFlush = flush && inputOff == inputEnd;
-            if(DeflaterConstants.DEBUGGING) {
+            if(Sink.getDecision(DeflaterConstants.DEBUGGING)) {
                 System.err.println("window: [" + blockStart + "," + strstart + "," + lookahead + "], " + comprFunc + "," + canFlush);
             }
             switch (comprFunc) {
@@ -512,11 +514,11 @@ class DeflaterEngine implements DeflaterConstants {
     }
 
     public void setInput(byte[] buf, int off, int len) {
-        if(inputOff < inputEnd) {
+        if(Sink.getDecision(inputOff < inputEnd)) {
             throw new IllegalStateException("Old input was not completely processed");
         }
         int end = off + len;
-        if(0 > off || off > end || end > buf.length) {
+        if(Sink.getDecision(0 > off || off > end || end > buf.length)) {
             throw new ArrayIndexOutOfBoundsException();
         }
         inputBuf = buf;
@@ -542,7 +544,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 29, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook26() {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook26__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -564,7 +566,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 30, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook27() {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook27__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -586,7 +588,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 31, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook28(int more) {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook28__role__DerivativeCompressAdler32Checksum(more);
         }
         else {
@@ -608,7 +610,7 @@ class DeflaterEngine implements DeflaterConstants {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 32, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook29(byte[] buffer, int offset, int length) {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook29__role__DerivativeCompressAdler32Checksum(buffer, offset, length);
         }
         else {

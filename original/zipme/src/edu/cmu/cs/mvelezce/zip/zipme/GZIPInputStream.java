@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +105,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 13, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     public void
     hook() {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook__role__DerivativeGZIPCRC();
         }
         else {
@@ -135,15 +137,15 @@ public class GZIPInputStream extends InflaterInputStream {
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "GZIP")
     public int read(byte[] buf, int offset, int len) throws IOException {
-        if(!readGZIPHeader) {
+        if(Sink.getDecision(!readGZIPHeader)) {
             readHeader();
         }
-        if(eos) {
+        if(Sink.getDecision(eos)) {
             return -1;
         }
         int numRead = super.read(buf, offset, len);
         this.hook30(buf, offset, numRead);
-        if(inf.finished()) {
+        if(Sink.getDecision(inf.finished())) {
             readFooter();
         }
         return numRead;
@@ -156,51 +158,51 @@ public class GZIPInputStream extends InflaterInputStream {
     private void readHeader() throws IOException {
         hook1();
         int magic = in.read();
-        if(magic < 0) {
+        if(Sink.getDecision(magic < 0)) {
             eos = true;
             return;
         }
         int magic2 = in.read();
-        if((magic + (magic2 << 8)) != GZIP_MAGIC) {
+        if(Sink.getDecision((magic + (magic2 << 8)) != GZIP_MAGIC)) {
             throw new IOException("Error in GZIP header, bad magic code" + " code is " + (magic + (magic2 << 8)));
         }
         hook2(magic);
         hook2(magic2);
         int CM = in.read();
-        if(CM != Deflater.DEFLATED) {
+        if(Sink.getDecision(CM != Deflater.DEFLATED)) {
             throw new IOException("Error in GZIP header, data not in deflate format");
         }
         hook2(CM);
         int flags = in.read();
-        if(flags < 0) {
+        if(Sink.getDecision(flags < 0)) {
             throw new EOFException("Early EOF in GZIP header");
         }
         hook2(flags);
-        if((flags & 0xd0) != 0) {
+        if(Sink.getDecision((flags & 0xd0) != 0)) {
             throw new IOException("Reserved flag bits in GZIP header != 0");
         }
         for(int i = 0; i < 6; i++) {
             int readByte = in.read();
-            if(readByte < 0) {
+            if(Sink.getDecision(readByte < 0)) {
                 throw new EOFException("Early EOF in GZIP header");
             }
             hook2(readByte);
         }
-        if((flags & FEXTRA) != 0) {
+        if(Sink.getDecision((flags & FEXTRA) != 0)) {
             for(int i = 0; i < 2; i++) {
                 int readByte = in.read();
-                if(readByte < 0) {
+                if(Sink.getDecision(readByte < 0)) {
                     throw new EOFException("Early EOF in GZIP header");
                 }
                 hook2(readByte);
             }
-            if(in.read() < 0 || in.read() < 0) {
+            if(Sink.getDecision(in.read() < 0 || in.read() < 0)) {
                 throw new EOFException("Early EOF in GZIP header");
             }
             int len1, len2, extraLen;
             len1 = in.read();
             len2 = in.read();
-            if((len1 < 0) || (len2 < 0)) {
+            if(Sink.getDecision((len1 < 0) || (len2 < 0))) {
                 throw new EOFException("Early EOF in GZIP header");
             }
             hook2(len1);
@@ -208,36 +210,36 @@ public class GZIPInputStream extends InflaterInputStream {
             extraLen = (len1 << 8) | len2;
             for(int i = 0; i < extraLen; i++) {
                 int readByte = in.read();
-                if(readByte < 0) {
+                if(Sink.getDecision(readByte < 0)) {
                     throw new EOFException("Early EOF in GZIP header");
                 }
                 hook2(readByte);
             }
         }
-        if((flags & FNAME) != 0) {
+        if(Sink.getDecision((flags & FNAME) != 0)) {
             int readByte;
             while ((readByte = in.read()) > 0) hook2(readByte);
-            if(readByte < 0) {
+            if(Sink.getDecision(readByte < 0)) {
                 throw new EOFException("Early EOF in GZIP file name");
             }
             hook2(readByte);
         }
-        if((flags & FCOMMENT) != 0) {
+        if(Sink.getDecision((flags & FCOMMENT) != 0)) {
             int readByte;
             while ((readByte = in.read()) > 0) hook2(readByte);
-            if(readByte < 0) {
+            if(Sink.getDecision(readByte < 0)) {
                 throw new EOFException("Early EOF in GZIP comment");
             }
             hook2(readByte);
         }
-        if((flags & FHCRC) != 0) {
+        if(Sink.getDecision((flags & FHCRC) != 0)) {
             int tempByte;
             int crcval = in.read();
-            if(crcval < 0) {
+            if(Sink.getDecision(crcval < 0)) {
                 throw new EOFException("Early EOF in GZIP header");
             }
             tempByte = in.read();
-            if(tempByte < 0) {
+            if(Sink.getDecision(tempByte < 0)) {
                 throw new EOFException("Early EOF in GZIP header");
             }
             crcval = (crcval << 8) | tempByte;
@@ -252,7 +254,7 @@ public class GZIPInputStream extends InflaterInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeGZIPCRC")
     public void hook3__role__DerivativeGZIPCRC(int crcval) throws IOException {
-        if(crcval != ((int) headCRC.getValue() & 0xffff)) {
+        if(Sink.getDecision(crcval != ((int) headCRC.getValue() & 0xffff))) {
             throw new IOException("Header CRC value mismatch");
         }
         hook3__before__DerivativeGZIPCRC(crcval);
@@ -262,7 +264,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 14, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     public void
     hook3(int crcval) throws IOException {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook3__role__DerivativeGZIPCRC(crcval);
         }
         else {
@@ -284,7 +286,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 15, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     public void
     hook2(int CM) {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook2__role__DerivativeGZIPCRC(CM);
         }
         else {
@@ -306,7 +308,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 16, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     private void
     hook1() {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook1__role__DerivativeGZIPCRC();
         }
         else {
@@ -318,14 +320,14 @@ public class GZIPInputStream extends InflaterInputStream {
     private void readFooter() throws IOException {
         byte[] footer = new byte[8];
         int avail = inf.getRemaining();
-        if(avail > 8) {
+        if(Sink.getDecision(avail > 8)) {
             avail = 8;
         }
         System.arraycopy(buf, len - inf.getRemaining(), footer, 0, avail);
         int needed = 8 - avail;
         while (needed > 0) {
             int count = in.read(footer, 8 - needed, needed);
-            if(count <= 0) {
+            if(Sink.getDecision(count <= 0)) {
                 throw new EOFException("Early EOF in GZIP footer");
             }
             needed -= count;
@@ -333,7 +335,7 @@ public class GZIPInputStream extends InflaterInputStream {
         int crcval = (footer[0] & 0xff) | ((footer[1] & 0xff) << 8) | ((footer[2] & 0xff) << 16) | (footer[3] << 24);
         hook4(crcval);
         int total = (footer[4] & 0xff) | ((footer[5] & 0xff) << 8) | ((footer[6] & 0xff) << 16) | (footer[7] << 24);
-        if(total != inf.getTotalOut()) {
+        if(Sink.getDecision(total != inf.getTotalOut())) {
             throw new IOException("Number of bytes mismatch");
         }
         eos = true;
@@ -345,7 +347,7 @@ public class GZIPInputStream extends InflaterInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeGZIPCRC")
     public void hook4__role__DerivativeGZIPCRC(int crcval) throws IOException {
-        if(crcval != (int) crc.getValue()) {
+        if(Sink.getDecision(crcval != (int) crc.getValue())) {
             throw new IOException("GZIP crc sum mismatch, theirs \"" + Integer.toHexString(crcval) + "\" and ours \"" + Integer.toHexString((int) crc.getValue()));
         }
         hook4__before__DerivativeGZIPCRC(crcval);
@@ -355,7 +357,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 17, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     public void
     hook4(int crcval) throws IOException {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook4__role__DerivativeGZIPCRC(crcval);
         }
         else {
@@ -369,7 +371,7 @@ public class GZIPInputStream extends InflaterInputStream {
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeGZIPCRC")
     protected void hook30__role__DerivativeGZIPCRC(byte[] buf, int offset, int numRead) throws IOException {
-        if(numRead > 0) {
+        if(Sink.getDecision(numRead > 0)) {
             crc.update(buf, offset, numRead);
         }
         hook30__before__DerivativeGZIPCRC(buf, offset, numRead);
@@ -379,7 +381,7 @@ public class GZIPInputStream extends InflaterInputStream {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 18, thenFeature = "DerivativeGZIPCRC", elseFeature = "GZIP")
     protected void
     hook30(byte[] buf, int offset, int numRead) throws IOException {
-        if(FEATUREDerivativeGZIPCRC) {
+        if(Sink.getDecision(FEATUREDerivativeGZIPCRC)) {
             hook30__role__DerivativeGZIPCRC(buf, offset, numRead);
         }
         else {

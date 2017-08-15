@@ -1,6 +1,7 @@
 package edu.cmu.cs.mvelezce.Specifications;
 
 import edu.cmu.cs.mvelezce.TestSpecifications.SpecificationException;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 public abstract aspect AbstractSpecification {
     private static boolean errorFound = false;
@@ -23,7 +24,7 @@ public abstract aspect AbstractSpecification {
         // omit following errors.
         // This might be liveness properties that cannot be fulfilled because the program
         // terminates because of another error.
-        if(errorFound) {
+        if(Sink.getDecision(errorFound)) {
             //System.out.println("omit error: " +specificationException.getMessage());
             return;
         }

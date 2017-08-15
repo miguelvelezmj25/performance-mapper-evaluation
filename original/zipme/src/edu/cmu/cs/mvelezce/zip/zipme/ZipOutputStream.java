@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -60,7 +62,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     private static String toHexString(long num) {
-        if(num >= 0 && (int) num == num) {
+        if(Sink.getDecision(num >= 0 && (int) num == num)) {
             return Integer.toHexString((int) num);
         }
         int mask = (1 << 4) - 1;
@@ -89,7 +91,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
         } catch (UnsupportedEncodingException uee) {
             throw new Error(uee.toString());
         }
-        if(commentBytes.length > 0xffff) {
+        if(Sink.getDecision(commentBytes.length > 0xffff)) {
             throw new IllegalArgumentException("Comment too long.");
         }
         zipComment = commentBytes;
@@ -106,7 +108,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void setMethod(int method) {
-        if(method != STORED && method != DEFLATED) {
+        if(Sink.getDecision(method != STORED && method != DEFLATED)) {
             throw new IllegalArgumentException("Method not supported.");
         }
         defaultMethod = method;
@@ -165,42 +167,42 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void putNextEntry(ZipEntry entry) throws IOException {
-        if(entries == null) {
+        if(Sink.getDecision(entries == null)) {
             throw new ZipException("ZipOutputStream was finished");
         }
         int method = entry.getMethod();
         int flags = 0;
-        if(method == -1) {
+        if(Sink.getDecision(method == -1)) {
             method = defaultMethod;
         }
-        if(method == STORED) {
-            if(entry.getCompressedSize() >= 0) {
-                if(entry.getSize() < 0) {
+        if(Sink.getDecision(method == STORED)) {
+            if(Sink.getDecision(entry.getCompressedSize() >= 0)) {
+                if(Sink.getDecision(entry.getSize() < 0)) {
                     entry.setSize(entry.getCompressedSize());
                 }
-                else if(entry.getSize() != entry.getCompressedSize()) {
+                else if(Sink.getDecision(entry.getSize() != entry.getCompressedSize())) {
                     throw new ZipException("Method STORED, but compressed size != size");
                 }
             }
             else {
                 entry.setCompressedSize(entry.getSize());
             }
-            if(entry.getSize() < 0) {
+            if(Sink.getDecision(entry.getSize() < 0)) {
                 throw new ZipException("Method STORED, but size not set");
             }
-            if(entry.getCrc() < 0) {
+            if(Sink.getDecision(entry.getCrc() < 0)) {
                 throw new ZipException("Method STORED, but crc not set");
             }
         }
-        else if(method == DEFLATED) {
-            if(entry.getCompressedSize() < 0 || entry.getSize() < 0 || entry.getCrc() < 0) {
+        else if(Sink.getDecision(method == DEFLATED)) {
+            if(Sink.getDecision(entry.getCompressedSize() < 0 || entry.getSize() < 0 || entry.getCrc() < 0)) {
                 flags |= 8;
             }
         }
-        if(curEntry != null) {
+        if(Sink.getDecision(curEntry != null)) {
             closeEntry();
         }
-        if(entry.getTime() < 0) {
+        if(Sink.getDecision(entry.getTime() < 0)) {
             entry.setTime(System.currentTimeMillis());
         }
         entry.flags = flags;
@@ -212,7 +214,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
         writeLeShort(flags);
         writeLeShort(method);
         writeLeInt(entry.getDOSTime());
-        if((flags & 8) == 0) {
+        if(Sink.getDecision((flags & 8) == 0)) {
             writeLeInt((int) entry.getCrc());
             writeLeInt((int) entry.getCompressedSize());
             writeLeInt((int) entry.getSize());
@@ -228,11 +230,11 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
         } catch (UnsupportedEncodingException uee) {
             throw new Error(uee.toString());
         }
-        if(name.length > 0xffff) {
+        if(Sink.getDecision(name.length > 0xffff)) {
             throw new ZipException("Name too long.");
         }
         byte[] extra = entry.getExtra();
-        if(extra == null) {
+        if(Sink.getDecision(extra == null)) {
             extra = new byte[0];
         }
         writeLeShort(name.length);
@@ -242,7 +244,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
         offset += LOCHDR + name.length + extra.length;
         curEntry = entry;
         this.hook41();
-        if(method == DEFLATED) {
+        if(Sink.getDecision(method == DEFLATED)) {
             def.reset();
         }
         size = 0;
@@ -256,28 +258,28 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void closeEntry() throws IOException {
-        if(curEntry == null) {
+        if(Sink.getDecision(curEntry == null)) {
             throw new ZipException("No open entry");
         }
-        if(curMethod == DEFLATED) {
+        if(Sink.getDecision(curMethod == DEFLATED)) {
             super.finish();
         }
         int csize = curMethod == DEFLATED ? def.getTotalOut() : size;
-        if(curEntry.getSize() < 0) {
+        if(Sink.getDecision(curEntry.getSize() < 0)) {
             curEntry.setSize(size);
         }
-        else if(curEntry.getSize() != size) {
+        else if(Sink.getDecision(curEntry.getSize() != size)) {
             throw new ZipException("size was " + size + ", but I expected " + curEntry.getSize());
         }
-        if(curEntry.getCompressedSize() < 0) {
+        if(Sink.getDecision(curEntry.getCompressedSize() < 0)) {
             curEntry.setCompressedSize(csize);
         }
-        else if(curEntry.getCompressedSize() != csize) {
+        else if(Sink.getDecision(curEntry.getCompressedSize() != csize)) {
             throw new ZipException("compressed size was " + csize + ", but I expected " + curEntry.getSize());
         }
         this.hook42();
         offset += csize;
-        if(curMethod == DEFLATED && (curEntry.flags & 8) != 0) {
+        if(Sink.getDecision(curMethod == DEFLATED && (curEntry.flags & 8) != 0)) {
             writeLeInt(EXTSIG);
             writeLeInt((int) curEntry.getCrc());
             writeLeInt((int) curEntry.getCompressedSize());
@@ -296,7 +298,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void write(byte[] b, int off, int len) throws IOException {
-        if(curEntry == null) {
+        if(Sink.getDecision(curEntry == null)) {
             throw new ZipException("No open entry.");
         }
         switch (curMethod) {
@@ -319,10 +321,10 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
      */
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "Compress")
     public void finish() throws IOException {
-        if(entries == null) {
+        if(Sink.getDecision(entries == null)) {
             return;
         }
-        if(curEntry != null) {
+        if(Sink.getDecision(curEntry != null)) {
             closeEntry();
         }
         int numEntries = 0;
@@ -346,11 +348,11 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
             } catch (UnsupportedEncodingException uee) {
                 throw new Error(uee.toString());
             }
-            if(name.length > 0xffff) {
+            if(Sink.getDecision(name.length > 0xffff)) {
                 throw new ZipException("Name too long.");
             }
             byte[] extra = entry.getExtra();
-            if(extra == null) {
+            if(Sink.getDecision(extra == null)) {
                 extra = new byte[0];
             }
             String str = entry.getComment();
@@ -360,7 +362,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
             } catch (UnsupportedEncodingException uee) {
                 throw new Error(uee.toString());
             }
-            if(comment.length > 0xffff) {
+            if(Sink.getDecision(comment.length > 0xffff)) {
                 throw new ZipException("Comment too long.");
             }
             writeLeShort(name.length);
@@ -403,7 +405,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 19, thenFeature = "DerivativeCompressCRC", elseFeature = "Compress")
     protected void
     hook41() throws IOException {
-        if(FEATUREDerivativeCompressCRC) {
+        if(Sink.getDecision(FEATUREDerivativeCompressCRC)) {
             hook41__role__DerivativeCompressCRC();
         }
         else {
@@ -417,10 +419,10 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
 
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureAnnotation(name = "DerivativeCompressCRC")
     protected void hook42__role__DerivativeCompressCRC() throws IOException {
-        if(curEntry.getCrc() < 0) {
+        if(Sink.getDecision(curEntry.getCrc() < 0)) {
             curEntry.setCrc(crc.getValue());
         }
-        else if(curEntry.getCrc() != crc.getValue()) {
+        else if(Sink.getDecision(curEntry.getCrc() != crc.getValue())) {
             throw new ZipException("crc was " + toHexString(crc.getValue()) + ", but I expected " + toHexString(curEntry.getCrc()));
         }
         hook42__before__DerivativeCompressCRC();
@@ -430,7 +432,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 20, thenFeature = "DerivativeCompressCRC", elseFeature = "Compress")
     protected void
     hook42() throws IOException {
-        if(FEATUREDerivativeCompressCRC) {
+        if(Sink.getDecision(FEATUREDerivativeCompressCRC)) {
             hook42__role__DerivativeCompressCRC();
         }
         else {
@@ -452,7 +454,7 @@ public class ZipOutputStream extends DeflaterOutputStream implements ZipConstant
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 21, thenFeature = "DerivativeCompressCRC", elseFeature = "Compress")
     protected void
     hook43(byte[] b, int off, int len) throws IOException {
-        if(FEATUREDerivativeCompressCRC) {
+        if(Sink.getDecision(FEATUREDerivativeCompressCRC)) {
             hook43__role__DerivativeCompressCRC(b, off, len);
         }
         else {

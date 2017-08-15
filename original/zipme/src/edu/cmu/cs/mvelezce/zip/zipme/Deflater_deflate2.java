@@ -2,6 +2,8 @@
 
 package edu.cmu.cs.mvelezce.zip.zipme;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import static edu.cmu.cs.mvelezce.zip.ZipMain.FEATUREDerivativeCompressAdlerThreeTwoChecksum;
 
 class Deflater_deflate2 {
@@ -29,22 +31,22 @@ class Deflater_deflate2 {
 
     int execute() {
         origLength = length;
-        if(_this.state == _this.CLOSED_STATE) {
+        if(Sink.getDecision(_this.state == _this.CLOSED_STATE)) {
             throw new IllegalStateException("Deflater closed");
         }
-        if(_this.state < _this.BUSY_STATE) {
+        if(Sink.getDecision(_this.state < _this.BUSY_STATE)) {
             header = (_this.DEFLATED + ((DeflaterConstants.MAX_WBITS - 8) << 4)) << 8;
             level_flags = (_this.level - 1) >> 1;
-            if(level_flags < 0 || level_flags > 3) {
+            if(Sink.getDecision(level_flags < 0 || level_flags > 3)) {
                 level_flags = 3;
             }
             header |= level_flags << 6;
-            if((_this.state & _this.IS_SETDICT) != 0) {
+            if(Sink.getDecision((_this.state & _this.IS_SETDICT) != 0)) {
                 header |= DeflaterConstants.PRESET_DICT;
             }
             header += 31 - (header % 31);
             _this.pending.writeShortMSB(header);
-            if((_this.state & _this.IS_SETDICT) != 0) {
+            if(Sink.getDecision((_this.state & _this.IS_SETDICT) != 0)) {
                 this.hook22();
             }
             _this.state = _this.BUSY_STATE | (_this.state & (_this.IS_FLUSHING | _this.IS_FINISHING));
@@ -54,15 +56,15 @@ class Deflater_deflate2 {
             offset += count;
             _this.totalOut += count;
             length -= count;
-            if(length == 0 || _this.state == _this.FINISHED_STATE) {
+            if(Sink.getDecision(length == 0 || _this.state == _this.FINISHED_STATE)) {
                 break;
             }
-            if(!_this.engine.deflate((_this.state & _this.IS_FLUSHING) != 0, (_this.state & _this.IS_FINISHING) != 0)) {
-                if(_this.state == _this.BUSY_STATE) {
+            if(Sink.getDecision(!_this.engine.deflate((_this.state & _this.IS_FLUSHING) != 0, (_this.state & _this.IS_FINISHING) != 0))) {
+                if(Sink.getDecision(_this.state == _this.BUSY_STATE)) {
                     return origLength - length;
                 }
-                else if(_this.state == _this.FLUSHING_STATE) {
-                    if(_this.level != _this.NO_COMPRESSION) {
+                else if(Sink.getDecision(_this.state == _this.FLUSHING_STATE)) {
+                    if(Sink.getDecision(_this.level != _this.NO_COMPRESSION)) {
                         neededbits = 8 + ((-_this.pending.getBitCount()) & 7);
                         while (neededbits > 0) {
                             _this.pending.writeBits(2, 10);
@@ -71,9 +73,9 @@ class Deflater_deflate2 {
                     }
                     _this.state = _this.BUSY_STATE;
                 }
-                else if(_this.state == _this.FINISHING_STATE) {
+                else if(Sink.getDecision(_this.state == _this.FINISHING_STATE)) {
                     _this.pending.alignToByte();
-                    if(!_this.noHeader) {
+                    if(Sink.getDecision(!_this.noHeader)) {
                         this.hook23();
                     }
                     _this.state = _this.FINISHED_STATE;
@@ -102,7 +104,7 @@ class Deflater_deflate2 {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 33, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook22() {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook22__role__DerivativeCompressAdler32Checksum();
         }
         else {
@@ -129,7 +131,7 @@ class Deflater_deflate2 {
     @edu.cmu.cs.mvelezce.zip.featureHouse.FeatureSwitchID(id = 34, thenFeature = "DerivativeCompressAdler32Checksum", elseFeature = "Compress")
     protected void
     hook23() {
-        if(FEATUREDerivativeCompressAdlerThreeTwoChecksum) {
+        if(Sink.getDecision(FEATUREDerivativeCompressAdlerThreeTwoChecksum)) {
             hook23__role__DerivativeCompressAdler32Checksum();
         }
         else {
