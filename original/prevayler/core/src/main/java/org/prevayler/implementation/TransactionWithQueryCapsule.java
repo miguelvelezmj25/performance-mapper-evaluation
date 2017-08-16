@@ -1,5 +1,6 @@
 package org.prevayler.implementation;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.TransactionWithQuery;
 import org.prevayler.foundation.serialization.Serializer;
 
@@ -31,7 +32,7 @@ class TransactionWithQueryCapsule<P, R> extends Capsule {
     }
 
     public R result() throws Exception {
-        if(_queryException != null) {
+        if(Sink.getDecision(_queryException != null)) {
             throw _queryException;
         }
         return _queryResult;

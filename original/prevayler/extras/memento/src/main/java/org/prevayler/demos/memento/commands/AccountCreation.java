@@ -6,29 +6,29 @@ import org.prevayler.util.memento.MementoCollector;
 import org.prevayler.util.memento.MementoTransaction;
 
 public class AccountCreation extends MementoTransaction {
-  private final String holder;
+    private final String holder;
 
-  /**
-   * Set by findObjects(...)
-   */
-  protected transient Bank bank;
+    /**
+     * Set by findObjects(...)
+     */
+    protected transient Bank bank;
 
-  public AccountCreation(String holder) {
-    this.holder = holder;
-  }
+    public AccountCreation(String holder) {
+        this.holder = holder;
+    }
 
-  protected void findObjects(Bank prevalentSystem) {
-    bank = prevalentSystem;
-  }
+    protected void findObjects(Bank prevalentSystem) {
+        bank = prevalentSystem;
+    }
 
-  protected void checkPrecondition() {
-  }
+    protected void checkPrecondition() {
+    }
 
-  protected void createMementos(MementoCollector collector) {
-    bank.createMemento(collector);
-  }
+    protected void createMementos(MementoCollector collector) {
+        bank.createMemento(collector);
+    }
 
-  protected Account execute(MementoCollector collector) throws Account.InvalidHolder {
-    return bank.createAccount(holder);
-  }
+    protected Account execute(MementoCollector collector) throws Account.InvalidHolder {
+        return bank.createAccount(holder);
+    }
 }

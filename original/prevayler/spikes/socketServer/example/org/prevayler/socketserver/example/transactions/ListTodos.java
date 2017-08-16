@@ -34,11 +34,11 @@ import java.util.Date;
  */
 public class ListTodos extends RemoteTransaction {
 
-  /**
-   * @see org.prevayler.util.TransactionWithQuery#executeAndQuery(Object, Date)
-   */
-  public Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception {
-    return prevalentSystem;
-  }
+    /**
+     * @see org.prevayler.util.TransactionWithQuery#executeAndQuery(Object, Date)
+     */
+    public Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception {
+        return prevalentSystem;
+    }
 
 }

@@ -6,13 +6,13 @@ import java.util.Date;
 
 public class GetPerson implements Query<Root, Person> {
 
-  private String identity;
+    private String identity;
 
-  public GetPerson(String identity) {
-    this.identity = identity;
-  }
+    public GetPerson(String identity) {
+        this.identity = identity;
+    }
 
-  public Person query(Root prevalentSystem, Date executionTime) throws Exception {
-    return prevalentSystem.getPersons().get(identity);
-  }
+    public Person query(Root prevalentSystem, Date executionTime) throws Exception {
+        return prevalentSystem.getPersons().get(identity);
+    }
 }

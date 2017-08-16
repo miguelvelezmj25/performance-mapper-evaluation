@@ -6,8 +6,8 @@ import java.util.Date;
 
 public class NullQuery implements Query<Object, Object> {
 
-  public Object query(Object prevalentSystem, Date executionTime) throws Exception {
-    return null;
-  }
+    public Object query(Object prevalentSystem, Date executionTime) throws Exception {
+        return null;
+    }
 
 }

@@ -37,12 +37,12 @@ package org.prevayler.socketserver.transactions;
  */
 public interface IRemoteTransaction {
 
-  /**
-   * Sets the connectionID.
-   *
-   * @param connectionID The connectionID to set
-   */
-  public void setSenderID(Long connectionID);
+    /**
+     * Sets the connectionID.
+     *
+     * @param connectionID The connectionID to set
+     */
+    public void setSenderID(Long connectionID);
 
 }
 

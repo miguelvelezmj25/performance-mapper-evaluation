@@ -32,40 +32,39 @@ import java.io.Serializable;
  */
 public class Todo implements Serializable {
 
-  public Todo(int id) {
-    this.id = id;
-    desc = "";
-  }
+    private int id;
+    private String desc;
 
-  private int id;
+    public Todo(int id) {
+        this.id = id;
+        desc = "";
+    }
 
-  /**
-   * Returns the id.
-   *
-   * @return int
-   */
-  public int getId() {
-    return id;
-  }
+    /**
+     * Returns the id.
+     *
+     * @return int
+     */
+    public int getId() {
+        return id;
+    }
 
-  private String desc;
+    /**
+     * Returns the desc.
+     *
+     * @return String
+     */
+    public String getDesc() {
+        return desc;
+    }
 
-  /**
-   * Returns the desc.
-   *
-   * @return String
-   */
-  public String getDesc() {
-    return desc;
-  }
-
-  /**
-   * Sets the desc.
-   *
-   * @param desc The desc to set
-   */
-  public void setDesc(String desc) {
-    this.desc = desc;
-  }
+    /**
+     * Sets the desc.
+     *
+     * @param desc The desc to set
+     */
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
 }

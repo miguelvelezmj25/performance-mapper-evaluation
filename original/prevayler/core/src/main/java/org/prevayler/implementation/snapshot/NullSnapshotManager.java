@@ -10,15 +10,15 @@ import java.io.IOException;
 
 public class NullSnapshotManager<P> extends GenericSnapshotManager<P> {
 
-  private final String _snapshotAttemptErrorMessage;
+    private final String _snapshotAttemptErrorMessage;
 
-  public NullSnapshotManager(P newPrevalentSystem, String snapshotAttemptErrorMessage) {
-    super(newPrevalentSystem);
-    _snapshotAttemptErrorMessage = snapshotAttemptErrorMessage;
-  }
+    public NullSnapshotManager(P newPrevalentSystem, String snapshotAttemptErrorMessage) {
+        super(newPrevalentSystem);
+        _snapshotAttemptErrorMessage = snapshotAttemptErrorMessage;
+    }
 
-  public File writeSnapshot(P prevalentSystem, long version) throws IOException {
-    throw new IOException(_snapshotAttemptErrorMessage);
-  }
+    public File writeSnapshot(P prevalentSystem, long version) throws IOException {
+        throw new IOException(_snapshotAttemptErrorMessage);
+    }
 
 }

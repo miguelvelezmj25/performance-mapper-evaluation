@@ -18,79 +18,79 @@ import java.util.List;
  * @author Carlos Villela
  */
 public class Project
-    implements Serializable {
+        implements Serializable {
 
-  private int id;
-  private String name;
-  private List tasks;
+    private int id;
+    private String name;
+    private List tasks;
 
-  /**
-   * Creates a new Project object.
-   */
-  public Project() {
-    tasks = new ArrayList();
-  }
+    /**
+     * Creates a new Project object.
+     */
+    public Project() {
+        tasks = new ArrayList();
+    }
 
-  /**
-   * Returns the name.
-   *
-   * @return String
-   */
-  public String getName() {
+    /**
+     * Returns the name.
+     *
+     * @return String
+     */
+    public String getName() {
 
-    return name;
-  }
+        return name;
+    }
 
-  /**
-   * Returns the tasks.
-   *
-   * @return Task[]
-   */
-  public List getTasks() {
+    /**
+     * Sets the name.
+     *
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    return tasks;
-  }
+    /**
+     * Returns the tasks.
+     *
+     * @return Task[]
+     */
+    public List getTasks() {
 
-  /**
-   * Sets the name.
-   *
-   * @param name The name to set
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
+        return tasks;
+    }
 
-  /**
-   * Sets the tasks.
-   *
-   * @param tasks The tasks to set
-   */
-  public void setTasks(List tasks) {
-    this.tasks = tasks;
-  }
+    /**
+     * Sets the tasks.
+     *
+     * @param tasks The tasks to set
+     */
+    public void setTasks(List tasks) {
+        this.tasks = tasks;
+    }
 
-  /**
-   * Returns the id.
-   *
-   * @return int
-   */
-  public int getId() {
+    /**
+     * Returns the id.
+     *
+     * @return int
+     */
+    public int getId() {
 
-    return id;
-  }
+        return id;
+    }
 
-  /**
-   * Sets the id.
-   *
-   * @param id The id to set
-   */
-  public void setId(int id) {
-    this.id = id;
-  }
+    /**
+     * Sets the id.
+     *
+     * @param id The id to set
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
 
-  public String toString() {
-    return "Project Id: " + id
-        + "\n      Name: " + name
-        + "\n     Tasks:...\n" + tasks;
-  }
+    public String toString() {
+        return "Project Id: " + id
+                + "\n      Name: " + name
+                + "\n     Tasks:...\n" + tasks;
+    }
 }

@@ -38,34 +38,34 @@ import java.beans.Introspector;
  */
 public class TodoBeanSetter extends BeanSetter {
 
-  // Init the propertyDescriptors array for Todo objects
-  {
-    propertyDescriptors = null;
-    try {
-      propertyDescriptors = Introspector.getBeanInfo(Todo.class).getPropertyDescriptors();
-    } catch (IntrospectionException e) {
-      Log.error(e, "Unable to get beanInfo for Todo class");
+    // Init the propertyDescriptors array for Todo objects
+    {
+        propertyDescriptors = null;
+        try {
+            propertyDescriptors = Introspector.getBeanInfo(Todo.class).getPropertyDescriptors();
+        } catch (IntrospectionException e) {
+            Log.error(e, "Unable to get beanInfo for Todo class");
+        }
     }
-  }
 
-  /**
-   * Method BeanSetter.  A Prevayler command to set a Todo object
-   * field's value.
-   *
-   * @param id    The id of the Todo object to change
-   * @param field The field to change
-   * @param value The new value
-   */
-  public TodoBeanSetter(int id, String field, Object value) {
-    super(id, field, value);
-  }
+    /**
+     * Method BeanSetter.  A Prevayler command to set a Todo object
+     * field's value.
+     *
+     * @param id    The id of the Todo object to change
+     * @param field The field to change
+     * @param value The new value
+     */
+    public TodoBeanSetter(int id, String field, Object value) {
+        super(id, field, value);
+    }
 
-  /**
-   * @see org.prevayler.socketserver.example.transactions.BeanSetter#lookup(Object)
-   */
-  protected Object lookup(Object prevalentSystem) throws Exception {
-    TodoList todoList = (TodoList) prevalentSystem;
-    return todoList.get(id);
-  }
+    /**
+     * @see org.prevayler.socketserver.example.transactions.BeanSetter#lookup(Object)
+     */
+    protected Object lookup(Object prevalentSystem) throws Exception {
+        TodoList todoList = (TodoList) prevalentSystem;
+        return todoList.get(id);
+    }
 }
 

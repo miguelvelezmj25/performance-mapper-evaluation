@@ -9,57 +9,57 @@ import javax.swing.*;
 import java.util.Date;
 
 public class Withdrawal extends MementoTransaction {
-  private long accountNumber;
-  private long amount;
+    private long accountNumber;
+    private long amount;
 
-  /**
-   * Set by findObjects(...)
-   */
-  private transient Account account;
+    /**
+     * Set by findObjects(...)
+     */
+    private transient Account account;
 
-  public Withdrawal(long accountNumber, long amount) {
-    super();
+    public Withdrawal(long accountNumber, long amount) {
+        super();
 
-    this.accountNumber = accountNumber;
-    this.amount = amount;
-  }
-
-  protected void findObjects(Bank prevalentSystem) throws Exception {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::findObjects?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+        this.accountNumber = accountNumber;
+        this.amount = amount;
     }
 
-    account = prevalentSystem.findAccount(accountNumber);
-  }
+    protected void findObjects(Bank prevalentSystem) throws Exception {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::findObjects?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-  protected void checkPrecondition() throws Exception {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::checkPrecondition?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+        account = prevalentSystem.findAccount(accountNumber);
     }
 
-    if (account.balance() < amount) {
-      throw account.new InvalidAmount("Can not withdraw more than the balance");
-    }
-  }
+    protected void checkPrecondition() throws Exception {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::checkPrecondition?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-  protected void createMementos(MementoCollector collector) {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::createMemento?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
-    }
-
-    account.createMemento(collector);
-  }
-
-  protected Account execute(MementoCollector collector) throws Exception {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::execute?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+        if(account.balance() < amount) {
+            throw account.new InvalidAmount("Can not withdraw more than the balance");
+        }
     }
 
-    account.withdraw(amount, new Date()); //dummy'ed date to make things work
+    protected void createMementos(MementoCollector collector) {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::createMemento?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-    System.out.println("* Withdrew " + amount + " from account " + account.numberString());
+        account.createMemento(collector);
+    }
 
-    return null;
-  }
+    protected Account execute(MementoCollector collector) throws Exception {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Withdrawal::execute?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
+
+        account.withdraw(amount, new Date()); //dummy'ed date to make things work
+
+        System.out.println("* Withdrew " + amount + " from account " + account.numberString());
+
+        return null;
+    }
 
 }

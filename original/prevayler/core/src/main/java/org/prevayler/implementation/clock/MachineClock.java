@@ -4,6 +4,8 @@
 
 package org.prevayler.implementation.clock;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.util.Date;
 
 /**
@@ -22,7 +24,7 @@ public class MachineClock extends BrokenClock {
 
     private synchronized void update() {
         long newTime = System.currentTimeMillis();
-        if(newTime != _millis) {
+        if(Sink.getDecision(newTime != _millis)) {
             advanceTo(new Date(newTime));
         }
     }

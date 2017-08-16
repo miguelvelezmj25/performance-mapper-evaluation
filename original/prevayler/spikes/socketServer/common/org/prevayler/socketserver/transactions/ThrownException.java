@@ -34,9 +34,9 @@ import java.io.Serializable;
  * @author djo
  */
 public class ThrownException implements Serializable {
-  public Exception exception;
+    public Exception exception;
 
-  public ThrownException(Exception e) {
-    exception = e;
-  }
+    public ThrownException(Exception e) {
+        exception = e;
+    }
 }

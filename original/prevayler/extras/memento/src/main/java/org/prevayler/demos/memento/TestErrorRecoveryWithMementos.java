@@ -20,67 +20,67 @@ import org.prevayler.util.memento.MementoTransaction;
  */
 public class TestErrorRecoveryWithMementos {
 
-  public static void main(String[] args) {
-    try {
+    private static Prevayler<Bank> prevayler;
+    private static Bank bank;
 
-      run();
-
-    } catch (Exception ex) {
-      ex.printStackTrace();
+    static {
+        try {
+            prevayler = PrevaylerFactory.createPrevayler(new Bank(), "demoMemento");
+            bank = prevayler.prevalentSystem();
+        } catch (Exception e) {
+            System.out.println("FAILED TO CREATE PREVAYLER!");
+        }
     }
-  }
 
-  private static Prevayler<Bank> prevayler;
-  private static Bank bank;
+    public static void main(String[] args) {
+        try {
 
-  static {
-    try {
-      prevayler = PrevaylerFactory.createPrevayler(new Bank(), "demoMemento");
-      bank = prevayler.prevalentSystem();
-    } catch (Exception e) {
-      System.out.println("FAILED TO CREATE PREVAYLER!");
+            run();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
-  }
 
-  public static void run() throws Exception {
-    Account account1 = null, account2 = null;
+    public static void run() throws Exception {
+        Account account1 = null, account2 = null;
 
-    System.out.println("*** Creating account 1");
-    MementoTransaction command = new AccountCreation("Owner 1");
-    account1 = execute(command);
+        System.out.println("*** Creating account 1");
+        MementoTransaction command = new AccountCreation("Owner 1");
+        account1 = execute(command);
 
-    System.out.println("*** Creating account 2");
-    command = new AccountCreation("Owner 2");
-    account2 = execute(command);
+        System.out.println("*** Creating account 2");
+        command = new AccountCreation("Owner 2");
+        account2 = execute(command);
 
-    System.out.println("*** Depositing 500 into account 1");
-    command = new Deposit(account1, 500);
-    execute(command);
+        System.out.println("*** Depositing 500 into account 1");
+        command = new Deposit(account1, 500);
+        execute(command);
 
-    System.out.println("*** Transferring 200 from account 1 into account 2");
-    command = new Transfer(account1.number(), account2.number(), 200);
-    execute(command);
+        System.out.println("*** Transferring 200 from account 1 into account 2");
+        command = new Transfer(account1.number(), account2.number(), 200);
+        execute(command);
 
-    System.out.println("*** Deleting account 1");
-    command = new AccountDeletion(account1);
-    execute(command);
+        System.out.println("*** Deleting account 1");
+        command = new AccountDeletion(account1);
+        execute(command);
 
-    System.out.println("*** Deleting account 1");
-    command = new AccountDeletion(account2);
-    execute(command);
+        System.out.println("*** Deleting account 1");
+        command = new AccountDeletion(account2);
+        execute(command);
 
-    prevayler.takeSnapshot();
-  }
-
-  private static Account execute(MementoTransaction command) {
-    try {
-      return new MementoManagerCommand(command).executeAndQuery(prevayler.prevalentSystem(), prevayler.clock().time());
-    } catch (Exception exception) {
-      System.out.println("FAILURE!");
-      exception.printStackTrace(System.out);
-    } finally {
-      System.out.println(bank.toString());
+        prevayler.takeSnapshot();
     }
-    return null;
-  }
+
+    private static Account execute(MementoTransaction command) {
+        try {
+            return new MementoManagerCommand(command).executeAndQuery(prevayler.prevalentSystem(), prevayler.clock().time());
+        } catch (Exception exception) {
+            System.out.println("FAILURE!");
+            exception.printStackTrace(System.out);
+        } finally {
+            System.out.println(bank.toString());
+        }
+        return null;
+    }
 }

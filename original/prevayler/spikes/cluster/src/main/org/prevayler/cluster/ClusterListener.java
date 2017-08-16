@@ -1,9 +1,9 @@
 package org.prevayler.cluster;
 
 public interface ClusterListener {
-  Object getState();
+    Object getState();
 
-  void setState(Object state);
+    void setState(Object state);
 
-  Object receive(Object message);
+    Object receive(Object message);
 }

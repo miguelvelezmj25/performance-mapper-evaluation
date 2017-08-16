@@ -4,6 +4,7 @@
 
 package org.prevayler.implementation.clock;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.Clock;
 
 import java.util.Date;
@@ -31,7 +32,7 @@ public class BrokenClock implements Clock {
 
     public synchronized void advanceTo(Date newTime) {
         long newMillis = newTime.getTime();
-        if(newMillis == _millis) {
+        if(Sink.getDecision(newMillis == _millis)) {
             return;
         }
         _millis = newMillis;

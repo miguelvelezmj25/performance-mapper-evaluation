@@ -9,58 +9,58 @@ import javax.swing.*;
 import java.util.Date;
 
 public class Deposit extends MementoTransaction {
-  private long accountNumber;
-  private long amount;
+    private long accountNumber;
+    private long amount;
 
-  /**
-   * Set by findObjects(...)
-   */
-  private transient Account account;
+    /**
+     * Set by findObjects(...)
+     */
+    private transient Account account;
 
-  public Deposit(Account account, long amount) {
-    this(account.number(), amount);
-  }
-
-  public Deposit(long accountNumber, long amount) {
-    super();
-
-    this.accountNumber = accountNumber;
-    this.amount = amount;
-  }
-
-  protected void findObjects(Bank prevalentSystem) throws Exception {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Deposit::findObjects?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+    public Deposit(Account account, long amount) {
+        this(account.number(), amount);
     }
 
-    account = prevalentSystem.findAccount(accountNumber);
-  }
+    public Deposit(long accountNumber, long amount) {
+        super();
 
-  protected void checkPrecondition() {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Deposit::checkPrecondition?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+        this.accountNumber = accountNumber;
+        this.amount = amount;
     }
 
-  }
+    protected void findObjects(Bank prevalentSystem) throws Exception {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Deposit::findObjects?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-  protected void createMementos(MementoCollector collector) {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Deposit::createMemento?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
+        account = prevalentSystem.findAccount(accountNumber);
     }
 
-    account.createMemento(collector);
-  }
+    protected void checkPrecondition() {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Deposit::checkPrecondition?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-  protected Account execute(MementoCollector collector) throws Exception {
-    if (JOptionPane.showConfirmDialog(null, "Fail at Deposit::execute?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
-      throw new RuntimeException();
     }
 
-    account.deposit(amount, new Date()); //dummy'ed date to make things work
+    protected void createMementos(MementoCollector collector) {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Deposit::createMemento?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
 
-    System.out.println("* Deposited " + amount + " into account " + account.numberString());
+        account.createMemento(collector);
+    }
 
-    return null;
-  }
+    protected Account execute(MementoCollector collector) throws Exception {
+        if(JOptionPane.showConfirmDialog(null, "Fail at Deposit::execute?", "Prevayler with rollback", JOptionPane.YES_NO_OPTION) == 0) {
+            throw new RuntimeException();
+        }
+
+        account.deposit(amount, new Date()); //dummy'ed date to make things work
+
+        System.out.println("* Deposited " + amount + " into account " + account.numberString());
+
+        return null;
+    }
 
 }

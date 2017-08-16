@@ -32,34 +32,34 @@ package org.prevayler.socketserver.util;
  */
 public class Log {
 
-  /**
-   * Log an application error
-   *
-   * @param e       The exception object
-   * @param message The message to log
-   */
-  public static void error(Exception e, String message) {
-    System.err.println(message);
-    e.printStackTrace();
-  }
+    /**
+     * Log an application error
+     *
+     * @param e       The exception object
+     * @param message The message to log
+     */
+    public static void error(Exception e, String message) {
+        System.err.println(message);
+        e.printStackTrace();
+    }
 
-  /**
-   * Method message. Log a message
-   *
-   * @param message The message to log
-   */
-  public static void message(String message) {
-    System.out.println(message);
-  }
+    /**
+     * Method message. Log a message
+     *
+     * @param message The message to log
+     */
+    public static void message(String message) {
+        System.out.println(message);
+    }
 
-  /**
-   * Method message. Log a debug message
-   *
-   * @param message The message to log
-   */
-  public static void debug(String message) {
-    System.out.println(message);
-  }
+    /**
+     * Method message. Log a debug message
+     *
+     * @param message The message to log
+     */
+    public static void debug(String message) {
+        System.out.println(message);
+    }
 
 }
 

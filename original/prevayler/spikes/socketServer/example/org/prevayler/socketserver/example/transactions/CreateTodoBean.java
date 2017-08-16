@@ -37,26 +37,26 @@ import java.util.Date;
  */
 public class CreateTodoBean extends RemoteTransaction {
 
-  private String desc;
+    private String desc;
 
-  public CreateTodoBean(String desc) {
-    this.desc = desc;
-  }
+    public CreateTodoBean(String desc) {
+        this.desc = desc;
+    }
 
-  /**
-   * @see org.prevayler.util.TransactionWithQuery#executeAndQuery(Object, Date)
-   */
-  public Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception {
-    TodoList todoList = (TodoList) prevalentSystem;
-    Todo todo = todoList.newTodo();
-    todo.setDesc(desc);
+    /**
+     * @see org.prevayler.util.TransactionWithQuery#executeAndQuery(Object, Date)
+     */
+    public Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception {
+        TodoList todoList = (TodoList) prevalentSystem;
+        Todo todo = todoList.newTodo();
+        todo.setDesc(desc);
 
-    // Notify interested clients that the list just changed
-    // Note that much more complex notification schemes can be devised
-    // than this.
-    Notification.submit(senderID, "ListChanged", todoList);
-    return todo;
-  }
+        // Notify interested clients that the list just changed
+        // Note that much more complex notification schemes can be devised
+        // than this.
+        Notification.submit(senderID, "ListChanged", todoList);
+        return todo;
+    }
 
 }
 

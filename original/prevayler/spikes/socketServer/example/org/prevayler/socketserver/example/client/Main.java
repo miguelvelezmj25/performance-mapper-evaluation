@@ -46,142 +46,144 @@ import org.prevayler.socketserver.util.Log;
  */
 public class Main {
 
-  public static synchronized void printList(Object todoList) {
-    TodoList theList = (TodoList) todoList;
-    Todo[] items = theList.toArray();
-    for (int i = 0; i < items.length; i++) {
-      System.out.println(items[i].getId() + "\t" + items[i].getDesc());
-    }
-    System.out.println();
-  }
+    private static char[] responses = {'A', 'E', 'L'};
 
-  private static char[] responses = {'A', 'E', 'L'};
-
-  private static char toUpperCase(char ch) {
-    String result = "";
-    result += ch;
-    result = result.toUpperCase();
-    return result.toCharArray()[0];
-  }
-
-  private static boolean invalidResponse(char response) {
-    boolean responseIsInvalid = true;
-    for (int i = 0; i < responses.length && responseIsInvalid; i++) {
-      if (responses[i] == response) {
-        responseIsInvalid = false;
-      }
-    }
-    return responseIsInvalid;
-  }
-
-  public static void printMenu() {
-    System.out.println("L)ist todos;  A)dd todo;  E)xit");
-  }
-
-  public static void addTodo() {
-    System.out.println("Please enter the todo item and press enter");
-    String response = "";
-    try {
-      // Throw away any pending newline characters
-      char nextChar;
-      do {
-        nextChar = (char) System.in.read();
-      } while (nextChar == '\n' || nextChar == '\r');
-      response += nextChar;
-
-      // Read the rest of the input line
-      while (true) {
-        nextChar = (char) System.in.read();
-        if (nextChar == '\n' || nextChar == '\r') break;
-        response += nextChar;
-      }
-    } catch (Exception e) {
-      Log.error(e, "Unable to read user input");
+    public static synchronized void printList(Object todoList) {
+        TodoList theList = (TodoList) todoList;
+        Todo[] items = theList.toArray();
+        for(int i = 0; i < items.length; i++) {
+            System.out.println(items[i].getId() + "\t" + items[i].getDesc());
+        }
+        System.out.println();
     }
 
-    // Add the new todo item
-    Remote.conn.execl(new CreateTodoBean(response), "Unable to add Todo");
-  }
+    private static char toUpperCase(char ch) {
+        String result = "";
+        result += ch;
+        result = result.toUpperCase();
+        return result.toCharArray()[0];
+    }
 
-  public static void mainMenu() {
-    try {
-      // Print the current todo list
-      System.out.println();
-      printList(Remote.conn.execl(new ListTodos(), "Unable to list todos"));
+    private static boolean invalidResponse(char response) {
+        boolean responseIsInvalid = true;
+        for(int i = 0; i < responses.length && responseIsInvalid; i++) {
+            if(responses[i] == response) {
+                responseIsInvalid = false;
+            }
+        }
+        return responseIsInvalid;
+    }
 
-      // Display the menu the first time
-      printMenu();
+    public static void printMenu() {
+        System.out.println("L)ist todos;  A)dd todo;  E)xit");
+    }
 
-      while (true) {
-        // Get the response
-        char response;
-        do {
-          response = (char) System.in.read();
+    public static void addTodo() {
+        System.out.println("Please enter the todo item and press enter");
+        String response = "";
+        try {
+            // Throw away any pending newline characters
+            char nextChar;
+            do {
+                nextChar = (char) System.in.read();
+            } while (nextChar == '\n' || nextChar == '\r');
+            response += nextChar;
 
-          if (response == '\n') {
-            printMenu();
-          }
+            // Read the rest of the input line
+            while (true) {
+                nextChar = (char) System.in.read();
+                if(nextChar == '\n' || nextChar == '\r') {
+                    break;
+                }
+                response += nextChar;
+            }
+        } catch (Exception e) {
+            Log.error(e, "Unable to read user input");
+        }
 
-          response = toUpperCase(response);
-        } while (invalidResponse(response));
+        // Add the new todo item
+        Remote.conn.execl(new CreateTodoBean(response), "Unable to add Todo");
+    }
 
-        // Process it
-        switch (response) {
-          case 'L':
+    public static void mainMenu() {
+        try {
+            // Print the current todo list
+            System.out.println();
             printList(Remote.conn.execl(new ListTodos(), "Unable to list todos"));
-            break;
-          case 'A':
-            addTodo();
-            break;
-          case 'E':
+
+            // Display the menu the first time
+            printMenu();
+
+            while (true) {
+                // Get the response
+                char response;
+                do {
+                    response = (char) System.in.read();
+
+                    if(response == '\n') {
+                        printMenu();
+                    }
+
+                    response = toUpperCase(response);
+                } while (invalidResponse(response));
+
+                // Process it
+                switch (response) {
+                    case 'L':
+                        printList(Remote.conn.execl(new ListTodos(), "Unable to list todos"));
+                        break;
+                    case 'A':
+                        addTodo();
+                        break;
+                    case 'E':
+                        return;
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e, "Error in main menu loop");
+        }
+    }
+
+    public static void main(String[] args) {
+        Config.propertyFile = "Todo.ini";
+        new ClientConfig();
+
+        // Get the config options
+        int basePort = Integer.parseInt(Config.properties.getProperty("BasePort"));
+        String remoteHost = Config.properties.getProperty("RemoteHost");
+
+        // Connect to the server
+        try {
+            Remote.connect(remoteHost, basePort);
+        } catch (Exception e) {
+            Log.error(e, "Error connecting to remote host: " + remoteHost);
             return;
         }
-      }
-    } catch (Exception e) {
-      Log.error(e, "Error in main menu loop");
-    }
-  }
 
-  public static void main(String[] args) {
-    Config.propertyFile = "Todo.ini";
-    new ClientConfig();
-
-    // Get the config options
-    int basePort = Integer.parseInt(Config.properties.getProperty("BasePort"));
-    String remoteHost = Config.properties.getProperty("RemoteHost");
-
-    // Connect to the server
-    try {
-      Remote.connect(remoteHost, basePort);
-    } catch (Exception e) {
-      Log.error(e, "Error connecting to remote host: " + remoteHost);
-      return;
-    }
-
-    // Listen to interesting events
-    try {
-      Remote.conn.registerCallback("ListChanged", new IModelCallback() {
-        public void happened(Long connectionID, String name, Object obj) {
-          // We'll just re-print the list when a change happens.
-          // Note that this will happen in a background thread.
-          System.out.println();
-          Main.printList(obj);
-          Main.printMenu();
+        // Listen to interesting events
+        try {
+            Remote.conn.registerCallback("ListChanged", new IModelCallback() {
+                public void happened(Long connectionID, String name, Object obj) {
+                    // We'll just re-print the list when a change happens.
+                    // Note that this will happen in a background thread.
+                    System.out.println();
+                    Main.printList(obj);
+                    Main.printMenu();
+                }
+            });
+        } catch (Exception e) {
+            Log.error(e, "Unable to register callback");
+            return;
         }
-      });
-    } catch (Exception e) {
-      Log.error(e, "Unable to register callback");
-      return;
-    }
 
-    // Run the main loop
-    mainMenu();
+        // Run the main loop
+        mainMenu();
 
-    // Close the connection
-    try {
-      Remote.conn.close();
-    } catch (Exception e) {
-      Log.error(e, "Unable to close client connection");
+        // Close the connection
+        try {
+            Remote.conn.close();
+        } catch (Exception e) {
+            Log.error(e, "Unable to close client connection");
+        }
     }
-  }
 }

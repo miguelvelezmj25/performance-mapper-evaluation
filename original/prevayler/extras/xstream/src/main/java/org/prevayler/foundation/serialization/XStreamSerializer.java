@@ -24,47 +24,47 @@ import java.io.*;
  */
 public class XStreamSerializer implements Serializer {
 
-  private ThreadLocal _xstreams = new ThreadLocal() {
-    protected Object initialValue() {
-      return createXStream();
+    private ThreadLocal _xstreams = new ThreadLocal() {
+        protected Object initialValue() {
+            return createXStream();
+        }
+    };
+
+    private String _encoding;
+
+    /**
+     * Use the default character encoding for XML serialization.
+     */
+    public XStreamSerializer() {
+        _encoding = null;
     }
-  };
 
-  private String _encoding;
+    /**
+     * Use the specified character encoding for XML serialization.
+     */
+    public XStreamSerializer(String encoding) {
+        _encoding = encoding;
+    }
 
-  /**
-   * Use the default character encoding for XML serialization.
-   */
-  public XStreamSerializer() {
-    _encoding = null;
-  }
+    private XStream getXStream() {
+        return (XStream) _xstreams.get();
+    }
 
-  /**
-   * Use the specified character encoding for XML serialization.
-   */
-  public XStreamSerializer(String encoding) {
-    _encoding = encoding;
-  }
+    public void writeObject(OutputStream stream, Object object) throws IOException {
+        OutputStreamWriter writer = _encoding == null ? new OutputStreamWriter(stream) : new OutputStreamWriter(stream, _encoding);
+        getXStream().toXML(object, writer);
+        writer.flush();
+    }
 
-  private XStream getXStream() {
-    return (XStream) _xstreams.get();
-  }
+    public Object readObject(InputStream stream) throws IOException, ClassNotFoundException {
+        return getXStream().fromXML(_encoding == null ? new InputStreamReader(stream) : new InputStreamReader(stream, _encoding));
+    }
 
-  public void writeObject(OutputStream stream, Object object) throws IOException {
-    OutputStreamWriter writer = _encoding == null ? new OutputStreamWriter(stream) : new OutputStreamWriter(stream, _encoding);
-    getXStream().toXML(object, writer);
-    writer.flush();
-  }
-
-  public Object readObject(InputStream stream) throws IOException, ClassNotFoundException {
-    return getXStream().fromXML(_encoding == null ? new InputStreamReader(stream) : new InputStreamReader(stream, _encoding));
-  }
-
-  /**
-   * Create a new XStream instance. This must be a new instance because XStream instances are not threadsafe.
-   */
-  protected XStream createXStream() {
-    return new XStream();
-  }
+    /**
+     * Create a new XStream instance. This must be a new instance because XStream instances are not threadsafe.
+     */
+    protected XStream createXStream() {
+        return new XStream();
+    }
 
 }

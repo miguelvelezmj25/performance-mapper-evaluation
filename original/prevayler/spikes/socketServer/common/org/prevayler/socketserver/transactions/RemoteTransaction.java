@@ -37,24 +37,24 @@ import java.util.Date;
  */
 public abstract class RemoteTransaction implements Transaction, TransactionWithQuery, IRemoteTransaction {
 
-  protected Long senderID;
+    protected Long senderID;
 
-  /**
-   * Sets the connectionID.
-   *
-   * @param connectionID The connectionID to set
-   */
-  public void setSenderID(Long connectionID) {
-    this.senderID = connectionID;
-  }
-
-  public abstract Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception;
-
-  public void executeOn(Object prevalentSystem, Date timestamp) {
-    try {
-      executeAndQuery(prevalentSystem, timestamp);
-    } catch (Exception e) {
+    /**
+     * Sets the connectionID.
+     *
+     * @param connectionID The connectionID to set
+     */
+    public void setSenderID(Long connectionID) {
+        this.senderID = connectionID;
     }
-  }
+
+    public abstract Object executeAndQuery(Object prevalentSystem, Date timestamp) throws Exception;
+
+    public void executeOn(Object prevalentSystem, Date timestamp) {
+        try {
+            executeAndQuery(prevalentSystem, timestamp);
+        } catch (Exception e) {
+        }
+    }
 }
 

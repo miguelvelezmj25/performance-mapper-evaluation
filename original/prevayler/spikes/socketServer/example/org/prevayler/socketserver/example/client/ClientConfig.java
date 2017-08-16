@@ -34,22 +34,22 @@ import java.util.Properties;
  */
 public class ClientConfig extends Config {
 
-  /**
-   * @see org.prevayler.socketserver.util.Config#getConfigHeader()
-   */
-  public String getConfigHeader() {
-    return "Todo client config";
-  }
+    /**
+     * @see org.prevayler.socketserver.util.Config#getConfigHeader()
+     */
+    public String getConfigHeader() {
+        return "Todo client config";
+    }
 
-  /**
-   * @see org.prevayler.socketserver.util.Config#getDefaultProps()
-   */
-  public Properties getDefaultProps() {
-    // Init the default property values
-    Properties props = new Properties();
-    props.put("BasePort", "7000");
-    props.put("RemoteHost", "localhost");
-    return props;
-  }
+    /**
+     * @see org.prevayler.socketserver.util.Config#getDefaultProps()
+     */
+    public Properties getDefaultProps() {
+        // Init the default property values
+        Properties props = new Properties();
+        props.put("BasePort", "7000");
+        props.put("RemoteHost", "localhost");
+        return props;
+    }
 
 }

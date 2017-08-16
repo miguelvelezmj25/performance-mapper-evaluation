@@ -30,51 +30,51 @@ import java.io.Serializable;
  * @version 2.0
  */
 public abstract class MementoTransaction implements Serializable {
-  /**
-   * Executes this command on the received system. See prevayler.demos for examples.
-   * The returned object has to be Serializable in preparation for future versions of
-   * Prevayler that will provide fault-tolerance through system replicas.
-   *
-   * @param collector       The memento collector to which to add the mementos. A memento
-   *                        collector instead of a Prevayler instance is passed, so the command will not easily
-   *                        invoke subcommands through the prevayler (which is not allowed).
-   * @param prevalentSystem The system on which to execute the command.
-   * @return The object returned by the execution of this command. Most commands simply return null.
-   */
-  public Account execute(MementoCollector collector, Bank prevalentSystem) throws Exception {
-    findObjects(prevalentSystem);
+    /**
+     * Executes this command on the received system. See prevayler.demos for examples.
+     * The returned object has to be Serializable in preparation for future versions of
+     * Prevayler that will provide fault-tolerance through system replicas.
+     *
+     * @param collector       The memento collector to which to add the mementos. A memento
+     *                        collector instead of a Prevayler instance is passed, so the command will not easily
+     *                        invoke subcommands through the prevayler (which is not allowed).
+     * @param prevalentSystem The system on which to execute the command.
+     * @return The object returned by the execution of this command. Most commands simply return null.
+     */
+    public Account execute(MementoCollector collector, Bank prevalentSystem) throws Exception {
+        findObjects(prevalentSystem);
 
-    checkPrecondition();
+        checkPrecondition();
 
-    createMementos(collector);
+        createMementos(collector);
 
-    return execute(collector);
-  }
+        return execute(collector);
+    }
 
-  /**
-   * Find the objects this command modifies.
-   *
-   * @param prevalentSystem The prevalent system in which to find the objects.
-   */
-  protected abstract void findObjects(Bank prevalentSystem) throws Exception;
+    /**
+     * Find the objects this command modifies.
+     *
+     * @param prevalentSystem The prevalent system in which to find the objects.
+     */
+    protected abstract void findObjects(Bank prevalentSystem) throws Exception;
 
-  /**
-   * Check the precondition.
-   */
-  protected abstract void checkPrecondition() throws Exception;
+    /**
+     * Check the precondition.
+     */
+    protected abstract void checkPrecondition() throws Exception;
 
-  /**
-   * Create mementos for all objects which (possibly) get modified.
-   *
-   * @param collector The memento collector to which to add the mementos.
-   */
-  protected abstract void createMementos(MementoCollector collector);
+    /**
+     * Create mementos for all objects which (possibly) get modified.
+     *
+     * @param collector The memento collector to which to add the mementos.
+     */
+    protected abstract void createMementos(MementoCollector collector);
 
-  /**
-   * Execute the actual command.
-   *
-   * @param collector The memento collector which can be used to execute subcommands.
-   * @return The object returned by the execution of this command. Most commands simply return null.
-   */
-  protected abstract Account execute(MementoCollector collector) throws Exception;
+    /**
+     * Execute the actual command.
+     *
+     * @param collector The memento collector which can be used to execute subcommands.
+     * @return The object returned by the execution of this command. Most commands simply return null.
+     */
+    protected abstract Account execute(MementoCollector collector) throws Exception;
 }

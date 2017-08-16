@@ -55,101 +55,97 @@ import java.util.Properties;
  * YourConfigClass.configFile.store();
  */
 public abstract class Config {
-  /**
-   * Initialize the configuration file.  This must be called in order
-   * to create the "properties" object.
-   */
-  public Config() {
-    init();
-  }
+    /**
+     * The last Config object created (probably the only one) is stored here
+     * automatically for easy global access
+     */
+    public static Config configFile;
+    /**
+     * A "global" properties object containing the current
+     * application properties as read from the configuration file.
+     */
+    public static Properties properties;
+    /**
+     * The filename (not including path) of the application configuration
+     * file.<p>
+     * <p/>
+     * The default value may be overridden:
+     * <ul>
+     * <li> By changing this variable before constructing your Config
+     * descendent class
+     * <li> By creating a non-default construtor accepting a String and
+     * calling super(yourstring) in your constructor and using
+     * that constructor instead of the default one.
+     * </ul>
+     */
+    public static String propertyFile = "Config.ini";
 
-  /**
-   * Initialize the configuration file objects.  This must be called in
-   * order to create the "properties" object.
-   *
-   * @param propertyFile The name of the property file to use.  This sets the propertyFile field.
-   */
-  public Config(String propertyFile) {
-    Config.propertyFile = propertyFile;
-    init();
-  }
 
-
-  private void init() {
-    // Init the default property values
-    Properties props = getDefaultProps();
-
-    // Create root app properties object
-    properties = new Properties(props);
-
-    // Try to load it from disk
-    propertyFile = System.getProperty("user.dir") + "/" + propertyFile;
-    try {
-      properties.load(new FileInputStream(propertyFile));
-    } catch (IOException e) {
-      try {
-        props.store(new FileOutputStream(propertyFile), getConfigHeader());
-        properties.load(new FileInputStream(propertyFile));
-      } catch (IOException e2) {
-        Log.error(e, "Could not save default properties");
-      }
+    /**
+     * Initialize the configuration file.  This must be called in order
+     * to create the "properties" object.
+     */
+    public Config() {
+        init();
     }
 
-    configFile = this;
-  }
+    /**
+     * Initialize the configuration file objects.  This must be called in
+     * order to create the "properties" object.
+     *
+     * @param propertyFile The name of the property file to use.  This sets the propertyFile field.
+     */
+    public Config(String propertyFile) {
+        Config.propertyFile = propertyFile;
+        init();
+    }
 
+    private void init() {
+        // Init the default property values
+        Properties props = getDefaultProps();
 
-  /**
-   * This method creates and initializes initializes a Properties object
-   * with the default values for all properties stored in the config file.
-   * It <b>must</b> be overriden in a derived class.
-   *
-   * @return Properties the default properties
-   */
-  public abstract Properties getDefaultProps();
+        // Create root app properties object
+        properties = new Properties(props);
 
-  /**
-   * This method returns the string that is stored in the comment at the
-   * top of the config file.  It must be overridden in a derived class.
-   */
-  public abstract String getConfigHeader();
+        // Try to load it from disk
+        propertyFile = System.getProperty("user.dir") + "/" + propertyFile;
+        try {
+            properties.load(new FileInputStream(propertyFile));
+        } catch (IOException e) {
+            try {
+                props.store(new FileOutputStream(propertyFile), getConfigHeader());
+                properties.load(new FileInputStream(propertyFile));
+            } catch (IOException e2) {
+                Log.error(e, "Could not save default properties");
+            }
+        }
 
-  /**
-   * The last Config object created (probably the only one) is stored here
-   * automatically for easy global access
-   */
-  public static Config configFile;
+        configFile = this;
+    }
 
-  /**
-   * A "global" properties object containing the current
-   * application properties as read from the configuration file.
-   */
-  public static Properties properties;
+    /**
+     * This method creates and initializes initializes a Properties object
+     * with the default values for all properties stored in the config file.
+     * It <b>must</b> be overriden in a derived class.
+     *
+     * @return Properties the default properties
+     */
+    public abstract Properties getDefaultProps();
 
-  /**
-   * The filename (not including path) of the application configuration
-   * file.<p>
-   * <p/>
-   * The default value may be overridden:
-   * <ul>
-   * <li> By changing this variable before constructing your Config
-   * descendent class
-   * <li> By creating a non-default construtor accepting a String and
-   * calling super(yourstring) in your constructor and using
-   * that constructor instead of the default one.
-   * </ul>
-   */
-  public static String propertyFile = "Config.ini";
+    /**
+     * This method returns the string that is stored in the comment at the
+     * top of the config file.  It must be overridden in a derived class.
+     */
+    public abstract String getConfigHeader();
 
-
-  /**
-   * Store the current configuration properties in the configuration file
-   *
-   * @throws IOException if an error happened while storing
-   */
-  public void store() throws IOException {
-    properties.store(new FileOutputStream(propertyFile), getConfigHeader());
-  }
+    /**
+     * Store the current configuration properties in the configuration file
+     *
+     * @throws IOException if an error happened while storing
+     */
+    public void store() throws IOException {
+        properties.store(new FileOutputStream(propertyFile), getConfigHeader());
+    }
 
 }
 

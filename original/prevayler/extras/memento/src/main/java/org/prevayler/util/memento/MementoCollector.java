@@ -11,10 +11,10 @@ package org.prevayler.util.memento;
  * @version 2.0
  */
 public interface MementoCollector {
-  /**
-   * Add a memento to the memento collection.
-   *
-   * @param memento The memento to add.
-   */
-  public void addMemento(Memento memento);
+    /**
+     * Add a memento to the memento collection.
+     *
+     * @param memento The memento to add.
+     */
+    public void addMemento(Memento memento);
 }

@@ -11,69 +11,68 @@ import org.prevayler.foundation.FileIOTest;
 
 public class CheckpointTest extends FileIOTest {
 
-  private Prevayler<AppendingSystem> _prevayler;
+    private Prevayler<AppendingSystem> _prevayler;
 
-  public void testCheckpoint() throws Exception {
+    private static void out(Object obj) {
+        if(false) {
+            System.out.println(obj);   //Change this line to see what the test is doing.
+        }
+    }
 
-    crashRecover(); //There is nothing to recover at first. A new system will be created.
-    crashRecover();
-    append("a", "a");
-    append("b", "ab");
-    verify("ab");
+    public void testCheckpoint() throws Exception {
 
-    crashRecover();
-    verify("");
+        crashRecover(); //There is nothing to recover at first. A new system will be created.
+        crashRecover();
+        append("a", "a");
+        append("b", "ab");
+        verify("ab");
 
-    append("a", "a");
-    append("b", "ab");
-    snapshot();
-    snapshot();
-    verify("ab");
+        crashRecover();
+        verify("");
 
-    crashRecover();
-    snapshot();
-    append("c", "abc");
-    snapshot();
-    append("d", "abcd");
-    append("e", "abcde");
-    verify("abcde");
+        append("a", "a");
+        append("b", "ab");
+        snapshot();
+        snapshot();
+        verify("ab");
 
-    crashRecover();
-    append("d", "abcd");
-    verify("abcd");
+        crashRecover();
+        snapshot();
+        append("c", "abc");
+        snapshot();
+        append("d", "abcd");
+        append("e", "abcde");
+        verify("abcde");
 
-  }
+        crashRecover();
+        append("d", "abcd");
+        verify("abcd");
 
-  private void crashRecover() throws Exception {
-    out("CrashRecovery.");
-    _prevayler = PrevaylerFactory.createCheckpointPrevayler(new AppendingSystem(), _testDirectory);
-  }
+    }
 
-  private void snapshot() throws Exception {
-    out("Snapshot.");
-    _prevayler.takeSnapshot();
-  }
+    private void crashRecover() throws Exception {
+        out("CrashRecovery.");
+        _prevayler = PrevaylerFactory.createCheckpointPrevayler(new AppendingSystem(), _testDirectory);
+    }
 
+    private void snapshot() throws Exception {
+        out("Snapshot.");
+        _prevayler.takeSnapshot();
+    }
 
-  private void append(String appendix, String expectedResult) throws Exception {
-    out("Appending " + appendix);
-    _prevayler.execute(new Appendix(appendix));
-    verify(expectedResult);
-  }
+    private void append(String appendix, String expectedResult) throws Exception {
+        out("Appending " + appendix);
+        _prevayler.execute(new Appendix(appendix));
+        verify(expectedResult);
+    }
 
+    private void verify(String expectedResult) {
+        out("Expecting result: " + expectedResult);
+        assertEquals(expectedResult, system().value());
+    }
 
-  private void verify(String expectedResult) {
-    out("Expecting result: " + expectedResult);
-    assertEquals(expectedResult, system().value());
-  }
-
-
-  private AppendingSystem system() {
-    return _prevayler.prevalentSystem();
-  }
-
-  private static void out(Object obj) {
-    if (false) System.out.println(obj);   //Change this line to see what the test is doing.
-  }
+    private AppendingSystem system() {
+        return _prevayler.prevalentSystem();
+    }
 
 }

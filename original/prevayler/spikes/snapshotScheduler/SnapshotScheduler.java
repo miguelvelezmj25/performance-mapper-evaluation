@@ -6,8 +6,6 @@ package org.prevayler.util;
 
 import org.prevayler.implementation.SnapshotPrevayler;
 
-import java.util.*;
-
 /**
  * SnapshotScheduler is a utility class to make snapshots of the given
  * prevalent system at regular intervals, as scheduled, with complete
@@ -69,262 +67,262 @@ import java.util.*;
  * @see TimerTask
  */
 public class SnapshotScheduler extends TimerTask {
-  private volatile boolean done = false;
-  private Object snapshotLock = new Object();
-  private Prevayler prevayler;
-  private Timer timer;
-  private Object sync = new Object();
+    private volatile boolean done = false;
+    private Object snapshotLock = new Object();
+    private Prevayler prevayler;
+    private Timer timer;
+    private Object sync = new Object();
 
-  private List listenerList = Collections.synchronizedList(new LinkedList());
-
-  /**
-   * Construct a SnapshotScheduler without a listener. One or more listeners can be added
-   * by calling <a href="#addListener">addListener</a>. The first snapshot will
-   * be made at firstTime, with subsequent snapshots every period milliseconds.
-   *
-   * @param prevayler the prevalent system to make snapshots of.
-   * @param firstTime time when the first snapshot is to be made.
-   * @param period    time in milliseconds between successive snapshots.
-   */
-  public SnapshotScheduler(Prevayler prevayler, Date firstTime, long period) {
-    this(prevayler, firstTime, period, null);
-  }
-
-  /**
-   * Construct a SnapshotScheduler without a listener. One or more listeners can be added
-   * by calling <a href="#addListener">addListener</a>. The first snapshot will
-   * be made after delay milliseconds, with subsequent snapshots every
-   * period milliseconds.
-   *
-   * @param prevayler the prevalent system to make snapshots of.
-   * @param delay     delay in milliseconds before first snapshot is to be made.
-   * @param period    time in milliseconds between successive snapshots.
-   */
-  public SnapshotScheduler(Prevayler prevayler, long delay, long period) {
-    this(prevayler, delay, period, null);
-  }
-
-  /**
-   * Construct a SnapshotScheduler with the given listener. More listeners can be added
-   * by calling <a href="#addListener">addListerner</a>.
-   *
-   * @param prevayler the prevalent system to make snapshots of.
-   * @param firstTime time when the first snapshot is to be made.
-   * @param period    time in milliseconds between successive snapshots.
-   * @param listener  If non-null, the listener will be called each time a snapshot has been made.
-   */
-  public SnapshotScheduler(Prevayler prevayler, Date firstTime, long period, Listener listener) {
-    this.prevayler = prevayler;
-    if (listener != null) {
-      listenerList.add(listener);
-    }
-    timer = new Timer(false); // Don't make this a daemon thread!
-    timer.scheduleAtFixedRate(this, firstTime, period);
-  }
-
-  /**
-   * Construct a SnapshotScheduler with the given listener. More listeners can be added
-   * by calling <a href="#addListener">addListerner</a>. The first snapshot will
-   * be made after delay milliseconds, with subsequent snapshots every
-   * period milliseconds.
-   *
-   * @param prevayler the prevalent system to make snapshots of.
-   * @param delay     delay in milliseconds before first snapshot is to be made.
-   * @param period    time in milliseconds between successive snapshots.
-   * @param listener  If non-null, the listener will be called each time a snapshot has been made.
-   */
-  public SnapshotScheduler(SnapshotPrevayler prevayler, long delay, long period, Listener listener) {
-    this.prevayler = prevayler;
-    if (listener != null) {
-      listenerList.add(listener);
-    }
-    timer = new Timer(false); // Don't make this a daemon thread!
-    timer.scheduleAtFixedRate(this, delay, period);
-  }
-
-  /**
-   * Make a snapshot.
-   */
-  public void run() {
-    snapshotStarted();
-
-    try {
-
-      prevayler.takeSnapshot();
-
-    } catch (Exception e) {
-
-      // This is likely a temporary problem, so keep running.
-      snapshotException(e);
-
-    } catch (Error e) {
-
-      snapshotError(e);
-
-      // This is likely fatal, so reassert. See Java documentation for classes Error and Throwable.
-      throw e;
-    }
-
-    snapshotTaken();
-  }
-
-  /**
-   * Stop making snapshots. If a snapshot is being made at the time of this call
-   * it will be completed, but no further snapshots will be made.
-   */
-  public boolean cancel() {
-    snapshotShutdown();
-    return super.cancel();
-  }
-
-  /**
-   * To get informed when a Prevayler snapshot is made, implement this interface
-   * and add your listener either using the SnapshotScheduler constructor or using
-   * {@link SnapshotScheduler#addListener(SnapshotScheduler.Listener) addListener}.
-   */
-  public interface Listener {
-    /**
-     * SnapshotScheduler will start making a snapshot immediately
-     * after having informed all listeners.
-     *
-     * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
-     * @param prevaylerDate the date of the prevayler clock in milliseconds when the snapshot begins.
-     * @param systemDate    the date of the system clock in milliseconds when the snapshot begins.
-     */
-    public void snapshotStarted(Prevayler prevayler, long prevaylerDate, long systemDate);
+    private List listenerList = Collections.synchronizedList(new LinkedList());
 
     /**
-     * SnapshotScheduler has completed making a snapshot.
+     * Construct a SnapshotScheduler without a listener. One or more listeners can be added
+     * by calling <a href="#addListener">addListener</a>. The first snapshot will
+     * be made at firstTime, with subsequent snapshots every period milliseconds.
      *
-     * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
-     * @param prevaylerDate the date of the prevayler clock in milliseconds when the snapshot was completed.
-     * @param systemDate    the date of the system clock in milliseconds when the snapshot was completed.
+     * @param prevayler the prevalent system to make snapshots of.
+     * @param firstTime time when the first snapshot is to be made.
+     * @param period    time in milliseconds between successive snapshots.
      */
-    public void snapshotTaken(Prevayler prevayler, long prevaylerDate, long systemDate);
+    public SnapshotScheduler(Prevayler prevayler, Date firstTime, long period) {
+        this(prevayler, firstTime, period, null);
+    }
 
     /**
-     * An Exception has occured while making the snapshot.
+     * Construct a SnapshotScheduler without a listener. One or more listeners can be added
+     * by calling <a href="#addListener">addListener</a>. The first snapshot will
+     * be made after delay milliseconds, with subsequent snapshots every
+     * period milliseconds.
      *
-     * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
-     * @param exception     the Exception. Note that since Java 1.4, this can contain a chain
-     *                      of linked causes, see Throwable.getCause() for more information.
-     * @param prevaylerDate the date of the prevayler clock in milliseconds when the Exception occured.
-     * @param systemDate    the date of the system clock in milliseconds when the Exception occured.
-     * @see java.lang.Exception
+     * @param prevayler the prevalent system to make snapshots of.
+     * @param delay     delay in milliseconds before first snapshot is to be made.
+     * @param period    time in milliseconds between successive snapshots.
      */
-    public void snapshotException(Prevayler prevayler, Exception exception, long prevaylerDate, long systemDate);
+    public SnapshotScheduler(Prevayler prevayler, long delay, long period) {
+        this(prevayler, delay, period, null);
+    }
 
     /**
-     * An Error has occured while making the snapshot.
-     * Quoting from the documentation from Java class Error:
-     * "An Error is a subclass of Throwable that indicates serious problems
-     * that a reasonable application should not try to catch.
-     * Most such errors are abnormal conditions. [...]"
-     * <p/>
-     * SnapshotScheduler will quit making snapshots whenever an Error occurs and die
-     * after having informed all listeners through this method.
+     * Construct a SnapshotScheduler with the given listener. More listeners can be added
+     * by calling <a href="#addListener">addListerner</a>.
      *
-     * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
-     * @param error         the Error. Note that since Java 1.4, this can contain a chain
-     *                      of linked causes, see Throwable.getCause() for more information.
-     * @param prevaylerDate the date of the prevayler clock in milliseconds when the Error occured.
-     * @param systemDate    the date of the system clock in milliseconds when the Error occured.
-     * @see java.lang.Error
+     * @param prevayler the prevalent system to make snapshots of.
+     * @param firstTime time when the first snapshot is to be made.
+     * @param period    time in milliseconds between successive snapshots.
+     * @param listener  If non-null, the listener will be called each time a snapshot has been made.
      */
-    public void snapshotError(Prevayler prevayler, Error error, long prevaylerDate, long systemDate);
+    public SnapshotScheduler(Prevayler prevayler, Date firstTime, long period, Listener listener) {
+        this.prevayler = prevayler;
+        if(listener != null) {
+            listenerList.add(listener);
+        }
+        timer = new Timer(false); // Don't make this a daemon thread!
+        timer.scheduleAtFixedRate(this, firstTime, period);
+    }
 
     /**
-     * SnapshotScheduler is shutting down after a call to cancel().
+     * Construct a SnapshotScheduler with the given listener. More listeners can be added
+     * by calling <a href="#addListener">addListerner</a>. The first snapshot will
+     * be made after delay milliseconds, with subsequent snapshots every
+     * period milliseconds.
      *
-     * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
-     * @param prevaylerDate the date of the prevayler clock in milliseconds when shutting down SnapshotScheduler.
-     * @param systemDate    the date of the system clock in milliseconds when shutting down SnapshotScheduler.
+     * @param prevayler the prevalent system to make snapshots of.
+     * @param delay     delay in milliseconds before first snapshot is to be made.
+     * @param period    time in milliseconds between successive snapshots.
+     * @param listener  If non-null, the listener will be called each time a snapshot has been made.
      */
-    public void snapshotShutdown(Prevayler prevayler, long prevaylerDate, long systemDate);
-  }
-
-  /**
-   * Remove the given listener from this SnapshotScheduler, no more
-   * notifications will occur to the given listener.
-   *
-   * @param listener listener to remove.
-   */
-  public void removeListener(Listener listener) {
-    listenerList.remove(listener);
-  }
-
-  /**
-   * Add the given listener to this SnapshotScheduler; the listener will be notified
-   * on the progress of making snapshots.
-   *
-   * @param listener listener to add.
-   */
-  public void addListener(Listener listener) {
-    listenerList.add(listener);
-  }
-
-  /**
-   * Inform all listeners that a new snapshot is about to be made immediately.
-   */
-  private void snapshotStarted() {
-    long prevaylerDate = prevayler.system().clock().time().getTime();
-    long systemDate = System.currentTimeMillis();
-
-    Iterator i = listenerList.iterator();
-    while (i.hasNext()) {
-      ((Listener) i.next()).snapshotStarted(prevayler, prevaylerDate, systemDate);
+    public SnapshotScheduler(SnapshotPrevayler prevayler, long delay, long period, Listener listener) {
+        this.prevayler = prevayler;
+        if(listener != null) {
+            listenerList.add(listener);
+        }
+        timer = new Timer(false); // Don't make this a daemon thread!
+        timer.scheduleAtFixedRate(this, delay, period);
     }
-  }
 
-  /**
-   * Inform all interested listeners that a new snapshot has been made.
-   */
-  private void snapshotTaken() {
-    long prevaylerDate = prevayler.system().clock().time().getTime();
-    long systemDate = System.currentTimeMillis();
+    /**
+     * Make a snapshot.
+     */
+    public void run() {
+        snapshotStarted();
 
-    Iterator i = listenerList.iterator();
-    while (i.hasNext()) {
-      ((Listener) i.next()).snapshotTaken(prevayler, prevaylerDate, systemDate);
+        try {
+
+            prevayler.takeSnapshot();
+
+        } catch (Exception e) {
+
+            // This is likely a temporary problem, so keep running.
+            snapshotException(e);
+
+        } catch (Error e) {
+
+            snapshotError(e);
+
+            // This is likely fatal, so reassert. See Java documentation for classes Error and Throwable.
+            throw e;
+        }
+
+        snapshotTaken();
     }
-  }
 
-  /**
-   * Inform all listeners that an exception occured while making the snapshot.
-   */
-  private void snapshotException(Exception e) {
-    long prevaylerDate = prevayler.system().clock().time().getTime();
-    long systemDate = System.currentTimeMillis();
-
-    Iterator i = listenerList.iterator();
-    while (i.hasNext()) {
-      ((Listener) i.next()).snapshotException(prevayler, e, prevaylerDate, systemDate);
+    /**
+     * Stop making snapshots. If a snapshot is being made at the time of this call
+     * it will be completed, but no further snapshots will be made.
+     */
+    public boolean cancel() {
+        snapshotShutdown();
+        return super.cancel();
     }
-  }
 
-  /**
-   * Inform all listeners that an exception occured while making the snapshot.
-   */
-  private void snapshotError(Error e) {
-    long prevaylerDate = prevayler.system().clock().time().getTime();
-    long systemDate = System.currentTimeMillis();
-
-    Iterator i = listenerList.iterator();
-    while (i.hasNext()) {
-      ((Listener) i.next()).snapshotError(prevayler, e, prevaylerDate, systemDate);
+    /**
+     * Remove the given listener from this SnapshotScheduler, no more
+     * notifications will occur to the given listener.
+     *
+     * @param listener listener to remove.
+     */
+    public void removeListener(Listener listener) {
+        listenerList.remove(listener);
     }
-  }
 
-  /**
-   * Inform all listeners that SnapshotScheduler is shutting down.
-   */
-  private void snapshotShutdown() {
-    long prevaylerDate = prevayler.system().clock().time().getTime();
-    long systemDate = System.currentTimeMillis();
-
-    Iterator i = listenerList.iterator();
-    while (i.hasNext()) {
-      ((Listener) i.next()).snapshotShutdown(prevayler, prevaylerDate, systemDate);
+    /**
+     * Add the given listener to this SnapshotScheduler; the listener will be notified
+     * on the progress of making snapshots.
+     *
+     * @param listener listener to add.
+     */
+    public void addListener(Listener listener) {
+        listenerList.add(listener);
     }
-  }
+
+    /**
+     * Inform all listeners that a new snapshot is about to be made immediately.
+     */
+    private void snapshotStarted() {
+        long prevaylerDate = prevayler.system().clock().time().getTime();
+        long systemDate = System.currentTimeMillis();
+
+        Iterator i = listenerList.iterator();
+        while (i.hasNext()) {
+            ((Listener) i.next()).snapshotStarted(prevayler, prevaylerDate, systemDate);
+        }
+    }
+
+    /**
+     * Inform all interested listeners that a new snapshot has been made.
+     */
+    private void snapshotTaken() {
+        long prevaylerDate = prevayler.system().clock().time().getTime();
+        long systemDate = System.currentTimeMillis();
+
+        Iterator i = listenerList.iterator();
+        while (i.hasNext()) {
+            ((Listener) i.next()).snapshotTaken(prevayler, prevaylerDate, systemDate);
+        }
+    }
+
+    /**
+     * Inform all listeners that an exception occured while making the snapshot.
+     */
+    private void snapshotException(Exception e) {
+        long prevaylerDate = prevayler.system().clock().time().getTime();
+        long systemDate = System.currentTimeMillis();
+
+        Iterator i = listenerList.iterator();
+        while (i.hasNext()) {
+            ((Listener) i.next()).snapshotException(prevayler, e, prevaylerDate, systemDate);
+        }
+    }
+
+    /**
+     * Inform all listeners that an exception occured while making the snapshot.
+     */
+    private void snapshotError(Error e) {
+        long prevaylerDate = prevayler.system().clock().time().getTime();
+        long systemDate = System.currentTimeMillis();
+
+        Iterator i = listenerList.iterator();
+        while (i.hasNext()) {
+            ((Listener) i.next()).snapshotError(prevayler, e, prevaylerDate, systemDate);
+        }
+    }
+
+    /**
+     * Inform all listeners that SnapshotScheduler is shutting down.
+     */
+    private void snapshotShutdown() {
+        long prevaylerDate = prevayler.system().clock().time().getTime();
+        long systemDate = System.currentTimeMillis();
+
+        Iterator i = listenerList.iterator();
+        while (i.hasNext()) {
+            ((Listener) i.next()).snapshotShutdown(prevayler, prevaylerDate, systemDate);
+        }
+    }
+
+    /**
+     * To get informed when a Prevayler snapshot is made, implement this interface
+     * and add your listener either using the SnapshotScheduler constructor or using
+     * {@link SnapshotScheduler#addListener(SnapshotScheduler.Listener) addListener}.
+     */
+    public interface Listener {
+        /**
+         * SnapshotScheduler will start making a snapshot immediately
+         * after having informed all listeners.
+         *
+         * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
+         * @param prevaylerDate the date of the prevayler clock in milliseconds when the snapshot begins.
+         * @param systemDate    the date of the system clock in milliseconds when the snapshot begins.
+         */
+        public void snapshotStarted(Prevayler prevayler, long prevaylerDate, long systemDate);
+
+        /**
+         * SnapshotScheduler has completed making a snapshot.
+         *
+         * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
+         * @param prevaylerDate the date of the prevayler clock in milliseconds when the snapshot was completed.
+         * @param systemDate    the date of the system clock in milliseconds when the snapshot was completed.
+         */
+        public void snapshotTaken(Prevayler prevayler, long prevaylerDate, long systemDate);
+
+        /**
+         * An Exception has occured while making the snapshot.
+         *
+         * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
+         * @param exception     the Exception. Note that since Java 1.4, this can contain a chain
+         *                      of linked causes, see Throwable.getCause() for more information.
+         * @param prevaylerDate the date of the prevayler clock in milliseconds when the Exception occured.
+         * @param systemDate    the date of the system clock in milliseconds when the Exception occured.
+         * @see java.lang.Exception
+         */
+        public void snapshotException(Prevayler prevayler, Exception exception, long prevaylerDate, long systemDate);
+
+        /**
+         * An Error has occured while making the snapshot.
+         * Quoting from the documentation from Java class Error:
+         * "An Error is a subclass of Throwable that indicates serious problems
+         * that a reasonable application should not try to catch.
+         * Most such errors are abnormal conditions. [...]"
+         * <p/>
+         * SnapshotScheduler will quit making snapshots whenever an Error occurs and die
+         * after having informed all listeners through this method.
+         *
+         * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
+         * @param error         the Error. Note that since Java 1.4, this can contain a chain
+         *                      of linked causes, see Throwable.getCause() for more information.
+         * @param prevaylerDate the date of the prevayler clock in milliseconds when the Error occured.
+         * @param systemDate    the date of the system clock in milliseconds when the Error occured.
+         * @see java.lang.Error
+         */
+        public void snapshotError(Prevayler prevayler, Error error, long prevaylerDate, long systemDate);
+
+        /**
+         * SnapshotScheduler is shutting down after a call to cancel().
+         *
+         * @param prevayler     the Prevayler system that this SnapshotScheduler is working on.
+         * @param prevaylerDate the date of the prevayler clock in milliseconds when shutting down SnapshotScheduler.
+         * @param systemDate    the date of the system clock in milliseconds when shutting down SnapshotScheduler.
+         */
+        public void snapshotShutdown(Prevayler prevayler, long prevaylerDate, long systemDate);
+    }
 }
