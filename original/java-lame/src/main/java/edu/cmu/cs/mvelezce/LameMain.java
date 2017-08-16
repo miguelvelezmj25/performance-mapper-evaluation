@@ -75,7 +75,6 @@ public class LameMain {
 
         AudioFormat inputFormat = new AudioFormat(16000, 16, 2, true, true);
         LameEncoder encoder = new LameEncoder(inputFormat, bitRate, mpegMode, quality, vrb);
-//        encoder.initParams(inputFormat);
 
         ByteArrayOutputStream mp3 = new ByteArrayOutputStream();
         byte[] buffer = new byte[encoder.getPCMBufferSize()];

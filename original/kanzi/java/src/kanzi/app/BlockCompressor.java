@@ -53,7 +53,6 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
     private InputStream is;
     private CompressedOutputStream cos;
 
-
     public BlockCompressor(Map<String, Object> map, ExecutorService threadPool) {
         this.level = (Integer) map.remove("level");
         this.verbosity = (Integer) map.remove("verbose");
@@ -85,6 +84,52 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         Boolean bChecksum = (Boolean) map.remove("checksum");
         this.checksum = (bChecksum == null) ? false : bChecksum;
         this.jobs = (Integer) map.remove("jobs");
+        this.pool = (this.jobs == 1) ? null :
+                ((threadPool == null) ? Executors.newCachedThreadPool() : threadPool);
+        this.ownPool = (threadPool == null) && (this.pool != null);
+        this.listeners = new ArrayList<>(10);
+
+        if(Sink.getDecision(this.verbosity > 2)) {
+            this.addListener(new InfoPrinter(this.verbosity, InfoPrinter.Type.ENCODING, System.out));
+        }
+
+        if(Sink.getDecision((this.verbosity > 0) && (map.size() > 0))) {
+            for(String k : map.keySet())
+                printOut("Ignoring invalid option [" + k + "]", verbosity > 0);
+        }
+    }
+
+    public BlockCompressor(int verbose, boolean force, int level, int block, String entropy, String transform, boolean checksum, int jobs, Map<String, Object> map, ExecutorService threadPool) {
+        this.level = level;
+        this.verbosity = verbose;
+        Boolean bForce = force;
+        this.overwrite = (bForce == null) ? false : bForce;
+        this.inputName = (String) map.remove("inputName");
+        this.outputName = (String) map.remove("outputName");
+        String strTransf;
+        String strCodec;
+
+        if(Sink.getDecision(this.level >= 0)) {
+            String tranformAndCodec = getTransformAndCodec(this.level);
+            String[] tokens = tranformAndCodec.split("&");
+            strTransf = tokens[0];
+            strCodec = tokens[1];
+        }
+        else {
+            strTransf = transform;
+            strCodec = entropy;
+        }
+
+        this.codec = (strCodec == null) ? "HUFFMAN" : strCodec;
+        Integer iBlockSize = block;
+        this.blockSize = (iBlockSize == null) ? 1024 * 1024 : iBlockSize;
+
+        // Extract transform names. Curate input (EG. NONE+NONE+xxxx => xxxx)
+        ByteFunctionFactory bff = new ByteFunctionFactory();
+        this.transform = (strTransf == null) ? "BWT+MTFT+ZRLT" : bff.getName(bff.getType(strTransf));
+        Boolean bChecksum = checksum;
+        this.checksum = (bChecksum == null) ? false : bChecksum;
+        this.jobs = jobs;
         this.pool = (this.jobs == 1) ? null :
                 ((threadPool == null) ? Executors.newCachedThreadPool() : threadPool);
         this.ownPool = (threadPool == null) && (this.pool != null);
