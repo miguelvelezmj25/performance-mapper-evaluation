@@ -79,29 +79,9 @@ public class Encryption {
             return null;
         }
         SecretKey secretKey = getSecretKey(hashTheKey(mBuilder.getKey()));
-
-//        if(Sink.getDecision(secretKey == null)) {
-//            System.out.println(":");
-//        }
-
         byte[] dataBytes = data.getBytes(mBuilder.getCharsetName());
-
-//        if(Sink.getDecision(dataBytes == null)) {
-//            System.out.println(":");
-//        }
-
         Cipher cipher = Cipher.getInstance(mBuilder.getAlgorithm());
-
-//        if(Sink.getDecision(cipher == null)) {
-//            System.out.println(":");
-//        }
-
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, mBuilder.getIvParameterSpec(), mBuilder.getSecureRandom());
-
-//        if(Sink.getDecision(cipher == null)) {
-//            System.out.println(":");
-//        }
-
         return Base64.encodeToString(cipher.doFinal(dataBytes), mBuilder.getBase64Mode());
     }
 

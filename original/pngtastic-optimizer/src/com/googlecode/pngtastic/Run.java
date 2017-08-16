@@ -1,6 +1,5 @@
 package com.googlecode.pngtastic;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.util.Arrays;

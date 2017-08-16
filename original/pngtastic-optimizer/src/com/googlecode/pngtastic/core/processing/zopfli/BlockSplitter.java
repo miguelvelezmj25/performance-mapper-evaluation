@@ -58,7 +58,7 @@ final class BlockSplitter {
         int numBlocks = 1;
         int maxBlocks = cookie.blockSplittingMax;
 
-        if(llSize < 10) {
+        if(Sink.getDecision(llSize < 10)) {
             return numBlocks;
         }
 
@@ -71,7 +71,7 @@ final class BlockSplitter {
             int splitL = Deflate.calculateBlockSize(cookie, litLens, dists, lStart, llPos);
             int splitR = Deflate.calculateBlockSize(cookie, litLens, dists, llPos, lEnd);
 
-            if(splitL + splitR > splitSize[blockN] || llPos == lStart + 1 || llPos == lEnd) {
+            if(Sink.getDecision(splitL + splitR > splitSize[blockN] || llPos == lStart + 1 || llPos == lEnd)) {
                 splitSize[blockN] = -1;
             }
             else {
@@ -89,7 +89,7 @@ final class BlockSplitter {
             for(int i = 0; i < numBlocks; i++) {
                 int start = splitPoints[i];
                 int end = splitPoints[i + 1];
-                if((splitSize[i] != -1) && end - start > longest) {
+                if(Sink.getDecision((splitSize[i] != -1) && end - start > longest)) {
                     lStart = start;
                     lEnd = end;
                     found = true;
@@ -97,11 +97,11 @@ final class BlockSplitter {
                     blockN = i;
                 }
             }
-            if(!found) {
+            if(Sink.getDecision(!found)) {
                 break;
             }
 
-            if(lEnd - lStart < 10) {
+            if(Sink.getDecision(lEnd - lStart < 10)) {
                 break;
             }
         }
@@ -112,13 +112,13 @@ final class BlockSplitter {
     private static int findMinimum(Cookie cookie, char[] litLens, char[] dists, int from, int to) {
         int start = from + 1;
         int end = to;
-        if(end - start < 1024) {
+        if(Sink.getDecision(end - start < 1024)) {
             int best = Integer.MAX_VALUE;
             int result = start;
             for(int i = start; i < end; i++) {
                 int v = Deflate.calculateBlockSize(cookie, litLens, dists, from, i)
                         + Deflate.calculateBlockSize(cookie, litLens, dists, i, to);
-                if(v < best) {
+                if(Sink.getDecision(v < best)) {
                     best = v;
                     result = i;
                 }
@@ -133,7 +133,7 @@ final class BlockSplitter {
             int pos = start;
 
             while (true) {
-                if(end - start <= n) {
+                if(Sink.getDecision(end - start <= n)) {
                     break;
                 }
 
@@ -145,12 +145,12 @@ final class BlockSplitter {
                 int bestI = 0;
                 int best = vp[0];
                 for(int i = 1; i < n; i++) {
-                    if(vp[i] < best) {
+                    if(Sink.getDecision(vp[i] < best)) {
                         best = vp[i];
                         bestI = i;
                     }
                 }
-                if(best > lastBest) {
+                if(Sink.getDecision(best > lastBest)) {
                     break;
                 }
 

@@ -59,22 +59,10 @@ public class EncryptionMain {
                 .setIv(new byte[]{29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30})
                 .build();
 
-//        if(Sink.getDecision(builder == null)) {
-//            System.out.println(";");
-//        }
-//
-//        if(Sink.getDecision(encryption == null)) {
-//            System.out.println(":");
-//        }
-
         String secretText = "This is a text to be encrypt, it can be any string that you want";
 
         String encrypted = encryption.encrypt(secretText);
-
-////        if(Sink.getDecision(encrypted == null)) {
-////            System.out.println(":");
-////        }
-//
+        //
 //        System.out.println("This is our secret text: " + secretText);
 //        System.out.println("And this is our encrypted text: " + encrypted);
 //

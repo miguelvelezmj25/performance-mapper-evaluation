@@ -1,5 +1,7 @@
 package com.googlecode.pngtastic.core.processing;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.ByteArrayOutputStream;
 
 /**
@@ -32,7 +34,7 @@ public class PngByteArrayOutputStream extends ByteArrayOutputStream {
 
     public void reset() {
         super.reset();
-        if(buf.length > initialSize) {
+        if(Sink.getDecision(buf.length > initialSize)) {
             buf = new byte[initialSize];
         }
     }

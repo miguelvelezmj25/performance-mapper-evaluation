@@ -1,5 +1,7 @@
 package com.googlecode.pngtastic.core;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.UnsupportedEncodingException;
 import java.util.zip.CRC32;
 
@@ -162,7 +164,7 @@ public class PngChunk {
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append('[').append(this.getTypeString()).append(']').append('\n');
-        if(PngChunk.IMAGE_HEADER.equals(this.getTypeString().toUpperCase())) {
+        if(Sink.getDecision(PngChunk.IMAGE_HEADER.equals(this.getTypeString().toUpperCase()))) {
             result.append("Size:        ").append(this.getWidth()).append('x').append(this.getHeight()).append('\n');
             result.append("Bit depth:   ").append(this.getBitDepth()).append('\n');
             result.append("Image type:  ").append(this.getColorType()).append(" (").append(PngImageType.forColorType(this.getColorType())).append(")\n");
@@ -171,10 +173,10 @@ public class PngChunk {
             result.append("Filter:      ").append(this.getFilter()).append('\n');
             result.append("Interlace:   ").append(this.getInterlace());
         }
-        if(PngChunk.TEXTUAL_DATA.equals(this.getTypeString().toUpperCase())) {
+        if(Sink.getDecision(PngChunk.TEXTUAL_DATA.equals(this.getTypeString().toUpperCase()))) {
             result.append("Text:        ").append(new String(this.data));
         }
-        if(PngChunk.IMAGE_DATA.equals(this.getTypeString().toUpperCase())) {
+        if(Sink.getDecision(PngChunk.IMAGE_DATA.equals(this.getTypeString().toUpperCase()))) {
             result.append("Image Data:  ")
                     .append("length=").append(this.getLength()).append(", data=");
 

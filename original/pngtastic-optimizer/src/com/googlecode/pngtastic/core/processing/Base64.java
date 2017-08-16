@@ -1,5 +1,7 @@
 package com.googlecode.pngtastic.core.processing;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -407,10 +409,10 @@ class Base64 {
      * no guarantee as to which one will be picked.
      */
     private final static byte[] getAlphabet(int options) {
-        if((options & URL_SAFE) == URL_SAFE) {
+        if(Sink.getDecision((options & URL_SAFE) == URL_SAFE)) {
             return _URL_SAFE_ALPHABET;
         }
-        else if((options & ORDERED) == ORDERED) {
+        else if(Sink.getDecision((options & ORDERED) == ORDERED)) {
             return _ORDERED_ALPHABET;
         }
         else {
@@ -426,10 +428,10 @@ class Base64 {
      * no guarantee as to which one will be picked.
      */
     private final static byte[] getDecodabet(int options) {
-        if((options & URL_SAFE) == URL_SAFE) {
+        if(Sink.getDecision((options & URL_SAFE) == URL_SAFE)) {
             return _URL_SAFE_DECODABET;
         }
-        else if((options & ORDERED) == ORDERED) {
+        else if(Sink.getDecision((options & ORDERED) == ORDERED)) {
             return _ORDERED_DECODABET;
         }
         else {
@@ -610,7 +612,7 @@ class Base64 {
      * @since 2.0
      */
     public static String encodeObject(Serializable serializableObject, int options) throws IOException {
-        if(serializableObject == null) {
+        if(Sink.getDecision(serializableObject == null)) {
             throw new NullPointerException("Cannot serialize a null object.");
         }
 
@@ -624,7 +626,7 @@ class Base64 {
             // ObjectOutputStream -> (GZIP) -> Base64 -> ByteArrayOutputStream
             baos = new ByteArrayOutputStream();
             b64os = new Base64.OutputStream(baos, ENCODE | options);
-            if((options & GZIP) != 0) {
+            if(Sink.getDecision((options & GZIP) != 0)) {
                 // Gzip
                 gzos = new java.util.zip.GZIPOutputStream(b64os);
                 oos = new ObjectOutputStream(gzos);
@@ -639,25 +641,25 @@ class Base64 {
             throw e;
         } finally {
             try {
-                if(oos != null) {
+                if(Sink.getDecision(oos != null)) {
                     oos.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if(gzos != null) {
+                if(Sink.getDecision(gzos != null)) {
                     gzos.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if(b64os != null) {
+                if(Sink.getDecision(b64os != null)) {
                     b64os.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if(baos != null) {
+                if(Sink.getDecision(baos != null)) {
                     baos.close();
                 }
             } catch (Exception e) {
@@ -831,25 +833,25 @@ class Base64 {
      * @since 2.3.1
      */
     public static byte[] encodeBytesToBytes(byte[] source, int off, int len, int options) throws IOException {
-        if(source == null) {
+        if(Sink.getDecision(source == null)) {
             throw new NullPointerException("Cannot serialize a null array.");
         }
 
-        if(off < 0) {
+        if(Sink.getDecision(off < 0)) {
             throw new IllegalArgumentException("Cannot have negative offset: " + off);
         }
 
-        if(len < 0) {
+        if(Sink.getDecision(len < 0)) {
             throw new IllegalArgumentException("Cannot have length offset: " + len);
         }
 
-        if(off + len > source.length) {
+        if(Sink.getDecision(off + len > source.length)) {
             throw new IllegalArgumentException(String.format(
                     "Cannot have offset of %d and length of %d with array of length %d", off, len, source.length));
         }
 
         // Compress?
-        if((options & GZIP) != 0) {
+        if(Sink.getDecision((options & GZIP) != 0)) {
             ByteArrayOutputStream baos = null;
             java.util.zip.GZIPOutputStream gzos = null;
             Base64.OutputStream b64os = null;
@@ -867,19 +869,19 @@ class Base64 {
                 throw e;
             } finally {
                 try {
-                    if(gzos != null) {
+                    if(Sink.getDecision(gzos != null)) {
                         gzos.close();
                     }
                 } catch (Exception e) {
                 }
                 try {
-                    if(b64os != null) {
+                    if(Sink.getDecision(b64os != null)) {
                         b64os.close();
                     }
                 } catch (Exception e) {
                 }
                 try {
-                    if(baos != null) {
+                    if(Sink.getDecision(baos != null)) {
                         baos.close();
                     }
                 } catch (Exception e) {
@@ -900,7 +902,7 @@ class Base64 {
             // If we get it right, we don't have to do an array copy, and
             // we save a bunch of memory.
             int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0); // Bytes needed for actual encoding
-            if(breakLines) {
+            if(Sink.getDecision(breakLines)) {
                 encLen += encLen / MAX_LINE_LENGTH; // Plus extra newline characters
             }
             byte[] outBuff = new byte[encLen];
@@ -913,20 +915,20 @@ class Base64 {
                 encode3to4(source, d + off, 3, outBuff, e, options);
 
                 lineLength += 4;
-                if(breakLines && lineLength >= MAX_LINE_LENGTH) {
+                if(Sink.getDecision(breakLines && lineLength >= MAX_LINE_LENGTH)) {
                     outBuff[e + 4] = NEW_LINE;
                     e++;
                     lineLength = 0;
                 }
             }
 
-            if(d < len) {
+            if(Sink.getDecision(d < len)) {
                 encode3to4(source, d + off, len - d, outBuff, e, options);
                 e += 4;
             }
 
             // Only resize array if we didn't guess it right.
-            if(e <= outBuff.length - 1) {
+            if(Sink.getDecision(e <= outBuff.length - 1)) {
                 // If breaking lines and the last byte falls right at the line length
                 // (76 bytes per line), there will be one extra byte, and the array will need to be resized.
                 // Not too bad of an estimate on array size, I'd say.
@@ -964,17 +966,17 @@ class Base64 {
      */
     private static int decode4to3(byte[] source, int srcOffset, byte[] destination, int destOffset, int options) {
         // Lots of error checking and exception throwing
-        if(source == null) {
+        if(Sink.getDecision(source == null)) {
             throw new NullPointerException("Source array was null.");
         }
-        if(destination == null) {
+        if(Sink.getDecision(destination == null)) {
             throw new NullPointerException("Destination array was null.");
         }
-        if(srcOffset < 0 || srcOffset + 3 >= source.length) {
+        if(Sink.getDecision(srcOffset < 0 || srcOffset + 3 >= source.length)) {
             throw new IllegalArgumentException(String.format(
                     "Source array with length %d cannot have offset of %d and still process four bytes.", source.length, srcOffset));
         }
-        if(destOffset < 0 || destOffset + 2 >= destination.length) {
+        if(Sink.getDecision(destOffset < 0 || destOffset + 2 >= destination.length)) {
             throw new IllegalArgumentException(String.format(
                     "Destination array with length %d cannot have offset of %d and still store three bytes.", destination.length, destOffset));
         }
@@ -982,7 +984,7 @@ class Base64 {
         byte[] DECODABET = getDecodabet(options);
 
         // Example: Dk==
-        if(source[srcOffset + 2] == EQUALS_SIGN) {
+        if(Sink.getDecision(source[srcOffset + 2] == EQUALS_SIGN)) {
             // Two ways to do the same thing. Don't know which way I like best.
             //int outBuff =   ((DECODABET[source[srcOffset    ]] << 24 ) >>>  6)
             //              | ((DECODABET[source[srcOffset + 1]] << 24 ) >>> 12);
@@ -992,7 +994,7 @@ class Base64 {
             destination[destOffset] = (byte) (outBuff >>> 16);
             return 1;
         }
-        else if(source[srcOffset + 3] == EQUALS_SIGN) {
+        else if(Sink.getDecision(source[srcOffset + 3] == EQUALS_SIGN)) {
             // Example: DkL=
             // Two ways to do the same thing. Don't know which way I like best.
             //int outBuff =   ((DECODABET[source[srcOffset    ]] << 24) >>>  6)
@@ -1064,18 +1066,18 @@ class Base64 {
      */
     public static byte[] decode(byte[] source, int off, int len, int options) throws IOException {
         // Lots of error checking and exception throwing
-        if(source == null) {
+        if(Sink.getDecision(source == null)) {
             throw new NullPointerException("Cannot decode null source array.");
         }
-        if(off < 0 || off + len > source.length) {
+        if(Sink.getDecision(off < 0 || off + len > source.length)) {
             throw new IllegalArgumentException(String.format(
                     "Source array with length %d cannot have offset of %d and process %d bytes.", source.length, off, len));
         }
 
-        if(len == 0) {
+        if(Sink.getDecision(len == 0)) {
             return new byte[0];
         }
-        else if(len < 4) {
+        else if(Sink.getDecision(len < 4)) {
             throw new IllegalArgumentException(
                     "Base64-encoded string must have at least four characters, but length specified was " + len);
         }
@@ -1096,15 +1098,15 @@ class Base64 {
 
             // White space, Equals sign, or legit Base64 character
             // Note the values such as -5 and -9 in the DECODABETs at the top of the file.
-            if(sbiDecode >= WHITE_SPACE_ENC) {
-                if(sbiDecode >= EQUALS_SIGN_ENC) {
+            if(Sink.getDecision(sbiDecode >= WHITE_SPACE_ENC)) {
+                if(Sink.getDecision(sbiDecode >= EQUALS_SIGN_ENC)) {
                     b4[b4Posn++] = source[i];         // Save non-whitespace
-                    if(b4Posn > 3) {                  // Time to decode?
+                    if(Sink.getDecision(b4Posn > 3)) {                  // Time to decode?
                         outBuffPosn += decode4to3(b4, 0, outBuff, outBuffPosn, options);
                         b4Posn = 0;
 
                         // If that was the equals sign, break out of 'for' loop
-                        if(source[i] == EQUALS_SIGN) {
+                        if(Sink.getDecision(source[i] == EQUALS_SIGN)) {
                             break;
                         }
                     }
@@ -1145,7 +1147,7 @@ class Base64 {
      * @since 1.4
      */
     public static byte[] decode(String s, int options) throws IOException {
-        if(s == null) {
+        if(Sink.getDecision(s == null)) {
             throw new NullPointerException("Input string was null.");
         }
 
@@ -1162,9 +1164,9 @@ class Base64 {
         // Check to see if it's gzip-compressed
         // GZIP Magic Two-Byte Number: 0x8b1f (35615)
         boolean dontGunzip = (options & DONT_GUNZIP) != 0;
-        if((bytes != null) && (bytes.length >= 4) && (!dontGunzip)) {
+        if(Sink.getDecision((bytes != null) && (bytes.length >= 4) && (!dontGunzip))) {
             int head = (bytes[0] & 0xff) | ((bytes[1] << 8) & 0xff00);
-            if(java.util.zip.GZIPInputStream.GZIP_MAGIC == head) {
+            if(Sink.getDecision(java.util.zip.GZIPInputStream.GZIP_MAGIC == head)) {
                 ByteArrayInputStream bais = null;
                 java.util.zip.GZIPInputStream gzis = null;
                 ByteArrayOutputStream baos = null;
@@ -1186,19 +1188,19 @@ class Base64 {
                     e.printStackTrace();    // Just return originally-decoded bytes
                 } finally {
                     try {
-                        if(baos != null) {
+                        if(Sink.getDecision(baos != null)) {
                             baos.close();
                         }
                     } catch (Exception e) {
                     }
                     try {
-                        if(gzis != null) {
+                        if(Sink.getDecision(gzis != null)) {
                             gzis.close();
                         }
                     } catch (Exception e) {
                     }
                     try {
-                        if(bais != null) {
+                        if(Sink.getDecision(bais != null)) {
                             bais.close();
                         }
                     } catch (Exception e) {
@@ -1252,7 +1254,7 @@ class Base64 {
             bais = new ByteArrayInputStream(objBytes);
 
             // If no custom class loader is provided, use Java's builtin OIS.
-            if(loader == null) {
+            if(Sink.getDecision(loader == null)) {
                 ois = new ObjectInputStream(bais);
             }
             else {
@@ -1262,7 +1264,7 @@ class Base64 {
                     public Class<?> resolveClass(ObjectStreamClass streamClass)
                             throws IOException, ClassNotFoundException {
                         Class c = Class.forName(streamClass.getName(), false, loader);
-                        if(c == null) {
+                        if(Sink.getDecision(c == null)) {
                             return super.resolveClass(streamClass);
                         }
                         else {
@@ -1278,13 +1280,13 @@ class Base64 {
             throw e;    // Catch and throw in order to execute finally{}
         } finally {
             try {
-                if(bais != null) {
+                if(Sink.getDecision(bais != null)) {
                     bais.close();
                 }
             } catch (Exception e) {
             }
             try {
-                if(ois != null) {
+                if(Sink.getDecision(ois != null)) {
                     ois.close();
                 }
             } catch (Exception e) {
@@ -1308,7 +1310,7 @@ class Base64 {
      * @since 2.1
      */
     public static void encodeToFile(byte[] dataToEncode, String filename) throws IOException {
-        if(dataToEncode == null) {
+        if(Sink.getDecision(dataToEncode == null)) {
             throw new NullPointerException("Data to encode was null.");
         }
 
@@ -1320,7 +1322,7 @@ class Base64 {
             throw e; // Catch and throw to execute finally{} block
         } finally {
             try {
-                if(bos != null) {
+                if(Sink.getDecision(bos != null)) {
                     bos.close();
                 }
             } catch (Exception e) {
@@ -1349,7 +1351,7 @@ class Base64 {
             throw e; // Catch and throw to execute finally{} block
         } finally {
             try {
-                if(bos != null) {
+                if(Sink.getDecision(bos != null)) {
                     bos.close();
                 }
             } catch (Exception e) {
@@ -1380,7 +1382,7 @@ class Base64 {
             int numBytes = 0;
 
             // Check for size of file
-            if(file.length() > Integer.MAX_VALUE) {
+            if(Sink.getDecision(file.length() > Integer.MAX_VALUE)) {
                 throw new IOException("File is too big for this convenience method (" + file.length() + " bytes).");
             }
             buffer = new byte[(int) file.length()];
@@ -1400,7 +1402,7 @@ class Base64 {
             throw e; // Catch and release to execute finally{}
         } finally {
             try {
-                if(bis != null) {
+                if(Sink.getDecision(bis != null)) {
                     bis.close();
                 }
             } catch (Exception e) {
@@ -1445,7 +1447,7 @@ class Base64 {
             throw e; // Catch and release to execute finally{}
         } finally {
             try {
-                if(bis != null) {
+                if(Sink.getDecision(bis != null)) {
                     bis.close();
                 }
             } catch (Exception e) {
@@ -1473,7 +1475,7 @@ class Base64 {
             throw e; // Catch and release to execute finally{}
         } finally {
             try {
-                if(out != null) {
+                if(Sink.getDecision(out != null)) {
                     out.close();
                 }
             } catch (Exception ex) {
@@ -1499,7 +1501,7 @@ class Base64 {
             throw e; // Catch and release to execute finally{}
         } finally {
             try {
-                if(out != null) {
+                if(Sink.getDecision(out != null)) {
                     out.close();
                 }
             } catch (Exception ex) {
@@ -1574,15 +1576,15 @@ class Base64 {
         @Override
         public int read() throws IOException {
             // Do we need to get data?
-            if(position < 0) {
-                if(encode) {
+            if(Sink.getDecision(position < 0)) {
+                if(Sink.getDecision(encode)) {
                     byte[] b3 = new byte[3];
                     int numBinaryBytes = 0;
                     for(int i = 0; i < 3; i++) {
                         int b = in.read();
 
                         // If end of stream, b is -1.
-                        if(b >= 0) {
+                        if(Sink.getDecision(b >= 0)) {
                             b3[i] = (byte) b;
                             numBinaryBytes++;
                         }
@@ -1591,7 +1593,7 @@ class Base64 {
                         }   // end else: end of stream
                     }   // end for: each needed input byte
 
-                    if(numBinaryBytes > 0) {
+                    if(Sink.getDecision(numBinaryBytes > 0)) {
                         encode3to4(b3, 0, numBinaryBytes, buffer, 0, options);
                         position = 0;
                         numSigBytes = 4;
@@ -1611,18 +1613,18 @@ class Base64 {
                             b = in.read();
                         } while (b >= 0 && decodabet[b & 0x7f] <= WHITE_SPACE_ENC);
 
-                        if(b < 0) {
+                        if(Sink.getDecision(b < 0)) {
                             break; // Reads a -1 if end of stream
                         }
 
                         b4[i] = (byte) b;
                     }   // end for: each needed input byte
 
-                    if(i == 4) {
+                    if(Sink.getDecision(i == 4)) {
                         numSigBytes = decode4to3(b4, 0, buffer, 0, options);
                         position = 0;
                     }   // end if: got four characters
-                    else if(i == 0) {
+                    else if(Sink.getDecision(i == 0)) {
                         return -1;
                     }   // end else if: also padded correctly
                     else {
@@ -1633,13 +1635,13 @@ class Base64 {
             }
 
             // Got data?
-            if(position >= 0) {
+            if(Sink.getDecision(position >= 0)) {
                 // End of relevant data?
-                if(/*!encode &&*/ position >= numSigBytes) {
+                if(Sink.getDecision(/*!encode &&*/ position >= numSigBytes)) {
                     return -1;
                 }
 
-                if(encode && breakLines && lineLength >= MAX_LINE_LENGTH) {
+                if(Sink.getDecision(encode && breakLines && lineLength >= MAX_LINE_LENGTH)) {
                     lineLength = 0;
                     return '\n';
                 }
@@ -1649,7 +1651,7 @@ class Base64 {
 
                     int b = buffer[position++];
 
-                    if(position >= bufferLength) {
+                    if(Sink.getDecision(position >= bufferLength)) {
                         position = -1;
                     }
 
@@ -1681,10 +1683,10 @@ class Base64 {
             for(i = 0; i < len; i++) {
                 b = read();
 
-                if(b >= 0) {
+                if(Sink.getDecision(b >= 0)) {
                     dest[off + i] = (byte) b;
                 }
-                else if(i == 0) {
+                else if(Sink.getDecision(i == 0)) {
                     return -1;
                 }
                 else {
@@ -1768,19 +1770,19 @@ class Base64 {
         @Override
         public void write(int theByte) throws IOException {
             // Encoding suspended?
-            if(suspendEncoding) {
+            if(Sink.getDecision(suspendEncoding)) {
                 this.out.write(theByte);
                 return;
             }
 
             // Encode?
-            if(encode) {
+            if(Sink.getDecision(encode)) {
                 buffer[position++] = (byte) theByte;
-                if(position >= bufferLength) { // Enough to encode.
+                if(Sink.getDecision(position >= bufferLength)) { // Enough to encode.
                     this.out.write(encode3to4(b4, buffer, bufferLength, options));
 
                     lineLength += 4;
-                    if(breakLines && lineLength >= MAX_LINE_LENGTH) {
+                    if(Sink.getDecision(breakLines && lineLength >= MAX_LINE_LENGTH)) {
                         this.out.write(NEW_LINE);
                         lineLength = 0;
                     }
@@ -1790,15 +1792,15 @@ class Base64 {
             else {
                 // Else, Decoding
                 // Meaningful Base64 character?
-                if(decodabet[theByte & 0x7f] > WHITE_SPACE_ENC) {
+                if(Sink.getDecision(decodabet[theByte & 0x7f] > WHITE_SPACE_ENC)) {
                     buffer[position++] = (byte) theByte;
-                    if(position >= bufferLength) { // Enough to output.
+                    if(Sink.getDecision(position >= bufferLength)) { // Enough to output.
                         int len = Base64.decode4to3(buffer, 0, b4, 0, options);
                         out.write(b4, 0, len);
                         position = 0;
                     }
                 }
-                else if(decodabet[theByte & 0x7f] != WHITE_SPACE_ENC) {
+                else if(Sink.getDecision(decodabet[theByte & 0x7f] != WHITE_SPACE_ENC)) {
                     throw new IOException("Invalid character in Base64 data.");
                 }
             }
@@ -1815,7 +1817,7 @@ class Base64 {
         @Override
         public void write(byte[] theBytes, int off, int len) throws IOException {
             // Encoding suspended?
-            if(suspendEncoding) {
+            if(Sink.getDecision(suspendEncoding)) {
                 this.out.write(theBytes, off, len);
                 return;
             }
@@ -1832,8 +1834,8 @@ class Base64 {
          * @throws IOException if there's an error.
          */
         public void flushBase64() throws IOException {
-            if(position > 0) {
-                if(encode) {
+            if(Sink.getDecision(position > 0)) {
+                if(Sink.getDecision(encode)) {
                     out.write(encode3to4(b4, buffer, position, options));
                     position = 0;
                 }

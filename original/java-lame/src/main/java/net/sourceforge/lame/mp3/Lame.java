@@ -27,6 +27,7 @@
 
 package net.sourceforge.lame.mp3;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import net.sourceforge.lame.mpg.Interface;
 import net.sourceforge.lame.mpg.MPGLib;
 
@@ -963,7 +964,7 @@ public class Lame {
 		 * don't allow forced mid/side stereo for mono output
 		 */
 
-        if(gfp.getVBR() == VbrMode.vbr_off && gfp.VBR_mean_bitrate_kbps != 128
+        if(gfp.getVBR() == VbrMode.vbr_off && gfp.VBR_mean_bitrate_kbps != 28
                 && gfp.getBitRate() == 0) {
             gfp.setBitRate(gfp.VBR_mean_bitrate_kbps);
         }
@@ -1458,7 +1459,7 @@ public class Lame {
 
 		/* initialize default values common for all modes */
 
-        if(gfp.getVBR() != VbrMode.vbr_off) { /* choose a min/max bitrate for VBR */
+        if(gfp.getVBR() != VbrMode.vbr_off) { /* choose a min/max bitrate for VBR*/
 			/* if the user didn't specify VBR_max_bitrate: */
             gfc.VBR_min_bitrate = 1;
 			/*
@@ -1951,7 +1952,7 @@ public class Lame {
         }
 
 		/* user selected scaling of the channel 0 (left) samples */
-        if(BitStream.NEQ(gfp.scale_left, 0)
+        if(BitStream.NEQ(gfp.scale_left,0)
                 && BitStream.NEQ(gfp.scale_left, 1.0f)) {
             for(i = 0; i < nsamples; ++i) {
                 in_buffer[0][i] *= gfp.scale_left;
@@ -1959,7 +1960,7 @@ public class Lame {
         }
 
 		/* user selected scaling of the channel 1 (right) samples */
-        if(BitStream.NEQ(gfp.scale_right, 0)
+        if(BitStream.NEQ(gfp.scale_right,0)
                 && BitStream.NEQ(gfp.scale_right, 1.0f)) {
             for(i = 0; i < nsamples; ++i) {
                 in_buffer[1][i] *= gfp.scale_right;

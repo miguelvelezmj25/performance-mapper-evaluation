@@ -18,6 +18,8 @@ Author: eustas.ru@gmail.com (Eugene Klyuchnikov)
 
 package com.googlecode.pngtastic.core.processing.zopfli;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 final class LongestMatchCache {
 
     private final static int CACHE_LENGTH = 8;
@@ -48,7 +50,7 @@ final class LongestMatchCache {
         int i = 0;
         while (i < n) {
             int j = i + 65536;
-            if(j > n) {
+            if(Sink.getDecision(j > n)) {
                 j = n;
             }
             int l = j - i;
@@ -60,7 +62,7 @@ final class LongestMatchCache {
         i = 0;
         while (i < blockSize) {
             int j = i + 65536;
-            if(j > blockSize) {
+            if(Sink.getDecision(j > blockSize)) {
                 j = blockSize;
             }
             int l = j - i;
@@ -71,7 +73,7 @@ final class LongestMatchCache {
     }
 
     void subLenToCache(char[] input, int pos, int len) {
-        if(len < 3) {
+        if(Sink.getDecision(len < 3)) {
             return;
         }
 
@@ -79,23 +81,23 @@ final class LongestMatchCache {
         int j = pos * CACHE_LENGTH;
         int last = j + CACHE_LENGTH - 1;
         for(int i = 3; i <= len; ++i) {
-            if(i == len || input[i] != input[i + 1]) {
+            if(Sink.getDecision(i == len || input[i] != input[i + 1])) {
                 subLenPos[j] = input[i];
                 subLenLen[j] = (byte) (i - 3);
                 bestLength = i;
                 j++;
-                if(j > last) {
+                if(Sink.getDecision(j > last)) {
                     break;
                 }
             }
         }
-        if(j <= last) {
+        if(Sink.getDecision(j <= last)) {
             subLenLen[last] = (byte) (bestLength - 3);
         }
     }
 
     void cacheToSubLen(int pos, int len, char[] output) {
-        if(len < 3) {
+        if(Sink.getDecision(len < 3)) {
             return;
         }
 
@@ -109,7 +111,7 @@ final class LongestMatchCache {
             for(int i = prevLength; i <= cLen; ++i) {
                 output[i] = dist;
             }
-            if(cLen == maxLength) {
+            if(Sink.getDecision(cLen == maxLength)) {
                 break;
             }
             prevLength = cLen + 1;
@@ -118,7 +120,7 @@ final class LongestMatchCache {
 
     int maxCachedSubLen(int pos) {
         pos = pos * CACHE_LENGTH;
-        if(subLenPos[pos] == 0) {
+        if(Sink.getDecision(subLenPos[pos] == 0)) {
             return 0;
         }
         return (subLenLen[pos + CACHE_LENGTH - 1] & 0xFF) + 3;

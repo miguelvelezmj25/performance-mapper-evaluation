@@ -3,6 +3,7 @@ package com.googlecode.pngtastic.core.processing;
 import com.googlecode.pngtastic.core.Logger;
 import com.googlecode.pngtastic.core.PngException;
 import com.googlecode.pngtastic.core.PngFilterType;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +32,7 @@ public class PngtasticFilterHandler implements PngFilterHandler {
         int scanlineLength = scanlines.get(0).length;
         byte[] previousRow = new byte[scanlineLength];
         for(byte[] scanline : scanlines) {
-            if(filterType != null) {
+            if(Sink.getDecision(filterType != null)) {
                 scanline[0] = filterType.getValue();
             }
 
@@ -61,12 +62,12 @@ public class PngtasticFilterHandler implements PngFilterHandler {
                     sum += Math.abs(scanline[i]);
                 }
 
-                if(sum < bestSum) {
+                if(Sink.getDecision(sum < bestSum)) {
                     bestFilterType = entry.getKey();
                     bestSum = sum;
                 }
             }
-            if(bestFilterType != null) {
+            if(Sink.getDecision(bestFilterType != null)) {
                 scanlines.get(s)[0] = bestFilterType.getValue();
             }
         }
@@ -189,7 +190,7 @@ public class PngtasticFilterHandler implements PngFilterHandler {
         int pb = (p >= b) ? (p - b) : -(p - b);
         int pc = (p >= c) ? (p - c) : -(p - c);
 
-        if(pa <= pb && pa <= pc) {
+        if(Sink.getDecision(pa <= pb && pa <= pc)) {
             return a;
         }
 

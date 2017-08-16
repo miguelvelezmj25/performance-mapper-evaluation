@@ -18,6 +18,8 @@ Author: eustas.ru@gmail.com (Eugene Klyuchnikov)
 
 package com.googlecode.pngtastic.core.processing.zopfli;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 final class Squeeze {
 
     static LzStore optimal(Cookie cookie, int numIterations, LongestMatchCache lmc, byte[] input, int from, int to) {
@@ -43,18 +45,18 @@ final class Squeeze {
             bestLengths(cookie, lmc, from, input, from, to, stats.minCost(), stats, lengthArray, costs);
             optimalRun(cookie, lmc, input, from, to, lengthArray, currentStore);
             cost = Deflate.calculateBlockSize(cookie, currentStore.litLens, currentStore.dists, 0, currentStore.size);
-            if(cost < bestCost) {
+            if(Sink.getDecision(cost < bestCost)) {
                 store.copy(currentStore);
                 bestStats.copy(stats);
                 bestCost = cost;
             }
             lastStats.copy(stats);
             stats.getFreqs(currentStore);
-            if(lastRandomStep != -1) {
+            if(Sink.getDecision(lastRandomStep != -1)) {
                 stats.alloy(lastStats);
                 stats.calculate();
             }
-            if(i > 5 && cost == lastCost) {
+            if(Sink.getDecision(i > 5 && cost == lastCost)) {
                 stats.copy(bestStats);
                 cookie.rnd = stats.randomizeFreqs(cookie.rnd);
                 stats.calculate();
@@ -85,7 +87,7 @@ final class Squeeze {
         do {
             h.updateHash(input, pos, to);
             int length = path[--pathSize];
-            if(length >= 3) {
+            if(Sink.getDecision(length >= 3)) {
                 Deflate.findLongestMatch(cookie, lmc, from, h, input, pos, to, length, null);
                 store.append((char) length, (char) cookie.distVal);
             }
@@ -102,8 +104,8 @@ final class Squeeze {
     }
 
     private static long fixedCost(int litLen, int dist) {
-        if(dist == 0) {
-            if(litLen <= 143) {
+        if(Sink.getDecision(dist == 0)) {
+            if(Sink.getDecision(litLen <= 143)) {
                 return 8;
             }
             return 9;
@@ -111,7 +113,7 @@ final class Squeeze {
         else {
             long cost = 12 + (dist < 4097 ? Util.CACHED_DIST_EXTRA_BITS[dist] : dist < 16385 ? dist < 8193 ? 11 : 12 : 13)
                     + Util.LENGTH_EXTRA_BITS[litLen];
-            if(Util.LENGTH_SYMBOL[litLen] > 279) {
+            if(Sink.getDecision(Util.LENGTH_SYMBOL[litLen] > 279)) {
                 return cost + 1;
             }
             return cost;
@@ -147,7 +149,7 @@ final class Squeeze {
         while (i < to) {
             h.updateHash(input, i, to);
 
-            if(same[i & 0x7FFF] > 516 && i > from + 259 && i + 517 < to && same[(i - 258) & 0x7FFF] > 258) {
+            if(Sink.getDecision(same[i & 0x7FFF] > 516 && i > from + 259 && i + 517 < to && same[(i - 258) & 0x7FFF] > 258)) {
                 for(int k = 0; k < 258; ++k) {
                     costs[j + 258] = costs[j] + stepCost;
                     lengthArray[j + 258] = 258;
@@ -160,23 +162,23 @@ final class Squeeze {
             Deflate.findLongestMatch(cookie, lmc, blockStart, h, input, i, to, 258, subLen);
 
             long costsJ = costs[j];
-            if(i + 1 <= to) {
+            if(Sink.getDecision(i + 1 <= to)) {
                 long newCost = costsJ + slLiterals[input[i] & 0xFF];
-                if(newCost < costs[j + 1]) {
+                if(Sink.getDecision(newCost < costs[j + 1])) {
                     costs[j + 1] = newCost;
                     lengthArray[j + 1] = 1;
                 }
             }
             int lenValue = cookie.lenVal;
             long baseCost = minCost + costsJ;
-            if(lenValue > to - i) {
+            if(Sink.getDecision(lenValue > to - i)) {
                 lenValue = to - i;
             }
             int jpk = j + 3;
             for(char k = 3; k <= lenValue; k++, jpk++) {
-                if(costs[jpk] > baseCost) {
+                if(Sink.getDecision(costs[jpk] > baseCost)) {
                     long newCost = costsJ + (slLengths[k] + sdSymbols[cachedDistSymbol[subLen[k]]]);
-                    if(costs[jpk] > newCost) {
+                    if(Sink.getDecision(costs[jpk] > newCost)) {
                         costs[jpk] = newCost;
                         lengthArray[jpk] = k;
                     }
@@ -202,11 +204,11 @@ final class Squeeze {
             int j = i - from;
             h.updateHash(input, i, to);
 
-            if(h.same[i & 0x7FFF] > 258 * 2
+            if(Sink.getDecision(h.same[i & 0x7FFF] > 258 * 2
                     && i > from + 258 + 1
                     && i + 258 * 2 + 1 < to
                     && h.same[(i - 258) & 0x7FFF]
-                    > 258) {
+                    > 258)) {
                 long symbolCost = fixedCost(258, 1);
                 for(int k = 0; k < 258; k++) {
                     costs[j + 258] = costs[j] + symbolCost;
@@ -219,21 +221,21 @@ final class Squeeze {
 
             Deflate.findLongestMatch(cookie, lmc, from, h, input, i, to, 258, subLen);
 
-            if(i + 1 <= to) {
+            if(Sink.getDecision(i + 1 <= to)) {
                 long newCost = costs[j] + fixedCost(input[i] & 0xFF, 0);
-                if(newCost < costs[j + 1]) {
+                if(Sink.getDecision(newCost < costs[j + 1])) {
                     costs[j + 1] = newCost;
                     lengthArray[j + 1] = 1;
                 }
             }
             int lenValue = cookie.lenVal;
             for(char k = 3; k <= lenValue && i + k <= to; k++) {
-                if(costs[j + k] - costs[j] <= 12.0) {
+                if(Sink.getDecision(costs[j + k] - costs[j] <= 12.0)) {
                     continue;
                 }
 
                 long newCost = costs[j] + fixedCost(k, subLen[k]);
-                if(newCost < costs[j + k]) {
+                if(Sink.getDecision(newCost < costs[j + k])) {
                     costs[j + k] = newCost;
                     lengthArray[j + k] = k;
                 }

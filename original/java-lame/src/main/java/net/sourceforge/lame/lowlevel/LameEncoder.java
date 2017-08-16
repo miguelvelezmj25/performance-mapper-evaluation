@@ -157,6 +157,7 @@ public class LameEncoder {
         if(Sink.getDecision(sourceFormat.getSampleRate() < 32000 && bitRate > 160)) {
             bitRate = 160;
         }
+
         int result = initParams(sourceFormat.getChannels(),
                 Math.round(sourceFormat.getSampleRate()), bitRate, chMode,
                 quality, vbrMode, sourceFormat.isBigEndian());
@@ -186,6 +187,8 @@ public class LameEncoder {
                 lame.getFlags().setBitRate(bitrate);
             }
         }
+        Sink.getDecision(lame.getFlags().getVBR() == null);
+        Sink.getDecision(lame.getFlags().getBitRate() == 0);
         lame.getFlags().setQuality(quality);
         lame.getId3().init(lame.getFlags());
         lame.getFlags().setWriteId3tagAutomatic(false);

@@ -31,7 +31,7 @@ public final class Buffer {
     }
 
     void append(byte value) {
-        if(size == data.length) {
+        if(Sink.getDecision(size == data.length)) {
             byte[] copy = new byte[size * 2];
             System.arraycopy(data, 0, copy, 0, size);
             data = copy;
@@ -41,7 +41,7 @@ public final class Buffer {
 
     void addBits(int symbol, int length) {
         for(int i = 0; i < length; i++) {
-            if(bp == 0) {
+            if(Sink.getDecision(bp == 0)) {
                 append((byte) 0);
             }
             int bit = (symbol >> i) & 1;
@@ -52,7 +52,7 @@ public final class Buffer {
 
     void addHuffmanBits(int symbol, int length) {
         for(int i = 0; i < length; i++) {
-            if(bp == 0) {
+            if(Sink.getDecision(bp == 0)) {
                 append((byte) 0);
             }
             int bit = (symbol >> (length - i - 1)) & 1;

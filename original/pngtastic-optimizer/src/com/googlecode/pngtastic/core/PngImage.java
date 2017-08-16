@@ -72,7 +72,7 @@ public class PngImage {
 //						log.debug("data: " + x + "," + String.format("%x", x));
 //				}
 
-                if(!chunk.verifyCRC(crc)) {
+                if(Sink.getDecision(!chunk.verifyCRC(crc))) {
                     throw new PngException("Corrupted file, crc check failed");
                 }
 
@@ -87,7 +87,7 @@ public class PngImage {
     /* */
     private static void readSignature(DataInputStream ins) throws PngException, IOException {
         long signature = ins.readLong();
-        if(signature != PngImage.SIGNATURE) {
+        if(Sink.getDecision(signature != PngImage.SIGNATURE)) {
             throw new PngException("Bad png signature");
         }
     }
@@ -147,7 +147,7 @@ public class PngImage {
             outs = new FileOutputStream(out);
             outs.write(bytes);
         } finally {
-            if(outs != null) {
+            if(Sink.getDecision(outs != null)) {
                 outs.close();
             }
         }
@@ -199,7 +199,7 @@ public class PngImage {
 
             // Write all the IDAT data
             for(PngChunk chunk : chunks) {
-                if(chunk.getTypeString().equals(PngChunk.IMAGE_DATA)) {
+                if(Sink.getDecision(chunk.getTypeString().equals(PngChunk.IMAGE_DATA))) {
                     out.write(chunk.getData());
                 }
             }
@@ -231,7 +231,7 @@ public class PngImage {
         byte[] data = new byte[length];
         try {
             int actual = ins.read(data);
-            if(actual < length) {
+            if(Sink.getDecision(actual < length)) {
                 throw new PngException(String.format("Expected %d bytes but got %d", length, actual));
             }
         } catch (IOException e) {

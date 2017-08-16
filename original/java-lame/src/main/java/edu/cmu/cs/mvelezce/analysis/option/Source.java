@@ -8,4 +8,10 @@ public class Source {
 
     public static boolean getOptionMPEGMODE(boolean option) { return option;
     }
+
+    public static boolean getOptionHIGHQUALITY(boolean option) { return option;
+    }
+
+    public static boolean getOptionVBR(boolean option) { return option;
+    }
 }
