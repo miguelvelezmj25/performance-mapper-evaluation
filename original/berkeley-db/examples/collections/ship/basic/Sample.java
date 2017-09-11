@@ -60,7 +60,8 @@ public class Sample {
 
         // Parse the command line arguments.
         //
-        String homeDir = "./tmp";
+//        String homeDir = "./tmp";
+        String homeDir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/env";
         for(int i = 0; i < args.length; i += 1) {
             if(args[i].equals("-h") && i < args.length - 1) {
                 i += 1;

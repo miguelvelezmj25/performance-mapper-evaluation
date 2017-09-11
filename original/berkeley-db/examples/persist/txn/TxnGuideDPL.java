@@ -25,7 +25,7 @@ import java.io.File;
 
 public class TxnGuideDPL {
 
-    private static final int NUMTHREADS = 5;
+    private static final int NUMTHREADS = 1;
     private static String myEnvPath = "./";
     private static String storeName = "exampleStore";
     // Handles

@@ -30,7 +30,8 @@ import java.io.File;
  */
 public class SQLApp {
 
-    private static String envDir = "./tmp";
+//    private static String envDir = "./tmp";
+    private static String envDir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/env";
     private static boolean cleanEnvOnExit = false;
     private static Environment env = null;
     private static EntityStore store = null;

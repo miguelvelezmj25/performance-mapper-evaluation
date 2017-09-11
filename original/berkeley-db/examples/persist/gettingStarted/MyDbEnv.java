@@ -23,6 +23,8 @@ import java.io.File;
 
 public class MyDbEnv {
 
+
+
     private Environment myEnv;
     private EntityStore store;
 
@@ -46,6 +48,29 @@ public class MyDbEnv {
         // they do not exist.
         myEnvConfig.setAllowCreate(!readOnly);
         storeConfig.setAllowCreate(!readOnly);
+
+        // Open the environment and entity store
+        myEnv = new Environment(envHome, myEnvConfig);
+        store = new EntityStore(myEnv, "EntityStore", storeConfig);
+
+    }
+
+    // The setup() method opens the environment and store
+    // for us.
+    public void setup(File envHome, boolean allowCreate, String l)
+            throws DatabaseException {
+
+        EnvironmentConfig myEnvConfig = new EnvironmentConfig();
+        StoreConfig storeConfig = new StoreConfig();
+
+        myEnvConfig.setReadOnly(allowCreate);
+        storeConfig.setReadOnly(allowCreate);
+
+        // If the environment is opened for write, then we want to be
+        // able to create the environment and entity store if
+        // they do not exist.
+        myEnvConfig.setAllowCreate(!allowCreate);
+        storeConfig.setAllowCreate(!allowCreate);
 
         // Open the environment and entity store
         myEnv = new Environment(envHome, myEnvConfig);

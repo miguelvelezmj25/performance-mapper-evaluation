@@ -14,13 +14,15 @@
 package persist.gettingStarted;
 
 import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.config.EnvironmentParams;
 import com.sleepycat.persist.EntityCursor;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.io.File;
 
 public class ExampleInventoryRead {
+
+    public static boolean ALLOWCREATE;
 
     //    private static File myDbEnvPath = new File("/tmp/JEDB");
     private static File myDbEnvPath = new File("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/env");
@@ -30,7 +32,7 @@ public class ExampleInventoryRead {
     private static String locateItem;
     private DataAccessor da;
 
-    protected ExampleInventoryRead() {
+    public ExampleInventoryRead() {
     }
 
     private static void usage() {
@@ -40,6 +42,8 @@ public class ExampleInventoryRead {
     }
 
     public static void main(String args[]) {
+        Sink.init();
+
         ExampleInventoryRead eir = new ExampleInventoryRead();
         try {
             eir.run(args);
@@ -74,8 +78,18 @@ public class ExampleInventoryRead {
         // Parse the arguments list
         parseArgs(args);
 
-        myDbEnv.setup(myDbEnvPath, // path to the environment home
-                true);       // is this environment read-only?
+        boolean allowCreate = false;
+
+        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
+
+        if(ALLOWCREATE) {
+            allowCreate = true;
+        }
+
+        myDbEnv.setup(myDbEnvPath, allowCreate, "");
+
+//        myDbEnv.setup(myDbEnvPath, // path to the environment home
+//                true);       // is this environment read-only?
 
         // Open the data accessor. This is used to retrieve
         // persistent objects.
