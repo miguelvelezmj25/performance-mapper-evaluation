@@ -86,24 +86,24 @@ public class ExampleInventoryRead {
             allowCreate = true;
         }
 
-//        myDbEnv.setup(myDbEnvPath, allowCreate, "");
-//
-////        myDbEnv.setup(myDbEnvPath, // path to the environment home
-////                true);       // is this environment read-only?
-//
-//        // Open the data accessor. This is used to retrieve
-//        // persistent objects.
-//        da = new DataAccessor(myDbEnv.getEntityStore());
-//
-//        // If a item to locate is provided on the command line,
-//        // show just the inventory items using the provided name.
-//        // Otherwise, show everything in the inventory.
-//        if(locateItem != null) {
-//            showItem();
-//        }
-//        else {
-//            showAllInventory();
-//        }
+        myDbEnv.setup(myDbEnvPath, allowCreate, "");
+
+//        myDbEnv.setup(myDbEnvPath, // path to the environment home
+//                true);       // is this environment read-only?
+
+        // Open the data accessor. This is used to retrieve
+        // persistent objects.
+        da = new DataAccessor(myDbEnv.getEntityStore());
+
+        // If a item to locate is provided on the command line,
+        // show just the inventory items using the provided name.
+        // Otherwise, show everything in the inventory.
+        if(locateItem != null) {
+            showItem();
+        }
+        else {
+            showAllInventory();
+        }
     }
 
     // Shows all the inventory items that exist for a given
