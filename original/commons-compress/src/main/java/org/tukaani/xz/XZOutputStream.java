@@ -175,12 +175,12 @@ public class XZOutputStream extends FinishableOutputStream {
      */
     public void updateFilters(FilterOptions[] filterOptions)
             throws XZIOException {
-        if(Sink.getDecision(blockEncoder != null)) {
+        if(blockEncoder != null) {
             throw new UnsupportedOptionsException("Changing filter options "
                     + "in the middle of a XZ Block not implemented");
         }
 
-        if(Sink.getDecision(filterOptions.length < 1 || filterOptions.length > 4)) {
+        if(filterOptions.length < 1 || filterOptions.length > 4) {
             throw new UnsupportedOptionsException(
                     "XZ filter chain must be 1-4 filters");
         }
@@ -229,20 +229,20 @@ public class XZOutputStream extends FinishableOutputStream {
      * @throws IOException   may be thrown by the underlying output stream
      */
     public void write(byte[] buf, int off, int len) throws IOException {
-        if(Sink.getDecision(off < 0 || len < 0 || off + len < 0 || off + len > buf.length)) {
+        if(off < 0 || len < 0 || off + len < 0 || off + len > buf.length) {
             throw new IndexOutOfBoundsException();
         }
 
-        if(Sink.getDecision(exception != null)) {
+        if(exception != null) {
             throw exception;
         }
 
-        if(Sink.getDecision(finished)) {
+        if(finished) {
             throw new XZIOException("Stream finished or closed");
         }
 
         try {
-            if(Sink.getDecision(blockEncoder == null)) {
+            if(blockEncoder == null) {
                 blockEncoder = new BlockOutputStream(out, filters, check);
             }
 
@@ -275,18 +275,18 @@ public class XZOutputStream extends FinishableOutputStream {
      * @throws IOException   may be thrown by the underlying output stream
      */
     public void endBlock() throws IOException {
-        if(Sink.getDecision(exception != null)) {
+        if(exception != null) {
             throw exception;
         }
 
-        if(Sink.getDecision(finished)) {
+        if(finished) {
             throw new XZIOException("Stream finished or closed");
         }
 
         // NOTE: Once there is threading with multiple Blocks, it's possible
         // that this function will be more like a barrier that returns
         // before the last Block has been finished.
-        if(Sink.getDecision(blockEncoder != null)) {
+        if(blockEncoder != null) {
             try {
                 blockEncoder.finish();
                 index.add(blockEncoder.getUnpaddedSize(),
@@ -318,17 +318,17 @@ public class XZOutputStream extends FinishableOutputStream {
      * @throws IOException   may be thrown by the underlying output stream
      */
     public void flush() throws IOException {
-        if(Sink.getDecision(exception != null)) {
+        if(exception != null) {
             throw exception;
         }
 
-        if(Sink.getDecision(finished)) {
+        if(finished) {
             throw new XZIOException("Stream finished or closed");
         }
 
         try {
-            if(Sink.getDecision(blockEncoder != null)) {
-                if(Sink.getDecision(filtersSupportFlushing)) {
+            if(blockEncoder != null) {
+                if(filtersSupportFlushing) {
                     // This will eventually call out.flush() so
                     // no need to do it here again.
                     blockEncoder.flush();
@@ -364,7 +364,7 @@ public class XZOutputStream extends FinishableOutputStream {
      * @throws IOException   may be thrown by the underlying output stream
      */
     public void finish() throws IOException {
-        if(Sink.getDecision(!finished)) {
+        if(!finished) {
             // This checks for pending exceptions so we don't need to
             // worry about it here.
             endBlock();
@@ -395,7 +395,7 @@ public class XZOutputStream extends FinishableOutputStream {
      * @throws IOException   may be thrown by the underlying output stream
      */
     public void close() throws IOException {
-        if(Sink.getDecision(out != null)) {
+        if(out != null) {
             // If finish() throws an exception, it stores the exception to
             // the variable "exception". So we can ignore the possible
             // exception here.
@@ -409,7 +409,7 @@ public class XZOutputStream extends FinishableOutputStream {
             } catch (IOException e) {
                 // Remember the exception but only if there is no previous
                 // pending exception.
-                if(Sink.getDecision(exception == null)) {
+                if(exception == null) {
                     exception = e;
                 }
             }
@@ -417,7 +417,7 @@ public class XZOutputStream extends FinishableOutputStream {
             out = null;
         }
 
-        if(Sink.getDecision(exception != null)) {
+        if(exception != null) {
             throw exception;
         }
     }

@@ -5,7 +5,6 @@
 
 package org.prevayler;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.foundation.monitor.Monitor;
 import org.prevayler.foundation.monitor.SimpleMonitor;
 import org.prevayler.foundation.network.OldNetworkImpl;
@@ -153,7 +152,7 @@ public class PrevaylerFactory<P> {
     }
 
     private Clock clock() {
-        return Sink.getDecision(_clock != null) ? _clock : new MachineClock();
+        return _clock != null ? _clock : new MachineClock();
     }
 
     /**
@@ -287,7 +286,7 @@ public class PrevaylerFactory<P> {
     public void configureJournalSerializer(String suffix, Serializer serializer) {
         PrevaylerDirectory.checkValidJournalSuffix(suffix);
 
-        if(Sink.getDecision(_journalSerializer != null)) {
+        if(_journalSerializer != null) {
             throw new IllegalStateException("Read the javadoc to this method.");
         }
 
@@ -313,7 +312,7 @@ public class PrevaylerFactory<P> {
     public void configureSnapshotSerializer(String suffix, Serializer serializer) {
         PrevaylerDirectory.checkValidSnapshotSuffix(suffix);
         _snapshotSerializers.put(suffix, serializer);
-        if(Sink.getDecision(_primarySnapshotSuffix == null)) {
+        if(_primarySnapshotSuffix == null) {
             _primarySnapshotSuffix = suffix;
         }
     }
@@ -327,7 +326,7 @@ public class PrevaylerFactory<P> {
     public Prevayler<P> create() throws Exception {
         GenericSnapshotManager<P> snapshotManager = snapshotManager();
         TransactionPublisher publisher = publisher(snapshotManager);
-        if(Sink.getDecision(_serverPort != -1)) {
+        if(_serverPort != -1) {
             new ServerListener(publisher, new OldNetworkImpl(), _serverPort);
         }
         return new PrevaylerImpl<P>(snapshotManager, publisher, journalSerializer(), _transactionDeepCopyMode);
@@ -340,7 +339,7 @@ public class PrevaylerFactory<P> {
 
 
     private P prevalentSystem() {
-        if(Sink.getDecision(_prevalentSystem == null)) {
+        if(_prevalentSystem == null) {
             throw new IllegalStateException("The prevalent system must be configured.");
         }
         return _prevalentSystem;
@@ -348,14 +347,14 @@ public class PrevaylerFactory<P> {
 
 
     private TransactionPublisher publisher(GenericSnapshotManager<P> snapshotManager) throws IOException {
-        if(Sink.getDecision(_remoteServerIpAddress != null)) {
+        if(_remoteServerIpAddress != null) {
             return new ClientPublisher(new OldNetworkImpl(), _remoteServerIpAddress, _remoteServerPort);
         }
         return new CentralPublisher(clock(), journal());
     }
 
     private Journal journal() throws IOException {
-        if(Sink.getDecision(_transientMode)) {
+        if(_transientMode) {
             return (Journal) new TransientJournal();
         }
         else {
@@ -366,7 +365,7 @@ public class PrevaylerFactory<P> {
 
 
     private Serializer journalSerializer() {
-        if(Sink.getDecision(_journalSerializer != null)) {
+        if(_journalSerializer != null) {
             return _journalSerializer;
         }
         return new JavaSerializer();
@@ -377,12 +376,12 @@ public class PrevaylerFactory<P> {
     }
 
     private GenericSnapshotManager<P> snapshotManager() throws Exception {
-        if(Sink.getDecision(_nullSnapshotManager != null)) {
+        if(_nullSnapshotManager != null) {
             return _nullSnapshotManager;
         }
 
         PrevaylerDirectory directory = new PrevaylerDirectory(prevalenceDirectory());
-        if(Sink.getDecision(!_snapshotSerializers.isEmpty())) {
+        if(!_snapshotSerializers.isEmpty()) {
             return new GenericSnapshotManager<P>(_snapshotSerializers, _primarySnapshotSuffix, prevalentSystem(), directory, journalSerializer());
         }
 

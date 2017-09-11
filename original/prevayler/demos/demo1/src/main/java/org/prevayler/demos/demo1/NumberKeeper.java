@@ -1,7 +1,5 @@
 package org.prevayler.demos.demo1;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +23,7 @@ class NumberKeeper implements java.io.Serializable {
     }
 
     int lastNumber() {
-        return Sink.getDecision(numbers.isEmpty())
+        return numbers.isEmpty()
                 ? 0
                 : ((Integer) numbers.get(numbers.size() - 1)).intValue();
     }

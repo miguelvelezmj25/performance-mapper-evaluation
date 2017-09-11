@@ -97,7 +97,7 @@ public final class IOUtils {
         final long available = numToSkip;
         while (numToSkip > 0) {
             final long skipped = input.skip(numToSkip);
-            if(Sink.getDecision(skipped == 0)) {
+            if(skipped == 0) {
                 break;
             }
             numToSkip -= skipped;
@@ -106,7 +106,7 @@ public final class IOUtils {
         while (numToSkip > 0) {
             final int read = readFully(input, SKIP_BUF, 0,
                     (int) Math.min(numToSkip, SKIP_BUF_SIZE));
-            if(Sink.getDecision(read < 1)) {
+            if(read < 1) {
                 break;
             }
             numToSkip -= read;
@@ -147,13 +147,13 @@ public final class IOUtils {
      */
     public static int readFully(final InputStream input, final byte[] b, final int offset, final int len)
             throws IOException {
-        if(Sink.getDecision(len < 0 || offset < 0 || len + offset > b.length)) {
+        if(len < 0 || offset < 0 || len + offset > b.length) {
             throw new IndexOutOfBoundsException();
         }
         int count = 0, x = 0;
         while (count != len) {
             x = input.read(b, offset + count, len - count);
-            if(Sink.getDecision(x == -1)) {
+            if(x == -1) {
                 break;
             }
             count += x;
@@ -180,12 +180,12 @@ public final class IOUtils {
         int read = 0;
         while (read < expectedLength) {
             int readNow = channel.read(b);
-            if(Sink.getDecision(readNow <= 0)) {
+            if(readNow <= 0) {
                 break;
             }
             read += readNow;
         }
-        if(Sink.getDecision(read < expectedLength)) {
+        if(read < expectedLength) {
             throw new EOFException();
         }
     }
@@ -221,7 +221,7 @@ public final class IOUtils {
      * @since 1.7
      */
     public static void closeQuietly(final Closeable c) {
-        if(Sink.getDecision(c != null)) {
+        if(c != null) {
             try {
                 c.close();
             } catch (final IOException ignored) { // NOPMD

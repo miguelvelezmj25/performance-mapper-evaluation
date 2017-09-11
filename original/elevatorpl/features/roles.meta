@@ -1,0 +1,14 @@
+{
+	"features" : [
+		"base",
+		"empty",
+		"base"
+	],
+	"roles": {
+		"leaveElevator": {
+			"base": "leaveElevator__wrappee__base",
+			"empty": "leaveElevator"
+		}
+	}
+
+}

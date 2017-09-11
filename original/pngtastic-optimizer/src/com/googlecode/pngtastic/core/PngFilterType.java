@@ -31,7 +31,7 @@ public enum PngFilterType {
     /** */
     public static PngFilterType forValue(byte value) {
         for(PngFilterType type : PngFilterType.values()) {
-            if(Sink.getDecision(type.getValue() == value)) {
+            if(type.getValue() == value) {
                 return type;
             }
         }

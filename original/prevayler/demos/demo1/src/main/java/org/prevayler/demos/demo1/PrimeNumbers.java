@@ -1,5 +1,6 @@
 package org.prevayler.demos.demo1;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import org.prevayler.Clock;
 import org.prevayler.Prevayler;
@@ -21,6 +22,8 @@ public class PrimeNumbers {
     public static boolean MONITOR;
 
     public static void main(String[] args) throws Exception {
+        Sink.init();
+
         TRANSIENTMODE = Source.getOptionTRANSIENTMODE(true);
         CLOCK = Source.getOptionCLOCK(true);
         DEEPCOPY = Source.getOptionDEEPCOPY(true);

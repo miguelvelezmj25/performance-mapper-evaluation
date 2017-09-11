@@ -42,10 +42,6 @@ public class PngtasticOptimizer {
         long start = System.currentTimeMillis();
 
         PngOptimizer optimizer = new PngOptimizer(logLevel);
-
-//        compressor == nul);
-//        iterations ==0);
-
         optimizer.setCompressor(compressor, iterations);
 
         for(String file : fileNames) {
@@ -69,9 +65,9 @@ public class PngtasticOptimizer {
 //        int last = 0;
 //        for(int i = 0; i < args.length; i++) {
 //            String arg = args[i];
-//            if(Sink.getDecision(Sink.getDecision1(arg.startsWith("--")))) {
+//            if(Sink.getDecision1(arg.startsWith("--"))) {
 //                int next = i + 1;
-//                if(Sink.getDecision(Sink.getDecision1(next < args.length))) {
+//                if(Sink.getDecision1(next < args.length)) {
 //                    options.put(arg, args[next]);
 //                    last = next + 1;
 //                }
@@ -85,7 +81,7 @@ public class PngtasticOptimizer {
 //        files = new String[1];
 //        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic/images/optimizer/1px.png";
 //
-//        if(Sink.getDecision(Sink.getDecision1(files.length == 0))) {
+//        if(Sink.getDecision1(files.length == 0)) {
 //            System.out.println("No files to process");
 //            System.out.println(HELP);
 //            return;
@@ -117,35 +113,35 @@ public class PngtasticOptimizer {
 //        String compressor;
 //        Integer iterations;
 //
-//        if(Sink.getDecision(Sink.getDecision1(REMOVEGAMMA))) {
+//        if(Sink.getDecision1(REMOVEGAMMA)) {
 //            removeGamma = true;
 //        }
 //        else {
 //            removeGamma = false;
 //        }
 //
-//        if(Sink.getDecision(Sink.getDecision1(COMPRESSIONLEVEL))) {
+//        if(Sink.getDecision1(COMPRESSIONLEVEL)) {
 //            compressionLevel = 9;
 //        }
 //        else {
 //            compressionLevel = 0;
 //        }
 //
-//        if(Sink.getDecision(Sink.getDecision1(COMPRESSOR))) {
+//        if(Sink.getDecision1(COMPRESSOR)) {
 //            compressor = "zopfli";
 //        }
 //        else {
 //            compressor = "none";
 //        }
 //
-//        if(Sink.getDecision(Sink.getDecision1(ITERATIONS))) {
+//        if(Sink.getDecision1(ITERATIONS)) {
 //            iterations = 10;
 //        }
 //        else {
 //            iterations = 0;
 //        }
 //
-//        if(Sink.getDecision(Sink.getDecision1(LOGLEVEL))) {
+//        if(Sink.getDecision1(LOGLEVEL)) {
 //            logLevel = "debug";
 //        }
 //        else {
@@ -170,8 +166,8 @@ public class PngtasticOptimizer {
     /* */
     private String makeDirs(String path) throws IOException {
         File out = new File(path);
-        if(Sink.getDecision(!out.exists())) {
-            if(Sink.getDecision(!out.mkdirs())) {
+        if(!out.exists()) {
+            if(!out.mkdirs()) {
                 throw new IOException("Couldn't create path: " + path);
             }
         }

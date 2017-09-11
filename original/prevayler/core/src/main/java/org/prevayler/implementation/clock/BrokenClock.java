@@ -32,7 +32,7 @@ public class BrokenClock implements Clock {
 
     public synchronized void advanceTo(Date newTime) {
         long newMillis = newTime.getTime();
-        if(Sink.getDecision(newMillis == _millis)) {
+        if(newMillis == _millis) {
             return;
         }
         _millis = newMillis;

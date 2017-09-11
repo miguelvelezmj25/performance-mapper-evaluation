@@ -1,6 +1,5 @@
 package org.prevayler.implementation;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.Clock;
 import org.prevayler.Query;
 import org.prevayler.foundation.Cool;
@@ -30,7 +29,7 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
 
     public P prevalentSystem() {
         synchronized (this) {
-            if(Sink.getDecision(Sink.getDecision(_prevalentSystem == null))) {
+            if(_prevalentSystem == null) {
                 throw new Error("Prevayler is no longer allowing access to the prevalent system due to an Error thrown from an earlier transaction.");
             }
             return _prevalentSystem;
@@ -57,11 +56,11 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
         Date executionTime = transactionTimestamp.executionTime();
 
         synchronized (this) {
-            if(Sink.getDecision(_prevalentSystem == null)) {
+            if(_prevalentSystem == null) {
                 throw new Error("Prevayler is no longer processing transactions due to an Error thrown from an earlier transaction.");
             }
 
-            if(Sink.getDecision(systemVersion != _systemVersion + 1)) {
+            if(systemVersion != _systemVersion + 1) {
                 throw new IllegalStateException(
                         "Attempted to apply transaction " + systemVersion + " when prevalent system was only at " + _systemVersion);
             }
@@ -73,7 +72,7 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
                 // copy of the transaction without blocking queries.
                 capsule.executeOn(_prevalentSystem, executionTime, _journalSerializer);
             } catch (RuntimeException rx) {
-                if(Sink.getDecision(!_ignoreRuntimeExceptions)) {
+                if(!_ignoreRuntimeExceptions) {
                     throw rx;  //TODO Guarantee that transactions received from pending transaction recovery don't ever throw RuntimeExceptions. Maybe use a wrapper for that.
                 }
             } catch (Error error) {
@@ -87,7 +86,7 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
 
     public <R> R executeQuery(Query<? super P, R> sensitiveQuery, Clock clock) throws Exception {
         synchronized (this) {
-            if(Sink.getDecision(_prevalentSystem == null)) {
+            if(_prevalentSystem == null) {
                 throw new Error("Prevayler is no longer processing queries due to an Error thrown from an earlier transaction.");
             }
 
@@ -99,7 +98,7 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
 
     public File takeSnapshot(GenericSnapshotManager<P> snapshotManager) throws Exception {
         synchronized (this) {
-            if(Sink.getDecision(_prevalentSystem == null)) {
+            if(_prevalentSystem == null) {
                 throw new Error("Prevayler is no longer allowing snapshots due to an Error thrown from an earlier transaction.");
             }
 
@@ -115,11 +114,11 @@ public class PrevalentSystemGuard<P> implements TransactionSubscriber {
                 Cool.wait(this);
             }
 
-            if(Sink.getDecision(_prevalentSystem == null)) {
+            if(_prevalentSystem == null) {
                 throw new Error("Prevayler is no longer accepting transactions due to an Error thrown from an earlier transaction.");
             }
 
-            if(Sink.getDecision(_systemVersion > systemVersion)) {
+            if(_systemVersion > systemVersion) {
                 throw new IllegalStateException("Already at " + _systemVersion + "; can't go back to " + systemVersion);
             }
 

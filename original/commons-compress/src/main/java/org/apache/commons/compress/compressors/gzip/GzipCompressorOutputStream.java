@@ -95,7 +95,6 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
     public GzipCompressorOutputStream(final OutputStream out, final GzipParameters parameters) throws IOException {
         this.out = out;
         this.deflater = new Deflater(parameters.getCompressionLevel(), true);
-        Sink.getDecision(deflater == null);
 
         writeHeader(parameters);
     }
@@ -113,10 +112,10 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
 
         // extra flags
         final int compressionLevel = parameters.getCompressionLevel();
-        if(Sink.getDecision(compressionLevel == Deflater.BEST_COMPRESSION)) {
+        if(compressionLevel == Deflater.BEST_COMPRESSION) {
             buffer.put((byte) 2);
         }
-        else if(Sink.getDecision(compressionLevel == Deflater.BEST_SPEED)) {
+        else if(compressionLevel == Deflater.BEST_SPEED) {
             buffer.put((byte) 4);
         }
         else {
@@ -127,12 +126,12 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
 
         out.write(buffer.array());
 
-        if(Sink.getDecision(filename != null)) {
+        if(filename != null) {
             out.write(filename.getBytes(CharsetNames.ISO_8859_1));
             out.write(0);
         }
 
-        if(Sink.getDecision(comment != null)) {
+        if(comment != null) {
             out.write(comment.getBytes(CharsetNames.ISO_8859_1));
             out.write(0);
         }
@@ -143,7 +142,6 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putInt((int) crc.getValue());
         buffer.putInt(deflater.getTotalIn());
-        Sink.getDecision(deflater == null);
         out.write(buffer.array());
     }
 
@@ -169,13 +167,12 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
      */
     @Override
     public void write(final byte[] buffer, final int offset, final int length) throws IOException {
-        if(Sink.getDecision(deflater.finished())) {
+        if(deflater.finished()) {
             throw new IOException("Cannot write more data, the end of the compressed data stream has been reached");
 
         }
-        else if(Sink.getDecision(length > 0)) {
+        else if(length > 0) {
             deflater.setInput(buffer, offset, length);
-            Sink.getDecision(deflater == null);
             while (!deflater.needsInput()) {
                 deflate();
             }
@@ -186,8 +183,7 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
 
     private void deflate() throws IOException {
         final int length = deflater.deflate(deflateBuffer, 0, deflateBuffer.length);
-        Sink.getDecision(deflater == null);
-        if(Sink.getDecision(length > 0)) {
+        if(length > 0) {
             out.write(deflateBuffer, 0, length);
         }
     }
@@ -199,7 +195,7 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
      * @since 1.7
      */
     public void finish() throws IOException {
-        if(Sink.getDecision(!deflater.finished())) {
+        if(!deflater.finished()) {
             deflater.finish();
 
             while (!deflater.finished()) {
@@ -222,10 +218,9 @@ public class GzipCompressorOutputStream extends CompressorOutputStream {
 
     @Override
     public void close() throws IOException {
-        if(Sink.getDecision(!closed)) {
+        if(!closed) {
             finish();
             deflater.end();
-            Sink.getDecision(deflater == null);
             out.close();
             closed = true;
         }

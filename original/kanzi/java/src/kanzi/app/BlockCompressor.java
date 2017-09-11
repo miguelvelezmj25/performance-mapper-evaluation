@@ -63,7 +63,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         String strTransf;
         String strCodec;
 
-        if(Sink.getDecision(this.level >= 0)) {
+        if(this.level >= 0) {
             String tranformAndCodec = getTransformAndCodec(this.level);
             String[] tokens = tranformAndCodec.split("&");
             strTransf = tokens[0];
@@ -89,11 +89,11 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         this.ownPool = (threadPool == null) && (this.pool != null);
         this.listeners = new ArrayList<>(10);
 
-        if(Sink.getDecision(this.verbosity > 2)) {
+        if(this.verbosity > 2) {
             this.addListener(new InfoPrinter(this.verbosity, InfoPrinter.Type.ENCODING, System.out));
         }
 
-        if(Sink.getDecision((this.verbosity > 0) && (map.size() > 0))) {
+        if((this.verbosity > 0) && (map.size() > 0)) {
             for(String k : map.keySet())
                 printOut("Ignoring invalid option [" + k + "]", verbosity > 0);
         }
@@ -109,7 +109,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         String strTransf;
         String strCodec;
 
-        if(Sink.getDecision(this.level >= 0)) {
+        if(this.level >= 0) {
             String tranformAndCodec = getTransformAndCodec(this.level);
             String[] tokens = tranformAndCodec.split("&");
             strTransf = tokens[0];
@@ -128,25 +128,25 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         ByteFunctionFactory bff = new ByteFunctionFactory();
         this.transform = (strTransf == null) ? "BWT+MTFT+ZRLT" : bff.getName(bff.getType(strTransf));
         Boolean bChecksum = checksum;
-        this.checksum = (bChecksum == null) ? false : bChecksum;
+        this.checksum = bChecksum == null ? false : bChecksum;
         this.jobs = jobs;
         this.pool = (this.jobs == 1) ? null :
                 ((threadPool == null) ? Executors.newCachedThreadPool() : threadPool);
         this.ownPool = (threadPool == null) && (this.pool != null);
         this.listeners = new ArrayList<>(10);
 
-        if(Sink.getDecision(this.verbosity > 2)) {
+        if(this.verbosity > 2) {
             this.addListener(new InfoPrinter(this.verbosity, InfoPrinter.Type.ENCODING, System.out));
         }
 
-        if(Sink.getDecision((this.verbosity > 0) && (map.size() > 0))) {
+        if((this.verbosity > 0) && (map.size() > 0)) {
             for(String k : map.keySet())
                 printOut("Ignoring invalid option [" + k + "]", verbosity > 0);
         }
     }
 
     private static void printOut(String msg, boolean print) {
-        if(Sink.getDecision((print == true) && (msg != null))) {
+        if((print == true) && (msg != null)) {
             System.out.println(msg);
         }
     }
@@ -188,7 +188,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
 
     public void dispose() {
         try {
-            if(Sink.getDecision(this.is != null)) {
+            if(this.is != null) {
                 this.is.close();
             }
         } catch (IOException ioe) {
@@ -196,7 +196,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         }
 
         try {
-            if(Sink.getDecision(this.cos != null)) {
+            if(this.cos != null) {
                 this.cos.close();
             }
         } catch (IOException ioe) {
@@ -204,7 +204,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
             System.exit(Error.ERR_WRITE_FILE);
         }
 
-        if(Sink.getDecision((this.pool != null) && (this.ownPool == true))) {
+        if((this.pool != null) && (this.ownPool == true)) {
             this.pool.shutdown();
         }
     }
@@ -226,7 +226,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         printOut("Overwrite set to " + this.overwrite, printFlag);
         printOut("Checksum set to " + this.checksum, printFlag);
 
-        if(Sink.getDecision(this.level < 0)) {
+        if(this.level < 0) {
             String etransform = ("NONE".equals(this.transform)) ? "no" : this.transform;
             printOut("Using " + etransform + " transform (stage 1)", printFlag);
             String ecodec = ("NONE".equals(this.codec)) ? "no" : this.codec;
@@ -241,22 +241,22 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         OutputStream os;
 
         try {
-            if(Sink.getDecision(this.outputName.equalsIgnoreCase("NONE"))) {
+            if(this.outputName.equalsIgnoreCase("NONE")) {
                 os = new NullOutputStream();
             }
-            else if(Sink.getDecision(this.outputName.equalsIgnoreCase("STDOUT"))) {
+            else if(this.outputName.equalsIgnoreCase("STDOUT")) {
                 os = System.out;
             }
             else {
                 File output = new File(this.outputName);
 
-                if(Sink.getDecision(output.exists())) {
-                    if(Sink.getDecision(output.isDirectory())) {
+                if(output.exists()) {
+                    if(output.isDirectory()) {
                         System.err.println("The output file is a directory");
                         return Error.ERR_OUTPUT_IS_DIR;
                     }
 
-                    if(Sink.getDecision(this.overwrite == false)) {
+                    if(this.overwrite == false) {
                         System.err.println("The output file exists and the 'overwrite' command "
                                 + "line option has not been provided");
                         return Error.ERR_OVERWRITE_FILE;
@@ -265,7 +265,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
                     Path path1 = FileSystems.getDefault().getPath(this.inputName).toAbsolutePath();
                     Path path2 = FileSystems.getDefault().getPath(this.outputName).toAbsolutePath();
 
-                    if(Sink.getDecision(path1.equals(path2))) {
+                    if(path1.equals(path2)) {
                         System.err.println("The input and output files must be different");
                         return Error.ERR_CREATE_FILE;
                     }
@@ -304,7 +304,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         SliceByteArray sa = new SliceByteArray(new byte[DEFAULT_BUFFER_SIZE], 0);
         int len;
 
-        if(Sink.getDecision(this.listeners.size() > 0)) {
+        if(this.listeners.size() > 0) {
             Event evt = new Event(Event.Type.COMPRESSION_START, -1, 0);
             Listener[] array = this.listeners.toArray(new Listener[this.listeners.size()]);
             notifyListeners(array, evt);
@@ -322,7 +322,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
                     return Error.ERR_READ_FILE;
                 }
 
-                if(Sink.getDecision(len <= 0)) {
+                if(len <= 0) {
                     break;
                 }
 
@@ -348,7 +348,7 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
             }
         }
 
-        if(Sink.getDecision(read == 0)) {
+        if(read == 0) {
             System.out.println("Empty input file ... nothing to do");
             return WARN_EMPTY_INPUT;
         }
@@ -364,13 +364,13 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
         printOut("Encoding: " + read + " => " + this.cos.getWritten() +
                 " bytes in " + delta + " ms", this.verbosity == 1);
 
-        if(Sink.getDecision(delta > 0)) {
+        if(delta > 0) {
             printOut("Throughput (KB/s): " + (((read * 1000L) >> 10) / delta), printFlag);
         }
 
         printOut("", this.verbosity >= 1);
 
-        if(Sink.getDecision(this.listeners.size() > 0)) {
+        if(this.listeners.size() > 0) {
             Event evt = new Event(Event.Type.COMPRESSION_END, -1, this.cos.getWritten());
             Listener[] array = this.listeners.toArray(new Listener[this.listeners.size()]);
             notifyListeners(array, evt);

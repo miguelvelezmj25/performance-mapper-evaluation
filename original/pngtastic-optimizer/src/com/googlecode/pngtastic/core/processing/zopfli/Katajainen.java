@@ -33,16 +33,16 @@ final class Katajainen {
         int nn = 0;
         Node[] leaves = cookie.leaves1;
         for(int i = 0; i < n; i++) {
-            if(Sink.getDecision(frequencies[i] != 0)) {
+            if(frequencies[i] != 0) {
                 leaves[nn] = cookie.node(frequencies[i], i, null);
                 nn++;
             }
         }
 
-        if(Sink.getDecision(nn == 0)) {
+        if(nn == 0) {
             return;
         }
-        if(Sink.getDecision(nn == 1)) {
+        if(nn == 1) {
             bitLengths[leaves[0].count] = 1;
             return;
         }
@@ -79,23 +79,23 @@ final class Katajainen {
                                    boolean last) {
         int lastCount = list1[index].count;
 
-        if(Sink.getDecision(index == 0 && lastCount >= numSymbols)) {
+        if(index == 0 && lastCount >= numSymbols) {
             return;
         }
 
         list0[index] = list1[index];
 
-        if(Sink.getDecision(index == 0)) {
+        if(index == 0) {
             list1[index] = cookie.node(leaves[lastCount].weight, lastCount + 1, null);
         }
         else {
             int sum = list0[index - 1].weight + list1[index - 1].weight;
-            if(Sink.getDecision(lastCount < numSymbols && sum > leaves[lastCount].weight)) {
+            if(lastCount < numSymbols && sum > leaves[lastCount].weight) {
                 list1[index] = cookie.node(leaves[lastCount].weight, lastCount + 1, list1[index].tail);
             }
             else {
                 list1[index] = cookie.node(sum, lastCount, list1[index - 1]);
-                if(Sink.getDecision(!last)) {
+                if(!last) {
                     boundaryPm(cookie, leaves, list0, list1, numSymbols, index - 1, false);
                     boundaryPm(cookie, leaves, list0, list1, numSymbols, index - 1, false);
                 }
@@ -106,7 +106,7 @@ final class Katajainen {
     private static void sort(Node[] src, Node[] dest, int low, int high) {
         int length = high - low;
 
-        if(Sink.getDecision(length < 7)) {
+        if(length < 7) {
             for(int i = low + 1; i < high; i++)
                 for(int j = i, k = i - 1; j > low && (dest[k].weight > dest[j].weight); --j, --k) {
                     Node t = dest[j];
@@ -121,7 +121,7 @@ final class Katajainen {
         sort(dest, src, mid, high);
 
         for(int i = low, p = low, q = mid; i < high; i++) {
-            if(Sink.getDecision(q >= high || p < mid && (src[p].weight <= src[q].weight))) {
+            if(q >= high || p < mid && (src[p].weight <= src[q].weight)) {
                 dest[i] = src[p++];
             }
             else {

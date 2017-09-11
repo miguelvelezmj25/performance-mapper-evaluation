@@ -115,15 +115,15 @@ final class Util {
     }
 
     private static int distSymbol(int dist) {
-        if(Sink.getDecision(dist < 193)) {
-            if(Sink.getDecision(dist < 13)) {  /* dist 0..13. */
-                if(Sink.getDecision(dist < 5)) {
+        if(dist < 193) {
+            if(dist < 13) {  /* dist 0..13.*/
+                if(dist < 5) {
                     return dist - 1;
                 }
-                else if(Sink.getDecision(dist < 7)) {
+                else if(dist < 7) {
                     return 4;
                 }
-                else if(Sink.getDecision(dist < 9)) {
+                else if(dist < 9) {
                     return 5;
                 }
                 else {
@@ -131,25 +131,25 @@ final class Util {
                 }
             }
             else {  /* dist 13..193. */
-                if(Sink.getDecision(dist < 17)) {
+                if(dist < 17) {
                     return 7;
                 }
-                else if(Sink.getDecision(dist < 25)) {
+                else if(dist < 25) {
                     return 8;
                 }
-                else if(Sink.getDecision(dist < 33)) {
+                else if(dist < 33) {
                     return 9;
                 }
-                else if(Sink.getDecision(dist < 49)) {
+                else if(dist < 49) {
                     return 10;
                 }
-                else if(Sink.getDecision(dist < 65)) {
+                else if(dist < 65) {
                     return 11;
                 }
-                else if(Sink.getDecision(dist < 97)) {
+                else if(dist < 97) {
                     return 12;
                 }
-                else if(Sink.getDecision(dist < 129)) {
+                else if(dist < 129) {
                     return 13;
                 }
                 else {
@@ -158,23 +158,23 @@ final class Util {
             }
         }
         else {
-            if(Sink.getDecision(dist < 2049)) {  /* dist 193..2049. */
-                if(Sink.getDecision(dist < 257)) {
+            if(dist < 2049) {  /* dist 193..2049.*/
+                if(dist < 257) {
                     return 15;
                 }
-                else if(Sink.getDecision(dist < 385)) {
+                else if(dist < 385) {
                     return 16;
                 }
-                else if(Sink.getDecision(dist < 513)) {
+                else if(dist < 513) {
                     return 17;
                 }
-                else if(Sink.getDecision(dist < 769)) {
+                else if(dist < 769) {
                     return 18;
                 }
-                else if(Sink.getDecision(dist < 1025)) {
+                else if(dist < 1025) {
                     return 19;
                 }
-                else if(Sink.getDecision(dist < 1537)) {
+                else if(dist < 1537) {
                     return 20;
                 }
                 else {
@@ -182,25 +182,25 @@ final class Util {
                 }
             }
             else {  /* dist 2049..32768. */
-                if(Sink.getDecision(dist < 3073)) {
+                if(dist < 3073) {
                     return 22;
                 }
-                else if(Sink.getDecision(dist < 4097)) {
+                else if(dist < 4097) {
                     return 23;
                 }
-                else if(Sink.getDecision(dist < 6145)) {
+                else if(dist < 6145) {
                     return 24;
                 }
-                else if(Sink.getDecision(dist < 8193)) {
+                else if(dist < 8193) {
                     return 25;
                 }
-                else if(Sink.getDecision(dist < 12289)) {
+                else if(dist < 12289) {
                     return 26;
                 }
-                else if(Sink.getDecision(dist < 16385)) {
+                else if(dist < 16385) {
                     return 27;
                 }
-                else if(Sink.getDecision(dist < 24577)) {
+                else if(dist < 24577) {
                     return 28;
                 }
                 else {
@@ -219,86 +219,86 @@ final class Util {
     }
 
     private static int distExtraBits(int dist) {
-        if(Sink.getDecision(dist < 5)) {
+        if(dist < 5) {
             return 0;
         }
-        else if(Sink.getDecision(dist < 9)) {
+        else if(dist < 9) {
             return 1;
         }
-        else if(Sink.getDecision(dist < 17)) {
+        else if(dist < 17) {
             return 2;
         }
-        else if(Sink.getDecision(dist < 33)) {
+        else if(dist < 33) {
             return 3;
         }
-        else if(Sink.getDecision(dist < 65)) {
+        else if(dist < 65) {
             return 4;
         }
-        else if(Sink.getDecision(dist < 129)) {
+        else if(dist < 129) {
             return 5;
         }
-        else if(Sink.getDecision(dist < 257)) {
+        else if(dist < 257) {
             return 6;
         }
-        else if(Sink.getDecision(dist < 513)) {
+        else if(dist < 513) {
             return 7;
         }
-        else if(Sink.getDecision(dist < 1025)) {
+        else if(dist < 1025) {
             return 8;
         }
-        else if(Sink.getDecision(dist < 2049)) {
+        else if(dist < 2049) {
             return 9;
         }
-        else if(Sink.getDecision(dist < 4097)) {
+        else if(dist < 4097) {
             return 10;
         }
-        else if(Sink.getDecision(dist < 8193)) {
+        else if(dist < 8193) {
             return 11;
         }
-        else if(Sink.getDecision(dist < 16385)) {
+        else if(dist < 16385) {
             return 12;
         }
         return 13;
     }
 
     static int distExtraBitsValue(int dist) {
-        if(Sink.getDecision(dist < 5)) {
+        if(dist < 5) {
             return 0;
         }
-        else if(Sink.getDecision(dist < 9)) {
+        else if(dist < 9) {
             return (dist - 5) & 1;
         }
-        else if(Sink.getDecision(dist < 17)) {
+        else if(dist < 17) {
             return (dist - 9) & 3;
         }
-        else if(Sink.getDecision(dist < 33)) {
+        else if(dist < 33) {
             return (dist - 17) & 7;
         }
-        else if(Sink.getDecision(dist < 65)) {
+        else if(dist < 65) {
             return (dist - 33) & 15;
         }
-        else if(Sink.getDecision(dist < 129)) {
+        else if(dist < 129) {
             return (dist - 65) & 31;
         }
-        else if(Sink.getDecision(dist < 257)) {
+        else if(dist < 257) {
             return (dist - 129) & 63;
         }
-        else if(Sink.getDecision(dist < 513)) {
+        else if(dist < 513) {
             return (dist - 257) & 127;
         }
-        else if(Sink.getDecision(dist < 1025)) {
+        else if(dist < 1025) {
             return (dist - 513) & 255;
         }
-        else if(Sink.getDecision(dist < 2049)) {
+        else if(dist < 2049) {
             return (dist - 1025) & 511;
         }
-        else if(Sink.getDecision(dist < 4097)) {
+        else if(dist < 4097) {
             return (dist - 2049) & 1023;
         }
-        else if(Sink.getDecision(dist < 8193)) {
+        else if(dist < 8193) {
             return (dist - 4097) & 2047;
         }
-        else if(Sink.getDecision(dist < 16385)) {
+        else if(dist < 16385) {
             return (dist - 8193) & 4095;
         }
         return (dist - 16385) & 8191;

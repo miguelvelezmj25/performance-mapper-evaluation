@@ -16,26 +16,13 @@
     </SUITE>
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="CCMain.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/CCMain.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="523">
-              <caret line="97" column="20" lean-forward="false" selection-start-line="76" selection-start-column="8" selection-end-line="97" selection-end-column="20" />
+            <state relative-caret-position="30">
+              <caret line="54" column="28" lean-forward="false" selection-start-line="54" selection-start-column="28" selection-end-line="54" selection-end-column="28" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Source.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="8" column="40" lean-forward="false" selection-start-line="8" selection-start-column="40" selection-end-line="8" selection-end-column="40" />
-              <folding>
-                <element signature="e#238#239#0" expanded="true" />
-                <element signature="e#267#268#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -54,9 +41,11 @@
       <find>deflater</find>
       <find>deflate</find>
       <find>if(</find>
+      <find>Sink.getDecision(</find>
     </findStrings>
     <replaceStrings>
       <replace>if(Sink.getDecision(</replace>
+      <replace />
     </replaceStrings>
   </component>
   <component name="GradleLocalSettings">
@@ -68,12 +57,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/CompressorInputStream.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/xz/XZCompressorInputStream.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/CompressorStreamFactory.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/apache/commons/compress/compressors/GZipTestCase.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/utils/IOUtils.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorOutputStream.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/test/java/org/tunaaki/XZDecDemo.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/tunaaki/XZEncDemo.java" />
@@ -82,9 +66,15 @@
         <option value="$PROJECT_DIR$/src/test/java/org/tunaaki/XZSeekDecDemo.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/tunaaki/XZSeekEncDemo.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java" />
-        <option value="$PROJECT_DIR$/src/main/java/org/tukaani/xz/LZMA2Options.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/apache/commons/compress/archivers/ArchiveStreamFactoryTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/utils/IOUtils.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/xz/XZCompressorInputStream.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/CompressorStreamFactory.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/tukaani/xz/LZMA2Options.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream.java" />
         <option value="$PROJECT_DIR$/src/main/java/org/tukaani/xz/XZOutputStream.java" />
+        <option value="$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorOutputStream.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/CCMain.java" />
       </list>
     </option>
@@ -142,10 +132,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="AndroidView" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -171,110 +157,14 @@
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="mvelezce" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="xz" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="resources" type="462c0819:PsiDirectoryNode" />
-              <item name="output" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="compress" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="compress" type="462c0819:PsiDirectoryNode" />
-              <item name="compressors" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="compress" type="462c0819:PsiDirectoryNode" />
-              <item name="compressors" type="462c0819:PsiDirectoryNode" />
-              <item name="xz" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="commons-compress" type="b2602c69:ProjectViewProjectNode" />
-              <item name="commons-compress" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="tunaaki" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -409,22 +299,6 @@
       <envs />
       <patterns />
     </configuration>
-    <configuration default="true" type="tests" factoryName="Nosetests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="_new_regexPattern" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-    </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
@@ -464,6 +338,22 @@
       <envs />
       <properties />
       <listeners />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -536,6 +426,8 @@
       <option name="presentableId" value="Default" />
       <updated>1502893955094</updated>
       <workItem from="1502893956388" duration="9583000" />
+      <workItem from="1503681525831" duration="1295000" />
+      <workItem from="1504280790215" duration="261000" />
     </task>
     <servers />
   </component>
@@ -554,42 +446,41 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9583000" />
+    <option name="totallyTimeSpent" value="11139000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1926" y="23" width="1889" height="1034" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22631294" sideWeight="0.5" order="5" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24959394" sideWeight="0.49563318" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3995633" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24959394" sideWeight="0.5043668" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22198159" sideWeight="0.5" order="5" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3995633" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="11" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="11" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24959394" sideWeight="0.5043668" order="11" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -605,19 +496,10 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/test/java/org/apache/commons/compress/compressors/ZTestCase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="41" column="36" lean-forward="false" selection-start-line="41" selection-start-column="36" selection-end-line="41" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/org/apache/commons/compress/compressors/BZip2TestCase.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="33" column="19" lean-forward="false" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -625,7 +507,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="23" column="21" lean-forward="false" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -633,7 +514,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="38" column="61" lean-forward="false" selection-start-line="38" selection-start-column="61" selection-end-line="38" selection-end-column="61" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -641,9 +521,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#2317#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -651,10 +528,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="50" column="11" lean-forward="false" selection-start-line="50" selection-start-column="11" selection-end-line="50" selection-end-column="11" />
-          <folding>
-            <element signature="e#1026#1027#0" expanded="true" />
-            <element signature="e#1051#1052#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -662,7 +535,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-41">
           <caret line="73" column="6" lean-forward="false" selection-start-line="73" selection-start-column="6" selection-end-line="73" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -670,7 +542,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="175">
           <caret line="148" column="10" lean-forward="false" selection-start-line="148" selection-start-column="10" selection-end-line="148" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -678,7 +549,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -686,7 +556,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-697">
           <caret line="30" column="13" lean-forward="false" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -694,7 +563,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="24" column="11" lean-forward="false" selection-start-line="24" selection-start-column="11" selection-end-line="24" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -702,7 +570,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
           <caret line="37" column="11" lean-forward="false" selection-start-line="37" selection-start-column="11" selection-end-line="37" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -710,7 +577,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
           <caret line="68" column="17" lean-forward="false" selection-start-line="68" selection-start-column="17" selection-end-line="68" selection-end-column="17" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -718,7 +584,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="184">
           <caret line="463" column="17" lean-forward="false" selection-start-line="463" selection-start-column="17" selection-end-line="463" selection-end-column="17" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -726,7 +591,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="34" column="13" lean-forward="false" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -734,7 +598,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="160" column="11" lean-forward="false" selection-start-line="160" selection-start-column="11" selection-end-line="160" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -742,7 +605,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-396">
           <caret line="48" column="13" lean-forward="false" selection-start-line="48" selection-start-column="13" selection-end-line="48" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -750,7 +612,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="184">
           <caret line="170" column="11" lean-forward="false" selection-start-line="170" selection-start-column="11" selection-end-line="170" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -758,7 +619,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1149">
           <caret line="64" column="13" lean-forward="false" selection-start-line="64" selection-start-column="13" selection-end-line="64" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -766,7 +626,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
           <caret line="35" column="56" lean-forward="false" selection-start-line="35" selection-start-column="56" selection-end-line="35" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -774,7 +633,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="100">
           <caret line="495" column="90" lean-forward="false" selection-start-line="495" selection-start-column="76" selection-end-line="495" selection-end-column="90" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -782,9 +640,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="191">
           <caret line="32" column="19" lean-forward="false" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#12787#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -792,7 +647,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
           <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -800,7 +654,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="22" column="22" lean-forward="false" selection-start-line="22" selection-start-column="22" selection-end-line="22" selection-end-column="22" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -808,15 +661,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="191">
           <caret line="41" column="11" lean-forward="false" selection-start-line="41" selection-start-column="11" selection-end-line="41" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/xz/XZCompressorInputStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="141" column="0" lean-forward="false" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -824,17 +668,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="28" column="13" lean-forward="false" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
-          <caret line="67" column="28" lean-forward="false" selection-start-line="67" selection-start-column="28" selection-end-line="67" selection-end-column="28" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -842,7 +675,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="27" column="19" lean-forward="false" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -850,7 +682,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-138">
           <caret line="33" column="13" lean-forward="false" selection-start-line="33" selection-start-column="13" selection-end-line="33" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -858,7 +689,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="116">
           <caret line="213" column="0" lean-forward="false" selection-start-line="213" selection-start-column="0" selection-end-line="215" selection-end-column="96" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -866,7 +696,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="261" column="22" lean-forward="false" selection-start-line="261" selection-start-column="22" selection-end-line="261" selection-end-column="22" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -874,23 +703,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="167" column="11" lean-forward="false" selection-start-line="167" selection-start-column="11" selection-end-line="167" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/utils/IOUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="55" column="100" lean-forward="true" selection-start-line="55" selection-start-column="100" selection-end-line="55" selection-end-column="100" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorOutputStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="227" column="47" lean-forward="false" selection-start-line="227" selection-start-column="47" selection-end-line="227" selection-end-column="47" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -906,7 +718,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -914,7 +725,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -922,7 +732,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="26" column="6" lean-forward="false" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -930,7 +739,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="21" column="6" lean-forward="false" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -938,7 +746,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
           <caret line="17" column="6" lean-forward="false" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -946,7 +753,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-94">
           <caret line="27" column="6" lean-forward="false" selection-start-line="27" selection-start-column="6" selection-end-line="27" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -954,7 +760,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="23" column="13" lean-forward="false" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -962,15 +767,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
           <caret line="40" column="36" lean-forward="false" selection-start-line="40" selection-start-column="36" selection-end-line="40" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/CompressorStreamFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="599" column="37" lean-forward="false" selection-start-line="599" selection-start-column="37" selection-end-line="599" selection-end-column="37" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -978,38 +774,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="523">
           <caret line="318" column="6" lean-forward="false" selection-start-line="318" selection-start-column="6" selection-end-line="318" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/tukaani/xz/LZMA2Options.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="296" column="40" lean-forward="false" selection-start-line="296" selection-start-column="40" selection-end-line="296" selection-end-column="40" />
-          <folding>
-            <element signature="e#6515#6516#0" expanded="true" />
-            <element signature="e#6546#6547#0" expanded="true" />
-            <element signature="e#7842#7843#0" expanded="true" />
-            <element signature="e#7875#7876#0" expanded="true" />
-            <element signature="e#8650#8651#0" expanded="true" />
-            <element signature="e#8694#8695#0" expanded="true" />
-            <element signature="e#9637#9638#0" expanded="true" />
-            <element signature="e#9662#9663#0" expanded="true" />
-            <element signature="e#11214#11215#0" expanded="true" />
-            <element signature="e#11239#11240#0" expanded="true" />
-            <element signature="e#11912#11913#0" expanded="true" />
-            <element signature="e#11937#11938#0" expanded="true" />
-            <element signature="e#13454#13455#0" expanded="true" />
-            <element signature="e#13481#13482#0" expanded="true" />
-            <element signature="e#14619#14620#0" expanded="true" />
-            <element signature="e#14649#14650#0" expanded="true" />
-            <element signature="e#15711#15712#0" expanded="true" />
-            <element signature="e#15736#15737#0" expanded="true" />
-            <element signature="e#16555#16556#0" expanded="true" />
-            <element signature="e#16588#16589#0" expanded="true" />
-            <marker date="1502902642000" expanded="false" signature="19418:19429" ph=" { " />
-            <marker date="1502902642000" expanded="false" signature="19459:19465" ph=" }" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1021,18 +785,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/tukaani/xz/XZOutputStream.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="177" column="50" lean-forward="false" selection-start-line="177" selection-start-column="50" selection-end-line="177" selection-end-column="50" />
+        <state relative-caret-position="135">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/utils/IOUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="659">
+          <caret line="99" column="28" lean-forward="true" selection-start-line="99" selection-start-column="28" selection-end-line="99" selection-end-column="28" />
+          <caret line="108" column="24" lean-forward="true" selection-start-line="108" selection-start-column="24" selection-end-line="108" selection-end-column="24" />
+          <caret line="149" column="60" lean-forward="true" selection-start-line="149" selection-start-column="60" selection-end-line="149" selection-end-column="60" />
+          <caret line="155" column="23" lean-forward="true" selection-start-line="155" selection-start-column="23" selection-end-line="155" selection-end-column="23" />
+          <caret line="182" column="28" lean-forward="true" selection-start-line="182" selection-start-column="28" selection-end-line="182" selection-end-column="28" />
+          <caret line="187" column="33" lean-forward="true" selection-start-line="187" selection-start-column="33" selection-end-line="187" selection-end-column="33" />
+          <caret line="223" column="21" lean-forward="true" selection-start-line="223" selection-start-column="21" selection-end-line="223" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="8" column="40" lean-forward="false" selection-start-line="8" selection-start-column="40" selection-end-line="8" selection-end-column="40" />
+        <state relative-caret-position="240">
+          <caret line="24" column="0" lean-forward="true" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#238#239#0" expanded="true" />
             <element signature="e#267#268#0" expanded="true" />
@@ -1040,10 +818,112 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/CCMain.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/xz/XZCompressorInputStream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="511">
+          <caret line="98" column="34" lean-forward="true" selection-start-line="98" selection-start-column="34" selection-end-line="98" selection-end-column="34" />
+          <caret line="114" column="43" lean-forward="true" selection-start-line="114" selection-start-column="43" selection-end-line="114" selection-end-column="43" />
+          <caret line="119" column="50" lean-forward="true" selection-start-line="119" selection-start-column="50" selection-end-line="119" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/CompressorStreamFactory.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="523">
-          <caret line="97" column="20" lean-forward="false" selection-start-line="76" selection-start-column="8" selection-end-line="97" selection-end-column="20" />
+          <caret line="398" column="22" lean-forward="true" selection-start-line="398" selection-start-column="22" selection-end-line="398" selection-end-column="22" />
+          <caret line="402" column="31" lean-forward="true" selection-start-line="402" selection-start-column="31" selection-end-line="402" selection-end-column="31" />
+          <caret line="416" column="74" lean-forward="true" selection-start-line="416" selection-start-column="74" selection-end-line="416" selection-end-column="74" />
+          <caret line="420" column="73" lean-forward="true" selection-start-line="420" selection-start-column="73" selection-end-line="420" selection-end-column="73" />
+          <caret line="424" column="76" lean-forward="true" selection-start-line="424" selection-start-column="76" selection-end-line="424" selection-end-column="76" />
+          <caret line="428" column="81" lean-forward="true" selection-start-line="428" selection-start-column="81" selection-end-line="428" selection-end-column="81" />
+          <caret line="432" column="70" lean-forward="true" selection-start-line="432" selection-start-column="70" selection-end-line="432" selection-end-column="70" />
+          <caret line="436" column="76" lean-forward="true" selection-start-line="436" selection-start-column="76" selection-end-line="436" selection-end-column="76" />
+          <caret line="440" column="55" lean-forward="true" selection-start-line="440" selection-start-column="55" selection-end-line="440" selection-end-column="55" />
+          <caret line="444" column="57" lean-forward="true" selection-start-line="444" selection-start-column="57" selection-end-line="444" selection-end-column="57" />
+          <caret line="448" column="78" lean-forward="true" selection-start-line="448" selection-start-column="78" selection-end-line="448" selection-end-column="78" />
+          <caret line="494" column="38" lean-forward="true" selection-start-line="494" selection-start-column="38" selection-end-line="494" selection-end-column="38" />
+          <caret line="500" column="43" lean-forward="true" selection-start-line="500" selection-start-column="43" selection-end-line="500" selection-end-column="43" />
+          <caret line="504" column="44" lean-forward="true" selection-start-line="504" selection-start-column="44" selection-end-line="504" selection-end-column="44" />
+          <caret line="508" column="45" lean-forward="true" selection-start-line="508" selection-start-column="45" selection-end-line="508" selection-end-column="45" />
+          <caret line="509" column="63" lean-forward="true" selection-start-line="509" selection-start-column="63" selection-end-line="509" selection-end-column="63" />
+          <caret line="515" column="41" lean-forward="true" selection-start-line="515" selection-start-column="41" selection-end-line="515" selection-end-column="41" />
+          <caret line="516" column="55" lean-forward="true" selection-start-line="516" selection-start-column="55" selection-end-line="516" selection-end-column="55" />
+          <caret line="522" column="43" lean-forward="true" selection-start-line="522" selection-start-column="43" selection-end-line="522" selection-end-column="43" />
+          <caret line="523" column="59" lean-forward="true" selection-start-line="523" selection-start-column="59" selection-end-line="523" selection-end-column="59" />
+          <caret line="529" column="46" lean-forward="true" selection-start-line="529" selection-start-column="46" selection-end-line="529" selection-end-column="46" />
+          <caret line="533" column="49" lean-forward="true" selection-start-line="533" selection-start-column="49" selection-end-line="533" selection-end-column="49" />
+          <caret line="537" column="52" lean-forward="true" selection-start-line="537" selection-start-column="52" selection-end-line="537" selection-end-column="52" />
+          <caret line="541" column="40" lean-forward="true" selection-start-line="541" selection-start-column="40" selection-end-line="541" selection-end-column="40" />
+          <caret line="545" column="46" lean-forward="true" selection-start-line="545" selection-start-column="46" selection-end-line="545" selection-end-column="46" />
+          <caret line="549" column="48" lean-forward="true" selection-start-line="549" selection-start-column="48" selection-end-line="549" selection-end-column="48" />
+          <caret line="553" column="49" lean-forward="true" selection-start-line="553" selection-start-column="49" selection-end-line="553" selection-end-column="49" />
+          <caret line="561" column="44" lean-forward="true" selection-start-line="561" selection-start-column="44" selection-end-line="561" selection-end-column="44" />
+          <caret line="584" column="39" lean-forward="true" selection-start-line="584" selection-start-column="39" selection-end-line="584" selection-end-column="39" />
+          <caret line="590" column="43" lean-forward="true" selection-start-line="590" selection-start-column="43" selection-end-line="590" selection-end-column="43" />
+          <caret line="594" column="44" lean-forward="true" selection-start-line="594" selection-start-column="44" selection-end-line="594" selection-end-column="44" />
+          <caret line="598" column="41" lean-forward="true" selection-start-line="598" selection-start-column="41" selection-end-line="598" selection-end-column="41" />
+          <caret line="602" column="46" lean-forward="true" selection-start-line="602" selection-start-column="46" selection-end-line="602" selection-end-column="46" />
+          <caret line="606" column="43" lean-forward="true" selection-start-line="606" selection-start-column="43" selection-end-line="606" selection-end-column="43" />
+          <caret line="610" column="46" lean-forward="true" selection-start-line="610" selection-start-column="46" selection-end-line="610" selection-end-column="46" />
+          <caret line="614" column="52" lean-forward="true" selection-start-line="614" selection-start-column="52" selection-end-line="614" selection-end-column="52" />
+          <caret line="618" column="48" lean-forward="true" selection-start-line="618" selection-start-column="48" selection-end-line="618" selection-end-column="48" />
+          <caret line="622" column="49" lean-forward="true" selection-start-line="622" selection-start-column="49" selection-end-line="622" selection-end-column="49" />
+          <caret line="630" column="44" lean-forward="true" selection-start-line="630" selection-start-column="44" selection-end-line="630" selection-end-column="44" />
+          <caret line="637" column="50" lean-forward="true" selection-start-line="637" selection-start-column="50" selection-end-line="637" selection-end-column="50" />
+          <caret line="645" column="51" lean-forward="true" selection-start-line="645" selection-start-column="51" selection-end-line="645" selection-end-column="51" />
+          <caret line="676" column="43" lean-forward="true" selection-start-line="676" selection-start-column="43" selection-end-line="676" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/tukaani/xz/LZMA2Options.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="237">
+          <caret line="296" column="39" lean-forward="true" selection-start-line="296" selection-start-column="39" selection-end-line="296" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="115" column="39" lean-forward="true" selection-start-line="115" selection-start-column="39" selection-end-line="115" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/tukaani/xz/XZOutputStream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="537">
+          <caret line="177" column="32" lean-forward="true" selection-start-line="177" selection-start-column="32" selection-end-line="177" selection-end-column="32" />
+          <caret line="182" column="64" lean-forward="true" selection-start-line="182" selection-start-column="64" selection-end-line="182" selection-end-column="64" />
+          <caret line="231" column="73" lean-forward="true" selection-start-line="231" selection-start-column="73" selection-end-line="231" selection-end-column="73" />
+          <caret line="235" column="29" lean-forward="true" selection-start-line="235" selection-start-column="29" selection-end-line="235" selection-end-column="29" />
+          <caret line="239" column="20" lean-forward="true" selection-start-line="239" selection-start-column="20" selection-end-line="239" selection-end-column="20" />
+          <caret line="244" column="36" lean-forward="true" selection-start-line="244" selection-start-column="36" selection-end-line="244" selection-end-column="36" />
+          <caret line="277" column="29" lean-forward="true" selection-start-line="277" selection-start-column="29" selection-end-line="277" selection-end-column="29" />
+          <caret line="281" column="20" lean-forward="true" selection-start-line="281" selection-start-column="20" selection-end-line="281" selection-end-column="20" />
+          <caret line="288" column="32" lean-forward="true" selection-start-line="288" selection-start-column="32" selection-end-line="288" selection-end-column="32" />
+          <caret line="320" column="29" lean-forward="true" selection-start-line="320" selection-start-column="29" selection-end-line="320" selection-end-column="29" />
+          <caret line="324" column="20" lean-forward="true" selection-start-line="324" selection-start-column="20" selection-end-line="324" selection-end-column="20" />
+          <caret line="329" column="36" lean-forward="true" selection-start-line="329" selection-start-column="36" selection-end-line="329" selection-end-column="36" />
+          <caret line="330" column="42" lean-forward="true" selection-start-line="330" selection-start-column="42" selection-end-line="330" selection-end-column="42" />
+          <caret line="366" column="21" lean-forward="true" selection-start-line="366" selection-start-column="21" selection-end-line="366" selection-end-column="21" />
+          <caret line="397" column="23" lean-forward="true" selection-start-line="397" selection-start-column="23" selection-end-line="397" selection-end-column="23" />
+          <caret line="411" column="37" lean-forward="true" selection-start-line="411" selection-start-column="37" selection-end-line="411" selection-end-column="37" />
+          <caret line="419" column="29" lean-forward="true" selection-start-line="419" selection-start-column="29" selection-end-line="419" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorOutputStream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="674">
+          <caret line="222" column="27" lean-forward="false" selection-start-line="222" selection-start-column="27" selection-end-line="222" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/CCMain.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="54" column="28" lean-forward="false" selection-start-line="54" selection-start-column="28" selection-end-line="54" selection-end-column="28" />
           <folding />
         </state>
       </provider>

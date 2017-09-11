@@ -24,7 +24,7 @@ public class MachineClock extends BrokenClock {
 
     private synchronized void update() {
         long newTime = System.currentTimeMillis();
-        if(Sink.getDecision(newTime != _millis)) {
+        if(newTime != _millis) {
             advanceTo(new Date(newTime));
         }
     }

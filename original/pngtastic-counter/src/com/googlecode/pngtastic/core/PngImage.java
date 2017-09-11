@@ -1,7 +1,5 @@
 package com.googlecode.pngtastic.core;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +70,7 @@ public class PngImage {
 //						log.debug("data: " + x + "," + String.format("%x", x));
 //				}
 
-                if(Sink.getDecision(!chunk.verifyCRC(crc))) {
+                if(!chunk.verifyCRC(crc)) {
                     throw new PngException("Corrupted file, crc check failed");
                 }
 
@@ -87,7 +85,7 @@ public class PngImage {
     /* */
     private static void readSignature(DataInputStream ins) throws PngException, IOException {
         long signature = ins.readLong();
-        if(Sink.getDecision(signature != PngImage.SIGNATURE)) {
+        if(signature != PngImage.SIGNATURE) {
             throw new PngException("Bad png signature");
         }
     }
@@ -147,7 +145,7 @@ public class PngImage {
             outs = new FileOutputStream(out);
             outs.write(bytes);
         } finally {
-            if(Sink.getDecision(outs != null)) {
+            if(outs != null) {
                 outs.close();
             }
         }
@@ -199,7 +197,7 @@ public class PngImage {
 
             // Write all the IDAT data
             for(PngChunk chunk : chunks) {
-                if(Sink.getDecision(chunk.getTypeString().equals(PngChunk.IMAGE_DATA))) {
+                if(chunk.getTypeString().equals(PngChunk.IMAGE_DATA)) {
                     out.write(chunk.getData());
                 }
             }
@@ -231,7 +229,7 @@ public class PngImage {
         byte[] data = new byte[length];
         try {
             int actual = ins.read(data);
-            if(Sink.getDecision(actual < length)) {
+            if(actual < length) {
                 throw new PngException(String.format("Expected %d bytes but got %d", length, actual));
             }
         } catch (IOException e) {

@@ -1,7 +1,5 @@
 package com.googlecode.pngtastic.core;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-
 /**
  * Represents the available PNG filter types.
  *
@@ -31,7 +29,7 @@ public enum PngFilterType {
     /** */
     public static PngFilterType forValue(byte value) {
         for(PngFilterType type : PngFilterType.values()) {
-            if(Sink.getDecision(type.getValue() == value)) {
+            if(type.getValue() == value) {
                 return type;
             }
         }

@@ -65,11 +65,6 @@ public class PngOptimizer extends PngProcessor {
         final long fileSizeDifference = (optimizedFileSize <= originalFileSize)
                 ? (originalFileSize - optimizedFileSize) : -(optimizedFileSize - originalFileSize);
 
-        Sink.getDecision(fileSizeDifference == 0);
-        Sink.getDecision(originalFileSize == 0);
-        Sink.getDecision(optimizedFileSize == 0);
-        Sink.getDecision(fileSizeDifference == 0);
-        Sink.getDecision(outputFileName == null);
         log.info("%5.2f%% :%6dB ->%6dB (%5dB saved) - %s",
                 fileSizeDifference / Float.valueOf(originalFileSize) * 100,
                 originalFileSize, optimizedFileSize, fileSizeDifference, outputFileName);
@@ -87,7 +82,7 @@ public class PngOptimizer extends PngProcessor {
     /** */
     public PngImage optimize(PngImage image, boolean removeGamma, Integer compressionLevel) throws IOException {
         // FIXME: support low bit depth interlaced images
-        if(Sink.getDecision(image.getInterlace() == 1 && image.getSampleBitCount() < 8)) {
+        if(image.getInterlace() == 1 && image.getSampleBitCount() < 8) {
             return image;
         }
 
@@ -123,8 +118,8 @@ public class PngOptimizer extends PngProcessor {
         PngFilterType bestFilterType = null;
         byte[] deflatedImageData = null;
         for(Entry<PngFilterType, List<byte[]>> entry : filteredScanlines.entrySet()) {
-            final byte[] imageResult = pngCompressionHandler.deflate(serialize(entry.getValue()), compressionLevel, true);
-            if(Sink.getDecision(deflatedImageData == null || imageResult.length < deflatedImageData.length)) {
+            final byte[] imageResult = pngCompressionHandler.deflate(serialize(entry.getValue()), compressionLevel, false);
+            if(deflatedImageData == null || imageResult.length < deflatedImageData.length) {
                 deflatedImageData = imageResult;
                 bestFilterType = entry.getKey();
             }
@@ -134,11 +129,11 @@ public class PngOptimizer extends PngProcessor {
         final List<byte[]> scanlines = copyScanlines(originalScanlines);
         pngFilterHandler.applyAdaptiveFiltering(inflatedImageData, scanlines, filteredScanlines, image.getSampleBitCount());
 
-        final byte[] adaptiveImageData = pngCompressionHandler.deflate(inflatedImageData, compressionLevel, true);
+        final byte[] adaptiveImageData = pngCompressionHandler.deflate(inflatedImageData, compressionLevel, false);
         log.debug("Original=%d, Adaptive=%d, %s=%d", image.getImageData().length, adaptiveImageData.length,
                 bestFilterType, (deflatedImageData == null) ? 0 : deflatedImageData.length);
 
-        if(Sink.getDecision(deflatedImageData == null || adaptiveImageData.length < deflatedImageData.length)) {
+        if(deflatedImageData == null || adaptiveImageData.length < deflatedImageData.length) {
             deflatedImageData = adaptiveImageData;
             bestFilterType = PngFilterType.ADAPTIVE;
         }
@@ -148,7 +143,7 @@ public class PngOptimizer extends PngProcessor {
 
         // finish it
         while (chunk != null) {
-            if(Sink.getDecision(chunk.isCritical() && !PngChunk.IMAGE_DATA.equals(chunk.getTypeString()))) {
+            if(chunk.isCritical() && !PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream(chunk.getLength());
                 DataOutputStream data = new DataOutputStream(bytes);
 
@@ -163,7 +158,7 @@ public class PngOptimizer extends PngProcessor {
 
         // make sure we have the IEND chunk
         final List<PngChunk> chunks = result.getChunks();
-        if(Sink.getDecision(chunks != null && !PngChunk.IMAGE_TRAILER.equals(chunks.get(chunks.size() - 1).getTypeString()))) {
+        if(chunks != null && !PngChunk.IMAGE_TRAILER.equals(chunks.get(chunks.size() - 1).getTypeString())) {
             result.addChunk(new PngChunk(PngChunk.IMAGE_TRAILER.getBytes(), new byte[]{}));
         }
 
@@ -235,7 +230,7 @@ public class PngOptimizer extends PngProcessor {
 
             out.append("</body>\n</html>");
         } finally {
-            if(Sink.getDecision(out != null)) {
+            if(out != null) {
                 out.close();
             }
         }
@@ -248,7 +243,7 @@ public class PngOptimizer extends PngProcessor {
             ins = new FileInputStream(originalFile);
             ins.getChannel().read(buffer);
         } finally {
-            if(Sink.getDecision(ins != null)) {
+            if(ins != null) {
                 ins.close();
             }
         }
@@ -266,8 +261,8 @@ public class PngOptimizer extends PngProcessor {
     }
 
     public void setCompressor(String compressor, Integer iterations) {
-        if(Sink.getDecision("zopfli".equals(compressor))) {
-            if(Sink.getDecision(iterations != null)) {
+        if("zopfli".equals(compressor)) {
+            if(iterations != null) {
                 pngCompressionHandler = new ZopfliCompressionHandler(log, iterations);
             }
             else {

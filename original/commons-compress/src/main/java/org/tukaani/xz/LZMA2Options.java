@@ -196,7 +196,7 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>preset</code> is not supported
      */
     public void setPreset(int preset) throws UnsupportedOptionsException {
-        if(Sink.getDecision(preset < 0 || preset > 9)) {
+        if(preset < 0 || preset > 9) {
             throw new UnsupportedOptionsException(
                     "Unsupported preset: " + preset);
         }
@@ -206,7 +206,7 @@ public class LZMA2Options extends FilterOptions {
         pb = PB_DEFAULT;
         dictSize = presetToDictSize[preset];
 
-        if(Sink.getDecision(preset <= 3)) {
+        if(preset <= 3) {
             mode = MODE_FAST;
             mf = MF_HC4;
             niceLen = preset <= 1 ? 128 : NICE_LEN_MAX;
@@ -242,13 +242,13 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>dictSize</code> is not supported
      */
     public void setDictSize(int dictSize) throws UnsupportedOptionsException {
-        if(Sink.getDecision(dictSize < DICT_SIZE_MIN)) {
+        if(dictSize < DICT_SIZE_MIN) {
             throw new UnsupportedOptionsException(
                     "LZMA2 dictionary size must be at least 4 KiB: "
                             + dictSize + " B");
         }
 
-        if(Sink.getDecision(dictSize > DICT_SIZE_MAX)) {
+        if(dictSize > DICT_SIZE_MAX) {
             throw new UnsupportedOptionsException(
                     "LZMA2 dictionary size must not exceed "
                             + (DICT_SIZE_MAX >> 20) + " MiB: " + dictSize + " B");
@@ -293,8 +293,8 @@ public class LZMA2Options extends FilterOptions {
      *                                     are invalid
      */
     public void setLcLp(int lc, int lp) throws UnsupportedOptionsException {
-        if(Sink.getDecision(lc < 0 || lp < 0 || lc > LC_LP_MAX || lp > LC_LP_MAX
-                || lc + lp > LC_LP_MAX)) {
+        if(lc < 0 || lp < 0 || lc > LC_LP_MAX || lp > LC_LP_MAX
+                || lc + lp > LC_LP_MAX) {
             throw new UnsupportedOptionsException(
                     "lc + lp must not exceed " + LC_LP_MAX + ": "
                             + lc + " + " + lp);
@@ -393,7 +393,7 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>pb</code> is invalid
      */
     public void setPb(int pb) throws UnsupportedOptionsException {
-        if(Sink.getDecision(pb < 0 || pb > PB_MAX)) {
+        if(pb < 0 || pb > PB_MAX) {
             throw new UnsupportedOptionsException(
                     "pb must not exceed " + PB_MAX + ": " + pb);
         }
@@ -426,7 +426,7 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>mode</code> is not supported
      */
     public void setMode(int mode) throws UnsupportedOptionsException {
-        if(Sink.getDecision(mode < MODE_UNCOMPRESSED || mode > MODE_NORMAL)) {
+        if(mode < MODE_UNCOMPRESSED || mode > MODE_NORMAL) {
             throw new UnsupportedOptionsException(
                     "Unsupported compression mode: " + mode);
         }
@@ -451,13 +451,13 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>niceLen</code> is invalid
      */
     public void setNiceLen(int niceLen) throws UnsupportedOptionsException {
-        if(Sink.getDecision(niceLen < NICE_LEN_MIN)) {
+        if(niceLen < NICE_LEN_MIN) {
             throw new UnsupportedOptionsException(
                     "Minimum nice length of matches is "
                             + NICE_LEN_MIN + " bytes: " + niceLen);
         }
 
-        if(Sink.getDecision(niceLen > NICE_LEN_MAX)) {
+        if(niceLen > NICE_LEN_MAX) {
             throw new UnsupportedOptionsException(
                     "Maximum nice length of matches is " + NICE_LEN_MAX
                             + ": " + niceLen);
@@ -484,7 +484,7 @@ public class LZMA2Options extends FilterOptions {
      * @throws UnsupportedOptionsException <code>mf</code> is not supported
      */
     public void setMatchFinder(int mf) throws UnsupportedOptionsException {
-        if(Sink.getDecision(mf != MF_HC4 && mf != MF_BT4)) {
+        if(mf != MF_HC4 && mf != MF_BT4) {
             throw new UnsupportedOptionsException(
                     "Unsupported match finder: " + mf);
         }
@@ -516,7 +516,7 @@ public class LZMA2Options extends FilterOptions {
      */
     public void setDepthLimit(int depthLimit)
             throws UnsupportedOptionsException {
-        if(Sink.getDecision(depthLimit < 0)) {
+        if(depthLimit < 0) {
             throw new UnsupportedOptionsException(
                     "Depth limit cannot be negative: " + depthLimit);
         }
@@ -531,7 +531,7 @@ public class LZMA2Options extends FilterOptions {
     }
 
     public FinishableOutputStream getOutputStream(FinishableOutputStream out) {
-        if(Sink.getDecision(mode == MODE_UNCOMPRESSED)) {
+        if(mode == MODE_UNCOMPRESSED) {
             return new UncompressedLZMA2OutputStream(out);
         }
 

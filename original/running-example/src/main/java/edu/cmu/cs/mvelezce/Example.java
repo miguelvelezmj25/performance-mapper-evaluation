@@ -6,6 +6,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Source;
 public class Example {
 
     public static void main(String[] args) throws InterruptedException {
+        Sink.init();
         Options.A = Source.getOptionA(Boolean.valueOf(args[0]));
         Options.B = Source.getOptionB(Boolean.valueOf(args[1]));
         Options.C = Source.getOptionC(Boolean.valueOf(args[2]));
@@ -21,7 +22,7 @@ public class Example {
         boolean c = Options.C;
         boolean d = Options.D;
 
-        if(Sink.getDecision(Workload.ONE)) {
+        if(Workload.ONE) {
             Example.foo(a, b, c);
         }
     }
@@ -29,19 +30,19 @@ public class Example {
     public static void foo(boolean a, boolean b, boolean c) throws InterruptedException {
         boolean x = false;
 
-        if(Sink.getDecision(a)) {
+        if(a) {
             Thread.sleep(2000);
             Example.moo(c);
             x = true;
         }
 
-        if(Sink.getDecision(b && x)) {
+        if(b && x) {
             Thread.sleep(4000);
         }
     }
 
     private static void moo(boolean c) throws InterruptedException {
-        if(Sink.getDecision(c)) {
+        if(c) {
             Thread.sleep(7000);
         }
     }

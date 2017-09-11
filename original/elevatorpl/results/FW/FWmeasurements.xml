@@ -1,0 +1,22 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">37,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, </data>
+    <data columnname="Measured Value">20029</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, twothirdsfull, </data>
+    <data columnname="Measured Value">20031</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, overloaded, </data>
+    <data columnname="Measured Value">22429</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, empty, </data>
+    <data columnname="Measured Value">10060</data>
+  </row>
+</results>

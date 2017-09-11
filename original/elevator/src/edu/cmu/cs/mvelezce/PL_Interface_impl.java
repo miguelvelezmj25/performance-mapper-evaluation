@@ -54,6 +54,10 @@ public class PL_Interface_impl implements PL_Interface {
 //            FEATUREEXECUTIVEFLOOR = false;
 //            FEATUREOVERLOADED = false;
 
+//            if(Sink.getDecision(FEATUREWEIGHT)) {
+//                System.out.println(":");
+//            }
+
 //			verificationClasses.FeatureSwitches.select_features();
             PL_Interface_impl impl = new PL_Interface_impl();
             args = new String[1];

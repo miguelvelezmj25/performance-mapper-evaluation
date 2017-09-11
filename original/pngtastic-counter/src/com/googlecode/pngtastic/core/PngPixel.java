@@ -1,7 +1,5 @@
 package com.googlecode.pngtastic.core;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-
 /**
  * An individual pixel in an image
  */
@@ -34,7 +32,7 @@ public class PngPixel {
     }
 
     public double rgbaDistance(PngPixel other, int bits) {
-        if(Sink.getDecision(bits == 8)) {
+        if(bits == 8) {
             return rgba8Distance(other);
         }
         return rgba16Distance(other);
@@ -97,16 +95,16 @@ public class PngPixel {
 
     @Override
     public boolean equals(Object obj) {
-        if(Sink.getDecision(this == obj)) {
+        if(this == obj) {
             return true;
         }
 
-        if(Sink.getDecision(obj == null || this.getClass() != obj.getClass())) {
+        if(obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
 
         PngPixel other = (PngPixel) obj;
-        if(Sink.getDecision(this.alpha != other.alpha || this.blue != other.blue || this.green != other.green || this.red != other.red)) {
+        if(this.alpha != other.alpha || this.blue != other.blue || this.green != other.green || this.red != other.red) {
             return false;
         }
 

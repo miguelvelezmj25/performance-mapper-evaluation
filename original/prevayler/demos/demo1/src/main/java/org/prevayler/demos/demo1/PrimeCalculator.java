@@ -1,6 +1,5 @@
 package org.prevayler.demos.demo1;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.Prevayler;
 
 
@@ -22,12 +21,12 @@ class PrimeCalculator {
     void start() throws Exception {
         int largestPrime = 0;
         int primesFound = 0;
-        int primeCandidate = Sink.getDecision(_numberKeeper.lastNumber() == 0)
+        int primeCandidate = _numberKeeper.lastNumber() == 0
                 ? 2
                 : _numberKeeper.lastNumber() + 1;
 
-        while (Sink.getDecision(primeCandidate <= Integer.MAX_VALUE)) {
-            if(Sink.getDecision(isPrime(primeCandidate))) {
+        while (primeCandidate <= Integer.MAX_VALUE) {
+            if(isPrime(primeCandidate)) {
 
                 _prevayler.execute(new NumberStorageTransaction(primeCandidate));
 

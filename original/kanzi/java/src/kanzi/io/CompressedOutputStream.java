@@ -15,6 +15,7 @@ limitations under the License.
 
 package kanzi.io;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import kanzi.*;
 import kanzi.bitstream.DefaultOutputBitStream;
 import kanzi.entropy.EntropyCodecFactory;
@@ -114,7 +115,7 @@ public class CompressedOutputStream extends OutputStream {
         this.entropyType = new EntropyCodecFactory().getType(entropyCodec);
         this.transformType = new ByteFunctionFactory().getType(transform);
         this.blockSize = blockSize;
-        this.hasher = (checksum == true) ? new XXHash32(BITSTREAM_TYPE) : null;
+        this.hasher = checksum == true ? new XXHash32(BITSTREAM_TYPE) : null;
         this.jobs = jobs;
         this.pool = pool;
         this.sa = new SliceByteArray(new byte[blockSize * this.jobs], 0);

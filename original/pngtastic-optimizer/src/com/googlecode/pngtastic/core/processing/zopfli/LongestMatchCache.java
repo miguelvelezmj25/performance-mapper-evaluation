@@ -50,7 +50,7 @@ final class LongestMatchCache {
         int i = 0;
         while (i < n) {
             int j = i + 65536;
-            if(Sink.getDecision(j > n)) {
+            if(j > n) {
                 j = n;
             }
             int l = j - i;
@@ -62,7 +62,7 @@ final class LongestMatchCache {
         i = 0;
         while (i < blockSize) {
             int j = i + 65536;
-            if(Sink.getDecision(j > blockSize)) {
+            if(j > blockSize) {
                 j = blockSize;
             }
             int l = j - i;
@@ -73,7 +73,7 @@ final class LongestMatchCache {
     }
 
     void subLenToCache(char[] input, int pos, int len) {
-        if(Sink.getDecision(len < 3)) {
+        if(len < 3) {
             return;
         }
 
@@ -81,23 +81,23 @@ final class LongestMatchCache {
         int j = pos * CACHE_LENGTH;
         int last = j + CACHE_LENGTH - 1;
         for(int i = 3; i <= len; ++i) {
-            if(Sink.getDecision(i == len || input[i] != input[i + 1])) {
+            if(i == len || input[i] != input[i + 1]) {
                 subLenPos[j] = input[i];
                 subLenLen[j] = (byte) (i - 3);
                 bestLength = i;
                 j++;
-                if(Sink.getDecision(j > last)) {
+                if(j > last) {
                     break;
                 }
             }
         }
-        if(Sink.getDecision(j <= last)) {
+        if(j <= last) {
             subLenLen[last] = (byte) (bestLength - 3);
         }
     }
 
     void cacheToSubLen(int pos, int len, char[] output) {
-        if(Sink.getDecision(len < 3)) {
+        if(len < 3) {
             return;
         }
 
@@ -111,7 +111,7 @@ final class LongestMatchCache {
             for(int i = prevLength; i <= cLen; ++i) {
                 output[i] = dist;
             }
-            if(Sink.getDecision(cLen == maxLength)) {
+            if(cLen == maxLength) {
                 break;
             }
             prevLength = cLen + 1;
@@ -120,7 +120,7 @@ final class LongestMatchCache {
 
     int maxCachedSubLen(int pos) {
         pos = pos * CACHE_LENGTH;
-        if(Sink.getDecision(subLenPos[pos] == 0)) {
+        if(subLenPos[pos] == 0) {
             return 0;
         }
         return (subLenLen[pos + CACHE_LENGTH - 1] & 0xFF) + 3;

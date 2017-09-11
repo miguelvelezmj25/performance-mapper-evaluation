@@ -32,7 +32,7 @@ public class PngtasticFilterHandler implements PngFilterHandler {
         int scanlineLength = scanlines.get(0).length;
         byte[] previousRow = new byte[scanlineLength];
         for(byte[] scanline : scanlines) {
-            if(Sink.getDecision(filterType != null)) {
+            if(filterType != null) {
                 scanline[0] = filterType.getValue();
             }
 
@@ -62,12 +62,12 @@ public class PngtasticFilterHandler implements PngFilterHandler {
                     sum += Math.abs(scanline[i]);
                 }
 
-                if(Sink.getDecision(sum < bestSum)) {
+                if(sum < bestSum) {
                     bestFilterType = entry.getKey();
                     bestSum = sum;
                 }
             }
-            if(Sink.getDecision(bestFilterType != null)) {
+            if(bestFilterType != null) {
                 scanlines.get(s)[0] = bestFilterType.getValue();
             }
         }
@@ -190,7 +190,7 @@ public class PngtasticFilterHandler implements PngFilterHandler {
         int pb = (p >= b) ? (p - b) : -(p - b);
         int pc = (p >= c) ? (p - c) : -(p - c);
 
-        if(Sink.getDecision(pa <= pb && pa <= pc)) {
+        if(pa <= pb && pa <= pc) {
             return a;
         }
 

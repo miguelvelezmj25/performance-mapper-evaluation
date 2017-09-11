@@ -118,7 +118,7 @@ final class Cookie {
         int i = 0;
         while (i < length) {
             int j = i + 65536;
-            if(Sink.getDecision(j > length)) {
+            if(j > length) {
                 j = length;
             }
             System.arraycopy(intZeroes, 0, array, i, j - i);
@@ -130,7 +130,7 @@ final class Cookie {
         int i = 0;
         while (i < length) {
             int j = i + 65536;
-            if(Sink.getDecision(j > length)) {
+            if(j > length) {
                 j = length;
             }
             System.arraycopy(charZeroes, 0, array, i, j - i);
@@ -142,7 +142,7 @@ final class Cookie {
         int i = 0;
         while (i < length) {
             int j = i + 65536;
-            if(Sink.getDecision(j > length)) {
+            if(j > length) {
                 j = length;
             }
             System.arraycopy(costMax, 0, array, i, j - i);

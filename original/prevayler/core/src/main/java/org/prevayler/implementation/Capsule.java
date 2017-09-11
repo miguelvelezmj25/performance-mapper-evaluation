@@ -15,7 +15,7 @@ public abstract class Capsule implements Serializable {
     private transient Object _directTransaction = null;
 
     protected Capsule(Object transaction, Serializer journalSerializer, boolean transactionDeepCopyMode) {
-        if(Sink.getDecision(transactionDeepCopyMode == false)) {
+        if(transactionDeepCopyMode == false) {
             _directTransaction = transaction;
         }
         try {

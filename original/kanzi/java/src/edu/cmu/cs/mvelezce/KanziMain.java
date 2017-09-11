@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import kanzi.app.BlockCompressor;
 
@@ -18,6 +19,8 @@ public class KanziMain {
     private static boolean CHECKSUM;
 
     public static void main(String[] args) {
+        Sink.init();
+
         VERBOSE = Source.getOptionVERBOSE(true);
         FORCE = Source.getOptionFORCE(true);
         LEVEL = Source.getOptionLEVEL(true);
@@ -73,7 +76,6 @@ public class KanziMain {
         }
 
         final int code = bc.call();
-
         if(code != 0) {
             bc.dispose();
         }

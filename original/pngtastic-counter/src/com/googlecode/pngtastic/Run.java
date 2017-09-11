@@ -1,5 +1,6 @@
 package com.googlecode.pngtastic;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class Run {
     public static boolean LOGLEVEL;
 
     public static void main(String[] args) {
+        Sink.init();
         Map<String, String> options = new HashMap<>();
         int last = 0;
         for(int i = 0; i < args.length; i++) {
@@ -45,7 +47,7 @@ public class Run {
         String[] files = Arrays.copyOfRange(args, last, args.length);
 
         files = new String[1];
-        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic/images/optimizer/1px.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic/images/optimizer/us.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");
@@ -59,17 +61,17 @@ public class Run {
 //        Integer timeout = safeInteger(options.get("--timeout"), 0);
 //        String logLevel = options.get("--logLevel");
 
-        FREQTHRESHOLD = Source.getOptionFreqThreshold(Boolean.valueOf(args[0]));
-        DISTTHRESHOLD = Source.getOptionDistThreshold(Boolean.valueOf(args[1]));
-        MINALPHA = Source.getOptionMinAlpha(Boolean.valueOf(args[2]));
-        TIMEOUT = Source.getOptionTimeout(Boolean.valueOf(args[3]));
-        LOGLEVEL = Source.getOptionLogLevel(Boolean.valueOf(args[4]));
+//        FREQTHRESHOLD = Source.getOptionFreqThreshold(Boolean.valueOf(args[0]));
+//        DISTTHRESHOLD = Source.getOptionDistThreshold(Boolean.valueOf(args[1]));
+//        MINALPHA = Source.getOptionMinAlpha(Boolean.valueOf(args[2]));
+//        TIMEOUT = Source.getOptionTimeout(Boolean.valueOf(args[3]));
+//        LOGLEVEL = Source.getOptionLogLevel(Boolean.valueOf(args[4]));
 
-//        FREQTHRESHOLD = Source.getOptionFreqThreshold(true);
-//        DISTTHRESHOLD = Source.getOptionDistThreshold(true);
-//        MINALPHA = Source.getOptionMinAlpha(true);
-//        TIMEOUT = Source.getOptionTimeout(true);
-//        LOGLEVEL = Source.getOptionLogLevel(true);
+        FREQTHRESHOLD = Source.getOptionFreqThreshold(false);
+        DISTTHRESHOLD = Source.getOptionDistThreshold(false);
+        MINALPHA = Source.getOptionMinAlpha(false);
+        TIMEOUT = Source.getOptionTimeout(false);
+        LOGLEVEL = Source.getOptionLogLevel(false);
 
         Double distThreshold;
         Double freqThreshold;
@@ -111,12 +113,6 @@ public class Run {
         else {
             logLevel = "none";
         }
-
-//        Sink.getDecision(logLevel == null);
-//        Sink.getDecision(distThreshold == null);
-//        Sink.getDecision(freqThreshold == null);
-//        Sink.getDecision(minAlpha == null);
-//        Sink.getDecision(timeout == null);
 
         new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
     }

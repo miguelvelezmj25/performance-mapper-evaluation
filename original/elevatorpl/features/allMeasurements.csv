@@ -1,0 +1,10 @@
+base, ;28,5
+base, empty, ;10027,5
+base, weight, ;20029,5
+base, weight, overloaded, ;22433,5
+base, weight, empty, ;30042
+base, weight, overloaded, empty, ;32427,5
+base, weight, twothirdsfull, ;20029
+base, weight, twothirdsfull, empty, ;30030
+base, weight, twothirdsfull, overloaded, ;22429,5
+base, weight, twothirdsfull, overloaded, empty, ;32431,5

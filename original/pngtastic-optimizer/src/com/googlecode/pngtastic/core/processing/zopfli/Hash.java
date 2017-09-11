@@ -76,7 +76,7 @@ final class Hash {
             head[val] = hPos;
 
             tmp = same[(i - 1) & 0x7FFF];
-            if(Sink.getDecision(tmp < 1)) {
+            if(tmp < 1) {
                 tmp = 1;
             }
             tmp += i;
@@ -110,7 +110,7 @@ final class Hash {
         head[val] = hPos;
 
         tmp = same[(pos - 1) & 0x7FFF];
-        if(Sink.getDecision(tmp < 1)) {
+        if(tmp < 1) {
             tmp = 1;
         }
         tmp += pos;

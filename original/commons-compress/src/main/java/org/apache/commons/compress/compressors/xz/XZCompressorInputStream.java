@@ -96,7 +96,7 @@ public class XZCompressorInputStream extends CompressorInputStream {
     public XZCompressorInputStream(InputStream inputStream,
                                    boolean decompressConcatenated, final int memoryLimitInKb)
             throws IOException {
-        if(Sink.getDecision(decompressConcatenated)) {
+        if(decompressConcatenated) {
             in = new XZInputStream(inputStream, memoryLimitInKb);
         }
         else {
@@ -112,12 +112,12 @@ public class XZCompressorInputStream extends CompressorInputStream {
      * @return true if signature matches the .xz magic bytes, false otherwise
      */
     public static boolean matches(final byte[] signature, final int length) {
-        if(Sink.getDecision(length < XZ.HEADER_MAGIC.length)) {
+        if(length < XZ.HEADER_MAGIC.length) {
             return false;
         }
 
         for(int i = 0; i < XZ.HEADER_MAGIC.length; ++i) {
-            if(Sink.getDecision(signature[i] != XZ.HEADER_MAGIC[i])) {
+            if(signature[i] != XZ.HEADER_MAGIC[i]) {
                 return false;
             }
         }

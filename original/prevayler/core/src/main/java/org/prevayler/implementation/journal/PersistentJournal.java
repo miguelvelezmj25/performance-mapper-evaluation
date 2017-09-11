@@ -54,7 +54,7 @@ public class PersistentJournal implements Journal {
 
 
     public void append(TransactionGuide guide) {
-        if(Sink.getDecision(!_nextTransactionInitialized)) {
+        if(!_nextTransactionInitialized) {
             throw new IllegalStateException("Journal.update() has to be called at least once before Journal.append().");
         }
 
@@ -65,7 +65,7 @@ public class PersistentJournal implements Journal {
         try {
             guide.checkSystemVersion(_nextTransaction);
 
-            if(Sink.getDecision(!isOutputJournalStillValid())) {
+            if(!isOutputJournalStillValid()) {
                 outputJournalToClose = _outputJournal;
                 _outputJournal = createOutputJournal(_nextTransaction, guide);
                 _journalAgeTimer = StopWatch.start();
@@ -87,7 +87,7 @@ public class PersistentJournal implements Journal {
         guide.startTurn();
         try {
             try {
-                if(Sink.getDecision(outputJournalToClose != null)) {
+                if(outputJournalToClose != null) {
                     outputJournalToClose.close();
                 }
             } catch (Exception exception) {
@@ -136,7 +136,7 @@ public class PersistentJournal implements Journal {
     public void update(TransactionSubscriber subscriber, long initialTransactionWanted) throws IOException, ClassNotFoundException {
         File initialJournal = _directory.findInitialJournalFile(initialTransactionWanted);
 
-        if(Sink.getDecision(initialJournal == null)) {
+        if(initialJournal == null) {
             initializeNextTransaction(initialTransactionWanted, 1);
             return;
         }
@@ -148,14 +148,14 @@ public class PersistentJournal implements Journal {
 
 
     private void initializeNextTransaction(long initialTransactionWanted, long nextTransaction) throws IOException {
-        if(Sink.getDecision(_nextTransactionInitialized)) {
-            if(Sink.getDecision(_nextTransaction < initialTransactionWanted)) {
+        if(_nextTransactionInitialized) {
+            if(_nextTransaction < initialTransactionWanted) {
                 throw new IOException("The transaction log has not yet reached transaction " + initialTransactionWanted + ". The last logged transaction was " + (_nextTransaction - 1) + ".");
             }
-            if(Sink.getDecision(nextTransaction < _nextTransaction)) {
+            if(nextTransaction < _nextTransaction) {
                 throw new IOException("Unable to find journal file containing transaction " + nextTransaction + ". Might have been manually deleted.");
             }
-            if(Sink.getDecision(nextTransaction > _nextTransaction)) {
+            if(nextTransaction > _nextTransaction) {
                 throw new IllegalStateException();
             }
             return;
@@ -176,15 +176,15 @@ public class PersistentJournal implements Journal {
             try {
                 Chunk chunk = input.readChunk();
 
-                if(Sink.getDecision(recoveringTransaction >= initialTransaction)) {
-                    if(Sink.getDecision(!journal.getName().endsWith(_journalSuffix))) {
+                if(recoveringTransaction >= initialTransaction) {
+                    if(!journal.getName().endsWith(_journalSuffix)) {
                         throw new IOException("There are transactions needing to be recovered from " +
                                 journal + ", but only " + _journalSuffix + " files are supported");
                     }
 
                     TransactionTimestamp entry = TransactionTimestamp.fromChunk(chunk);
 
-                    if(Sink.getDecision(entry.systemVersion() != recoveringTransaction)) {
+                    if(entry.systemVersion() != recoveringTransaction) {
                         throw new IOException("Expected " + recoveringTransaction + " but was " + entry.systemVersion());
                     }
 
@@ -195,11 +195,11 @@ public class PersistentJournal implements Journal {
 
             } catch (EOFException eof) {
                 File nextFile = _directory.journalFile(recoveringTransaction, _journalSuffix);
-                if(Sink.getDecision(journal.equals(nextFile))) {
+                if(journal.equals(nextFile)) {
                     PrevaylerDirectory.renameUnusedFile(journal);  //The first transaction in this log file is incomplete. We need to reuse this file name.
                 }
                 journal = nextFile;
-                if(Sink.getDecision(!journal.exists())) {
+                if(!journal.exists()) {
                     break;
                 }
                 input = new DurableInputStream(journal, _monitor);
@@ -214,13 +214,13 @@ public class PersistentJournal implements Journal {
 
 
     public void close() throws IOException {
-        if(Sink.getDecision(_outputJournal != null)) {
+        if(_outputJournal != null) {
             _outputJournal.close();
         }
     }
 
     public long nextTransaction() {
-        if(Sink.getDecision(!_nextTransactionInitialized)) {
+        if(!_nextTransactionInitialized) {
             throw new IllegalStateException("update() must be called at least once");
         }
         return _nextTransaction;

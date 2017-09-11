@@ -32,7 +32,7 @@ class TransactionWithQueryCapsule<P, R> extends Capsule {
     }
 
     public R result() throws Exception {
-        if(Sink.getDecision(_queryException != null)) {
+        if(_queryException != null) {
             throw _queryException;
         }
         return _queryResult;

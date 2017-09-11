@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.CompressorException;
@@ -43,28 +44,29 @@ public class CCMain {
     private static boolean XZBESTPRESET;
 
     public static void main(String[] args) throws IOException, ArchiveException, CompressorException {
+        Sink.init();
         GZIPCOMPRESSOR = Source.getOptionGZIPCOMPRESSOR(true);
-        DECOMPRESSUNTILEOF = Source.getOptionDECOMPRESSUNTILEOF(true);
-        MEMORYLIMITINKB = Source.getOptionMEMORYLIMITINKB(true);
+//        DECOMPRESSUNTILEOF = Source.getOptionDECOMPRESSUNTILEOF(true);
+//        MEMORYLIMITINKB = Source.getOptionMEMORYLIMITINKB(true);
         GZIPBESTCOMPRESSION = Source.getOptionGZIPBESTCOMPRESSION(true);
         XZBESTPRESET = Source.getOptionXZBESTPRESET(true);
 
-        String compressor;
-        boolean decompressConcatenated = false;
-        int memoryLimitInKb = -1;
+//        String compressor;
+//        boolean decompressConcatenated = false;
+//        int memoryLimitInKb = -1;
         int deflater = Deflater.BEST_SPEED;
         int preset = 0;
 
         File input = new File("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/commons-compress/src/main/resources/output/bla.tar");
         File output = new File("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/commons-compress/src/main/resources/output/");
 
-        if(DECOMPRESSUNTILEOF) {
-            decompressConcatenated = true;
-        }
-
-        if(MEMORYLIMITINKB) {
-            memoryLimitInKb = 10_000;
-        }
+//        if(DECOMPRESSUNTILEOF) {
+//            decompressConcatenated = true;
+//        }
+//
+//        if(MEMORYLIMITINKB) {
+//            memoryLimitInKb = 10_000;
+//        }
 
         if(GZIPBESTCOMPRESSION) {
             deflater = Deflater.BEST_COMPRESSION;

@@ -15,7 +15,7 @@ import java.io.File;
 public abstract class LoggingMonitor implements Monitor {
 
     public void notify(Class clazz, String message) {
-        if(Sink.getDecision(isInfoEnabled(clazz))) {
+        if(isInfoEnabled(clazz)) {
             info(clazz, message);
         }
     }
@@ -25,7 +25,7 @@ public abstract class LoggingMonitor implements Monitor {
     }
 
     public void notify(Class clazz, String message, File file) {
-        if(Sink.getDecision(isInfoEnabled(clazz))) {
+        if(isInfoEnabled(clazz)) {
             info(clazz, message + "\nFile: " + file);
         }
     }

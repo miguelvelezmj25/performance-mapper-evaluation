@@ -1,0 +1,82 @@
+<results>
+  <row>
+    <data columnname="Configuration">0</data>
+    <data columnname="Elements">base, </data>
+    <data columnname="Estimated Value">29</data>
+    <data columnname="Measured Value">28,5</data>
+    <data columnname="Difference Absolut">-0,5</data>
+    <data columnname="Difference in %">-1,75438596491227</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1</data>
+    <data columnname="Elements">base, empty, </data>
+    <data columnname="Estimated Value">10029</data>
+    <data columnname="Measured Value">10027,5</data>
+    <data columnname="Difference Absolut">-1,5</data>
+    <data columnname="Difference in %">-0,0149588631264095</data>
+  </row>
+  <row>
+    <data columnname="Configuration">2</data>
+    <data columnname="Elements">base, weight, </data>
+    <data columnname="Estimated Value">20032</data>
+    <data columnname="Measured Value">20029,5</data>
+    <data columnname="Difference Absolut">-2,5</data>
+    <data columnname="Difference in %">-0,0124815896552519</data>
+  </row>
+  <row>
+    <data columnname="Configuration">3</data>
+    <data columnname="Elements">base, weight, overloaded, </data>
+    <data columnname="Estimated Value">22432</data>
+    <data columnname="Measured Value">22433,5</data>
+    <data columnname="Difference Absolut">1,5</data>
+    <data columnname="Difference in %">0,00668642877839432</data>
+  </row>
+  <row>
+    <data columnname="Configuration">4</data>
+    <data columnname="Elements">base, weight, empty, </data>
+    <data columnname="Estimated Value">30032</data>
+    <data columnname="Measured Value">30042</data>
+    <data columnname="Difference Absolut">10</data>
+    <data columnname="Difference in %">0,0332867319086603</data>
+  </row>
+  <row>
+    <data columnname="Configuration">5</data>
+    <data columnname="Elements">base, weight, overloaded, empty, </data>
+    <data columnname="Estimated Value">32432</data>
+    <data columnname="Measured Value">32427,5</data>
+    <data columnname="Difference Absolut">-4,5</data>
+    <data columnname="Difference in %">-0,0138771104772246</data>
+  </row>
+  <row>
+    <data columnname="Configuration">6</data>
+    <data columnname="Elements">base, weight, twothirdsfull, </data>
+    <data columnname="Estimated Value">20032</data>
+    <data columnname="Measured Value">20029</data>
+    <data columnname="Difference Absolut">-3</data>
+    <data columnname="Difference in %">-0,0149782814918353</data>
+  </row>
+  <row>
+    <data columnname="Configuration">7</data>
+    <data columnname="Elements">base, weight, twothirdsfull, empty, </data>
+    <data columnname="Estimated Value">30032</data>
+    <data columnname="Measured Value">30030</data>
+    <data columnname="Difference Absolut">-2</data>
+    <data columnname="Difference in %">-0,0066600066600131</data>
+  </row>
+  <row>
+    <data columnname="Configuration">8</data>
+    <data columnname="Elements">base, weight, twothirdsfull, overloaded, </data>
+    <data columnname="Estimated Value">22432</data>
+    <data columnname="Measured Value">22429,5</data>
+    <data columnname="Difference Absolut">-2,5</data>
+    <data columnname="Difference in %">-0,0111460353552246</data>
+  </row>
+  <row>
+    <data columnname="Configuration">9</data>
+    <data columnname="Elements">base, weight, twothirdsfull, overloaded, empty, </data>
+    <data columnname="Estimated Value">32432</data>
+    <data columnname="Measured Value">32431,5</data>
+    <data columnname="Difference Absolut">-0,5</data>
+    <data columnname="Difference in %">-0,00154171099086398</data>
+  </row>
+</results>

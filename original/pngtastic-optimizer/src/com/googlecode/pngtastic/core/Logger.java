@@ -31,7 +31,7 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void debug(String message, Object... args) {
-        if(Sink.getDecision(DEBUG.equals(this.logLevel))) {
+        if(DEBUG.equals(this.logLevel)) {
             System.out.println(String.format(message, args));
         }
     }
@@ -41,7 +41,7 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void info(String message, Object... args) {
-        if(Sink.getDecision(DEBUG.equals(this.logLevel) || INFO.equals(this.logLevel))) {
+        if(DEBUG.equals(this.logLevel) || INFO.equals(this.logLevel)) {
             System.out.println(String.format(message, args));
         }
     }
@@ -51,7 +51,7 @@ public class Logger {
      * Takes a varags list of args so that string concatenation only happens if the logging level applies.
      */
     public void error(String message, Object... args) {
-        if(Sink.getDecision(!NONE.equals(this.logLevel))) {
+        if(!NONE.equals(this.logLevel)) {
             System.out.println(String.format(message, args));
         }
     }

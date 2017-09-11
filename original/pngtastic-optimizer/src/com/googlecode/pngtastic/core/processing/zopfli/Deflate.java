@@ -65,11 +65,11 @@ final class Deflate {
             int lengthScore = dist > 1024 ? len - 1 : len;
             int prevLengthScore = prevMatch > 1024 ? prevLength - 1 : prevLength;
 
-            if(Sink.getDecision(matchAvailable)) {
+            if(matchAvailable) {
                 matchAvailable = false;
-                if(Sink.getDecision(lengthScore > prevLengthScore + 1)) {
+                if(lengthScore > prevLengthScore + 1) {
                     store.append((char) (input[i - 1] & 0xFF), (char) 0);
-                    if(Sink.getDecision(lengthScore >= 3 && len < 258)) {
+                    if(lengthScore >= 3 && len < 258) {
                         matchAvailable = true;
                         prevLength = len;
                         prevMatch = dist;
@@ -85,14 +85,14 @@ final class Deflate {
                     continue;
                 }
             }
-            else if(Sink.getDecision(lengthScore >= 3 && len < 258)) {
+            else if(lengthScore >= 3 && len < 258) {
                 matchAvailable = true;
                 prevLength = len;
                 prevMatch = dist;
                 continue;
             }
 
-            if(Sink.getDecision(lengthScore >= 3)) {
+            if(lengthScore >= 3) {
                 store.append((char) len, (char) dist);
             }
             else {
@@ -115,15 +115,15 @@ final class Deflate {
 
         int offset = pos - blockStart;
         char[] lmcLength = lmc != null ? lmc.length : null;
-        if(Sink.getDecision(lmc != null && ((lmcLength[offset] == 0 || lmc.dist[offset] != 0)))
+        if(lmc != null && ((lmcLength[offset] == 0 || lmc.dist[offset] != 0))
                 && (limit == 258 || lmcLength[offset] <= limit
                 || subLen != null && lmc.maxCachedSubLen(offset) >= limit)) {
-            if(Sink.getDecision(subLen == null || lmcLength[offset] <= lmc.maxCachedSubLen(offset))) {
+            if(subLen == null || lmcLength[offset] <= lmc.maxCachedSubLen(offset)) {
                 cookie.lenVal = lmcLength[offset];
-                if(Sink.getDecision(cookie.lenVal > limit)) {
+                if(cookie.lenVal > limit) {
                     cookie.lenVal = limit;
                 }
-                if(Sink.getDecision(subLen != null)) {
+                if(subLen != null) {
                     lmc.cacheToSubLen(offset, cookie.lenVal, subLen);
                     cookie.distVal = subLen[cookie.lenVal];
                 }
@@ -135,13 +135,13 @@ final class Deflate {
             limit = lmcLength[offset];
         }
 
-        if(Sink.getDecision(size - pos < 3)) {
+        if(size - pos < 3) {
             cookie.lenVal = 0;
             cookie.distVal = 0;
             return;
         }
 
-        if(Sink.getDecision(pos + limit > size)) {
+        if(pos + limit > size) {
             limit = size - pos;
         }
 
@@ -163,12 +163,12 @@ final class Deflate {
             int scan = pos;
             int match = pos - dist;
 
-            if(Sink.getDecision(array[scan + bestLength] == array[match + bestLength])) {
+            if(array[scan + bestLength] == array[match + bestLength]) {
                 int same0 = h.same[pos & 0x7FFF];
-                if(Sink.getDecision(same0 > 2 && array[scan] == array[match])) {
+                if(same0 > 2 && array[scan] == array[match]) {
                     int same1 = h.same[match & 0x7FFF];
                     int same = same0 < same1 ? same0 : same1;
-                    if(Sink.getDecision(same > limit)) {
+                    if(same > limit) {
                         same = limit;
                     }
                     scan += same;
@@ -180,27 +180,27 @@ final class Deflate {
                 }
                 scan -= pos;
 
-                if(Sink.getDecision(scan > bestLength)) {
-                    if(Sink.getDecision(subLen != null)) {
+                if(scan > bestLength) {
+                    if(subLen != null) {
                         for(int j = bestLength + 1; j <= scan; j++) {
                             subLen[j] = (char) dist;
                         }
                     }
                     bestDist = dist;
                     bestLength = scan;
-                    if(Sink.getDecision(scan >= limit)) {
+                    if(scan >= limit) {
                         break;
                     }
                 }
             }
 
-            if(Sink.getDecision(hPrev != hPrev2 && bestLength >= threshold && marker == hashVal2[p])) {
+            if(hPrev != hPrev2 && bestLength >= threshold && marker == hashVal2[p]) {
                 hPrev = hPrev2;
             }
 
             pp = p;
             p = hPrev[p];
-            if(Sink.getDecision(p == pp)) {
+            if(p == pp) {
                 break;
             }
             pp -= p;
@@ -209,8 +209,8 @@ final class Deflate {
             --chainCounter;
         }
 
-        if(Sink.getDecision(lmc != null && limit == 258 && subLen != null && lmcLength[offset] != 0 && lmc.dist[offset] == 0)) {
-            if(Sink.getDecision(bestLength < 3)) {
+        if(lmc != null && limit == 258 && subLen != null && lmcLength[offset] != 0 && lmc.dist[offset] == 0) {
+            if(bestLength < 3) {
                 lmc.dist[offset] = 0;
                 lmcLength[offset] = 0;
             }
@@ -252,7 +252,7 @@ final class Deflate {
         BlockType type = BlockType.DYNAMIC;
         LzStore store = Squeeze.optimal(cookie, options.numIterations, lmc, input, from, to);
 
-        if(Sink.getDecision(store.size < 1000)) {
+        if(store.size < 1000) {
             LzStore fixedStore = cookie.store1;
             fixedStore.reset();
             Squeeze.bestFixedLengths(cookie, lmc, input, from, to, cookie.lengthArray, cookie.costs);
@@ -260,7 +260,7 @@ final class Deflate {
             int dynCost = calculateBlockSize(cookie, store.litLens, store.dists, 0, store.size);
             int fixedCost = calculateFixedBlockSize(cookie, fixedStore.litLens,
                     fixedStore.dists, fixedStore.size);
-            if(Sink.getDecision(fixedCost < dynCost)) {
+            if(fixedCost < dynCost) {
                 type = BlockType.FIXED;
                 store = fixedStore;
             }
@@ -316,7 +316,7 @@ final class Deflate {
         for(int i = lStart; i < lEnd; i++) {
             int d = dists[i];
             int l = litLens[i];
-            if(Sink.getDecision(d == 0)) {
+            if(d == 0) {
                 llCounts[l]++;
             }
             else {
@@ -324,7 +324,7 @@ final class Deflate {
                 int distSymbol = cachedDistSymbol[d];
                 dCounts[distSymbol]++;
                 result += lengthExtraBits[l];
-                if(Sink.getDecision(distSymbol > 3)) {
+                if(distSymbol > 3) {
                     result += (distSymbol / 2) - 1;
                 }
             }
@@ -368,7 +368,7 @@ final class Deflate {
         for(int i = 0; i < size; i++) {
             int d = dists[i];
             int l = litLens[i];
-            if(Sink.getDecision(d == 0)) {
+            if(d == 0) {
                 result += llLengths[l];
             }
             else {
@@ -389,7 +389,7 @@ final class Deflate {
         for(int i = start; i < end; i++) {
             int d = dists[i];
             int l = litLens[i];
-            if(Sink.getDecision(d == 0)) {
+            if(d == 0) {
                 llCount[l]++;
             }
             else {
@@ -413,19 +413,19 @@ final class Deflate {
     private static void patchDistanceCodesForBuggyDecoders(int[] dLengths) {
         int numDistCodes = 0;
         for(int i = 0; i < 30; i++) {
-            if(Sink.getDecision(dLengths[i] != 0)) {
+            if(dLengths[i] != 0) {
                 numDistCodes++;
-                if(Sink.getDecision(numDistCodes == 2)) {
+                if(numDistCodes == 2) {
                     return;
                 }
             }
         }
 
-        if(Sink.getDecision(numDistCodes == 0)) {
+        if(numDistCodes == 0) {
             dLengths[0] = 1;
             dLengths[1] = 1;
         }
-        else if(Sink.getDecision(numDistCodes == 1)) {
+        else if(numDistCodes == 1) {
             dLengths[dLengths[0] != 0 ? 1 : 0] = 1;
         }
     }
@@ -436,7 +436,7 @@ final class Deflate {
 
         for(int i = 0; i < 8; i++) {
             int size = simulateEncodeTree(cookie, llLengths, dLengths, (i & 1) != 0, (i & 2) != 0, (i & 4) != 0);
-            if(Sink.getDecision(size < bestSize)) {
+            if(size < bestSize) {
                 bestSize = size;
                 best = i;
             }
@@ -469,15 +469,15 @@ final class Deflate {
         for(int i = 0; i < lldTotal; i++) {
             int count = 1;
             int symbol = lldLengths[i];
-            if(Sink.getDecision(use16 || (symbol == 0 && (use17 || use18)))) {
+            if(use16 || (symbol == 0 && (use17 || use18))) {
                 for(int j = i + 1; j < lldTotal && symbol == lldLengths[j]; j++) {
                     count++;
                 }
             }
             i += count - 1;
 
-            if(Sink.getDecision(symbol == 0 && count > 2)) {
-                if(Sink.getDecision(use18)) {
+            if(symbol == 0 && count > 2) {
+                if(use18) {
                     while (count > 10) {
                         int delta = count > 138 ? 138 : count;
                         rle[rleSize] = 18;
@@ -485,7 +485,7 @@ final class Deflate {
                         count -= delta;
                     }
                 }
-                if(Sink.getDecision(use17)) {
+                if(use17) {
                     while (count > 2) {
                         int delta = count > 10 ? 10 : count;
                         rle[rleSize] = 17;
@@ -495,7 +495,7 @@ final class Deflate {
                 }
             }
 
-            if(Sink.getDecision(use16 && count > 3)) {
+            if(use16 && count > 3) {
                 count--;
                 rle[rleSize] = symbol;
                 rleBits[rleSize++] = 0;
@@ -543,13 +543,13 @@ final class Deflate {
         for(int i = 0; i < rleSize; i++) {
             int symbol = clSymbols[rle[i]];
             output.addHuffmanBits(symbol, clCl[rle[i]]);
-            if(Sink.getDecision(rle[i] == 16)) {
+            if(rle[i] == 16) {
                 output.addBits(rleBits[i], 2);
             }
-            else if(Sink.getDecision(rle[i] == 17)) {
+            else if(rle[i] == 17) {
                 output.addBits(rleBits[i], 3);
             }
-            else if(Sink.getDecision(rle[i] == 18)) {
+            else if(rle[i] == 18) {
                 output.addBits(rleBits[i], 7);
             }
         }
@@ -560,7 +560,7 @@ final class Deflate {
 
         for(int i = 0; i < 8; i++) {
             int size = simulateEncodeTree(cookie, llLengths, dLengths, (i & 1) != 0, (i & 2) != 0, (i & 4) != 0);
-            if(Sink.getDecision(size < bestSize)) {
+            if(size < bestSize) {
                 bestSize = size;
             }
         }
@@ -591,21 +591,21 @@ final class Deflate {
         for(int i = 0; i < lldTotal; i++) {
             int count = 1;
             int symbol = lldLengths[i];
-            if(Sink.getDecision(use16 || (symbol == 0 && (use17 || use18)))) {
+            if(use16 || (symbol == 0 && (use17 || use18))) {
                 for(int j = i + 1; j < lldTotal && symbol == lldLengths[j]; j++) {
                     count++;
                 }
             }
             i += count - 1;
 
-            if(Sink.getDecision(symbol == 0 && count > 2)) {
-                if(Sink.getDecision(use18)) {
+            if(symbol == 0 && count > 2) {
+                if(use18) {
                     while (count > 10) {
                         rle[rleSize++] = 18;
                         count -= count > 138 ? 138 : count;
                     }
                 }
-                if(Sink.getDecision(use17)) {
+                if(use17) {
                     while (count > 2) {
                         rle[rleSize++] = 17;
                         count -= count > 10 ? 10 : count;
@@ -613,7 +613,7 @@ final class Deflate {
                 }
             }
 
-            if(Sink.getDecision(use16 && count > 3)) {
+            if(use16 && count > 3) {
                 count--;
                 rle[rleSize++] = symbol;
                 while (count > 2) {
@@ -667,14 +667,14 @@ final class Deflate {
         System.arraycopy(Cookie.intZeroes, 0, dCounts, 0, 32);
 
         output.addHuffmanBits(last ? 1 : 0, 1);
-        if(Sink.getDecision(type == BlockType.FIXED)) {
+        if(type == BlockType.FIXED) {
             output.addHuffmanBits(2, 2); // 1, 0
         }
         else { // DYNAMIC
             output.addHuffmanBits(1, 2); // 0, 1
         }
 
-        if(Sink.getDecision(type == BlockType.FIXED)) {
+        if(type == BlockType.FIXED) {
             getFixedTree(llLengths, dLengths);
         }
         else { // DYNAMIC
@@ -709,7 +709,7 @@ final class Deflate {
         for(int i = lStart; i < lEnd; i++) {
             int dist = dists[i];
             int litLen = litLens[i];
-            if(Sink.getDecision(dist == 0)) {
+            if(dist == 0) {
                 output.addHuffmanBits(llSymbols[litLen], llLengths[litLen]);
             }
             else {
@@ -738,7 +738,7 @@ final class Deflate {
         }
         for(int i = 0; i < n; i++) {
             int len = lengths[i];
-            if(Sink.getDecision(len != 0)) {
+            if(len != 0) {
                 symbols[i] = nextCode[len];
                 nextCode[len]++;
             }
@@ -749,10 +749,10 @@ final class Deflate {
         int[] goodForRle = cookie.i289a;
         int length = counts.length;
         for(; length >= 0; --length) {
-            if(Sink.getDecision(length == 0)) {
+            if(length == 0) {
                 return;
             }
-            if(Sink.getDecision(counts[length - 1] != 0)) {
+            if(counts[length - 1] != 0) {
                 break;
             }
         }
@@ -761,14 +761,14 @@ final class Deflate {
         int symbol = counts[0];
         int stride = 0;
         for(int i = 0; i < length + 1; ++i) {
-            if(Sink.getDecision(i == length || counts[i] != symbol)) {
-                if(Sink.getDecision((symbol == 0 && stride >= 5) || (symbol != 0 && stride >= 7))) {
+            if(i == length || counts[i] != symbol) {
+                if((symbol == 0 && stride >= 5) || (symbol != 0 && stride >= 7)) {
                     for(int k = 0; k < stride; ++k) {
                         goodForRle[i - k - 1] = 1;
                     }
                 }
                 stride = 1;
-                if(Sink.getDecision(i != length)) {
+                if(i != length) {
                     symbol = counts[i];
                 }
             }
@@ -781,13 +781,13 @@ final class Deflate {
         int limit = counts[0];
         int sum = 0;
         for(int i = 0; i < length + 1; ++i) {
-            if(Sink.getDecision((i == length) || (goodForRle[i] != 0) || (counts[i] - limit >= 4) || (limit - counts[i] >= 4))) {
-                if(Sink.getDecision((stride >= 4) || ((stride >= 3) && (sum == 0)))) {
+            if((i == length) || (goodForRle[i] != 0) || (counts[i] - limit >= 4) || (limit - counts[i] >= 4)) {
+                if((stride >= 4) || ((stride >= 3) && (sum == 0))) {
                     int count = (sum + stride / 2) / stride;
-                    if(Sink.getDecision(count < 1)) {
+                    if(count < 1) {
                         count = 1;
                     }
-                    if(Sink.getDecision(sum == 0)) {
+                    if(sum == 0) {
                         count = 0;
                     }
                     for(int k = 0; k < stride; ++k) {
@@ -796,10 +796,10 @@ final class Deflate {
                 }
                 stride = 0;
                 sum = 0;
-                if(Sink.getDecision(i < length - 3)) {
+                if(i < length - 3) {
                     limit = (counts[i] + counts[i + 1] + counts[i + 2] + counts[i + 3] + 2) / 4;
                 }
-                else if(Sink.getDecision(i < length)) {
+                else if(i < length) {
                     limit = counts[i];
                 }
                 else {
@@ -807,7 +807,7 @@ final class Deflate {
                 }
             }
             ++stride;
-            if(Sink.getDecision(i != length)) {
+            if(i != length) {
                 sum += counts[i];
             }
         }

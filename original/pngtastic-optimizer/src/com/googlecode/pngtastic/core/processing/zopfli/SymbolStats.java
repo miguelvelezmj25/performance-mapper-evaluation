@@ -42,7 +42,7 @@ final class SymbolStats {
         for(int i = 0; i < size; i++) {
             int d = dists[i];
             int l = litLens[i];
-            if(Sink.getDecision(d == 0)) {
+            if(d == 0) {
                 sLitLens[l]++;
             }
             else {
@@ -76,13 +76,13 @@ final class SymbolStats {
         double log2sum = (sum == 0 ? Math.log(288) : Math.log(sum)) * INV_LOG_2;
         long[] lLiterals = this.lLiterals;
         for(int i = 0; i < 288; ++i) {
-            if(Sink.getDecision(litLens[i] == 0)) {
+            if(litLens[i] == 0) {
                 lLiterals[i] = (long) log2sum;
             }
             else {
                 lLiterals[i] = (long) (log2sum - Math.log(litLens[i]) * INV_LOG_2);
             }
-            if(Sink.getDecision(lLiterals[i] < 0)) {
+            if(lLiterals[i] < 0) {
                 lLiterals[i] = 0;
             }
         }
@@ -103,13 +103,13 @@ final class SymbolStats {
         double log2sum = (sum == 0 ? Math.log(32) : Math.log(sum)) * INV_LOG_2;
         long[] dSymbols = this.dSymbols;
         for(int i = 0; i < 32; ++i) {
-            if(Sink.getDecision(dists[i] == 0)) {
+            if(dists[i] == 0) {
                 dSymbols[i] = (long) log2sum;
             }
             else {
                 dSymbols[i] = (long) (log2sum - Math.log(dists[i]) * INV_LOG_2);
             }
-            if(Sink.getDecision(dSymbols[i] < 0)) {
+            if(dSymbols[i] < 0) {
                 dSymbols[i] = 0;
             }
         }
@@ -136,10 +136,10 @@ final class SymbolStats {
         int n = data.length;
         for(int i = 0; i < n; i++) {
             z = 0x7FFFFFFF & (1103515245 * z + 12345);
-            if(Sink.getDecision((z >>> 4) % 3 == 0)) {
+            if((z >>> 4) % 3 == 0) {
                 z = 0x7FFFFFFF & (1103515245 * z + 12345);
                 int p = z % n;
-                if(Sink.getDecision(data[i] < data[p])) {
+                if(data[i] < data[p]) {
                     data[i] = data[p];
                 }
             }
@@ -150,10 +150,10 @@ final class SymbolStats {
         n = data.length;
         for(int i = 0; i < n; i++) {
             z = 0x7FFFFFFF & (1103515245 * z + 12345);
-            if(Sink.getDecision((z >>> 4) % 3 == 0)) {
+            if((z >>> 4) % 3 == 0) {
                 z = 0x7FFFFFFF & (1103515245 * z + 12345);
                 int p = z % n;
-                if(Sink.getDecision(data[i] < data[p])) {
+                if(data[i] < data[p]) {
                     data[i] = data[p];
                 }
             }
@@ -167,7 +167,7 @@ final class SymbolStats {
         long minLengthCost = lLengths[3];
         for(int i = 4; i < 259; i++) {
             long c = lLengths[i];
-            if(Sink.getDecision(c < minLengthCost)) {
+            if(c < minLengthCost) {
                 minLengthCost = c;
             }
         }
@@ -176,7 +176,7 @@ final class SymbolStats {
         long minDistCost = dSymbols[0];
         for(int i = 1; i < 30; i++) {
             long c = dSymbols[i];
-            if(Sink.getDecision(c < minDistCost)) {
+            if(c < minDistCost) {
                 minDistCost = c;
             }
         }

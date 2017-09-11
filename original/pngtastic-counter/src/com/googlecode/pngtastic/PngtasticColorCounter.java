@@ -3,6 +3,7 @@ package com.googlecode.pngtastic;
 import com.googlecode.pngtastic.core.PngColorCounter;
 import com.googlecode.pngtastic.core.PngException;
 import com.googlecode.pngtastic.core.PngImage;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.IOException;
 
@@ -33,7 +34,7 @@ public class PngtasticColorCounter {
     public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
                                  int minAlpha, long timeout) {
 
-//        Sink.getDecision(logLevel == null));
+//        Sink.getDecision(logLevel == null);
 //        Sink.getDecision(distThreshold > 0));
 //        Sink.getDecision(freqThreshold > 0));
 //        Sink.getDecision(minAlpha > 0));

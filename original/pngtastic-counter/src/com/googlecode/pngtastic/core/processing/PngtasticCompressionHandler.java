@@ -1,7 +1,6 @@
 package com.googlecode.pngtastic.core.processing;
 
 import com.googlecode.pngtastic.core.Logger;
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class PngtasticCompressionHandler implements PngCompressionHandler {
         byte[] result = null;
         for(int i = 0; i < results.size(); i++) {
             final byte[] data = results.get(i);
-            if(Sink.getDecision(result == null || (data.length < result.length))) {
+            if(result == null || (data.length < result.length)) {
                 result = data;
             }
         }
@@ -113,11 +112,11 @@ public class PngtasticCompressionHandler implements PngCompressionHandler {
         byte[] result = null;
         int bestCompression = Deflater.BEST_COMPRESSION;
 
-        if(Sink.getDecision(compressionLevel == null || compressionLevel > Deflater.BEST_COMPRESSION || compressionLevel < Deflater.NO_COMPRESSION)) {
+        if(compressionLevel == null || compressionLevel > Deflater.BEST_COMPRESSION || compressionLevel < Deflater.NO_COMPRESSION) {
             for(int compression = Deflater.BEST_COMPRESSION; compression > Deflater.NO_COMPRESSION; compression--) {
                 final ByteArrayOutputStream deflatedOut = deflate(inflatedImageData, strategy, compression);
 
-                if(Sink.getDecision(result == null || (result.length > deflatedOut.size()))) {
+                if(result == null || (result.length > deflatedOut.size())) {
                     result = deflatedOut.toByteArray();
                     bestCompression = compression;
                 }

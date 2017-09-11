@@ -396,11 +396,11 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * @since 1.14
      */
     public static String detect(final InputStream in) throws CompressorException {
-        if(Sink.getDecision(in == null)) {
+        if(in == null) {
             throw new IllegalArgumentException("Stream must not be null.");
         }
 
-        if(Sink.getDecision(!in.markSupported())) {
+        if(!in.markSupported()) {
             throw new IllegalArgumentException("Mark is not supported.");
         }
 
@@ -414,39 +414,39 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             throw new CompressorException("IOException while reading signature.", e);
         }
 
-        if(Sink.getDecision(BZip2CompressorInputStream.matches(signature, signatureLength))) {
+        if(BZip2CompressorInputStream.matches(signature, signatureLength)) {
             return BZIP2;
         }
 
-        if(Sink.getDecision(GzipCompressorInputStream.matches(signature, signatureLength))) {
+        if(GzipCompressorInputStream.matches(signature, signatureLength)) {
             return GZIP;
         }
 
-        if(Sink.getDecision(Pack200CompressorInputStream.matches(signature, signatureLength))) {
+        if(Pack200CompressorInputStream.matches(signature, signatureLength)) {
             return PACK200;
         }
 
-        if(Sink.getDecision(FramedSnappyCompressorInputStream.matches(signature, signatureLength))) {
+        if(FramedSnappyCompressorInputStream.matches(signature, signatureLength)) {
             return SNAPPY_FRAMED;
         }
 
-        if(Sink.getDecision(ZCompressorInputStream.matches(signature, signatureLength))) {
+        if(ZCompressorInputStream.matches(signature, signatureLength)) {
             return Z;
         }
 
-        if(Sink.getDecision(DeflateCompressorInputStream.matches(signature, signatureLength))) {
+        if(DeflateCompressorInputStream.matches(signature, signatureLength)) {
             return DEFLATE;
         }
 
-        if(Sink.getDecision(XZUtils.matches(signature, signatureLength))) {
+        if(XZUtils.matches(signature, signatureLength)) {
             return XZ;
         }
 
-        if(Sink.getDecision(LZMAUtils.matches(signature, signatureLength))) {
+        if(LZMAUtils.matches(signature, signatureLength)) {
             return LZMA;
         }
 
-        if(Sink.getDecision(FramedLZ4CompressorInputStream.matches(signature, signatureLength))) {
+        if(FramedLZ4CompressorInputStream.matches(signature, signatureLength)) {
             return LZ4_FRAMED;
         }
 
@@ -492,66 +492,66 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     @Override
     public CompressorInputStream createCompressorInputStream(final String name, final InputStream in,
                                                              final boolean actualDecompressConcatenated) throws CompressorException {
-        if(Sink.getDecision(name == null || in == null)) {
+        if(name == null || in == null) {
             throw new IllegalArgumentException("Compressor name and stream must not be null.");
         }
 
         try {
 
-            if(Sink.getDecision(GZIP.equalsIgnoreCase(name))) {
+            if(GZIP.equalsIgnoreCase(name)) {
                 return new GzipCompressorInputStream(in, actualDecompressConcatenated);
             }
 
-            if(Sink.getDecision(BZIP2.equalsIgnoreCase(name))) {
+            if(BZIP2.equalsIgnoreCase(name)) {
                 return new BZip2CompressorInputStream(in, actualDecompressConcatenated);
             }
 
-            if(Sink.getDecision(BROTLI.equalsIgnoreCase(name))) {
-                if(Sink.getDecision(!BrotliUtils.isBrotliCompressionAvailable())) {
+            if(BROTLI.equalsIgnoreCase(name)) {
+                if(!BrotliUtils.isBrotliCompressionAvailable()) {
                     throw new CompressorException("Brotli compression is not available.");
                 }
                 return new BrotliCompressorInputStream(in);
             }
 
-            if(Sink.getDecision(XZ.equalsIgnoreCase(name))) {
-                if(Sink.getDecision(!XZUtils.isXZCompressionAvailable())) {
+            if(XZ.equalsIgnoreCase(name)) {
+                if(!XZUtils.isXZCompressionAvailable()) {
                     throw new CompressorException("XZ compression is not available.");
                 }
                 return new XZCompressorInputStream(in, actualDecompressConcatenated, memoryLimitInKb);
             }
 
-            if(Sink.getDecision(LZMA.equalsIgnoreCase(name))) {
-                if(Sink.getDecision(!LZMAUtils.isLZMACompressionAvailable())) {
+            if(LZMA.equalsIgnoreCase(name)) {
+                if(!LZMAUtils.isLZMACompressionAvailable()) {
                     throw new CompressorException("LZMA compression is not available");
                 }
                 return new LZMACompressorInputStream(in, memoryLimitInKb);
             }
 
-            if(Sink.getDecision(PACK200.equalsIgnoreCase(name))) {
+            if(PACK200.equalsIgnoreCase(name)) {
                 return new Pack200CompressorInputStream(in);
             }
 
-            if(Sink.getDecision(SNAPPY_RAW.equalsIgnoreCase(name))) {
+            if(SNAPPY_RAW.equalsIgnoreCase(name)) {
                 return new SnappyCompressorInputStream(in);
             }
 
-            if(Sink.getDecision(SNAPPY_FRAMED.equalsIgnoreCase(name))) {
+            if(SNAPPY_FRAMED.equalsIgnoreCase(name)) {
                 return new FramedSnappyCompressorInputStream(in);
             }
 
-            if(Sink.getDecision(Z.equalsIgnoreCase(name))) {
+            if(Z.equalsIgnoreCase(name)) {
                 return new ZCompressorInputStream(in, memoryLimitInKb);
             }
 
-            if(Sink.getDecision(DEFLATE.equalsIgnoreCase(name))) {
+            if(DEFLATE.equalsIgnoreCase(name)) {
                 return new DeflateCompressorInputStream(in);
             }
 
-            if(Sink.getDecision(LZ4_BLOCK.equalsIgnoreCase(name))) {
+            if(LZ4_BLOCK.equalsIgnoreCase(name)) {
                 return new BlockLZ4CompressorInputStream(in);
             }
 
-            if(Sink.getDecision(LZ4_FRAMED.equalsIgnoreCase(name))) {
+            if(LZ4_FRAMED.equalsIgnoreCase(name)) {
                 return new FramedLZ4CompressorInputStream(in, actualDecompressConcatenated);
             }
 
@@ -559,7 +559,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             throw new CompressorException("Could not create CompressorInputStream.", e);
         }
         final CompressorStreamProvider compressorStreamProvider = getCompressorInputStreamProviders().get(toKey(name));
-        if(Sink.getDecision(compressorStreamProvider != null)) {
+        if(compressorStreamProvider != null) {
             return compressorStreamProvider.createCompressorInputStream(name, in, actualDecompressConcatenated);
         }
 
@@ -582,45 +582,45 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     @Override
     public CompressorOutputStream createCompressorOutputStream(final String name, final OutputStream out)
             throws CompressorException {
-        if(Sink.getDecision(name == null || out == null)) {
+        if(name == null || out == null) {
             throw new IllegalArgumentException("Compressor name and stream must not be null.");
         }
 
         try {
 
-            if(Sink.getDecision(GZIP.equalsIgnoreCase(name))) {
+            if(GZIP.equalsIgnoreCase(name)) {
                 return new GzipCompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(BZIP2.equalsIgnoreCase(name))) {
+            if(BZIP2.equalsIgnoreCase(name)) {
                 return new BZip2CompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(XZ.equalsIgnoreCase(name))) {
+            if(XZ.equalsIgnoreCase(name)) {
                 return new XZCompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(PACK200.equalsIgnoreCase(name))) {
+            if(PACK200.equalsIgnoreCase(name)) {
                 return new Pack200CompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(LZMA.equalsIgnoreCase(name))) {
+            if(LZMA.equalsIgnoreCase(name)) {
                 return new LZMACompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(DEFLATE.equalsIgnoreCase(name))) {
+            if(DEFLATE.equalsIgnoreCase(name)) {
                 return new DeflateCompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(SNAPPY_FRAMED.equalsIgnoreCase(name))) {
+            if(SNAPPY_FRAMED.equalsIgnoreCase(name)) {
                 return new FramedSnappyCompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(LZ4_BLOCK.equalsIgnoreCase(name))) {
+            if(LZ4_BLOCK.equalsIgnoreCase(name)) {
                 return new BlockLZ4CompressorOutputStream(out);
             }
 
-            if(Sink.getDecision(LZ4_FRAMED.equalsIgnoreCase(name))) {
+            if(LZ4_FRAMED.equalsIgnoreCase(name)) {
                 return new FramedLZ4CompressorOutputStream(out);
             }
 
@@ -628,14 +628,14 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             throw new CompressorException("Could not create CompressorOutputStream", e);
         }
         final CompressorStreamProvider compressorStreamProvider = getCompressorOutputStreamProviders().get(toKey(name));
-        if(Sink.getDecision(compressorStreamProvider != null)) {
+        if(compressorStreamProvider != null) {
             return compressorStreamProvider.createCompressorOutputStream(name, out);
         }
         throw new CompressorException("Compressor: " + name + " not found.");
     }
 
     public SortedMap<String, CompressorStreamProvider> getCompressorInputStreamProviders() {
-        if(Sink.getDecision(compressorInputStreamProviders == null)) {
+        if(compressorInputStreamProviders == null) {
             compressorInputStreamProviders = Collections
                     .unmodifiableSortedMap(findAvailableCompressorInputStreamProviders());
         }
@@ -643,7 +643,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     }
 
     public SortedMap<String, CompressorStreamProvider> getCompressorOutputStreamProviders() {
-        if(Sink.getDecision(compressorOutputStreamProviders == null)) {
+        if(compressorOutputStreamProviders == null) {
             compressorOutputStreamProviders = Collections
                     .unmodifiableSortedMap(findAvailableCompressorOutputStreamProviders());
         }
@@ -674,7 +674,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      */
     @Deprecated
     public void setDecompressConcatenated(final boolean decompressConcatenated) {
-        if(Sink.getDecision(this.decompressUntilEOF != null)) {
+        if(this.decompressUntilEOF != null) {
             throw new IllegalStateException("Cannot override the setting defined by the constructor");
         }
         this.decompressConcatenated = decompressConcatenated;

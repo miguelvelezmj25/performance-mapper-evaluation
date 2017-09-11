@@ -2,8 +2,8 @@ package edu.cmu.cs.mvelezce.analysis.option;
 
 public class Sink {
 
-    public static boolean getDecision(boolean option) {
-        return option;
-    }
+    public static void init() { ; }
+
+    public static void sink(Object o) { ; }
 
 }

@@ -1,5 +1,7 @@
 package com.googlecode.pngtastic.core;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+
 /**
  * Exception type for pngtastic code
  *

@@ -113,7 +113,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
             throws IOException {
         // Mark support is strictly needed for concatenated files only,
         // but it's simpler if it is always available.
-        if(Sink.getDecision(inputStream.markSupported())) {
+        if(inputStream.markSupported()) {
             in = inputStream;
         }
         else {
@@ -143,15 +143,15 @@ public class GzipCompressorInputStream extends CompressorInputStream {
      */
     public static boolean matches(final byte[] signature, final int length) {
 
-        if(Sink.getDecision(length < 2)) {
+        if(length < 2) {
             return false;
         }
 
-        if(Sink.getDecision(signature[0] != 31)) {
+        if(signature[0] != 31) {
             return false;
         }
 
-        if(Sink.getDecision(signature[1] != -117)) {
+        if(signature[1] != -117) {
             return false;
         }
 
@@ -178,11 +178,11 @@ public class GzipCompressorInputStream extends CompressorInputStream {
 
         // If end of input was reached after decompressing at least
         // one .gz member, we have reached the end of the file successfully.
-        if(Sink.getDecision(magic0 == -1 && !isFirstMember)) {
+        if(magic0 == -1 && !isFirstMember) {
             return false;
         }
 
-        if(Sink.getDecision(magic0 != 31 || magic1 != 139)) {
+        if(magic0 != 31 || magic1 != 139) {
             throw new IOException(isFirstMember
                     ? "Input is not in the .gz format"
                     : "Garbage after a valid .gz stream");
@@ -191,13 +191,13 @@ public class GzipCompressorInputStream extends CompressorInputStream {
         // Parsing the rest of the header may throw EOFException.
         final DataInput inData = new DataInputStream(in);
         final int method = inData.readUnsignedByte();
-        if(Sink.getDecision(method != Deflater.DEFLATED)) {
+        if(method != Deflater.DEFLATED) {
             throw new IOException("Unsupported compression method "
                     + method + " in the .gz header");
         }
 
         final int flg = inData.readUnsignedByte();
-        if(Sink.getDecision((flg & FRESERVED) != 0)) {
+        if((flg & FRESERVED) != 0) {
             throw new IOException(
                     "Reserved flags are set in the .gz header");
         }
@@ -217,7 +217,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
         parameters.setOperatingSystem(inData.readUnsignedByte());
 
         // Extra field, ignored
-        if(Sink.getDecision((flg & FEXTRA) != 0)) {
+        if((flg & FEXTRA) != 0) {
             int xlen = inData.readUnsignedByte();
             xlen |= inData.readUnsignedByte() << 8;
 
@@ -230,13 +230,13 @@ public class GzipCompressorInputStream extends CompressorInputStream {
         }
 
         // Original file name
-        if(Sink.getDecision((flg & FNAME) != 0)) {
+        if((flg & FNAME) != 0) {
             parameters.setFilename(new String(readToNull(inData),
                     CharsetNames.ISO_8859_1));
         }
 
         // Comment
-        if(Sink.getDecision((flg & FCOMMENT) != 0)) {
+        if((flg & FCOMMENT) != 0) {
             parameters.setComment(new String(readToNull(inData),
                     CharsetNames.ISO_8859_1));
         }
@@ -246,7 +246,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
         // sets this, so it's not worth trying to verify it. GNU gzip 1.4
         // doesn't support this field, but zlib seems to be able to at least
         // skip over it.
-        if(Sink.getDecision((flg & FHCRC) != 0)) {
+        if((flg & FHCRC) != 0) {
             inData.readShort();
         }
 
@@ -269,20 +269,20 @@ public class GzipCompressorInputStream extends CompressorInputStream {
      */
     @Override
     public int read(final byte[] b, int off, int len) throws IOException {
-        if(Sink.getDecision(endReached)) {
+        if(endReached) {
             return -1;
         }
 
         int size = 0;
 
         while (len > 0) {
-            if(Sink.getDecision(inf.needsInput())) {
+            if(inf.needsInput()) {
                 // Remember the current position because we may need to
                 // rewind after reading too much input.
                 in.mark(buf.length);
 
                 bufUsed = in.read(buf);
-                if(Sink.getDecision(bufUsed == -1)) {
+                if(bufUsed == -1) {
                     throw new EOFException();
                 }
 
@@ -302,7 +302,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
             size += ret;
             count(ret);
 
-            if(Sink.getDecision(inf.finished())) {
+            if(inf.finished()) {
                 // We may have read too many bytes. Rewind the read
                 // position to match the actual amount used.
                 //
@@ -311,7 +311,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
                 in.reset();
 
                 final int skipAmount = bufUsed - inf.getRemaining();
-                if(Sink.getDecision(in.skip(skipAmount) != skipAmount)) {
+                if(in.skip(skipAmount) != skipAmount) {
                     throw new IOException();
                 }
 
@@ -322,7 +322,7 @@ public class GzipCompressorInputStream extends CompressorInputStream {
                 // CRC32
                 final long crcStored = ByteUtils.fromLittleEndian(inData, 4);
 
-                if(Sink.getDecision(crcStored != crc.getValue())) {
+                if(crcStored != crc.getValue()) {
                     throw new IOException("Gzip-compressed data is corrupt "
                             + "(CRC32 error)");
                 }
@@ -330,13 +330,13 @@ public class GzipCompressorInputStream extends CompressorInputStream {
                 // Uncompressed size modulo 2^32 (ISIZE in the spec)
                 final long isize = ByteUtils.fromLittleEndian(inData, 4);
 
-                if(Sink.getDecision(isize != (inf.getBytesWritten() & 0xffffffffl))) {
+                if(isize != (inf.getBytesWritten() & 0xffffffffl)) {
                     throw new IOException("Gzip-compressed data is corrupt"
                             + "(uncompressed size mismatch)");
                 }
 
                 // See if this is the end of the file.
-                if(Sink.getDecision(!decompressConcatenated || !init(false))) {
+                if(!decompressConcatenated || !init(false)) {
                     inf.end();
                     inf = null;
                     endReached = true;
@@ -355,12 +355,12 @@ public class GzipCompressorInputStream extends CompressorInputStream {
      */
     @Override
     public void close() throws IOException {
-        if(Sink.getDecision(inf != null)) {
+        if(inf != null) {
             inf.end();
             inf = null;
         }
 
-        if(Sink.getDecision(this.in != System.in)) {
+        if(this.in != System.in) {
             this.in.close();
         }
     }
