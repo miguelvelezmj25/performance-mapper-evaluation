@@ -82,6 +82,7 @@ public class ExampleInventoryRead {
 
         ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
 
+        Sink.sink(ALLOWCREATE);
         if(ALLOWCREATE) {
             allowCreate = true;
         }
