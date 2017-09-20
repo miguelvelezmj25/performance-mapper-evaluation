@@ -16,9 +16,10 @@ public class Sleep6 {
         System.out.println("main");
         boolean a = Boolean.valueOf(args[0]);
         Thread.sleep(200);
-        if (a) {
+        if(a) {
             Thread.sleep(600);
-        } else {
+        }
+        else {
             Thread.sleep(700);
             return;
         }

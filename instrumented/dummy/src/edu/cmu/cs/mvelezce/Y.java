@@ -5,9 +5,9 @@ package edu.cmu.cs.mvelezce;
  */
 public class Y {
     public void foo(int a) {
-        if (a == 0)
+        if(a == 0) {
             System.out.println("foo");
+        }
 
     }
 }
-

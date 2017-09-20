@@ -7,8 +7,9 @@ public class X {
 
     public X(int a) {
 
-        if (a == 0)
+        if(a == 0) {
             System.out.println("foo");
+        }
     }
 }
 

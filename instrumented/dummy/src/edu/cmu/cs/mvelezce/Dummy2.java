@@ -10,32 +10,33 @@ public class Dummy2 {
     public static void main(String[] args) {
         int a = A ? 1 : 0;
 
-        if (a == 0)
+        if(a == 0) {
             System.out.println("foo");
+        }
 
 
-//        new X(a);
-//        new Y().foo(a);
-        new W(a);
-        new Z().foo(a);
+        new X(a);
+        new Y().foo(a);
+//        new W(a);
+//        new Z().foo(a);
     }
 
 
 }
 
-class W {
-
-    public W(int a) {
-
-        if (a == 0)
-            System.out.println("foo");
-    }
-}
-
-class Z {
-    public void foo(int a) {
-        if (a == 0)
-            System.out.println("foo");
-
-    }
-}
+//class W {
+//
+//    public W(int a) {
+//
+//        if (a == 0)
+//            System.out.println("foo");
+//    }
+//}
+//
+//class Z {
+//    public void foo(int a) {
+//        if (a == 0)
+//            System.out.println("foo");
+//
+//    }
+//}

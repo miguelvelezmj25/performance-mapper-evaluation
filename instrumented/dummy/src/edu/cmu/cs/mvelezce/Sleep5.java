@@ -5,12 +5,11 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep5 {
 
-    public static boolean A = false;
-
     public static final String FILENAME = Sleep5.class.getCanonicalName();
     public static final String PACKAGE = Sleep5.class.getPackage().getName();
     public static final String CLASS = Sleep5.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
 
     // TODO corner case that has two returns
     public static void main(String[] args) throws InterruptedException {
@@ -22,17 +21,19 @@ public class Sleep5 {
 
         boolean a;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
 
         Thread.sleep(200);
-        if (a) {
+        if(a) {
             Thread.sleep(600);
             return;
-        } else {
+        }
+        else {
             Thread.sleep(700);
         }
 

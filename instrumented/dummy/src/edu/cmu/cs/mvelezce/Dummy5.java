@@ -13,16 +13,16 @@ public class Dummy5 {
     public static void main(String[] args) throws InterruptedException {
         int i = 0;
 
-        if (A) {
+        if(A) {
             Thread.sleep(100);
             i = 1;
         }
 
-        if (B && i > 0) {
+        if(B && i > 0) {
             Thread.sleep(200);
         }
 
-        if (C) {
+        if(C) {
             Thread.sleep(300);
         }
     }

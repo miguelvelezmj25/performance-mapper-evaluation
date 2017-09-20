@@ -9,6 +9,7 @@ public class Sleep24 {
 
     public static void main(String[] args) throws InterruptedException {
         A = Boolean.valueOf(args[0]);
+        B = Boolean.valueOf(args[1]);
 
         if(A) {
             m1(3);
@@ -17,6 +18,12 @@ public class Sleep24 {
             m1(5);
         }
 
+        if(B) {
+            m1(2);
+        }
+        else {
+            m1(4);
+        }
 
     }
 

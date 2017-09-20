@@ -80,9 +80,10 @@ public class Dummy4 {
     public static void main(String[] args) {
         int i = 0;
 
-        if (ON) {
+        if(ON) {
             i = 1;
-        } else {
+        }
+        else {
             i = 2;
         }
 
@@ -90,7 +91,7 @@ public class Dummy4 {
     }
 
     private static void integer(int i) {
-        if (i > 0) {
+        if(i > 0) {
             int a = 0;
         }
     }

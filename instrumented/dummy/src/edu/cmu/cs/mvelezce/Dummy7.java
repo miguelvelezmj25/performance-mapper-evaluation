@@ -12,9 +12,10 @@ public class Dummy7 {
 
         boolean a;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
     }

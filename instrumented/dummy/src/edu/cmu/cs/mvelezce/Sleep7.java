@@ -5,12 +5,11 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep7 {
 
-    public static boolean A = false;
-
     public static final String FILENAME = Sleep7.class.getCanonicalName();
     public static final String PACKAGE = Sleep7.class.getPackage().getName();
     public static final String CLASS = Sleep7.class.getSimpleName();
     public static final String MAIN_METHOD = "main";
+    public static boolean A = false;
 
     public static void main(String[] args) throws InterruptedException {
         // Region program start
@@ -21,9 +20,10 @@ public class Sleep7 {
 
         boolean a;
 
-        if (A) {
+        if(A) {
             a = true;
-        } else {
+        }
+        else {
             a = false;
         }
 
@@ -31,15 +31,16 @@ public class Sleep7 {
 
         // Region A start
         int repeat;
-        if (a) { // 20
+        if(a) { // 20
             repeat = 5;
-        } else {
+        }
+        else {
             repeat = 10;
         }
         // Region A end
 
         // Not a region since this is always executed at least once
-        for (int i = 0; i < repeat; i++) { // 41
+        for(int i = 0; i < repeat; i++) { // 41
             Thread.sleep(100);
         }
         // Region A end
