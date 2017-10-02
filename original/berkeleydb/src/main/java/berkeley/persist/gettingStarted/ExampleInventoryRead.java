@@ -80,32 +80,33 @@ public class ExampleInventoryRead {
 
         boolean allowCreate = false;
 
-        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
-//        ALLOWCREATE = Source.getOptionALLOWCREATE(false);
+//        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
+        ALLOWCREATE = Source.getOptionALLOWCREATE(false);
 
         Sink.sink(ALLOWCREATE);
         if(ALLOWCREATE) {
             allowCreate = true;
         }
 
-        myDbEnv.setup(myDbEnvPath, allowCreate, "");
-
-//        myDbEnv.setup(myDbEnvPath, // path to the environment home
-//                true);       // is this environment read-only?
-
-        // Open the data accessor. This is used to retrieve
-        // persistent objects.
-        da = new DataAccessor(myDbEnv.getEntityStore());
-
-        // If a item to locate is provided on the command line,
-        // show just the inventory items using the provided name.
-        // Otherwise, show everything in the inventory.
-        if(locateItem != null) {
-            showItem();
-        }
-        else {
-            showAllInventory();
-        }
+        Math.random();
+//        myDbEnv.setup(myDbEnvPath, allowCreate, "");
+//
+////        myDbEnv.setup(myDbEnvPath, // path to the environment home
+////                true);       // is this environment read-only?
+//
+//        // Open the data accessor. This is used to retrieve
+//        // persistent objects.
+//        da = new DataAccessor(myDbEnv.getEntityStore());
+//
+//        // If a item to locate is provided on the command line,
+//        // show just the inventory items using the provided name.
+//        // Otherwise, show everything in the inventory.
+//        if(locateItem != null) {
+//            showItem();
+//        }
+//        else {
+//            showAllInventory();
+//        }
     }
 
     // Shows all the inventory items that exist for a given
