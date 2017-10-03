@@ -14,6 +14,7 @@
 package berkeley.persist.gettingStarted;
 
 import berkeley.com.sleepycat.je.DatabaseException;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class ExampleDatabasePut {
     }
 
     public static void main(String args[]) {
+        Sink.init();
+
         ExampleDatabasePut edp = new ExampleDatabasePut();
         try {
             edp.run(args);
@@ -80,8 +83,10 @@ public class ExampleDatabasePut {
         // Parse the arguments list
         parseArgs(args);
 
-        myDbEnv.setup(myDbEnvPath,  // Path to the environment home
-                false);       // Environment read-only?
+        myDbEnv.setup(myDbEnvPath, args);
+
+//        myDbEnv.setup(myDbEnvPath,  // Path to the environment home
+//                false);       // Environment read-only?
 
         // Open the data accessor. This is used to store
         // persistent objects.

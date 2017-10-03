@@ -18,12 +18,18 @@ import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.persist.EntityStore;
 import berkeley.com.sleepycat.persist.StoreConfig;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.io.File;
+
+import static com.sun.jmx.snmp.SnmpStatusException.readOnly;
 
 public class MyDbEnv {
 
 
+    private static boolean ALLOWCREATE = false;
+    private static boolean READONLY = false;
+    private static boolean TRANSACTIONAL = false;
 
     private Environment myEnv;
     private EntityStore store;
@@ -34,11 +40,83 @@ public class MyDbEnv {
 
     // The setup() method opens the environment and store
     // for us.
+    public void setup(File envHome, String[] args) throws DatabaseException {
+
+//        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
+//        READONLY = Source.getOptionREADONLY(Boolean.valueOf(args[1]));
+
+        ALLOWCREATE = Source.getOptionALLOWCREATE(true);
+        READONLY = Source.getOptionREADONLY(true);
+        TRANSACTIONAL = Source.getOptionTRANSACTIONAL(true);
+
+        boolean allowCreate = false;
+        boolean readOnly = false;
+        boolean transactional = false;
+
+        EnvironmentConfig myEnvConfig = new EnvironmentConfig();
+        StoreConfig storeConfig = new StoreConfig();
+
+        if(ALLOWCREATE) {
+            allowCreate = true;
+        }
+
+        if(READONLY) {
+            readOnly = true;
+        }
+
+        if(TRANSACTIONAL) {
+            transactional = true;
+        }
+
+        myEnvConfig.setAllowCreateVoid(allowCreate);
+//        myEnvConfig.setClassLoaderVoid();
+//        myEnvConfig.setCustomStatsVoid();
+//        myEnvConfig.setCacheModeVoid();
+//        myEnvConfig.setCachePercentVoid();
+//        myEnvConfig.setCacheSizeVoid();
+//        myEnvConfig.setDurabilityVoid();
+//        myEnvConfig.setDupConvertPreloadConfigVoid();
+//        myEnvConfig.setExceptionListenerVoid();
+//        myEnvConfig.setLoggingHandlerVoid();
+//        myEnvConfig.setLockTimeoutVoid();
+//        myEnvConfig.setLockingVoid();
+//        myEnvConfig.setNodeNameVoid();
+//        myEnvConfig.setOffHeapCacheSizeVoid();
+        myEnvConfig.setReadOnlyVoid(readOnly);
+//        myEnvConfig.setRecoveryProgressListenerVoid();
+        myEnvConfig.setTransactionalVoid(transactional);
+//        myEnvConfig.setTxnSerializableIsolationVoid();
+//        myEnvConfig.setTxnTimeoutVoid();
+//        myEnvConfig.setTxnNoSyncVoid();
+//        myEnvConfig.setTxnWriteNoSyncVoid();
+//
+//
+//        myEnvConfig.setReadOnly(readOnly);
+//        storeConfig.setReadOnly(readOnly);
+//
+//        // If the environment is opened for write, then we want to be
+//        // able to create the environment and entity store if
+//        // they do not exist.
+//        myEnvConfig.setAllowCreate(!readOnly);
+//        storeConfig.setAllowCreate(!readOnly);
+
+        storeConfig.setReadOnly(readOnly);
+        storeConfig.setAllowCreate(allowCreate);
+
+        // Open the environment and entity store
+        myEnv = new Environment(envHome, myEnvConfig);
+        store = new EntityStore(myEnv, "EntityStore", storeConfig);
+    }
+
+    // The setup() method opens the environment and store
+    // for us.
     public void setup(File envHome, boolean readOnly)
             throws DatabaseException {
 
         EnvironmentConfig myEnvConfig = new EnvironmentConfig();
         StoreConfig storeConfig = new StoreConfig();
+
+
 
         myEnvConfig.setReadOnly(readOnly);
         storeConfig.setReadOnly(readOnly);
@@ -48,29 +126,6 @@ public class MyDbEnv {
         // they do not exist.
         myEnvConfig.setAllowCreate(!readOnly);
         storeConfig.setAllowCreate(!readOnly);
-
-        // Open the environment and entity store
-        myEnv = new Environment(envHome, myEnvConfig);
-        store = new EntityStore(myEnv, "EntityStore", storeConfig);
-
-    }
-
-    // The setup() method opens the environment and store
-    // for us.
-    public void setup(File envHome, boolean allowCreate, String l)
-            throws DatabaseException {
-
-        EnvironmentConfig myEnvConfig = new EnvironmentConfig();
-        StoreConfig storeConfig = new StoreConfig();
-
-        myEnvConfig.setReadOnly(allowCreate);
-        storeConfig.setReadOnly(allowCreate);
-
-        // If the environment is opened for write, then we want to be
-        // able to create the environment and entity store if
-        // they do not exist.
-        myEnvConfig.setAllowCreate(!allowCreate);
-        storeConfig.setAllowCreate(!allowCreate);
 
         // Open the environment and entity store
         myEnv = new Environment(envHome, myEnvConfig);

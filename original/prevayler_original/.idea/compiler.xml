@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="prevayler-core" />
+        <module name="prevayler-demo1" />
+        <module name="prevayler-facade" />
+        <module name="prevayler-factory" />
+        <module name="prevayler-jxpath" />
+        <module name="prevayler-log4j" />
+        <module name="prevayler-memento" />
+        <module name="prevayler-mirror" />
+        <module name="prevayler-mirror-tests" />
+        <module name="prevayler-scalability" />
+        <module name="prevayler-tests" />
+        <module name="prevayler-tutorials" />
+        <module name="prevayler-xstream" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="demos-parent" target="1.6" />
+      <module name="extras-parent" target="1.6" />
+      <module name="prevayler" target="1.6" />
+      <module name="prevayler-core" target="1.6" />
+      <module name="prevayler-demo1" target="1.6" />
+      <module name="prevayler-facade" target="1.6" />
+      <module name="prevayler-factory" target="1.6" />
+      <module name="prevayler-jxpath" target="1.6" />
+      <module name="prevayler-log4j" target="1.6" />
+      <module name="prevayler-memento" target="1.6" />
+      <module name="prevayler-mirror" target="1.6" />
+      <module name="prevayler-mirror-tests" target="1.6" />
+      <module name="prevayler-scalability" target="1.6" />
+      <module name="prevayler-tests" target="1.6" />
+      <module name="prevayler-tutorials" target="1.6" />
+      <module name="prevayler-xstream" target="1.6" />
+      <module name="spikes-parent" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

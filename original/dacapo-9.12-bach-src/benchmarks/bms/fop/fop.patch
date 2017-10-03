@@ -1,0 +1,16 @@
+diff -ur ../fop-0.95/src/java/org/apache/fop/cli/Main.java fop-0.95/src/java/org/apache/fop/cli/Main.java
+--- ../fop-0.95/src/java/org/apache/fop/cli/Main.java	2008-08-01 00:02:56.000000000 +1000
++++ fop-0.95/src/java/org/apache/fop/cli/Main.java	2009-06-16 23:02:09.000000000 +1000
+@@ -174,9 +174,9 @@
+             // System.exit(0) called to close AWT/SVG-created threads, if any.
+             // AWTRenderer closes with window shutdown, so exit() should not
+             // be called here
+-            if (!MimeConstants.MIME_FOP_AWT_PREVIEW.equals(outputFormat)) {
+-                System.exit(0);
+-            }
++            //if (!MimeConstants.MIME_FOP_AWT_PREVIEW.equals(outputFormat)) {
++            //    System.exit(0);
++            //}
+         } catch (Exception e) {
+             if (options != null) {
+                 options.getLogger().error("Exception", e);

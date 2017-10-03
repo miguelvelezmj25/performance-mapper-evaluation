@@ -6,6 +6,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Source;
 public class Example {
 
     public static void main(String[] args) throws InterruptedException {
+        System.out.println("Original");
         Sink.init();
         Options.A = Source.getOptionA(Boolean.valueOf(args[0]));
         Options.B = Source.getOptionB(Boolean.valueOf(args[1]));
@@ -25,27 +26,25 @@ public class Example {
         if(Workload.ONE) {
             Example.foo(a, b, c);
         }
-
     }
 
     public static void foo(boolean a, boolean b, boolean c) throws InterruptedException {
         boolean x = false;
 
         if(a) {
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             Example.moo(c);
             x = true;
         }
 
         if(b && x) {
-            Thread.sleep(4000);
+            Thread.sleep(2000);
         }
     }
 
     private static void moo(boolean c) throws InterruptedException {
         if(c) {
-            Thread.sleep(7000);
+            Thread.sleep(4000);
         }
     }
-
 }
