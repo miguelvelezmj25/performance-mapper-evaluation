@@ -28,7 +28,7 @@ public class Run {
     /** */
 
     public static void main(String[] args) {
-        System.out.println("Instrumented");
+        System.out.println("Instrument");
         Sink.init();
 
         Map<String, String> options = new HashMap<>();
@@ -49,8 +49,8 @@ public class Run {
         }
         String[] files = Arrays.copyOfRange(args, last, args.length);
         files = new String[1];
-//        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic-optimizer/images/optimizer/lena.png";
-        files[0] = "/home/mvelezce/programming/java/projects/systems/instrumented/pngtastic-optimizer/images/optimizer/lena.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-optimizer/images/optimizer/car.png";
+//        files[0] = "/home/mvelezce/programming/java/projects/systems/orignal/pngtastic-optimizer/images/optimizer/lena.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");
@@ -74,7 +74,7 @@ public class Run {
 
 //        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
 //        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
-//        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
+//        COMPRESSOR = Source.getOptionCOMPRESSOR(false);
 //        ITERATIONS = Source.getOptionITERATIONS(false);
 //        LOGLEVEL = Source.getOptionLOGLEVEL(true);
 

@@ -48,7 +48,7 @@ public class Run {
         String[] files = Arrays.copyOfRange(args, last, args.length);
 
         files = new String[1];
-        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/us.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/nyc.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");
@@ -70,7 +70,7 @@ public class Run {
 
 //        FREQTHRESHOLD = Source.getOptionFreqThreshold(false);
 //        DISTTHRESHOLD = Source.getOptionDistThreshold(false);
-//        MINALPHA = Source.getOptionMinAlpha(true);
+//        MINALPHA = Source.getOptionMinAlpha(false);
 //        TIMEOUT = Source.getOptionTimeout(true);
 //        LOGLEVEL = Source.getOptionLogLevel(true);
 
@@ -81,14 +81,14 @@ public class Run {
         String logLevel;
 
         if(DISTTHRESHOLD) {
-            distThreshold = 0.0D;
+            distThreshold = 0.005D;
         }
         else {
             distThreshold = 1.0D;
         }
 
         if(FREQTHRESHOLD) {
-            freqThreshold = 0.0D;
+            freqThreshold = 0.005D;
         }
         else {
             freqThreshold = 1.0D;
