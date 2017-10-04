@@ -9,6 +9,8 @@ import org.prevayler.PrevaylerFactory;
 import org.prevayler.foundation.monitor.Log4jMonitor;
 import org.prevayler.foundation.monitor.LoggingMonitor;
 import org.prevayler.foundation.monitor.SimpleMonitor;
+import org.prevayler.foundation.serialization.JavaSerializer;
+import org.prevayler.foundation.serialization.XStreamSerializer;
 import org.prevayler.implementation.clock.MachineClock;
 import org.prevayler.implementation.clock.PausableClock;
 
@@ -16,6 +18,8 @@ import java.io.File;
 
 public class PrimeNumbers {
 
+    public static boolean JOURNALSERIALIZER;
+    public static boolean SNAPSHOTSERIALIZER;
     public static boolean TRANSIENTMODE;
     public static boolean CLOCK;
     public static boolean DEEPCOPY;
@@ -42,6 +46,8 @@ public class PrimeNumbers {
         FILESIZETHRESHOLD = Source.getOptionFILESIZETHRESHOLD(Boolean.valueOf(args[4]));
         FILEAGETHRESHOLD = Source.getOptionFILEAGETHRESHOLD(Boolean.valueOf(args[5]));
         MONITOR = Source.getOptionMONITOR(Boolean.valueOf(args[6]));
+        JOURNALSERIALIZER = Source.getOptionJOURNALSERIALIZER(Boolean.valueOf(args[7]));
+        SNAPSHOTSERIALIZER = Source.getOptionSNAPSHOTSERIALIZER(Boolean.valueOf(args[8]));
 
 //        TRANSIENTMODE = Source.getOptionTRANSIENTMODE(false);
 //        CLOCK = Source.getOptionCLOCK(true);
@@ -93,17 +99,35 @@ public class PrimeNumbers {
             monitor = new SimpleMonitor();
         }
 
-        PrevaylerFactory<NumberKeeper> factory = new PrevaylerFactory<NumberKeeper>();
+        PrevaylerFactory<NumberKeeper> factory = new PrevaylerFactory<>();
         factory.configurePrevalentSystem(new NumberKeeper());
         factory.configurePrevalenceDirectory(dir);
 
-        factory.configureTransientMode(transientMode);
         factory.configureClock(clock);
+        factory.configureMonitor(monitor);
+        factory.configureTransientMode(transientMode);
         factory.configureTransactionDeepCopy(deepCopy);
         factory.configureJournalDiskSync(diskSync);
         factory.configureJournalFileSizeThreshold(fileSizeThreshold);
         factory.configureJournalFileAgeThreshold(fileAgeThreshold);
-        factory.configureMonitor(monitor);
+
+
+        if(JOURNALSERIALIZER) {
+            factory.configureJournalSerializer(new XStreamSerializer());
+        }
+        else {
+            factory.configureJournalSerializer(new JavaSerializer());
+        }
+
+        if(SNAPSHOTSERIALIZER) {
+            factory.configureSnapshotSerializer(new XStreamSerializer());
+        }
+        else {
+            factory.configureSnapshotSerializer(new JavaSerializer());
+        }
+
+        //factory.configureReplicationClient();
+        //factory.configureReplicationServer();
 
         Prevayler<NumberKeeper> prevayler = factory.create();
         new PrimeCalculator(prevayler).start();

@@ -23,23 +23,8 @@ public class PngtasticColorCounter {
 
     /** */
 
-
-    public static boolean FREQTHRESHOLD;
-    public static boolean DISTTHRESHOLD;
-    public static boolean MINALPHA;
-    public static boolean TIMEOUT;
-    public static boolean LOGLEVEL;
-
     public PngtasticColorCounter(String[] fileNames, String logLevel, double distThreshold, double freqThreshold,
                                  int minAlpha, long timeout) {
-
-//        Sink.getDecision(logLevel == null);
-//        Sink.getDecision(distThreshold > 0));
-//        Sink.getDecision(freqThreshold > 0));
-//        Sink.getDecision(minAlpha > 0));
-//        Sink.getDecision(timeout > 0));
-
-
         long start = System.currentTimeMillis();
         PngColorCounter counter = new PngColorCounter(logLevel, distThreshold, freqThreshold, minAlpha, timeout);
 

@@ -6,15 +6,22 @@ package edu.cmu.cs.mvelezce;
 public class Graph15 {
 
     public static void main(String[] args) {
-        System.out.println("");
+        System.out.println("start");
 
         try {
-            throw new RuntimeException();
+            System.out.println("");
+
+            if(args[0].equals("DSFSF")) {
+                throw new ArithmeticException();
+            }
+
+            System.out.println("");
+            throw new ArithmeticException();
         } catch (ArithmeticException e) {
             e.printStackTrace();
         }
 
-        System.out.println("");
+        System.out.println("end");
     }
 
 }
