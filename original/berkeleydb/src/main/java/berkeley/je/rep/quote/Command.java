@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
 import java.util.StringTokenizer;
 

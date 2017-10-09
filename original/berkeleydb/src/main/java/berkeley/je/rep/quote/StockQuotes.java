@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.je.*;
-import com.sleepycat.je.rep.*;
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityStore;
-import je.rep.quote.Command.InvalidCommandException;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.rep.*;
+import berkeley.com.sleepycat.persist.EntityCursor;
+import berkeley.com.sleepycat.persist.EntityStore;
+import berkeley.je.rep.quote.Command.InvalidCommandException;
 
 import java.io.*;
 import java.util.concurrent.TimeUnit;

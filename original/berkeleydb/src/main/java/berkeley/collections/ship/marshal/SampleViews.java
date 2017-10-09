@@ -11,18 +11,18 @@
  * license and additional information.
  */
 
-package collections.ship.marshal;
+package berkeley.collections.ship.marshal;
 
-import com.sleepycat.bind.EntityBinding;
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.TupleSerialBinding;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
-import com.sleepycat.collections.StoredSortedMap;
-import com.sleepycat.collections.StoredSortedValueSet;
-import com.sleepycat.util.RuntimeExceptionWrapper;
+import berkeley.com.sleepycat.bind.EntityBinding;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.ClassCatalog;
+import berkeley.com.sleepycat.bind.serial.TupleSerialBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.collections.StoredSortedMap;
+import berkeley.com.sleepycat.collections.StoredSortedValueSet;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * SampleViews defines the data bindings and collection views for the sample

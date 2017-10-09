@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.tuple;
+package berkeley.collections.ship.tuple;
 
 import java.io.Serializable;
 

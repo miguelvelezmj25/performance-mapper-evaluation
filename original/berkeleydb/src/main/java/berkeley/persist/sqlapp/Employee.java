@@ -11,14 +11,14 @@
  * license and additional information.
  */
 
-package persist.sqlapp;
+package berkeley.persist.sqlapp;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.SecondaryKey;
+import berkeley.com.sleepycat.persist.model.Entity;
+import berkeley.com.sleepycat.persist.model.PrimaryKey;
+import berkeley.com.sleepycat.persist.model.SecondaryKey;
 
-import static com.sleepycat.persist.model.DeleteAction.NULLIFY;
-import static com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
+import static berkeley.com.sleepycat.persist.model.DeleteAction.NULLIFY;
+import static berkeley.com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
 
 /**
  * The Employee entity class.

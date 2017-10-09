@@ -13,11 +13,11 @@
 
 // file MyDbEnv.java
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

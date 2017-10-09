@@ -13,13 +13,13 @@
 
 // File TxnGuideDPL.java
 
-package persist.txn;
+package berkeley.persist.txn;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.StoreConfig;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.persist.EntityStore;
+import berkeley.com.sleepycat.persist.StoreConfig;
 
 import java.io.File;
 

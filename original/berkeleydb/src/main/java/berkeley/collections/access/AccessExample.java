@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package collections.access;
+package berkeley.collections.access;
 
-import com.sleepycat.bind.ByteArrayBinding;
-import com.sleepycat.collections.StoredSortedMap;
-import com.sleepycat.collections.TransactionRunner;
-import com.sleepycat.collections.TransactionWorker;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.ByteArrayBinding;
+import berkeley.com.sleepycat.collections.StoredSortedMap;
+import berkeley.com.sleepycat.collections.TransactionRunner;
+import berkeley.com.sleepycat.collections.TransactionWorker;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.*;
 import java.util.Iterator;
@@ -181,7 +181,7 @@ public class AccessExample
                         }
                     }
                 });
-            } catch (com.sleepycat.je.DatabaseException e) {
+            } catch (berkeley.com.sleepycat.je.DatabaseException e) {
                 System.err.println("AccessExample: " + e);
                 System.exit(1);
             } catch (java.lang.Exception e) {

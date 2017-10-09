@@ -11,14 +11,14 @@
  * license and additional information.
  */
 
-package persist;
+package berkeley.persist;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.tuple.IntegerBinding;
-import com.sleepycat.bind.tuple.LongBinding;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.bind.tuple.IntegerBinding;
+import berkeley.com.sleepycat.bind.tuple.LongBinding;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 import java.io.Serializable;

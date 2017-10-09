@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.marshal;
+package berkeley.collections.ship.marshal;
 
 import java.io.Serializable;
 

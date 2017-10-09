@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package jmx;
+package berkeley.jmx;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.jmx.JEMBeanHelper;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.jmx.JEMBeanHelper;
 
 import javax.management.*;
 import java.io.File;

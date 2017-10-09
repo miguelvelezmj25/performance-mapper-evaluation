@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.je.rep.ReplicatedEnvironment;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.StoreConfig;
+import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
+import berkeley.com.sleepycat.persist.EntityStore;
+import berkeley.com.sleepycat.persist.StoreConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;

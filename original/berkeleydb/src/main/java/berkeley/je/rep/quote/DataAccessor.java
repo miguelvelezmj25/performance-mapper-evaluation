@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.PrimaryIndex;
+import berkeley.com.sleepycat.persist.EntityStore;
+import berkeley.com.sleepycat.persist.PrimaryIndex;
 
 class DataAccessor {
     /* Quote Accessor */

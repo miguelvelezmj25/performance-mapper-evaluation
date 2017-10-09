@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.index;
+package berkeley.collections.ship.index;
 
 import java.io.Serializable;
 

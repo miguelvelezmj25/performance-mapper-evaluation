@@ -13,12 +13,12 @@
 
 // file ExampleInventoryRead
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 import java.io.IOException;

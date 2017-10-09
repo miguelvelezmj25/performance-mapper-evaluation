@@ -11,23 +11,23 @@
  * license and additional information.
  */
 
-package persist;
+package berkeley.persist;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.persist.*;
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.Persistent;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.SecondaryKey;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.persist.*;
+import berkeley.com.sleepycat.persist.model.Entity;
+import berkeley.com.sleepycat.persist.model.Persistent;
+import berkeley.com.sleepycat.persist.model.PrimaryKey;
+import berkeley.com.sleepycat.persist.model.SecondaryKey;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.sleepycat.persist.model.DeleteAction.NULLIFY;
-import static com.sleepycat.persist.model.Relationship.*;
+import static berkeley.com.sleepycat.persist.model.DeleteAction.NULLIFY;
+import static berkeley.com.sleepycat.persist.model.Relationship.*;
 
 public class PersonExample {
 

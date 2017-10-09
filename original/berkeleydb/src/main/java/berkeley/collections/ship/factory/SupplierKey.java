@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
-import com.sleepycat.bind.tuple.MarshalledTupleEntry;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.bind.tuple.MarshalledTupleEntry;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 
 /**
  * A SupplierKey serves as the key in the key/data pair for a supplier entity.

@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package collections.ship.basic;
+package berkeley.collections.ship.basic;
 
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

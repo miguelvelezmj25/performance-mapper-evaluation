@@ -13,11 +13,11 @@
 
 // file InventoryBinding.java
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 
 public class InventoryBinding extends TupleBinding {
 

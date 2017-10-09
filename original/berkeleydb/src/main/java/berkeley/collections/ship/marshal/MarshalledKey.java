@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package collections.ship.marshal;
+package berkeley.collections.ship.marshal;
 
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 
 /**
  * MarshalledKey is implemented by key objects and called by {@link

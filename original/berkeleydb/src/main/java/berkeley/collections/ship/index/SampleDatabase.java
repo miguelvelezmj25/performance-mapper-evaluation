@@ -11,12 +11,12 @@
  * license and additional information.
  */
 
-package collections.ship.index;
+package berkeley.collections.ship.index;
 
-import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.SerialSerialKeyCreator;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.ClassCatalog;
+import berkeley.com.sleepycat.bind.serial.SerialSerialKeyCreator;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

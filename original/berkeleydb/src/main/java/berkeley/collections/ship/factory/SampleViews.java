@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
-import com.sleepycat.collections.StoredSortedMap;
-import com.sleepycat.collections.StoredSortedValueSet;
-import com.sleepycat.collections.TupleSerialFactory;
+import berkeley.com.sleepycat.collections.StoredSortedMap;
+import berkeley.com.sleepycat.collections.StoredSortedValueSet;
+import berkeley.com.sleepycat.collections.TupleSerialFactory;
 
 /**
  * SampleViews defines the data bindings and collection views for the sample

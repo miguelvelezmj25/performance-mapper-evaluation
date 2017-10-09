@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.sentity;
+package berkeley.collections.ship.sentity;
 
 import java.io.Serializable;
 

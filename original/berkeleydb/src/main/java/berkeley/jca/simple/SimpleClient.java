@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package jca.simple;
+package berkeley.jca.simple;
 
 import javax.naming.InitialContext;
 import java.util.Hashtable;

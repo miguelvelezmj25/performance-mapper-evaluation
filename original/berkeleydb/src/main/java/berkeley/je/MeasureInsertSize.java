@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package je;
+package berkeley.je;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.bind.tuple.TupleOutput;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

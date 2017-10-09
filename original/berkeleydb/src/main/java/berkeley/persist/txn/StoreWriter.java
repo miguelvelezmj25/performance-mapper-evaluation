@@ -11,12 +11,12 @@
  * license and additional information.
  */
 
-package persist.txn;
+package berkeley.persist.txn;
 
-import com.sleepycat.je.*;
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.PrimaryIndex;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.persist.EntityCursor;
+import berkeley.com.sleepycat.persist.EntityStore;
+import berkeley.com.sleepycat.persist.PrimaryIndex;
 
 import java.util.Random;
 

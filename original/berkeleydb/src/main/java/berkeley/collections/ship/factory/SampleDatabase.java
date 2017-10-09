@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.collections.TupleSerialFactory;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.collections.TupleSerialFactory;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

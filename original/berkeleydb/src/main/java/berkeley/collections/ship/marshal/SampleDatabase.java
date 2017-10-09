@@ -11,14 +11,14 @@
  * license and additional information.
  */
 
-package collections.ship.marshal;
+package berkeley.collections.ship.marshal;
 
-import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.serial.TupleSerialKeyCreator;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.ClassCatalog;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.bind.serial.TupleSerialKeyCreator;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

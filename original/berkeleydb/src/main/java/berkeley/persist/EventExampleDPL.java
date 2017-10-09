@@ -11,21 +11,21 @@
  * license and additional information.
  */
 
-package persist;
+package berkeley.persist;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.*;
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.SecondaryKey;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.je.Transaction;
+import berkeley.com.sleepycat.persist.*;
+import berkeley.com.sleepycat.persist.model.Entity;
+import berkeley.com.sleepycat.persist.model.PrimaryKey;
+import berkeley.com.sleepycat.persist.model.SecondaryKey;
 
 import java.io.File;
 import java.util.*;
 
-import static com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
+import static berkeley.com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
 
 /**
  * EventExampleDPL is a trivial example which stores Java objects that

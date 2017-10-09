@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
-import com.sleepycat.bind.tuple.MarshalledTupleKeyEntity;
-import com.sleepycat.bind.tuple.TupleInput;
-import com.sleepycat.bind.tuple.TupleOutput;
+import berkeley.com.sleepycat.bind.tuple.MarshalledTupleKeyEntity;
+import berkeley.com.sleepycat.bind.tuple.TupleInput;
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 
 import java.io.Serializable;
 

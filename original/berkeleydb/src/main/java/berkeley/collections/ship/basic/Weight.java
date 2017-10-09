@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.basic;
+package berkeley.collections.ship.basic;
 
 import java.io.Serializable;
 

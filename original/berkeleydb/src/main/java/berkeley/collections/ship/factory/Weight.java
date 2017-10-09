@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
 import java.io.Serializable;
 

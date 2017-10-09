@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package collections.ship.entity;
+package berkeley.collections.ship.entity;
 
-import com.sleepycat.collections.TransactionRunner;
-import com.sleepycat.collections.TransactionWorker;
-import com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.collections.TransactionRunner;
+import berkeley.com.sleepycat.collections.TransactionWorker;
+import berkeley.com.sleepycat.je.DatabaseException;
 
 import java.util.Iterator;
 import java.util.Set;

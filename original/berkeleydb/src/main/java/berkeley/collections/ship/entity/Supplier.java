@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.entity;
+package berkeley.collections.ship.entity;
 
 /**
  * A Supplier represents the combined key/data pair for a supplier entity.

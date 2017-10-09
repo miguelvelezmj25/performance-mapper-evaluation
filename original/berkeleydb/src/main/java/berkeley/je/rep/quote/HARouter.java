@@ -10,11 +10,11 @@
  * appropriate version of Oracle Berkeley DB Java Edition for a copy of the
  * license and additional information.
  */
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.je.rep.*;
-import com.sleepycat.je.rep.monitor.*;
-import je.rep.quote.Command.InvalidCommandException;
+import berkeley.com.sleepycat.je.rep.*;
+import berkeley.com.sleepycat.je.rep.monitor.*;
+import berkeley.je.rep.quote.Command.InvalidCommandException;
 
 import java.io.BufferedReader;
 import java.io.IOException;

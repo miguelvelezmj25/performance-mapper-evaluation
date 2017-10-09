@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package jca.simple;
+package berkeley.jca.simple;
 
 import javax.ejb.EJBObject;
 import java.rmi.RemoteException;

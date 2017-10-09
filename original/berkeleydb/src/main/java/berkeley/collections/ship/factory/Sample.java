@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package collections.ship.factory;
+package berkeley.collections.ship.factory;
 
-import com.sleepycat.collections.TransactionRunner;
-import com.sleepycat.collections.TransactionWorker;
+import berkeley.com.sleepycat.collections.TransactionRunner;
+import berkeley.com.sleepycat.collections.TransactionWorker;
 
 import java.util.Iterator;
 import java.util.Set;

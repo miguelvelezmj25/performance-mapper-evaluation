@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.je.rep.ReplicaWriteException;
-import com.sleepycat.je.rep.ReplicationNode;
-import com.sleepycat.je.rep.StateChangeEvent;
-import com.sleepycat.je.rep.StateChangeListener;
+import berkeley.com.sleepycat.je.Transaction;
+import berkeley.com.sleepycat.je.rep.ReplicaWriteException;
+import berkeley.com.sleepycat.je.rep.ReplicationNode;
+import berkeley.com.sleepycat.je.rep.StateChangeEvent;
+import berkeley.com.sleepycat.je.rep.StateChangeListener;
 
 import java.io.PrintStream;
 import java.rmi.NotBoundException;

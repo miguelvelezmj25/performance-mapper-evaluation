@@ -10,7 +10,7 @@
  * appropriate version of Oracle Berkeley DB Java Edition for a copy of the
  * license and additional information.
  */
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -11,16 +11,16 @@
  * license and additional information.
  */
 
-package persist;
+package berkeley.persist;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.persist.*;
-import com.sleepycat.persist.model.EntityModel;
-import com.sleepycat.persist.raw.RawObject;
-import com.sleepycat.persist.raw.RawStore;
-import com.sleepycat.persist.raw.RawType;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.persist.*;
+import berkeley.com.sleepycat.persist.model.EntityModel;
+import berkeley.com.sleepycat.persist.raw.RawObject;
+import berkeley.com.sleepycat.persist.raw.RawStore;
+import berkeley.com.sleepycat.persist.raw.RawType;
 
 import java.io.File;
 

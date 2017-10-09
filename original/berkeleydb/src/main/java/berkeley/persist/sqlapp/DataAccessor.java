@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package persist.sqlapp;
+package berkeley.persist.sqlapp;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.persist.*;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.persist.*;
 
 import java.util.Collection;
 

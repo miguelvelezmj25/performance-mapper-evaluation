@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package je.txn;
+package berkeley.je.txn;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.tuple.StringBinding;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.bind.tuple.StringBinding;
+import berkeley.com.sleepycat.je.*;
 
 import java.util.Random;
 

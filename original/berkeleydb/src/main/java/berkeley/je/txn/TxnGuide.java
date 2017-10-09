@@ -13,10 +13,10 @@
 
 // File TxnGuide.java
 
-package je.txn;
+package berkeley.je.txn;
 
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.je.*;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.je.*;
 
 import java.io.File;
 

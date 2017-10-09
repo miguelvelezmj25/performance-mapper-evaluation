@@ -13,12 +13,12 @@
 
 // file ItemNameKeyCreator.java
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.SecondaryDatabase;
-import com.sleepycat.je.SecondaryKeyCreator;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.je.DatabaseEntry;
+import berkeley.com.sleepycat.je.SecondaryDatabase;
+import berkeley.com.sleepycat.je.SecondaryKeyCreator;
 
 import java.io.IOException;
 

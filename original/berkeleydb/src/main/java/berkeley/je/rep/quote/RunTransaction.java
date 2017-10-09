@@ -11,12 +11,12 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.je.*;
-import com.sleepycat.je.Durability.ReplicaAckPolicy;
-import com.sleepycat.je.Durability.SyncPolicy;
-import com.sleepycat.je.rep.*;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
+import berkeley.com.sleepycat.je.Durability.SyncPolicy;
+import berkeley.com.sleepycat.je.rep.*;
 
 import java.io.PrintStream;
 

@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package collections.ship.sentity;
+package berkeley.collections.ship.sentity;
 
 /**
  * A PartKey serves as the key in the key/data pair for a part entity.

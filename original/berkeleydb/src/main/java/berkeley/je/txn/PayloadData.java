@@ -11,7 +11,7 @@
  * license and additional information.
  */
 
-package je.txn;
+package berkeley.je.txn;
 
 import java.io.Serializable;
 

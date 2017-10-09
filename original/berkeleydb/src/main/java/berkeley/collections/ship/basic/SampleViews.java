@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package collections.ship.basic;
+package berkeley.collections.ship.basic;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.collections.StoredEntrySet;
-import com.sleepycat.collections.StoredMap;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.ClassCatalog;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.collections.StoredEntrySet;
+import berkeley.com.sleepycat.collections.StoredMap;
 
 /**
  * SampleViews defines the data bindings and collection views for the sample

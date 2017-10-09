@@ -11,11 +11,11 @@
  * license and additional information.
  */
 
-package jca.simple;
+package berkeley.jca.simple;
 
-import com.sleepycat.je.*;
-import com.sleepycat.je.jca.ra.JEConnection;
-import com.sleepycat.je.jca.ra.JEConnectionFactory;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.jca.ra.JEConnection;
+import berkeley.com.sleepycat.je.jca.ra.JEConnectionFactory;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;

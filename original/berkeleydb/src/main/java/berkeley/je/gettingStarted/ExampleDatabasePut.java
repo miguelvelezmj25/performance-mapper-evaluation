@@ -13,14 +13,14 @@
 
 // file: ExampleDatabasePut.java
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Transaction;
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.je.DatabaseEntry;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.Transaction;
 
 import java.io.*;
 import java.util.ArrayList;

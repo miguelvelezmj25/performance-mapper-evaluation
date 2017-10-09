@@ -7,10 +7,10 @@
 
 import java.io.File
 
-import com.sleepycat.je.{Environment, EnvironmentConfig}
-import com.sleepycat.persist.model.Relationship.ONE_TO_ONE
-import com.sleepycat.persist.model.{Entity, PrimaryKey, SecondaryKey}
-import com.sleepycat.persist.{EntityCursor, EntityStore, StoreConfig}
+import berkeley.com.sleepycat.je.{Environment, EnvironmentConfig}
+import berkeley.com.sleepycat.persist.model.Relationship.ONE_TO_ONE
+import berkeley.com.sleepycat.persist.model.{Entity, PrimaryKey, SecondaryKey}
+import berkeley.com.sleepycat.persist.{EntityCursor, EntityStore, StoreConfig}
 
 /**
   * Simple example of using Berkeley DB Java Edition (JE) with Scala.  The JE

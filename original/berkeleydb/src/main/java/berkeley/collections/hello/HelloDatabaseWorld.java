@@ -11,19 +11,19 @@
  * license and additional information.
  */
 
-package collections.hello;
+package berkeley.collections.hello;
 
-import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.collections.StoredSortedMap;
-import com.sleepycat.collections.TransactionRunner;
-import com.sleepycat.collections.TransactionWorker;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.bind.serial.ClassCatalog;
+import berkeley.com.sleepycat.bind.serial.SerialBinding;
+import berkeley.com.sleepycat.bind.serial.StoredClassCatalog;
+import berkeley.com.sleepycat.bind.tuple.TupleBinding;
+import berkeley.com.sleepycat.collections.StoredSortedMap;
+import berkeley.com.sleepycat.collections.TransactionRunner;
+import berkeley.com.sleepycat.collections.TransactionWorker;
+import berkeley.com.sleepycat.je.Database;
+import berkeley.com.sleepycat.je.DatabaseConfig;
+import berkeley.com.sleepycat.je.Environment;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
 
 import java.io.File;
 import java.util.Iterator;

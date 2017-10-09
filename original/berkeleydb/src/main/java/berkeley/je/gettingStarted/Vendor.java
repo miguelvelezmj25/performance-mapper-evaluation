@@ -12,7 +12,7 @@
  */
 
 // file Vendor.java
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
 import java.io.Serializable;
 

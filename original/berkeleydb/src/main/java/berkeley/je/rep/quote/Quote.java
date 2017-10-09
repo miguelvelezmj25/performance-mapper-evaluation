@@ -11,10 +11,10 @@
  * license and additional information.
  */
 
-package je.rep.quote;
+package berkeley.je.rep.quote;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
+import berkeley.com.sleepycat.persist.model.Entity;
+import berkeley.com.sleepycat.persist.model.PrimaryKey;
 
 import java.io.Serializable;
 

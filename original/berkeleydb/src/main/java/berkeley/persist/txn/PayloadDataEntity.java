@@ -11,13 +11,13 @@
  * license and additional information.
  */
 
-package persist.txn;
+package berkeley.persist.txn;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.SecondaryKey;
+import berkeley.com.sleepycat.persist.model.Entity;
+import berkeley.com.sleepycat.persist.model.PrimaryKey;
+import berkeley.com.sleepycat.persist.model.SecondaryKey;
 
-import static com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
+import static berkeley.com.sleepycat.persist.model.Relationship.MANY_TO_ONE;
 
 @Entity
 public class PayloadDataEntity {

@@ -13,7 +13,7 @@
 
 // file Inventory.java
 
-package je.gettingStarted;
+package berkeley.je.gettingStarted;
 
 public class Inventory {
 
