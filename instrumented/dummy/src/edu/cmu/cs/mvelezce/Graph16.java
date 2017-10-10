@@ -63,16 +63,16 @@ public class Graph16 {
             return duplicate;
         }
 
+        public void setDuplicate(boolean duplicate) {
+            this.duplicate = duplicate;
+        }
+
         public int rgbaDistance(PngPixel pb, int bits) {
             return (int) Math.random();
         }
 
         public int getFreq() {
             return freq;
-        }
-
-        public void setDuplicate(boolean duplicate) {
-            this.duplicate = duplicate;
         }
     }
 

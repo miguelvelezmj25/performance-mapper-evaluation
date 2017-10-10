@@ -18,17 +18,17 @@ public class Regions1 {
 
         int i = 0;
 
-        if(A) {
+        if(A) { // A
             i++;
 
-            if(B) {
+            if(B) { // AB
                 i++;
-                if(C) {
+                if(C) { // ABC
                     i++;
                 }
             }
 
-            if(B) {
+            if(B) { // AB
                 i++;
             }
         }

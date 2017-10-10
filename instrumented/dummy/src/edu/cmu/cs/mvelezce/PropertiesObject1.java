@@ -31,10 +31,10 @@ public class PropertiesObject1 {
         }
 
         if(f != null) {
-        Sink.sink(f);
-        Sink.sink(f.isA());
-        Sink.sink(f.isB());
-        Sink.sink(f.isC());
+            Sink.sink(f);
+            Sink.sink(f.isA());
+            Sink.sink(f.isB());
+            Sink.sink(f.isC());
 
         }
 

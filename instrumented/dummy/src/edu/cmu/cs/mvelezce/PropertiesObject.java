@@ -3,8 +3,6 @@ package edu.cmu.cs.mvelezce;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
-import java.util.Properties;
-
 public class PropertiesObject {
 
     public static final Fields DEFAULT = new Fields();

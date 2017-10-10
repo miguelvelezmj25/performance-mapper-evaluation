@@ -3,29 +3,27 @@ package edu.cmu.cs.mvelezce;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
-public class Regions5 {
+public class Regions8 {
 
     static boolean A = Source.getOptionA(true);
+    static boolean B = Source.getOptionB(true);
 
     public static void main(String[] args) {
         Sink.init();
 
-        int x = 0;
-
-        if(A) {
-            x = 20;
-        }
-        else {
-            x = 10;
+        if(A) { // A
+            foo();
         }
 
-        int i = 0;
+        if(A) { // A
+            foo();
+        }
+    }
 
-        while (i < x) {
+    private static void foo() {
+        if(B) { // AB
             System.out.println();
-            i++;
         }
-
     }
 
 }

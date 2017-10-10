@@ -5,8 +5,8 @@ package edu.cmu.cs.mvelezce;
  */
 public class Sleep20 {
 
-    private static boolean B = false;
     public static boolean A = false;
+    private static boolean B = false;
 
     public static void main(String[] args) throws InterruptedException {
 //        int i = 2;
@@ -39,7 +39,7 @@ public class Sleep20 {
 
     public static void foo() {
         if(A) {
-            return ;
+            return;
         }
 
         System.out.println("");

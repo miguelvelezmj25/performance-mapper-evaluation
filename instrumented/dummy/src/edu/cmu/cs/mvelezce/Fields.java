@@ -6,7 +6,9 @@ public class Fields implements Cloneable {
     private boolean b = false;
     private boolean c = false;
 
-    public Fields() { ; }
+    public Fields() {
+        ;
+    }
 
     public Fields(boolean a, boolean b) {
         this.a = a;
@@ -29,7 +31,7 @@ public class Fields implements Cloneable {
         try {
             return (Fields) super.clone();
         } catch (CloneNotSupportedException e) {
-           return null;
+            return null;
         }
     }
 
