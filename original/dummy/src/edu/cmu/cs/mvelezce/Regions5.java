@@ -12,7 +12,6 @@ public class Regions5 {
 
         int x = 0;
 
-        Sink.sink(A);
         if(A) {
             x = 20;
         }
