@@ -28,4 +28,10 @@ public class Source {
     public static boolean getOptionMONITOR(boolean option) {
         return option;
     }
+
+    public static boolean getOptionJOURNALSERIALIZER(boolean option) { return option;
+    }
+
+    public static boolean getOptionSNAPSHOTSERIALIZER(boolean option) { return option;
+    }
 }

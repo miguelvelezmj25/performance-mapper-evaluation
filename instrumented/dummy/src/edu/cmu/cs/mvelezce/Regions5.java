@@ -21,7 +21,7 @@ public class Regions5 {
 
         int i = 0;
 
-        while (i < x) {
+        while(i < x) {
             System.out.println();
             i++;
         }

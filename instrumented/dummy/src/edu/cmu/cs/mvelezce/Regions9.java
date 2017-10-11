@@ -4,8 +4,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 /**
- * Tested that the inner regions B,B,C,D cannot be removed since they have different options affecting them.
- * Region D can be removed since it is inside C and the options in C are a subset of the options in D.
+ *  Removing regions. 2 regions are left
  */
 public class Regions9 {
 
@@ -14,8 +13,6 @@ public class Regions9 {
 
         boolean A = Source.getOptionA(true);
         boolean B = Source.getOptionB(true);
-
-        int i = 0;
 
         if(A) { // A
             System.out.println();

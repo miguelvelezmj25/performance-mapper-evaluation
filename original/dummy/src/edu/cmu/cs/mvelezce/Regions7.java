@@ -21,10 +21,10 @@ public class Regions7 {
         }
 
         if(x) {
-            x = !x;
+            y = !x;
         }
 
-        if(x) {
+        if(y) {
             System.out.println();
         }
 

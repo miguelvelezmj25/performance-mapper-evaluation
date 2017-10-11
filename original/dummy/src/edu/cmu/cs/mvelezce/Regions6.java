@@ -11,7 +11,6 @@ public class Regions6 {
         Sink.init();
 
         boolean x = false;
-        boolean y = false;
 
         if(A) {
             x = true;

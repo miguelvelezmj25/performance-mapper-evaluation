@@ -12,5 +12,4 @@ public class Source {
 
     public static boolean getOptionD(boolean option) { return option;
     }
-
 }

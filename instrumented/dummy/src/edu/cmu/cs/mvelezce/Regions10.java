@@ -3,6 +3,9 @@ package edu.cmu.cs.mvelezce;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
+/**
+ * Removing regions. no regions are removed and 3 are left
+ */
 public class Regions10 {
 
     private static boolean A = Source.getOptionA(true);

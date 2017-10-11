@@ -28,7 +28,7 @@ public class Run {
     /** */
 
     public static void main(String[] args) {
-        System.out.println("Instrument");
+        System.out.println("Instrumented");
         Sink.init();
 
         Map<String, String> options = new HashMap<>();
@@ -78,52 +78,31 @@ public class Run {
 //        ITERATIONS = Source.getOptionITERATIONS(false);
 //        LOGLEVEL = Source.getOptionLOGLEVEL(true);
 
-        Boolean removeGamma;
-        Integer compressionLevel;
-        String logLevel;
-        String compressor;
-        Integer iterations;
+        Boolean removeGamma = false;
+        Integer compressionLevel = 0;
+        String logLevel = "none";
+        String compressor = "none";
+        Integer iterations = 1;
 
         if(REMOVEGAMMA) {
             removeGamma = true;
-        }
-        else {
-            removeGamma = false;
         }
 
         if(COMPRESSIONLEVEL) {
             compressionLevel = 9;
         }
-        else {
-            compressionLevel = 0;
-        }
 
         if(COMPRESSOR) {
             compressor = "zopfli";
-        }
-        else {
-            compressor = "none";
         }
 
         if(ITERATIONS) {
             iterations = 32;
         }
-        else {
-            iterations = 1;
-        }
 
         if(LOGLEVEL) {
             logLevel = "debug";
         }
-        else {
-            logLevel = "none";
-        }
-
-//        Sink.getDecision(removeGamma);
-//        Sink.getDecision(compressionLevel == 0);
-//        Sink.getDecision(compressor == null);
-//        Sink.getDecision(iterations == 0);
-//        Sink.getDecision(logLevel == null);
 
         new PngtasticOptimizer(toDir, files, fileSuffix, removeGamma, compressionLevel, compressor, iterations, logLevel);
     }

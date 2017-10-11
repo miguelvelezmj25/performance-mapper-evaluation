@@ -9,12 +9,6 @@ public class Interactions {
 
     private transient Object a = null;
 
-    protected Interactions(boolean x) {
-        if(x == false) {
-            a = x;
-        }
-    }
-
     public static void main(String[] args) {
         Sink.init();
 
@@ -26,6 +20,12 @@ public class Interactions {
 
         Interactions i = new Interactions(a);
         i.moo();
+    }
+
+    protected Interactions(boolean x) {
+        if(x == false) {
+            a = x;
+        }
     }
 
     public void foo() {

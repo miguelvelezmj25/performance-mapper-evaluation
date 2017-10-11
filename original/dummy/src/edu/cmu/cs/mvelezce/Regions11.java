@@ -1,36 +1,43 @@
 package edu.cmu.cs.mvelezce;
 
-import edu.cmu.cs.mvelezce.analysis.option.Noop;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 public class Regions11 {
 
+    static boolean A;
+    static boolean B;
+
     public static void main(String[] args) {
         Sink.init();
 
-        boolean A = Source.getOptionA(true);
-        boolean B = Source.getOptionB(true);
+        A = Source.getOptionA(true);
+        B = Source.getOptionB(true);
 
-        foo(A, B);
+        boolean a = false;
+        boolean b = false;
+
+        if(A) {
+            a = true;
+        }
+
+        if(B) {
+            b = true;
+        }
+
+        foo(a, b);
     }
 
-
-    private static void foo(boolean a, boolean b) {
-        moo(a, b);
-    }
-
-    private static void moo(boolean a, boolean b) {
-        if(a) {
-            boo(b);
+    public static void foo(boolean x, boolean y) {
+        if(x) {
+            boo(y);
         }
     }
 
-    private static void boo(boolean b) {
-        if(b) {
+    public static void boo(boolean decision) {
+        if(decision) {
             System.out.println();
         }
     }
-
 
 }

@@ -27,7 +27,7 @@ public class Run {
     public static boolean LOGLEVEL;
 
     public static void main(String[] args) {
-        System.out.println("Instrumented");
+        System.out.println("Original");
         Sink.init();
         Map<String, String> options = new HashMap<>();
         int last = 0;
@@ -48,7 +48,7 @@ public class Run {
         String[] files = Arrays.copyOfRange(args, last, args.length);
 
         files = new String[1];
-        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/pngtastic-counter/images/optimizer/nyc.png";
+        files[0] = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/nyc.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");

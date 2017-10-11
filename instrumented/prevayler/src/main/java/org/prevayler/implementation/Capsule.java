@@ -1,5 +1,6 @@
 package org.prevayler.implementation;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.foundation.Chunk;
 import org.prevayler.foundation.serialization.Serializer;
 
@@ -24,6 +25,7 @@ public abstract class Capsule implements Serializable {
         } catch (Exception exception) {
             throw new Error("Unable to serialize transaction", exception);
         }
+
     }
 
     protected Capsule(byte[] serialized) {
@@ -62,6 +64,7 @@ public abstract class Capsule implements Serializable {
      * Executes a freshly deserialized copy of the transaction by default. If <code>configureTransactionDeepCopy</code> was set to <code>true</code> on your <code>PrevaylerFactory</code>, this will execute the transaction directly. The execution will synchronize on the prevalentSystem.
      */
     public void executeOn(Object prevalentSystem, Date executionTime, Serializer journalSerializer) {
+        System.out.println("miguel");
         Object transaction;
         if(_directTransaction != null) {
             transaction = _directTransaction;

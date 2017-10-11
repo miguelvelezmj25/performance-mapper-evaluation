@@ -15,8 +15,6 @@ public class Regions9 {
         boolean A = Source.getOptionA(true);
         boolean B = Source.getOptionB(true);
 
-        int i = 0;
-
         if(A) { // A
             System.out.println();
         }
