@@ -76,7 +76,7 @@ public class Run {
         COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
         COMPRESSOR = Source.getOptionCOMPRESSOR(true);
         ITERATIONS = Source.getOptionITERATIONS(false);
-        LOGLEVEL = Source.getOptionLOGLEVEL(true);
+        LOGLEVEL = Source.getOptionLOGLEVEL(false);
 
         Boolean removeGamma = false;
         Integer compressionLevel = 0;
