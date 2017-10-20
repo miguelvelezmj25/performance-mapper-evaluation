@@ -35,8 +35,11 @@ public class PngtasticCompressionHandler implements PngCompressionHandler {
      */
     @Override
     public byte[] deflate(PngByteArrayOutputStream inflatedImageData, Integer compressionLevel, boolean concurrent) throws IOException {
+//        final List<byte[]> results = (concurrent)
+//                ? deflateImageDataConcurrently(inflatedImageData, compressionLevel)
+//                : deflateImageDataSerially(inflatedImageData, compressionLevel, Deflater.DEFAULT_STRATEGY);
         final List<byte[]> results = (concurrent)
-                ? deflateImageDataConcurrently(inflatedImageData, compressionLevel)
+                ? deflateImageDataSerially(inflatedImageData, compressionLevel, Deflater.DEFAULT_STRATEGY)
                 : deflateImageDataSerially(inflatedImageData, compressionLevel, Deflater.DEFAULT_STRATEGY);
 
         byte[] result = null;
@@ -56,38 +59,38 @@ public class PngtasticCompressionHandler implements PngCompressionHandler {
         return Base64.encodeBytes(bytes);
     }
 
-    /*
-     * Do the work of deflating (compressing) the image data with the
-     * different compression strategies in separate threads to take
-     * advantage of multiple core architectures.
-     */
-    private List<byte[]> deflateImageDataConcurrently(final PngByteArrayOutputStream inflatedImageData, final Integer compressionLevel) {
-        final Collection<byte[]> results = new ConcurrentLinkedQueue<>();
-
-        final Collection<Callable<Object>> tasks = new ArrayList<>();
-        for(final int strategy : compressionStrategies) {
-            tasks.add(Executors.callable(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        results.add(PngtasticCompressionHandler.this.deflateImageData(inflatedImageData, strategy, compressionLevel));
-                    } catch (Throwable e) {
-                        PngtasticCompressionHandler.this.log.error("Uncaught Exception: %s", e.getMessage());
-                    }
-                }
-            }));
-        }
-
-        final ExecutorService compressionThreadPool = Executors.newFixedThreadPool(compressionStrategies.size());
-        try {
-            compressionThreadPool.invokeAll(tasks);
-        } catch (InterruptedException ex) {
-        } finally {
-            compressionThreadPool.shutdown();
-        }
-
-        return new ArrayList<>(results);
-    }
+//    /*
+//     * Do the work of deflating (compressing) the image data with the
+//     * different compression strategies in separate threads to take
+//     * advantage of multiple core architectures.
+//     */
+//    private List<byte[]> deflateImageDataConcurrently(final PngByteArrayOutputStream inflatedImageData, final Integer compressionLevel) {
+//        final Collection<byte[]> results = new ConcurrentLinkedQueue<>();
+//
+//        final Collection<Callable<Object>> tasks = new ArrayList<>();
+//        for(final int strategy : compressionStrategies) {
+//            tasks.add(Executors.callable(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        results.add(PngtasticCompressionHandler.this.deflateImageData(inflatedImageData, strategy, compressionLevel));
+//                    } catch (Throwable e) {
+//                        PngtasticCompressionHandler.this.log.error("Uncaught Exception: %s", e.getMessage());
+//                    }
+//                }
+//            }));
+//        }
+//
+//        final ExecutorService compressionThreadPool = Executors.newFixedThreadPool(compressionStrategies.size());
+//        try {
+//            compressionThreadPool.invokeAll(tasks);
+//        } catch (InterruptedException ex) {
+//        } finally {
+//            compressionThreadPool.shutdown();
+//        }
+//
+//        return new ArrayList<>(results);
+//    }
 
     /* */
     private List<byte[]> deflateImageDataSerially(PngByteArrayOutputStream inflatedImageData, Integer compressionLevel, Integer compressionStrategy) {

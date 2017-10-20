@@ -80,7 +80,49 @@ public class EntropyCodecFactory {
     }
 
 
-    public EntropyEncoder newEncoder(OutputBitStream obs, Map<String, Object> ctx, short entropyType) {
+//    public EntropyEncoder newEncoder(OutputBitStream obs, Map<String, Object> ctx, short entropyType) {
+//        if(obs == null) {
+//            throw new NullPointerException("Invalid null output bitstream parameter");
+//        }
+//
+//        switch (entropyType) {
+//            case HUFFMAN_TYPE:
+//                return new HuffmanEncoder(obs);
+//            case ANS0_TYPE:
+//                return new ANSRangeEncoder(obs, 0);
+//            case ANS1_TYPE:
+//                return new ANSRangeEncoder(obs, 1);
+//            case RANGE_TYPE:
+//                return new RangeEncoder(obs);
+//            case PAQ_TYPE:
+//                return new BinaryEntropyEncoder(obs, new PAQPredictor());
+//            case FPAQ_TYPE:
+//                return new BinaryEntropyEncoder(obs, new FPAQPredictor());
+//            case CM_TYPE:
+//                return new BinaryEntropyEncoder(obs, new CMPredictor());
+//            case TPAQ_TYPE:
+//                final int size = (Integer) ctx.get("blockSize");
+//                int logStates;
+//
+//                if(size >= 64 * 1024 * 1024) {
+//                    logStates = 29;
+//                }
+//                else if(size >= 16 * 1024 * 1024) {
+//                    logStates = 28;
+//                }
+//                else {
+//                    logStates = (size < 1024 * 1024) ? 26 : 27;
+//                }
+//
+//                return new BinaryEntropyEncoder(obs, new TPAQPredictor(logStates));
+//            case NONE_TYPE:
+//                return new NullEntropyEncoder(obs);
+//            default:
+//                throw new IllegalArgumentException("Unknown entropy codec type: " + (char) entropyType);
+//        }
+//    }
+
+    public EntropyEncoder newEncoder(OutputBitStream obs, int blockSize, short entropyType) {
         if(obs == null) {
             throw new NullPointerException("Invalid null output bitstream parameter");
         }
@@ -101,7 +143,7 @@ public class EntropyCodecFactory {
             case CM_TYPE:
                 return new BinaryEntropyEncoder(obs, new CMPredictor());
             case TPAQ_TYPE:
-                final int size = (Integer) ctx.get("blockSize");
+                final int size = blockSize;
                 int logStates;
 
                 if(size >= 64 * 1024 * 1024) {

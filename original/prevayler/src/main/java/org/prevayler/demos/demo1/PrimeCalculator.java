@@ -25,7 +25,28 @@ class PrimeCalculator {
                 ? 2
                 : _numberKeeper.lastNumber() + 1;
 
-        while (primeCandidate <= 5000000) {
+        while (primeCandidate <= 5_000_000) {
+            if(isPrime(primeCandidate)) {
+
+                _prevayler.execute(new NumberStorageTransaction(primeCandidate));
+
+                largestPrime = primeCandidate;
+                primesFound = _numberKeeper.numbers().size();
+//                System.out.println("Primes found: " + primesFound + ". Largest: " + largestPrime);
+            }
+
+            primeCandidate++;
+        }
+    }
+
+    void start1() throws Exception {
+        int largestPrime = 0;
+        int primesFound = 0;
+        int primeCandidate = _numberKeeper.lastNumber() == 0
+                ? 2
+                : _numberKeeper.lastNumber() + 1;
+
+        while (primeCandidate <= 10_000_000) {
             if(isPrime(primeCandidate)) {
 
                 _prevayler.execute(new NumberStorageTransaction(primeCandidate));

@@ -29,7 +29,8 @@ public class PrimeNumbers {
     public static boolean MONITOR;
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Original");
+        long start = System.nanoTime();
+        System.out.println("Instrument");
         Sink.init();
 
         String dir = "prime";
@@ -50,12 +51,12 @@ public class PrimeNumbers {
         SNAPSHOTSERIALIZER = Source.getOptionSNAPSHOTSERIALIZER(Boolean.valueOf(args[8]));
 
 //        TRANSIENTMODE = Source.getOptionTRANSIENTMODE(false);
-//        CLOCK = Source.getOptionCLOCK(true);
-//        DEEPCOPY = Source.getOptionDEEPCOPY(true);
-//        DISKSYNC = Source.getOptionDISKSYNC(true);
-//        FILESIZETHRESHOLD = Source.getOptionFILESIZETHRESHOLD(true);
-//        FILEAGETHRESHOLD = Source.getOptionFILEAGETHRESHOLD(true);
-//        MONITOR = Source.getOptionMONITOR(true);
+//        CLOCK = Source.getOptionCLOCK(false);
+//        DEEPCOPY = Source.getOptionDEEPCOPY(false);
+//        DISKSYNC = Source.getOptionDISKSYNC(false);
+//        FILESIZETHRESHOLD = Source.getOptionFILESIZETHRESHOLD(false);
+//        FILEAGETHRESHOLD = Source.getOptionFILEAGETHRESHOLD(false);
+//        MONITOR = Source.getOptionMONITOR(false);
 
         boolean transientMode = false;
         Clock clock;
@@ -126,10 +127,41 @@ public class PrimeNumbers {
             factory.configureSnapshotSerializer(new JavaSerializer());
         }
 
-        //factory.configureReplicationClient();
-        //factory.configureReplicationServer();
-
         Prevayler<NumberKeeper> prevayler = factory.create();
         new PrimeCalculator(prevayler).start();
+
+        factory = new PrevaylerFactory<>();
+        factory.configurePrevalentSystem(new NumberKeeper());
+        factory.configurePrevalenceDirectory(dir);
+
+        factory.configureClock(clock);
+        factory.configureMonitor(monitor);
+        factory.configureTransientMode(transientMode);
+        factory.configureTransactionDeepCopy(deepCopy);
+        factory.configureJournalDiskSync(diskSync);
+        factory.configureJournalFileSizeThreshold(fileSizeThreshold);
+        factory.configureJournalFileAgeThreshold(fileAgeThreshold);
+
+
+        if(JOURNALSERIALIZER) {
+            factory.configureJournalSerializer(new XStreamSerializer());
+        }
+        else {
+            factory.configureJournalSerializer(new JavaSerializer());
+        }
+
+        if(SNAPSHOTSERIALIZER) {
+            factory.configureSnapshotSerializer(new XStreamSerializer());
+        }
+        else {
+            factory.configureSnapshotSerializer(new JavaSerializer());
+        }
+
+        prevayler = factory.create();
+        new PrimeCalculator(prevayler).start1();
+
+        long end = System.nanoTime();
+
+        System.out.println((end - start) / 1000000000.0);
     }
 }

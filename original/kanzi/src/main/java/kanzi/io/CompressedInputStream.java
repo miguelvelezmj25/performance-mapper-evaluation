@@ -604,9 +604,14 @@ public class CompressedInputStream extends InputStream {
                     data.index = savedIdx + preTransformLength;
                 }
                 else {
-                    this.ctx.put("size", preTransformLength);
-                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(this.ctx,
+//                    this.ctx.put("size", preTransformLength);
+//                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(this.ctx,
+//                            typeOfTransform);
+
+                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(preTransformLength,
                             typeOfTransform);
+
+
                     transform.setSkipFlags((byte) ((mode >> 2) & ByteTransformSequence.SKIP_MASK));
                     buffer.index = 0;
 

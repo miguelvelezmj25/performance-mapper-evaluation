@@ -2,6 +2,8 @@ package optimizer.com.googlecode.pngtastic;
 
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
+import optimizer.com.googlecode.pngtastic.core.PngImage;
+import optimizer.com.googlecode.pngtastic.core.processing.zopfli.Buffer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,17 +68,17 @@ public class Run {
 //        String compressor = options.get("--compressor");
 //        Integer iterations = safeInteger(options.get("--iterations"));
 
-//        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[0]));
-//        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[1]));
-//        COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[2]));
-//        ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[3]));
-//        LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[4]));
+        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[0]));
+        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[1]));
+        COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[2]));
+        ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[3]));
+        LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[4]));
 
-        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
-        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
-        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
-        ITERATIONS = Source.getOptionITERATIONS(false);
-        LOGLEVEL = Source.getOptionLOGLEVEL(false);
+//        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
+//        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
+//        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
+//        ITERATIONS = Source.getOptionITERATIONS(false);
+//        LOGLEVEL = Source.getOptionLOGLEVEL(false);
 
         Boolean removeGamma = false;
         Integer compressionLevel = 0;

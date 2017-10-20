@@ -62,66 +62,121 @@ public class CompressedOutputStream extends OutputStream {
     private final int jobs;
     private final ExecutorService pool;
     private final List<Listener> listeners;
-    private final Map<String, Object> ctx;
+//    private final Map<String, Object> ctx;
 
 
-    public CompressedOutputStream(OutputStream os, Map<String, Object> ctx) {
+//    public CompressedOutputStream(OutputStream os, Map<String, Object> ctx) {
+//        if(os == null) {
+//            throw new NullPointerException("Invalid null output stream parameter");
+//        }
+//
+//        if(ctx == null) {
+//            throw new NullPointerException("Invalid null context parameter");
+//        }
+//
+//        String entropyCodec = (String) ctx.get("codec");
+//
+//        if(entropyCodec == null) {
+//            throw new NullPointerException("Invalid null entropy encoder type parameter");
+//        }
+//
+//        String transform = (String) ctx.get("transform");
+//
+//        if(transform == null) {
+//            throw new NullPointerException("Invalid null transform type parameter");
+//        }
+//
+//        final int bSize = (Integer) ctx.get("blockSize");
+//
+//        if(bSize > MAX_BITSTREAM_BLOCK_SIZE) {
+//            throw new IllegalArgumentException("The block size must be at most " + (MAX_BITSTREAM_BLOCK_SIZE >> 20) + " MB");
+//        }
+//
+//        if(bSize < MIN_BITSTREAM_BLOCK_SIZE) {
+//            throw new IllegalArgumentException("The block size must be at least " + MIN_BITSTREAM_BLOCK_SIZE);
+//        }
+//
+//        if((bSize & -16) != bSize) {
+//            throw new IllegalArgumentException("The block size must be a multiple of 16");
+//        }
+//
+//        final int tasks = (Integer) ctx.get("jobs");
+//
+//        if((tasks < 0) || (tasks > 16)) // 0 indicates no user choice
+//        {
+//            throw new IllegalArgumentException("The number of jobs must be in [1..16]");
+//        }
+//
+//        ExecutorService threadPool = (ExecutorService) ctx.get("pool");
+//
+//        if((tasks > 1) && (threadPool == null)) {
+//            throw new IllegalArgumentException("The thread pool cannot be null when the number of jobs is " + tasks);
+//        }
+//
+//        final int bufferSize = (bSize <= 65536) ? bSize : 65536;
+//        this.obs = new DefaultOutputBitStream(os, bufferSize);
+//        this.entropyType = new EntropyCodecFactory().getType(entropyCodec);
+//        this.transformType = new ByteFunctionFactory().getType(transform);
+//        this.blockSize = bSize;
+//        final boolean checksum = (Boolean) ctx.get("checksum");
+//        this.hasher = (checksum == true) ? new XXHash32(BITSTREAM_TYPE) : null;
+//        this.jobs = (tasks == 0) ? 1 : tasks;
+//        this.pool = threadPool;
+//        this.sa = new SliceByteArray(new byte[this.blockSize * this.jobs], 0);
+//        this.buffers = new SliceByteArray[2 * this.jobs];
+//        this.closed = new AtomicBoolean(false);
+//        this.initialized = new AtomicBoolean(false);
+//
+//        for(int i = 0; i < this.buffers.length; i++)
+//            this.buffers[i] = new SliceByteArray(EMPTY_BYTE_ARRAY, 0);
+//
+//        this.blockId = new AtomicInteger(0);
+//        this.listeners = new ArrayList<>(10);
+//        this.ctx = ctx;
+//    }
+
+    public CompressedOutputStream(OutputStream os, int blockSize, boolean checksum, ExecutorService pool, int jobs, String codec, String transform) {
         if(os == null) {
             throw new NullPointerException("Invalid null output stream parameter");
         }
 
-        if(ctx == null) {
-            throw new NullPointerException("Invalid null context parameter");
-        }
-
-        String entropyCodec = (String) ctx.get("codec");
-
-        if(entropyCodec == null) {
+        if(codec == null) {
             throw new NullPointerException("Invalid null entropy encoder type parameter");
         }
-
-        String transform = (String) ctx.get("transform");
 
         if(transform == null) {
             throw new NullPointerException("Invalid null transform type parameter");
         }
 
-        final int bSize = (Integer) ctx.get("blockSize");
-
-        if(bSize > MAX_BITSTREAM_BLOCK_SIZE) {
+        if(blockSize > MAX_BITSTREAM_BLOCK_SIZE) {
             throw new IllegalArgumentException("The block size must be at most " + (MAX_BITSTREAM_BLOCK_SIZE >> 20) + " MB");
         }
 
-        if(bSize < MIN_BITSTREAM_BLOCK_SIZE) {
+        if(blockSize < MIN_BITSTREAM_BLOCK_SIZE) {
             throw new IllegalArgumentException("The block size must be at least " + MIN_BITSTREAM_BLOCK_SIZE);
         }
 
-        if((bSize & -16) != bSize) {
+        if((blockSize & -16) != blockSize) {
             throw new IllegalArgumentException("The block size must be a multiple of 16");
         }
 
-        final int tasks = (Integer) ctx.get("jobs");
-
-        if((tasks < 0) || (tasks > 16)) // 0 indicates no user choice
+        if((jobs < 0) || (jobs > 16)) // 0 indicates no user choice
         {
             throw new IllegalArgumentException("The number of jobs must be in [1..16]");
         }
 
-        ExecutorService threadPool = (ExecutorService) ctx.get("pool");
-
-        if((tasks > 1) && (threadPool == null)) {
-            throw new IllegalArgumentException("The thread pool cannot be null when the number of jobs is " + tasks);
+        if((jobs > 1) && (pool == null)) {
+            throw new IllegalArgumentException("The thread pool cannot be null when the number of jobs is " + jobs);
         }
 
-        final int bufferSize = (bSize <= 65536) ? bSize : 65536;
+        final int bufferSize = (blockSize <= 65536) ? blockSize : 65536;
         this.obs = new DefaultOutputBitStream(os, bufferSize);
-        this.entropyType = new EntropyCodecFactory().getType(entropyCodec);
+        this.entropyType = new EntropyCodecFactory().getType(codec);
         this.transformType = new ByteFunctionFactory().getType(transform);
-        this.blockSize = bSize;
-        final boolean checksum = (Boolean) ctx.get("checksum");
+        this.blockSize = blockSize;
         this.hasher = (checksum == true) ? new XXHash32(BITSTREAM_TYPE) : null;
-        this.jobs = (tasks == 0) ? 1 : tasks;
-        this.pool = threadPool;
+        this.jobs = (jobs == 0) ? 1 : jobs;
+        this.pool = pool;
         this.sa = new SliceByteArray(new byte[this.blockSize * this.jobs], 0);
         this.buffers = new SliceByteArray[2 * this.jobs];
         this.closed = new AtomicBoolean(false);
@@ -132,7 +187,7 @@ public class CompressedOutputStream extends OutputStream {
 
         this.blockId = new AtomicInteger(0);
         this.listeners = new ArrayList<>(10);
-        this.ctx = ctx;
+//        this.ctx = ctx;
     }
 
     static void notifyListeners(Listener[] listeners, Event evt) {
@@ -377,11 +432,18 @@ public class CompressedOutputStream extends OutputStream {
 
                 System.arraycopy(this.sa.array, this.sa.index, this.buffers[2 * jobId].array, 0, sz);
 
+//                Callable<Status> task = new EncodingTask(this.buffers[2 * jobId],
+//                        this.buffers[2 * jobId + 1], sz, this.transformType,
+//                        this.entropyType, firstBlockId + jobId + 1,
+//                        this.obs, this.hasher, this.blockId,
+//                        blockListeners, new HashMap<>(this.ctx));
                 Callable<Status> task = new EncodingTask(this.buffers[2 * jobId],
                         this.buffers[2 * jobId + 1], sz, this.transformType,
                         this.entropyType, firstBlockId + jobId + 1,
                         this.obs, this.hasher, this.blockId,
-                        blockListeners, new HashMap<>(this.ctx));
+                        blockListeners, this.blockSize);
+
+
                 tasks.add(task);
                 this.sa.index += sz;
             }
@@ -435,14 +497,33 @@ public class CompressedOutputStream extends OutputStream {
         private final XXHash32 hasher;
         private final AtomicInteger processedBlockId;
         private final Listener[] listeners;
-        private final Map<String, Object> ctx;
+        private final int blockSize;
+//        private final Map<String, Object> ctx;
 
+
+//        EncodingTask(SliceByteArray iBuffer, SliceByteArray oBuffer, int length,
+//                     short transformType, short entropyType, int blockId,
+//                     OutputBitStream obs, XXHash32 hasher,
+//                     AtomicInteger processedBlockId, Listener[] listeners,
+//                     Map<String, Object> ctx) {
+//            this.data = iBuffer;
+//            this.buffer = oBuffer;
+//            this.length = length;
+//            this.transformType = transformType;
+//            this.entropyType = entropyType;
+//            this.blockId = blockId;
+//            this.obs = obs;
+//            this.hasher = hasher;
+//            this.processedBlockId = processedBlockId;
+//            this.listeners = listeners;
+//            this.ctx = ctx;
+//        }
 
         EncodingTask(SliceByteArray iBuffer, SliceByteArray oBuffer, int length,
                      short transformType, short entropyType, int blockId,
                      OutputBitStream obs, XXHash32 hasher,
                      AtomicInteger processedBlockId, Listener[] listeners,
-                     Map<String, Object> ctx) {
+                     int blockSize) {
             this.data = iBuffer;
             this.buffer = oBuffer;
             this.length = length;
@@ -453,7 +534,7 @@ public class CompressedOutputStream extends OutputStream {
             this.hasher = hasher;
             this.processedBlockId = processedBlockId;
             this.listeners = listeners;
-            this.ctx = ctx;
+            this.blockSize = blockSize;
         }
 
 
@@ -511,8 +592,11 @@ public class CompressedOutputStream extends OutputStream {
                     mode = (byte) (SMALL_BLOCK_MASK | (blockLength & COPY_LENGTH_MASK));
                 }
                 else {
-                    this.ctx.put("size", blockLength);
-                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(this.ctx, typeOfTransform);
+//                    this.ctx.put("size", blockLength);
+//                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(this.ctx, typeOfTransform);
+
+                    ByteTransformSequence transform = new ByteFunctionFactory().newFunction(blockLength, typeOfTransform);
+
                     int requiredSize = transform.getMaxEncodedLength(blockLength);
 
                     if(buffer.length < requiredSize) {
@@ -586,7 +670,8 @@ public class CompressedOutputStream extends OutputStream {
 
                 // Each block is encoded separately
                 // Rebuild the entropy encoder to reset block statistics
-                ee = new EntropyCodecFactory().newEncoder(this.obs, this.ctx, typeOfEntropy);
+//                ee = new EntropyCodecFactory().newEncoder(this.obs, this.ctx, typeOfEntropy);
+                ee = new EntropyCodecFactory().newEncoder(this.obs, this.blockSize, typeOfEntropy);
 
                 // Entropy encode block
                 if(ee.encode(buffer.array, 0, postTransformLength) != postTransformLength) {

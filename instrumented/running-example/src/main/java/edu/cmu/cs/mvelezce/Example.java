@@ -6,7 +6,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Source;
 public class Example {
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("Original");
+        System.out.println("Instrumented");
         Sink.init();
         Options.A = Source.getOptionA(Boolean.valueOf(args[0]));
         Options.B = Source.getOptionB(Boolean.valueOf(args[1]));

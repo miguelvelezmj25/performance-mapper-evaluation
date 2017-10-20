@@ -64,7 +64,6 @@ public abstract class Capsule implements Serializable {
      * Executes a freshly deserialized copy of the transaction by default. If <code>configureTransactionDeepCopy</code> was set to <code>true</code> on your <code>PrevaylerFactory</code>, this will execute the transaction directly. The execution will synchronize on the prevalentSystem.
      */
     public void executeOn(Object prevalentSystem, Date executionTime, Serializer journalSerializer) {
-        System.out.println("miguel");
         Object transaction;
         if(_directTransaction != null) {
             transaction = _directTransaction;

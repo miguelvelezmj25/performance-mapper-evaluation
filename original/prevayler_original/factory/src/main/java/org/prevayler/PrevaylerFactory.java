@@ -45,7 +45,7 @@ public class PrevaylerFactory<P> {
     private P _prevalentSystem;
     private Clock _clock;
     private boolean _transactionDeepCopyMode = true;
-    private boolean _transientMode;
+    private boolean _transientMode = true;
     private String _prevalenceDirectory;
     private NullSnapshotManager<P> _nullSnapshotManager;
     private long _journalSizeThreshold;

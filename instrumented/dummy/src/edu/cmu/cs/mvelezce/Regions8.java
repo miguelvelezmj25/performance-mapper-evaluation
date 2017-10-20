@@ -29,5 +29,4 @@ public class Regions8 {
             System.out.println();
         }
     }
-
 }

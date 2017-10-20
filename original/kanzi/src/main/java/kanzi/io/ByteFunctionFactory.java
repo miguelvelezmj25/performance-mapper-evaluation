@@ -38,9 +38,58 @@ public class ByteFunctionFactory {
     public static final short TIMESTAMP_TYPE = 9;  // TimeStamp
     public static final short TEXTCODEC_TYPE = 10; // Text codec
 
-    private static ByteTransform newFunctionToken(Map<String, Object> ctx, short functionType) {
-        final int size = (Integer) ctx.get("size");
+//    private static ByteTransform newFunctionToken(Map<String, Object> ctx, short functionType) {
+//        final int size = (Integer) ctx.get("size");
+//
+//        switch (functionType & 0x0F) {
+//            case SNAPPY_TYPE:
+//                return new SnappyCodec();
+//
+//            case LZ4_TYPE:
+//                return new LZ4Codec();
+//
+//            case BWT_TYPE:
+//                return new BWTBlockCodec();
+//
+//            case BWTS_TYPE:
+//                return new BWTS();
+//
+//            case MTFT_TYPE:
+//                return new MTFT();
+//
+//            case ZRLT_TYPE:
+//                return new ZRLT();
+//
+//            case RLT_TYPE:
+//                return new RLT();
+//
+//            case RANK_TYPE:
+//                return new SBRT(SBRT.MODE_RANK);
+//
+//            case TEXTCODEC_TYPE:
+//                // Select an appropriate initial dictionary size
+//                int dictSize = 1 << 12;
+//
+//                for(int i = 14; i <= 24; i += 2) {
+//                    if(size >= 1 << i) {
+//                        dictSize <<= 1;
+//                    }
+//                }
+//
+//                return new TextCodec(dictSize);
+//
+//            case TIMESTAMP_TYPE:
+//                return new SBRT(SBRT.MODE_TIMESTAMP);
+//
+//            case NULL_TRANSFORM_TYPE:
+//                return new NullFunction();
+//
+//            default:
+//                throw new IllegalArgumentException("Unknown transform type: " + functionType);
+//        }
+//    }
 
+    private static ByteTransform newFunctionToken(int size, short functionType) {
         switch (functionType & 0x0F) {
             case SNAPPY_TYPE:
                 return new SnappyCodec();
@@ -204,7 +253,36 @@ public class ByteFunctionFactory {
         }
     }
 
-    public ByteTransformSequence newFunction(Map<String, Object> ctx, short functionType) {
+//    public ByteTransformSequence newFunction(Map<String, Object> ctx, short functionType) {
+//        int nbtr = 0;
+//
+//        // Several transforms
+//        for(int i = 0; i < 4; i++) {
+//            if(((functionType >>> (12 - 4 * i)) & 0x0F) != NULL_TRANSFORM_TYPE) {
+//                nbtr++;
+//            }
+//        }
+//
+//        // Only null transforms ? Keep first.
+//        if(nbtr == 0) {
+//            nbtr = 1;
+//        }
+//
+//        ByteTransform[] transforms = new ByteTransform[nbtr];
+//        nbtr = 0;
+//
+//        for(int i = 0; i < transforms.length; i++) {
+//            int t = (functionType >>> (12 - 4 * i)) & 0x0F;
+//
+//            if((t != NULL_TRANSFORM_TYPE) || (i == 0)) {
+//                transforms[nbtr++] = newFunctionToken(ctx, (short) t);
+//            }
+//        }
+//
+//        return new ByteTransformSequence(transforms);
+//    }
+
+    public ByteTransformSequence newFunction(int size, short functionType) {
         int nbtr = 0;
 
         // Several transforms
@@ -226,7 +304,7 @@ public class ByteFunctionFactory {
             int t = (functionType >>> (12 - 4 * i)) & 0x0F;
 
             if((t != NULL_TRANSFORM_TYPE) || (i == 0)) {
-                transforms[nbtr++] = newFunctionToken(ctx, (short) t);
+                transforms[nbtr++] = newFunctionToken(size, (short) t);
             }
         }
 

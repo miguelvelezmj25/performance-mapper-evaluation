@@ -10,9 +10,12 @@ import java.io.InputStreamReader;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        printMessage();
+//        printMessage();
         Prevayler<NumberKeeper> prevayler = PrevaylerFactory.createPrevayler(new NumberKeeper(), "demo1");
         new PrimeCalculator(prevayler).start();
+
+        prevayler = PrevaylerFactory.createPrevayler(new NumberKeeper(), "demo1");
+        new PrimeCalculator(prevayler).start1();
     }
 
     static private void printMessage() throws Exception {

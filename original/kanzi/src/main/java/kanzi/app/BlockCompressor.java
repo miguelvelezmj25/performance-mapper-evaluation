@@ -281,14 +281,16 @@ public class BlockCompressor implements Runnable, Callable<Integer> {
             }
 
             try {
-                Map<String, Object> ctx = new HashMap<>();
-                ctx.put("blockSize", this.blockSize);
-                ctx.put("checksum", this.checksum);
-                ctx.put("pool", this.pool);
-                ctx.put("jobs", this.jobs);
-                ctx.put("codec", this.codec);
-                ctx.put("transform", this.transform);
-                this.cos = new CompressedOutputStream(os, ctx);
+//                Map<String, Object> ctx = new HashMap<>();
+//                ctx.put("blockSize", this.blockSize);
+//                ctx.put("checksum", this.checksum);
+//                ctx.put("pool", this.pool);
+//                ctx.put("jobs", this.jobs);
+//                ctx.put("codec", this.codec);
+//                ctx.put("transform", this.transform);
+//                this.cos = new CompressedOutputStream(os, ctx);
+                this.cos = new CompressedOutputStream(os, this.blockSize, this.checksum, this.pool, this.jobs,
+                        this.codec, this.transform);
 
                 for(Listener bl : this.listeners)
                     this.cos.addListener(bl);
