@@ -57,6 +57,8 @@ public class PrimeNumbers {
 //        FILESIZETHRESHOLD = Source.getOptionFILESIZETHRESHOLD(false);
 //        FILEAGETHRESHOLD = Source.getOptionFILEAGETHRESHOLD(false);
 //        MONITOR = Source.getOptionMONITOR(false);
+//        JOURNALSERIALIZER = Source.getOptionJOURNALSERIALIZER(false);
+//        SNAPSHOTSERIALIZER = Source.getOptionSNAPSHOTSERIALIZER(false);
 
         boolean transientMode = false;
         Clock clock;

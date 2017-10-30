@@ -30,7 +30,7 @@ public class PrimeNumbers {
 
     public static void main(String[] args) throws Exception {
         long start = System.nanoTime();
-        System.out.println("Instrument");
+        System.out.println("Instrumented");
         Sink.init();
 
         String dir = "prime";
@@ -57,6 +57,8 @@ public class PrimeNumbers {
 //        FILESIZETHRESHOLD = Source.getOptionFILESIZETHRESHOLD(false);
 //        FILEAGETHRESHOLD = Source.getOptionFILEAGETHRESHOLD(false);
 //        MONITOR = Source.getOptionMONITOR(false);
+//        JOURNALSERIALIZER = Source.getOptionJOURNALSERIALIZER(false);
+//        SNAPSHOTSERIALIZER = Source.getOptionSNAPSHOTSERIALIZER(false);
 
         boolean transientMode = false;
         Clock clock;
