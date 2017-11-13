@@ -108,7 +108,7 @@ class QuoteUtil {
             out.println(commandLine);
             in = new BufferedReader(new InputStreamReader(socket
                     .getInputStream()));
-            while (true) {
+            while(true) {
                 String line = in.readLine();
                 if(line == null) {
                     break;
@@ -134,21 +134,21 @@ class QuoteUtil {
             if(in != null) {
                 in.close();
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             // Ignore exceptions during cleanup
         }
         try {
             if(out != null) {
                 out.close();
             }
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             // Ignore exceptions during cleanup
         }
         try {
             if(socket != null) {
                 socket.close();
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             // Ignore exceptions during cleanup
         }
     }

@@ -38,24 +38,7 @@ public class CheckpointConfig implements Cloneable {
     }
 
     /**
-     * Configures the checkpoint log data threshold, in kilobytes.
-     *
-     * <p>The default is 0 for this class and the database environment.</p>
-     *
-     * @param kBytes If the kBytes parameter is non-zero, a checkpoint will
-     * be performed if more than kBytes of log data have been written since
-     * the last checkpoint.
-     *
-     * @return this
-     */
-    public CheckpointConfig setKBytes(int kBytes) {
-        setKBytesVoid(kBytes);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setKBytesVoid(int kBytes) {
         this.kBytes = kBytes;
@@ -63,7 +46,7 @@ public class CheckpointConfig implements Cloneable {
 
     /**
      * Returns the checkpoint log data threshold, in kilobytes.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -74,24 +57,22 @@ public class CheckpointConfig implements Cloneable {
     }
 
     /**
-     * Configures the checkpoint time threshold, in minutes.
-     *
+     * Configures the checkpoint log data threshold, in kilobytes.
+     * <p>
      * <p>The default is 0 for this class and the database environment.</p>
      *
-     * @param minutes If the minutes parameter is non-zero, a checkpoint is
-     * performed if more than min minutes have passed since the last
-     * checkpoint.
-     *
+     * @param kBytes If the kBytes parameter is non-zero, a checkpoint will
+     *               be performed if more than kBytes of log data have been written since
+     *               the last checkpoint.
      * @return this
      */
-    public CheckpointConfig setMinutes(int minutes) {
-        setMinutesVoid(minutes);
+    public CheckpointConfig setKBytes(int kBytes) {
+        setKBytesVoid(kBytes);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMinutesVoid(int minutes) {
         this.minutes = minutes;
@@ -107,23 +88,22 @@ public class CheckpointConfig implements Cloneable {
     }
 
     /**
-     * Configures the checkpoint force option.
+     * Configures the checkpoint time threshold, in minutes.
+     * <p>
+     * <p>The default is 0 for this class and the database environment.</p>
      *
-     * <p>The default is false for this class and the BDB JE environment.</p>
-     *
-     * @param force If set to true, force a checkpoint, even if there has
-     * been no activity since the last checkpoint.
-     *
+     * @param minutes If the minutes parameter is non-zero, a checkpoint is
+     *                performed if more than min minutes have passed since the last
+     *                checkpoint.
      * @return this
      */
-    public CheckpointConfig setForce(boolean force) {
-        setForceVoid(force);
+    public CheckpointConfig setMinutes(int minutes) {
+        setMinutesVoid(minutes);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setForceVoid(boolean force) {
         this.force = force;
@@ -139,25 +119,21 @@ public class CheckpointConfig implements Cloneable {
     }
 
     /**
-     * Configures the minimize recovery time option.
-     *
+     * Configures the checkpoint force option.
+     * <p>
      * <p>The default is false for this class and the BDB JE environment.</p>
      *
-     * @param minimizeRecoveryTime If set to true, the checkpoint will itself
-     * take longer but will cause a subsequent recovery (Environment.open) to
-     * finish more quickly.
-     *
+     * @param force If set to true, force a checkpoint, even if there has
+     *              been no activity since the last checkpoint.
      * @return this
      */
-    public CheckpointConfig
-        setMinimizeRecoveryTime(boolean minimizeRecoveryTime) {
-        setMinimizeRecoveryTimeVoid(minimizeRecoveryTime);
+    public CheckpointConfig setForce(boolean force) {
+        setForceVoid(force);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMinimizeRecoveryTimeVoid(boolean minimizeRecoveryTime) {
         this.minimizeRecoveryTime = minimizeRecoveryTime;
@@ -173,13 +149,29 @@ public class CheckpointConfig implements Cloneable {
     }
 
     /**
+     * Configures the minimize recovery time option.
+     * <p>
+     * <p>The default is false for this class and the BDB JE environment.</p>
+     *
+     * @param minimizeRecoveryTime If set to true, the checkpoint will itself
+     *                             take longer but will cause a subsequent recovery (Environment.open) to
+     *                             finish more quickly.
+     * @return this
+     */
+    public CheckpointConfig
+    setMinimizeRecoveryTime(boolean minimizeRecoveryTime) {
+        setMinimizeRecoveryTimeVoid(minimizeRecoveryTime);
+        return this;
+    }
+
+    /**
      * Returns a copy of this configuration object.
      */
     @Override
     public CheckpointConfig clone() {
         try {
             return (CheckpointConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -192,9 +184,9 @@ public class CheckpointConfig implements Cloneable {
     @Override
     public String toString() {
         return "minutes=" + minutes +
-            "\nkBytes=" + kBytes +
-            "\nforce=" + force +
-            "\nminimizeRecoveryTime=" + minimizeRecoveryTime +
-            "\n";
+                "\nkBytes=" + kBytes +
+                "\nforce=" + force +
+                "\nminimizeRecoveryTime=" + minimizeRecoveryTime +
+                "\n";
     }
 }

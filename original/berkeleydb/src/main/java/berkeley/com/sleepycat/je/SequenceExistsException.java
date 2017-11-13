@@ -17,7 +17,7 @@ package berkeley.com.sleepycat.je;
  * Thrown by {@link Database#openSequence Database.openSequence} if the
  * sequence record already exists and the {@code SequenceConfig
  * ExclusiveCreate} parameter is true.
- *
+ * <p>
  * <p>The {@link Transaction} handle is <em>not</em> invalidated as a result of
  * this exception.</p>
  *
@@ -27,26 +27,29 @@ public class SequenceExistsException extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public SequenceExistsException(String message) {
         super(null /*locker*/, false /*abortOnly*/, message, null /*cause*/);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private SequenceExistsException(String message,
                                     SequenceExistsException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

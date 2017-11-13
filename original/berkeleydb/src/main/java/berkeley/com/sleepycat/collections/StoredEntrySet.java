@@ -13,22 +13,23 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.je.DatabaseEntry;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
+import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.util.Map;
 import java.util.Set;
 
-import berkeley.com.sleepycat.je.DatabaseEntry;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * The Set returned by Map.entrySet().  This class may not be instantiated
  * directly.  Contrary to what is stated by {@link Map#entrySet} this class
  * does support the {@link #add} and {@link #addAll} methods.
- *
+ * <p>
  * <p>The {@link java.util.Map.Entry#setValue} method of the Map.Entry objects
  * that are returned by this class and its iterators behaves just as the {@link
  * StoredIterator#set} method does.</p>
@@ -36,8 +37,8 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class StoredEntrySet<K, V>
-    extends StoredCollection<Map.Entry<K, V>>
-    implements Set<Map.Entry<K, V>> {
+        extends StoredCollection<Map.Entry<K, V>>
+        implements Set<Map.Entry<K, V>> {
 
     StoredEntrySet(DataView mapView) {
 
@@ -50,26 +51,21 @@ public class StoredEntrySet<K, V>
      * This method conforms to the {@link Set#add} interface.
      *
      * @param mapEntry must be a {@link java.util.Map.Entry} instance.
-     *
      * @return true if the key-value pair was added to the set (and was not
      * previously present).
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only.
-     *
-     * @throws ClassCastException if the mapEntry is not a {@link
-     * java.util.Map.Entry} instance.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     * @throws ClassCastException            if the mapEntry is not a {@link
+     *                                       java.util.Map.Entry} instance.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean add(Map.Entry<K, V> mapEntry) {
 
@@ -82,28 +78,24 @@ public class StoredEntrySet<K, V>
      * This method conforms to the {@link Set#remove} interface.
      *
      * @param mapEntry is a {@link java.util.Map.Entry} instance to be removed.
-     *
      * @return true if the key-value pair was removed from the set, or false if
      * the mapEntry is not a {@link java.util.Map.Entry} instance or is not
      * present in the set.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean remove(Object mapEntry) {
 
-        if (!(mapEntry instanceof Map.Entry)) {
+        if(!(mapEntry instanceof Map.Entry)) {
             return false;
         }
         DataCursor cursor = null;
@@ -112,14 +104,14 @@ public class StoredEntrySet<K, V>
             cursor = new DataCursor(view, true);
             Map.Entry entry = (Map.Entry) mapEntry;
             OperationStatus status =
-                cursor.findBoth(entry.getKey(), entry.getValue(), true);
-            if (status == OperationStatus.SUCCESS) {
+                    cursor.findBoth(entry.getKey(), entry.getValue(), true);
+            if(status == OperationStatus.SUCCESS) {
                 cursor.delete();
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return (status == OperationStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -130,26 +122,23 @@ public class StoredEntrySet<K, V>
      * This method conforms to the {@link Set#contains} interface.
      *
      * @param mapEntry is a {@link java.util.Map.Entry} instance to be checked.
-     *
      * @return true if the key-value pair is present in the set, or false if
      * the mapEntry is not a {@link java.util.Map.Entry} instance or is not
      * present in the set.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean contains(Object mapEntry) {
 
-        if (!(mapEntry instanceof Map.Entry)) {
+        if(!(mapEntry instanceof Map.Entry)) {
             return false;
         }
         DataCursor cursor = null;
@@ -157,9 +146,9 @@ public class StoredEntrySet<K, V>
             cursor = new DataCursor(view, false);
             Map.Entry entry = (Map.Entry) mapEntry;
             OperationStatus status =
-                cursor.findBoth(entry.getKey(), entry.getValue(), false);
+                    cursor.findBoth(entry.getKey(), entry.getValue(), false);
             return (status == OperationStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             closeCursor(cursor);
@@ -173,18 +162,24 @@ public class StoredEntrySet<K, V>
         StoredIterator i = null;
         try {
             i = storedIterator();
-            while (i.hasNext()) {
+            while(i.hasNext()) {
                 Map.Entry entry = (Map.Entry) i.next();
-                if (buf.length() > 1) buf.append(',');
+                if(buf.length() > 1) {
+                    buf.append(',');
+                }
                 Object key = entry.getKey();
                 Object val = entry.getValue();
-                if (key != null) buf.append(key.toString());
+                if(key != null) {
+                    buf.append(key.toString());
+                }
                 buf.append('=');
-                if (val != null) buf.append(val.toString());
+                if(val != null) {
+                    buf.append(val.toString());
+                }
             }
             buf.append(']');
             return buf.toString();
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             StoredIterator.close(i);
@@ -197,8 +192,8 @@ public class StoredEntrySet<K, V>
                                      DatabaseEntry valueEntry) {
 
         return new StoredMapEntry(view.makeKey(keyEntry, priKeyEntry),
-                                  view.makeValue(priKeyEntry, valueEntry),
-                                  this, iterator);
+                view.makeValue(priKeyEntry, valueEntry),
+                this, iterator);
     }
 
     boolean hasValues() {

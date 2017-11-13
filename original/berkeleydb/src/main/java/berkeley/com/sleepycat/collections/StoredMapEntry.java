@@ -34,11 +34,12 @@ final class StoredMapEntry extends MapEntryParameter {
     public Object setValue(Object newValue) {
 
         Object oldValue;
-        if (iter != null && iter.isCurrentData(this)) {
+        if(iter != null && iter.isCurrentData(this)) {
             oldValue = getValue();
             iter.set(newValue);
-        } else {
-            if (coll.view.dupsAllowed) {
+        }
+        else {
+            if(coll.view.dupsAllowed) {
                 throw new IllegalStateException("May not insert duplicates");
             }
             oldValue = coll.putKeyValue(getKey(), newValue);

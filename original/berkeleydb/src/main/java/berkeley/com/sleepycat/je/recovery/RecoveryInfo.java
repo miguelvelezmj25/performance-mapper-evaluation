@@ -13,17 +13,22 @@
 
 package berkeley.com.sleepycat.je.recovery;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.txn.Txn;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * RecoveryInfo keeps information about recovery processing.
  */
 public class RecoveryInfo {
 
+    /**
+     * ReplayTxns that are resurrected during recovery processing, for
+     * replication. Txnid -> replayTxn
+     */
+    public final Map<Long, Txn> replayTxns = new HashMap<Long, Txn>();
     /* Locations found during recovery. */
     public long lastUsedLsn = DbLsn.NULL_LSN;      // location of last entry
     /*  EOF, location of first unused spot. */
@@ -32,16 +37,13 @@ public class RecoveryInfo {
     public long checkpointStartLsn = DbLsn.NULL_LSN;
     public long checkpointEndLsn = DbLsn.NULL_LSN;
     public long useRootLsn = DbLsn.NULL_LSN;
-
     /*
      * Represents the first CkptStart following the CkptEnd.  It is a CkptStart
      * with no CkptEnd, and is used for counting provisional INs obsolete.
      */
     public long partialCheckpointStartLsn = DbLsn.NULL_LSN;
-
     /* Checkpoint record used for this recovery. */
     public CheckpointEnd checkpointEnd;
-
     /* Ids */
     public long useMinReplicatedNodeId;
     public long useMaxNodeId;
@@ -49,15 +51,8 @@ public class RecoveryInfo {
     public long useMaxDbId;
     public long useMinReplicatedTxnId;
     public long useMaxTxnId;
-
     /* VLSN mappings seen during recovery processing, for replication. */
     public VLSNRecoveryProxy vlsnProxy;
-
-    /**
-     * ReplayTxns that are resurrected during recovery processing, for
-     * replication. Txnid -> replayTxn
-     */
-    public final Map<Long, Txn> replayTxns = new HashMap<Long, Txn>();
 
     @Override
     public String toString() {
@@ -80,7 +75,7 @@ public class RecoveryInfo {
     }
 
     private void appendLsn(StringBuilder sb, String name, long lsn) {
-        if (lsn != DbLsn.NULL_LSN) {
+        if(lsn != DbLsn.NULL_LSN) {
             sb.append(name).append(DbLsn.getNoFormatString(lsn));
         }
     }

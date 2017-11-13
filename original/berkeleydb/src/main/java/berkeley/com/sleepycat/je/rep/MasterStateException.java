@@ -23,6 +23,7 @@ public class MasterStateException extends StateChangeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public MasterStateException(StateChangeEvent stateChangeEvent) {
@@ -31,6 +32,7 @@ public class MasterStateException extends StateChangeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public MasterStateException(String message) {
@@ -44,6 +46,7 @@ public class MasterStateException extends StateChangeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

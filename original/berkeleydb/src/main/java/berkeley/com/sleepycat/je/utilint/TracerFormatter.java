@@ -45,6 +45,16 @@ public class TracerFormatter extends Formatter {
     }
 
     /**
+     * Return a DateFormat object that uses the standard format and the UTC
+     * timezone.
+     */
+    public static DateFormat makeDateFormat() {
+        final DateFormat df = new SimpleDateFormat(FORMAT);
+        df.setTimeZone(TIMEZONE);
+        return df;
+    }
+
+    /**
      * Return a formatted date for the specified time.  Use this method for
      * thread safety, since Date and DateFormat are not thread safe.
      *
@@ -59,7 +69,8 @@ public class TracerFormatter extends Formatter {
 
     /**
      * Format the log record in this form:
-     *   <short date> <short time> <message level> <message>
+     * <short date> <short time> <message level> <message>
+     *
      * @param record the log record to be formatted.
      * @return a formatted log record
      */
@@ -82,32 +93,22 @@ public class TracerFormatter extends Formatter {
     }
 
     protected void appendEnvironmentName(StringBuilder sb) {
-        if (envName != null) {
+        if(envName != null) {
             sb.append(" [" + envName + "]");
         }
     }
 
     protected void getThrown(LogRecord record, StringBuilder sb) {
-        if (record.getThrown() != null) {
+        if(record.getThrown() != null) {
             try {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 record.getThrown().printStackTrace(pw);
                 pw.close();
                 sb.append(sw.toString());
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 /* Ignored. */
             }
         }
-    }
-
-    /**
-     * Return a DateFormat object that uses the standard format and the UTC
-     * timezone.
-     */
-    public static DateFormat makeDateFormat() {
-        final DateFormat df = new SimpleDateFormat(FORMAT);
-        df.setTimeZone(TIMEZONE);
-        return df;
     }
 }

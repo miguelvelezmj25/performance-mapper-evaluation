@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for an unsorted <code>Float</code>
  * primitive wrapper or an unsorted <code>float</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class FloatBinding extends TupleBinding<Float> {
 
     private static final int FLOAT_SIZE = 4;
 
+    /**
+     * Converts an entry buffer into a simple <code>float</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static float entryToFloat(DatabaseEntry entry) {
+
+        return entryToInput(entry).readFloat();
+    }
+
+    /**
+     * Converts a simple <code>float</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void floatToEntry(float val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeFloat(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[FLOAT_SIZE]);
+    }
+
     // javadoc is inherited
     public Float entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class FloatBinding extends TupleBinding<Float> {
     protected TupleOutput getTupleOutput(Float object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>float</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static float entryToFloat(DatabaseEntry entry) {
-
-        return entryToInput(entry).readFloat();
-    }
-
-    /**
-     * Converts a simple <code>float</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void floatToEntry(float val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeFloat(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[FLOAT_SIZE]);
     }
 }

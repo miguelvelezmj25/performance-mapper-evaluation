@@ -13,17 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl.networkRestore;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -35,81 +24,79 @@ import berkeley.com.sleepycat.je.util.DbBackup;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
 
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
+
 /**
  * Manages the multiple log file feeders that may be servicing requests from
  * multiple clients requesting log files.
  */
 public class FeederManager extends StoppableThread {
 
+    /* Identifies the Feeder Service. */
+    public static final String FEEDER_SERVICE = "LogFileFeeder";
     /*
-     * The queue into which the ServiceDispatcher queues socket channels for
-     * new Feeder instances.
+     * Default duration of lease on DbBackup associated with the client. It's
+     * five minutes.
      */
-    private final BlockingQueue<DataChannel> channelQueue =
-        new LinkedBlockingQueue<DataChannel>();
-
+    private static final long DEFAULT_LEASE_DURATION = 5 * 60 * 1000;
+    /* Wait indefinitely for somebody to request the service. */
+    private static long POLL_TIMEOUT = Long.MAX_VALUE;
     /*
      * Map indexed by the client id. Each Feeder adds itself to the Map when
      * its first created and removes itself when it exits.
      */
     final Map<Integer, LogFileFeeder> feeders =
-        new ConcurrentHashMap<Integer, LogFileFeeder>();
-
+            new ConcurrentHashMap<Integer, LogFileFeeder>();
     /*
      * Maps the client id to its Lease. Except for instantaneous overlaps,
      * a client will have an entry in either the feeders map or the leases
      * map, but not in both maps.
      */
     final Map<Integer, Lease> leases = new ConcurrentHashMap<Integer, Lease>();
-
     /*
      * A cache of StatResponses to try minimize the recomputation of SHA1
      * hashes.
      */
     final Map<String, Protocol.FileInfoResp> statResponses =
-        new ConcurrentHashMap<String, Protocol.FileInfoResp>();
-
+            new ConcurrentHashMap<String, Protocol.FileInfoResp>();
     /* Implements the timer used to maintain the leases. */
     final Timer leaseTimer = new Timer(true);
-
     /* This node's name and internal id */
     final NameIdPair nameIdPair;
-
-    /* Counts the number of times the lease was renewed. */
-    public int leaseRenewalCount;
-
-    /* The duration of leases. */
-    long leaseDuration = DEFAULT_LEASE_DURATION;
-
     final ServiceDispatcher serviceDispatcher;
 
     /* Determines whether the feeder manager has been shutdown. */
     final AtomicBoolean shutdown = new AtomicBoolean(false);
 
     final Logger logger;
-
-    /* Wait indefinitely for somebody to request the service. */
-    private static long POLL_TIMEOUT = Long.MAX_VALUE;
-
-    /* Identifies the Feeder Service. */
-    public static final String FEEDER_SERVICE = "LogFileFeeder";
-
     /*
-     * Default duration of lease on DbBackup associated with the client. It's
-     * five minutes.
+     * The queue into which the ServiceDispatcher queues socket channels for
+     * new Feeder instances.
      */
-    private static final long DEFAULT_LEASE_DURATION = 5 * 60 * 1000;
+    private final BlockingQueue<DataChannel> channelQueue =
+            new LinkedBlockingQueue<DataChannel>();
+    /* Counts the number of times the lease was renewed. */
+    public int leaseRenewalCount;
+    /* The duration of leases. */
+    long leaseDuration = DEFAULT_LEASE_DURATION;
 
     /**
      * Creates a FeederManager but does not start it.
      *
      * @param serviceDispatcher The service dispatcher with which the
-     * FeederManager must register itself. It's null only in a test
-     * environment.
-     *
-     * @param nameIdPair The node name and id  associated with the feeder
-     *
-     * @param envImpl the environment that will provide the log files
+     *                          FeederManager must register itself. It's null only in a test
+     *                          environment.
+     * @param nameIdPair        The node name and id  associated with the feeder
+     * @param envImpl           the environment that will provide the log files
      */
     public FeederManager(ServiceDispatcher serviceDispatcher,
                          EnvironmentImpl envImpl,
@@ -118,8 +105,8 @@ public class FeederManager extends StoppableThread {
         super(envImpl, "Feeder Manager node: " + nameIdPair.getName());
         this.serviceDispatcher = serviceDispatcher;
         serviceDispatcher.register
-            (serviceDispatcher.new
-                 LazyQueuingService(FEEDER_SERVICE, channelQueue, this));
+                (serviceDispatcher.new
+                        LazyQueuingService(FEEDER_SERVICE, channelQueue, this));
         this.nameIdPair = nameIdPair;
         logger = LoggerUtils.getLogger(getClass());
     }
@@ -165,24 +152,24 @@ public class FeederManager extends StoppableThread {
     @Override
     public void run() {
         try {
-            while (true) {
+            while(true) {
                 final DataChannel channel =
-                    channelQueue.poll(POLL_TIMEOUT, TimeUnit.MILLISECONDS);
-                if (channel == RepUtils.CHANNEL_EOF_MARKER) {
+                        channelQueue.poll(POLL_TIMEOUT, TimeUnit.MILLISECONDS);
+                if(channel == RepUtils.CHANNEL_EOF_MARKER) {
                     LoggerUtils.info(logger, envImpl,
-                                     "Log file Feeder manager soft shutdown.");
+                            "Log file Feeder manager soft shutdown.");
                     return;
                 }
                 new LogFileFeeder(this, channel).start();
             }
-        } catch (InterruptedException ie) {
+        } catch(InterruptedException ie) {
             LoggerUtils.info
-                (logger, envImpl, "Log file feeder manager interrupted");
-        } catch (Exception e) {
+                    (logger, envImpl, "Log file feeder manager interrupted");
+        } catch(Exception e) {
             LoggerUtils.severe(logger, envImpl,
-                               "unanticipated exception: " + e.getMessage());
+                    "unanticipated exception: " + e.getMessage());
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.UNCAUGHT_EXCEPTION, e);
+                    (envImpl, EnvironmentFailureReason.UNCAUGHT_EXCEPTION, e);
         } finally {
             shutdown();
         }
@@ -190,16 +177,16 @@ public class FeederManager extends StoppableThread {
 
     public void shutdown() {
         LoggerUtils.fine
-            (logger, envImpl, "Shutting down log file feeder manager");
+                (logger, envImpl, "Shutting down log file feeder manager");
 
-        if (!shutdown.compareAndSet(false, true)) {
+        if(!shutdown.compareAndSet(false, true)) {
             return;
         }
         shutdownThread(logger);
 
         /* shutdown active feeder threads */
-        for (LogFileFeeder feeder :
-             new ArrayList<LogFileFeeder>(feeders.values())) {
+        for(LogFileFeeder feeder :
+                new ArrayList<LogFileFeeder>(feeders.values())) {
             feeder.shutdown();
         }
         leaseTimer.cancel();
@@ -207,13 +194,13 @@ public class FeederManager extends StoppableThread {
          * Terminate any outstanding leases, so we don't hold back file
          * deletion by the cleaner.
          */
-        for (Lease l : new ArrayList<Lease>(leases.values())) {
+        for(Lease l : new ArrayList<Lease>(leases.values())) {
             l.terminate();
         }
         serviceDispatcher.cancel(FEEDER_SERVICE);
         cleanup();
         LoggerUtils.fine(logger, envImpl,
-                         "Shut down log file feeder manager completed");
+                "Shut down log file feeder manager completed");
     }
 
     @Override
@@ -223,6 +210,14 @@ public class FeederManager extends StoppableThread {
         /* Add special entry so that the channelQueue.poll operation exits. */
         channelQueue.add(RepUtils.CHANNEL_EOF_MARKER);
         return 0;
+    }
+
+    /**
+     * @see StoppableThread#getLogger
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
     /**
@@ -238,9 +233,9 @@ public class FeederManager extends StoppableThread {
             this.dbBackup = dbbackup;
             this.id = id;
             Lease oldLease = leases.put(id, this);
-            if (oldLease != null) {
+            if(oldLease != null) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Found an old lease for node: " + id);
+                        ("Found an old lease for node: " + id);
             }
             leaseTimer.schedule(this, duration);
         }
@@ -248,7 +243,7 @@ public class FeederManager extends StoppableThread {
         @Override
         /* The timer went off, expire the lease if it hasn't been terminated */
         public synchronized void run() {
-            if (dbBackup == null) {
+            if(dbBackup == null) {
                 return;
             }
             dbBackup.endBackup();
@@ -262,12 +257,12 @@ public class FeederManager extends StoppableThread {
          * terminated
          */
         public synchronized DbBackup terminate() {
-            if (dbBackup == null) {
+            if(dbBackup == null) {
                 return null;
             }
             cancel();
             Lease l = leases.remove(id);
-            assert(l == this);
+            assert (l == this);
             DbBackup saveDbBackup = dbBackup;
             dbBackup = null;
             return saveDbBackup;
@@ -278,13 +273,5 @@ public class FeederManager extends StoppableThread {
                     dbBackup :
                     null;
         }
-    }
-
-    /**
-     * @see StoppableThread#getLogger
-     */
-    @Override
-    protected Logger getLogger() {
-        return logger;
     }
 }

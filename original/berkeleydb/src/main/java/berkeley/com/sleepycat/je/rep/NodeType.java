@@ -21,6 +21,7 @@ public enum NodeType {
      * A node that passively listens for the results of elections, but does not
      * participate in them. It does not have a replicated environment
      * associated with it.
+     *
      * @see com.sleepycat.je.rep.monitor.Monitor
      */
     MONITOR {
@@ -39,6 +40,7 @@ public enum NodeType {
         public boolean isElectable() {
             return true;
         }
+
         @Override
         public boolean isDataNode() {
             return true;
@@ -50,13 +52,13 @@ public enum NodeType {
      * environment that serves as a Replica but does not participate in
      * elections or durability decisions.  Secondary nodes are only remembered
      * by the group while they maintain contact with the Master.
-     *
+     * <p>
      * <p>You can use SECONDARY nodes to:
      * <ul>
      * <li>Provide a copy of the data available at a distant location
      * <li>Maintain an extra copy of the data to increase redundancy
      * <li>Change the number of replicas to adjust to dynamically changing read
-     *     loads
+     * loads
      * </ul>
      *
      * @since 6.0
@@ -66,10 +68,12 @@ public enum NodeType {
         public boolean isSecondary() {
             return true;
         }
+
         @Override
         public boolean isDataNode() {
             return true;
         }
+
         @Override
         public boolean hasTransientId() {
             return true;
@@ -81,6 +85,7 @@ public enum NodeType {
         public boolean isArbiter() {
             return true;
         }
+
         @Override
         public boolean isElectable() {
             return true;
@@ -88,13 +93,11 @@ public enum NodeType {
     },
 
     /**
-     * @hidden
-     * For internal use only.
-     *
+     * @hidden For internal use only.
+     * <p>
      * A node that receives replication data, but does not participate in
      * elections or durability decisions, and is not considered a data node
      * and cannot be depended on to maintain a copy of the data.
-     *
      * @since 7.2
      */
     EXTERNAL {
@@ -102,6 +105,7 @@ public enum NodeType {
         public boolean isExternal() {
             return true;
         }
+
         @Override
         public boolean hasTransientId() {
             return true;
@@ -160,12 +164,10 @@ public enum NodeType {
     }
 
     /**
-     * @hidden
-     * For internal use only.
-     *
-     * Returns whether this is the {@link #EXTERNAL} type.
-     *
      * @return whether this is {@code EXTERNAL}
+     * @hidden For internal use only.
+     * <p>
+     * Returns whether this is the {@link #EXTERNAL} type.
      * @since 7.2
      */
     public boolean isExternal() {
@@ -173,13 +175,11 @@ public enum NodeType {
     }
 
     /**
-     * @hidden
-     * For internal use only
-     *
+     * @return whether this node has a transient node ID
+     * @hidden For internal use only
+     * <p>
      * Returns whether this node has a transient node ID.  New transient node
      * IDs are assigned each time the node connects to the feeder.
-     *
-     * @return whether this node has a transient node ID
      * @since 7.2
      */
     public boolean hasTransientId() {

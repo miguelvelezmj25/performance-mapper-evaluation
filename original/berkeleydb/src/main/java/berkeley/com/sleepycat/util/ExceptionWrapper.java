@@ -24,14 +24,13 @@ public interface ExceptionWrapper {
      * Returns the nested exception or null if none is present.
      *
      * @return the nested exception or null if none is present.
-     *
      * @deprecated replaced by {@link #getCause}.
      */
     Throwable getDetail();
 
     /**
      * Returns the nested exception or null if none is present.
-     *
+     * <p>
      * <p>This method is intentionally defined to be the same signature as the
      * <code>java.lang.Throwable.getCause</code> method in Java 1.4 and
      * greater.  By defining this method to return a nested exception, the Java

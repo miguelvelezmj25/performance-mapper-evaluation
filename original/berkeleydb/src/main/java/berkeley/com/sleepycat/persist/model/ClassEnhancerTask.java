@@ -90,7 +90,7 @@ public class ClassEnhancerTask extends Task {
                     File file = new File(scanner.getBasedir(), fileName);
                     try {
                         nFiles += enhancer.enhanceFile(file);
-                    } catch (IOException e) {
+                    } catch(IOException e) {
                         throw new BuildException(e);
                     }
                 }
@@ -98,7 +98,7 @@ public class ClassEnhancerTask extends Task {
             if(nFiles > 0) {
                 System.out.println("Enhanced: " + nFiles + " files");
             }
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             e.printStackTrace();
             throw e;
         }

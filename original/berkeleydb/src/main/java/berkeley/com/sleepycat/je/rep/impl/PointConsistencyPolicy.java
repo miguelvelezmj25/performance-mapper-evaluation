@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -22,6 +20,8 @@ import berkeley.com.sleepycat.je.rep.ReplicaConsistencyException;
 import berkeley.com.sleepycat.je.rep.impl.node.Replica;
 import berkeley.com.sleepycat.je.utilint.PropUtil;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is used to ensure that the Replica has finished replaying or proceeded
@@ -31,7 +31,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * entries.
  */
 public class PointConsistencyPolicy
-    implements ReplicaConsistencyPolicy {
+        implements ReplicaConsistencyPolicy {
 
     /**
      * The name:{@value} associated with this policy. The name can be used when
@@ -60,6 +60,7 @@ public class PointConsistencyPolicy
 
     /**
      * Returns the name:{@value #NAME}, associated with this policy.
+     *
      * @see #NAME
      */
     @Override
@@ -74,9 +75,9 @@ public class PointConsistencyPolicy
      */
     @Override
     public void ensureConsistency(EnvironmentImpl replicatorImpl)
-        throws InterruptedException,
-               ReplicaConsistencyException,
-               DatabaseException {
+            throws InterruptedException,
+            ReplicaConsistencyException,
+            DatabaseException {
 
         /*
          * Cast is done to preserve replication/non replication code
@@ -85,7 +86,7 @@ public class PointConsistencyPolicy
         RepImpl repImpl = (RepImpl) replicatorImpl;
         Replica replica = repImpl.getRepNode().replica();
         replica.getConsistencyTracker().awaitVLSN(targetVLSN.getSequence(),
-                                                  this);
+                this);
     }
 
     @Override
@@ -104,21 +105,22 @@ public class PointConsistencyPolicy
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if(getClass() != obj.getClass()) {
             return false;
         }
         PointConsistencyPolicy other = (PointConsistencyPolicy) obj;
-        if (targetVLSN == null) {
-            if (other.targetVLSN != null) {
+        if(targetVLSN == null) {
+            if(other.targetVLSN != null) {
                 return false;
             }
-        } else if (!targetVLSN.equals(other.targetVLSN)) {
+        }
+        else if(!targetVLSN.equals(other.targetVLSN)) {
             return false;
         }
         return true;

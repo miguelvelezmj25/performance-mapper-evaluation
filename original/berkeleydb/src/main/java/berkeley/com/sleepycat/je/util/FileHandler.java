@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.util;
 
+import berkeley.com.sleepycat.je.config.EnvironmentParams;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
 import java.io.IOException;
 import java.util.logging.ErrorManager;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
-
-import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
 /**
  * JE instances of java.util.logging.Logger are configured to use this
@@ -86,28 +86,29 @@ public class FileHandler extends java.util.logging.FileHandler {
                        int count,
                        Formatter formatter,
                        EnvironmentImpl envImpl)
-        throws SecurityException, IOException {
+            throws SecurityException, IOException {
 
         super(pattern, limit, count, true /* append */);
 
-            ErrorManager em = new ErrorManager() {
-                    public void error(String msg, Exception e, int code) {
-                        if (STIFLE_DEFAULT_ERROR_MANAGER) {
-                            System.out.println
-                                ("FileHandler stifled exception: " + e);
-                        } else {
-                            super.error(msg, e, code);
-                        }
-                    }
-                };
-            setErrorManager(em);
+        ErrorManager em = new ErrorManager() {
+            public void error(String msg, Exception e, int code) {
+                if(STIFLE_DEFAULT_ERROR_MANAGER) {
+                    System.out.println
+                            ("FileHandler stifled exception: " + e);
+                }
+                else {
+                    super.error(msg, e, code);
+                }
+            }
+        };
+        setErrorManager(em);
 
         /* Messages may be formatted with an environment specific tag. */
         setFormatter(formatter);
 
         Level level = LoggerUtils.getHandlerLevel
-            (envImpl.getConfigManager(), EnvironmentParams.JE_FILE_LEVEL,
-             getClass().getName() + ".level");
+                (envImpl.getConfigManager(), EnvironmentParams.JE_FILE_LEVEL,
+                        getClass().getName() + ".level");
 
         setLevel(level);
     }

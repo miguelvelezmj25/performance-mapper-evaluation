@@ -202,9 +202,9 @@ public class SampleViews {
                 MarshalledKey key = (MarshalledKey) keyClass.newInstance();
                 key.unmarshalKey(input);
                 return key;
-            } catch (IllegalAccessException e) {
+            } catch(IllegalAccessException e) {
                 throw new RuntimeExceptionWrapper(e);
-            } catch (InstantiationException e) {
+            } catch(InstantiationException e) {
                 throw new RuntimeExceptionWrapper(e);
             }
         }

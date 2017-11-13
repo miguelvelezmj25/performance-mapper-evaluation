@@ -16,21 +16,14 @@ package berkeley.com.sleepycat.collections;
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.compat.DbCompat.OpReadOptions;
 import berkeley.com.sleepycat.compat.DbCompat.OpResult;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.JoinConfig;
-import berkeley.com.sleepycat.je.JoinCursor;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.util.keyrange.KeyRange;
 import berkeley.com.sleepycat.util.keyrange.RangeCursor;
 
 /**
  * Represents a Berkeley DB cursor and adds support for indices, bindings and
  * key ranges.
- *
+ * <p>
  * <p>This class operates on a view and takes care of reading and updating
  * indices, calling bindings, constraining access to a key range, etc.</p>
  *
@@ -38,11 +31,17 @@ import berkeley.com.sleepycat.util.keyrange.RangeCursor;
  */
 final class DataCursor implements Cloneable {
 
-    /** Repositioned exactly to the key/data pair given. */
+    /**
+     * Repositioned exactly to the key/data pair given.
+     */
     static final int REPOS_EXACT = 0;
-    /** Repositioned on a record following the key/data pair given. */
+    /**
+     * Repositioned on a record following the key/data pair given.
+     */
     static final int REPOS_NEXT = 1;
-    /** Repositioned failed, no records on or after the key/data pair given. */
+    /**
+     * Repositioned failed, no records on or after the key/data pair given.
+     */
     static final int REPOS_EOF = 2;
 
     private RangeCursor cursor;
@@ -61,7 +60,7 @@ final class DataCursor implements Cloneable {
      * Creates a cursor for a given view.
      */
     DataCursor(DataView view, boolean writeAllowed)
-        throws DatabaseException {
+            throws DatabaseException {
 
         init(view, writeAllowed, null, null);
     }
@@ -70,7 +69,7 @@ final class DataCursor implements Cloneable {
      * Creates a cursor for a given view.
      */
     DataCursor(DataView view, boolean writeAllowed, CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         init(view, writeAllowed, config, null);
     }
@@ -80,7 +79,7 @@ final class DataCursor implements Cloneable {
      * Used by unit tests.
      */
     DataCursor(DataView view, boolean writeAllowed, Object singleKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         init(view, writeAllowed, null, view.subRange(view.range, singleKey));
     }
@@ -92,11 +91,11 @@ final class DataCursor implements Cloneable {
     DataCursor(DataView view, boolean writeAllowed,
                Object beginKey, boolean beginInclusive,
                Object endKey, boolean endInclusive)
-        throws DatabaseException {
+            throws DatabaseException {
 
         init(view, writeAllowed, null,
-             view.subRange
-                (view.range, beginKey, beginInclusive, endKey, endInclusive));
+                view.subRange
+                        (view.range, beginKey, beginInclusive, endKey, endInclusive));
     }
 
     /**
@@ -104,20 +103,20 @@ final class DataCursor implements Cloneable {
      */
     DataCursor(DataView view, DataCursor[] indexCursors,
                JoinConfig joinConfig, boolean closeIndexCursors)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (view.isSecondary()) {
+        if(view.isSecondary()) {
             throw new IllegalArgumentException(
-                "The primary collection in a join must not be a secondary " +
-                "database");
+                    "The primary collection in a join must not be a secondary " +
+                            "database");
         }
         Cursor[] cursors = new Cursor[indexCursors.length];
-        for (int i = 0; i < cursors.length; i += 1) {
+        for(int i = 0; i < cursors.length; i += 1) {
             cursors[i] = indexCursors[i].cursor.getCursor();
         }
         joinCursor = view.db.join(cursors, joinConfig);
         init(view, false, null, null);
-        if (closeIndexCursors) {
+        if(closeIndexCursors) {
             indexCursorsToClose = indexCursors;
         }
     }
@@ -126,21 +125,21 @@ final class DataCursor implements Cloneable {
      * Clones a cursor preserving the current position.
      */
     DataCursor cloneCursor()
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
 
         DataCursor o;
         try {
             o = (DataCursor) super.clone();
-        } catch (CloneNotSupportedException neverHappens) {
+        } catch(CloneNotSupportedException neverHappens) {
             return null;
         }
 
         o.initThangs();
         KeyRange.copy(keyThang, o.keyThang);
         KeyRange.copy(valueThang, o.valueThang);
-        if (primaryKeyThang != keyThang) {
+        if(primaryKeyThang != keyThang) {
             KeyRange.copy(primaryKeyThang, o.primaryKeyThang);
         }
 
@@ -162,21 +161,21 @@ final class DataCursor implements Cloneable {
                       boolean writeAllowed,
                       CursorConfig config,
                       KeyRange range)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (config == null) {
+        if(config == null) {
             config = view.cursorConfig;
         }
         this.view = view;
         this.writeAllowed = writeAllowed && view.writeAllowed;
         this.range = (range != null) ? range : view.range;
         readUncommitted = config.getReadUncommitted() ||
-                          view.currentTxn.isReadUncommitted();
+                view.currentTxn.isReadUncommitted();
         initThangs();
 
-        if (joinCursor == null) {
+        if(joinCursor == null) {
             cursor = new MyRangeCursor
-                (this.range, config, view, this.writeAllowed);
+                    (this.range, config, view, this.writeAllowed);
         }
     }
 
@@ -186,7 +185,7 @@ final class DataCursor implements Cloneable {
     private void initThangs() {
         keyThang = new DatabaseEntry();
         primaryKeyThang = view.isSecondary() ? (new DatabaseEntry())
-                                             : keyThang;
+                : keyThang;
         valueThang = new DatabaseEntry();
     }
 
@@ -199,7 +198,7 @@ final class DataCursor implements Cloneable {
 
         keyThang.setData(KeyRange.copyBytes(keyBytes));
 
-        if (keyThang != primaryKeyThang) {
+        if(keyThang != primaryKeyThang) {
             primaryKeyThang.setData(KeyRange.copyBytes(priKeyBytes));
         }
 
@@ -210,22 +209,22 @@ final class DataCursor implements Cloneable {
      * Closes the associated cursor.
      */
     void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (joinCursor != null) {
+        if(joinCursor != null) {
             JoinCursor toClose = joinCursor;
             joinCursor = null;
             toClose.close();
         }
-        if (cursor != null) {
+        if(cursor != null) {
             Cursor toClose = cursor.getCursor();
             cursor = null;
             view.currentTxn.closeCursor(toClose);
         }
-        if (indexCursorsToClose != null) {
+        if(indexCursorsToClose != null) {
             DataCursor[] toClose = indexCursorsToClose;
             indexCursorsToClose = null;
-            for (int i = 0; i < toClose.length; i += 1) {
+            for(int i = 0; i < toClose.length; i += 1) {
                 toClose[i].close();
             }
         }
@@ -241,7 +240,7 @@ final class DataCursor implements Cloneable {
                         byte[] lastPriKeyBytes,
                         byte[] lastValueBytes,
                         boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpReadOptions options = OpReadOptions.make(getLockMode(lockForWrite));
         OpResult result;
@@ -251,22 +250,22 @@ final class DataCursor implements Cloneable {
 
         /* Position on or after the given key/data pair. */
 
-        if (!view.dupsAllowed) {
+        if(!view.dupsAllowed) {
             /*
              * No-dups is the simple case. Search for key >= lastKey, and then
              * compare to see if we found lastKey again.
              */
             result = cursor.getSearchKeyRange(
-                keyThang, primaryKeyThang, valueThang, options);
+                    keyThang, primaryKeyThang, valueThang, options);
 
-            if (!result.isSuccess()) {
+            if(!result.isSuccess()) {
                 return REPOS_EOF;
             }
 
             return KeyRange.equalBytes(
-                lastKeyBytes, 0, lastKeyBytes.length,
-                keyThang.getData(), keyThang.getOffset(), keyThang.getSize()) ?
-                REPOS_EXACT : REPOS_NEXT;
+                    lastKeyBytes, 0, lastKeyBytes.length,
+                    keyThang.getData(), keyThang.getOffset(), keyThang.getSize()) ?
+                    REPOS_EXACT : REPOS_NEXT;
         }
 
         /*
@@ -276,20 +275,20 @@ final class DataCursor implements Cloneable {
          * see if we found lastData again.
          */
         result = cursor.getSearchBothRange(
-            keyThang, primaryKeyThang, valueThang, options);
+                keyThang, primaryKeyThang, valueThang, options);
 
-        if (result.isSuccess()) {
+        if(result.isSuccess()) {
 
             DatabaseEntry thang =
-                view.isSecondary() ? primaryKeyThang : valueThang;
+                    view.isSecondary() ? primaryKeyThang : valueThang;
 
             byte[] bytes =
-                view.isSecondary() ? lastPriKeyBytes : lastValueBytes;
+                    view.isSecondary() ? lastPriKeyBytes : lastValueBytes;
 
             return KeyRange.equalBytes(
-                bytes, 0, bytes.length,
-                thang.getData(), thang.getOffset(), thang.getSize()) ?
-                REPOS_EXACT : REPOS_NEXT;
+                    bytes, 0, bytes.length,
+                    thang.getData(), thang.getOffset(), thang.getSize()) ?
+                    REPOS_EXACT : REPOS_NEXT;
         }
 
         /*
@@ -300,9 +299,9 @@ final class DataCursor implements Cloneable {
          * land on the first record with lastKey.
          */
         result = cursor.getSearchKeyRange(
-            keyThang, primaryKeyThang, valueThang, options);
+                keyThang, primaryKeyThang, valueThang, options);
 
-        if (!result.isSuccess()) {
+        if(!result.isSuccess()) {
             return REPOS_EOF;
         }
 
@@ -310,13 +309,13 @@ final class DataCursor implements Cloneable {
          * If we are positioned on the first dup of lastKey, skip over its
          * records to the first record with the next key.
          */
-        if (KeyRange.equalBytes(lastKeyBytes, 0, lastKeyBytes.length,
-            keyThang.getData(), keyThang.getOffset(), keyThang.getSize())) {
+        if(KeyRange.equalBytes(lastKeyBytes, 0, lastKeyBytes.length,
+                keyThang.getData(), keyThang.getOffset(), keyThang.getSize())) {
 
             result = cursor.getNextNoDup(keyThang, primaryKeyThang,
-                valueThang, options);
+                    valueThang, options);
 
-            if (!result.isSuccess()) {
+            if(!result.isSuccess()) {
                 return REPOS_EOF;
             }
         }
@@ -327,16 +326,15 @@ final class DataCursor implements Cloneable {
     /**
      * Repositions to a given raw key/data pair.
      *
-     * @throws IllegalStateException when the database has unordered keys or
-     * unordered duplicates.
-     *
      * @return whether the search succeeded.
+     * @throws IllegalStateException when the database has unordered keys or
+     *                               unordered duplicates.
      */
     boolean repositionExact(byte[] keyBytes,
                             byte[] priKeyBytes,
                             byte[] valueBytes,
                             boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpReadOptions options = OpReadOptions.make(getLockMode(lockForWrite));
         OpResult result;
@@ -345,13 +343,14 @@ final class DataCursor implements Cloneable {
         setThangs(keyBytes, priKeyBytes, valueBytes);
 
         /* Position on the given key/data pair. */
-        if (view.recNumRenumber) {
+        if(view.recNumRenumber) {
             /* getSearchBoth doesn't work with recno-renumber databases. */
             result = cursor.getSearchKey(keyThang, primaryKeyThang,
-                                         valueThang, options);
-        } else {
+                    valueThang, options);
+        }
+        else {
             result = cursor.getSearchBoth(keyThang, primaryKeyThang,
-                                          valueThang, options);
+                    valueThang, options);
         }
 
         return result.isSuccess();
@@ -430,17 +429,18 @@ final class DataCursor implements Cloneable {
      * Returns the record number for the last record read.
      */
     int getCurrentRecordNumber()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (view.btreeRecNumDb) {
+        if(view.btreeRecNumDb) {
             /* BTREE-RECNO access. */
-            if (otherThang == null) {
+            if(otherThang == null) {
                 otherThang = new DatabaseEntry();
             }
             DbCompat.getCurrentRecordNumber(cursor.getCursor(), otherThang,
-                                            getLockMode(false));
+                    getLockMode(false));
             return DbCompat.getRecordNumber(otherThang);
-        } else {
+        }
+        else {
             /* QUEUE or RECNO database. */
             return DbCompat.getRecordNumber(keyThang);
         }
@@ -450,27 +450,28 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getCurrent(), no join cursor allowed.
      */
     OperationStatus getCurrent(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         return cursor.getCurrent(
-            keyThang, primaryKeyThang, valueThang,
-            OpReadOptions.make(getLockMode(lockForWrite))).status();
+                keyThang, primaryKeyThang, valueThang,
+                OpReadOptions.make(getLockMode(lockForWrite))).status();
     }
 
     /**
      * Binding version of Cursor.getFirst(), join cursor is allowed.
      */
     OperationStatus getFirst(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LockMode lockMode = getLockMode(lockForWrite);
-        if (joinCursor != null) {
+        if(joinCursor != null) {
             return joinCursor.getNext(keyThang, valueThang, lockMode);
-        } else {
+        }
+        else {
             return cursor.getFirst(
-                keyThang, primaryKeyThang, valueThang,
-                OpReadOptions.make(lockMode)).status();
+                    keyThang, primaryKeyThang, valueThang,
+                    OpReadOptions.make(lockMode)).status();
         }
     }
 
@@ -478,15 +479,16 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getNext(), join cursor is allowed.
      */
     OperationStatus getNext(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LockMode lockMode = getLockMode(lockForWrite);
-        if (joinCursor != null) {
+        if(joinCursor != null) {
             return joinCursor.getNext(keyThang, valueThang, lockMode);
-        } else {
+        }
+        else {
             return cursor.getNext(
-                keyThang, primaryKeyThang, valueThang,
-                OpReadOptions.make(lockMode)).status();
+                    keyThang, primaryKeyThang, valueThang,
+                    OpReadOptions.make(lockMode)).status();
         }
     }
 
@@ -494,18 +496,20 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getNext(), join cursor is allowed.
      */
     OperationStatus getNextNoDup(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LockMode lockMode = getLockMode(lockForWrite);
         OpReadOptions options = OpReadOptions.make(lockMode);
-        if (joinCursor != null) {
+        if(joinCursor != null) {
             return joinCursor.getNext(keyThang, valueThang, lockMode);
-        } else if (view.dupsView) {
+        }
+        else if(view.dupsView) {
             return cursor.getNext
-                (keyThang, primaryKeyThang, valueThang, options).status();
-        } else {
+                    (keyThang, primaryKeyThang, valueThang, options).status();
+        }
+        else {
             return cursor.getNextNoDup
-                (keyThang, primaryKeyThang, valueThang, options).status();
+                    (keyThang, primaryKeyThang, valueThang, options).status();
         }
     }
 
@@ -513,15 +517,16 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getNextDup(), no join cursor allowed.
      */
     OperationStatus getNextDup(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
-        if (view.dupsView) {
+        if(view.dupsView) {
             return null;
-        } else {
+        }
+        else {
             return cursor.getNextDup(
-                keyThang, primaryKeyThang, valueThang,
-                OpReadOptions.make(getLockMode(lockForWrite))).status();
+                    keyThang, primaryKeyThang, valueThang,
+                    OpReadOptions.make(getLockMode(lockForWrite))).status();
         }
     }
 
@@ -529,40 +534,41 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getLast(), no join cursor allowed.
      */
     OperationStatus getLast(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         return cursor.getLast(
-            keyThang, primaryKeyThang, valueThang,
-            OpReadOptions.make(getLockMode(lockForWrite))).status();
+                keyThang, primaryKeyThang, valueThang,
+                OpReadOptions.make(getLockMode(lockForWrite))).status();
     }
 
     /**
      * Binding version of Cursor.getPrev(), no join cursor allowed.
      */
     OperationStatus getPrev(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         return cursor.getPrev(
-            keyThang, primaryKeyThang, valueThang,
-            OpReadOptions.make(getLockMode(lockForWrite))).status();
+                keyThang, primaryKeyThang, valueThang,
+                OpReadOptions.make(getLockMode(lockForWrite))).status();
     }
 
     /**
      * Binding version of Cursor.getPrevNoDup(), no join cursor allowed.
      */
     OperationStatus getPrevNoDup(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         LockMode lockMode = getLockMode(lockForWrite);
         OpReadOptions options = OpReadOptions.make(lockMode);
-        if (view.dupsView) {
+        if(view.dupsView) {
             return null;
-        } else {
+        }
+        else {
             return cursor.getPrevNoDup(
-                keyThang, primaryKeyThang, valueThang, options).status();
+                    keyThang, primaryKeyThang, valueThang, options).status();
         }
     }
 
@@ -570,15 +576,16 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.getPrevDup(), no join cursor allowed.
      */
     OperationStatus getPrevDup(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
-        if (view.dupsView) {
+        if(view.dupsView) {
             return null;
-        } else {
+        }
+        else {
             return cursor.getPrevDup(
-                keyThang, primaryKeyThang, valueThang,
-                OpReadOptions.make(getLockMode(lockForWrite))).status();
+                    keyThang, primaryKeyThang, valueThang,
+                    OpReadOptions.make(getLockMode(lockForWrite))).status();
         }
     }
 
@@ -588,18 +595,19 @@ final class DataCursor implements Cloneable {
      */
     OperationStatus getSearchKey(Object key, Object value,
                                  boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
-        if (view.dupsView) {
-            if (view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
+        if(view.dupsView) {
+            if(view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
                 KeyRange.copy(view.dupsKey, keyThang);
                 return cursor.getSearchBoth(
-                    keyThang, primaryKeyThang, valueThang,
-                    OpReadOptions.make(getLockMode(lockForWrite))).status();
+                        keyThang, primaryKeyThang, valueThang,
+                        OpReadOptions.make(getLockMode(lockForWrite))).status();
             }
-        } else {
-            if (view.useKey(key, value, keyThang, range)) {
+        }
+        else {
+            if(view.useKey(key, value, keyThang, range)) {
                 return doGetSearchKey(lockForWrite);
             }
         }
@@ -611,15 +619,16 @@ final class DataCursor implements Cloneable {
      * Searches by record number in a BTREE-RECNO db with RECNO access.
      */
     private OperationStatus doGetSearchKey(boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpReadOptions options = OpReadOptions.make(getLockMode(lockForWrite));
-        if (view.btreeRecNumAccess) {
+        if(view.btreeRecNumAccess) {
             return cursor.getSearchRecordNumber(
-                keyThang, primaryKeyThang, valueThang, options).status();
-        } else {
+                    keyThang, primaryKeyThang, valueThang, options).status();
+        }
+        else {
             return cursor.getSearchKey(
-                keyThang, primaryKeyThang, valueThang, options).status();
+                    keyThang, primaryKeyThang, valueThang, options).status();
         }
     }
 
@@ -628,20 +637,21 @@ final class DataCursor implements Cloneable {
      */
     OperationStatus getSearchKeyRange(Object key, Object value,
                                       boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         OpReadOptions options = OpReadOptions.make(getLockMode(lockForWrite));
-        if (view.dupsView) {
-            if (view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
+        if(view.dupsView) {
+            if(view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
                 KeyRange.copy(view.dupsKey, keyThang);
                 return cursor.getSearchBothRange(
-                    keyThang, primaryKeyThang, valueThang, options).status();
+                        keyThang, primaryKeyThang, valueThang, options).status();
             }
-        } else {
-            if (view.useKey(key, value, keyThang, range)) {
+        }
+        else {
+            if(view.useKey(key, value, keyThang, range)) {
                 return cursor.getSearchKeyRange(
-                    keyThang, primaryKeyThang, valueThang, options).status();
+                        keyThang, primaryKeyThang, valueThang, options).status();
             }
         }
         return OperationStatus.NOTFOUND;
@@ -652,43 +662,45 @@ final class DataCursor implements Cloneable {
      * sequential scan otherwise, no join cursor allowed.
      */
     OperationStatus findBoth(Object key, Object value, boolean lockForWrite)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
         OpReadOptions options = OpReadOptions.make(getLockMode(lockForWrite));
         view.useValue(value, valueThang, null);
-        if (view.dupsView) {
-            if (view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
+        if(view.dupsView) {
+            if(view.useKey(key, value, primaryKeyThang, view.dupsRange)) {
                 KeyRange.copy(view.dupsKey, keyThang);
-                if (otherThang == null) {
+                if(otherThang == null) {
                     otherThang = new DatabaseEntry();
                 }
                 OperationStatus status = cursor.getSearchBoth(
-                    keyThang, primaryKeyThang, otherThang, options).status();
-                if (status == OperationStatus.SUCCESS &&
-                    KeyRange.equalBytes(otherThang, valueThang)) {
+                        keyThang, primaryKeyThang, otherThang, options).status();
+                if(status == OperationStatus.SUCCESS &&
+                        KeyRange.equalBytes(otherThang, valueThang)) {
                     return status;
                 }
             }
-        } else if (view.useKey(key, value, keyThang, range)) {
-            if (view.isSecondary()) {
-                if (otherThang == null) {
+        }
+        else if(view.useKey(key, value, keyThang, range)) {
+            if(view.isSecondary()) {
+                if(otherThang == null) {
                     otherThang = new DatabaseEntry();
                 }
                 OperationStatus status = cursor.getSearchKey(
-                    keyThang, primaryKeyThang, otherThang, options).status();
-                while (status == OperationStatus.SUCCESS) {
-                    if (KeyRange.equalBytes(otherThang, valueThang)) {
+                        keyThang, primaryKeyThang, otherThang, options).status();
+                while(status == OperationStatus.SUCCESS) {
+                    if(KeyRange.equalBytes(otherThang, valueThang)) {
                         return status;
                     }
                     status = cursor.getNextDup(
-                        keyThang, primaryKeyThang, otherThang,
-                        options).status();
+                            keyThang, primaryKeyThang, otherThang,
+                            options).status();
                 }
                 /* if status != SUCCESS set range cursor to invalid? */
-            } else {
+            }
+            else {
                 return cursor.getSearchBoth(
-                    keyThang, null, valueThang, options).status();
+                        keyThang, null, valueThang, options).status();
             }
         }
         return OperationStatus.NOTFOUND;
@@ -699,22 +711,23 @@ final class DataCursor implements Cloneable {
      * scan otherwise, no join cursor allowed.
      */
     OperationStatus findValue(Object value, boolean findFirst)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
 
-        if (view.entityBinding != null && !view.isSecondary() &&
-            (findFirst || !view.dupsAllowed)) {
+        if(view.entityBinding != null && !view.isSecondary() &&
+                (findFirst || !view.dupsAllowed)) {
             return findBoth(null, value, false);
-        } else {
-            if (otherThang == null) {
+        }
+        else {
+            if(otherThang == null) {
                 otherThang = new DatabaseEntry();
             }
             view.useValue(value, otherThang, null);
             OperationStatus status = findFirst ? getFirst(false)
-                                               : getLast(false);
-            while (status == OperationStatus.SUCCESS) {
-                if (KeyRange.equalBytes(valueThang, otherThang)) {
+                    : getLast(false);
+            while(status == OperationStatus.SUCCESS) {
+                if(KeyRange.equalBytes(valueThang, otherThang)) {
                     break;
                 }
                 status = findFirst ? getNext(false) : getPrev(false);
@@ -727,12 +740,13 @@ final class DataCursor implements Cloneable {
      * Calls Cursor.count(), no join cursor allowed.
      */
     int count()
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkNoJoinCursor();
-        if (view.dupsView) {
+        if(view.dupsView) {
             return 1;
-        } else {
+        }
+        else {
             return cursor.count();
         }
     }
@@ -741,7 +755,7 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.putCurrent().
      */
     OperationStatus putCurrent(Object value)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkWriteAllowed(false);
         view.useValue(value, valueThang, keyThang);
@@ -751,17 +765,18 @@ final class DataCursor implements Cloneable {
          * different data is allowed.
          */
         boolean hashWorkaround = (view.dupsOrdered && !view.ordered);
-        if (hashWorkaround) {
-            if (otherThang == null) {
+        if(hashWorkaround) {
+            if(otherThang == null) {
                 otherThang = new DatabaseEntry();
             }
             cursor.getCurrent(
-                keyThang, primaryKeyThang, otherThang, OpReadOptions.EMPTY);
-            if (KeyRange.equalBytes(valueThang, otherThang)) {
+                    keyThang, primaryKeyThang, otherThang, OpReadOptions.EMPTY);
+            if(KeyRange.equalBytes(valueThang, otherThang)) {
                 return OperationStatus.SUCCESS;
-            } else {
+            }
+            else {
                 throw new IllegalArgumentException(
-                  "Current data differs from put data with sorted duplicates");
+                        "Current data differs from put data with sorted duplicates");
             }
         }
 
@@ -772,7 +787,7 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.putAfter().
      */
     OperationStatus putAfter(Object value)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkWriteAllowed(false);
         view.useValue(value, valueThang, null); /* why no key check? */
@@ -783,7 +798,7 @@ final class DataCursor implements Cloneable {
      * Binding version of Cursor.putBefore().
      */
     OperationStatus putBefore(Object value)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkWriteAllowed(false);
         view.useValue(value, valueThang, keyThang);
@@ -796,7 +811,7 @@ final class DataCursor implements Cloneable {
      */
     OperationStatus put(Object key, Object value, Object[] oldValue,
                         boolean useCurrentKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         initForPut(key, value, oldValue, useCurrentKey);
         return cursor.put(keyThang, valueThang);
@@ -808,7 +823,7 @@ final class DataCursor implements Cloneable {
      */
     OperationStatus putNoOverwrite(Object key, Object value,
                                    boolean useCurrentKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         initForPut(key, value, null, useCurrentKey);
         return cursor.putNoOverwrite(keyThang, valueThang);
@@ -820,23 +835,26 @@ final class DataCursor implements Cloneable {
      */
     OperationStatus putNoDupData(Object key, Object value, Object[] oldValue,
                                  boolean useCurrentKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         initForPut(key, value, oldValue, useCurrentKey);
-        if (view.dupsOrdered) {
+        if(view.dupsOrdered) {
             return cursor.putNoDupData(keyThang, valueThang);
-        } else {
-            if (view.dupsAllowed) {
+        }
+        else {
+            if(view.dupsAllowed) {
                 /* Unordered duplicates. */
                 OperationStatus status = cursor.getSearchBoth(
-                    keyThang, primaryKeyThang, valueThang,
-                    OpReadOptions.make(getLockMode(false))).status();
-                if (status == OperationStatus.SUCCESS) {
+                        keyThang, primaryKeyThang, valueThang,
+                        OpReadOptions.make(getLockMode(false))).status();
+                if(status == OperationStatus.SUCCESS) {
                     return OperationStatus.KEYEXIST;
-                } else {
+                }
+                else {
                     return cursor.put(keyThang, valueThang);
                 }
-            } else {
+            }
+            else {
                 /* No duplicates. */
                 return cursor.putNoOverwrite(keyThang, valueThang);
             }
@@ -848,17 +866,17 @@ final class DataCursor implements Cloneable {
      */
     private void initForPut(Object key, Object value, Object[] oldValue,
                             boolean useCurrentKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkWriteAllowed(false);
-        if (!useCurrentKey && !view.useKey(key, value, keyThang, range)) {
+        if(!useCurrentKey && !view.useKey(key, value, keyThang, range)) {
             throw new IllegalArgumentException("key out of range");
         }
-        if (oldValue != null) {
+        if(oldValue != null) {
             oldValue[0] = null;
-            if (!view.dupsAllowed) {
+            if(!view.dupsAllowed) {
                 OperationStatus status = doGetSearchKey(true);
-                if (status == OperationStatus.SUCCESS) {
+                if(status == OperationStatus.SUCCESS) {
                     oldValue[0] = getCurrentValue();
                 }
             }
@@ -871,7 +889,7 @@ final class DataCursor implements Cloneable {
      * time a putXxx() method is called that key will be used.
      */
     void useRangeKey() {
-        if (!range.isSingleKey()) {
+        if(!range.isSingleKey()) {
             throw DbCompat.unexpectedState();
         }
         KeyRange.copy(range.getSingleKey(), keyThang);
@@ -881,7 +899,7 @@ final class DataCursor implements Cloneable {
      * Perform an arbitrary database 'delete' operation.
      */
     OperationStatus delete()
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkWriteAllowed(true);
         return cursor.delete();
@@ -894,11 +912,13 @@ final class DataCursor implements Cloneable {
 
         /* Read-uncommmitted takes precedence over write-locking. */
 
-        if (readUncommitted) {
+        if(readUncommitted) {
             return LockMode.READ_UNCOMMITTED;
-        } else if (lockForWrite) {
+        }
+        else if(lockForWrite) {
             return view.currentTxn.getWriteLockMode();
-        } else {
+        }
+        else {
             return LockMode.DEFAULT;
         }
     }
@@ -908,9 +928,9 @@ final class DataCursor implements Cloneable {
      */
     private void checkNoJoinCursor() {
 
-        if (joinCursor != null) {
+        if(joinCursor != null) {
             throw new UnsupportedOperationException
-                ("Not allowed with a join cursor");
+                    ("Not allowed with a join cursor");
         }
     }
 
@@ -922,9 +942,9 @@ final class DataCursor implements Cloneable {
 
         checkNoJoinCursor();
 
-        if (!writeAllowed || (!allowSecondary && view.isSecondary())) {
+        if(!writeAllowed || (!allowSecondary && view.isSecondary())) {
             throw new UnsupportedOperationException
-                ("Writing is not allowed");
+                    ("Writing is not allowed");
         }
     }
 }

@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A long JE stat that uses {@link AtomicLong} to be thread safe.
@@ -70,7 +70,7 @@ public class AtomicLongStat extends Stat<Long> {
     @Override
     public Stat<Long> computeInterval(Stat<Long> base) {
         AtomicLongStat ret = copy();
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
             ret.set(counter.get() - base.get());
         }
         return ret;
@@ -78,16 +78,16 @@ public class AtomicLongStat extends Stat<Long> {
 
     @Override
     public void negate() {
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
 
             /*
              * Negate the value atomically, retrying if another change
              * intervenes.  This loop emulates the behavior of
              * AtomicLong.getAndIncrement.
              */
-            while (true) {
+            while(true) {
                 final long current = counter.get();
-                if (counter.compareAndSet(current, -current)) {
+                if(counter.compareAndSet(current, -current)) {
                     return;
                 }
             }

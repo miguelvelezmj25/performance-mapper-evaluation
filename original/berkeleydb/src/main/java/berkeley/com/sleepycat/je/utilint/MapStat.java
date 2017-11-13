@@ -13,7 +13,7 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import static berkeley.com.sleepycat.je.utilint.CollectionUtils.emptySortedMap;
+import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+import static berkeley.com.sleepycat.je.utilint.CollectionUtils.emptySortedMap;
 
 /**
  * A base class for JE stats that map String keys to component statistics, and
@@ -43,12 +43,12 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
     protected final Map<String, C> statMap =
 
         /* Use a sorted map so that the output is sorted */
-        new TreeMap<>();
+            new TreeMap<>();
 
     /**
      * Creates an instance of this class.
      *
-     * @param group the owning group
+     * @param group      the owning group
      * @param definition the associated definition
      */
     protected MapStat(StatGroup group, StatDefinition definition) {
@@ -63,9 +63,9 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
      */
     protected MapStat(MapStat<T, C> other) {
         super(other.definition);
-        synchronized (this) {
-            synchronized (other) {
-                for (final Entry<String, C> entry : other.statMap.entrySet()) {
+        synchronized(this) {
+            synchronized(other) {
+                for(final Entry<String, C> entry : other.statMap.entrySet()) {
                     statMap.put(entry.getKey(), entry.getValue().copy());
                 }
             }
@@ -90,17 +90,17 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
      */
     public synchronized SortedMap<String, T> getMap() {
         SortedMap<String, T> ret = null;
-        for (final Entry<String, C> entry : statMap.entrySet()) {
+        for(final Entry<String, C> entry : statMap.entrySet()) {
             final C stat = entry.getValue();
-            if (stat.isNotSet()) {
+            if(stat.isNotSet()) {
                 continue;
             }
-            if (ret == null) {
+            if(ret == null) {
                 ret = new TreeMap<>();
             }
             ret.put(entry.getKey(), stat.get());
         }
-        if (ret == null) {
+        if(ret == null) {
             return emptySortedMap();
         }
         return ret;
@@ -117,8 +117,8 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
 
     @Override
     public synchronized void clear() {
-        if (definition.getType() == StatType.INCREMENTAL) {
-            for (final C stat : statMap.values()) {
+        if(definition.getType() == StatType.INCREMENTAL) {
+            for(final C stat : statMap.values()) {
                 stat.clear();
             }
         }
@@ -136,21 +136,22 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
     private synchronized String getFormattedValue(boolean useCommas) {
         final StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (final Entry<String, C> entry : statMap.entrySet()) {
+        for(final Entry<String, C> entry : statMap.entrySet()) {
             final C value = entry.getValue();
-            if (value.isNotSet()) {
+            if(value.isNotSet()) {
                 continue;
             }
-            if (!first) {
+            if(!first) {
                 sb.append(';');
-            } else {
+            }
+            else {
                 first = false;
             }
             sb.append(entry.getKey()).append('=');
             final String formattedValue =
-                value.getFormattedValue(useCommas);
+                    value.getFormattedValue(useCommas);
             assert useCommas || (formattedValue.indexOf(',') == -1)
-                : "Formatted value doesn't obey useCommas: " + formattedValue;
+                    : "Formatted value doesn't obey useCommas: " + formattedValue;
             sb.append(formattedValue);
         }
         return sb.toString();
@@ -158,44 +159,54 @@ public abstract class MapStat<T, C extends MapStatComponent<T, C>>
 
     @Override
     public synchronized boolean isNotSet() {
-        for (final C stat : statMap.values()) {
-            if (!stat.isNotSet()) {
+        for(final C stat : statMap.values()) {
+            if(!stat.isNotSet()) {
                 return false;
             }
         }
         return true;
     }
 
-    /** @throws UnsupportedOperationException always */
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void set(String value) {
         throw new UnsupportedOperationException(
-            "The set method is not supported");
+                "The set method is not supported");
     }
 
-    /** @throws UnsupportedOperationException always */
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void add(Stat<String> other) {
         throw new UnsupportedOperationException(
-            "The add method is not supported");
+                "The add method is not supported");
     }
 
-    /** This implementation adds synchronization. */
+    /**
+     * This implementation adds synchronization.
+     */
     @Override
     public synchronized Stat<String> copyAndClear() {
         return super.copyAndClear();
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void writeObject(ObjectOutputStream out)
-        throws IOException {
+            throws IOException {
 
         out.defaultWriteObject();
     }

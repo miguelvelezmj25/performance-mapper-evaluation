@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.WriteOptions;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A struct for passing record expiration info to a 'put' operation, and
@@ -24,7 +24,7 @@ import berkeley.com.sleepycat.je.WriteOptions;
 public class ExpirationInfo {
 
     public static final ExpirationInfo DEFAULT =
-        new ExpirationInfo(0, false, false);
+            new ExpirationInfo(0, false, false);
 
     public final int expiration;
     public final boolean expirationInHours;
@@ -33,9 +33,9 @@ public class ExpirationInfo {
     private long oldExpirationTime = 0;
 
     public ExpirationInfo(
-        final int expiration,
-        final boolean expirationInHours,
-        final boolean updateExpiration) {
+            final int expiration,
+            final boolean expirationInHours,
+            final boolean updateExpiration) {
 
         this.expiration = expiration;
         this.expirationInHours = expirationInHours;
@@ -47,36 +47,35 @@ public class ExpirationInfo {
      * the current system time.
      *
      * @param options WriteOptions, may not be null.
-     *
      * @return ExpirationInfo, or null if WriteOptions.getTTL is zero and
      * WriteOptions.getUpdateTTL is false, meaning we will not add or update
      * the TTL.
      */
     public static ExpirationInfo getInfo(final WriteOptions options) {
 
-        if (options.getTTL() == 0 && !options.getUpdateTTL()) {
+        if(options.getTTL() == 0 && !options.getUpdateTTL()) {
             return null;
         }
 
         return new ExpirationInfo(
-            TTL.ttlToExpiration(options.getTTL(), options.getTTLUnit()),
-            options.getTTLUnit() == TimeUnit.HOURS,
-            options.getUpdateTTL());
-    }
-
-    public void setExpirationUpdated(boolean val) {
-        expirationUpdated = val;
+                TTL.ttlToExpiration(options.getTTL(), options.getTTLUnit()),
+                options.getTTLUnit() == TimeUnit.HOURS,
+                options.getUpdateTTL());
     }
 
     public boolean getExpirationUpdated() {
         return expirationUpdated;
     }
 
-    public void setOldExpirationTime(long val) {
-        oldExpirationTime = val;
+    public void setExpirationUpdated(boolean val) {
+        expirationUpdated = val;
     }
 
     public long getOldExpirationTime() {
         return oldExpirationTime;
+    }
+
+    public void setOldExpirationTime(long val) {
+        oldExpirationTime = val;
     }
 }

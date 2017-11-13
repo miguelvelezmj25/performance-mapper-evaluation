@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
+
+import java.nio.ByteBuffer;
 
 /**
  * Per-DB-per-file utilization counters.  The DatabaseImpl stores a persistent
@@ -60,14 +60,14 @@ public class DbFileSummary implements Loggable, Cloneable {
      */
     public int getLogSize() {
         return
-            LogUtils.getPackedIntLogSize(totalINCount) +
-            LogUtils.getPackedIntLogSize(totalINSize) +
-            LogUtils.getPackedIntLogSize(totalLNCount) +
-            LogUtils.getPackedIntLogSize(totalLNSize) +
-            LogUtils.getPackedIntLogSize(obsoleteINCount) +
-            LogUtils.getPackedIntLogSize(obsoleteLNCount) +
-            LogUtils.getPackedIntLogSize(obsoleteLNSize) +
-            LogUtils.getPackedIntLogSize(obsoleteLNSizeCounted);
+                LogUtils.getPackedIntLogSize(totalINCount) +
+                        LogUtils.getPackedIntLogSize(totalINSize) +
+                        LogUtils.getPackedIntLogSize(totalLNCount) +
+                        LogUtils.getPackedIntLogSize(totalLNSize) +
+                        LogUtils.getPackedIntLogSize(obsoleteINCount) +
+                        LogUtils.getPackedIntLogSize(obsoleteLNCount) +
+                        LogUtils.getPackedIntLogSize(obsoleteLNSize) +
+                        LogUtils.getPackedIntLogSize(obsoleteLNSizeCounted);
     }
 
     /**
@@ -126,6 +126,7 @@ public class DbFileSummary implements Loggable, Cloneable {
 
     /**
      * Never called.
+     *
      * @see Loggable#getTransactionId
      */
     public long getTransactionId() {
@@ -144,7 +145,7 @@ public class DbFileSummary implements Loggable, Cloneable {
     public DbFileSummary clone() {
         try {
             return (DbFileSummary) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             /* Should never happen. */
             throw new IllegalStateException(e);
         }

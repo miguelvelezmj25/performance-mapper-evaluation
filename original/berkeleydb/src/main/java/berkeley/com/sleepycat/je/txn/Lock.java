@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.util.List;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * A Lock embodies the lock state of an LSN.  It includes a set of owners and
@@ -45,7 +45,7 @@ interface Lock {
     /**
      * Return true if locker is an owner of this Lock for lockType,
      * false otherwise.
-     *
+     * <p>
      * This method is only used by unit tests.
      */
     public boolean isOwner(Locker locker, LockType lockType);
@@ -64,7 +64,7 @@ interface Lock {
 
     /**
      * Return true if locker is a waiter on this Lock.
-     *
+     * <p>
      * This method is only used by unit tests.
      */
     public boolean isWaiter(Locker locker);
@@ -75,7 +75,7 @@ interface Lock {
 
     /**
      * Attempts to acquire the lock and returns the LockGrantType.
-     *
+     * <p>
      * Assumes we hold the lockTableLatch when entering this method.
      */
     public LockAttemptResult lock(LockType requestType,
@@ -84,17 +84,17 @@ interface Lock {
                                   boolean jumpAheadOfWaiters,
                                   MemoryBudget mb,
                                   int lockTableIndex)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * Releases a lock and moves the next waiter(s) to the owners.
-     * @return
-     *  - null if we were not the owner,
-     *  - a non-empty set if owners should be notified after releasing,
-     *  - an empty set if no notification is required.
+     *
+     * @return - null if we were not the owner,
+     * - a non-empty set if owners should be notified after releasing,
+     * - an empty set if no notification is required.
      */
-    public Set<Locker> release(Locker locker, 
-                               MemoryBudget mb, 
+    public Set<Locker> release(Locker locker,
+                               MemoryBudget mb,
                                int lockTableIndex);
 
     /**
@@ -102,7 +102,7 @@ interface Lock {
      * property on the removed owners.
      */
     public void stealLock(Locker locker, MemoryBudget mb, int lockTableIndex)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * Downgrade a write lock to a read lock.

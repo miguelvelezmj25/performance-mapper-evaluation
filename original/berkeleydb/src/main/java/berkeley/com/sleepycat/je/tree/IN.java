@@ -13,7 +13,23 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
+import berkeley.com.sleepycat.je.CacheMode;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.cleaner.PackedObsoleteInfo;
+import berkeley.com.sleepycat.je.dbi.*;
+import berkeley.com.sleepycat.je.evictor.Evictor;
+import berkeley.com.sleepycat.je.evictor.OffHeapCache;
+import berkeley.com.sleepycat.je.latch.*;
+import berkeley.com.sleepycat.je.log.*;
+import berkeley.com.sleepycat.je.log.entry.BINDeltaLogEntry;
+import berkeley.com.sleepycat.je.log.entry.INLogEntry;
+import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
+import berkeley.com.sleepycat.je.log.entry.LogEntry;
+import berkeley.com.sleepycat.je.tree.dupConvert.DBIN;
+import berkeley.com.sleepycat.je.tree.dupConvert.DIN;
+import berkeley.com.sleepycat.je.tree.dupConvert.DupConvert;
+import berkeley.com.sleepycat.je.utilint.*;
 
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
@@ -22,120 +38,81 @@ import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import berkeley.com.sleepycat.je.CacheMode;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.cleaner.PackedObsoleteInfo;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbTree;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.INList;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
-import berkeley.com.sleepycat.je.dbi.TTL;
-import berkeley.com.sleepycat.je.evictor.Evictor;
-import berkeley.com.sleepycat.je.evictor.OffHeapCache;
-import berkeley.com.sleepycat.je.latch.LatchContext;
-import berkeley.com.sleepycat.je.latch.LatchFactory;
-import berkeley.com.sleepycat.je.latch.LatchSupport;
-import berkeley.com.sleepycat.je.latch.LatchTable;
-import berkeley.com.sleepycat.je.latch.SharedLatch;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.LogItem;
-import berkeley.com.sleepycat.je.log.LogParams;
-import berkeley.com.sleepycat.je.log.LogUtils;
-import berkeley.com.sleepycat.je.log.Loggable;
-import berkeley.com.sleepycat.je.log.Provisional;
-import berkeley.com.sleepycat.je.log.ReplicationContext;
-import berkeley.com.sleepycat.je.log.WholeEntry;
-import berkeley.com.sleepycat.je.log.entry.BINDeltaLogEntry;
-import berkeley.com.sleepycat.je.log.entry.INLogEntry;
-import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
-import berkeley.com.sleepycat.je.log.entry.LogEntry;
-import berkeley.com.sleepycat.je.tree.dupConvert.DBIN;
-import berkeley.com.sleepycat.je.tree.dupConvert.DIN;
-import berkeley.com.sleepycat.je.tree.dupConvert.DupConvert;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.SizeofMarker;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
 
 /**
  * An IN represents an Internal Node in the JE tree.
- *
+ * <p>
  * Explanation of KD (KnownDeleted) and PD (PendingDelete) entry flags
  * ===================================================================
- *
+ * <p>
  * PD: set for all LN entries that are deleted, even before the LN is
  * committed.  Is used as an authoritative (transactionally correct) indication
  * that an LN is deleted. PD will be cleared if the txn for the deleted LN is
  * aborted.
- *
+ * <p>
  * KD: set under special conditions for entries containing LNs which are known
  * to be obsolete.  Not used for entries in an active/uncommitted transaction.
- *
+ * <p>
  * First notice that IN.fetchLN will allow a FileNotFoundException when the
  * PD or KD flag is set on the entry.  And it will allow a NULL_LSN when the KD
  * flag is set.
- *
+ * <p>
  * KD was implemented first, and was originally used when the cleaner attempts
  * to migrate an LN and discovers it is deleted (see Cleaner.migrateLN). We
  * need KD because the INCompressor may not have run, and may not have
  * compressed the BIN. There's the danger that we'll try to fetch that entry,
  * and that the file was deleted by the cleaner.
- *
+ * <p>
  * KD was used more recently when an unexpected exception occurs while logging
  * an LN, after inserting the entry.  Rather than delete the entry to clean up,
  * we mark the entry KD so it won't cause a fetch error later.  In this case
  * the entry LSN is NULL_LSN. See Tree.insertNewSlot.
- *
+ * <p>
  * PD is closely related to the first use of KD above (for cleaned deleted LNs)
  * and came about because of a cleaner optimization we make. The cleaner
  * considers all deleted LN log entries to be obsolete, without doing a tree
  * lookup, and without any record of an obsolete offset.  This makes the cost
  * of cleaning of deleted LNs very low.  For example, if the log looks like
  * this:
- *
+ * <p>
  * 100  LNA
  * 200  delete of LNA
- *
+ * <p>
  * then LSN 200 will be considered obsolete when this file is processed by the
  * cleaner. After all, only two things can happen: (1) the txn commits, and we
  * don't need LSN 200, because we can wipe this LN out of the tree, or (2) the
  * txn aborts, and we don't need LSN 200, because we are going to revert to LSN
  * 100/LNA.
- *
+ * <p>
  * We set PD for the entry of a deleted LN at the time of the operation, and we
  * clear PD if the transaction aborts.  There is no real danger that this log
  * entry will be processed by the cleaner before it's committed, because
  * cleaning can only happen after the first active LSN.
- *
+ * <p>
  * Just as in the first use of KD above, setting PD is necessary to avoid a
  * fetch error, when the file is deleted by the cleaner but the entry
  * containing the deleted LN has not been deleted by the INCompressor.
- *
+ * <p>
  * PD is also set in replication rollback, when LNs are marked as
  * invisible.
- *
+ * <p>
  * When LSN locking was implemented (see CursorImpl.lockLN), the PD flag took
  * on additional meaning.  PD is used to determine whether an LN is deleted
  * without fetching it, and therefore is relied on to be transactionally
  * correct.
- *
+ * <p>
  * In addition to the setting and use of the KD/PD flags described above, the
  * situation is complicated by the fact that we must restore the state of these
  * flags during abort, recovery, and set them properly during slot reuse.
- *
+ * <p>
  * We have been meaning to consider whether PD and KD can be consolidated into
  * one flag: simply the Deleted flag.  The Deleted flag would be set in the
  * same way as PD is currently set, as well as the second use of KD described
  * above (when the LSN is NULL_LSN after an insertion error).  The use of KD
  * and PD for invisible entries and recovery rollback should also be
  * considered.
- *
+ * <p>
  * If we consolidate the two flags and set the Deleted flag during a delete
  * operation (like PD), we'll have to remove optimizations (in CursorImpl for
  * example) that consider a slot deleted when KD is set.  Since KD is rarely
@@ -143,27 +120,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  */
 public class IN extends Node implements Comparable<IN>, LatchContext {
 
-    private static final String BEGIN_TAG = "<in>";
-    private static final String END_TAG = "</in>";
-    private static final String TRACE_SPLIT = "Split:";
-    private static final String TRACE_DELETE = "Delete:";
-
-    private static final int BYTES_PER_LSN_ENTRY = 4;
     public static final int MAX_FILE_OFFSET = 0xfffffe;
-    private static final int THREE_BYTE_NEGATIVE_ONE = 0xffffff;
-
-    /**
-     * Used as the "empty rep" for the INLongRep offHeapBINIds field.
-     *
-     * minLength is 3 because BIN IDs are LRU list indexes. Initially 100k
-     * indexes are allocated and the largest values are used first.
-     *
-     * allowSparseRep is true because some workloads will only load BIN IDs for
-     * a subset of the BINs in the IN.
-     */
-    private static final INLongRep.EmptyRep EMPTY_OFFHEAP_BIN_IDS =
-        new INLongRep.EmptyRep(3, true);
-
     /*
      * Levels:
      * The mapping tree has levels in the 0x20000 -> 0x2ffff number space.
@@ -175,19 +132,39 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     public static final int LEVEL_MASK = 0x0ffff;
     public static final int MIN_LEVEL = -1;
     public static final int BIN_LEVEL = MAIN_LEVEL | 1;
-
     /* Used to indicate that an exact match was found in findEntry. */
     public static final int EXACT_MATCH = (1 << 16);
-
     /* Used to indicate that an insert was successful. */
     public static final int INSERT_SUCCESS = (1 << 17);
-
     /*
      * A bit flag set in the return value of partialEviction() to indicate
      * whether the IN is evictable or not.
      */
     public static final long NON_EVICTABLE_IN = (1L << 62);
-
+    /*
+     * Max allowable accumulation of memory budget changes before MemoryBudget
+     * should be updated. This allows for consolidating multiple calls to
+     * updateXXXMemoryBudget() into one call.  Not declared final so that the
+     * unit tests can modify it.  See SR 12273.
+     */
+    public static final int ACCUMULATED_LIMIT_DEFAULT = 1000;
+    private static final String BEGIN_TAG = "<in>";
+    private static final String END_TAG = "</in>";
+    private static final String TRACE_SPLIT = "Split:";
+    private static final String TRACE_DELETE = "Delete:";
+    private static final int BYTES_PER_LSN_ENTRY = 4;
+    private static final int THREE_BYTE_NEGATIVE_ONE = 0xffffff;
+    /**
+     * Used as the "empty rep" for the INLongRep offHeapBINIds field.
+     * <p>
+     * minLength is 3 because BIN IDs are LRU list indexes. Initially 100k
+     * indexes are allocated and the largest values are used first.
+     * <p>
+     * allowSparseRep is true because some workloads will only load BIN IDs for
+     * a subset of the BINs in the IN.
+     */
+    private static final INLongRep.EmptyRep EMPTY_OFFHEAP_BIN_IDS =
+            new INLongRep.EmptyRep(3, true);
     /*
      * Boolean properties of an IN, encoded as bits inside the flags
      * data member.
@@ -203,34 +180,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     private static final int IN_RESIDENT_BIT = 0x100;
     private static final int IN_PROHIBIT_NEXT_DELTA_BIT = 0x200;
     private static final int IN_EXPIRATION_IN_HOURS = 0x400;
-
     /* Tracing for LRU-related ops */
     private static final boolean traceLRU = false;
     private static final boolean traceDeltas = false;
     private static final Level traceLevel = Level.INFO;
-
+    public static boolean disableCompactLsns; // DbCacheSize only
+    public static int ACCUMULATED_LIMIT = ACCUMULATED_LIMIT_DEFAULT;
     DatabaseImpl databaseImpl;
-
-    private int level;
-
     /* The unique id of this node. */
     long nodeId;
-
     /* Some bits are persistent and some are not, see serialize. */
     int flags;
-
-    /*
-     * The identifier key is a key that can be used used to search for this IN.
-     * Initially it is the key of the zeroth slot, but insertions prior to slot
-     * zero make this no longer true.  It is always equal to some key in the
-     * IN, and therefore it is changed by BIN.compress when removing slots.
-     */
-    private byte[] identifierKey;
-
     int nEntries;
-
     byte[] entryStates;
-
     /*
      * entryKeys contains the keys in their entirety if key prefixing is not
      * being used. If prefixing is enabled, then keyPrefix contains the prefix
@@ -246,7 +208,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     INKeyRep entryKeys;
     byte[] keyPrefix;
-
     /*
      * The following entryLsnXXX fields are used for storing LSNs.  There are
      * two possible representations: a byte array based rep, and a long array
@@ -273,8 +234,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     long baseFileNumber;
     byte[] entryLsnByteArray;
     long[] entryLsnLongArray;
-    public static boolean disableCompactLsns; // DbCacheSize only
-
     /*
      * The children of this IN. Only the ones that are actually in the cache
      * have non-null entries. Specialized sparse array represents are used to
@@ -282,39 +241,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * are made to it.
      */
     INTargetRep entryTargets;
-
-    /*
-     * In a level 2 IN, the LRU IDs of the child BINs.
-     */
-    private INLongRep offHeapBINIds = EMPTY_OFFHEAP_BIN_IDS;
-
     long inMemorySize;
-
-    /*
-     * accumluted memory budget delta.  Once this exceeds
-     * MemoryBudget.ACCUMULATED_LIMIT we inform the MemoryBudget that a change
-     * has occurred.  See SR 12273.
-     */
-    private int accumulatedDelta = 0;
-
-    /*
-     * Max allowable accumulation of memory budget changes before MemoryBudget
-     * should be updated. This allows for consolidating multiple calls to
-     * updateXXXMemoryBudget() into one call.  Not declared final so that the
-     * unit tests can modify it.  See SR 12273.
-     */
-    public static final int ACCUMULATED_LIMIT_DEFAULT = 1000;
-    public static int ACCUMULATED_LIMIT = ACCUMULATED_LIMIT_DEFAULT;
-
-    /**
-     * References to the next and previous nodes in an LRU list. If the node
-     * is not in any LRUList, both of these will be null. If the node is at
-     * the front/back of an LRUList, prevLRUNode/nextLRUNode will point to
-     * the node itself.
-     */
-    private IN nextLRUNode = null;
-    private IN prevLRUNode = null;
-
     /*
      * Let L be the most recently written logrec for this IN instance.
      * (a) If this is a UIN, lastFullVersion is the lsn of L.
@@ -341,6 +268,32 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * rather than the IN readFromLog/writeFromLog methods.
      */
     long lastFullVersion = DbLsn.NULL_LSN;
+    private int level;
+    /*
+     * The identifier key is a key that can be used used to search for this IN.
+     * Initially it is the key of the zeroth slot, but insertions prior to slot
+     * zero make this no longer true.  It is always equal to some key in the
+     * IN, and therefore it is changed by BIN.compress when removing slots.
+     */
+    private byte[] identifierKey;
+    /*
+     * In a level 2 IN, the LRU IDs of the child BINs.
+     */
+    private INLongRep offHeapBINIds = EMPTY_OFFHEAP_BIN_IDS;
+    /*
+     * accumluted memory budget delta.  Once this exceeds
+     * MemoryBudget.ACCUMULATED_LIMIT we inform the MemoryBudget that a change
+     * has occurred.  See SR 12273.
+     */
+    private int accumulatedDelta = 0;
+    /**
+     * References to the next and previous nodes in an LRU list. If the node
+     * is not in any LRUList, both of these will be null. If the node is at
+     * the front/back of an LRUList, prevLRUNode/nextLRUNode will point to
+     * the node itself.
+     */
+    private IN nextLRUNode = null;
+    private IN prevLRUNode = null;
 
     /*
      * BINs have a lastDeltaVersion data field as well, which is defined as
@@ -370,8 +323,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      *
      * private long lastDeltaVersion = DbLsn.NULL_LSN;
      */
-
-
     /*
      * A sequence of obsolete info that cannot be counted as obsolete until an
      * ancestor IN is logged non-provisionally.
@@ -400,15 +351,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Create a new IN.
      */
     public IN(
-        DatabaseImpl dbImpl,
-        byte[] identifierKey,
-        int capacity,
-        int level) {
+            DatabaseImpl dbImpl,
+            byte[] identifierKey,
+            int capacity,
+            int level) {
 
         nodeId = dbImpl.getEnv().getNodeSequence().getNextLocalNodeId();
 
         init(dbImpl, identifierKey, capacity,
-            generateLevel(dbImpl.getId(), level));
+                generateLevel(dbImpl.getId(), level));
 
         initMemorySize();
     }
@@ -430,7 +381,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         entryStates = null;
 
         latch = LatchFactory.createSharedLatch(
-            LatchSupport.DUMMY_LATCH_CONTEXT, isAlwaysLatchedExclusively());
+                LatchSupport.DUMMY_LATCH_CONTEXT, isAlwaysLatchedExclusively());
 
         /*
          * Use the latch to force it to grow to "runtime size".
@@ -441,14 +392,339 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         latch.release();
     }
 
+    private static int generateLevel(DatabaseId dbId, int newLevel) {
+        if(dbId.equals(DbTree.ID_DB_ID)) {
+            return newLevel | DBMAP_LEVEL;
+        }
+        else {
+            return newLevel | MAIN_LEVEL;
+        }
+    }
+
+    /**
+     * Returns true if the given state is known deleted.
+     */
+    static boolean isStateKnownDeleted(byte state) {
+        return ((state & EntryStates.KNOWN_DELETED_BIT) != 0);
+    }
+
+    /**
+     * Returns true if the given state is pending deleted.
+     */
+    static boolean isStatePendingDeleted(byte state) {
+        return ((state & EntryStates.PENDING_DELETED_BIT) != 0);
+    }
+
+    public static boolean isEmbeddedLN(byte state) {
+        return ((state & EntryStates.EMBEDDED_LN_BIT) != 0);
+    }
+
+    public static boolean isNoDataLN(byte state) {
+        return ((state & EntryStates.NO_DATA_LN_BIT) != 0);
+    }
+
+    /*
+     * Given 2 byte arrays, "prefix" and "key", where "prefix" is or stores
+     * a prefix of "key", allocate and return another byte array that stores
+     * the suffix of "key" w.r.t. "prefix".
+     */
+    private static byte[] computeKeySuffix(byte[] prefix, byte[] key) {
+
+        int prefixLen = (prefix == null ? 0 : prefix.length);
+
+        if(prefixLen == 0) {
+            return key;
+        }
+
+        int suffixLen = key.length - prefixLen;
+        byte[] ret = new byte[suffixLen];
+        System.arraycopy(key, prefixLen, ret, 0, suffixLen);
+        return ret;
+    }
+
+    /**
+     * @param in parent IN.  Is null when root is fetched.
+     */
+    static String makeFetchErrorMsg(
+            String msg,
+            IN in,
+            long lsn,
+            byte state,
+            long expirationTime) {
+
+        /*
+         * Bolster the exception with the LSN, which is critical for
+         * debugging. Otherwise, the exception propagates upward and loses the
+         * problem LSN.
+         */
+        StringBuilder sb = new StringBuilder();
+
+        if(in == null) {
+            sb.append("fetchRoot of ");
+        }
+        else if(in.isBIN()) {
+            sb.append("fetchLN of ");
+        }
+        else {
+            sb.append("fetchIN of ");
+        }
+
+        if(lsn == DbLsn.NULL_LSN) {
+            sb.append("null lsn");
+        }
+        else {
+            sb.append(DbLsn.getNoFormatString(lsn));
+        }
+
+        if(in != null) {
+            sb.append(" parent IN=").append(in.getNodeId());
+            sb.append(" IN class=").append(in.getClass().getName());
+            sb.append(" lastFullLsn=");
+            sb.append(DbLsn.getNoFormatString(in.getLastFullLsn()));
+            sb.append(" lastLoggedLsn=");
+            sb.append(DbLsn.getNoFormatString(in.getLastLoggedLsn()));
+            sb.append(" parent.getDirty()=").append(in.getDirty());
+        }
+
+        sb.append(" state=").append(state);
+
+        sb.append(" expires=");
+
+        if(expirationTime != 0) {
+            sb.append(TTL.formatExpirationTime(expirationTime));
+        }
+        else {
+            sb.append("never");
+        }
+
+        if(msg != null) {
+            sb.append(" ").append(msg);
+        }
+
+        return sb.toString();
+    }
+
+    public static long logEntry(
+            INLogEntry<BIN> logEntry,
+            Provisional provisional,
+            boolean backgroundIO,
+            IN parent) {
+
+        return logInternal(
+                null, logEntry, true /*allowDeltas*/, false /*allowCompress*/,
+                provisional, backgroundIO, parent);
+    }
+
+    /**
+     * Bottleneck method for all IN logging.
+     * <p>
+     * If 'node' is non-null, 'logEntry' must be null.
+     * If 'node' is null, 'logEntry' and 'parent' must be non-null.
+     * <p>
+     * When 'logEntry' is non-null we are logging an off-heap BIN, and it is
+     * not resident in the main cache. The lastFull/DeltaLsns are not updated
+     * here, and this must be done instead by the caller.
+     * <p>
+     * When 'node' is non-null, 'parent' may or may not be null. It must be
+     * non-null when logging provisionally, since obsolete LSNs are added to
+     * the parent's collection.
+     */
+    private static long logInternal(
+            final IN node,
+            INLogEntry<?> logEntry,
+            final boolean allowDeltas,
+            final boolean allowCompress,
+            final Provisional provisional,
+            final boolean backgroundIO,
+            final IN parent) {
+
+        assert node == null || node.isLatchExclusiveOwner();
+        assert parent == null || parent.isLatchExclusiveOwner();
+        assert node != null || parent != null;
+        assert (node == null) != (logEntry == null);
+
+        final DatabaseImpl dbImpl =
+                (node != null) ? node.getDatabase() : parent.getDatabase();
+
+        final EnvironmentImpl envImpl = dbImpl.getEnv();
+
+        final boolean countObsoleteNow =
+                provisional != Provisional.YES || dbImpl.isTemporary();
+
+        final boolean isBin = (node != null) ?
+                node.isBIN() : (parent.getNormalizedLevel() == 2);
+
+        final BIN bin = (node != null && isBin) ? ((BIN) node) : null;
+
+        final boolean isDelta;
+
+        if(isBin) {
+            if(logEntry != null) {
+                /*
+                 * When a logEntry is supplied (node/bin are null), the logic
+                 * below is implemented by OffHeapCache.createBINLogEntry.
+                 */
+                isDelta = logEntry.isBINDelta();
+            }
+            else {
+                /* Compress non-dirty slots before determining delta status. */
+                if(allowCompress) {
+                    envImpl.lazyCompress(bin, false /*compressDirtySlots*/);
+                }
+
+                isDelta = bin.isBINDelta() ||
+                        (allowDeltas && bin.shouldLogDelta());
+
+                /* Be sure that we didn't illegally mutate to a delta. */
+                assert (!(isDelta && bin.isDeltaProhibited()));
+
+                /* Also compress dirty slots, if we will not log a delta. */
+                if(allowCompress && !isDelta) {
+                    envImpl.lazyCompress(bin, true /*compressDirtySlots*/);
+                }
+
+                /*
+                 * Write dirty LNs in deferred-write databases after
+                 * compression to reduce total logging, at least for temp DBs.
+                 */
+                if(dbImpl.isDeferredWriteMode()) {
+                    bin.logDirtyChildren();
+                }
+
+                logEntry = isDelta ?
+                        (new BINDeltaLogEntry(bin)) :
+                        (new INLogEntry<>(bin));
+            }
+        }
+        else {
+            assert node != null;
+
+            isDelta = false;
+            logEntry = new INLogEntry<>(node);
+        }
+
+        final LogParams params = new LogParams();
+        params.entry = logEntry;
+        params.provisional = provisional;
+        params.repContext = ReplicationContext.NO_REPLICATE;
+        params.nodeDb = dbImpl;
+        params.backgroundIO = backgroundIO;
+
+        /*
+         * For delta logging:
+         *  + Count lastDeltaVersion obsolete, if non-null.
+         *  + Set lastDeltaVersion to newly logged LSN.
+         *  + Leave lastFullVersion unchanged.
+         *
+         * For full version logging:
+         *  + Count lastFullVersion and lastDeltaVersion obsolete, if non-null.
+         *  + Set lastFullVersion to newly logged LSN.
+         *  + Set lastDeltaVersion to null.
+         */
+        final long oldLsn =
+                isDelta ? DbLsn.NULL_LSN : logEntry.getPrevFullLsn();
+
+        final long auxOldLsn = logEntry.getPrevDeltaLsn();
+
+        /*
+         * Determine whether to count the prior version of an IN (as well as
+         * accumulated provisionally obsolete LSNs for child nodes) obsolete
+         * when logging the new version.
+         *
+         * True is set if we are logging the IN non-provisionally, since the
+         * non-provisional version durably replaces the prior version and
+         * causes all provisional children to also become durable.
+         *
+         * True is also set if the database is temporary. Since we never use a
+         * temporary DB past recovery, prior versions of an IN are never used.
+         * [#16928]
+         */
+        if(countObsoleteNow) {
+            params.oldLsn = oldLsn;
+            params.auxOldLsn = auxOldLsn;
+            params.packedObsoleteInfo =
+                    (node != null) ? node.provisionalObsolete : null;
+        }
+
+        /* Log it. */
+        final LogItem item = envImpl.getLogManager().log(params);
+
+        if(node != null) {
+            node.setDirty(false);
+        }
+
+        if(countObsoleteNow) {
+            if(node != null) {
+                node.discardProvisionalObsolete();
+            }
+        }
+        else if(parent != null) {
+            parent.trackProvisionalObsolete(node, oldLsn);
+            parent.trackProvisionalObsolete(node, auxOldLsn);
+            /*
+             * TODO:
+             * The parent is null and provisional is YES when evicting the root
+             * of a DW DB. How does obsolete counting happen?
+             */
+        }
+
+        if(bin != null) {
+            /*
+             * When a logEntry is supplied (node/bin are null), the logic
+             * below is implemented by OffHeapCache.postBINLog.
+             */
+            if(isDelta) {
+                bin.setLastDeltaLsn(item.lsn);
+            }
+            else {
+                bin.setLastFullLsn(item.lsn);
+                bin.setLastDeltaLsn(DbLsn.NULL_LSN);
+            }
+
+            bin.setProhibitNextDelta(false);
+
+        }
+        else if(node != null) {
+            node.setLastFullLsn(item.lsn);
+        }
+
+        final Evictor evictor = envImpl.getEvictor();
+
+        if(node != null && evictor.getUseDirtyLRUSet()) {
+
+            /*
+             * To capture all cases where a node needs to be moved to the
+             * priority-1 LRUSet after being cleaned, we invoke moveToPri1LRU()
+             * from IN.afterLog(). This includes the case where the node is
+             * being logged as part of being evicted, in which case we don't
+             * really want it to go back to the LRU. However, this is ok
+             * because moveToPri1LRU() checks whether the node is actually
+             * in the priority-2 LRUSet before moving it to the priority-1
+             * LRUSet.
+             */
+            if(traceLRU && node.isUpperIN()) {
+                LoggerUtils.envLogMsg(
+                        traceLevel, envImpl,
+                        Thread.currentThread().getId() + "-" +
+                                Thread.currentThread().getName() +
+                                "-" + envImpl.getName() +
+                                " afterLogCommon(): " +
+                                " Moving UIN to mixed LRU: " + node.getNodeId());
+            }
+            evictor.moveToPri1LRU(node);
+        }
+
+        return item.lsn;
+    }
+
     /**
      * Create a new IN.  Need this because we can't call newInstance() without
      * getting a 0 for nodeId.
      */
     IN createNewInstance(
-        byte[] identifierKey,
-        int maxEntries,
-        int level) {
+            byte[] identifierKey,
+            int maxEntries,
+            int level) {
         return new IN(databaseImpl, identifierKey, maxEntries, level);
     }
 
@@ -456,16 +732,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Initialize IN object.
      */
     protected void init(
-        DatabaseImpl db,
-        @SuppressWarnings("hiding")
-        byte[] identifierKey,
-        int initialCapacity,
-        @SuppressWarnings("hiding")
-        int level) {
+            DatabaseImpl db,
+            @SuppressWarnings("hiding")
+                    byte[] identifierKey,
+            int initialCapacity,
+            @SuppressWarnings("hiding")
+                    int level) {
 
         setDatabase(db);
         latch = LatchFactory.createSharedLatch(
-            this, isAlwaysLatchedExclusively());
+                this, isAlwaysLatchedExclusively());
         flags = 0;
         nEntries = 0;
         this.identifierKey = identifierKey;
@@ -479,10 +755,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * the long rep when needed.  But for some purposes (DbCacheSize) we
          * start out with the long rep and never use the compact rep.
          */
-        if (disableCompactLsns) {
+        if(disableCompactLsns) {
             entryLsnByteArray = null;
             entryLsnLongArray = new long[initialCapacity];
-        } else {
+        }
+        else {
             entryLsnByteArray = new byte[initialCapacity << 2];
             entryLsnLongArray = null;
         }
@@ -530,7 +807,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * using the given cacheMode if the latch succeeds.
      */
     public final boolean latchNoWait(CacheMode cacheMode) {
-        if (!latch.acquireExclusiveNoWait()) {
+        if(!latch.acquireExclusiveNoWait()) {
             return false;
         }
         updateLRU(cacheMode);
@@ -574,10 +851,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * related side effects.
      *
      * @param db is passed in order to initialize the database for an
-     * uninitialized node, which is necessary in order to latch it.
+     *           uninitialized node, which is necessary in order to latch it.
      */
     public final void latchNoUpdateLRU(DatabaseImpl db) {
-        if (databaseImpl == null) {
+        if(databaseImpl == null) {
             databaseImpl = db;
         }
         latch.acquireExclusive();
@@ -625,28 +902,28 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     public final void updateLRU(CacheMode cacheMode) {
 
-        if (!getInListResident()) {
+        if(!getInListResident()) {
             return;
         }
 
-        switch (cacheMode) {
-        case UNCHANGED:
-        case MAKE_COLD:
-            break;
-        case DEFAULT:
-        case EVICT_LN:
-        case EVICT_BIN:
-        case KEEP_HOT:
-            setFetchedCold(false);
-            setFetchedColdOffHeap(false);
+        switch(cacheMode) {
+            case UNCHANGED:
+            case MAKE_COLD:
+                break;
+            case DEFAULT:
+            case EVICT_LN:
+            case EVICT_BIN:
+            case KEEP_HOT:
+                setFetchedCold(false);
+                setFetchedColdOffHeap(false);
 
-            if (isBIN() || !hasCachedChildrenFlag()) {
-                assert(isBIN() || !hasCachedChildren());
-                getEvictor().moveBack(this);
-            }
-            break;
-        default:
-            assert false;
+                if(isBIN() || !hasCachedChildrenFlag()) {
+                    assert (isBIN() || !hasCachedChildren());
+                    getEvictor().moveBack(this);
+                }
+                break;
+            default:
+                assert false;
         }
     }
 
@@ -667,7 +944,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * the parent initially (it is currently null), we assume it is being
          * attached and no other threads have access to it.
          */
-        if (parent != null && !isLatchExclusiveOwner()) {
+        if(parent != null && !isLatchExclusiveOwner()) {
             throw unexpectedState();
         }
 
@@ -677,19 +954,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Latches the parent exclusively, leaving this node latched. The parent
      * must not already be latched.
-     *
+     * <p>
      * This node must be latched on entry and will be latched on exit. This
      * node's latch may be released temporarily, in which case it will be
      * ex-latched (since the parent is ex-latched, this isn't a drawback).
-     *
+     * <p>
      * Does not perform cache mode processing, since this node is already
      * latched.
      *
      * @return the ex-latched parent, for which calling getKnownChildIndex with
      * this node is guaranteed to succeed.
-     *
      * @throws EnvironmentFailureException (fatal) if the parent latch is
-     * already held.
+     *                                     already held.
      */
     public final IN latchParent() {
 
@@ -697,10 +973,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         assert !isRoot();
         assert getParent() != null;
 
-        while (true) {
+        while(true) {
             final IN p = getParent();
 
-            if (p.latch.acquireExclusiveNoWait()) {
+            if(p.latch.acquireExclusiveNoWait()) {
                 return p;
             }
 
@@ -713,7 +989,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 unpin();
             }
 
-            if (getParent() == p) {
+            if(getParent() == p) {
                 return p;
             }
 
@@ -727,8 +1003,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public int getKnownChildIndex(final Node child) {
 
-        for (int i = 0; i < nEntries; i += 1) {
-            if (getTarget(i) == child) {
+        for(int i = 0; i < nEntries; i += 1) {
+            if(getTarget(i) == child) {
                 return i;
             }
         }
@@ -737,19 +1013,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     public final synchronized void pin() {
-        assert(isLatchOwner());
-        assert(pinCount >= 0);
+        assert (isLatchOwner());
+        assert (pinCount >= 0);
         ++pinCount;
     }
 
     public final synchronized void unpin() {
-        assert(pinCount > 0);
+        assert (pinCount > 0);
         --pinCount;
     }
 
     public final synchronized boolean isPinned() {
-        assert(isLatchExclusiveOwner());
-        assert(pinCount >= 0);
+        assert (isLatchExclusiveOwner());
+        assert (pinCount >= 0);
         return pinCount > 0;
     }
 
@@ -807,14 +1083,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         return level & LEVEL_MASK;
     }
 
-    private static int generateLevel(DatabaseId dbId, int newLevel) {
-        if (dbId.equals(DbTree.ID_DB_ID)) {
-            return newLevel | DBMAP_LEVEL;
-        } else {
-            return newLevel | MAIN_LEVEL;
-        }
-    }
-
     public final long getNodeId() {
         return nodeId;
     }
@@ -840,7 +1108,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     @Override
     public final boolean equals(Object obj) {
-        if (!(obj instanceof IN)) {
+        if(!(obj instanceof IN)) {
             return false;
         }
         IN in = (IN) obj;
@@ -854,11 +1122,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         long argNodeId = argIN.getNodeId();
         long myNodeId = getNodeId();
 
-        if (myNodeId < argNodeId) {
+        if(myNodeId < argNodeId) {
             return -1;
-        } else if (myNodeId > argNodeId) {
+        }
+        else if(myNodeId > argNodeId) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -868,17 +1138,27 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     public final void setDirty(boolean dirty) {
-        if (dirty) {
+        if(dirty) {
             flags |= IN_DIRTY_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_DIRTY_BIT;
         }
     }
 
     @Override
     public final boolean isBINDelta() {
-        assert(isUpperIN() || isLatchOwner());
+        assert (isUpperIN() || isLatchOwner());
         return (flags & IN_DELTA_BIT) != 0;
+    }
+
+    final void setBINDelta(boolean delta) {
+        if(delta) {
+            flags |= IN_DELTA_BIT;
+        }
+        else {
+            flags &= ~IN_DELTA_BIT;
+        }
     }
 
     /*
@@ -889,16 +1169,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     @Override
     public final boolean isBINDelta(boolean checkLatched) {
-        assert(!checkLatched || isUpperIN() || isLatchOwner());
+        assert (!checkLatched || isUpperIN() || isLatchOwner());
         return (flags & IN_DELTA_BIT) != 0;
-    }
-
-    final void setBINDelta(boolean delta) {
-        if (delta) {
-            flags |= IN_DELTA_BIT;
-        } else {
-            flags &= ~IN_DELTA_BIT;
-        }
     }
 
     /**
@@ -914,25 +1186,33 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         return (flags & IN_FETCHED_COLD_BIT) != 0;
     }
 
-    /** @see #getFetchedCold() */
+    /**
+     * @see #getFetchedCold()
+     */
     public final void setFetchedCold(boolean val) {
-        if (val) {
+        if(val) {
             flags |= IN_FETCHED_COLD_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_FETCHED_COLD_BIT;
         }
     }
 
-    /** @see #getFetchedCold() */
+    /**
+     * @see #getFetchedCold()
+     */
     public final boolean getFetchedColdOffHeap() {
         return (flags & IN_FETCHED_COLD_OFFHEAP_BIT) != 0;
     }
 
-    /** @see #getFetchedCold() */
+    /**
+     * @see #getFetchedCold()
+     */
     public final void setFetchedColdOffHeap(boolean val) {
-        if (val) {
+        if(val) {
             flags |= IN_FETCHED_COLD_OFFHEAP_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_FETCHED_COLD_OFFHEAP_BIT;
         }
     }
@@ -942,9 +1222,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     public final void setRecalcToggle(boolean toggle) {
-        if (toggle) {
+        if(toggle) {
             flags |= IN_RECALC_TOGGLE_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_RECALC_TOGGLE_BIT;
         }
     }
@@ -959,9 +1240,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     private void setIsRootFlag(boolean isRoot) {
-        if (isRoot) {
+        if(isRoot) {
             flags |= IN_IS_ROOT_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_IS_ROOT_BIT;
         }
     }
@@ -971,9 +1253,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     private void setHasCachedChildrenFlag(boolean value) {
-        if (value) {
+        if(value) {
             flags |= IN_HAS_CACHED_CHILDREN_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_HAS_CACHED_CHILDREN_BIT;
         }
     }
@@ -984,9 +1267,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /* public for unit tests */
     public final void setInPri2LRU(boolean value) {
-        if (value) {
+        if(value) {
             flags |= IN_PRI2_LRU_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_PRI2_LRU_BIT;
         }
     }
@@ -996,9 +1280,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     void setExpirationInHours(boolean value) {
-        if (value) {
+        if(value) {
             flags |= IN_EXPIRATION_IN_HOURS;
-        } else {
+        }
+        else {
             flags &= ~IN_EXPIRATION_IN_HOURS;
         }
     }
@@ -1013,14 +1298,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Set the identifier key for this node.
      *
-     * @param key - the new identifier key for this node.
-     *
+     * @param key       - the new identifier key for this node.
      * @param makeDirty should normally be true, but may be false when an
-     * expired slot containing the identifier key has been deleted.
+     *                  expired slot containing the identifier key has been deleted.
      */
     public final void setIdentifierKey(byte[] key, boolean makeDirty) {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         /*
          * The identifierKey is "intentionally" not kept track of in the
@@ -1038,7 +1322,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          */
         identifierKey = key;
 
-        if (makeDirty) {
+        if(makeDirty) {
             setDirty(true);
         }
     }
@@ -1052,7 +1336,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * @return the maximum number of entries in this node.
-     *
+     * <p>
      * Overriden by TestIN in INEntryTestBase.java
      */
     public int getMaxEntries() {
@@ -1062,6 +1346,12 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     public final byte getState(int idx) {
         return entryStates[idx];
     }
+
+    /*
+     * In the future we may want to move the following static methods to an
+     * EntryState utility class and share all state bit twidling among IN,
+     * ChildReference, and DeltaInfo.
+     */
 
     /**
      * @return true if the object is dirty.
@@ -1112,7 +1402,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final void setKnownDeleted(int idx) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         entryStates[idx] |= EntryStates.KNOWN_DELETED_BIT;
         entryStates[idx] &= EntryStates.CLEAR_PENDING_DELETED_BIT;
@@ -1127,12 +1417,12 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final void setKnownDeletedAndEvictLN(int index) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         setKnownDeleted(index);
 
         LN oldLN = (LN) getTarget(index);
-        if (oldLN != null) {
+        if(oldLN != null) {
             updateMemorySize(oldLN, null /* newNode */);
             oldLN.releaseMemoryBudget();
         }
@@ -1144,31 +1434,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     final void clearKnownDeleted(int idx) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         entryStates[idx] &= EntryStates.CLEAR_KNOWN_DELETED_BIT;
         entryStates[idx] |= EntryStates.DIRTY_BIT;
         setDirty(true);
-    }
-
-    /*
-     * In the future we may want to move the following static methods to an
-     * EntryState utility class and share all state bit twidling among IN,
-     * ChildReference, and DeltaInfo.
-     */
-
-    /**
-     * Returns true if the given state is known deleted.
-     */
-    static boolean isStateKnownDeleted(byte state) {
-        return ((state & EntryStates.KNOWN_DELETED_BIT) != 0);
-    }
-
-    /**
-     * Returns true if the given state is pending deleted.
-     */
-    static boolean isStatePendingDeleted(byte state) {
-        return ((state & EntryStates.PENDING_DELETED_BIT) != 0);
     }
 
     /**
@@ -1176,10 +1446,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final boolean isEmbeddedLN(int idx) {
         return ((entryStates[idx] & EntryStates.EMBEDDED_LN_BIT) != 0);
-    }
-
-    public static boolean isEmbeddedLN(byte state) {
-        return ((state & EntryStates.EMBEDDED_LN_BIT) != 0);
     }
 
     /**
@@ -1207,10 +1473,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final boolean isNoDataLN(int idx) {
         return ((entryStates[idx] & EntryStates.NO_DATA_LN_BIT) != 0);
-    }
-
-    public static boolean isNoDataLN(byte state) {
-        return ((state & EntryStates.NO_DATA_LN_BIT) != 0);
     }
 
     /**
@@ -1243,8 +1505,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /* For unit testing */
     public final int getNumEmbeddedLNs() {
         int res = 0;
-        for (int i = 0; i < getNEntries(); ++i) {
-            if (isEmbeddedLN(i)) {
+        for(int i = 0; i < getNEntries(); ++i) {
+            if(isEmbeddedLN(i)) {
                 ++res;
             }
         }
@@ -1261,13 +1523,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         return keyPrefix;
     }
 
-    /*
-     * For unit testing only
-     */
-    public final boolean hasKeyPrefix() {
-        return keyPrefix != null;
-    }
-
     /* This has default protection for access by the unit tests. */
     final void setKeyPrefix(byte[] keyPrefix) {
 
@@ -1280,6 +1535,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         updateMemorySize(prevLength, currLength);
     }
 
+    /*
+     * For unit testing only
+     */
+    public final boolean hasKeyPrefix() {
+        return keyPrefix != null;
+    }
+
     /**
      * Return the idx'th key. If prefixing is enabled, construct a new byte[]
      * containing the prefix and suffix. If prefixing is not enabled, just
@@ -1290,20 +1552,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         assert idx < nEntries;
 
         byte[] key = entryKeys.getFullKey(
-            keyPrefix, idx, haveEmbeddedData(idx));
+                keyPrefix, idx, haveEmbeddedData(idx));
 
-        assert(key != null);
+        assert (key != null);
 
         return key;
     }
 
+    // TODO re-enable this and figure out why it is firing
+
     public final byte[] getData(int idx) {
 
-        if (haveEmbeddedData(idx)) {
+        if(haveEmbeddedData(idx)) {
             return entryKeys.getData(idx);
         }
 
-        if (isNoDataLN(idx)) {
+        if(isNoDataLN(idx)) {
             return Key.EMPTY_KEY;
         }
 
@@ -1326,33 +1590,33 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * non-null, or removes embedded data, if "data" is null. Finally, it
      * sets the EMBEDDED_LN_BIT and NO_DATA_LN_BIT flags in the slot's state.
      *
-     * @param key is the key to set in the slot and is the LN key.
-     *
+     * @param key  is the key to set in the slot and is the LN key.
      * @param data If the data portion of a record must be embedded in this
-     * BIN, "data" stores the record's data. Null otherwise. See also comment
-     * for the keyEntries field. 
-     * 
+     *             BIN, "data" stores the record's data. Null otherwise. See also comment
+     *             for the keyEntries field.
      * @return true if a multi-slot change was made and the complete IN memory
      * size must be updated.
      */
     private boolean updateLNSlotKey(int idx, byte[] key, byte[] data) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         boolean haveEmbeddedData = haveEmbeddedData(idx);
 
-        if (data == null) {
-            if (isEmbeddedLN(idx)) {
-                clearEmbeddedLN(idx); 
+        if(data == null) {
+            if(isEmbeddedLN(idx)) {
+                clearEmbeddedLN(idx);
                 clearNoDataLN(idx);
             }
-        } else {
-            if (!isEmbeddedLN(idx)) {
+        }
+        else {
+            if(!isEmbeddedLN(idx)) {
                 setEmbeddedLN(idx);
             }
-            if (data.length == 0) {
+            if(data.length == 0) {
                 setNoDataLN(idx);
-            } else {
+            }
+            else {
                 clearNoDataLN(idx);
             }
         }
@@ -1363,15 +1627,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * is no comparator configured, since a key cannot be changed when the
          * default comparator is used.
          */
-        if (key != null &&
-            (databaseImpl.allowsKeyUpdates() ||
-             DupConvert.needsConversion(databaseImpl)) &&
-            !Arrays.equals(key, getKey(idx))) {
+        if(key != null &&
+                (databaseImpl.allowsKeyUpdates() ||
+                        DupConvert.needsConversion(databaseImpl)) &&
+                !Arrays.equals(key, getKey(idx))) {
 
             setDirty(true);
             return setKey(idx, key, data, false);
 
-        } else if (haveEmbeddedData) {
+        }
+        else if(haveEmbeddedData) {
 
             /*
              * The key does not change, but the slot contains embedded data,
@@ -1386,7 +1651,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             entryKeys = entryKeys.setData(idx, data, this);
             return oldRepType != entryKeys.getType();
 
-        } else if (data != null && data.length != 0) {
+        }
+        else if(data != null && data.length != 0) {
 
             /*
              * The key does not change, but we now have to embed data in a slot
@@ -1400,7 +1666,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             entryKeys = entryKeys.set(idx, key, data, this);
             return oldRepType != entryKeys.getType();
 
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -1409,39 +1676,37 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Convenience wrapper for setKey() method below
      */
     private boolean insertKey(
-        int idx,
-        byte[] key,
-        byte[] data) {
+            int idx,
+            byte[] key,
+            byte[] data) {
 
         /*
          * Set the id key when inserting the first entry. This is important
          * when compression removes all entries from a BIN, and then an entry
          * is inserted before the empty BIN is purged.
          */
-        if (nEntries == 1 && !isBINDelta()) {
+        if(nEntries == 1 && !isBINDelta()) {
             setIdentifierKey(key, true /*makeDirty*/);
         }
 
         return setKey(idx, key, data, true);
     }
 
-    // TODO re-enable this and figure out why it is firing
-
     private boolean idKeyIsSlotKey() {
 
-        if (true) {
+        if(true) {
             return true;
         }
 
-        if (!isBIN() || nEntries == 0) {
+        if(!isBIN() || nEntries == 0) {
             return true;
         }
 
-        for (int i = 0; i < nEntries; i += 1) {
+        for(int i = 0; i < nEntries; i += 1) {
 
-            if (entryKeys.compareKeys(
-                identifierKey,  keyPrefix, i, haveEmbeddedData(i),
-                databaseImpl.getKeyComparator()) == 0) {
+            if(entryKeys.compareKeys(
+                    identifierKey, keyPrefix, i, haveEmbeddedData(i),
+                    databaseImpl.getKeyComparator()) == 0) {
 
                 return true;
             }
@@ -1456,9 +1721,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * and NO_DATA_LN_BIT flags.
      */
     private boolean updateKey(
-        int idx,
-        byte[] key,
-        byte[] data) {
+            int idx,
+            byte[] key,
+            byte[] data) {
         return setKey(idx, key, data, false);
     }
 
@@ -1466,35 +1731,34 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * This method inserts or updates a key at a given slot. In either case,
      * the associated embedded data (if any) is inserted or updated as well,
      * and the key prefix is adjusted, if necessary.
-     *
+     * <p>
      * In case of insertion (indicated by a true value for the isInsertion
      * param), it is assumed that the idx slot does not store any valid info,
      * so any change to the key prefix (if any) is due to the insertion of
      * this new new key and not to the removal of the current key at the idx
      * slot.
-     *
+     * <p>
      * In case of update, the method does not check if the current key is
      * indeed different from the new key; it just updates the key
      * unconditionally. If the slot has embedded data, that data will also
      * be updated (if the data param is not null), or be removed (if the data
      * param is null). If the slot does not have embedded data and the data
      * param is not null, the given data will be embedded.
-     *
+     * <p>
      * Note: For BINs, the maintenance of the EMBEDDED_LN_BIT andNO_DATA_LN_BIT
      * is done by the callers of this method.
      *
      * @param data If the data portion of a record must be embedded in this
-     * BIN, "data" stores the record's data. Null otherwise. See also comment
-     * for the keyEntries field. 
-     *
+     *             BIN, "data" stores the record's data. Null otherwise. See also comment
+     *             for the keyEntries field.
      * @return true if a multi-slot change was made and the complete IN memory
      * size must be updated.
      */
     private boolean setKey(
-        int idx,
-        byte[] key,
-        byte[] data,
-        boolean isInsertion) {
+            int idx,
+            byte[] key,
+            byte[] data,
+            boolean isInsertion) {
 
         entryStates[idx] |= EntryStates.DIRTY_BIT;
         setDirty(true);
@@ -1503,22 +1767,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * Only compute key prefix if prefixing is enabled and there's an
          * existing prefix.
          */
-        if (databaseImpl.getKeyPrefixing() && keyPrefix != null) {
+        if(databaseImpl.getKeyPrefixing() && keyPrefix != null) {
 
             int newPrefixLen = Key.getKeyPrefixLength(
-                keyPrefix, keyPrefix.length, key);
+                    keyPrefix, keyPrefix.length, key);
 
-            if (newPrefixLen < keyPrefix.length) {
+            if(newPrefixLen < keyPrefix.length) {
 
                 /*
                  * The new key doesn't share the current prefix, so recompute
                  * the prefix and readjust all the existing suffixes.
                  */
                 byte[] newPrefix = (isInsertion ?
-                                    Key.createKeyPrefix(keyPrefix, key) :
-                                    computeKeyPrefix(idx));
+                        Key.createKeyPrefix(keyPrefix, key) :
+                        computeKeyPrefix(idx));
 
-                if (newPrefix != null) {
+                if(newPrefix != null) {
                     /* Take the new key into consideration for new prefix. */
                     newPrefix = Key.createKeyPrefix(newPrefix, key);
                 }
@@ -1526,7 +1790,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 recalcSuffixes(newPrefix, key, data, idx);
                 return true;
 
-            } else {
+            }
+            else {
 
                 INKeyRep.Type prevRepType = entryKeys.getType();
 
@@ -1536,7 +1801,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 return prevRepType != entryKeys.getType();
             }
 
-        } else if (keyPrefix != null) {
+        }
+        else if(keyPrefix != null) {
 
             /*
              * Key prefixing has been turned off on this database, but there
@@ -1545,30 +1811,12 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             recalcSuffixes(null, key, data, idx);
             return true;
 
-        } else {
+        }
+        else {
             INKeyRep.Type oldRepType = entryKeys.getType();
             entryKeys = entryKeys.set(idx, key, data, this);
             return oldRepType != entryKeys.getType();
         }
-    }
-
-    /*
-     * Given 2 byte arrays, "prefix" and "key", where "prefix" is or stores
-     * a prefix of "key", allocate and return another byte array that stores
-     * the suffix of "key" w.r.t. "prefix".
-     */
-    private static byte[] computeKeySuffix(byte[] prefix, byte[] key) {
-
-        int prefixLen = (prefix == null ? 0 : prefix.length);
-
-        if (prefixLen == 0) {
-            return key;
-        }
-
-        int suffixLen = key.length - prefixLen;
-        byte[] ret = new byte[suffixLen];
-        System.arraycopy(key, prefixLen, ret, 0, suffixLen);
-        return ret;
     }
 
     /*
@@ -1579,20 +1827,21 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * and keyVal is null, then recalculate suffixes for all entries in this.
      */
     private void recalcSuffixes(
-        byte[] newPrefix,
-        byte[] key,
-        byte[] data,
-        int idx) {
+            byte[] newPrefix,
+            byte[] key,
+            byte[] data,
+            int idx) {
 
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
 
             byte[] curKey = (i == idx ? key : getKey(i));
 
             byte[] curData = null;
 
-            if (i == idx) {
+            if(i == idx) {
                 curData = data;
-            } else if (haveEmbeddedData(i)) {
+            }
+            else if(haveEmbeddedData(i)) {
                 curData = entryKeys.getData(i);
             }
 
@@ -1610,7 +1859,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final void recalcKeyPrefix() {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         recalcSuffixes(computeKeyPrefix(-1), null, null, -1);
     }
@@ -1622,7 +1871,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private byte[] computeKeyPrefix(int excludeIdx) {
 
-        if (!databaseImpl.getKeyPrefixing() || nEntries <= 1) {
+        if(!databaseImpl.getKeyPrefixing() || nEntries <= 1) {
             return null;
         }
 
@@ -1636,41 +1885,43 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * necessarily ordered byte-by-byte.  [#21328]
          */
         boolean byteOrdered;
-        if (true) {
+        if(true) {
             /* Disable optimization for now.  Needs testing. */
             byteOrdered = false;
-        } else {
+        }
+        else {
             byteOrdered = (databaseImpl.getKeyComparator() == null);
         }
 
-        if (byteOrdered) {
+        if(byteOrdered) {
             int lastIdx = nEntries - 1;
-            if (lastIdx == excludeIdx) {
+            if(lastIdx == excludeIdx) {
                 lastIdx -= 1;
             }
-            if (lastIdx > firstIdx) {
+            if(lastIdx > firstIdx) {
                 byte[] lastKey = getKey(lastIdx);
                 int newPrefixLen = Key.getKeyPrefixLength(
-                    curPrefixKey, prefixLen, lastKey);
+                        curPrefixKey, prefixLen, lastKey);
 
-                if (newPrefixLen < prefixLen) {
+                if(newPrefixLen < prefixLen) {
                     curPrefixKey = lastKey;
                     prefixLen = newPrefixLen;
                 }
             }
-        } else {
-            for (int i = firstIdx + 1; i < nEntries; i++) {
+        }
+        else {
+            for(int i = firstIdx + 1; i < nEntries; i++) {
 
-                if (i == excludeIdx) {
+                if(i == excludeIdx) {
                     continue;
                 }
 
                 byte[] curKey = getKey(i);
 
                 int newPrefixLen = Key.getKeyPrefixLength(
-                    curPrefixKey, prefixLen, curKey);
+                        curPrefixKey, prefixLen, curKey);
 
-                if (newPrefixLen < prefixLen) {
+                if(newPrefixLen < prefixLen) {
                     curPrefixKey = curKey;
                     prefixLen = newPrefixLen;
                 }
@@ -1689,18 +1940,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     final boolean verifyKeyPrefix() {
 
         byte[] computedKeyPrefix = computeKeyPrefix(-1);
-        if (keyPrefix == null) {
+        if(keyPrefix == null) {
             return computedKeyPrefix == null;
         }
 
-        if (computedKeyPrefix == null ||
-            computedKeyPrefix.length < keyPrefix.length) {
+        if(computedKeyPrefix == null ||
+                computedKeyPrefix.length < keyPrefix.length) {
             System.out.println("VerifyKeyPrefix failed");
             System.out.println(dumpString(0, false));
             return false;
         }
-        for (int i = 0; i < keyPrefix.length; i++) {
-            if (keyPrefix[i] != computedKeyPrefix[i]) {
+        for(int i = 0; i < keyPrefix.length; i++) {
+            if(keyPrefix[i] != computedKeyPrefix[i]) {
                 System.out.println("VerifyKeyPrefix failed");
                 System.out.println(dumpString(0, false));
                 return false;
@@ -1719,9 +1970,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final boolean isKeyInBounds(byte[] key) {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
-        if (nEntries < 2) {
+        if(nEntries < 2) {
             return false;
         }
 
@@ -1730,16 +1981,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         /* Compare key given to my first key. */
         cmp = entryKeys.compareKeys(
-            key, keyPrefix, 0, haveEmbeddedData(0), comparator);
+                key, keyPrefix, 0, haveEmbeddedData(0), comparator);
 
-        if (cmp < 0) {
+        if(cmp < 0) {
             return false;
         }
 
         /* Compare key given to my last key. */
-        int idx =  nEntries - 1;
+        int idx = nEntries - 1;
         cmp = entryKeys.compareKeys(
-            key, keyPrefix, idx, haveEmbeddedData(idx), comparator);
+                key, keyPrefix, idx, haveEmbeddedData(idx), comparator);
 
         return cmp <= 0;
     }
@@ -1751,17 +2002,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final long getLsn(int idx) {
 
-        if (entryLsnLongArray == null) {
+        if(entryLsnLongArray == null) {
             int offset = idx << 2;
             int fileOffset = getFileOffset(offset);
-            if (fileOffset == -1) {
+            if(fileOffset == -1) {
                 return DbLsn.NULL_LSN;
-            } else {
-                return DbLsn.makeLsn((baseFileNumber +
-                                      getFileNumberOffset(offset)),
-                                     fileOffset);
             }
-        } else {
+            else {
+                return DbLsn.makeLsn((baseFileNumber +
+                                getFileNumberOffset(offset)),
+                        fileOffset);
+            }
+        }
+        else {
             return entryLsnLongArray[idx];
         }
     }
@@ -1781,7 +2034,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private void setLsn(int idx, long lsn, boolean check) {
 
-        if (!check || shouldUpdateLsn(getLsn(idx), lsn)) {
+        if(!check || shouldUpdateLsn(getLsn(idx), lsn)) {
 
             int oldSize = computeLsnOverhead();
 
@@ -1802,14 +2055,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         /* Will implement this in the future. Note, don't adjust if mutating.*/
         //maybeAdjustCapacity(offset);
-        if (entryLsnLongArray != null) {
+        if(entryLsnLongArray != null) {
             entryLsnLongArray[idx] = value;
             return;
         }
 
         int offset = idx << 2;
 
-        if (value == DbLsn.NULL_LSN) {
+        if(value == DbLsn.NULL_LSN) {
             setFileNumberOffset(offset, (byte) 0);
             setFileOffset(offset, -1);
             return;
@@ -1817,15 +2070,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         long thisFileNumber = DbLsn.getFileNumber(value);
 
-        if (baseFileNumber == -1) {
+        if(baseFileNumber == -1) {
             /* First entry. */
             baseFileNumber = thisFileNumber;
             setFileNumberOffset(offset, (byte) 0);
 
-        } else {
+        }
+        else {
 
-            if (thisFileNumber < baseFileNumber) {
-                if (!adjustFileNumbers(thisFileNumber)) {
+            if(thisFileNumber < baseFileNumber) {
+                if(!adjustFileNumbers(thisFileNumber)) {
                     mutateToLongArray(idx, value);
                     return;
                 }
@@ -1833,18 +2087,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             }
 
             long fileNumberDifference = thisFileNumber - baseFileNumber;
-            if (fileNumberDifference > Byte.MAX_VALUE) {
+            if(fileNumberDifference > Byte.MAX_VALUE) {
                 mutateToLongArray(idx, value);
                 return;
             }
 
             setFileNumberOffset(
-                offset, (byte) (thisFileNumber - baseFileNumber));
+                    offset, (byte) (thisFileNumber - baseFileNumber));
             //assert getFileNumberOffset(offset) >= 0;
         }
 
         int fileOffset = (int) DbLsn.getFileOffset(value);
-        if (fileOffset > MAX_FILE_OFFSET) {
+        if(fileOffset > MAX_FILE_OFFSET) {
             mutateToLongArray(idx, value);
             return;
         }
@@ -1856,28 +2110,28 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     private boolean adjustFileNumbers(long newBaseFileNumber) {
 
         long oldBaseFileNumber = baseFileNumber;
-        for (int i = 0;
-             i < entryLsnByteArray.length;
-             i += BYTES_PER_LSN_ENTRY) {
-            if (getFileOffset(i) == -1) {
+        for(int i = 0;
+            i < entryLsnByteArray.length;
+            i += BYTES_PER_LSN_ENTRY) {
+            if(getFileOffset(i) == -1) {
                 continue;
             }
 
             long curEntryFileNumber =
-                oldBaseFileNumber + getFileNumberOffset(i);
+                    oldBaseFileNumber + getFileNumberOffset(i);
             long newCurEntryFileNumberOffset =
-                (curEntryFileNumber - newBaseFileNumber);
+                    (curEntryFileNumber - newBaseFileNumber);
 
-            if (newCurEntryFileNumberOffset > Byte.MAX_VALUE) {
+            if(newCurEntryFileNumberOffset > Byte.MAX_VALUE) {
                 long undoOffset = oldBaseFileNumber - newBaseFileNumber;
-                for (int j = i - BYTES_PER_LSN_ENTRY;
-                     j >= 0;
-                     j -= BYTES_PER_LSN_ENTRY) {
-                    if (getFileOffset(j) == -1) {
+                for(int j = i - BYTES_PER_LSN_ENTRY;
+                    j >= 0;
+                    j -= BYTES_PER_LSN_ENTRY) {
+                    if(getFileOffset(j) == -1) {
                         continue;
                     }
                     setFileNumberOffset
-                        (j, (byte) (getFileNumberOffset(j) - undoOffset));
+                            (j, (byte) (getFileNumberOffset(j) - undoOffset));
                     //assert getFileNumberOffset(j) >= 0;
                 }
                 return false;
@@ -1908,14 +2162,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     private void put3ByteInt(int offset, int value) {
         entryLsnByteArray[offset++] = (byte) value;
         entryLsnByteArray[offset++] = (byte) (value >>> 8);
-        entryLsnByteArray[offset]   = (byte) (value >>> 16);
+        entryLsnByteArray[offset] = (byte) (value >>> 16);
     }
 
     private int get3ByteInt(int offset) {
         int ret = (entryLsnByteArray[offset++] & 0xFF);
         ret += (entryLsnByteArray[offset++] & 0xFF) << 8;
-        ret += (entryLsnByteArray[offset]   & 0xFF) << 16;
-        if (ret == THREE_BYTE_NEGATIVE_ONE) {
+        ret += (entryLsnByteArray[offset] & 0xFF) << 16;
+        if(ret == THREE_BYTE_NEGATIVE_ONE) {
             ret = -1;
         }
 
@@ -1925,7 +2179,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     private void mutateToLongArray(int idx, long value) {
         int nElts = entryLsnByteArray.length >> 2;
         long[] newArr = new long[nElts];
-        for (int i = 0; i < nElts; i++) {
+        for(int i = 0; i < nElts; i++) {
             newArr[i] = getLsn(i);
         }
         newArr[idx] = value;
@@ -1937,55 +2191,93 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * For a deferred write database, ensure that information is not lost when
      * a new LSN is assigned.  Also ensures that a transient LSN is not
      * accidentally assigned to a persistent entry.
-     *
+     * <p>
      * Because this method uses strict checking, prepareForSlotReuse must
      * sometimes be called when a new logical entry is being placed in a slot,
      * e.g., during an IN split or an LN slot reuse.
-     *
+     * <p>
      * The following transition is a NOOP and the LSN is not set:
-     *   Any LSN to same value.
+     * Any LSN to same value.
      * The following transitions are allowed and cause the LSN to be set:
-     *   Null LSN to transient LSN
-     *   Null LSN to persistent LSN
-     *   Transient LSN to persistent LSN
-     *   Persistent LSN to new persistent LSN
+     * Null LSN to transient LSN
+     * Null LSN to persistent LSN
+     * Transient LSN to persistent LSN
+     * Persistent LSN to new persistent LSN
      * The following transitions should not occur and throw an exception:
-     *   Transient LSN to null LSN
-     *   Transient LSN to new transient LSN
-     *   Persistent LSN to null LSN
-     *   Persistent LSN to transient LSN
-     *
+     * Transient LSN to null LSN
+     * Transient LSN to new transient LSN
+     * Persistent LSN to null LSN
+     * Persistent LSN to transient LSN
+     * <p>
      * The above imply that a transient or null LSN can overwrite only a null
      * LSN.
      */
     private final boolean shouldUpdateLsn(long oldLsn, long newLsn) {
 
         /* Save a little computation in packing/updating an unchanged LSN. */
-        if (oldLsn == newLsn) {
+        if(oldLsn == newLsn) {
             return false;
         }
         /* The rules for a new null LSN can be broken in a read-only env. */
-        if (newLsn == DbLsn.NULL_LSN && getEnv().isReadOnly()) {
+        if(newLsn == DbLsn.NULL_LSN && getEnv().isReadOnly()) {
             return true;
         }
         /* Enforce LSN update rules.  Assume lsn != oldLsn. */
-        if (databaseImpl.isDeferredWriteMode()) {
-            if (oldLsn != DbLsn.NULL_LSN && DbLsn.isTransientOrNull(newLsn)) {
+        if(databaseImpl.isDeferredWriteMode()) {
+            if(oldLsn != DbLsn.NULL_LSN && DbLsn.isTransientOrNull(newLsn)) {
                 throw unexpectedState(
-                    "DeferredWrite LSN update not allowed" +
-                    " oldLsn = " + DbLsn.getNoFormatString(oldLsn) +
-                    " newLsn = " + DbLsn.getNoFormatString(newLsn));
+                        "DeferredWrite LSN update not allowed" +
+                                " oldLsn = " + DbLsn.getNoFormatString(oldLsn) +
+                                " newLsn = " + DbLsn.getNoFormatString(newLsn));
             }
-        } else {
-            if (DbLsn.isTransientOrNull(newLsn)) {
+        }
+        else {
+            if(DbLsn.isTransientOrNull(newLsn)) {
                 throw unexpectedState(
-                    "LSN update not allowed" +
-                    " oldLsn = " + DbLsn.getNoFormatString(oldLsn) +
-                    " newLsn = " + DbLsn.getNoFormatString(newLsn));
+                        "LSN update not allowed" +
+                                " oldLsn = " + DbLsn.getNoFormatString(oldLsn) +
+                                " newLsn = " + DbLsn.getNoFormatString(newLsn));
             }
         }
         return true;
     }
+
+    /* Will implement this in the future. Note, don't adjust if mutating.*/
+    /***
+     private void maybeAdjustCapacity(int offset) {
+     if (entryLsnLongArray == null) {
+     int bytesNeeded = offset + BYTES_PER_LSN_ENTRY;
+     int currentBytes = entryLsnByteArray.length;
+     if (currentBytes < bytesNeeded) {
+     int newBytes = bytesNeeded +
+     (GROWTH_INCREMENT * BYTES_PER_LSN_ENTRY);
+     byte[] newArr = new byte[newBytes];
+     System.arraycopy(entryLsnByteArray, 0, newArr, 0,
+     currentBytes);
+     entryLsnByteArray = newArr;
+     for (int i = currentBytes;
+     i < newBytes;
+     i += BYTES_PER_LSN_ENTRY) {
+     setFileNumberOffset(i, (byte) 0);
+     setFileOffset(i, -1);
+     }
+     }
+     } else {
+     int currentEntries = entryLsnLongArray.length;
+     int idx = offset >> 2;
+     if (currentEntries < idx + 1) {
+     int newEntries = idx + GROWTH_INCREMENT;
+     long[] newArr = new long[newEntries];
+     System.arraycopy(entryLsnLongArray, 0, newArr, 0,
+     currentEntries);
+     entryLsnLongArray = newArr;
+     for (int i = currentEntries; i < newEntries; i++) {
+     entryLsnLongArray[i] = DbLsn.NULL_LSN;
+     }
+     }
+     }
+     }
+     ***/
 
     /* For unit tests. */
     final long[] getEntryLsnLongArray() {
@@ -2003,43 +2295,6 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         entryLsnByteArray = new byte[capacity << 2];
         baseFileNumber = -1;
     }
-
-    /* Will implement this in the future. Note, don't adjust if mutating.*/
-    /***
-      private void maybeAdjustCapacity(int offset) {
-      if (entryLsnLongArray == null) {
-      int bytesNeeded = offset + BYTES_PER_LSN_ENTRY;
-      int currentBytes = entryLsnByteArray.length;
-      if (currentBytes < bytesNeeded) {
-      int newBytes = bytesNeeded +
-      (GROWTH_INCREMENT * BYTES_PER_LSN_ENTRY);
-      byte[] newArr = new byte[newBytes];
-      System.arraycopy(entryLsnByteArray, 0, newArr, 0,
-      currentBytes);
-      entryLsnByteArray = newArr;
-      for (int i = currentBytes;
-      i < newBytes;
-      i += BYTES_PER_LSN_ENTRY) {
-      setFileNumberOffset(i, (byte) 0);
-      setFileOffset(i, -1);
-      }
-      }
-      } else {
-      int currentEntries = entryLsnLongArray.length;
-      int idx = offset >> 2;
-      if (currentEntries < idx + 1) {
-      int newEntries = idx + GROWTH_INCREMENT;
-      long[] newArr = new long[newEntries];
-      System.arraycopy(entryLsnLongArray, 0, newArr, 0,
-      currentEntries);
-      entryLsnLongArray = newArr;
-      for (int i = currentEntries; i < newEntries; i++) {
-      entryLsnLongArray[i] = DbLsn.NULL_LSN;
-      }
-      }
-      }
-      }
-     ***/
 
     /**
      * The last logged size is not stored for UINs.
@@ -2091,7 +2346,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         final long newVal = val + 1;
         final long oldVal = offHeapBINIds.get(idx);
 
-        if (oldVal == newVal) {
+        if(oldVal == newVal) {
             return;
         }
 
@@ -2109,15 +2364,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         final long oldVal = offHeapBINIds.get(idx);
 
-        if (oldVal == 0) {
+        if(oldVal == 0) {
             return;
         }
 
         offHeapBINIds = offHeapBINIds.set(idx, 0, this);
 
-        if (getInListResident() &&
-            getNormalizedLevel() == 2 &&
-            offHeapBINIds.isEmpty()) {
+        if(getInListResident() &&
+                getNormalizedLevel() == 2 &&
+                offHeapBINIds.isEmpty()) {
 
             getEvictor().moveToPri1LRU(this);
         }
@@ -2136,9 +2391,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     private void setOffHeapBINDirty(int idx, boolean val) {
-        if (val) {
+        if(val) {
             entryStates[idx] |= EntryStates.OFFHEAP_DIRTY_BIT;
-        } else {
+        }
+        else {
             entryStates[idx] &= EntryStates.CLEAR_OFFHEAP_DIRTY_BIT;
         }
     }
@@ -2148,9 +2404,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     private void setOffHeapBINPri2(int idx, boolean val) {
-        if (val) {
+        if(val) {
             entryStates[idx] |= EntryStates.OFFHEAP_PRI2_BIT;
-        } else {
+        }
+        else {
             entryStates[idx] &= EntryStates.CLEAR_OFFHEAP_PRI2_BIT;
         }
     }
@@ -2166,69 +2423,70 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Sets the idx'th target. No need to make dirty, that state only applies
      * to key and LSN.
-     *
+     * <p>
      * <p>WARNING: This method does not update the memory budget.  The caller
      * must update the budget.</p>
      */
     void setTarget(int idx, Node target) {
 
         assert isLatchExclusiveOwner() :
-            "Not latched for write " + getClass().getName() +
-            " id=" + getNodeId();
+                "Not latched for write " + getClass().getName() +
+                        " id=" + getNodeId();
 
         final Node curChild = entryTargets.get(idx);
 
         entryTargets = entryTargets.set(idx, target, this);
 
-        if (target != null && target.isIN()) {
+        if(target != null && target.isIN()) {
             ((IN) target).setParent(this);
         }
 
-        if (isUpperIN()) {
-            if (target == null) {
+        if(isUpperIN()) {
+            if(target == null) {
 
                 /*
                  * If this UIN has just lost its last cached child, set its
                  * hasCachedChildren flag to false and put it back to the
                  * LRU list.
                  */
-                if (curChild != null &&
-                    hasCachedChildrenFlag() &&
-                    !hasCachedChildren()) {
+                if(curChild != null &&
+                        hasCachedChildrenFlag() &&
+                        !hasCachedChildren()) {
 
                     setHasCachedChildrenFlag(false);
 
-                    if (!isDIN()) {
-                        if (traceLRU) {
+                    if(!isDIN()) {
+                        if(traceLRU) {
                             LoggerUtils.envLogMsg(
-                                traceLevel, getEnv(),
-                                Thread.currentThread().getId() + "-" +
-                                    Thread.currentThread().getName() +
-                                    "-" + getEnv().getName() +
-                                    " setTarget(): " +
-                                    " Adding UIN " + getNodeId() +
-                                    " to LRU after detaching chld " +
-                                    ((IN) curChild).getNodeId());
+                                    traceLevel, getEnv(),
+                                    Thread.currentThread().getId() + "-" +
+                                            Thread.currentThread().getName() +
+                                            "-" + getEnv().getName() +
+                                            " setTarget(): " +
+                                            " Adding UIN " + getNodeId() +
+                                            " to LRU after detaching chld " +
+                                            ((IN) curChild).getNodeId());
                         }
                         getEvictor().addBack(this);
                     }
                 }
-            } else {
-                if (curChild == null &&
-                    !hasCachedChildrenFlag()) {
+            }
+            else {
+                if(curChild == null &&
+                        !hasCachedChildrenFlag()) {
 
                     setHasCachedChildrenFlag(true);
 
-                    if (traceLRU) {
+                    if(traceLRU) {
                         LoggerUtils.envLogMsg(
-                            traceLevel, getEnv(),
-                            Thread.currentThread().getId() + "-" +
-                                Thread.currentThread().getName() +
-                                "-" + getEnv().getName() +
-                                " setTarget(): " +
-                                " Removing UIN " + getNodeId() +
-                                " after attaching child " +
-                                ((IN) target).getNodeId());
+                                traceLevel, getEnv(),
+                                Thread.currentThread().getId() + "-" +
+                                        Thread.currentThread().getName() +
+                                        "-" + getEnv().getName() +
+                                        " setTarget(): " +
+                                        " Removing UIN " + getNodeId() +
+                                        " after attaching child " +
+                                        ((IN) target).getNodeId());
                     }
                     getEvictor().remove(this);
                 }
@@ -2238,7 +2496,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * Return the idx'th target.
-     *
+     * <p>
      * This method does not load children from off-heap cache, so it always
      * returns null when then child is not in main cache. Note that when
      * children are INs (this is not a BIN), when this method returns null it
@@ -2254,24 +2512,24 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Returns the idx-th child of "this" upper IN, fetching the child from
      * the log and attaching it to its parent if it is not already attached.
      * This method is used during tree searches.
-     *
+     * <p>
      * On entry, the parent must be latched already.
-     *
+     * <p>
      * If the child must be fetched from the log, the parent is unlatched.
      * After the disk read is done, the parent is relatched. However, due to
      * splits, it may not be the correct parent anymore. If so, the method
      * will return null, and the caller is expected to restart the tree search.
-     *
+     * <p>
      * On return, the parent will be latched, unless null is returned or an
      * exception is thrown.
-     *
+     * <p>
      * The "searchKey" param is the key that the caller is looking for. It is
      * used by this method in determining if, after a disk read, "this" is
      * still the correct parent for the child. "searchKey" may be null if the
      * caller is doing a LEFT or RIGHT search.
      */
     final IN fetchINWithNoLatch(int idx,
-                                byte [] searchKey,
+                                byte[] searchKey,
                                 CacheMode cacheMode) {
         return fetchINWithNoLatch(idx, searchKey, null, cacheMode);
     }
@@ -2285,7 +2543,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * parent.
      */
     final IN fetchINWithNoLatch(SearchResult result,
-                                byte [] searchKey,
+                                byte[] searchKey,
                                 CacheMode cacheMode) {
         return fetchINWithNoLatch(result.index, searchKey, result, cacheMode);
     }
@@ -2294,13 +2552,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Provides the implementation of the above two methods.
      */
     private IN fetchINWithNoLatch(
-        int idx,
-        byte [] searchKey,
-        SearchResult result,
-        CacheMode cacheMode) {
+            int idx,
+            byte[] searchKey,
+            SearchResult result,
+            CacheMode cacheMode) {
 
-        assert(isUpperIN());
-        assert(isLatchOwner());
+        assert (isUpperIN());
+        assert (isLatchOwner());
 
         final EnvironmentImpl envImpl = getEnv();
         final OffHeapCache ohCache = envImpl.getOffHeapCache();
@@ -2308,15 +2566,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         boolean isMiss = false;
         boolean success = false;
 
-        IN child = (IN)entryTargets.get(idx);
+        IN child = (IN) entryTargets.get(idx);
 
-        if (child == null) {
+        if(child == null) {
 
             final long lsn = getLsn(idx);
 
-            if (lsn == DbLsn.NULL_LSN) {
+            if(lsn == DbLsn.NULL_LSN) {
                 throw unexpectedState(makeFetchErrorMsg(
-                    "NULL_LSN in upper IN", lsn, idx));
+                        "NULL_LSN in upper IN", lsn, idx));
             }
 
             /*
@@ -2326,7 +2584,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              */
             byte[] ohBytes = null;
 
-            if (getNormalizedLevel() == 2) {
+            if(getNormalizedLevel() == 2) {
                 ohBytes = ohCache.getBINBytes(this, idx);
             }
 
@@ -2336,12 +2594,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
                 TestHookExecute.doHookIfSet(fetchINHook);
 
-                if (ohBytes != null) {
+                if(ohBytes != null) {
                     child = ohCache.materializeBIN(envImpl, ohBytes);
-                } else {
+                }
+                else {
                     final WholeEntry wholeEntry = envImpl.getLogManager().
-                        getLogEntryAllowInvisibleAtRecovery(
-                            lsn, getLastLoggedSize(idx));
+                            getLogEntryAllowInvisibleAtRecovery(
+                                    lsn, getLastLoggedSize(idx));
 
                     final LogEntry logEntry = wholeEntry.getEntry();
 
@@ -2357,8 +2616,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * immediately, or more precisely, the split node and its
                  * new sibling being logged immediately, while both siblings
                  * and their parent are latched exclusively. The reason for
-                 * this is as follows: 
-                 * 
+                 * this is as follows:
+                 *
                  * Let K be the search key. If we are doing a left-deep or
                  * right-deep search, K is -INF or +INF respectively.
                  *
@@ -2367,7 +2626,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * view slots as independent objects, not identified by their
                  * position in an IN but by some unique (imaginary) and
                  * immutable id assigned to the slot when it is first inserted
-                 * into an IN. 
+                 * into an IN.
                  *
                  * Before unlatching P, S was the correct slot to follow down
                  * the tree looking for K. After P is unlatched and then
@@ -2406,14 +2665,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * tree search only if something changes with S while P is
                  * unlatched (S moves to a different position or a different
                  * IN or it points to a different LSN).
-                 * 
+                 *
                  * Notice also that if P does not split while it is unlatched,
                  * the range of keys covered by P does not change either. This
                  * implies that the correct slot to follow *must* be inside P,
                  * and as a result, the 1st and last slots in P can be trusted.
                  * Unfortunately, however, we have no way to detecting reliably
                  * whether P splits or not.
-                 * 
+                 *
                  * Special care for DBs in DW mode:
                  *
                  * For DBs in DW mode, special care must be taken because
@@ -2426,24 +2685,24 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * either the child would be still cached, or if it was evicted
                  * after the split, S.LSN would have changed.
                  */
-                if (idx >= nEntries ||
-                    getLsn(idx) != lsn ||
-                    (databaseImpl.isDeferredWriteMode() &&
-                     entryTargets.get(idx) != null)) {
+                if(idx >= nEntries ||
+                        getLsn(idx) != lsn ||
+                        (databaseImpl.isDeferredWriteMode() &&
+                                entryTargets.get(idx) != null)) {
 
-                    if (searchKey == null) {
+                    if(searchKey == null) {
                         return null;
                     }
 
                     idx = findEntry(searchKey, false, false);
 
-                    if ((idx == 0 || idx == nEntries - 1) &&
-                        !isKeyInBounds(searchKey)) {
+                    if((idx == 0 || idx == nEntries - 1) &&
+                            !isKeyInBounds(searchKey)) {
                         return null;
                     }
                 }
 
-                if (result != null) {
+                if(result != null) {
                     result.index = idx;
                 }
 
@@ -2486,26 +2745,31 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * (e) Otherwise, we attach the fetched/loaded child to the
                  * parent.
                  */
-                if (entryTargets.get(idx) != null) {
+                if(entryTargets.get(idx) != null) {
                     child = (IN) entryTargets.get(idx);
 
-                } else if (getLsn(idx) != lsn) {
+                }
+                else if(getLsn(idx) != lsn) {
                     return null;
 
-                } else if (ohBytes != null &&
-                           ohCache.haveBINBytesChanged(this, idx, ohBytes)) {
+                }
+                else if(ohBytes != null &&
+                        ohCache.haveBINBytesChanged(this, idx, ohBytes)) {
                     return null;
 
-                } else if (ohBytes == null &&
-                           getOffHeapBINId(idx) >= 0) {
+                }
+                else if(ohBytes == null &&
+                        getOffHeapBINId(idx) >= 0) {
                     return null;
 
-                } else {
+                }
+                else {
                     child.latchNoUpdateLRU(databaseImpl);
 
-                    if (ohBytes != null) {
+                    if(ohBytes != null) {
                         child.postLoadInit(this, idx);
-                    } else {
+                    }
+                    else {
                         child.postFetchInit(databaseImpl, lsn);
                     }
 
@@ -2516,19 +2780,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
                 success = true;
 
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                    makeFetchErrorMsg(null, lsn, idx), e);
+                        envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                        makeFetchErrorMsg(null, lsn, idx), e);
 
-            } catch (EnvironmentFailureException e) {
+            } catch(EnvironmentFailureException e) {
                 e.addErrorMessage(makeFetchErrorMsg(null, lsn, idx));
                 throw e;
 
-            } catch (RuntimeException e) {
+            } catch(RuntimeException e) {
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                    makeFetchErrorMsg(e.toString(), lsn, idx), e);
+                        envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                        makeFetchErrorMsg(e.toString(), lsn, idx), e);
             } finally {
                 /*
                  * Release the parent latch if null is being returned. In this
@@ -2540,8 +2804,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  * parent may or may not be latched. So, only release the latch
                  * if it is currently held.
                  */
-                if (!success) {
-                    if (child != null) {
+                if(!success) {
+                    if(child != null) {
                         child.incFetchStats(envImpl, isMiss);
                     }
                     releaseLatchIfOwner();
@@ -2551,7 +2815,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             }
         }
 
-        assert(hasCachedChildren() == hasCachedChildrenFlag());
+        assert (hasCachedChildren() == hasCachedChildrenFlag());
 
         child.incFetchStats(envImpl, isMiss);
 
@@ -2561,7 +2825,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Returns the idx-th child of "this" upper IN, fetching the child from
      * the log and attaching it to its parent if it is not already attached.
-     *
+     * <p>
      * On entry, the parent must be EX-latched already and it stays EX-latched
      * for the duration of this method and on return (even in case of
      * exceptions).
@@ -2570,8 +2834,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public IN fetchIN(int idx, CacheMode cacheMode) {
 
-        assert(isUpperIN());
-        if (!isLatchExclusiveOwner()) {
+        assert (isUpperIN());
+        if(!isLatchExclusiveOwner()) {
             throw unexpectedState("EX-latch not held before fetch");
         }
 
@@ -2581,29 +2845,29 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         IN child = (IN) entryTargets.get(idx);
 
-        if (child == null) {
+        if(child == null) {
 
             final long lsn = getLsn(idx);
 
-            if (lsn == DbLsn.NULL_LSN) {
+            if(lsn == DbLsn.NULL_LSN) {
                 throw unexpectedState(
-                    makeFetchErrorMsg("NULL_LSN in upper IN", lsn, idx));
+                        makeFetchErrorMsg("NULL_LSN in upper IN", lsn, idx));
             }
 
             try {
                 byte[] ohBytes = null;
 
-                if (getNormalizedLevel() == 2) {
+                if(getNormalizedLevel() == 2) {
                     ohBytes = ohCache.getBINBytes(this, idx);
-                    if (ohBytes != null) {
+                    if(ohBytes != null) {
                         child = ohCache.materializeBIN(envImpl, ohBytes);
                     }
                 }
 
-                if (child == null) {
+                if(child == null) {
                     final WholeEntry wholeEntry = envImpl.getLogManager().
-                        getLogEntryAllowInvisibleAtRecovery(
-                            lsn, getLastLoggedSize(idx));
+                            getLogEntryAllowInvisibleAtRecovery(
+                                    lsn, getLastLoggedSize(idx));
 
                     final LogEntry logEntry = wholeEntry.getEntry();
                     child = (IN) logEntry.getResolvedItem(databaseImpl);
@@ -2613,9 +2877,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
                 child.latchNoUpdateLRU(databaseImpl);
 
-                if (ohBytes != null) {
+                if(ohBytes != null) {
                     child.postLoadInit(this, idx);
-                } else {
+                }
+                else {
                     child.postFetchInit(databaseImpl, lsn);
                 }
 
@@ -2623,23 +2888,23 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
                 child.releaseLatch();
 
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                    makeFetchErrorMsg(null, lsn, idx), e);
+                        envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                        makeFetchErrorMsg(null, lsn, idx), e);
 
-            } catch (EnvironmentFailureException e) {
+            } catch(EnvironmentFailureException e) {
                 e.addErrorMessage(makeFetchErrorMsg(null, lsn, idx));
                 throw e;
 
-            } catch (RuntimeException e) {
+            } catch(RuntimeException e) {
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                    makeFetchErrorMsg(e.toString(), lsn, idx), e);
+                        envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                        makeFetchErrorMsg(e.toString(), lsn, idx), e);
             }
         }
 
-        assert(hasCachedChildren() == hasCachedChildrenFlag());
+        assert (hasCachedChildren() == hasCachedChildrenFlag());
 
         child.incFetchStats(envImpl, isMiss);
 
@@ -2651,29 +2916,28 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * off-heap and attaching it to its parent if it is not already attached
      * and is cached off-heap. This method does not fetch from disk, and will
      * return null if the child is not in the main or off-heap cache.
-     *
+     * <p>
      * On entry, the parent must be EX-latched already and it stays EX-latched
      * for the duration of this method and on return (even in case of
      * exceptions).
      *
      * @param idx The slot of the child to fetch.
-     *
      * @return null if the LN is not in the main or off-heap cache.
      */
     public IN loadIN(int idx, CacheMode cacheMode) {
 
-        assert(isUpperIN());
-        if (!isLatchExclusiveOwner()) {
+        assert (isUpperIN());
+        if(!isLatchExclusiveOwner()) {
             throw unexpectedState("EX-latch not held before load");
         }
 
         IN child = (IN) entryTargets.get(idx);
 
-        if (child != null) {
+        if(child != null) {
             return child;
         }
 
-        if (getNormalizedLevel() != 2) {
+        if(getNormalizedLevel() != 2) {
             return null;
         }
 
@@ -2684,7 +2948,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         try {
             final byte[] ohBytes = ohCache.getBINBytes(this, idx);
-            if (ohBytes == null) {
+            if(ohBytes == null) {
                 return null;
             }
 
@@ -2696,33 +2960,33 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
             return child;
 
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                makeFetchErrorMsg(e.toString(), lsn, idx), e);
+                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                    makeFetchErrorMsg(e.toString(), lsn, idx), e);
         }
     }
 
     /**
      * Returns the target of the idx'th entry, fetching from disk if necessary.
-     *
+     * <p>
      * Null is returned in the following cases:
-     *
+     * <p>
      * 1. if the LSN is null and the KnownDeleted flag is set; or
      * 2. if the LSN's file has been cleaned and:
-     *    a. the PendingDeleted or KnownDeleted flag is set, or
-     *    b. the entry is "probably expired".
-     *
+     * a. the PendingDeleted or KnownDeleted flag is set, or
+     * b. the entry is "probably expired".
+     * <p>
      * Note that checking for PD/KD before calling this method is not
      * sufficient to ensure that null is not returned, because null is also
      * returned for expired records.
-     *
+     * <p>
      * When null is returned, the caller must treat the record as deleted.
-     *
+     * <p>
      * Note that null can only be returned for a slot that could contain an LN,
      * not other node types and not a DupCountLN since DupCountLNs are never
      * deleted or expired.
-     *
+     * <p>
      * An exclusive latch must be held on this BIN.
      *
      * @return the LN or null.
@@ -2746,13 +3010,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private Node fetchLN(int idx, CacheMode cacheMode, boolean dupConvert) {
 
-        assert(isBIN());
+        assert (isBIN());
 
-        if (!isLatchExclusiveOwner()) {
+        if(!isLatchExclusiveOwner()) {
             throw unexpectedState("EX-latch not held before fetch");
         }
 
-        if (isEntryKnownDeleted(idx)) {
+        if(isEntryKnownDeleted(idx)) {
             return null;
         }
 
@@ -2764,21 +3028,21 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         Node child = entryTargets.get(idx);
 
         /* Fetch it from disk. */
-        if (child == null) {
+        if(child == null) {
 
             final long lsn = getLsn(idx);
 
-            if (lsn == DbLsn.NULL_LSN) {
+            if(lsn == DbLsn.NULL_LSN) {
                 throw unexpectedState(makeFetchErrorMsg(
-                    "NULL_LSN without KnownDeleted", lsn, idx));
+                        "NULL_LSN without KnownDeleted", lsn, idx));
             }
 
             /*
              * Fetch of immediately obsolete LN not allowed. The only exception
              * is during conversion of an old-style dups DB.
              */
-            if (isEmbeddedLN(idx) ||
-                (databaseImpl.isLNImmediatelyObsolete() && !dupConvert)) {
+            if(isEmbeddedLN(idx) ||
+                    (databaseImpl.isLNImmediatelyObsolete() && !dupConvert)) {
                 throw unexpectedState("May not fetch immediately obsolete LN");
             }
 
@@ -2787,30 +3051,30 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
                 child = ohCache.loadLN(bin, idx, cacheMode);
 
-                if (child == null) {
+                if(child == null) {
                     final WholeEntry wholeEntry = envImpl.getLogManager().
-                        getLogEntryAllowInvisibleAtRecovery(
-                            lsn, getLastLoggedSize(idx));
+                            getLogEntryAllowInvisibleAtRecovery(
+                                    lsn, getLastLoggedSize(idx));
 
                     /* Last logged size is not present before log version 9. */
                     setLastLoggedSize(
-                        idx, wholeEntry.getHeader().getEntrySize());
+                            idx, wholeEntry.getHeader().getEntrySize());
 
                     final LogEntry logEntry = wholeEntry.getEntry();
 
-                    if (logEntry instanceof LNLogEntry) {
+                    if(logEntry instanceof LNLogEntry) {
 
                         final LNLogEntry<?> lnEntry =
-                            (LNLogEntry<?>) wholeEntry.getEntry();
+                                (LNLogEntry<?>) wholeEntry.getEntry();
 
                         lnEntry.postFetchInit(databaseImpl);
 
                         lnSlotKey = lnEntry.getKey();
 
-                        if (cacheMode != CacheMode.EVICT_LN &&
-                            cacheMode != CacheMode.EVICT_BIN &&
-                            cacheMode != CacheMode.UNCHANGED &&
-                            cacheMode != CacheMode.MAKE_COLD) {
+                        if(cacheMode != CacheMode.EVICT_LN &&
+                                cacheMode != CacheMode.EVICT_BIN &&
+                                cacheMode != CacheMode.UNCHANGED &&
+                                cacheMode != CacheMode.MAKE_COLD) {
                             getEvictor().moveToPri1LRU(this);
                         }
                     }
@@ -2823,14 +3087,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 child.postFetchInit(databaseImpl, lsn);
                 attachNode(idx, child, lnSlotKey);
 
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
 
-                if (!bin.isDeleted(idx) &&
-                    !bin.isProbablyExpired(idx)) {
+                if(!bin.isDeleted(idx) &&
+                        !bin.isProbablyExpired(idx)) {
 
                     throw new EnvironmentFailureException(
-                         envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                         makeFetchErrorMsg(null, lsn, idx), e);
+                            envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                            makeFetchErrorMsg(null, lsn, idx), e);
                 }
 
                 /*
@@ -2840,22 +3104,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                  */
                 return null;
 
-            } catch (EnvironmentFailureException e) {
+            } catch(EnvironmentFailureException e) {
                 e.addErrorMessage(makeFetchErrorMsg(null, lsn, idx));
                 throw e;
 
-            } catch (RuntimeException e) {
+            } catch(RuntimeException e) {
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                    makeFetchErrorMsg(e.toString(), lsn, idx), e);
+                        envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                        makeFetchErrorMsg(e.toString(), lsn, idx), e);
             }
         }
 
-        if (child.isLN()) {
+        if(child.isLN()) {
             final LN ln = (LN) child;
 
-            if (cacheMode != CacheMode.UNCHANGED &&
-                cacheMode != CacheMode.MAKE_COLD) {
+            if(cacheMode != CacheMode.UNCHANGED &&
+                    cacheMode != CacheMode.MAKE_COLD) {
                 ln.setFetchedCold(false);
             }
 
@@ -2877,18 +3141,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         final LN ln = (LN) entryTargets.get(idx);
 
-        if (ln == null) {
+        if(ln == null) {
             return null;
         }
 
-        if (cacheMode != CacheMode.UNCHANGED &&
-            cacheMode != CacheMode.MAKE_COLD) {
+        if(cacheMode != CacheMode.UNCHANGED &&
+                cacheMode != CacheMode.MAKE_COLD) {
             ln.setFetchedCold(false);
         }
 
         final OffHeapCache ohCache = getOffHeapCache();
 
-        if (ohCache.isEnabled()) {
+        if(ohCache.isEnabled()) {
             ohCache.freeRedundantLN((BIN) this, idx, ln, cacheMode);
         }
 
@@ -2907,19 +3171,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         convertDupKeys(); // must be after initMemorySize
         addToMainCache();
 
-        if (isBIN()) {
+        if(isBIN()) {
             setFetchedCold(true);
         }
 
         /* See Database.mutateDeferredWriteBINDeltas. */
-        if (db.isDeferredWriteMode()) {
+        if(db.isDeferredWriteMode()) {
             mutateToFullBIN(false);
         }
     }
 
     /**
      * Initialize a BIN loaded from off-heap cache.
-     *
+     * <p>
      * Does not call setLastLoggedLsn because materialization of the off-heap
      * BIN initializes all fields including the last logged/delta LSNs.
      */
@@ -2929,7 +3193,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         commonInit(parent.databaseImpl);
         addToMainCache();
 
-        if (isBIN()) {
+        if(isBIN()) {
             setFetchedCold(true);
             setFetchedColdOffHeap(true);
         }
@@ -2960,21 +3224,21 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         getEnv().getInMemoryINs().add(this);
 
-        if (!isDIN() && !isDBIN()) {
-            if (isUpperIN() && traceLRU) {
+        if(!isDIN() && !isDBIN()) {
+            if(isUpperIN() && traceLRU) {
                 LoggerUtils.envLogMsg(
-                    traceLevel, getEnv(),
-                    Thread.currentThread().getId() + "-" +
-                    Thread.currentThread().getName() +
-                    "-" + getEnv().getName() +
-                    " postFetchInit(): " +
-                    " Adding UIN to LRU: " + getNodeId());
+                        traceLevel, getEnv(),
+                        Thread.currentThread().getId() + "-" +
+                                Thread.currentThread().getName() +
+                                "-" + getEnv().getName() +
+                                " postFetchInit(): " +
+                                " Adding UIN to LRU: " + getNodeId());
             }
             getEvictor().addBack(this);
         }
 
         /* Compress full BINs after fetching or loading. */
-        if (!(this instanceof DBIN || this instanceof DIN)) {
+        if(!(this instanceof DBIN || this instanceof DIN)) {
             getEnv().lazyCompress(this);
         }
     }
@@ -2989,7 +3253,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private void convertDupKeys() {
         /* Do not convert more than once. */
-        if (!needDupKeyConversion) {
+        if(!needDupKeyConversion) {
             return;
         }
         needDupKeyConversion = false;
@@ -3002,132 +3266,76 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     @Override
     final void incFetchStats(EnvironmentImpl envImpl, boolean isMiss) {
         Evictor e = envImpl.getEvictor();
-        if (isBIN()) {
+        if(isBIN()) {
             e.incBINFetchStats(isMiss, isBINDelta(false/*checLatched*/));
-        } else {
+        }
+        else {
             e.incUINFetchStats(isMiss);
         }
     }
 
     public String makeFetchErrorMsg(
-        final String msg,
-        final long lsn,
-        final int idx) {
+            final String msg,
+            final long lsn,
+            final int idx) {
 
         final byte state = idx >= 0 ? entryStates[idx] : 0;
 
         final long expirationTime;
 
-        if (isBIN() && idx >= 0) {
+        if(isBIN() && idx >= 0) {
 
             final BIN bin = (BIN) this;
 
             expirationTime = TTL.expirationToSystemTime(
-                bin.getExpiration(idx), isExpirationInHours());
+                    bin.getExpiration(idx), isExpirationInHours());
 
-        } else {
+        }
+        else {
             expirationTime = 0;
         }
 
         return makeFetchErrorMsg(msg, this, lsn, state, expirationTime);
     }
 
-    /**
-     * @param in parent IN.  Is null when root is fetched.
-     */
-    static String makeFetchErrorMsg(
-        String msg,
-        IN in,
-        long lsn,
-        byte state,
-        long expirationTime) {
-
-        /*
-         * Bolster the exception with the LSN, which is critical for
-         * debugging. Otherwise, the exception propagates upward and loses the
-         * problem LSN.
-         */
-        StringBuilder sb = new StringBuilder();
-
-        if (in == null) {
-            sb.append("fetchRoot of ");
-        } else if (in.isBIN()) {
-            sb.append("fetchLN of ");
-        } else {
-            sb.append("fetchIN of ");
-        }
-
-        if (lsn == DbLsn.NULL_LSN) {
-            sb.append("null lsn");
-        } else {
-            sb.append(DbLsn.getNoFormatString(lsn));
-        }
-
-        if (in != null) {
-            sb.append(" parent IN=").append(in.getNodeId());
-            sb.append(" IN class=").append(in.getClass().getName());
-            sb.append(" lastFullLsn=");
-            sb.append(DbLsn.getNoFormatString(in.getLastFullLsn()));
-            sb.append(" lastLoggedLsn=");
-            sb.append(DbLsn.getNoFormatString(in.getLastLoggedLsn()));
-            sb.append(" parent.getDirty()=").append(in.getDirty());
-        }
-
-        sb.append(" state=").append(state);
-
-        sb.append(" expires=");
-
-        if (expirationTime != 0) {
-            sb.append(TTL.formatExpirationTime(expirationTime));
-        } else {
-            sb.append("never");
-        }
-
-        if (msg != null) {
-            sb.append(" ").append(msg);
-        }
-
-        return sb.toString();
-    }
-
     public final int findEntry(
-        byte[] key,
-        boolean indicateIfDuplicate,
-        boolean exact) {
+            byte[] key,
+            boolean indicateIfDuplicate,
+            boolean exact) {
 
         return findEntry(key, indicateIfDuplicate, exact, null /*Comparator*/);
     }
 
     /**
      * Find the entry in this IN for which key is LTE the key arg.
-     *
+     * <p>
      * Currently uses a binary search, but eventually, this may use binary or
      * linear search depending on key size, number of entries, etc.
-     *
+     * <p>
      * This method guarantees that the key parameter, which is the user's key
      * parameter in user-initiated search operations, is always the left hand
      * parameter to the Comparator.compare method.  This allows a comparator
      * to perform specialized searches, when passed down from upper layers.
-     *
+     * <p>
      * This is public so that DbCursorTest can access it.
-     *
+     * <p>
      * Note that the 0'th entry's key is treated specially in an IN.  It always
      * compares lower than any other key.
      *
-     * @param key - the key to search for.
+     * @param key                 - the key to search for.
      * @param indicateIfDuplicate - true if EXACT_MATCH should
-     * be or'd onto the return value if key is already present in this node.
-     * @param exact - true if an exact match must be found.
+     *                            be or'd onto the return value if key is already present in this node.
+     * @param exact               - true if an exact match must be found.
      * @return offset for the entry that has a key LTE the arg.  0 if key
      * is less than the 1st entry.  -1 if exact is true and no exact match
      * is found.  If indicateIfDuplicate is true and an exact match was found
      * then EXACT_MATCH is or'd onto the return value.
      */
     public final int findEntry(
-        byte[] key,
-        boolean indicateIfDuplicate,
-        boolean exact,
-        Comparator<byte[]> comparator) {
+            byte[] key,
+            boolean indicateIfDuplicate,
+            boolean exact,
+            Comparator<byte[]> comparator) {
 
         assert idKeyIsSlotKey();
 
@@ -3135,7 +3343,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         int low = 0;
         int middle = 0;
 
-        if (comparator == null) {
+        if(comparator == null) {
             comparator = databaseImpl.getKeyComparator();
         }
 
@@ -3165,38 +3373,43 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * the 0th key in the comparison algorithm.
          */
         boolean entryZeroSpecialCompare =
-            isUpperIN() && !exact && !indicateIfDuplicate;
+                isUpperIN() && !exact && !indicateIfDuplicate;
 
         assert nEntries >= 0;
 
-        while (low <= high) {
+        while(low <= high) {
 
             middle = (high + low) / 2;
             int s;
 
-            if (middle == 0 && entryZeroSpecialCompare) {
+            if(middle == 0 && entryZeroSpecialCompare) {
                 s = 1;
-            } else {
+            }
+            else {
                 s = entryKeys.compareKeys(
-                    key,  keyPrefix, middle,
-                    haveEmbeddedData(middle), comparator);
+                        key, keyPrefix, middle,
+                        haveEmbeddedData(middle), comparator);
             }
 
-            if (s < 0) {
+            if(s < 0) {
                 high = middle - 1;
-            } else if (s > 0) {
+            }
+            else if(s > 0) {
                 low = middle + 1;
-            } else {
+            }
+            else {
                 int ret;
-                if (indicateIfDuplicate) {
+                if(indicateIfDuplicate) {
                     ret = middle | EXACT_MATCH;
-                } else {
+                }
+                else {
                     ret = middle;
                 }
 
-                if ((ret >= 0) && exact && isEntryKnownDeleted(ret & 0xffff)) {
+                if((ret >= 0) && exact && isEntryKnownDeleted(ret & 0xffff)) {
                     return -1;
-                } else {
+                }
+                else {
                     return ret;
                 }
             }
@@ -3206,9 +3419,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * No match found.  Either return -1 if caller wanted exact matches
          * only, or return entry whose key is < search key.
          */
-        if (exact) {
+        if(exact) {
             return -1;
-        } else {
+        }
+        else {
             return high;
         }
     }
@@ -3221,20 +3435,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      *
      * @return true if the entry was successfully inserted, false
      * if it was a duplicate.
-     *
      * @throws EnvironmentFailureException if the node is full
-     * (it should have been split earlier).
+     *                                     (it should have been split earlier).
      */
     public final boolean insertEntry(
-        Node child,
-        byte[] key,
-        long childLsn)
-        throws DatabaseException {
+            Node child,
+            byte[] key,
+            long childLsn)
+            throws DatabaseException {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         int res = insertEntry1(
-             child, key, null, childLsn, EntryStates.DIRTY_BIT, false);
+                child, key, null, childLsn, EntryStates.DIRTY_BIT, false);
 
         return (res & INSERT_SUCCESS) != 0;
     }
@@ -3246,33 +3459,31 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * caller.
      *
      * @param data If the data portion of a record must be embedded in this
-     * BIN, "data" stores the record's data. Null otherwise. See also comment
-     * for the keyEntries field. 
-     *
+     *             BIN, "data" stores the record's data. Null otherwise. See also comment
+     *             for the keyEntries field.
      * @return either (1) the index of location in the IN where the entry was
      * inserted |'d with INSERT_SUCCESS, or (2) the index of the duplicate in
      * the IN if the entry was found to be a duplicate.
-     *
      * @throws EnvironmentFailureException if the node is full (it should have
-     * been split earlier).
+     *                                     been split earlier).
      */
     public final int insertEntry1(
-        Node child,
-        byte[] key,
-        byte[] data,
-        long childLsn,
-        boolean blindInsertion) {
+            Node child,
+            byte[] key,
+            byte[] data,
+            long childLsn,
+            boolean blindInsertion) {
 
         return insertEntry1(
-            child, key, data, childLsn, EntryStates.DIRTY_BIT,
-            blindInsertion);
+                child, key, data, childLsn, EntryStates.DIRTY_BIT,
+                blindInsertion);
     }
 
     /**
      * Inserts a slot with the given key, lsn, state, and child node into this
      * IN, if a slot with the same key does not exist already. Assumes this
      * node is already latched by the caller.
-     *
+     * <p>
      * This returns a failure if there's a duplicate match. The caller must do
      * the processing to check if the entry is actually deleted and can be
      * overwritten. This is foisted upon the caller rather than handled in this
@@ -3280,23 +3491,21 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * check a child LN.
      *
      * @param data If the data portion of a record must be embedded in this
-     * BIN, "data" stores the record's data. Null otherwise. See also comment
-     * for the keyEntries field. 
-     *
+     *             BIN, "data" stores the record's data. Null otherwise. See also comment
+     *             for the keyEntries field.
      * @return either (1) the index of location in the IN where the entry was
      * inserted |'d with INSERT_SUCCESS, or (2) the index of the duplicate in
      * the IN if the entry was found to be a duplicate.
-     *
      * @throws EnvironmentFailureException if the node is full (it should have
-     * been split earlier).
+     *                                     been split earlier).
      */
     public final int insertEntry1(
-        Node child,
-        byte[] key,
-        byte[] data,
-        long childLsn,
-        byte state,
-        boolean blindInsertion) {
+            Node child,
+            byte[] key,
+            byte[] data,
+            long childLsn,
+            byte state,
+            boolean blindInsertion) {
 
         /*
          * Search without requiring an exact match, but do let us know the
@@ -3304,7 +3513,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          */
         int index = findEntry(key, true, false);
 
-        if (index >= 0 && (index & EXACT_MATCH) != 0) {
+        if(index >= 0 && (index & EXACT_MATCH) != 0) {
 
             /*
              * There is an exact match.  Don't insert; let the caller decide
@@ -3320,83 +3529,85 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * BIN, then don't mutate, unless there is no space in the delta to do
          * the insertion.
          */
-        if (isBINDelta()) {
+        if(isBINDelta()) {
 
-            BIN bin = (BIN)this;
+            BIN bin = (BIN) this;
 
             boolean doBlindInsertion = (nEntries < getMaxEntries());
 
-            if (doBlindInsertion &&
-                !blindInsertion &&
-                bin.mayHaveKeyInFullBin(key)) {
+            if(doBlindInsertion &&
+                    !blindInsertion &&
+                    bin.mayHaveKeyInFullBin(key)) {
 
                 doBlindInsertion = false;
             }
 
-            if (!doBlindInsertion) {
+            if(!doBlindInsertion) {
 
                 mutateToFullBIN(true /*leaveFreeSlot*/);
 
                 index = findEntry(key, true, false);
 
-                if (index >= 0 && (index & EXACT_MATCH) != 0) {
+                if(index >= 0 && (index & EXACT_MATCH) != 0) {
                     return index & ~IN.EXACT_MATCH;
                 }
-            } else {
+            }
+            else {
                 getEvictor().incBinDeltaBlindOps();
 
-                if (traceDeltas) {
+                if(traceDeltas) {
                     LoggerUtils.envLogMsg(
-                        traceLevel, getEnv(),
-                        Thread.currentThread().getId() + "-" +
-                        Thread.currentThread().getName() +
-                        "-" + getEnv().getName() +
-                        (blindInsertion ?
-                         " Blind insertion in BIN-delta " :
-                         " Blind put in BIN-delta ") +
-                        getNodeId() + " nEntries = " +
-                        nEntries + " max entries = " +
-                        getMaxEntries() +
-                        " full BIN entries = " +
-                        bin.getFullBinNEntries() +
-                        " full BIN max entries = " +
-                        bin.getFullBinMaxEntries());
+                            traceLevel, getEnv(),
+                            Thread.currentThread().getId() + "-" +
+                                    Thread.currentThread().getName() +
+                                    "-" + getEnv().getName() +
+                                    (blindInsertion ?
+                                            " Blind insertion in BIN-delta " :
+                                            " Blind put in BIN-delta ") +
+                                    getNodeId() + " nEntries = " +
+                                    nEntries + " max entries = " +
+                                    getMaxEntries() +
+                                    " full BIN entries = " +
+                                    bin.getFullBinNEntries() +
+                                    " full BIN max entries = " +
+                                    bin.getFullBinMaxEntries());
                 }
             }
         }
 
-        if (nEntries >= getMaxEntries()) {
+        if(nEntries >= getMaxEntries()) {
             throw unexpectedState(
-                getEnv(),
-                "Node " + getNodeId() +
-                " should have been split before calling insertEntry" +
-                " is BIN-delta: " + isBINDelta() +
-                " num entries: " + nEntries +
-                " max entries: " + getMaxEntries());
+                    getEnv(),
+                    "Node " + getNodeId() +
+                            " should have been split before calling insertEntry" +
+                            " is BIN-delta: " + isBINDelta() +
+                            " num entries: " + nEntries +
+                            " max entries: " + getMaxEntries());
         }
 
         /* There was no key match, so insert to the right of this entry. */
         index++;
 
         /* We found a spot for insert, shift entries as needed. */
-        if (index < nEntries) {
+        if(index < nEntries) {
             int oldSize = computeLsnOverhead();
 
             /* Adding elements to the LSN array can change the space used. */
             shiftEntriesRight(index);
 
             updateMemorySize(computeLsnOverhead() - oldSize);
-        } else {
+        }
+        else {
             nEntries++;
         }
 
-        if (isBINDelta()) {
-            ((BIN)this).incFullBinNEntries();
+        if(isBINDelta()) {
+            ((BIN) this).incFullBinNEntries();
         }
 
         int oldSize = computeLsnOverhead();
 
-        if (data == null || databaseImpl.isDeferredWriteMode()) {
+        if(data == null || databaseImpl.isDeferredWriteMode()) {
             setTarget(index, child);
         }
 
@@ -3410,9 +3621,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          */
         entryStates[index] = state;
 
-        if (data != null) {
+        if(data != null) {
             setEmbeddedLN(index);
-            if (data.length == 0) {
+            if(data.length == 0) {
                 setNoDataLN(index);
             }
         }
@@ -3420,16 +3631,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         adjustCursorsForInsert(index);
 
         updateMemorySize(oldSize,
-                         getEntryInMemorySize(index) +
-                         computeLsnOverhead());
+                getEntryInMemorySize(index) +
+                        computeLsnOverhead());
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
         }
 
         setDirty(true);
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
 
         return (index | INSERT_SUCCESS);
     }
@@ -3447,7 +3658,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Variant that allows specifying whether the IN is dirtied and whether
      * validation takes place. 'validate' should be false only in tests.
-     *
+     * <p>
      * See BIN.compress and INCompressor for a discussion about why slots can
      * be deleted without dirtying the BIN, and why the next delta is
      * prohibited when the slot is dirty.
@@ -3458,11 +3669,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         assert index >= 0 && index < nEntries;
         assert !validate || validateSubtreeBeforeDelete(index);
 
-        if (makeDirty) {
+        if(makeDirty) {
             setDirty(true);
         }
 
-        if (isDirty(index)) {
+        if(isDirty(index)) {
             setProhibitNextDelta(true);
         }
 
@@ -3470,14 +3681,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         final OffHeapCache ohCache = getEnv().getOffHeapCache();
         final int level = getNormalizedLevel();
-        if (level == 1) {
+        if(level == 1) {
             ohCache.freeLN((BIN) this, index);
-        } else if (level == 2) {
+        }
+        else if(level == 2) {
             ohCache.freeBIN((BIN) child, this, index);
         }
 
-        if (child != null && child.isIN()) {
-            IN childIN = (IN)child;
+        if(child != null && child.isIN()) {
+            IN childIN = (IN) child;
             getEnv().getInMemoryINs().remove(childIN);
         }
 
@@ -3499,7 +3711,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         /* setLsnInternal can mutate to an array of longs. */
         updateMemorySize(oldLSNArraySize, computeLsnOverhead());
 
-        assert(isBIN() || hasCachedChildrenFlag() == hasCachedChildren());
+        assert (isBIN() || hasCachedChildrenFlag() == hasCachedChildren());
 
         /*
          * Note that we don't have to adjust cursors for delete, since
@@ -3525,28 +3737,27 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * This method is called after the idx'th child of this node gets logged,
-     * and changes position as a result. 
+     * and changes position as a result.
      *
-     * @param newLSN The new on-disk position of the child.
-     *
+     * @param newLSN  The new on-disk position of the child.
      * @param newVLSN The VLSN of the logrec at the new position.
-     * For LN children only.
-     *
+     *                For LN children only.
      * @param newSize The size of the logrec at the new position.
-     * For LN children only.
+     *                For LN children only.
      */
     public final void updateEntry(
-        int idx,
-        long newLSN,
-        long newVLSN,
-        int newSize) {
+            int idx,
+            long newLSN,
+            long newVLSN,
+            int newSize) {
 
         setLsn(idx, newLSN);
 
-        if (isBIN()) {
-            if (isEmbeddedLN(idx)) {
-                ((BIN)this).setCachedVLSN(idx, newVLSN);
-            } else {
+        if(isBIN()) {
+            if(isEmbeddedLN(idx)) {
+                ((BIN) this).setCachedVLSN(idx, newVLSN);
+            }
+            else {
                 setLastLoggedSize(idx, newSize);
             }
         }
@@ -3557,29 +3768,29 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * This method is called only from BIN.applyDelta(). It applies the info
      * extracted from a delta slot to the corresponding slot in the full BIN.
-     *
+     * <p>
      * Unlike other update methods, the LSN may be NULL_LSN if the KD flag is
      * set. This allows applying a BIN-delta with a NULL_LSN and KD, for an
      * invisible log entry for example.
-     *
+     * <p>
      * No need to do memory counting in this method because the BIN is not
      * yet attached to the tree.
      */
     final void applyDeltaSlot(
-        int idx,
-        Node node,
-        long lsn,
-        int lastLoggedSize,
-        byte state,
-        byte[] key,
-        byte[] data) {
+            int idx,
+            Node node,
+            long lsn,
+            int lastLoggedSize,
+            byte state,
+            byte[] key,
+            byte[] data) {
 
-        assert(isBIN());
-        assert(!isBINDelta());
-        assert(lsn != DbLsn.NULL_LSN ||
-               (state & EntryStates.KNOWN_DELETED_BIT) != 0);
-        assert(node == null || data == null);
-        assert(!getInListResident());
+        assert (isBIN());
+        assert (!isBINDelta());
+        assert (lsn != DbLsn.NULL_LSN ||
+                (state & EntryStates.KNOWN_DELETED_BIT) != 0);
+        assert (node == null || data == null);
+        assert (!getInListResident());
 
         ((BIN) this).freeOffHeapLN(idx);
 
@@ -3589,8 +3800,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         updateLNSlotKey(idx, key, data);
 
-        assert(isEmbeddedLN(idx) == isEmbeddedLN(state));
-        assert(isNoDataLN(idx) == isNoDataLN(state));
+        assert (isEmbeddedLN(idx) == isEmbeddedLN(state));
+        assert (isNoDataLN(idx) == isNoDataLN(state));
 
         entryStates[idx] = state;
 
@@ -3602,31 +3813,27 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * existing KD slot. It is called from CursorImpl.insertRecordInternal(),
      * after logging the insertion op.
      *
-     * @param newLN The LN associated with the new record.
-     *
-     * @param newLSN The LSN of the insertion logrec.
-     *
+     * @param newLN   The LN associated with the new record.
+     * @param newLSN  The LSN of the insertion logrec.
      * @param newSize The size of the insertion logrec.
-     *
-     * @param newKey The value for the record's key. It is equal to the current
-     * key value in the slot, but may not be identical to that value if a
-     * custom comparator is used.
-     *
+     * @param newKey  The value for the record's key. It is equal to the current
+     *                key value in the slot, but may not be identical to that value if a
+     *                custom comparator is used.
      * @param newData If the record's data must be embedded in this BIN, "data"
-     * stores the record's data. Null otherwise. See also comment for the
-     * keyEntries field.
+     *                stores the record's data. Null otherwise. See also comment for the
+     *                keyEntries field.
      */
     public final void insertRecord(
-        int idx,
-        LN newLN,
-        long newLSN,
-        int newSize,
-        byte[] newKey,
-        byte[] newData,
-        int expiration,
-        boolean expirationInHours) {
+            int idx,
+            LN newLN,
+            long newLSN,
+            int newSize,
+            byte[] newKey,
+            byte[] newData,
+            int expiration,
+            boolean expirationInHours) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         final BIN bin = (BIN) this;
 
@@ -3638,25 +3845,27 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         boolean multiSlotChange = updateLNSlotKey(idx, newKey, newData);
 
-        if (isEmbeddedLN(idx)) {
+        if(isEmbeddedLN(idx)) {
 
             clearLastLoggedSize(idx);
 
             bin.setCachedVLSN(idx, newLN.getVLSNSequence());
 
-            if (databaseImpl.isDeferredWriteMode()) {
+            if(databaseImpl.isDeferredWriteMode()) {
                 setTarget(idx, newLN);
             }
-        } else {
+        }
+        else {
             setTarget(idx, newLN);
             setLastLoggedSize(idx, newSize);
         }
 
         bin.setExpiration(idx, expiration, expirationInHours);
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             long newSlotSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSlotSize, newSlotSize);
         }
@@ -3665,7 +3874,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         clearPendingDeleted(idx);
         setDirty(true);
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     /**
@@ -3674,39 +3883,34 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * logging the update op.
      *
      * @param oldMemSize If the child LN was cached before the update op, it has
-     * already been updated in-place by the caller. In this case, oldMemSize
-     * stores the size of the child LN before the update, and it is used to do
-     * memory counting. Otherwise oldMemSize is 0 and the newly created LN has
-     * not been attached to the tree; it will be attached later by the caller,
-     * if needed.
-     *
-     * @param newLSN The LSN of the update logrec.
-     *
-     * @param newVLSN The VLSN of the update logrec.
-     *
-     * @param newSize The on-disk size of the update logrec.
-     *
-     * @param newKey The new value for the record's key. It is equal to the
-     * current value, but may not be identical to the current value if a
-     * custom comparator is used. It may be null, if the caller knows for
-     * sure that the key does not change.
-     *
-     * @param newData If the record's data must be embedded in this BIN, "data"
-     * stores the record's data. Null otherwise. See also comment for the
-     * keyEntries field.
+     *                   already been updated in-place by the caller. In this case, oldMemSize
+     *                   stores the size of the child LN before the update, and it is used to do
+     *                   memory counting. Otherwise oldMemSize is 0 and the newly created LN has
+     *                   not been attached to the tree; it will be attached later by the caller,
+     *                   if needed.
+     * @param newLSN     The LSN of the update logrec.
+     * @param newVLSN    The VLSN of the update logrec.
+     * @param newSize    The on-disk size of the update logrec.
+     * @param newKey     The new value for the record's key. It is equal to the
+     *                   current value, but may not be identical to the current value if a
+     *                   custom comparator is used. It may be null, if the caller knows for
+     *                   sure that the key does not change.
+     * @param newData    If the record's data must be embedded in this BIN, "data"
+     *                   stores the record's data. Null otherwise. See also comment for the
+     *                   keyEntries field.
      */
     public final void updateRecord(
-        int idx,
-        long oldMemSize,
-        long newLSN,
-        long newVLSN,
-        int newSize,
-        byte[] newKey,
-        byte[] newData,
-        int expiration,
-        boolean expirationInHours) {
+            int idx,
+            long oldMemSize,
+            long newLSN,
+            long newVLSN,
+            int newSize,
+            byte[] newKey,
+            byte[] newData,
+            int expiration,
+            boolean expirationInHours) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         final BIN bin = (BIN) this;
 
@@ -3718,18 +3922,20 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         boolean multiSlotChange = updateLNSlotKey(idx, newKey, newData);
 
-        if (isEmbeddedLN(idx)) {
+        if(isEmbeddedLN(idx)) {
             clearLastLoggedSize(idx);
-            ((BIN)this).setCachedVLSN(idx, newVLSN);
-        } else {
+            ((BIN) this).setCachedVLSN(idx, newVLSN);
+        }
+        else {
             setLastLoggedSize(idx, newSize);
         }
 
         bin.setExpiration(idx, expiration, expirationInHours);
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             /* Update mem size for key change. */
             long newSlotSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSlotSize, newSlotSize);
@@ -3737,7 +3943,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             /* Update mem size for node change. */
             Node newLN = entryTargets.get(idx);
             long newMemSize =
-                (newLN != null ? newLN.getMemorySizeIncludedByParent() : 0);
+                    (newLN != null ? newLN.getMemorySizeIncludedByParent() : 0);
             updateMemorySize(oldMemSize, newMemSize);
         }
 
@@ -3745,31 +3951,28 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     /**
-     * Update the idx slot slot of this BIN to reflect a deletion of the 
+     * Update the idx slot slot of this BIN to reflect a deletion of the
      * associated record. It is called from CursorImpl.deleteCurrentRecord(),
      * after logging the deletion op.
      *
      * @param oldMemSize If the child LN was cached before the deletion, it
-     * has already been updated in-place by the caller (the ln contents have
-     * been deleted). In this case, oldMemSize stores the in-memory size of
-     * the child LN before the update, and it is used to do memory counting.
-     * Otherwise oldMemSize is 0 and the newly created LN has not been attached
-     * to the tree; it will be attached later by the caller, if needed.
-     *
-     * @param newLSN The LSN of the deletion logrec.
-     *
-     * @param newVLSN The VLSN of the deletion logrec.
-     *
-     * @param newSize The on-disk size of the deletion logrec.
+     *                   has already been updated in-place by the caller (the ln contents have
+     *                   been deleted). In this case, oldMemSize stores the in-memory size of
+     *                   the child LN before the update, and it is used to do memory counting.
+     *                   Otherwise oldMemSize is 0 and the newly created LN has not been attached
+     *                   to the tree; it will be attached later by the caller, if needed.
+     * @param newLSN     The LSN of the deletion logrec.
+     * @param newVLSN    The VLSN of the deletion logrec.
+     * @param newSize    The on-disk size of the deletion logrec.
      */
     public final void deleteRecord(
-        int idx,
-        long oldMemSize,
-        long newLSN,
-        long newVLSN,
-        int newSize) {
+            int idx,
+            long oldMemSize,
+            long newLSN,
+            long newVLSN,
+            int newSize) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         final BIN bin = (BIN) this;
 
@@ -3777,21 +3980,23 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         setLsn(idx, newLSN);
 
-        if (isEmbeddedLN(idx)) {
+        if(isEmbeddedLN(idx)) {
             clearLastLoggedSize(idx);
             bin.setCachedVLSN(idx, newVLSN);
-        } else {
+        }
+        else {
             setLastLoggedSize(idx, newSize);
         }
 
-        if (entryTargets.get(idx) != null) {
+        if(entryTargets.get(idx) != null) {
             /* Update mem size for node change. */
-            assert(oldMemSize != 0);
+            assert (oldMemSize != 0);
             Node newLN = entryTargets.get(idx);
             long newMemSize = newLN.getMemorySizeIncludedByParent();
             updateMemorySize(oldMemSize, newMemSize);
-        } else {
-            assert(oldMemSize == 0);
+        }
+        else {
+            assert (oldMemSize == 0);
         }
 
         setPendingDeleted(idx);
@@ -3800,62 +4005,55 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * This method is used by the RecoveryManager to change the current version
-     * of a record, either to a later version (in case of redo), or to an 
+     * of a record, either to a later version (in case of redo), or to an
      * earlier version (in case of undo). The current version may or may not be
      * cached as a child LN of this BIN (it may be only in case of txn abort
      * during normal processing). If it is, it is evicted. The new version is
      * not attached to the in-memory tree, to save memory during crash
      * recovery.
      *
-     * @param idx The BIN slot for the record.
-     *
-     * @param lsn The LSN of the new record version. It may be null in case of
-     * undo, if the logrec that is being undone is an insertion and the record
-     * did not exist at all in the DB before that insertion.
-     *
-     * @param knownDeleted True if the new version is a committed deletion.
-     *
-     * @param pendingDeleted True if the new version is a deletion, which 
-     * may or may not be committed.
-     *
-     * @param key The key of the new version. It is null only if we are undoing
-     * and the revert-to version was not embedded (in this case the key of the
-     * revert-to version is not stored in the logrec). If it is null and the
-     * DB allows key updates, the new record version is fetched from disk to
-     * retrieve its key, so that the key values stored in the BIN slots are
-     * always transactionally correct.
-     *
-     * @param data The data of the new version. It is non-null if and only if
-     * the new version must be embedded in the BIN.
-     *
-     * @param vlsn The VLSN of the new version.
-     *
-     * @param logrecSize The on-disk size of the logrec corresponding to the
-     * new version. It may be 0 (i.e. unknown) in case of undo. 
+     * @param idx            The BIN slot for the record.
+     * @param lsn            The LSN of the new record version. It may be null in case of
+     *                       undo, if the logrec that is being undone is an insertion and the record
+     *                       did not exist at all in the DB before that insertion.
+     * @param knownDeleted   True if the new version is a committed deletion.
+     * @param pendingDeleted True if the new version is a deletion, which
+     *                       may or may not be committed.
+     * @param key            The key of the new version. It is null only if we are undoing
+     *                       and the revert-to version was not embedded (in this case the key of the
+     *                       revert-to version is not stored in the logrec). If it is null and the
+     *                       DB allows key updates, the new record version is fetched from disk to
+     *                       retrieve its key, so that the key values stored in the BIN slots are
+     *                       always transactionally correct.
+     * @param data           The data of the new version. It is non-null if and only if
+     *                       the new version must be embedded in the BIN.
+     * @param vlsn           The VLSN of the new version.
+     * @param logrecSize     The on-disk size of the logrec corresponding to the
+     *                       new version. It may be 0 (i.e. unknown) in case of undo.
      */
     public final void recoverRecord(
-        int idx,
-        long lsn,
-        boolean knownDeleted,
-        boolean pendingDeleted,
-        byte[] key,
-        byte[] data,
-        long vlsn,
-        int logrecSize,
-        int expiration,
-        boolean expirationInHours) {
+            int idx,
+            long lsn,
+            boolean knownDeleted,
+            boolean pendingDeleted,
+            byte[] key,
+            byte[] data,
+            long vlsn,
+            int logrecSize,
+            int expiration,
+            boolean expirationInHours) {
 
-        assert(isBIN());
+        assert (isBIN());
 
         BIN bin = (BIN) this;
 
         bin.freeOffHeapLN(idx); // old version of the LN is stale
 
-        if (lsn == DbLsn.NULL_LSN) {
+        if(lsn == DbLsn.NULL_LSN) {
 
             /*
              * A NULL lsn means that we are undoing an insertion that was done
-             * without slot reuse. To undo such an insertion we evict the 
+             * without slot reuse. To undo such an insertion we evict the
              * current version (it may cached only in case of normal txn abort)
              * and set the KD flag in the slot. We also set the LSN to null to
              * ensure that the slot does not point to a logrec that does not
@@ -3871,14 +4069,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             return;
         }
 
-        if (key == null &&
-            databaseImpl.allowsKeyUpdates() &&
-            !knownDeleted) {
+        if(key == null &&
+                databaseImpl.allowsKeyUpdates() &&
+                !knownDeleted) {
 
             try {
                 WholeEntry wholeEntry = getEnv().getLogManager().
-                    getLogEntryAllowInvisibleAtRecovery(
-                        lsn, getLastLoggedSize(idx));
+                        getLogEntryAllowInvisibleAtRecovery(
+                                lsn, getLastLoggedSize(idx));
 
                 LNLogEntry<?> logrec = (LNLogEntry<?>) wholeEntry.getEntry();
                 logrec.postFetchInit(getDatabase());
@@ -3886,10 +4084,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 key = logrec.getKey();
                 logrecSize = wholeEntry.getHeader().getEntrySize();
 
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
                 throw new EnvironmentFailureException(
-                    getEnv(), EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                    makeFetchErrorMsg(null, lsn, idx), e);
+                        getEnv(), EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                        makeFetchErrorMsg(null, lsn, idx), e);
             }
         }
 
@@ -3900,32 +4098,36 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         boolean multiSlotChange = updateLNSlotKey(idx, key, data);
 
-        if (isEmbeddedLN(idx)) {
+        if(isEmbeddedLN(idx)) {
             clearLastLoggedSize(idx);
             bin.setCachedVLSN(idx, vlsn);
-        } else {
+        }
+        else {
             setLastLoggedSize(idx, logrecSize);
         }
 
-        if (knownDeleted) {
-            assert(!pendingDeleted);
+        if(knownDeleted) {
+            assert (!pendingDeleted);
             setKnownDeleted(idx);
             bin.queueSlotDeletion(idx);
-        } else {
+        }
+        else {
             clearKnownDeleted(idx);
-            if (pendingDeleted) {
+            if(pendingDeleted) {
                 setPendingDeleted(idx);
                 bin.queueSlotDeletion(idx);
-            } else {
+            }
+            else {
                 clearPendingDeleted(idx);
             }
         }
 
         bin.setExpiration(idx, expiration, expirationInHours);
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             long newSlotSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSlotSize, newSlotSize);
         }
@@ -3940,10 +4142,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * already attached to the tree.
      */
     public final void recoverIN(
-        int idx,
-        Node node,
-        long lsn,
-        int lastLoggedSize) {
+            int idx,
+            Node node,
+            long lsn,
+            int lastLoggedSize) {
 
         long oldSlotSize = getEntryInMemorySize(idx);
 
@@ -3953,9 +4155,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * during the recovery phase where the INList is disabled,
          */
         Node child = getTarget(idx);
-        assert(child == null ||
-               !((IN)child).getInListResident() ||
-               child == node/* this is needed by a unit test*/);
+        assert (child == null ||
+                !((IN) child).getInListResident() ||
+                child == node/* this is needed by a unit test*/);
 
         setLsn(idx, lsn);
         setLastLoggedSize(idx, lastLoggedSize);
@@ -3966,19 +4168,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         setDirty(true);
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     /**
      * Attach the given node as the idx-th child of "this" node. If the child
      * node is an LN, update the key of the parent slot to the given key value,
      * if that value is non-null and an update is indeed necessary.
-     *
+     * <p>
      * This method is called after the child node has been either (a) fetched
      * in from disk and is not dirty, or (b) is a newly created instance that
      * will be written out later by something like a checkpoint. In either
      * case, the slot LSN does not need to be updated.
-     *
+     * <p>
      * Note: does not dirty the node unless the LN slot key is changed.
      */
     public final void attachNode(int idx, Node node, byte[] newKey) {
@@ -3988,25 +4190,26 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         long oldSlotSize = getEntryInMemorySize(idx);
 
         /* Make sure we are not using this method to detach a cached child */
-        assert(getTarget(idx) == null);
+        assert (getTarget(idx) == null);
 
         setTarget(idx, node);
 
         boolean multiSlotChange = false;
 
-        if (isBIN() && newKey != null) {
-            assert(!haveEmbeddedData(idx));
+        if(isBIN() && newKey != null) {
+            assert (!haveEmbeddedData(idx));
             multiSlotChange = updateLNSlotKey(idx, newKey, null);
         }
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             long newSlotSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSlotSize, newSlotSize);
         }
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     /*
@@ -4022,7 +4225,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         Node child = getTarget(idx);
 
-        if (updateLsn) {
+        if(updateLsn) {
             setLsn(idx, newLsn);
             setDirty(true);
         }
@@ -4031,11 +4234,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         long newSlotSize = getEntryInMemorySize(idx);
         updateMemorySize(oldSlotSize, newSlotSize);
 
-        if (child != null && child.isIN()) {
+        if(child != null && child.isIN()) {
             getEnv().getInMemoryINs().remove((IN) child);
         }
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     /**
@@ -4049,16 +4252,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         boolean multiSlotChange = updateKey(idx, newKey, null);
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             long newSlotSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSlotSize, newSlotSize);
         }
 
         setDirty(true);
 
-        assert(isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
+        assert (isBIN() || hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     void copyEntries(final int from, final int to, final int n) {
@@ -4069,16 +4273,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         System.arraycopy(entryStates, from, entryStates, to, n);
 
-        if (entryLsnLongArray == null) {
+        if(entryLsnLongArray == null) {
             final int fromOff = from << 2;
             final int toOff = to << 2;
             final int nBytes = n << 2;
             System.arraycopy(entryLsnByteArray, fromOff,
-                entryLsnByteArray, toOff, nBytes);
-        } else {
+                    entryLsnByteArray, toOff, nBytes);
+        }
+        else {
             System.arraycopy(entryLsnLongArray, from,
-                entryLsnLongArray, to,
-                n);
+                    entryLsnLongArray, to,
+                    n);
         }
     }
 
@@ -4088,16 +4293,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final boolean needsSplitting() {
 
-        if (isBINDelta()) {
-            BIN bin = (BIN)this;
+        if(isBINDelta()) {
+            BIN bin = (BIN) this;
             int fullBinNEntries = bin.getFullBinNEntries();
             int fullBinMaxEntries = bin.getFullBinMaxEntries();
 
-            if (fullBinNEntries < 0) {
+            if(fullBinNEntries < 0) {
                 /* fullBinNEntries is unknown in logVersions < 10 */
                 mutateToFullBIN(false /*leaveFreeSlot*/);
-            } else {
-                assert(fullBinNEntries > 0);
+            }
+            else {
+                assert (fullBinNEntries > 0);
                 return ((fullBinMaxEntries - fullBinNEntries) < 1);
             }
         }
@@ -4108,14 +4314,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Split this into two nodes.  Parent IN is passed in parent and should be
      * latched by the caller.
-     *
+     * <p>
      * childIndex is the index in parent of where "this" can be found.
      */
     public final IN split(
-        IN parent,
-        int childIndex,
-        IN grandParent,
-        int maxEntries) {
+            IN parent,
+            int childIndex,
+            IN grandParent,
+            int maxEntries) {
 
         return splitInternal(parent, childIndex, grandParent, maxEntries, -1);
     }
@@ -4127,58 +4333,60 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * the left or the right (i.e. splitIndex is 1 or nEntries - 1).
      */
     IN splitSpecial(
-        IN parent,
-        int parentIndex,
-        IN grandParent,
-        int maxEntriesPerNode,
-        byte[] key,
-        boolean leftSide) {
+            IN parent,
+            int parentIndex,
+            IN grandParent,
+            int maxEntriesPerNode,
+            byte[] key,
+            boolean leftSide) {
 
         int index = findEntry(key, false, false);
 
-        if (leftSide && index == 0) {
+        if(leftSide && index == 0) {
             return splitInternal(
-                parent, parentIndex, grandParent, maxEntriesPerNode, 1);
+                    parent, parentIndex, grandParent, maxEntriesPerNode, 1);
 
-        } else if (!leftSide && index == (nEntries - 1)) {
+        }
+        else if(!leftSide && index == (nEntries - 1)) {
             return splitInternal(
-                parent, parentIndex, grandParent, maxEntriesPerNode,
-                nEntries - 1);
+                    parent, parentIndex, grandParent, maxEntriesPerNode,
+                    nEntries - 1);
 
-        } else {
+        }
+        else {
             return split(
-                parent, parentIndex, grandParent, maxEntriesPerNode);
+                    parent, parentIndex, grandParent, maxEntriesPerNode);
         }
     }
 
     final IN splitInternal(
-        final IN parent,
-        final int childIndex,
-        final IN grandParent,
-        final int maxEntries,
-        int splitIndex)
-        throws DatabaseException {
+            final IN parent,
+            final int childIndex,
+            final IN grandParent,
+            final int maxEntries,
+            int splitIndex)
+            throws DatabaseException {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         /*
          * Find the index of the existing identifierKey so we know which IN
          * (new or old) to put it in.
          */
-        if (identifierKey == null) {
+        if(identifierKey == null) {
             throw unexpectedState();
         }
 
         final int idKeyIndex = findEntry(identifierKey, false, false);
 
-        if (splitIndex < 0) {
+        if(splitIndex < 0) {
             splitIndex = nEntries / 2;
         }
 
         /* Range of entries to copy to new sibling. */
         final int low, high;
 
-        if (idKeyIndex < splitIndex) {
+        if(idKeyIndex < splitIndex) {
 
             /*
              * Current node (this) keeps left half entries.  Right half entries
@@ -4186,7 +4394,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              */
             low = splitIndex;
             high = nEntries;
-        } else {
+        }
+        else {
 
             /*
              * Current node (this) keeps right half entries.  Left half entries
@@ -4207,9 +4416,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * node has temporarily grown beyond its original fanout.
          */
         final IN newSibling = createNewInstance(
-            newIdKey,
-            Math.max(maxEntries, high - low + 1),
-            level);
+                newIdKey,
+                Math.max(maxEntries, high - low + 1),
+                level);
 
         newSibling.latch(CacheMode.UNCHANGED);
 
@@ -4218,18 +4427,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             final int newSiblingNEntries = (high - low);
             final boolean haveCachedChildren = hasCachedChildrenFlag();
 
-            assert(isBIN() || haveCachedChildren == hasCachedChildren());
+            assert (isBIN() || haveCachedChildren == hasCachedChildren());
 
             final BIN bin = isBIN() ? (BIN) this : null;
 
             /**
              * Distribute entries among the split node and the new sibling.
              */
-            for (int i = low; i < high; i++) {
+            for(int i = low; i < high; i++) {
 
-                if (!addedNewSiblingToCompressorQueue &&
-                    bin != null &&
-                    bin.isDefunct(i)) {
+                if(!addedNewSiblingToCompressorQueue &&
+                        bin != null &&
+                        bin.isDefunct(i)) {
 
                     addedNewSiblingToCompressorQueue = true;
                     getEnv().addToCompressorQueue((BIN) newSibling);
@@ -4239,22 +4448,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 clearEntry(i);
             }
 
-            if (low == 0) {
+            if(low == 0) {
                 shiftEntriesLeft(newSiblingNEntries);
             }
 
             nEntries -= newSiblingNEntries;
             setDirty(true);
 
-            if (isUpperIN() && haveCachedChildren) {
+            if(isUpperIN() && haveCachedChildren) {
                 setHasCachedChildrenFlag(hasCachedChildren());
             }
 
-            assert(isBIN() ||
-                   hasCachedChildrenFlag() == hasCachedChildren());
-            assert(isBIN() ||
-                   newSibling.hasCachedChildrenFlag() ==
-                   newSibling.hasCachedChildren());
+            assert (isBIN() ||
+                    hasCachedChildrenFlag() == hasCachedChildren());
+            assert (isBIN() ||
+                    newSibling.hasCachedChildrenFlag() ==
+                            newSibling.hasCachedChildren());
 
             adjustCursors(newSibling, low, high);
 
@@ -4270,7 +4479,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             entryKeys = entryKeys.compact(this);
 
             /* Only recalc if there are multiple entries in newSibling. */
-            if (newSibling.getNEntries() > 1) {
+            if(newSibling.getNEntries() > 1) {
                 byte[] newSiblingPrefix = newSibling.computeKeyPrefix(-1);
                 newSibling.recalcSuffixes(newSiblingPrefix, null, null, -1);
                 /* initMemorySize calls entryKeys.compact. */
@@ -4318,7 +4527,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * at least one entry in each IN. Note the use of getKey(0) below.
              */
             long newSiblingLsn =
-                newSibling.optionalLogProvisionalNoCompress(parent);
+                    newSibling.optionalLogProvisionalNoCompress(parent);
 
             long myNewLsn = optionalLogProvisionalNoCompress(parent);
 
@@ -4333,7 +4542,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * <= the existing one.  See tree/SplitTest.java for more details
              * on the scenario.
              */
-            if (low == 0) {
+            if(low == 0) {
 
                 /*
                  * Change the original entry to point to the new child and add
@@ -4343,12 +4552,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 parent.prepareForSlotReuse(childIndex);
 
                 parent.updateSplitSlot(
-                    childIndex, newSibling, newSiblingLsn, newIdKey);
+                        childIndex, newSibling, newSiblingLsn, newIdKey);
 
                 boolean inserted = parent.insertEntry(
-                    this, getKey(0), myNewLsn);
+                        this, getKey(0), myNewLsn);
                 assert inserted;
-            } else {
+            }
+            else {
 
                 /*
                  * Update the existing child's LSN to reflect the newly logged
@@ -4357,7 +4567,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                 parent.updateSplitSlot(childIndex, this, myNewLsn, getKey(0));
 
                 boolean inserted = parent.insertEntry(
-                    newSibling, newIdKey, newSiblingLsn);
+                        newSibling, newIdKey, newSiblingLsn);
                 assert inserted;
             }
 
@@ -4368,9 +4578,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * not updated with the parent's LSN here; this is done by
              * Tree.forceSplit.
              */
-            if (parent.isRoot()) {
+            if(parent.isRoot()) {
                 parentLsn = parent.optionalLog();
-            } else {
+            }
+            else {
                 parentLsn = parent.optionalLogProvisional(grandParent);
             }
 
@@ -4381,41 +4592,41 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * Check whether either the old or the new sibling must be added
              * to the LRU (priority-1 LRUSet).
              */
-            assert(!isDIN() && !isDBIN());
+            assert (!isDIN() && !isDBIN());
 
             if(isBIN() || !newSibling.hasCachedChildrenFlag()) {
-                if (isUpperIN() && traceLRU) {
+                if(isUpperIN() && traceLRU) {
                     LoggerUtils.envLogMsg(
-                        traceLevel, getEnv(),
-                        "split-newSibling " +
-                            Thread.currentThread().getId() + "-" +
-                            Thread.currentThread().getName() +
-                            "-" + getEnv().getName() +
-                            " Adding UIN to LRU: " +
-                            newSibling.getNodeId());
+                            traceLevel, getEnv(),
+                            "split-newSibling " +
+                                    Thread.currentThread().getId() + "-" +
+                                    Thread.currentThread().getName() +
+                                    "-" + getEnv().getName() +
+                                    " Adding UIN to LRU: " +
+                                    newSibling.getNodeId());
                 }
                 getEvictor().addBack(newSibling);
             }
 
-            if (isUpperIN() &&
-                haveCachedChildren &&
-                !hasCachedChildrenFlag()) {
-                if (traceLRU) {
+            if(isUpperIN() &&
+                    haveCachedChildren &&
+                    !hasCachedChildrenFlag()) {
+                if(traceLRU) {
                     LoggerUtils.envLogMsg(
-                        traceLevel, getEnv(),
-                        "split-oldSibling " +
-                        Thread.currentThread().getId() + "-" +
-                        Thread.currentThread().getName() +
-                        "-" + getEnv().getName() +
-                        " Adding UIN to LRU: " + getNodeId());
+                            traceLevel, getEnv(),
+                            "split-oldSibling " +
+                                    Thread.currentThread().getId() + "-" +
+                                    Thread.currentThread().getName() +
+                                    "-" + getEnv().getName() +
+                                    " Adding UIN to LRU: " + getNodeId());
                 }
                 getEvictor().addBack(this);
             }
 
             /* Debug log this information. */
             traceSplit(Level.FINE, parent,
-                       newSibling, parentLsn, myNewLsn,
-                       newSiblingLsn, splitIndex, idKeyIndex, childIndex);
+                    newSibling, parentLsn, myNewLsn,
+                    newSiblingLsn, splitIndex, idKeyIndex, childIndex);
         } finally {
             newSibling.releaseLatch();
         }
@@ -4428,7 +4639,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     void appendEntryFromOtherNode(IN from, int fromIdx) {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         final Node target = from.entryTargets.get(fromIdx);
         final int ohBinId = from.getOffHeapBINId(fromIdx);
@@ -4438,7 +4649,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         final byte state = from.entryStates[fromIdx];
         final byte[] key = from.getKey(fromIdx);
         final byte[] data = (from.haveEmbeddedData(fromIdx) ?
-                             from.getData(fromIdx) : null);
+                from.getData(fromIdx) : null);
 
         long oldSize = computeLsnOverhead();
 
@@ -4450,12 +4661,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * When calling setTarget for an IN child we must latch it, because
          * setTarget sets the parent.
          */
-        if (target != null && target.isIN()) {
+        if(target != null && target.isIN()) {
             final IN in = (IN) target;
             in.latchNoUpdateLRU(databaseImpl);
             setTarget(idx, target);
             in.releaseLatch();
-        } else {
+        }
+        else {
             setTarget(idx, target);
         }
 
@@ -4466,14 +4678,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         entryStates[idx] = state;
 
-        if (ohBinId >= 0) {
+        if(ohBinId >= 0) {
             setOffHeapBINId(idx, ohBinId, ohBinPri2, ohBinDirty);
             getOffHeapCache().setOwner(ohBinId, this);
         }
 
-        if (multiSlotChange) {
+        if(multiSlotChange) {
             updateMemorySize(inMemorySize, computeMemorySize());
-        } else {
+        }
+        else {
             long newSize = getEntryInMemorySize(idx) + computeLsnOverhead();
             updateMemorySize(oldSize, newSize);
         }
@@ -4486,58 +4699,60 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * one that existed before the split.
      *
      * @param child The new child to be placed under the slot. May be the
-     * newly created sibling or the pre-existing sibling.
-     * @param lsn The new lsn of the child (the child was logged just before
-     * calling this method, so its slot lsn must be updated)
-     * @param key The new key for the slot. We should not actually update the
-     * slot key, because its value is the lower bound of the key range covered
-     * by the slot, and this lower bound does not change as a result of the
-     * split (the new slot created as a result of the split is placed to the
-     * right of the pre-existing slot). There is however one exception: the
-     * key can be updated if "idx" is the 0-slot. The 0-slot key is not a true
-     * lower bound; the actual lower bound for the 0-slot is the key in the
-     * parent slot for this IN. So, in this case, if the given key is less
-     * than the current one, it is better to update the key in order to better
-     * approximate the real lower bound (and thus make the isKeyInBounds()
-     * method more effective).
+     *              newly created sibling or the pre-existing sibling.
+     * @param lsn   The new lsn of the child (the child was logged just before
+     *              calling this method, so its slot lsn must be updated)
+     * @param key   The new key for the slot. We should not actually update the
+     *              slot key, because its value is the lower bound of the key range covered
+     *              by the slot, and this lower bound does not change as a result of the
+     *              split (the new slot created as a result of the split is placed to the
+     *              right of the pre-existing slot). There is however one exception: the
+     *              key can be updated if "idx" is the 0-slot. The 0-slot key is not a true
+     *              lower bound; the actual lower bound for the 0-slot is the key in the
+     *              parent slot for this IN. So, in this case, if the given key is less
+     *              than the current one, it is better to update the key in order to better
+     *              approximate the real lower bound (and thus make the isKeyInBounds()
+     *              method more effective).
      */
     private void updateSplitSlot(
-        int idx,
-        IN child,
-        long lsn,
-        byte[] key) {
+            int idx,
+            IN child,
+            long lsn,
+            byte[] key) {
 
-        assert(isUpperIN());
+        assert (isUpperIN());
 
         long oldSize = getEntryInMemorySize(idx);
 
         setLsn(idx, lsn);
         setTarget(idx, child);
 
-        if (idx == 0) {
+        if(idx == 0) {
             int s = entryKeys.compareKeys(
-                key, keyPrefix, idx, haveEmbeddedData(idx),
-                getKeyComparator());
+                    key, keyPrefix, idx, haveEmbeddedData(idx),
+                    getKeyComparator());
 
             boolean multiSlotChange = false;
-            if (s < 0) {
+            if(s < 0) {
                 multiSlotChange = updateKey(idx, key, null/*data*/);
             }
 
-            if (multiSlotChange) {
+            if(multiSlotChange) {
                 updateMemorySize(inMemorySize, computeMemorySize());
-            } else {
+            }
+            else {
                 long newSize = getEntryInMemorySize(idx);
                 updateMemorySize(oldSize, newSize);
             }
-        } else {
+        }
+        else {
             long newSize = getEntryInMemorySize(idx);
             updateMemorySize(oldSize, newSize);
         }
 
         setDirty(true);
 
-        assert(hasCachedChildren() == hasCachedChildrenFlag());
+        assert (hasCachedChildren() == hasCachedChildrenFlag());
     }
 
     /**
@@ -4561,20 +4776,20 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * nEntries.
      *
      * @param byHowMuch - The number of entries to remove from the left side
-     * of the entries array.
+     *                  of the entries array.
      */
     private void shiftEntriesLeft(int byHowMuch) {
         copyEntries(byHowMuch, 0, nEntries - byHowMuch);
-        for (int i = nEntries - byHowMuch; i < nEntries; i++) {
+        for(int i = nEntries - byHowMuch; i < nEntries; i++) {
             clearEntry(i);
         }
         setDirty(true);
     }
 
     void adjustCursors(
-        IN newSibling,
-        int newSiblingLow,
-        int newSiblingHigh) {
+            IN newSibling,
+            int newSiblingLow,
+            int newSiblingHigh) {
         /* Cursors never refer to IN's. */
     }
 
@@ -4584,25 +4799,25 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * Called prior to changing a slot to contain a different logical node.
-     *
+     * <p>
      * Necessary to support assertions for transient LSNs in shouldUpdateLsn.
      * Examples: LN slot reuse, and splits where a new node is placed in an
      * existing slot.
-     *
+     * <p>
      * Also needed to free the off-heap BIN associated with the old node.
-     *
+     * <p>
      * TODO: This method is no longer used for LN slot reuse, and freeing of
      * the off-heap BIN could be done by the only caller, splitInternal, and
      * then this method could be removed.
      */
     public void prepareForSlotReuse(int idx) {
 
-        if (databaseImpl.isDeferredWriteMode()) {
+        if(databaseImpl.isDeferredWriteMode()) {
             setLsn(idx, DbLsn.NULL_LSN, false/*check*/);
         }
 
         final OffHeapCache ohCache = getOffHeapCache();
-        if (ohCache.isEnabled() && getNormalizedLevel() == 2) {
+        if(ohCache.isEnabled() && getNormalizedLevel() == 2) {
             ohCache.freeBIN((BIN) getTarget(idx), this, idx);
         }
     }
@@ -4637,22 +4852,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         calcMemorySize += computeLsnOverhead();
 
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
             calcMemorySize += getEntryInMemorySize(i);
         }
 
-        if (keyPrefix != null) {
+        if(keyPrefix != null) {
             calcMemorySize += MemoryBudget.byteArraySize(keyPrefix.length);
         }
 
-        if (provisionalObsolete != null) {
+        if(provisionalObsolete != null) {
             calcMemorySize += provisionalObsolete.getMemorySize();
         }
 
         calcMemorySize += entryTargets.calculateMemorySize();
         calcMemorySize += entryKeys.calculateMemorySize();
 
-        if (offHeapBINIds != null) {
+        if(offHeapBINIds != null) {
             calcMemorySize += offHeapBINIds.getMemorySize();
         }
 
@@ -4671,10 +4886,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private int computeLsnOverhead() {
         return (entryLsnLongArray == null) ?
-            MemoryBudget.byteArraySize(entryLsnByteArray.length) :
-            MemoryBudget.ARRAY_OVERHEAD +
-                (entryLsnLongArray.length *
-                 MemoryBudget.PRIMITIVE_LONG_ARRAY_ITEM_OVERHEAD);
+                MemoryBudget.byteArraySize(entryLsnByteArray.length) :
+                MemoryBudget.ARRAY_OVERHEAD +
+                        (entryLsnLongArray.length *
+                                MemoryBudget.PRIMITIVE_LONG_ARRAY_ITEM_OVERHEAD);
     }
 
     private long getEntryInMemorySize(int idx) {
@@ -4689,20 +4904,20 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * Don't count the key size if the representation has already
          * accounted for it.
          */
-        if (!entryKeys.accountsForKeyByteMemUsage()) {
+        if(!entryKeys.accountsForKeyByteMemUsage()) {
 
             /*
              * Materialize the key object only if needed, thus avoiding the
              * object allocation cost when possible.
              */
             final byte[] key = entryKeys.get(idx);
-            if (key != null) {
+            if(key != null) {
                 ret += MemoryBudget.byteArraySize(key.length);
             }
         }
 
         final Node target = entryTargets.get(idx);
-        if (target != null) {
+        if(target != null) {
             ret += target.getMemorySizeIncludedByParent();
         }
         return ret;
@@ -4710,7 +4925,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * Compacts the representation of the IN, if possible.
-     *
+     * <p>
      * Called by the evictor to reduce memory usage. Should not be called too
      * often (e.g., every CRUD operation), since this could cause lots of
      * memory allocations as the representations contract and expend, resulting
@@ -4738,7 +4953,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * responsibility for managing contained key byte mem usage has shifted
          * between the key rep and the IN parent.
          */
-        if (entryKeys != oldKeyRep) {
+        if(entryKeys != oldKeyRep) {
             updateMemorySize(inMemorySize, computeMemorySize());
         }
 
@@ -4771,11 +4986,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     void updateMemorySize(Node oldNode, Node newNode) {
         long delta = 0;
-        if (newNode != null) {
+        if(newNode != null) {
             delta = newNode.getMemorySizeIncludedByParent();
         }
 
-        if (oldNode != null) {
+        if(oldNode != null) {
             delta -= oldNode.getMemorySizeIncludedByParent();
         }
         updateMemorySize(delta);
@@ -4791,13 +5006,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     void updateMemorySize(long delta) {
 
-        if (delta == 0) {
+        if(delta == 0) {
             return;
         }
 
         inMemorySize += delta;
 
-        if (getInListResident()) {
+        if(getInListResident()) {
 
             /*
              * This assertion is disabled if the environment is invalid to
@@ -4806,16 +5021,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * [#21929]
              */
             assert
-                inMemorySize >= getFixedMemoryOverhead() ||
-                !getEnv().isValid():
-                "delta: " + delta + " inMemorySize: " + inMemorySize +
-                " overhead: " + getFixedMemoryOverhead() +
-                " computed: " + computeMemorySize() +
-                " dump: " + toString() + assertPrintMemorySize();
+                    inMemorySize >= getFixedMemoryOverhead() ||
+                            !getEnv().isValid() :
+                    "delta: " + delta + " inMemorySize: " + inMemorySize +
+                            " overhead: " + getFixedMemoryOverhead() +
+                            " computed: " + computeMemorySize() +
+                            " dump: " + toString() + assertPrintMemorySize();
 
             accumulatedDelta += delta;
-            if (accumulatedDelta > ACCUMULATED_LIMIT ||
-                accumulatedDelta < -ACCUMULATED_LIMIT) {
+            if(accumulatedDelta > ACCUMULATED_LIMIT ||
+                    accumulatedDelta < -ACCUMULATED_LIMIT) {
                 updateMemoryBudget();
             }
         }
@@ -4848,44 +5063,44 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         final long inOverhead = getFixedMemoryOverhead();
 
         final long statesOverhead =
-            MemoryBudget.byteArraySize(entryStates.length);
+                MemoryBudget.byteArraySize(entryStates.length);
 
-        final int lsnOverhead =  computeLsnOverhead();
+        final int lsnOverhead = computeLsnOverhead();
 
         int entryOverhead = 0;
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
             entryOverhead += getEntryInMemorySize(i);
         }
 
-        final int keyPrefixOverhead =  (keyPrefix != null) ?
-            MemoryBudget.byteArraySize(keyPrefix.length) : 0;
+        final int keyPrefixOverhead = (keyPrefix != null) ?
+                MemoryBudget.byteArraySize(keyPrefix.length) : 0;
 
         final int provisionalOverhead = (provisionalObsolete != null) ?
-            provisionalObsolete.getMemorySize() : 0;
+                provisionalObsolete.getMemorySize() : 0;
 
         final long targetRepOverhead = entryTargets.calculateMemorySize();
         final long keyRepOverhead = entryKeys.calculateMemorySize();
         final long total = inOverhead + statesOverhead + lsnOverhead +
-             entryOverhead + keyPrefixOverhead +  provisionalOverhead +
-             targetRepOverhead + keyRepOverhead;
+                entryOverhead + keyPrefixOverhead + provisionalOverhead +
+                targetRepOverhead + keyRepOverhead;
 
         final long offHeapBINIdOverhead = offHeapBINIds.getMemorySize();
 
         System.out.println(" nEntries:" + nEntries +
-                           "/" + entryStates.length +
-                           " in: " + inOverhead +
-                           " states: " + statesOverhead +
-                           " entry: " + entryOverhead +
-                           " lsn: " + lsnOverhead +
-                           " keyPrefix: " + keyPrefixOverhead +
-                           " provisional: " + provisionalOverhead +
-                           " targetRep(" + entryTargets.getType() + "): " +
-                           targetRepOverhead +
-                           " keyRep(" + entryKeys.getType() +"): " +
-                           keyRepOverhead +
-                           " offHeapBINIds: " + offHeapBINIdOverhead +
-                           " Total: " + total +
-                           " inMemorySize: " + inMemorySize);
+                "/" + entryStates.length +
+                " in: " + inOverhead +
+                " states: " + statesOverhead +
+                " entry: " + entryOverhead +
+                " lsn: " + lsnOverhead +
+                " keyPrefix: " + keyPrefixOverhead +
+                " provisional: " + provisionalOverhead +
+                " targetRep(" + entryTargets.getType() + "): " +
+                targetRepOverhead +
+                " keyRep(" + entryKeys.getType() + "): " +
+                keyRepOverhead +
+                " offHeapBINIds: " + offHeapBINIdOverhead +
+                " Total: " + total +
+                " inMemorySize: " + inMemorySize);
         return total;
     }
 
@@ -4898,11 +5113,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     public boolean verifyMemorySize() {
 
         long calcMemorySize = computeMemorySize();
-        if (calcMemorySize != inMemorySize) {
+        if(calcMemorySize != inMemorySize) {
 
             String msg = "-Warning: Out of sync. Should be " +
-                calcMemorySize + " / actual: " + inMemorySize +
-                " node: " + getNodeId();
+                    calcMemorySize + " / actual: " + inMemorySize +
+                    " node: " + getNodeId();
             LoggerUtils.envLogMsg(Level.INFO, getEnv(), msg);
 
             System.out.println(msg);
@@ -4921,7 +5136,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * or vice-versa.
      */
     protected void updateRepCacheStats(boolean increment) {
-        assert(isBIN());
+        assert (isBIN());
         entryKeys.updateCacheStats(increment, this);
         entryTargets.updateCacheStats(increment, this);
     }
@@ -4931,57 +5146,58 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     /**
-     * Called when adding/removing this IN to/from the INList.
-     */
-    public void setInListResident(boolean resident) {
-
-        if (!resident) {
-            /* Decrement the stats before clearing its residency */
-            entryTargets.updateCacheStats(false, this);
-            entryKeys.updateCacheStats(false, this);
-        }
-
-        if (resident) {
-            flags |= IN_RESIDENT_BIT;
-        } else {
-            flags &= ~IN_RESIDENT_BIT;
-        }
-
-        if (resident) {
-            /* Increment the stats after setting its residency. */
-            entryTargets.updateCacheStats(true, this);
-            entryKeys.updateCacheStats(true, this);
-        }
-    }
-
-    /**
      * Returns whether this IN is on the INList.
      */
     public boolean getInListResident() {
         return (flags & IN_RESIDENT_BIT) != 0;
     }
 
+    /**
+     * Called when adding/removing this IN to/from the INList.
+     */
+    public void setInListResident(boolean resident) {
+
+        if(!resident) {
+            /* Decrement the stats before clearing its residency */
+            entryTargets.updateCacheStats(false, this);
+            entryKeys.updateCacheStats(false, this);
+        }
+
+        if(resident) {
+            flags |= IN_RESIDENT_BIT;
+        }
+        else {
+            flags &= ~IN_RESIDENT_BIT;
+        }
+
+        if(resident) {
+            /* Increment the stats after setting its residency. */
+            entryTargets.updateCacheStats(true, this);
+            entryKeys.updateCacheStats(true, this);
+        }
+    }
+
     public IN getPrevLRUNode() {
-    	return prevLRUNode;
+        return prevLRUNode;
     }
 
     public void setPrevLRUNode(IN node) {
-    	prevLRUNode = node;
+        prevLRUNode = node;
     }
 
     public IN getNextLRUNode() {
-    	return nextLRUNode;
+        return nextLRUNode;
     }
 
     public void setNextLRUNode(IN node) {
-    	nextLRUNode = node;
+        nextLRUNode = node;
     }
 
     /**
      * Try to compact or otherwise reclaim memory in this IN and return the
      * number of bytes reclaimed. For example, a BIN should evict LNs, if
      * possible.
-     *
+     * <p>
      * Used by the evictor to reclaim memory by some means short of evicting
      * the entire node.  If a positive value is returned, the evictor will
      * postpone full eviction of this node.
@@ -4996,13 +5212,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     public boolean hasCachedChildren() {
         assert isLatchOwner();
 
-        for (int i = 0; i < getNEntries(); i++) {
-            if (entryTargets.get(i) != null) {
+        for(int i = 0; i < getNEntries(); i++) {
+            if(entryTargets.get(i) != null) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public boolean getProhibitNextDelta() {
+        return (flags & IN_PROHIBIT_NEXT_DELTA_BIT) != 0;
     }
 
     /**
@@ -5012,19 +5232,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public void setProhibitNextDelta(boolean val) {
 
-        if (!isBIN()) {
+        if(!isBIN()) {
             return;
         }
 
-        if (val) {
+        if(val) {
             flags |= IN_PROHIBIT_NEXT_DELTA_BIT;
-        } else {
+        }
+        else {
             flags &= ~IN_PROHIBIT_NEXT_DELTA_BIT;
         }
-    }
-
-    public boolean getProhibitNextDelta() {
-        return (flags & IN_PROHIBIT_NEXT_DELTA_BIT) != 0;
     }
 
     /*
@@ -5043,26 +5260,27 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * Overriden by BIN class.
      */
     boolean validateSubtreeBeforeDelete(int index)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (index >= nEntries) {
+        if(index >= nEntries) {
 
             /*
              * There's no entry here, so of course this entry is deletable.
              */
             return true;
-        } else {
+        }
+        else {
             IN child = fetchIN(index, CacheMode.UNCHANGED);
 
             boolean needToLatch = !child.isLatchExclusiveOwner();
 
             try {
-                if (needToLatch) {
+                if(needToLatch) {
                     child.latch(CacheMode.UNCHANGED);
                 }
                 return child.isValidForDelete();
             } finally {
-                if (needToLatch && isLatchOwner()) {
+                if(needToLatch && isLatchOwner()) {
                     child.releaseLatch();
                 }
             }
@@ -5072,48 +5290,50 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     /**
      * Check if this node fits the qualifications for being part of a deletable
      * subtree. It can only have one IN child and no LN children.
-     *
+     * <p>
      * Note: the method is overwritten by BIN and LN.
      * BIN.isValidForDelete() will not fetch any child LNs.
      * LN.isValidForDelete() simply returns false.
-     *
+     * <p>
      * We assume that this is only called under an assert.
      */
     @Override
     boolean isValidForDelete()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         /*
          * Can only have one valid child, and that child should be
          * deletable.
          */
-        if (nEntries > 1) {            // more than 1 entry.
+        if(nEntries > 1) {            // more than 1 entry.
             return false;
 
-        } else if (nEntries == 1) {    // 1 entry, check child
+        }
+        else if(nEntries == 1) {    // 1 entry, check child
             IN child = fetchIN(0, CacheMode.UNCHANGED);
             boolean needToLatch = !child.isLatchExclusiveOwner();
-            if (needToLatch) {
+            if(needToLatch) {
                 child.latch(CacheMode.UNCHANGED);
             }
 
             boolean ret = false;
             try {
-                if (child.isBINDelta()) {
+                if(child.isBINDelta()) {
                     return false;
                 }
 
                 ret = child.isValidForDelete();
 
             } finally {
-                if (needToLatch) {
+                if(needToLatch) {
                     child.releaseLatch();
                 }
             }
             return ret;
-        } else {                       // 0 entries.
+        }
+        else {                       // 0 entries.
             return true;
         }
     }
@@ -5123,50 +5343,51 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * keys are in sorted order and that there are more than 0 entries.
      * maxKey, if non-null specifies that all keys in this node must be less
      * than maxKey.
+     *
      * @throws EnvironmentFailureException when implemented.
      */
     @Override
     public final void verify(byte[] maxKey)
-        throws EnvironmentFailureException {
+            throws EnvironmentFailureException {
 
         /********* never used, but may be used for the basis of a verify()
-                   method in the future.
-        try {
-            Comparator<byte[]> userCompareToFcn =
-                (databaseImpl == null ? null : getKeyComparator());
+         method in the future.
+         try {
+         Comparator<byte[]> userCompareToFcn =
+         (databaseImpl == null ? null : getKeyComparator());
 
-            byte[] key1 = null;
-            for (int i = 1; i < nEntries; i++) {
-                key1 = entryKeys.get(i);
-                byte[] key2 = entryKeys.get(i - 1);
+         byte[] key1 = null;
+         for (int i = 1; i < nEntries; i++) {
+         key1 = entryKeys.get(i);
+         byte[] key2 = entryKeys.get(i - 1);
 
-                int s = Key.compareKeys(key1, key2, userCompareToFcn);
-                if (s <= 0) {
-                    throw EnvironmentFailureException.unexpectedState
-                        ("IN " + getNodeId() + " key " + (i-1) +
-                         " (" + Key.dumpString(key2, 0) +
-                         ") and " +
-                         i + " (" + Key.dumpString(key1, 0) +
-                         ") are out of order");
-                }
-            }
+         int s = Key.compareKeys(key1, key2, userCompareToFcn);
+         if (s <= 0) {
+         throw EnvironmentFailureException.unexpectedState
+         ("IN " + getNodeId() + " key " + (i-1) +
+         " (" + Key.dumpString(key2, 0) +
+         ") and " +
+         i + " (" + Key.dumpString(key1, 0) +
+         ") are out of order");
+         }
+         }
 
-            boolean inconsistent = false;
-            if (maxKey != null && key1 != null) {
-                if (Key.compareKeys(key1, maxKey, userCompareToFcn) >= 0) {
-                    inconsistent = true;
-                }
-            }
+         boolean inconsistent = false;
+         if (maxKey != null && key1 != null) {
+         if (Key.compareKeys(key1, maxKey, userCompareToFcn) >= 0) {
+         inconsistent = true;
+         }
+         }
 
-            if (inconsistent) {
-                throw EnvironmentFailureException.unexpectedState
-                    ("IN " + getNodeId() +
-                     " has entry larger than next entry in parent.");
-            }
-        } catch (DatabaseException DE) {
-            DE.printStackTrace(System.out);
-        }
-        *****************/
+         if (inconsistent) {
+         throw EnvironmentFailureException.unexpectedState
+         ("IN " + getNodeId() +
+         " has entry larger than next entry in parent.");
+         }
+         } catch (DatabaseException DE) {
+         DE.printStackTrace(System.out);
+         }
+         *****************/
     }
 
     /**
@@ -5175,7 +5396,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     @Override
     final void rebuildINList(INList inList)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Recompute your in memory size first and then add yourself to the
@@ -5191,38 +5412,40 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
          * Add your children if they're resident. (LNs know how to stop the
          * flow).
          */
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
             Node n = getTarget(i);
-            if (n != null) {
+            if(n != null) {
                 n.rebuildINList(inList);
                 hasCachedChildren = true;
             }
-            if (getOffHeapBINId(i) >= 0) {
+            if(getOffHeapBINId(i) >= 0) {
                 hasCachedChildren = true;
             }
         }
 
-        if (isUpperIN()) {
-            if (hasCachedChildren) {
+        if(isUpperIN()) {
+            if(hasCachedChildren) {
                 setHasCachedChildrenFlag(true);
-            } else {
+            }
+            else {
                 setHasCachedChildrenFlag(false);
-                if (!isDIN()) {
-                    if (traceLRU) {
+                if(!isDIN()) {
+                    if(traceLRU) {
                         LoggerUtils.envLogMsg(
-                            traceLevel, getEnv(),
-                            "rebuildINList " +
-                            Thread.currentThread().getId() +
-                            "-" +
-                            Thread.currentThread().getName() +
-                            "-" + getEnv().getName() +
-                            " Adding UIN to LRU: " +
-                            getNodeId());
+                                traceLevel, getEnv(),
+                                "rebuildINList " +
+                                        Thread.currentThread().getId() +
+                                        "-" +
+                                        Thread.currentThread().getName() +
+                                        "-" + getEnv().getName() +
+                                        " Adding UIN to LRU: " +
+                                        getNodeId());
                     }
                     getEvictor().addBack(this);
                 }
             }
-        } else if (isBIN() && !isDBIN()) {
+        }
+        else if(isBIN() && !isDBIN()) {
             getEvictor().addBack(this);
         }
     }
@@ -5235,8 +5458,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     /**
+     * Returns the LSN of the last last logged version of this IN, or NULL_LSN
+     * if never logged.
+     */
+    public final long getLastLoggedLsn() {
+        if(isBIN()) {
+            return (getLastDeltaLsn() != DbLsn.NULL_LSN ?
+                    getLastDeltaLsn() :
+                    getLastFullLsn());
+        }
+
+        return getLastFullLsn();
+    }
+
+    /**
      * Sets the last logged LSN, which for a BIN may be a delta.
-     *
+     * <p>
      * It is called from IN.postFetch/RecoveryInit(). If the logrec we have
      * just read was a BINDelta, this.lastFullVersion has already been set (in
      * BINDeltaLogEntry.readMainItem() or in OldBinDelta.reconstituteBIN()).
@@ -5247,36 +5484,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public void setLastLoggedLsn(long lsn) {
 
-        if (isBIN()) {
-            if (getLastFullLsn() == DbLsn.NULL_LSN) {
+        if(isBIN()) {
+            if(getLastFullLsn() == DbLsn.NULL_LSN) {
                 setLastFullLsn(lsn);
-            } else {
-                ((BIN)this).setLastDeltaLsn(lsn);
             }
-        } else {
+            else {
+                ((BIN) this).setLastDeltaLsn(lsn);
+            }
+        }
+        else {
             setLastFullLsn(lsn);
         }
-    }
-
-    /**
-     * Returns the LSN of the last last logged version of this IN, or NULL_LSN
-     * if never logged.
-     */
-    public final long getLastLoggedLsn() {
-        if (isBIN()) {
-            return (getLastDeltaLsn() != DbLsn.NULL_LSN ?
-                    getLastDeltaLsn() :
-                    getLastFullLsn());
-        }
-
-        return getLastFullLsn();
-    }
-
-    /**
-     * Sets the last full version LSN.
-     */
-    public final void setLastFullLsn(long lsn) {
-        lastFullVersion = lsn;
     }
 
     /**
@@ -5284,6 +5502,17 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     public final long getLastFullLsn() {
         return lastFullVersion;
+    }
+
+    /*
+     * Logging support
+     */
+
+    /**
+     * Sets the last full version LSN.
+     */
+    public final void setLastFullLsn(long lsn) {
+        lastFullVersion = lsn;
     }
 
     /**
@@ -5295,33 +5524,29 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         return DbLsn.NULL_LSN;
     }
 
-    /*
-     * Logging support
-     */
-
     /**
      * When splits and checkpoints intermingle in a deferred write databases,
      * a checkpoint target may appear which has a valid target but a null LSN.
      * Deferred write dbs are written out in checkpoint style by either
      * Database.sync() or a checkpoint which has cleaned a file containing
      * deferred write entries. For example,
-     *   INa
-     *    |
-     *   BINb
-     *
-     *  A checkpoint or Database.sync starts
-     *  The INList is traversed, dirty nodes are selected
-     *  BINb is bypassed on the INList, since it's not dirty
-     *  BINb is split, creating a new sibling, BINc, and dirtying INa
-     *  INa is selected as a dirty node for the ckpt
-     *
+     * INa
+     * |
+     * BINb
+     * <p>
+     * A checkpoint or Database.sync starts
+     * The INList is traversed, dirty nodes are selected
+     * BINb is bypassed on the INList, since it's not dirty
+     * BINb is split, creating a new sibling, BINc, and dirtying INa
+     * INa is selected as a dirty node for the ckpt
+     * <p>
      * If this happens, INa is in the selected dirty set, but not its dirty
      * child BINb and new child BINc.
-     *
+     * <p>
      * In a durable db, the existence of BINb and BINc are logged
      * anyway. But in a deferred write db, there is an entry that points to
      * BINc, but no logged version.
-     *
+     * <p>
      * This will not cause problems with eviction, because INa can't be
      * evicted until BINb and BINc are logged, are non-dirty, and are detached.
      * But it can cause problems at recovery, because INa will have a null LSN
@@ -5331,40 +5556,40 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * sufficient to write only null-LSN children, because the existing sibling
      * must be logged lest LN children recover twice (once in the new sibling,
      * once in the old existing sibling.
-     *
+     * <p>
      * TODO:
      * Would the problem above be solved by logging dirty nodes using a tree
      * traversal (post-order), rather than using the dirty map?
-     *
+     * <p>
      * Overriden by BIN class.
      */
     public void logDirtyChildren()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         EnvironmentImpl envImpl = getDatabase().getEnv();
 
         /* Look for targets that are dirty. */
-        for (int i = 0; i < getNEntries(); i++) {
+        for(int i = 0; i < getNEntries(); i++) {
 
             IN child = (IN) getTarget(i);
 
-            if (child != null) {
+            if(child != null) {
                 child.latch(CacheMode.UNCHANGED);
                 try {
-                    if (child.getDirty()) {
+                    if(child.getDirty()) {
                         /* Ask descendants to log their children. */
                         child.logDirtyChildren();
                         long childLsn =
-                            child.log(false, // allowDeltas
-                                      true,  // isProvisional
-                                      true,  // backgroundIO
-                                      this); // parent
+                                child.log(false, // allowDeltas
+                                        true,  // isProvisional
+                                        true,  // backgroundIO
+                                        this); // parent
 
                         updateEntry(
-                            i, childLsn, VLSN.NULL_VLSN_SEQUENCE,
-                            0/*lastLoggedSize*/);
+                                i, childLsn, VLSN.NULL_VLSN_SEQUENCE,
+                                0/*lastLoggedSize*/);
                     }
                 } finally {
                     child.releaseLatch();
@@ -5375,41 +5600,42 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     public final long log() {
         return logInternal(
-            this, null, false /*allowDeltas*/, true /*allowCompress*/,
-            Provisional.NO, false /*backgroundIO*/, null /*parent*/);
+                this, null, false /*allowDeltas*/, true /*allowCompress*/,
+                Provisional.NO, false /*backgroundIO*/, null /*parent*/);
     }
 
     public final long log(
-        boolean allowDeltas,
-        boolean isProvisional,
-        boolean backgroundIO,
-        IN parent) {
+            boolean allowDeltas,
+            boolean isProvisional,
+            boolean backgroundIO,
+            IN parent) {
 
         return logInternal(
-            this, null, allowDeltas, true /*allowCompress*/,
-            isProvisional ? Provisional.YES : Provisional.NO,
-            backgroundIO, parent);
+                this, null, allowDeltas, true /*allowCompress*/,
+                isProvisional ? Provisional.YES : Provisional.NO,
+                backgroundIO, parent);
     }
 
     public final long log(
-        boolean allowDeltas,
-        Provisional provisional,
-        boolean backgroundIO,
-        IN parent) {
+            boolean allowDeltas,
+            Provisional provisional,
+            boolean backgroundIO,
+            IN parent) {
 
         return logInternal(
-            this, null, allowDeltas, true /*allowCompress*/, provisional, backgroundIO,
-            parent);
+                this, null, allowDeltas, true /*allowCompress*/, provisional, backgroundIO,
+                parent);
     }
 
     public final long optionalLog() {
 
-        if (databaseImpl.isDeferredWriteMode()) {
+        if(databaseImpl.isDeferredWriteMode()) {
             return getLastLoggedLsn();
-        } else {
+        }
+        else {
             return logInternal(
-                this, null, false /*allowDeltas*/, true /*allowCompress*/,
-                Provisional.NO, false /*backgroundIO*/, null /*parent*/);
+                    this, null, false /*allowDeltas*/, true /*allowCompress*/,
+                    Provisional.NO, false /*backgroundIO*/, null /*parent*/);
         }
     }
 
@@ -5423,221 +5649,14 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     private long optionalLogProvisional(IN parent, boolean allowCompress) {
 
-        if (databaseImpl.isDeferredWriteMode()) {
+        if(databaseImpl.isDeferredWriteMode()) {
             return getLastLoggedLsn();
-        } else {
+        }
+        else {
             return logInternal(
-                this, null, false /*allowDeltas*/, allowCompress,
-                Provisional.YES, false /*backgroundIO*/, parent);
+                    this, null, false /*allowDeltas*/, allowCompress,
+                    Provisional.YES, false /*backgroundIO*/, parent);
         }
-    }
-
-    public static long logEntry(
-        INLogEntry<BIN> logEntry,
-        Provisional provisional,
-        boolean backgroundIO,
-        IN parent) {
-
-        return logInternal(
-            null, logEntry, true /*allowDeltas*/, false /*allowCompress*/,
-            provisional, backgroundIO, parent);
-    }
-
-    /**
-     * Bottleneck method for all IN logging.
-     *
-     * If 'node' is non-null, 'logEntry' must be null.
-     * If 'node' is null, 'logEntry' and 'parent' must be non-null.
-     *
-     * When 'logEntry' is non-null we are logging an off-heap BIN, and it is
-     * not resident in the main cache. The lastFull/DeltaLsns are not updated
-     * here, and this must be done instead by the caller.
-     *
-     * When 'node' is non-null, 'parent' may or may not be null. It must be
-     * non-null when logging provisionally, since obsolete LSNs are added to
-     * the parent's collection.
-     */
-    private static long logInternal(
-        final IN node,
-        INLogEntry<?> logEntry,
-        final boolean allowDeltas,
-        final boolean allowCompress,
-        final Provisional provisional,
-        final boolean backgroundIO,
-        final IN parent) {
-
-        assert node == null || node.isLatchExclusiveOwner();
-        assert parent == null || parent.isLatchExclusiveOwner();
-        assert node != null || parent != null;
-        assert (node == null) != (logEntry == null);
-
-        final DatabaseImpl dbImpl =
-            (node != null) ? node.getDatabase() : parent.getDatabase();
-
-        final EnvironmentImpl envImpl = dbImpl.getEnv();
-
-        final boolean countObsoleteNow =
-            provisional != Provisional.YES || dbImpl.isTemporary();
-
-        final boolean isBin = (node != null) ?
-            node.isBIN() : (parent.getNormalizedLevel() == 2);
-
-        final BIN bin = (node != null && isBin) ? ((BIN) node) : null;
-
-        final boolean isDelta;
-
-        if (isBin) {
-            if (logEntry != null) {
-                /*
-                 * When a logEntry is supplied (node/bin are null), the logic
-                 * below is implemented by OffHeapCache.createBINLogEntry.
-                 */
-                isDelta = logEntry.isBINDelta();
-            } else {
-                /* Compress non-dirty slots before determining delta status. */
-                if (allowCompress) {
-                    envImpl.lazyCompress(bin, false /*compressDirtySlots*/);
-                }
-
-                isDelta = bin.isBINDelta() ||
-                    (allowDeltas && bin.shouldLogDelta());
-
-                /* Be sure that we didn't illegally mutate to a delta. */
-                assert (!(isDelta && bin.isDeltaProhibited()));
-
-                /* Also compress dirty slots, if we will not log a delta. */
-                if (allowCompress && !isDelta) {
-                    envImpl.lazyCompress(bin, true /*compressDirtySlots*/);
-                }
-
-                /*
-                 * Write dirty LNs in deferred-write databases after
-                 * compression to reduce total logging, at least for temp DBs.
-                 */
-                if (dbImpl.isDeferredWriteMode()) {
-                    bin.logDirtyChildren();
-                }
-
-                logEntry = isDelta ?
-                    (new BINDeltaLogEntry(bin)) :
-                    (new INLogEntry<>(bin));
-            }
-        } else {
-            assert node != null;
-
-            isDelta = false;
-            logEntry = new INLogEntry<>(node);
-        }
-
-        final LogParams params = new LogParams();
-        params.entry = logEntry;
-        params.provisional = provisional;
-        params.repContext = ReplicationContext.NO_REPLICATE;
-        params.nodeDb = dbImpl;
-        params.backgroundIO = backgroundIO;
-
-        /*
-         * For delta logging:
-         *  + Count lastDeltaVersion obsolete, if non-null.
-         *  + Set lastDeltaVersion to newly logged LSN.
-         *  + Leave lastFullVersion unchanged.
-         *
-         * For full version logging:
-         *  + Count lastFullVersion and lastDeltaVersion obsolete, if non-null.
-         *  + Set lastFullVersion to newly logged LSN.
-         *  + Set lastDeltaVersion to null.
-         */
-        final long oldLsn =
-            isDelta ? DbLsn.NULL_LSN : logEntry.getPrevFullLsn();
-
-        final long auxOldLsn = logEntry.getPrevDeltaLsn();
-
-        /*
-         * Determine whether to count the prior version of an IN (as well as
-         * accumulated provisionally obsolete LSNs for child nodes) obsolete
-         * when logging the new version.
-         *
-         * True is set if we are logging the IN non-provisionally, since the
-         * non-provisional version durably replaces the prior version and
-         * causes all provisional children to also become durable.
-         *
-         * True is also set if the database is temporary. Since we never use a
-         * temporary DB past recovery, prior versions of an IN are never used.
-         * [#16928]
-         */
-        if (countObsoleteNow) {
-            params.oldLsn = oldLsn;
-            params.auxOldLsn = auxOldLsn;
-            params.packedObsoleteInfo =
-                (node != null) ? node.provisionalObsolete : null;
-        }
-
-        /* Log it. */
-        final LogItem item = envImpl.getLogManager().log(params);
-
-        if (node != null) {
-            node.setDirty(false);
-        }
-
-        if (countObsoleteNow) {
-            if (node != null) {
-                node.discardProvisionalObsolete();
-            }
-        } else if (parent != null) {
-            parent.trackProvisionalObsolete(node, oldLsn);
-            parent.trackProvisionalObsolete(node, auxOldLsn);
-            /*
-             * TODO:
-             * The parent is null and provisional is YES when evicting the root
-             * of a DW DB. How does obsolete counting happen?
-             */
-        }
-
-        if (bin != null) {
-            /*
-             * When a logEntry is supplied (node/bin are null), the logic
-             * below is implemented by OffHeapCache.postBINLog.
-             */
-            if (isDelta) {
-                bin.setLastDeltaLsn(item.lsn);
-            } else {
-                bin.setLastFullLsn(item.lsn);
-                bin.setLastDeltaLsn(DbLsn.NULL_LSN);
-            }
-
-            bin.setProhibitNextDelta(false);
-
-        } else if (node != null) {
-            node.setLastFullLsn(item.lsn);
-        }
-
-        final Evictor evictor = envImpl.getEvictor();
-
-        if (node != null && evictor.getUseDirtyLRUSet()) {
-
-            /*
-             * To capture all cases where a node needs to be moved to the
-             * priority-1 LRUSet after being cleaned, we invoke moveToPri1LRU()
-             * from IN.afterLog(). This includes the case where the node is
-             * being logged as part of being evicted, in which case we don't
-             * really want it to go back to the LRU. However, this is ok
-             * because moveToPri1LRU() checks whether the node is actually
-             * in the priority-2 LRUSet before moving it to the priority-1
-             * LRUSet.
-             */
-            if (traceLRU && node.isUpperIN()) {
-                LoggerUtils.envLogMsg(
-                    traceLevel, envImpl,
-                    Thread.currentThread().getId() + "-" +
-                        Thread.currentThread().getName() +
-                        "-" + envImpl.getName() +
-                        " afterLogCommon(): " +
-                        " Moving UIN to mixed LRU: " + node.getNodeId());
-            }
-            evictor.moveToPri1LRU(node);
-        }
-
-        return item.lsn;
     }
 
     /**
@@ -5650,42 +5669,43 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     void trackProvisionalObsolete(final IN childIN, final long obsoleteLsn) {
 
         final boolean moveChildInfo =
-            (childIN != null && childIN.provisionalObsolete != null);
+                (childIN != null && childIN.provisionalObsolete != null);
 
         final boolean addChildLsn = (obsoleteLsn != DbLsn.NULL_LSN);
 
-        if (!moveChildInfo && !addChildLsn) {
+        if(!moveChildInfo && !addChildLsn) {
             return;
         }
 
         final int oldMemSize = (provisionalObsolete != null) ?
-             provisionalObsolete.getMemorySize() : 0;
+                provisionalObsolete.getMemorySize() : 0;
 
-        if (moveChildInfo) {
-            if (provisionalObsolete != null) {
+        if(moveChildInfo) {
+            if(provisionalObsolete != null) {
                 /* Append child info to parent info. */
                 provisionalObsolete.copyObsoleteInfo
-                    (childIN.provisionalObsolete);
-            } else {
+                        (childIN.provisionalObsolete);
+            }
+            else {
                 /* Move reference from child to parent. */
                 provisionalObsolete = childIN.provisionalObsolete;
             }
             childIN.updateMemorySize(
-                0 - childIN.provisionalObsolete.getMemorySize());
+                    0 - childIN.provisionalObsolete.getMemorySize());
             childIN.provisionalObsolete = null;
         }
 
-        if (addChildLsn) {
-            if (provisionalObsolete == null) {
+        if(addChildLsn) {
+            if(provisionalObsolete == null) {
                 provisionalObsolete = new PackedObsoleteInfo();
             }
             provisionalObsolete.addObsoleteInfo(obsoleteLsn);
         }
 
         updateMemorySize(oldMemSize,
-                         (provisionalObsolete != null) ?
-                         provisionalObsolete.getMemorySize() :
-                         0);
+                (provisionalObsolete != null) ?
+                        provisionalObsolete.getMemorySize() :
+                        0);
     }
 
     /**
@@ -5694,9 +5714,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * after this node is logged non-provisionally.
      */
     private void discardProvisionalObsolete()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (provisionalObsolete != null) {
+        if(provisionalObsolete != null) {
             updateMemorySize(0 - provisionalObsolete.getMemorySize());
             provisionalObsolete = null;
         }
@@ -5709,7 +5729,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     }
 
     private int getNEntriesToWrite(boolean deltasOnly) {
-        if (!deltasOnly) {
+        if(!deltasOnly) {
             return nEntries;
         }
         return getNDeltas();
@@ -5717,8 +5737,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     public final int getNDeltas() {
         int n = 0;
-        for (int i = 0; i < nEntries; i++) {
-            if (!isDirty(i)) {
+        for(int i = 0; i < nEntries; i++) {
+            if(!isDirty(i)) {
                 continue;
             }
             n += 1;
@@ -5743,7 +5763,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * @see Loggable#getLogSize
-     *
+     * <p>
      * Overrriden by DIN and DBIN classes.
      */
     @Override
@@ -5753,7 +5773,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     public final int getLogSize(boolean deltasOnly) {
 
-        BIN bin = (isBIN() ? (BIN)this : null);
+        BIN bin = (isBIN() ? (BIN) this : null);
 
         boolean haveVLSNCache = (bin != null && bin.isVLSNCachingEnabled());
 
@@ -5761,7 +5781,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         boolean haveExpiration = false;
 
-        if (bin != null) {
+        if(bin != null) {
             int base = bin.getExpirationBase();
             haveExpiration = (base != -1);
             size += LogUtils.getPackedIntLogSize(base);
@@ -5770,7 +5790,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         size += LogUtils.getPackedLongLogSize(nodeId);
         size += LogUtils.getByteArrayLogSize(identifierKey); // identifier key
 
-        if (keyPrefix != null) {
+        if(keyPrefix != null) {
             size += LogUtils.getByteArrayLogSize(keyPrefix);
         }
 
@@ -5779,9 +5799,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         final int nEntriesToWrite = getNEntriesToWrite(deltasOnly);
 
         final int maxEntriesToWrite =
-            (!deltasOnly ?
-             getMaxEntries() :
-             bin.getDeltaCapacity(nEntriesToWrite));
+                (!deltasOnly ?
+                        getMaxEntries() :
+                        bin.getDeltaCapacity(nEntriesToWrite));
 
         size += LogUtils.getPackedIntLogSize(nEntriesToWrite);
         size += LogUtils.getPackedIntLogSize(level);
@@ -5789,36 +5809,36 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         final boolean compactLsnsRep = (entryLsnLongArray == null);
         size += LogUtils.getBooleanLogSize();   // compactLsnsRep
-        if (compactLsnsRep) {
+        if(compactLsnsRep) {
             size += LogUtils.INT_BYTES;         // baseFileNumber
         }
 
-        for (int i = 0; i < nEntries; i++) {    // entries
+        for(int i = 0; i < nEntries; i++) {    // entries
 
-            if (deltasOnly && !isDirty(i)) {
+            if(deltasOnly && !isDirty(i)) {
                 continue;
             }
 
             size += LogUtils.getByteArrayLogSize(entryKeys.get(i)) + // key
-                (compactLsnsRep ? LogUtils.INT_BYTES :
-                 LogUtils.getLongLogSize()) +                       // LSN
-                1;                                                  // state
+                    (compactLsnsRep ? LogUtils.INT_BYTES :
+                            LogUtils.getLongLogSize()) +                       // LSN
+                    1;                                                  // state
 
-            if (isLastLoggedSizeStored(i)) {
+            if(isLastLoggedSizeStored(i)) {
                 size += LogUtils.getPackedIntLogSize(getLastLoggedSize(i));
             }
 
-            if (haveVLSNCache && isEmbeddedLN(i)) {
+            if(haveVLSNCache && isEmbeddedLN(i)) {
                 size += LogUtils.getPackedLongLogSize(bin.getCachedVLSN(i));
             }
 
-            if (haveExpiration) {
+            if(haveExpiration) {
                 size +=
-                    LogUtils.getPackedIntLogSize(bin.getExpirationOffset(i));
+                        LogUtils.getPackedIntLogSize(bin.getExpirationOffset(i));
             }
         }
 
-        if (deltasOnly) {
+        if(deltasOnly) {
             size += LogUtils.getPackedIntLogSize(bin.getFullBinNEntries());
             size += LogUtils.getPackedIntLogSize(bin.getFullBinMaxEntries());
 
@@ -5851,15 +5871,15 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                                 boolean deltasOnly,
                                 boolean clearDirtyBits) {
 
-        assert(!deltasOnly || isBIN());
+        assert (!deltasOnly || isBIN());
 
-        BIN bin = (isBIN() ? (BIN)this : null);
+        BIN bin = (isBIN() ? (BIN) this : null);
 
         byte[] bloomFilter = (deltasOnly ? bin.createBloomFilter() : null);
 
         boolean haveExpiration = false;
 
-        if (bin != null) {
+        if(bin != null) {
             int base = bin.getExpirationBase();
             haveExpiration = (base != -1);
             LogUtils.writePackedInt(logBuffer, base);
@@ -5882,16 +5902,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         logBuffer.put(booleans);
 
-        if (hasKeyPrefix) {
+        if(hasKeyPrefix) {
             LogUtils.writeByteArray(logBuffer, keyPrefix);
         }
 
         final int nEntriesToWrite = getNEntriesToWrite(deltasOnly);
 
         final int maxEntriesToWrite =
-            (!deltasOnly ?
-             getMaxEntries() :
-             bin.getDeltaCapacity(nEntriesToWrite));
+                (!deltasOnly ?
+                        getMaxEntries() :
+                        bin.getDeltaCapacity(nEntriesToWrite));
         /*
         if (deltasOnly) {
             BIN bin = (BIN)this;
@@ -5911,13 +5931,13 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         /* true if compact representation. */
         boolean compactLsnsRep = (entryLsnLongArray == null);
         LogUtils.writeBoolean(logBuffer, compactLsnsRep);
-        if (compactLsnsRep) {
+        if(compactLsnsRep) {
             LogUtils.writeInt(logBuffer, (int) baseFileNumber);
         }
 
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
 
-            if (deltasOnly && !isDirty(i)) {
+            if(deltasOnly && !isDirty(i)) {
                 continue;
             }
 
@@ -5929,48 +5949,49 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * Tree.insert.  [#13126]
              */
             assert checkForNullLSN(i) :
-                "logging IN " + getNodeId() + " with null lsn child " +
-                " db=" + databaseImpl.getDebugName() +
-                " isDeferredWriteMode=" + databaseImpl.isDeferredWriteMode() +
-                " isTemporary=" + databaseImpl.isTemporary();
+                    "logging IN " + getNodeId() + " with null lsn child " +
+                            " db=" + databaseImpl.getDebugName() +
+                            " isDeferredWriteMode=" + databaseImpl.isDeferredWriteMode() +
+                            " isTemporary=" + databaseImpl.isTemporary();
 
-            if (compactLsnsRep) {
+            if(compactLsnsRep) {
                 int offset = i << 2;
                 int fileOffset = getFileOffset(offset);
                 logBuffer.put(getFileNumberOffset(offset));
                 logBuffer.put((byte) (fileOffset & 0xff));
                 logBuffer.put((byte) ((fileOffset >>> 8) & 0xff));
                 logBuffer.put((byte) ((fileOffset >>> 16) & 0xff));
-            } else {
+            }
+            else {
                 LogUtils.writeLong(logBuffer, entryLsnLongArray[i]);
             }
 
             logBuffer.put(
-                (byte) (entryStates[i] & EntryStates.CLEAR_TRANSIENT_BITS));
+                    (byte) (entryStates[i] & EntryStates.CLEAR_TRANSIENT_BITS));
 
-            if (clearDirtyBits) {
+            if(clearDirtyBits) {
                 entryStates[i] &= EntryStates.CLEAR_DIRTY_BIT;
             }
 
-            if (isLastLoggedSizeStored(i)) {
+            if(isLastLoggedSizeStored(i)) {
                 LogUtils.writePackedInt(logBuffer, getLastLoggedSize(i));
             }
 
-            if (haveVLSNCache && isEmbeddedLN(i)) {
+            if(haveVLSNCache && isEmbeddedLN(i)) {
                 LogUtils.writePackedLong(logBuffer, bin.getCachedVLSN(i));
             }
 
-            if (haveExpiration) {
+            if(haveExpiration) {
                 LogUtils.writePackedInt(
-                    logBuffer, bin.getExpirationOffset(i));
+                        logBuffer, bin.getExpirationOffset(i));
             }
         }
 
-        if (deltasOnly) {
+        if(deltasOnly) {
             LogUtils.writePackedInt(logBuffer, bin.getFullBinNEntries());
             LogUtils.writePackedInt(logBuffer, bin.getFullBinMaxEntries());
 
-            if (bloomFilter != null) {
+            if(bloomFilter != null) {
                 BINDeltaBloomFilter.writeToLog(bloomFilter, logBuffer);
             }
         }
@@ -5981,10 +6002,11 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private boolean checkForNullLSN(int index) {
         boolean ok;
-        if (isBIN()) {
+        if(isBIN()) {
             ok = !(getLsn(index) == DbLsn.NULL_LSN &&
-                   (entryStates[index] & EntryStates.KNOWN_DELETED_BIT) == 0);
-        } else {
+                    (entryStates[index] & EntryStates.KNOWN_DELETED_BIT) == 0);
+        }
+        else {
             ok = (getLsn(index) != DbLsn.NULL_LSN);
         }
         return ok;
@@ -5995,10 +6017,10 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * expiration values.
      */
     public boolean mayHaveExpirationValues(
-        ByteBuffer itemBuffer,
-        int entryVersion) {
+            ByteBuffer itemBuffer,
+            int entryVersion) {
 
-        if (!isBIN() || entryVersion < 12) {
+        if(!isBIN() || entryVersion < 12) {
             return false;
         }
 
@@ -6011,22 +6033,22 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     @Override
     public void readFromLog(
-        ByteBuffer itemBuffer,
-        int entryVersion) {
+            ByteBuffer itemBuffer,
+            int entryVersion) {
 
         materialize(
-            itemBuffer, entryVersion,
-            false /*deltasOnly*/, true /*clearDirtyBits*/);
+                itemBuffer, entryVersion,
+                false /*deltasOnly*/, true /*clearDirtyBits*/);
     }
 
     public void readFromLog(
-        ByteBuffer itemBuffer,
-        int entryVersion,
-        boolean deltasOnly) {
+            ByteBuffer itemBuffer,
+            int entryVersion,
+            boolean deltasOnly) {
 
         materialize(
-            itemBuffer, entryVersion,
-            deltasOnly, !deltasOnly /*clearDirtyBits*/);
+                itemBuffer, entryVersion,
+                deltasOnly, !deltasOnly /*clearDirtyBits*/);
     }
 
     /**
@@ -6036,20 +6058,20 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      * version is passed (off-heap caching uses the current version).
      */
     public final void materialize(
-        ByteBuffer itemBuffer,
-        int entryVersion,
-        boolean deltasOnly,
-        boolean clearDirtyBits) {
+            ByteBuffer itemBuffer,
+            int entryVersion,
+            boolean deltasOnly,
+            boolean clearDirtyBits) {
 
-        assert(!deltasOnly || isBIN());
+        assert (!deltasOnly || isBIN());
 
-        BIN bin = (isBIN() ? (BIN)this : null);
+        BIN bin = (isBIN() ? (BIN) this : null);
 
         boolean unpacked = (entryVersion < 6);
 
         boolean haveExpiration = false;
 
-        if (bin != null && entryVersion >= 12) {
+        if(bin != null && entryVersion >= 12) {
             int base = LogUtils.readPackedInt(itemBuffer);
             haveExpiration = (base != -1);
             bin.setExpirationBase(base);
@@ -6062,7 +6084,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         setIsRootFlag((booleans & 1) != 0);
 
-        if ((booleans & 2) != 0) {
+        if((booleans & 2) != 0) {
             keyPrefix = LogUtils.readByteArray(itemBuffer, unpacked);
         }
 
@@ -6070,7 +6092,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         assert !(mayHaveLastLoggedSize && (entryVersion < 9));
 
         boolean hasBloomFilter = ((booleans & 8) != 0);
-        assert(!hasBloomFilter || (entryVersion >= 10 && deltasOnly));
+        assert (!hasBloomFilter || (entryVersion >= 10 && deltasOnly));
 
         boolean haveVLSNCache = ((booleans & 16) != 0);
         assert !(haveVLSNCache && (entryVersion < 11));
@@ -6085,43 +6107,46 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         entryKeys = new INKeyRep.Default(length);
         baseFileNumber = -1;
         long storedBaseFileNumber = -1;
-        if (disableCompactLsns) {
+        if(disableCompactLsns) {
             entryLsnByteArray = null;
             entryLsnLongArray = new long[length];
-        } else {
+        }
+        else {
             entryLsnByteArray = new byte[length << 2];
             entryLsnLongArray = null;
         }
         entryStates = new byte[length];
         boolean compactLsnsRep = false;
 
-        if (entryVersion > 1) {
+        if(entryVersion > 1) {
             compactLsnsRep = LogUtils.readBoolean(itemBuffer);
-            if (compactLsnsRep) {
+            if(compactLsnsRep) {
                 baseFileNumber = LogUtils.readInt(itemBuffer);
                 storedBaseFileNumber = baseFileNumber;
             }
         }
 
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
 
             entryKeys = entryKeys.set(
-                i, LogUtils.readByteArray(itemBuffer, unpacked), this);
+                    i, LogUtils.readByteArray(itemBuffer, unpacked), this);
 
             long lsn;
-            if (compactLsnsRep) {
+            if(compactLsnsRep) {
                 /* LSNs in compact form. */
                 byte fileNumberOffset = itemBuffer.get();
                 int fileOffset = (itemBuffer.get() & 0xff);
                 fileOffset |= ((itemBuffer.get() & 0xff) << 8);
                 fileOffset |= ((itemBuffer.get() & 0xff) << 16);
-                if (fileOffset == THREE_BYTE_NEGATIVE_ONE) {
+                if(fileOffset == THREE_BYTE_NEGATIVE_ONE) {
                     lsn = DbLsn.NULL_LSN;
-                } else {
-                    lsn = DbLsn.makeLsn
-                        (storedBaseFileNumber + fileNumberOffset, fileOffset);
                 }
-            } else {
+                else {
+                    lsn = DbLsn.makeLsn
+                            (storedBaseFileNumber + fileNumberOffset, fileOffset);
+                }
+            }
+            else {
                 /* LSNs in long form. */
                 lsn = LogUtils.readLong(itemBuffer);              // LSN
             }
@@ -6130,7 +6155,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
             byte entryState = itemBuffer.get();                   // state
 
-            if (clearDirtyBits) {
+            if(clearDirtyBits) {
                 entryState &= EntryStates.CLEAR_DIRTY_BIT;
             }
 
@@ -6138,7 +6163,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * The MIGRATE_BIT (now the transient OFFHEAP_DIRTY_BIT) was
              * accidentally written in a pre-JE 6 log version.
              */
-            if (entryVersion < 9) {
+            if(entryVersion < 9) {
                 entryState &= EntryStates.CLEAR_TRANSIENT_BITS;
             }
 
@@ -6148,37 +6173,37 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
              * releases, the KnownDeleted flag may not be set.  So set it here.
              * See Tree.insert.  [#13126]
              */
-            if (entryVersion < 9 && lsn == DbLsn.NULL_LSN) {
+            if(entryVersion < 9 && lsn == DbLsn.NULL_LSN) {
                 entryState |= EntryStates.KNOWN_DELETED_BIT;
             }
 
             entryStates[i] = entryState;
 
-            if (mayHaveLastLoggedSize && !isEmbeddedLN(i)) {
+            if(mayHaveLastLoggedSize && !isEmbeddedLN(i)) {
                 setLastLoggedSizeUnconditional(
-                    i, LogUtils.readPackedInt(itemBuffer));
+                        i, LogUtils.readPackedInt(itemBuffer));
             }
 
-            if (haveVLSNCache && isEmbeddedLN(i)) {
+            if(haveVLSNCache && isEmbeddedLN(i)) {
                 bin.setCachedVLSNUnconditional(
-                    i, LogUtils.readPackedLong(itemBuffer));
+                        i, LogUtils.readPackedLong(itemBuffer));
             }
 
-            if (haveExpiration) {
+            if(haveExpiration) {
                 bin.setExpirationOffset(i, LogUtils.readPackedInt(itemBuffer));
             }
         }
 
-        if (deltasOnly) {
+        if(deltasOnly) {
             setBINDelta(true);
 
-            if (entryVersion >= 10) {
+            if(entryVersion >= 10) {
                 bin.setFullBinNEntries(LogUtils.readPackedInt(itemBuffer));
                 bin.setFullBinMaxEntries(LogUtils.readPackedInt(itemBuffer));
 
-                if (hasBloomFilter) {
+                if(hasBloomFilter) {
                     bin.bloomFilter = BINDeltaBloomFilter.readFromLog(
-                        itemBuffer, entryVersion);
+                            itemBuffer, entryVersion);
                 }
             }
         }
@@ -6219,7 +6244,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         sb.append(Integer.toHexString(level));
         sb.append("\"/>");
 
-        if (keyPrefix != null) {
+        if(keyPrefix != null) {
             sb.append(Key.dumpString(keyPrefix, "keyPrefix", 0));
         }
 
@@ -6232,7 +6257,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         final BIN bin = isBIN() ? (BIN) this : null;
 
-        if (isBINDelta(false)) {
+        if(isBINDelta(false)) {
             sb.append("\" numFullBinEntries=\"");
             sb.append(bin.getFullBinNEntries());
             sb.append("\" maxFullBinEntries=\"");
@@ -6240,19 +6265,19 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         }
 
         boolean compactLsnsRep = (entryLsnLongArray == null);
-        if (compactLsnsRep) {
+        if(compactLsnsRep) {
             sb.append("\" baseFileNumber=\"");
             sb.append(baseFileNumber);
         }
         sb.append("\">");
 
-        if (verbose) {
-            for (int i = 0; i < nEntries; i++) {
+        if(verbose) {
+            for(int i = 0; i < nEntries; i++) {
                 sb.append("<ref");
                 dumpSlotState(sb, i, bin);
                 sb.append(">");
                 sb.append(Key.dumpString(getKey(i), 0));
-                if (isEmbeddedLN(i)) {
+                if(isEmbeddedLN(i)) {
                     sb.append(Key.dumpString(getData(i), "data", 0));
                 }
                 sb.append(DbLsn.toString(getLsn(i)));
@@ -6262,8 +6287,8 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
         sb.append("</entries>");
 
-        if (isBINDelta(false)) {
-            if (bin.bloomFilter != null) {
+        if(isBINDelta(false)) {
+            if(bin.bloomFilter != null) {
                 BINDeltaBloomFilter.dumpLog(bin.bloomFilter, sb, verbose);
             }
         }
@@ -6291,37 +6316,39 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
 
     /**
      * For unit test support:
+     *
      * @return a string that dumps information about this IN, without
      */
     @Override
     public String dumpString(int nSpaces, boolean dumpTags) {
         StringBuilder sb = new StringBuilder();
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(beginTag());
             sb.append('\n');
         }
 
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append("<nodeId val=\"");
             sb.append(nodeId);
             sb.append("\"/>");
-        } else {
+        }
+        else {
             sb.append(nodeId);
         }
         sb.append('\n');
 
         BIN bin = null;
-        if (isBIN()) {
+        if(isBIN()) {
             bin = (BIN) this;
         }
 
         sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append("<idkey>");
         sb.append(identifierKey == null ?
-                  "" :
-                  Key.dumpString(identifierKey, 0));
+                "" :
+                Key.dumpString(identifierKey, 0));
         sb.append("</idkey>");
         sb.append('\n');
         sb.append(TreeUtils.indent(nSpaces + 2));
@@ -6342,9 +6369,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         sb.append("<isBINDelta val=\"").append(isBINDelta(false)).append("\"/>");
         sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append(
-            "<prohibitNextDelta val=\"").
-            append(getProhibitNextDelta()).append("\"/>");
-        if (bin != null) {
+                "<prohibitNextDelta val=\"").
+                append(getProhibitNextDelta()).append("\"/>");
+        if(bin != null) {
             sb.append(TreeUtils.indent(nSpaces + 2));
             sb.append("<cursors val=\"").append(bin.nCursors()).append("\"/>");
             sb.append(TreeUtils.indent(nSpaces + 2));
@@ -6358,37 +6385,40 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         sb.append("\">");
         sb.append('\n');
 
-        for (int i = 0; i < nEntries; i++) {
+        for(int i = 0; i < nEntries; i++) {
             sb.append(TreeUtils.indent(nSpaces + 4));
             sb.append("<entry id=\"").append(i).append("\"");
             dumpSlotState(sb, i, bin);
             sb.append(">\n");
-            if (getLsn(i) == DbLsn.NULL_LSN) {
+            if(getLsn(i) == DbLsn.NULL_LSN) {
                 sb.append(TreeUtils.indent(nSpaces + 6));
                 sb.append("<lsn/>");
-            } else {
+            }
+            else {
                 sb.append(DbLsn.dumpString(getLsn(i), nSpaces + 6));
             }
             sb.append('\n');
-            if (entryKeys.get(i) == null) {
+            if(entryKeys.get(i) == null) {
                 sb.append(TreeUtils.indent(nSpaces + 6));
                 sb.append("<key/>");
-            } else {
+            }
+            else {
                 sb.append(Key.dumpString(entryKeys.get(i), (nSpaces + 6)));
             }
             sb.append('\n');
-            if (getOffHeapBINId(i) >= 0) {
+            if(getOffHeapBINId(i) >= 0) {
                 sb.append("<ohBIN id=\"").append(i).append("\"");
                 sb.append(getOffHeapBINId(i)).append(">\n");
             }
-            if (bin != null && bin.getOffHeapLNId(i) != 0) {
+            if(bin != null && bin.getOffHeapLNId(i) != 0) {
                 sb.append("<ohLN id=\"").append(i).append("\"");
                 sb.append(bin.getOffHeapLNId(i)).append(">\n");
             }
-            if (entryTargets.get(i) == null) {
+            if(entryTargets.get(i) == null) {
                 sb.append(TreeUtils.indent(nSpaces + 6));
                 sb.append("<target/>");
-            } else {
+            }
+            else {
                 sb.append(entryTargets.get(i).dumpString(nSpaces + 6, true));
             }
             sb.append('\n');
@@ -6400,7 +6430,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append("</entries>");
         sb.append('\n');
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(endTag());
         }
@@ -6413,18 +6443,18 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         sb.append("\" dirty=\"").append(isDirty(i));
         sb.append("\" embedded=\"").append(isEmbeddedLN(i));
         sb.append("\" noData=\"").append(isNoDataLN(i));
-        if (bin != null) {
+        if(bin != null) {
             sb.append("\" logSize=\"");
             sb.append(bin.getLastLoggedSizeUnconditional(i));
             long vlsn = bin.getCachedVLSN(i);
-            if (!VLSN.isNull(vlsn)) {
+            if(!VLSN.isNull(vlsn)) {
                 sb.append("\" vlsn=\"").append(vlsn);
             }
         }
-        if (bin != null && bin.getExpiration(i) != 0) {
+        if(bin != null && bin.getExpiration(i) != 0) {
             sb.append("\" expires=\"");
             sb.append(TTL.formatExpiration(
-                bin.getExpiration(i), bin.isExpirationInHours()));
+                    bin.getExpiration(i), bin.isExpirationInHours()));
         }
         sb.append("\"");
     }
@@ -6453,7 +6483,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
                             int idKeyIndex,
                             int childIndex) {
         Logger logger = getEnv().getLogger();
-        if (logger.isLoggable(level)) {
+        if(logger.isLoggable(level)) {
             StringBuilder sb = new StringBuilder();
             sb.append(TRACE_SPLIT);
             sb.append(" parent=");
@@ -6475,9 +6505,9 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
             sb.append(" childIdx=");
             sb.append(childIndex);
             LoggerUtils.logMsg(logger,
-                               databaseImpl.getEnv(),
-                               level,
-                               sb.toString());
+                    databaseImpl.getEnv(),
+                    level,
+                    sb.toString());
         }
     }
 
@@ -6488,16 +6518,16 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
      */
     private void traceDelete(Level level, int index) {
         Logger logger = databaseImpl.getEnv().getLogger();
-        if (logger.isLoggable(level)) {
+        if(logger.isLoggable(level)) {
             StringBuilder sb = new StringBuilder();
             sb.append(TRACE_DELETE);
             sb.append(" in=").append(getNodeId());
             sb.append(" index=");
             sb.append(index);
             LoggerUtils.logMsg(logger,
-                               databaseImpl.getEnv(),
-                               level,
-                               sb.toString());
+                    databaseImpl.getEnv(),
+                    level,
+                    sb.toString());
         }
     }
 

@@ -16,20 +16,16 @@ package berkeley.com.sleepycat.util.keyrange;
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.compat.DbCompat.OpReadOptions;
 import berkeley.com.sleepycat.compat.DbCompat.OpResult;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.*;
+
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.Get;
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.je.SecondaryCursor;
 
 /**
  * A cursor-like interface that enforces a key range.  The method signatures
  * are actually those of SecondaryCursor, but the pKey parameter may be null.
  * It was done this way to avoid doubling the number of methods.
- *
+ * <p>
  * <p>This is not a fully general implementation of a range cursor and should
  * not be used directly by applications; however, it may evolve into a
  * generally useful range cursor some day.</p>
@@ -93,7 +89,7 @@ public class RangeCursor implements Cloneable {
                        KeyRange pkRange,
                        boolean sortedDups,
                        Cursor cursor) {
-        if (pkRange != null && !range.singleKey) {
+        if(pkRange != null && !range.singleKey) {
             throw new IllegalArgumentException();
         }
         this.range = range;
@@ -101,8 +97,35 @@ public class RangeCursor implements Cloneable {
         this.sortedDups = sortedDups;
         this.cursor = cursor;
         init();
-        if (pkRange != null && secCursor == null) {
+        if(pkRange != null && secCursor == null) {
             throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Swaps the contents of the two entries.  Used to return entry data to
+     * the caller when the operation was successful.
+     */
+    private static void swapData(DatabaseEntry e1, DatabaseEntry e2) {
+
+        byte[] d1 = e1.getData();
+        int o1 = e1.getOffset();
+        int s1 = e1.getSize();
+
+        e1.setData(e2.getData(), e2.getOffset(), e2.getSize());
+        e2.setData(d1, o1, s1);
+    }
+
+    /**
+     * Shares the same byte array, offset and size between two entries.
+     * Used when copying the entry data is not necessary because it is known
+     * that the underlying operation will not modify the entry, for example,
+     * with getSearchKey.
+     */
+    private static void shareData(DatabaseEntry from, DatabaseEntry to) {
+
+        if(from != null) {
+            to.setData(from.getData(), from.getOffset(), from.getSize());
         }
     }
 
@@ -112,14 +135,14 @@ public class RangeCursor implements Cloneable {
      * handled specially for CDS cursors outside this class.
      */
     public RangeCursor dup(boolean samePosition)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             RangeCursor c = (RangeCursor) super.clone();
             c.cursor = dupCursor(cursor, samePosition);
             c.init();
             return c;
-        } catch (CloneNotSupportedException neverHappens) {
+        } catch(CloneNotSupportedException neverHappens) {
             return null;
         }
     }
@@ -129,17 +152,19 @@ public class RangeCursor implements Cloneable {
      */
     private void init() {
 
-        if (cursor instanceof SecondaryCursor) {
+        if(cursor instanceof SecondaryCursor) {
             secCursor = (SecondaryCursor) cursor;
-        } else {
+        }
+        else {
             secCursor = null;
         }
 
-        if (range.hasBound()) {
+        if(range.hasBound()) {
             privKey = new DatabaseEntry();
             privPKey = new DatabaseEntry();
             privData = new DatabaseEntry();
-        } else {
+        }
+        else {
             privKey = null;
             privPKey = null;
             privData = null;
@@ -177,21 +202,22 @@ public class RangeCursor implements Cloneable {
      * Dups the cursor, sets the cursor and secCursor fields to the duped
      * cursor, and returns the old cursor.  Always call endOperation in a
      * finally clause after calling beginOperation.
-     *
+     * <p>
      * <p>If the returned cursor == the cursor field, the cursor is
      * uninitialized and was not duped; this case is handled correctly by
      * endOperation.</p>
      */
     private Cursor beginOperation()
-        throws DatabaseException {
+            throws DatabaseException {
 
         Cursor oldCursor = cursor;
-        if (initialized) {
+        if(initialized) {
             cursor = dupCursor(cursor, true);
-            if (secCursor != null) {
+            if(secCursor != null) {
                 secCursor = (SecondaryCursor) cursor;
             }
-        } else {
+        }
+        else {
             return cursor;
         }
         return oldCursor;
@@ -210,57 +236,31 @@ public class RangeCursor implements Cloneable {
                               DatabaseEntry key,
                               DatabaseEntry pKey,
                               DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (result.isSuccess()) {
-            if (oldCursor != null && oldCursor != cursor) {
+        if(result.isSuccess()) {
+            if(oldCursor != null && oldCursor != cursor) {
                 closeCursor(oldCursor);
             }
-            if (key != null) {
+            if(key != null) {
                 swapData(key, privKey);
             }
-            if (pKey != null && secCursor != null) {
+            if(pKey != null && secCursor != null) {
                 swapData(pKey, privPKey);
             }
-            if (data != null) {
+            if(data != null) {
                 swapData(data, privData);
             }
             initialized = true;
-        } else {
-            if (oldCursor != null && oldCursor != cursor) {
+        }
+        else {
+            if(oldCursor != null && oldCursor != cursor) {
                 closeCursor(cursor);
                 cursor = oldCursor;
-                if (secCursor != null) {
+                if(secCursor != null) {
                     secCursor = (SecondaryCursor) cursor;
                 }
             }
-        }
-    }
-
-    /**
-     * Swaps the contents of the two entries.  Used to return entry data to
-     * the caller when the operation was successful.
-     */
-    private static void swapData(DatabaseEntry e1, DatabaseEntry e2) {
-
-        byte[] d1 = e1.getData();
-        int o1 = e1.getOffset();
-        int s1 = e1.getSize();
-
-        e1.setData(e2.getData(), e2.getOffset(), e2.getSize());
-        e2.setData(d1, o1, s1);
-    }
-
-    /**
-     * Shares the same byte array, offset and size between two entries.
-     * Used when copying the entry data is not necessary because it is known
-     * that the underlying operation will not modify the entry, for example,
-     * with getSearchKey.
-     */
-    private static void shareData(DatabaseEntry from, DatabaseEntry to) {
-
-        if (from != null) {
-            to.setData(from.getData(), from.getOffset(), from.getSize());
         }
     }
 
@@ -268,66 +268,70 @@ public class RangeCursor implements Cloneable {
                              DatabaseEntry pKey,
                              DatabaseEntry data,
                              OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetFirst(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (pkRange != null && pkRange.isSingleKey()) {
+        if(pkRange != null && pkRange.isSingleKey()) {
             KeyRange.copy(range.beginKey, privKey);
             KeyRange.copy(pkRange.beginKey, privPKey);
             result = doGetSearchBoth(options);
             endOperation(null, result, key, pKey, data);
             return result;
         }
-        if (pkRange != null) {
+        if(pkRange != null) {
             KeyRange.copy(range.beginKey, privKey);
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
-                if (pkRange.beginKey == null || !sortedDups) {
+                if(pkRange.beginKey == null || !sortedDups) {
                     result = doGetSearchKey(options);
-                } else {
+                }
+                else {
                     KeyRange.copy(pkRange.beginKey, privPKey);
                     result = doGetSearchBothRange(options);
-                    if (result.isSuccess() &&
-                        !pkRange.beginInclusive &&
-                        pkRange.compare(privPKey, pkRange.beginKey) == 0) {
+                    if(result.isSuccess() &&
+                            !pkRange.beginInclusive &&
+                            pkRange.compare(privPKey, pkRange.beginKey) == 0) {
                         result = doGetNextDup(options);
                     }
                 }
-                if (result.isSuccess() &&
-                    !pkRange.check(privPKey)) {
+                if(result.isSuccess() &&
+                        !pkRange.check(privPKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
                 endOperation(oldCursor, result, key, pKey, data);
             }
-        } else if (range.singleKey) {
+        }
+        else if(range.singleKey) {
             KeyRange.copy(range.beginKey, privKey);
             result = doGetSearchKey(options);
             endOperation(null, result, key, pKey, data);
-        } else {
+        }
+        else {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
-                if (range.beginKey == null) {
+                if(range.beginKey == null) {
                     result = doGetFirst(options);
-                } else {
+                }
+                else {
                     KeyRange.copy(range.beginKey, privKey);
                     result = doGetSearchKeyRange(options);
-                    if (result.isSuccess() &&
-                        !range.beginInclusive &&
-                        range.compare(privKey, range.beginKey) == 0) {
+                    if(result.isSuccess() &&
+                            !range.beginInclusive &&
+                            range.compare(privKey, range.beginKey) == 0) {
                         result = doGetNextNoDup(options);
                     }
                 }
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
@@ -350,11 +354,11 @@ public class RangeCursor implements Cloneable {
                             DatabaseEntry pKey,
                             DatabaseEntry data,
                             OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result = OpResult.FAILURE;
 
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetLast(options);
             endOperation(null, result, null, null, null);
@@ -363,20 +367,21 @@ public class RangeCursor implements Cloneable {
 
         Cursor oldCursor = beginOperation();
         try {
-            if (pkRange != null) {
+            if(pkRange != null) {
                 result = getLastInPKeyRange(options);
 
                 /* Final check on candidate key and pKey value. */
-                if (result.isSuccess() &&
-                    !(range.check(privKey) && pkRange.check(privPKey))) {
+                if(result.isSuccess() &&
+                        !(range.check(privKey) && pkRange.check(privPKey))) {
                     result = OpResult.FAILURE;
                 }
-            } else {
+            }
+            else {
                 result = getLastInKeyRange(options);
 
                 /* Final check on candidate key value. */
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             }
@@ -393,10 +398,10 @@ public class RangeCursor implements Cloneable {
      * i.e., when SUCCESS is returned the caller should do the final check.
      */
     private OpResult getLastInKeyRange(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Without an endKey, getLast returns the candidate record. */
-        if (range.endKey == null) {
+        if(range.endKey == null) {
             return doGetLast(options);
         }
 
@@ -404,19 +409,19 @@ public class RangeCursor implements Cloneable {
          * K stands for the main key at the cursor position in the comments
          * below.
          */
-        while (true) {
+        while(true) {
             KeyRange.copy(range.endKey, privKey);
             OpResult result = doGetSearchKeyRange(options);
 
-            if (result.isSuccess()) {
+            if(result.isSuccess()) {
 
                 /* Found K >= endKey. */
-                if (range.endInclusive &&
-                    range.compare(range.endKey, privKey) == 0) {
+                if(range.endInclusive &&
+                        range.compare(range.endKey, privKey) == 0) {
 
                     /* K == endKey and endKey is inclusive. */
 
-                    if (!sortedDups) {
+                    if(!sortedDups) {
                         /* If dups are not configured, we're done. */
                         return result;
                     }
@@ -429,14 +434,15 @@ public class RangeCursor implements Cloneable {
                      * threads, the prev record is the last dup for endKey.
                      */
                     result = doGetNextNoDup(options);
-                    if (result.isSuccess()) {
+                    if(result.isSuccess()) {
 
                         /*
                          * K > endKey. Move backward to the last dup for
                          * endKey.
                          */
                         result = doGetPrev(options);
-                    } else {
+                    }
+                    else {
 
                         /*
                          * endKey is the last main key in the DB. Its last dup
@@ -444,7 +450,8 @@ public class RangeCursor implements Cloneable {
                          */
                         result = doGetLast(options);
                     }
-                } else {
+                }
+                else {
 
                     /*
                      * K > endKey or endKey is exclusive (and K >= endKey). In
@@ -453,7 +460,8 @@ public class RangeCursor implements Cloneable {
                      */
                     result = doGetPrev(options);
                 }
-            } else {
+            }
+            else {
 
                 /*
                  * There are no keys >= endKey in the DB. The last key in the
@@ -462,11 +470,11 @@ public class RangeCursor implements Cloneable {
                 result = doGetLast(options);
             }
 
-            if (!result.isSuccess()) {
+            if(!result.isSuccess()) {
                 return result;
             }
 
-            if (!range.checkEnd(privKey, true)) {
+            if(!range.checkEnd(privKey, true)) {
 
                 /*
                  * The last call above (getPrev or getLast) returned a key
@@ -487,10 +495,10 @@ public class RangeCursor implements Cloneable {
      * the caller should do the final two checks.
      */
     private OpResult getLastInPKeyRange(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* We can do an exact search when range and pkRange are single keys. */
-        if (pkRange.isSingleKey()) {
+        if(pkRange.isSingleKey()) {
             KeyRange.copy(range.beginKey, privKey);
             KeyRange.copy(pkRange.beginKey, privPKey);
             return doGetSearchBoth(options);
@@ -500,7 +508,7 @@ public class RangeCursor implements Cloneable {
          * When dups are not configured, getSearchKey for the main key returns
          * the only possible candidate record.
          */
-        if (!sortedDups) {
+        if(!sortedDups) {
             KeyRange.copy(range.beginKey, privKey);
             return doGetSearchKey(options);
         }
@@ -509,19 +517,19 @@ public class RangeCursor implements Cloneable {
          * K stands for the main key and D for the duplicate (data item) at the
          * cursor position in the comments below
          */
-        while (true) {
+        while(true) {
 
-            if (pkRange.endKey != null) {
+            if(pkRange.endKey != null) {
 
                 KeyRange.copy(range.beginKey, privKey);
                 KeyRange.copy(pkRange.endKey, privPKey);
                 OpResult result = doGetSearchBothRange(options);
 
-                if (result.isSuccess()) {
+                if(result.isSuccess()) {
 
                     /* Found D >= endKey. */
-                    if (!pkRange.endInclusive ||
-                        pkRange.compare(pkRange.endKey, privPKey) != 0) {
+                    if(!pkRange.endInclusive ||
+                            pkRange.compare(pkRange.endKey, privPKey) != 0) {
 
                         /*
                          * D > endKey or endKey is exclusive (and D >= endKey).
@@ -530,11 +538,11 @@ public class RangeCursor implements Cloneable {
                          */
                         result = doGetPrevDup(options);
 
-                        if (!result.isSuccess()) {
+                        if(!result.isSuccess()) {
                             return result;
                         }
 
-                        if (!pkRange.checkEnd(privPKey, true)) {
+                        if(!pkRange.checkEnd(privPKey, true)) {
 
                             /*
                              * getPrevDup returned a key outside the endKey
@@ -562,7 +570,7 @@ public class RangeCursor implements Cloneable {
             KeyRange.copy(range.beginKey, privKey);
             OpResult result = doGetSearchKey(options);
 
-            if (!result.isSuccess()) {
+            if(!result.isSuccess()) {
                 return result;
             }
 
@@ -575,14 +583,15 @@ public class RangeCursor implements Cloneable {
              */
             result = doGetNextNoDup(options);
 
-            if (result.isSuccess()) {
+            if(result.isSuccess()) {
 
                 /*
                  * K > main key and D is its first dup. Move to the prev record
                  * which should be the last dup for the main key.
                  */
                 result = doGetPrev(options);
-            } else {
+            }
+            else {
 
                 /*
                  * The main key specified is the last main key in the DB. Its
@@ -591,11 +600,11 @@ public class RangeCursor implements Cloneable {
                 result = doGetLast(options);
             }
 
-            if (!result.isSuccess()) {
+            if(!result.isSuccess()) {
                 return result;
             }
 
-            if (!range.checkEnd(privKey, true)) {
+            if(!range.checkEnd(privKey, true)) {
 
                 /*
                  * The last call above (getPrev or getLast) returned a key
@@ -613,45 +622,48 @@ public class RangeCursor implements Cloneable {
                             DatabaseEntry pKey,
                             DatabaseEntry data,
                             OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!initialized) {
+        if(!initialized) {
             return getFirst(key, pKey, data, options);
         }
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetNext(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (pkRange != null) {
-            if (pkRange.endKey == null) {
+        if(pkRange != null) {
+            if(pkRange.endKey == null) {
                 result = doGetNextDup(options);
                 endOperation(null, result, key, pKey, data);
-            } else {
+            }
+            else {
                 result = OpResult.FAILURE;
                 Cursor oldCursor = beginOperation();
                 try {
                     result = doGetNextDup(options);
-                    if (result.isSuccess() &&
-                        !pkRange.checkEnd(privPKey, true)) {
+                    if(result.isSuccess() &&
+                            !pkRange.checkEnd(privPKey, true)) {
                         result = OpResult.FAILURE;
                     }
                 } finally {
                     endOperation(oldCursor, result, key, pKey, data);
                 }
             }
-        } else if (range.singleKey) {
+        }
+        else if(range.singleKey) {
             result = doGetNextDup(options);
             endOperation(null, result, key, pKey, data);
-        } else {
+        }
+        else {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetNext(options);
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
@@ -665,27 +677,28 @@ public class RangeCursor implements Cloneable {
                                  DatabaseEntry pKey,
                                  DatabaseEntry data,
                                  OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!initialized) {
+        if(!initialized) {
             return getFirst(key, pKey, data, options);
         }
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetNextNoDup(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (range.singleKey) {
+        if(range.singleKey) {
             result = OpResult.FAILURE;
-        } else {
+        }
+        else {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetNextNoDup(options);
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
@@ -699,45 +712,48 @@ public class RangeCursor implements Cloneable {
                             DatabaseEntry pKey,
                             DatabaseEntry data,
                             OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!initialized) {
+        if(!initialized) {
             return getLast(key, pKey, data, options);
         }
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetPrev(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (pkRange != null) {
-            if (pkRange.beginKey == null) {
+        if(pkRange != null) {
+            if(pkRange.beginKey == null) {
                 result = doGetPrevDup(options);
                 endOperation(null, result, key, pKey, data);
-            } else {
+            }
+            else {
                 result = OpResult.FAILURE;
                 Cursor oldCursor = beginOperation();
                 try {
                     result = doGetPrevDup(options);
-                    if (result.isSuccess() &&
-                        !pkRange.checkBegin(privPKey, true)) {
+                    if(result.isSuccess() &&
+                            !pkRange.checkBegin(privPKey, true)) {
                         result = OpResult.FAILURE;
                     }
                 } finally {
                     endOperation(oldCursor, result, key, pKey, data);
                 }
             }
-        } else if (range.singleKey) {
+        }
+        else if(range.singleKey) {
             result = doGetPrevDup(options);
             endOperation(null, result, key, pKey, data);
-        } else {
+        }
+        else {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetPrev(options);
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
@@ -751,27 +767,28 @@ public class RangeCursor implements Cloneable {
                                  DatabaseEntry pKey,
                                  DatabaseEntry data,
                                  OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!initialized) {
+        if(!initialized) {
             return getLast(key, pKey, data, options);
         }
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetPrevNoDup(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (range.singleKey) {
+        if(range.singleKey) {
             result = OpResult.FAILURE;
-        } else {
+        }
+        else {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetPrevNoDup(options);
-                if (result.isSuccess() &&
-                    !range.check(privKey)) {
+                if(result.isSuccess() &&
+                        !range.check(privKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
@@ -785,31 +802,33 @@ public class RangeCursor implements Cloneable {
                                  DatabaseEntry pKey,
                                  DatabaseEntry data,
                                  OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetSearchKey(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (!range.check(key)) {
+        if(!range.check(key)) {
             result = OpResult.FAILURE;
-        } else if (pkRange != null) {
+        }
+        else if(pkRange != null) {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 shareData(key, privKey);
                 result = doGetSearchKey(options);
-                if (result.isSuccess() &&
-                    !pkRange.check(privPKey)) {
+                if(result.isSuccess() &&
+                        !pkRange.check(privPKey)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
                 endOperation(oldCursor, result, key, pKey, data);
             }
-        } else {
+        }
+        else {
             shareData(key, privKey);
             result = doGetSearchKey(options);
             endOperation(null, result, key, pKey, data);
@@ -821,23 +840,25 @@ public class RangeCursor implements Cloneable {
                                   DatabaseEntry pKey,
                                   DatabaseEntry data,
                                   OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetSearchBoth(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (!range.check(key) ||
-            (pkRange != null && !pkRange.check(pKey))) {
+        if(!range.check(key) ||
+                (pkRange != null && !pkRange.check(pKey))) {
             result = OpResult.FAILURE;
-        } else {
+        }
+        else {
             shareData(key, privKey);
-            if (secCursor != null) {
+            if(secCursor != null) {
                 shareData(pKey, privPKey);
-            } else {
+            }
+            else {
                 shareData(data, privData);
             }
             result = doGetSearchBoth(options);
@@ -850,10 +871,10 @@ public class RangeCursor implements Cloneable {
                                       DatabaseEntry pKey,
                                       DatabaseEntry data,
                                       OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result = OpResult.FAILURE;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetSearchKeyRange(options);
             endOperation(null, result, null, null, null);
@@ -863,9 +884,9 @@ public class RangeCursor implements Cloneable {
         try {
             shareData(key, privKey);
             result = doGetSearchKeyRange(options);
-            if (result.isSuccess() &&
-                (!range.check(privKey) ||
-                 (pkRange != null && !pkRange.check(pKey)))) {
+            if(result.isSuccess() &&
+                    (!range.check(privKey) ||
+                            (pkRange != null && !pkRange.check(pKey)))) {
                 result = OpResult.FAILURE;
             }
         } finally {
@@ -878,10 +899,10 @@ public class RangeCursor implements Cloneable {
                                        DatabaseEntry pKey,
                                        DatabaseEntry data,
                                        OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result = OpResult.FAILURE;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetSearchBothRange(options);
             endOperation(null, result, null, null, null);
@@ -890,15 +911,16 @@ public class RangeCursor implements Cloneable {
         Cursor oldCursor = beginOperation();
         try {
             shareData(key, privKey);
-            if (secCursor != null) {
+            if(secCursor != null) {
                 shareData(pKey, privPKey);
-            } else {
+            }
+            else {
                 shareData(data, privData);
             }
             result = doGetSearchBothRange(options);
-            if (result.isSuccess() &&
-                (!range.check(privKey) ||
-                 (pkRange != null && !pkRange.check(pKey)))) {
+            if(result.isSuccess() &&
+                    (!range.check(privKey) ||
+                            (pkRange != null && !pkRange.check(pKey)))) {
                 result = OpResult.FAILURE;
             }
         } finally {
@@ -911,18 +933,19 @@ public class RangeCursor implements Cloneable {
                                           DatabaseEntry pKey,
                                           DatabaseEntry data,
                                           OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetSearchRecordNumber(options);
             endOperation(null, result, null, null, null);
             return result;
         }
-        if (!range.check(key)) {
+        if(!range.check(key)) {
             result = OpResult.FAILURE;
-        } else {
+        }
+        else {
             shareData(key, privKey);
             result = doGetSearchRecordNumber(options);
             endOperation(null, result, key, pKey, data);
@@ -934,29 +957,31 @@ public class RangeCursor implements Cloneable {
                                DatabaseEntry pKey,
                                DatabaseEntry data,
                                OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!initialized) {
+        if(!initialized) {
             throw new IllegalStateException("Cursor not initialized");
         }
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetNextDup(options);
             endOperation(null, result, null, null, null);
-        } else if (pkRange != null && pkRange.endKey != null) {
+        }
+        else if(pkRange != null && pkRange.endKey != null) {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetNextDup(options);
-                if (result.isSuccess() &&
-                    !pkRange.checkEnd(privPKey, true)) {
+                if(result.isSuccess() &&
+                        !pkRange.checkEnd(privPKey, true)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
                 endOperation(oldCursor, result, key, pKey, data);
             }
-        } else {
+        }
+        else {
             result = doGetNextDup(options);
             endOperation(null, result, key, pKey, data);
         }
@@ -967,29 +992,31 @@ public class RangeCursor implements Cloneable {
                                DatabaseEntry pKey,
                                DatabaseEntry data,
                                OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!initialized) {
+        if(!initialized) {
             throw new IllegalStateException("Cursor not initialized");
         }
         OpResult result;
-        if (!range.hasBound()) {
+        if(!range.hasBound()) {
             setParams(key, pKey, data);
             result = doGetPrevDup(options);
             endOperation(null, result, null, null, null);
-        } else if (pkRange != null && pkRange.beginKey != null) {
+        }
+        else if(pkRange != null && pkRange.beginKey != null) {
             result = OpResult.FAILURE;
             Cursor oldCursor = beginOperation();
             try {
                 result = doGetPrevDup(options);
-                if (result.isSuccess() &&
-                    !pkRange.checkBegin(privPKey, true)) {
+                if(result.isSuccess() &&
+                        !pkRange.checkBegin(privPKey, true)) {
                     result = OpResult.FAILURE;
                 }
             } finally {
                 endOperation(oldCursor, result, key, pKey, data);
             }
-        } else {
+        }
+        else {
             result = doGetPrevDup(options);
             endOperation(null, result, key, pKey, data);
         }
@@ -1000,30 +1027,31 @@ public class RangeCursor implements Cloneable {
                                DatabaseEntry pKey,
                                DatabaseEntry data,
                                OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!initialized) {
+        if(!initialized) {
             throw new IllegalStateException("Cursor not initialized");
         }
-        if (secCursor != null && pKey != null) {
+        if(secCursor != null && pKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        key, pKey, data, Get.CURRENT, options.jeOptions));
+                        secCursor.get(
+                                key, pKey, data, Get.CURRENT, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getCurrent(key, pKey, data, options.getLockMode()));
-        } else {
+                    secCursor.getCurrent(key, pKey, data, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(key, data, Get.CURRENT, options.jeOptions));
+                        cursor.get(key, data, Get.CURRENT, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getCurrent(key, data, options.getLockMode()));
+                    cursor.getCurrent(key, data, options.getLockMode()));
         }
     }
 
@@ -1032,430 +1060,443 @@ public class RangeCursor implements Cloneable {
      */
 
     public void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
         closeCursor(cursor);
     }
 
     public int count()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.count();
     }
 
     public OperationStatus delete()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.delete();
     }
 
     public OperationStatus put(DatabaseEntry key, DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.put(key, data);
     }
 
     public OperationStatus putNoOverwrite(DatabaseEntry key,
                                           DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.putNoOverwrite(key, data);
     }
 
     public OperationStatus putNoDupData(DatabaseEntry key, DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.putNoDupData(key, data);
     }
 
     public OperationStatus putCurrent(DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.putCurrent(data);
     }
 
     public OperationStatus putAfter(DatabaseEntry key, DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return DbCompat.putAfter(cursor, key, data);
     }
 
     public OperationStatus putBefore(DatabaseEntry key, DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return DbCompat.putBefore(cursor, key, data);
     }
 
     private OpResult doGetFirst(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.FIRST,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.FIRST,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getFirst(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getFirst(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.FIRST, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.FIRST, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getFirst(privKey, privData, options.getLockMode()));
+                    cursor.getFirst(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetLast(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.LAST,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.LAST,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getLast(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getLast(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.LAST, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.LAST, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getLast(privKey, privData, options.getLockMode()));
+                    cursor.getLast(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetNext(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.NEXT,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.NEXT,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getNext(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getNext(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.NEXT, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.NEXT, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getNext(privKey, privData, options.getLockMode()));
+                    cursor.getNext(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetNextDup(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.NEXT_DUP,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.NEXT_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getNextDup(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getNextDup(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.NEXT_DUP, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.NEXT_DUP, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getNextDup(privKey, privData, options.getLockMode()));
+                    cursor.getNextDup(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetNextNoDup(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.NEXT_NO_DUP,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.NEXT_NO_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getNextNoDup(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getNextNoDup(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.NEXT_NO_DUP,
-                        options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.NEXT_NO_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getNextNoDup(privKey, privData, options.getLockMode()));
+                    cursor.getNextNoDup(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetPrev(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.PREV,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.PREV,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getPrev(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getPrev(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.PREV, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.PREV, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getPrev(privKey, privData, options.getLockMode()));
+                    cursor.getPrev(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetPrevDup(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.PREV_DUP,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.PREV_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getPrevDup(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getPrevDup(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.PREV_DUP, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.PREV_DUP, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getPrevDup(privKey, privData, options.getLockMode()));
+                    cursor.getPrevDup(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetPrevNoDup(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.PREV_NO_DUP,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.PREV_NO_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getPrevNoDup(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getPrevNoDup(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.PREV_NO_DUP,
-                        options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.PREV_NO_DUP,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getPrevNoDup(privKey, privData, options.getLockMode()));
+                    cursor.getPrevNoDup(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetSearchKey(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
+        if(checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
             return OpResult.FAILURE;
         }
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.SEARCH,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.SEARCH,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getSearchKey(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getSearchKey(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.SEARCH, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.SEARCH, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getSearchKey(privKey, privData, options.getLockMode()));
+                    cursor.getSearchKey(privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetSearchKeyRange(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
+        if(checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
             return OpResult.FAILURE;
         }
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.SEARCH_GTE,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.SEARCH_GTE,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getSearchKeyRange(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getSearchKeyRange(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.SEARCH_GTE, options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.SEARCH_GTE, options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getSearchKeyRange(
-                    privKey, privData, options.getLockMode()));
+                    cursor.getSearchKeyRange(
+                            privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetSearchBoth(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
+        if(checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
             return OpResult.FAILURE;
         }
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.SEARCH_BOTH,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.SEARCH_BOTH,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getSearchBoth(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getSearchBoth(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.SEARCH_BOTH,
-                        options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.SEARCH_BOTH,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getSearchBoth(
-                    privKey, privData, options.getLockMode()));
+                    cursor.getSearchBoth(
+                            privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetSearchBothRange(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
+        if(checkRecordNumber() && DbCompat.getRecordNumber(privKey) <= 0) {
             return OpResult.FAILURE;
         }
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    secCursor.get(
-                        privKey, privPKey, privData, Get.SEARCH_BOTH_GTE,
-                        options.jeOptions));
+                        secCursor.get(
+                                privKey, privPKey, privData, Get.SEARCH_BOTH_GTE,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                secCursor.getSearchBothRange(
-                    privKey, privPKey, privData, options.getLockMode()));
-        } else {
+                    secCursor.getSearchBothRange(
+                            privKey, privPKey, privData, options.getLockMode()));
+        }
+        else {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 return OpResult.make(
-                    cursor.get(
-                        privKey, privData, Get.SEARCH_BOTH_GTE,
-                        options.jeOptions));
+                        cursor.get(
+                                privKey, privData, Get.SEARCH_BOTH_GTE,
+                                options.jeOptions));
             }
             /* <!-- end JE only --> */
             return OpResult.make(
-                cursor.getSearchBothRange(
-                    privKey, privData, options.getLockMode()));
+                    cursor.getSearchBothRange(
+                            privKey, privData, options.getLockMode()));
         }
     }
 
     private OpResult doGetSearchRecordNumber(OpReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (DbCompat.getRecordNumber(privKey) <= 0) {
+        if(DbCompat.getRecordNumber(privKey) <= 0) {
             return OpResult.FAILURE;
         }
-        if (secCursor != null && privPKey != null) {
+        if(secCursor != null && privPKey != null) {
             return OpResult.make(
-                DbCompat.getSearchRecordNumber(
-                    secCursor, privKey, privPKey, privData,
-                    options.getLockMode()));
-        } else {
+                    DbCompat.getSearchRecordNumber(
+                            secCursor, privKey, privPKey, privData,
+                            options.getLockMode()));
+        }
+        else {
             return OpResult.make(
-                DbCompat.getSearchRecordNumber(
-                    cursor, privKey, privData, options.getLockMode()));
+                    DbCompat.getSearchRecordNumber(
+                            cursor, privKey, privData, options.getLockMode()));
         }
     }
 
@@ -1468,7 +1509,7 @@ public class RangeCursor implements Cloneable {
      * Dups the given cursor.
      */
     protected Cursor dupCursor(Cursor cursor, boolean samePosition)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor.dup(samePosition);
     }
@@ -1477,7 +1518,7 @@ public class RangeCursor implements Cloneable {
      * Closes the given cursor.
      */
     protected void closeCursor(Cursor cursor)
-        throws DatabaseException {
+            throws DatabaseException {
 
         cursor.close();
     }

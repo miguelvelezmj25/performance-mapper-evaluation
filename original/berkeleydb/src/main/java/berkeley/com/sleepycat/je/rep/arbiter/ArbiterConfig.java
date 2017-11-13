@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je.rep.arbiter;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
-
 import berkeley.com.sleepycat.je.config.ConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.rep.ReplicationNetworkConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
+
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 
 /**
  * The configuration parameters for an {@link Arbiter}.
@@ -44,6 +44,7 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
 
     /**
      * Arbiter configuration.
+     *
      * @param props to initialize configuration object.
      */
     public ArbiterConfig(Properties props) {
@@ -70,6 +71,15 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     }
 
     /**
+     * Returns the unique name associated with this Arbiter.
+     *
+     * @return the Arbiter name
+     */
+    public String getNodeName() {
+        return DbConfigManager.getVal(props, RepParams.NODE_NAME);
+    }
+
+    /**
      * Sets the name to be associated with this <code>Arbiter</code>. It must
      * be unique within the group. When the <code>Arbiter</code> is
      * instantiated and joins the replication group, a check is done to ensure
@@ -80,35 +90,10 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
      * @param nodeName the name of this arbiter.
      */
     public ArbiterConfig setNodeName(String nodeName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         DbConfigManager.setVal(
                 props, RepParams.NODE_NAME, nodeName, validateParams);
         return this;
-    }
-
-    /**
-     * Returns the unique name associated with this Arbiter.
-     *
-     * @return the Arbiter name
-     */
-    public String getNodeName() {
-        return DbConfigManager.getVal(props, RepParams.NODE_NAME);
-    }
-
-    /**
-     * Sets the name for the replication group. The name must be made up of
-     * just alpha numeric characters and must not be zero length.
-     *
-     * @param groupName the alpha numeric string representing the name.
-     *
-     * @throws IllegalArgumentException if the string name is not valid.
-     */
-    public ArbiterConfig setGroupName(String groupName)
-        throws IllegalArgumentException {
-
-            DbConfigManager.setVal(
-                props, RepParams.GROUP_NAME, groupName, validateParams);
-            return this;
     }
 
     /**
@@ -121,19 +106,17 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     }
 
     /**
-     * Sets the hostname and port associated with this arbiter. The hostname
-     * and port combination are denoted by a string of the form:
-     * <pre>
-     *  hostname[:port]
-     * </pre>
-     * The port must be outside the range of "Well Known Ports"
-     * (zero through 1023).
+     * Sets the name for the replication group. The name must be made up of
+     * just alpha numeric characters and must not be zero length.
      *
-     * @param hostPort the string containing the hostname and port as above.
+     * @param groupName the alpha numeric string representing the name.
+     * @throws IllegalArgumentException if the string name is not valid.
      */
-    public ArbiterConfig setNodeHostPort(String hostPort) {
+    public ArbiterConfig setGroupName(String groupName)
+            throws IllegalArgumentException {
+
         DbConfigManager.setVal(
-            props, RepParams.NODE_HOST_PORT, hostPort, validateParams);
+                props, RepParams.GROUP_NAME, groupName, validateParams);
         return this;
     }
 
@@ -151,24 +134,37 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     }
 
     /**
+     * Sets the hostname and port associated with this arbiter. The hostname
+     * and port combination are denoted by a string of the form:
+     * <pre>
+     *  hostname[:port]
+     * </pre>
+     * The port must be outside the range of "Well Known Ports"
+     * (zero through 1023).
+     *
+     * @param hostPort the string containing the hostname and port as above.
+     */
+    public ArbiterConfig setNodeHostPort(String hostPort) {
+        DbConfigManager.setVal(
+                props, RepParams.NODE_HOST_PORT, hostPort, validateParams);
+        return this;
+    }
+
+    /**
      * Time to wait for the discovery of the Master during the instantiation
      * of the Arbiter. If no Master is found with in the timeout period,
      * the Arbiter constructor return with the Arbiter in the UNKNOWN state.
      *
      * @param timeout The unknown state timeout. A value of 0 turns off
-     * Unknown state timeouts. The creation of the Arbiter will wait until
-     * a Master is found.
-     *
-     * @param unit the {@code TimeUnit} of the timeout value. May be null only
-     * if timeout is zero.
-     *
+     *                Unknown state timeouts. The creation of the Arbiter will wait until
+     *                a Master is found.
+     * @param unit    the {@code TimeUnit} of the timeout value. May be null only
+     *                if timeout is zero.
      * @return this
-     *
      * @throws IllegalArgumentException If the value of timeout is negative
-     *
      */
     public ArbiterConfig setUnknownStateTimeout(long timeout, TimeUnit unit)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         DbConfigManager.setDurationVal(
                 props, RepParams.ENV_UNKNOWN_STATE_TIMEOUT,
                 timeout, unit, validateParams);
@@ -177,21 +173,30 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
 
     /**
      * Returns the Unknown state timeout.
-     *
+     * <p>
      * <p>A value of 0 means Unknown state timeouts are not configured.</p>
      *
      * @param unit the {@code TimeUnit} of the returned value. May not be null.
-     *
      * @return The transaction timeout.
      */
     public long getUnknownStateTimeout(TimeUnit unit) {
         return DbConfigManager.getDurationVal(
-            props, RepParams.ENV_UNKNOWN_STATE_TIMEOUT, unit);
+                props, RepParams.ENV_UNKNOWN_STATE_TIMEOUT, unit);
 
     }
 
     /**
+     * Gets the heartbeat interval in milliseconds.
+     *
+     * @return Heartbeat interval.
+     */
+    public int getHeartbeatInterval() {
+        return DbConfigManager.getIntVal(props, RepParams.HEARTBEAT_INTERVAL);
+    }
+
+    /**
      * Sets the heartbeat interval.
+     *
      * @param millis Interval in milliseconds.
      * @return this
      */
@@ -202,202 +207,175 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     }
 
     /**
-     * Gets the heartbeat interval in milliseconds.
-     * @return Heartbeat interval.
-     */
-    public int getHeartbeatInterval() {
-        return DbConfigManager.getIntVal(props, RepParams.HEARTBEAT_INTERVAL);
-    }
-
-    /**
-     * @hidden
-     * The size of the message queue the Arbiter uses to read
-     * messages and used to size the output message queue for
-     * responses to the master.
-     *
-     * @param val size of the queue
-     * @return this
-     */
-    public ArbiterConfig setMessageQueueSize(int val) {
-        DbConfigManager.setIntVal(
-            props,
-            RepParams.REPLICA_MESSAGE_QUEUE_SIZE, val, validateParams);
-        return this;
-    }
-
-    /**
-     * @hidden
-     * Internal parameter enable use of the group ack message.
-     *
-     * @param val Boolean value.
-     * @return this
-     */
-    public ArbiterConfig setEnableGroupAcks(boolean val) {
-        DbConfigManager.setBooleanVal(
-            props, RepParams.ENABLE_GROUP_ACKS, val, validateParams);
-        return this;
-    }
-
-    /**
-     * @hidden
-     * Get boolean controlling the use of group ack message.
      * @return boolean
+     * @hidden Get boolean controlling the use of group ack message.
      */
     public boolean getEnableGroupAcks() {
         return DbConfigManager.getBooleanVal(
-            props, RepParams.ENABLE_GROUP_ACKS);
+                props, RepParams.ENABLE_GROUP_ACKS);
     }
 
     /**
-     * @hidden
-     * Gets the size of the message queue.
+     * @param val Boolean value.
+     * @return this
+     * @hidden Internal parameter enable use of the group ack message.
+     */
+    public ArbiterConfig setEnableGroupAcks(boolean val) {
+        DbConfigManager.setBooleanVal(
+                props, RepParams.ENABLE_GROUP_ACKS, val, validateParams);
+        return this;
+    }
+
+    /**
      * @return size of the message queue.
+     * @hidden Gets the size of the message queue.
      */
     public int getMessageQueueSize() {
         return DbConfigManager.getIntVal(
-            props, RepParams.REPLICA_MESSAGE_QUEUE_SIZE);
+                props, RepParams.REPLICA_MESSAGE_QUEUE_SIZE);
     }
 
     /**
-     * @hidden
-     * The interval used when checking an inactive connection to the
-     * master.
-     *
-     * @param timeout Timeout value
-     * @param unit time unit
+     * @param val size of the queue
      * @return this
-     * @throws IllegalArgumentException
+     * @hidden The size of the message queue the Arbiter uses to read
+     * messages and used to size the output message queue for
+     * responses to the master.
      */
-    public ArbiterConfig setChannelTimeout(long timeout, TimeUnit unit)
-        throws IllegalArgumentException {
-        DbConfigManager.setDurationVal(
-            props, RepParams.REPLICA_TIMEOUT,
-            timeout, unit, validateParams);
+    public ArbiterConfig setMessageQueueSize(int val) {
+        DbConfigManager.setIntVal(
+                props,
+                RepParams.REPLICA_MESSAGE_QUEUE_SIZE, val, validateParams);
         return this;
     }
 
     /**
-     * @hidden
-     * Gets the timeout value.
+     * @param timeout Timeout value
+     * @param unit    time unit
+     * @return this
+     * @throws IllegalArgumentException
+     * @hidden The interval used when checking an inactive connection to the
+     * master.
+     */
+    public ArbiterConfig setChannelTimeout(long timeout, TimeUnit unit)
+            throws IllegalArgumentException {
+        DbConfigManager.setDurationVal(
+                props, RepParams.REPLICA_TIMEOUT,
+                timeout, unit, validateParams);
+        return this;
+    }
+
+    /**
      * @param unit TimeUnit
      * @return timeout value.
+     * @hidden Gets the timeout value.
      */
     public long getChannelTimeout(TimeUnit unit) {
         return DbConfigManager.getDurationVal(
-            props, RepParams.REPLICA_TIMEOUT, unit);
+                props, RepParams.REPLICA_TIMEOUT, unit);
     }
 
     /**
-     * @hidden
-     * The timeout used when waiting for the initial heartbeat
-     * when establishing a connection.
      * @param timeout Maximum time to wait.
-     * @param unit TimeUnit
+     * @param unit    TimeUnit
      * @return this
      * @throws IllegalArgumentException
+     * @hidden The timeout used when waiting for the initial heartbeat
+     * when establishing a connection.
      */
     public ArbiterConfig setPreHeartbeatTimeout(long timeout, TimeUnit unit)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         DbConfigManager.setDurationVal(
-            props, RepParams.PRE_HEARTBEAT_TIMEOUT,
-            timeout, unit, validateParams);
+                props, RepParams.PRE_HEARTBEAT_TIMEOUT,
+                timeout, unit, validateParams);
         return this;
     }
 
     /**
-     * @hidden
-     * The pre heartbeat timeout value.
      * @param unit TimeUnit
      * @return timeout
+     * @hidden The pre heartbeat timeout value.
      */
     public long getPreHeartbeatTimeout(TimeUnit unit) {
         return DbConfigManager.getDurationVal(
-            props, RepParams.PRE_HEARTBEAT_TIMEOUT, unit);
+                props, RepParams.PRE_HEARTBEAT_TIMEOUT, unit);
     }
 
     /**
-     * @hidden
-     * The heartbeat timeout.
-     *
      * @param timeout Timeout value
-     * @param unit time unit
+     * @param unit    time unit
      * @return this
      * @throws IllegalArgumentException
+     * @hidden The heartbeat timeout.
      */
     public ArbiterConfig setFeederTimeout(long timeout, TimeUnit unit)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         DbConfigManager.setDurationVal(
-            props, RepParams.FEEDER_TIMEOUT,
-            timeout, unit, validateParams);
+                props, RepParams.FEEDER_TIMEOUT,
+                timeout, unit, validateParams);
         return this;
     }
 
     /**
-     * @hidden
-     * Gets the timeout value.
      * @param unit TimeUnit
      * @return timeout value.
+     * @hidden Gets the timeout value.
      */
     public long getFeederTimeout(TimeUnit unit) {
         return DbConfigManager.getDurationVal(
-            props, RepParams.FEEDER_TIMEOUT, unit);
+                props, RepParams.FEEDER_TIMEOUT, unit);
     }
 
     /**
-     * @hidden
-     * The size of the the TCP receive buffer associated with the socket used
-     * by the Arbiter to  communicate to the master.
-     * @param val size of the buffer
-     * @return this
-     */
-    public ArbiterConfig setReceiveBufferSize(int val) {
-        DbConfigManager.setIntVal(
-            props,
-            RepParams.REPLICA_RECEIVE_BUFFER_SIZE, val, validateParams);
-        return this;
-    }
-
-    /**
-     * @hidden
-     * Returns the receive buffer size.
      * @return buffer size.
+     * @hidden Returns the receive buffer size.
      */
     public int getReceiveBufferSize() {
         return DbConfigManager.getIntVal(
-            props, RepParams.REPLICA_RECEIVE_BUFFER_SIZE);
+                props, RepParams.REPLICA_RECEIVE_BUFFER_SIZE);
     }
 
     /**
-     * @hidden
-     * The socket timeout value used by an Arbiter when it opens a new
-     * connection to establish a stream with a feeder.
-     * @param timeout maximum time to wait
-     * @param unit TimeUnit
+     * @param val size of the buffer
      * @return this
-     * @throws IllegalArgumentException
+     * @hidden The size of the the TCP receive buffer associated with the socket used
+     * by the Arbiter to  communicate to the master.
      */
-    public ArbiterConfig setStreamOpenTimeout(long timeout, TimeUnit unit)
-        throws IllegalArgumentException {
-        DbConfigManager.setDurationVal(
-            props, RepParams.REPSTREAM_OPEN_TIMEOUT,
-            timeout, unit, validateParams);
+    public ArbiterConfig setReceiveBufferSize(int val) {
+        DbConfigManager.setIntVal(
+                props,
+                RepParams.REPLICA_RECEIVE_BUFFER_SIZE, val, validateParams);
         return this;
     }
 
     /**
-     * @hidden
-     * Returns the socket timeout value.
-     * @param unit TimeUnit
-     * @return Timeout value.
+     * @param timeout maximum time to wait
+     * @param unit    TimeUnit
+     * @return this
+     * @throws IllegalArgumentException
+     * @hidden The socket timeout value used by an Arbiter when it opens a new
+     * connection to establish a stream with a feeder.
      */
-    public long getStreamOpenTimeout(TimeUnit unit) {
-        return DbConfigManager.getDurationVal(
-            props, RepParams.REPSTREAM_OPEN_TIMEOUT, unit);
+    public ArbiterConfig setStreamOpenTimeout(long timeout, TimeUnit unit)
+            throws IllegalArgumentException {
+        DbConfigManager.setDurationVal(
+                props, RepParams.REPSTREAM_OPEN_TIMEOUT,
+                timeout, unit, validateParams);
+        return this;
     }
 
     /**
-     * @hidden
-     * Get the replication service net configuration associated with
+     * @param unit TimeUnit
+     * @return Timeout value.
+     * @hidden Returns the socket timeout value.
+     */
+    public long getStreamOpenTimeout(TimeUnit unit) {
+        return DbConfigManager.getDurationVal(
+                props, RepParams.REPSTREAM_OPEN_TIMEOUT, unit);
+    }
+
+    /**
+     * @hidden Get the replication service net configuration associated with
      * this MonitorConfig.
      */
     public ReplicationNetworkConfig getRepNetConfig() {
@@ -405,17 +383,14 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     }
 
     /**
-     * @hidden
-     * Set the replication service net configuration associated with
-     * this MonitorConfig.
-     *
      * @param netConfig the new ReplicationNetworkConfig to be associated
-     * with this MonitorConfig.  This must not be null.
-     *
+     *                  with this MonitorConfig.  This must not be null.
      * @throws IllegalArgumentException if the netConfig is null
+     * @hidden Set the replication service net configuration associated with
+     * this MonitorConfig.
      */
     public ArbiterConfig setRepNetConfig(
-        ReplicationNetworkConfig netConfig) {
+            ReplicationNetworkConfig netConfig) {
 
         setRepNetConfigVoid(netConfig);
         return this;
@@ -426,30 +401,29 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
      */
     @Override
     public ArbiterConfig setConfigParam(String paramName, String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         boolean forReplication = false;
         ConfigParam param =
-            EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
-        if (param != null) {
+                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+        if(param != null) {
             forReplication = param.isForReplication();
         }
         DbConfigManager.setConfigParam(props,
-                                       paramName,
-                                       value,
-                                       false, /* requireMutablity */
-                                       validateParams,
-                                       forReplication, /* forReplication */
-                                       true   /* verifyForReplication */);
+                paramName,
+                value,
+                false, /* requireMutablity */
+                validateParams,
+                forReplication, /* forReplication */
+                true   /* verifyForReplication */);
         return this;
     }
 
     /**
-     * @hidden
-     * For bean editors
+     * @hidden For bean editors
      */
     public void setRepNetConfigVoid(ReplicationNetworkConfig netConfig) {
-        if (netConfig == null) {
+        if(netConfig == null) {
             throw new IllegalArgumentException("netConfig may not be null");
         }
         repNetConfig = netConfig;
@@ -462,17 +436,10 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
     /**
      */
     public ArbiterConfig clone() {
-        ArbiterConfig retval = (ArbiterConfig)super.clone();
+        ArbiterConfig retval = (ArbiterConfig) super.clone();
         retval.repNetConfig = repNetConfig.clone();
         retval.arbiterHome = this.arbiterHome;
         return retval;
-    }
-
-    /**
-     */
-    public ArbiterConfig setLoggingHandler(Handler handler) {
-        loggingHandler = handler;
-        return this;
     }
 
     /**
@@ -481,6 +448,13 @@ public class ArbiterConfig extends ArbiterMutableConfig implements Cloneable {
      */
     public Handler getLoggingHandler() {
         return loggingHandler;
+    }
+
+    /**
+     */
+    public ArbiterConfig setLoggingHandler(Handler handler) {
+        loggingHandler = handler;
+        return this;
     }
 
     /**

@@ -34,13 +34,17 @@ public abstract class MapStatComponent<T, C extends MapStatComponent<T, C>>
      */
     protected abstract String getFormattedValue(boolean useCommas);
 
-    /** Implement this overloading to use commas. */
+    /**
+     * Implement this overloading to use commas.
+     */
     @Override
     protected String getFormattedValue() {
         return getFormattedValue(true);
     }
 
-    /** Narrow the return type to the component type. */
+    /**
+     * Narrow the return type to the component type.
+     */
     @Override
     public abstract C copy();
 }

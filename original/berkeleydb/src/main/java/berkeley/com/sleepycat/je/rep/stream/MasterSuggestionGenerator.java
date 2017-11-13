@@ -22,26 +22,24 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
 
 /**
  * A Basic suggestion generator.
- *
+ * <p>
  * A more sophisticated version may contact other replica nodes to see if it
  * has sufficient connectivity to implement the commit policy in effect for
  * the Replication Group. KIS for now.
  */
 public class MasterSuggestionGenerator
-    implements Acceptor.SuggestionGenerator {
-
-    private final RepNode repNode;
-
-    /* Determines whether to use pre-emptive ranking to make this
-     * node the Master during the next election */
-    private boolean forceAsMaster = false;
+        implements Acceptor.SuggestionGenerator {
 
     /* Used during a forced election to guarantee this proposal as a winner. */
     private static final Ranking PREMPTIVE_RANKING =
-        new Ranking(Long.MAX_VALUE, 0);
+            new Ranking(Long.MAX_VALUE, 0);
     /* The ranking used to ensure that a current master is reselected. */
     private static final Ranking MASTER_RANKING =
-        new Ranking(Long.MAX_VALUE - 1, 0);
+            new Ranking(Long.MAX_VALUE - 1, 0);
+    private final RepNode repNode;
+    /* Determines whether to use pre-emptive ranking to make this
+     * node the Master during the next election */
+    private boolean forceAsMaster = false;
 
     public MasterSuggestionGenerator(RepNode repNode) {
         this.repNode = repNode;
@@ -51,26 +49,26 @@ public class MasterSuggestionGenerator
     public Value get(Proposal proposal) {
         /* Suggest myself as master */
         return new MasterValue(repNode.getHostName(),
-                               repNode.getPort(),
-                               repNode.getNameIdPair());
+                repNode.getPort(),
+                repNode.getNameIdPair());
     }
 
     @Override
     public Ranking getRanking(Proposal proposal) {
-        if (forceAsMaster) {
+        if(forceAsMaster) {
             return PREMPTIVE_RANKING;
         }
         repNode.getVLSNFreezeLatch().freeze(proposal);
 
-        if (repNode.isAuthoritativeMaster()) {
+        if(repNode.isAuthoritativeMaster()) {
             return MASTER_RANKING;
         }
 
         final long dtvlsn = repNode.getDTVLSN();
         final long vlsn = repNode.getVLSNIndex().getRange().
-                           getLast().getSequence();
+                getLast().getSequence();
 
-        if (dtvlsn == VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
+        if(dtvlsn == VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
             /*
              * In a preDTVLSN stream segment on a postDTVLSN replica. No
              * DTVLSN information as yet.
@@ -83,7 +81,7 @@ public class MasterSuggestionGenerator
 
     /**
      * This entry point is for testing only.
-     *
+     * <p>
      * It will submit a Proposal with a premptive ranking so that it's
      * guaranteed to be the selected as the master at the next election.
      *

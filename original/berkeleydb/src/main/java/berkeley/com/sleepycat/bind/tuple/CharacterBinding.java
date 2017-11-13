@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a <code>Character</code> primitive
  * wrapper or a <code>char</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class CharacterBinding extends TupleBinding<Character> {
 
     private static final int CHAR_SIZE = 2;
 
+    /**
+     * Converts an entry buffer into a simple <code>char</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static char entryToChar(DatabaseEntry entry) {
+
+        return entryToInput(entry).readChar();
+    }
+
+    /**
+     * Converts a simple <code>char</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void charToEntry(char val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeChar(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[CHAR_SIZE]);
+    }
+
     // javadoc is inherited
     public Character entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class CharacterBinding extends TupleBinding<Character> {
     protected TupleOutput getTupleOutput(Character object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>char</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static char entryToChar(DatabaseEntry entry) {
-
-        return entryToInput(entry).readChar();
-    }
-
-    /**
-     * Converts a simple <code>char</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void charToEntry(char val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeChar(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[CHAR_SIZE]);
     }
 }

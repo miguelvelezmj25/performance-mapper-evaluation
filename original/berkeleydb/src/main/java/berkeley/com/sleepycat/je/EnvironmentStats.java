@@ -13,160 +13,6 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_BIN_DELTAS_CLEANED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_BIN_DELTAS_DEAD;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_BIN_DELTAS_MIGRATED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_BIN_DELTAS_OBSOLETE;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_CLUSTER_LNS_PROCESSED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_DELETIONS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_DISK_READS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_ENTRIES_READ;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_FILE_DELETION_BACKLOG;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_INS_CLEANED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_INS_DEAD;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_INS_MIGRATED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_INS_OBSOLETE;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNQUEUE_HITS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_CLEANED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_DEAD;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_EXPIRED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_LOCKED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_MARKED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_MIGRATED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_LNS_OBSOLETE;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_MARKED_LNS_PROCESSED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_MAX_UTILIZATION;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_MIN_UTILIZATION;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_PENDING_LNS_LOCKED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_PENDING_LNS_PROCESSED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_PENDING_LN_QUEUE_SIZE;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_REPEAT_ITERATOR_READS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_REVISAL_RUNS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_RUNS;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_TOTAL_LOG_SIZE;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_TO_BE_CLEANED_LNS_PROCESSED;
-import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.CLEANER_TWO_PASS_RUNS;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_CREATION_TIME;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_RELATCHES_REQUIRED;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_ADMIN_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DATA_ADMIN_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DATA_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DOS_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_LOCK_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_SHARED_CACHE_TOTAL_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_TOTAL_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_BIN_DELTA_DELETES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_BIN_DELTA_GETS;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_BIN_DELTA_INSERTS;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.ENV_BIN_DELTA_UPDATES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_DELETE;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_DELETE_FAIL;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_INSERT;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_INSERT_FAIL;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_POSITION;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_SEARCH;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_SEARCH_FAIL;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_PRI_UPDATE;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_DELETE;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_INSERT;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_POSITION;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_SEARCH;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_SEARCH_FAIL;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.THROUGHPUT_SEC_UPDATE;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.BIN_DELTA_BLIND_OPS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.BIN_DELTA_FETCH_MISS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.BIN_FETCH;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.BIN_FETCH_MISS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.BIN_FETCH_MISS_RATIO;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_BINS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_BIN_DELTAS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_IN_COMPACT_KEY;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_IN_NO_TARGET;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_IN_SPARSE_TARGET;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.CACHED_UPPER_INS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_DIRTY_NODES_EVICTED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_EVICTION_RUNS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_LNS_EVICTED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_EVICTED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_MOVED_TO_PRI2_LRU;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_MUTATED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_PUT_BACK;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_SKIPPED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_STRIPPED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_NODES_TARGETED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_ROOT_NODES_EVICTED;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.EVICTOR_SHARED_CACHE_ENVS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.FULL_BIN_MISS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.LN_FETCH;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.LN_FETCH_MISS;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.PRI1_LRU_SIZE;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.PRI2_LRU_SIZE;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.THREAD_UNAVAILABLE;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.UPPER_IN_FETCH;
-import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.UPPER_IN_FETCH_MISS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_CURSORS_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_DBCLOSED_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_NON_EMPTY_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_PROCESSED_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_QUEUE_SIZE;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_SPLIT_BINS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_CONTENTION;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NOWAIT_SUCCESS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NOWAIT_UNSUCCESS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NO_WAITERS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_RELEASES;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_SELF_OWNED;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_BYTES_READ_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_BYTES_WRITTEN_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_FILE_OPENS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_LOG_FSYNCS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_OPEN_FILES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_READ_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_WRITES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_WRITE_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_READS_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_READ_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_WRITES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_WRITE_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITEQUEUE_OVERFLOW;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITEQUEUE_OVERFLOW_FAILURES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITES_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_FSYNCS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_FSYNC_REQUESTS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_TIMEOUTS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_FSYNC_MAX_TIME;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_FSYNC_TIME;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LBFP_BUFFER_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LBFP_LOG_BUFFERS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LBFP_MISS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LBFP_NOT_RESIDENT;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_END_OF_LOG;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_REPEAT_FAULT_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_TEMP_BUFFER_WRITES;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_CHECKPOINTS;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_DELTA_IN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_FULL_BIN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_FULL_IN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPTID;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_END;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_INTERVAL;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_START;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_OWNERS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_READ_LOCKS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_REQUESTS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_TOTAL;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WAITERS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WAITS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WRITE_LOCKS;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition;
 import berkeley.com.sleepycat.je.dbi.DbiStatDefinition;
 import berkeley.com.sleepycat.je.evictor.Evictor.EvictionSource;
@@ -177,6 +23,21 @@ import berkeley.com.sleepycat.je.log.LogStatDefinition;
 import berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition;
 import berkeley.com.sleepycat.je.txn.LockStatDefinition;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static berkeley.com.sleepycat.je.cleaner.CleanerStatDefinition.*;
+import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.*;
+import static berkeley.com.sleepycat.je.evictor.EvictorStatDefinition.*;
+import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.*;
+import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.*;
+import static berkeley.com.sleepycat.je.log.LogStatDefinition.*;
+import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.*;
+import static berkeley.com.sleepycat.je.txn.LockStatDefinition.*;
 
 /**
  * Statistics for a single environment.
@@ -207,6 +68,7 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  * <li><b>Locks</b>: Number of locking operations, contention on lock table.
  * </li>
  * </ul>
+ *
  * @see <a href="{@docRoot}/../jconsole/JConsole-plugin.html">Viewing
  * Statistics with JConsole</a>
  */
@@ -225,169 +87,164 @@ public class EnvironmentStats implements Serializable {
     private StatGroup throughputStats;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public EnvironmentStats() {
         incompStats = new StatGroup(INCompStatDefinition.GROUP_NAME,
-                                    INCompStatDefinition.GROUP_DESC);
+                INCompStatDefinition.GROUP_DESC);
 
         cacheStats = new StatGroup(EvictorStatDefinition.GROUP_NAME,
-                                   EvictorStatDefinition.GROUP_DESC);
+                EvictorStatDefinition.GROUP_DESC);
         offHeapStats = new StatGroup(OffHeapStatDefinition.GROUP_NAME,
-                                     OffHeapStatDefinition.GROUP_DESC);
+                OffHeapStatDefinition.GROUP_DESC);
         ckptStats = new StatGroup(CheckpointStatDefinition.GROUP_NAME,
-                                  CheckpointStatDefinition.GROUP_DESC);
+                CheckpointStatDefinition.GROUP_DESC);
         cleanerStats = new StatGroup(CleanerStatDefinition.GROUP_NAME,
-                                     CleanerStatDefinition.GROUP_DESC);
+                CleanerStatDefinition.GROUP_DESC);
         logStats = new StatGroup(LogStatDefinition.GROUP_NAME,
-                                 LogStatDefinition.GROUP_DESC);
+                LogStatDefinition.GROUP_DESC);
         lockStats = new StatGroup(LockStatDefinition.GROUP_NAME,
-                                  LockStatDefinition.GROUP_DESC);
+                LockStatDefinition.GROUP_DESC);
         envImplStats = new StatGroup(DbiStatDefinition.ENV_GROUP_NAME,
-                                     DbiStatDefinition.ENV_GROUP_DESC);
+                DbiStatDefinition.ENV_GROUP_DESC);
         throughputStats =
-            new StatGroup(DbiStatDefinition.THROUGHPUT_GROUP_NAME,
-                          DbiStatDefinition.THROUGHPUT_GROUP_DESC);
+                new StatGroup(DbiStatDefinition.THROUGHPUT_GROUP_NAME,
+                        DbiStatDefinition.THROUGHPUT_GROUP_DESC);
     }
 
     /**
-     * @hidden
-     * Internal use only.
-     */
-    public List<StatGroup> getStatGroups() {
-        return Arrays.asList(
-            logStats, cacheStats, offHeapStats, cleanerStats, incompStats,
-            ckptStats, envImplStats, lockStats, throughputStats);
-    }
-
-    /**
-     * @hidden
-     * Internal use only.
-     */
-    public Map<String, StatGroup> getStatGroupsMap() {
-        final HashMap<String, StatGroup> map = new HashMap<>();
-        for (StatGroup group : getStatGroups()) {
-            map.put(group.getName(), group);
-        }
-        return map;
-    }
-
-    /**
-     * @hidden
-     * Internal use only.
-     */
-    public void setStatGroup(StatGroup sg) {
-
-        if (sg.getName().equals(INCompStatDefinition.GROUP_NAME)) {
-            incompStats = sg;
-        } else if (sg.getName().equals(EvictorStatDefinition.GROUP_NAME)) {
-            cacheStats = sg;
-        } else if (sg.getName().equals(OffHeapStatDefinition.GROUP_NAME)) {
-            offHeapStats = sg;
-        } else if (sg.getName().equals(CheckpointStatDefinition.GROUP_NAME)) {
-            ckptStats = sg;
-        } else if (sg.getName().equals(CleanerStatDefinition.GROUP_NAME)) {
-            cleanerStats = sg;
-        } else if (sg.getName().equals(LogStatDefinition.GROUP_NAME)) {
-            logStats = sg;
-        } else if (sg.getName().equals(LockStatDefinition.GROUP_NAME)) {
-            lockStats = sg;
-        } else if (sg.getName().equals(DbiStatDefinition.ENV_GROUP_NAME)) {
-            envImplStats = sg;
-        } else if (sg.getName().equals(
-            DbiStatDefinition.THROUGHPUT_GROUP_NAME)) {
-            throughputStats = sg;
-        } else {
-            throw EnvironmentFailureException.unexpectedState
-            ("Invalid stat group name in setStatGroup " +
-            sg.getName());
-        }
-    }
-
-    /**
-     * @hidden
-     * Internal use only
+     * @hidden Internal use only
      * For JConsole plugin support.
      */
     public static String[] getStatGroupTitles() {
         List<StatGroup> groups = new EnvironmentStats().getStatGroups();
         final String[] titles = new String[groups.size()];
-        for (int i = 0; i < titles.length; i += 1) {
+        for(int i = 0; i < titles.length; i += 1) {
             titles[i] = groups.get(i).getName();
         }
         return titles;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
+     */
+    public List<StatGroup> getStatGroups() {
+        return Arrays.asList(
+                logStats, cacheStats, offHeapStats, cleanerStats, incompStats,
+                ckptStats, envImplStats, lockStats, throughputStats);
+    }
+
+    /**
+     * @hidden Internal use only.
+     */
+    public Map<String, StatGroup> getStatGroupsMap() {
+        final HashMap<String, StatGroup> map = new HashMap<>();
+        for(StatGroup group : getStatGroups()) {
+            map.put(group.getName(), group);
+        }
+        return map;
+    }
+
+    /**
+     * @hidden Internal use only.
+     */
+    public void setStatGroup(StatGroup sg) {
+
+        if(sg.getName().equals(INCompStatDefinition.GROUP_NAME)) {
+            incompStats = sg;
+        }
+        else if(sg.getName().equals(EvictorStatDefinition.GROUP_NAME)) {
+            cacheStats = sg;
+        }
+        else if(sg.getName().equals(OffHeapStatDefinition.GROUP_NAME)) {
+            offHeapStats = sg;
+        }
+        else if(sg.getName().equals(CheckpointStatDefinition.GROUP_NAME)) {
+            ckptStats = sg;
+        }
+        else if(sg.getName().equals(CleanerStatDefinition.GROUP_NAME)) {
+            cleanerStats = sg;
+        }
+        else if(sg.getName().equals(LogStatDefinition.GROUP_NAME)) {
+            logStats = sg;
+        }
+        else if(sg.getName().equals(LockStatDefinition.GROUP_NAME)) {
+            lockStats = sg;
+        }
+        else if(sg.getName().equals(DbiStatDefinition.ENV_GROUP_NAME)) {
+            envImplStats = sg;
+        }
+        else if(sg.getName().equals(
+                DbiStatDefinition.THROUGHPUT_GROUP_NAME)) {
+            throughputStats = sg;
+        }
+        else {
+            throw EnvironmentFailureException.unexpectedState
+                    ("Invalid stat group name in setStatGroup " +
+                            sg.getName());
+        }
+    }
+
+    /**
+     * @hidden Internal use only.
      */
     public void setThroughputStats(StatGroup stats) {
         throughputStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setINCompStats(StatGroup stats) {
         incompStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setCkptStats(StatGroup stats) {
         ckptStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setCleanerStats(StatGroup stats) {
         cleanerStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setLogStats(StatGroup stats) {
         logStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setMBAndEvictorStats(StatGroup clonedMBStats,
-                                     StatGroup clonedEvictorStats){
+                                     StatGroup clonedEvictorStats) {
         cacheStats = clonedEvictorStats;
         cacheStats.addAll(clonedMBStats);
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setOffHeapStats(StatGroup stats) {
         offHeapStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setLockStats(StatGroup stats) {
         lockStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setEnvStats(StatGroup stats) {
         envImplStats = stats;
@@ -569,7 +426,6 @@ public class EnvironmentStats implements Serializable {
      *
      * @return the current minimum utilization, or -1 if the utilization has
      * not been calculated for this environment since it was last opened.
-     *
      * @since 6.5
      */
     public int getCurrentMinUtilization() {
@@ -606,7 +462,6 @@ public class EnvironmentStats implements Serializable {
      *
      * @return the current maximum utilization, or -1 if the utilization has
      * not been calculated for this environment since it was last opened.
-     *
      * @since 6.5
      */
     public int getCurrentMaxUtilization() {
@@ -705,7 +560,6 @@ public class EnvironmentStats implements Serializable {
      * in any cleaning.
      *
      * @see #getNCleanerTwoPassRuns()
-     *
      * @since 6.5.0
      */
     public long getNCleanerRevisalRuns() {
@@ -938,7 +792,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * The location of the next entry to be written to the log.
-     *
+     * <p>
      * <p>Note that the log entries prior to this position may not yet have
      * been flushed to disk.  Flushing can be forced using a Sync or
      * WriteNoSync commit, or a checkpoint.</p>
@@ -1299,7 +1153,7 @@ public class EnvironmentStats implements Serializable {
     /**
      * Number of dirty target nodes logged and evicted. This does not include
      * dirty nodes evicted from the main cache and stored off-heap.
-     *
+     * <p>
      * Can be used to determine how much logging and its associated costs
      * (cleaning, etc) are being caused by eviction.
      */
@@ -1666,7 +1520,7 @@ public class EnvironmentStats implements Serializable {
      */
     public long getNBytesEvictedEvictorThread() {
         return cacheStats.getLong(
-            EvictionSource.EVICTORTHREAD.getNumBytesEvictedStatDef());
+                EvictionSource.EVICTORTHREAD.getNumBytesEvictedStatDef());
     }
 
     /**
@@ -1677,7 +1531,7 @@ public class EnvironmentStats implements Serializable {
      */
     public long getNBytesEvictedManual() {
         return cacheStats.getLong(
-            EvictionSource.MANUAL.getNumBytesEvictedStatDef());
+                EvictionSource.MANUAL.getNumBytesEvictedStatDef());
     }
 
     /**
@@ -1687,7 +1541,7 @@ public class EnvironmentStats implements Serializable {
      */
     public long getNBytesEvictedCacheMode() {
         return cacheStats.getLong(
-            EvictionSource.CACHEMODE.getNumBytesEvictedStatDef());
+                EvictionSource.CACHEMODE.getNumBytesEvictedStatDef());
     }
 
     /**
@@ -1697,7 +1551,7 @@ public class EnvironmentStats implements Serializable {
      */
     public long getNBytesEvictedCritical() {
         return cacheStats.getLong(
-            EvictionSource.CRITICAL.getNumBytesEvictedStatDef());
+                EvictionSource.CRITICAL.getNumBytesEvictedStatDef());
     }
 
     /**
@@ -1706,7 +1560,7 @@ public class EnvironmentStats implements Serializable {
      */
     public long getNBytesEvictedDeamon() {
         return cacheStats.getLong(
-            EvictionSource.DAEMON.getNumBytesEvictedStatDef());
+                EvictionSource.DAEMON.getNumBytesEvictedStatDef());
     }
 
     /**
@@ -1756,7 +1610,7 @@ public class EnvironmentStats implements Serializable {
      * environment uses the shared cache, this method returns the total amount
      * used by all environments that are sharing the cache.  If this
      * environment does not use the shared cache, this method returns zero.
-     *
+     * <p>
      * <p>To get the configured maximum cache size, see {@link
      * EnvironmentMutableConfig#getCacheSize}.</p>
      */
@@ -1768,10 +1622,10 @@ public class EnvironmentStats implements Serializable {
      * The total amount of JE cache in use, in bytes.  If this environment uses
      * the shared cache, this method returns only the amount used by this
      * environment.
-     *
+     * <p>
      * <p>This method returns the sum of {@link #getDataBytes}, {@link
      * #getAdminBytes}, {@link #getLockBytes} and {@link #getBufferBytes}.</p>
-     *
+     * <p>
      * <p>To get the configured maximum cache size, see {@link
      * EnvironmentMutableConfig#getCacheSize}.</p>
      */
@@ -1783,7 +1637,7 @@ public class EnvironmentStats implements Serializable {
      * The amount of JE cache used for holding data, keys and internal Btree
      * nodes, in bytes.  If this environment uses the shared cache, this method
      * returns only the amount used by this environment.
-     *
+     * <p>
      * <p>The value returned by this method includes the amount returned by
      * {@link #getDataAdminBytes}.</p>
      */
@@ -1844,14 +1698,14 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of off-heap allocation failures due to lack of system memory.
-     *
+     * <p>
      * Currently, with the default off-heap allocator, this happens only when
      * OutOfMemoryError is thrown by Unsafe.allocateMemory. This might be
      * considered a fatal error, since it means that no memory is available on
      * the machine or VM. In practice, we have not seen this occur because
      * Linux will automatically kill processes that are rapidly allocating
      * memory when available memory is very low.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1861,12 +1715,12 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of off-heap allocation attempts that exceeded the cache size.
-     *
+     * <p>
      * Currently, with the default off-heap allocator, this never happens
      * because the allocator will perform the allocation as long as any memory
      * is available. Even so, the off-heap evictor normally prevents
      * overflowing of the off-heap cache by freeing memory before it is needed.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1878,10 +1732,10 @@ public class EnvironmentStats implements Serializable {
      * Number of eviction tasks that were submitted to the background off-heap
      * evictor pool, but were refused because all off-heap eviction threads
      * were busy.
-     *
+     * <p>
      * The user may want to change the size of the evictor pool through the
      * EnvironmentConfig.OFFHEAP_* properties.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1891,7 +1745,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of BINs selected as off-heap eviction targets.
-     *
+     * <p>
      * Nodes are selected as targets by the evictor based on LRU, always
      * selecting from the cold end of the LRU list. First, non-dirty nodes and
      * nodes referring to off-heap LNs are selected based on LRU. When there
@@ -1901,7 +1755,7 @@ public class EnvironmentStats implements Serializable {
      * An eviction target may actually be evicted, or skipped, or put back to
      * the LRU, potentially after stripping child LNs or mutation to a
      * BIN-delta.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1912,25 +1766,25 @@ public class EnvironmentStats implements Serializable {
     /**
      * Number of off-heap nodes targeted in 'critical eviction' mode,
      * potentially causing long operation latency in application threads.
-     *
+     * <p>
      * The user may want to change the size of the evictor pool or the number
      * of eviction bytes through the EnvironmentConfig.OFFHEAP_* properties.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
     public long getOffHeapCriticalNodesTargeted() {
         return cacheStats.getLong(
-            OffHeapStatDefinition.CRITICAL_NODES_TARGETED);
+                OffHeapStatDefinition.CRITICAL_NODES_TARGETED);
     }
 
     /**
      * Number of BINs (dirty and non-dirty) evicted from the off-heap cache.
-     *
+     * <p>
      * An evicted BIN is completely removed from the off-heap cache and LRU
      * list. If it is dirty, it must be logged. A BIN is evicted only if it has
      * no off-heap child LNs and it cannot be mutated to a BIN-delta.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1941,10 +1795,10 @@ public class EnvironmentStats implements Serializable {
     /**
      * Number of target BINs evicted from the off-heap cache that were dirty
      * and therefore were logged.
-     *
+     * <p>
      * Can be used to determine how much logging and its associated costs
      * (cleaning, etc) are being caused by eviction.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1954,7 +1808,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of target BINs whose off-heap child LNs were evicted (stripped).
-     *
+     * <p>
      * When a BIN is stripped, all off-heap LNs that the BIN refers to are
      * evicted. The {@link #getOffHeapLNsEvicted()} stat is incremented
      * accordingly.
@@ -1971,7 +1825,7 @@ public class EnvironmentStats implements Serializable {
      * list. Off-heap BINs are only mutated to BIN-deltas or evicted completely
      * when they do not refer to any off-heap LNs. This gives BINs precedence
      * over LNs in the cache.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1981,13 +1835,13 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of off-heap target BINs mutated to BIN-deltas.
-     *
+     * <p>
      * Mutation to a BIN-delta is performed for full BINs that do not refer to
      * any off-heap LNs and can be represented as BIN-deltas in cache and on
      * disk (see {@link EnvironmentConfig#TREE_BIN_DELTA}). When a BIN is
      * mutated, it is is copied to a new, smaller off-heap block. After
      * mutating an off-heap BIN, it is moved to the hot end of the LRU list.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -1997,7 +1851,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of off-heap target BINs on which no action was taken.
-     *
+     * <p>
      * For example, a node will be skipped if it has been moved to the hot end
      * of the LRU list by another thread, or more rarely, already processed by
      * another evictor thread. This can occur because there is a short period
@@ -2006,7 +1860,7 @@ public class EnvironmentStats implements Serializable {
      * <p>
      * The number of skipped nodes is normally very small, compared to the
      * number of targeted nodes.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2017,7 +1871,7 @@ public class EnvironmentStats implements Serializable {
     /**
      * Number of LNs evicted from the off-heap cache as a result of BIN
      * stripping.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      *
@@ -2029,10 +1883,10 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of LNs loaded from the off-heap cache.
-     *
+     * <p>
      * LNs are loaded when requested by CRUD operations or other internal
      * btree operations.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2042,12 +1896,12 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of LNs stored into the off-heap cache.
-     *
+     * <p>
      * LNs are stored off-heap when they are evicted from the main cache. Note
      * that when {@link CacheMode#EVICT_LN} is used, the LN resides in the main
      * cache for a very short period since it is evicted after the CRUD
      * operation is complete.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2057,10 +1911,10 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of BINs loaded from the off-heap cache.
-     *
+     * <p>
      * BINs are loaded when needed by CRUD operations or other internal
      * btree operations.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2070,12 +1924,12 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of BINs stored into the off-heap cache.
-     *
+     * <p>
      * BINs are stored off-heap when they are evicted from the main cache. Note
      * that when {@link CacheMode#EVICT_BIN} is used, the BIN resides in the
      * main cache for a very short period since it is evicted after the CRUD
      * operation is complete.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2085,7 +1939,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of LNs residing in the off-heap cache.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2096,7 +1950,7 @@ public class EnvironmentStats implements Serializable {
     /**
      * Number of BINs (full BINs and BIN-deltas) residing in the off-heap
      * cache.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2106,7 +1960,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of BIN-deltas residing in the off-heap cache.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2116,13 +1970,13 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Total number of estimated bytes in the off-heap cache.
-     *
+     * <p>
      * This includes the estimated overhead for off-heap memory blocks, as well
      * as their contents.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
-     *
+     * <p>
      * <p>To get the configured maximum off-heap cache size, see {@link
      * EnvironmentMutableConfig#getOffHeapCacheSize()}.</p>
      */
@@ -2132,11 +1986,11 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Total number of memory blocks in the off-heap cache.
-     *
+     * <p>
      * There is one block for each off-heap BIN and one for each off-heap LN.
      * So the total number of blocks is the sum of {@link #getOffHeapCachedLNs}
      * and {@link #getOffHeapCachedBINs}.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2146,7 +2000,7 @@ public class EnvironmentStats implements Serializable {
 
     /**
      * Number of entries in the off-heap LRU list.
-     *
+     * <p>
      * The off-heap LRU list is stored in the Java heap. Each entry occupies
      * 20 bytes of memory when compressed oops are used, or 24 bytes otherwise.
      * This memory is not considered part of the JE main cache, and is not
@@ -2157,7 +2011,7 @@ public class EnvironmentStats implements Serializable {
      * avoids an LRU entry per off-heap LN, which would use excessive amounts
      * of space in the Java heap. Similarly, when an off-heap BIN refers to
      * off-heap LNs, only one LRU entry (for the BIN) is used.
-     *
+     * <p>
      * <p>If this environment uses the shared cache, the return value is the
      * total for all environments that are sharing the cache.</p>
      */
@@ -2324,24 +2178,24 @@ public class EnvironmentStats implements Serializable {
      * <p>
      * This operation corresponds to one of the following API calls:
      * <ul>
-     *     <li>
-     *         A successful {@link Cursor#get(DatabaseEntry, DatabaseEntry,
-     *         Get, ReadOptions) Cursor.get} or {@link
-     *         Database#get(Transaction, DatabaseEntry, DatabaseEntry, Get,
-     *         ReadOptions) Database.get} call with {@link Get#SEARCH}, {@link
-     *         Get#SEARCH_GTE}, {@link Get#SEARCH_BOTH}, or {@link
-     *         Get#SEARCH_BOTH_GTE}.
-     *     </li>
-     *     <li>
-     *         A successful {@link SecondaryCursor#get(DatabaseEntry,
-     *         DatabaseEntry, DatabaseEntry, Get, ReadOptions)
-     *         SecondaryCursor.get} or {@link
-     *         SecondaryDatabase#get(Transaction, DatabaseEntry, DatabaseEntry,
-     *         DatabaseEntry, Get, ReadOptions) SecondaryDatabase.get} call
-     *         when the primary data is requested (via the {@code data} param).
-     *         This call internally performs a key search operation in the
-     *         primary DB in order to return the data.
-     *     </li>
+     * <li>
+     * A successful {@link Cursor#get(DatabaseEntry, DatabaseEntry,
+     * Get, ReadOptions) Cursor.get} or {@link
+     * Database#get(Transaction, DatabaseEntry, DatabaseEntry, Get,
+     * ReadOptions) Database.get} call with {@link Get#SEARCH}, {@link
+     * Get#SEARCH_GTE}, {@link Get#SEARCH_BOTH}, or {@link
+     * Get#SEARCH_BOTH_GTE}.
+     * </li>
+     * <li>
+     * A successful {@link SecondaryCursor#get(DatabaseEntry,
+     * DatabaseEntry, DatabaseEntry, Get, ReadOptions)
+     * SecondaryCursor.get} or {@link
+     * SecondaryDatabase#get(Transaction, DatabaseEntry, DatabaseEntry,
+     * DatabaseEntry, Get, ReadOptions) SecondaryDatabase.get} call
+     * when the primary data is requested (via the {@code data} param).
+     * This call internally performs a key search operation in the
+     * primary DB in order to return the data.
+     * </li>
      * </ul>
      */
     public long getPriSearchOps() {
@@ -2448,14 +2302,14 @@ public class EnvironmentStats implements Serializable {
      * or {@link Database#put(Transaction, DatabaseEntry, DatabaseEntry, Put,
      * WriteOptions) Database.put} in one of the following cases:
      * <ul>
-     *     <li>
-     *         When {@link Put#NO_OVERWRITE} or {@link Put#NO_DUP_DATA} is
-     *         specified.
-     *     </li>
-     *     <li>
-     *         When {@link Put#OVERWRITE} is specified and the key was inserted
-     *         because it previously did not exist in the DB.
-     *     </li>
+     * <li>
+     * When {@link Put#NO_OVERWRITE} or {@link Put#NO_DUP_DATA} is
+     * specified.
+     * </li>
+     * <li>
+     * When {@link Put#OVERWRITE} is specified and the key was inserted
+     * because it previously did not exist in the DB.
+     * </li>
      * </ul>
      */
     public long getPriInsertOps() {
@@ -2506,13 +2360,13 @@ public class EnvironmentStats implements Serializable {
      * or {@link Database#put(Transaction, DatabaseEntry, DatabaseEntry, Put,
      * WriteOptions) Database.put} in one of the following cases:
      * <ul>
-     *     <li>
-     *         When {@link Put#OVERWRITE} is specified and the key previously
-     *         existed in the DB.
-     *     </li>
-     *     <li>
-     *         When calling {@code Cursor.put} with {@link Put#CURRENT}.
-     *     </li>
+     * <li>
+     * When {@link Put#OVERWRITE} is specified and the key previously
+     * existed in the DB.
+     * </li>
+     * <li>
+     * When calling {@code Cursor.put} with {@link Put#CURRENT}.
+     * </li>
      * </ul>
      */
     public long getPriUpdateOps() {
@@ -2572,25 +2426,25 @@ public class EnvironmentStats implements Serializable {
      * <p>
      * This operation corresponds to one of the following API calls:
      * <ul>
-     *     <li>
-     *         A successful call to {@link Cursor#delete() Cursor.delete} or
-     *         {@link Database#delete(Transaction, DatabaseEntry,
-     *         WriteOptions) Database.delete}, that deletes a primary record
-     *         containing a non-null secondary key.
-     *     </li>
-     *     <li>
-     *         A successful call to {@link SecondaryCursor#delete()
-     *         SecondaryCursor.delete} or {@link
-     *         SecondaryDatabase#delete(Transaction, DatabaseEntry,
-     *         WriteOptions) SecondaryDatabase.delete}.
-     *     </li>
-     *     <li>
-     *         A successful call to {@link Cursor#put(DatabaseEntry,
-     *         DatabaseEntry, Put, WriteOptions) Cursor.put} or {@link
-     *         Database#put(Transaction, DatabaseEntry, DatabaseEntry, Put,
-     *         WriteOptions) Database.put} that updates a primary record and
-     *         changes its previously non-null secondary key to null.
-     *     </li>
+     * <li>
+     * A successful call to {@link Cursor#delete() Cursor.delete} or
+     * {@link Database#delete(Transaction, DatabaseEntry,
+     * WriteOptions) Database.delete}, that deletes a primary record
+     * containing a non-null secondary key.
+     * </li>
+     * <li>
+     * A successful call to {@link SecondaryCursor#delete()
+     * SecondaryCursor.delete} or {@link
+     * SecondaryDatabase#delete(Transaction, DatabaseEntry,
+     * WriteOptions) SecondaryDatabase.delete}.
+     * </li>
+     * <li>
+     * A successful call to {@link Cursor#put(DatabaseEntry,
+     * DatabaseEntry, Put, WriteOptions) Cursor.put} or {@link
+     * Database#put(Transaction, DatabaseEntry, DatabaseEntry, Put,
+     * WriteOptions) Database.put} that updates a primary record and
+     * changes its previously non-null secondary key to null.
+     * </li>
      * </ul>
      * <p>
      * Note: Operations are currently counted as secondary DB (rather than
@@ -2610,7 +2464,7 @@ public class EnvironmentStats implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             sb.append(group.toString());
         }
         return sb.toString();
@@ -2622,20 +2476,19 @@ public class EnvironmentStats implements Serializable {
      */
     public String toStringVerbose() {
         StringBuilder sb = new StringBuilder();
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             sb.append(group.toStringVerbose());
         }
         return sb.toString();
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      * JConsole plugin support: Get tips for stats.
      */
     public Map<String, String> getTips() {
         Map<String, String> tipsMap = new HashMap<String, String>();
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             group.addToTipMap(tipsMap);
         }
         return tipsMap;

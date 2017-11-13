@@ -13,24 +13,24 @@
 
 package berkeley.com.sleepycat.je;
 
+import berkeley.com.sleepycat.je.dbi.CursorImpl;
+import berkeley.com.sleepycat.je.dbi.GetMode;
+import berkeley.com.sleepycat.je.dbi.SearchMode;
+
 import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
 
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
-import berkeley.com.sleepycat.je.dbi.GetMode;
-import berkeley.com.sleepycat.je.dbi.SearchMode;
-
 /**
  * A specialized join cursor for use in performing equality or natural joins on
  * secondary indices.
- *
+ * <p>
  * <p>A join cursor is returned when calling {@link Database#join
  * Database.join}.</p>
- *
+ * <p>
  * <p>To open a join cursor using two secondary cursors:</p>
- *
+ * <p>
  * <pre>
  *     Transaction txn = ...
  *     Database primaryDb = ...
@@ -82,21 +82,21 @@ import berkeley.com.sleepycat.je.dbi.SearchMode;
  *         }
  *     }
  * </pre>
- *
+ * <p>
  * <p>The join algorithm is described here so that its cost can be estimated and
  * compared to other approaches for performing a query.  Say that N cursors are
  * provided for the join operation. According to the order they appear in the
  * array the cursors are labeled C(1) through C(n), and the keys at each cursor
  * position are labeled K(1) through K(n).</p>
- *
+ * <p>
  * <ol>
- *
+ * <p>
  * <li>Using C(1), the join algorithm iterates sequentially through all records
  * having K(1).  This iteration is equivalent to a {@link Cursor#getNextDup
  * Cursor.getNextDup} operation on the secondary index.  The primary key of a
  * candidate record is determined in this manner.  The primary record itself is
  * not retrieved and the primary database is not accessed.</li>
- *
+ * <p>
  * <li>For each candidate primary key found in step 1, a Btree lookup is
  * performed using C(2) through C(n), in that order.  The Btree lookups are
  * exact searches to determine whether the candidate record also contains
@@ -104,25 +104,25 @@ import berkeley.com.sleepycat.je.dbi.SearchMode;
  * Cursor#getSearchBoth Cursor.getSearchBoth} operation on the secondary index.
  * The primary record itself is not retrieved and the primary database is not
  * accessed.</li>
- *
+ * <p>
  * <li>If any lookup in step 2 fails, the algorithm advances to the next
  * candidate record using C(1).  Lookups are performed in the order of the
  * cursor array, and the algorithm proceeds to the next C(1) candidate key as
  * soon as a single lookup fails.</li>
- *
+ * <p>
  * <li>If all lookups in step 2 succeed, then the matching key and/or data is
  * returned by the {@code getNext} method.  If the {@link
- * #getNext(DatabaseEntry,DatabaseEntry,LockMode)} method signature is used,
+ * #getNext(DatabaseEntry, DatabaseEntry, LockMode)} method signature is used,
  * then the primary database is read to obtain the record data, as if {@link
  * Cursor#getSearchKey Cursor.getSearchKey} were called for the primary
- * database.  If the {@link #getNext(DatabaseEntry,LockMode)} method signature
+ * database.  If the {@link #getNext(DatabaseEntry, LockMode)} method signature
  * is used, then only the primary key is returned and the primary database is
  * not accessed.</li>
- *
+ * <p>
  * <li>The algorithm ends when C(1) has no more candidate records with K(1),
  * and the {@code getNext} method will then return {@link
  * com.sleepycat.je.OperationStatus#NOTFOUND OperationStatus.NOTFOUND}.</li>
- *
+ * <p>
  * </ol>
  */
 public class JoinCursor implements ForwardCursor, Closeable {
@@ -141,29 +141,29 @@ public class JoinCursor implements ForwardCursor, Closeable {
     JoinCursor(final Database primaryDb,
                final Cursor[] cursors,
                final JoinConfig configParam)
-        throws DatabaseException {
+            throws DatabaseException {
 
         priDb = primaryDb;
         config = (configParam != null) ? configParam.clone()
-                                       : JoinConfig.DEFAULT;
+                : JoinConfig.DEFAULT;
         scratchEntry = new DatabaseEntry();
         firstSecKey = new DatabaseEntry();
         cursorScratchEntries = new DatabaseEntry[cursors.length];
-        for (int i = 0; i < cursors.length; i += 1) {
+        for(int i = 0; i < cursors.length; i += 1) {
             cursorScratchEntries[i] = new DatabaseEntry();
         }
         cursorFetchedFirst = new boolean[cursors.length];
         Cursor[] sortedCursors = new Cursor[cursors.length];
         System.arraycopy(cursors, 0, sortedCursors, 0, cursors.length);
 
-        if (!config.getNoSort()) {
+        if(!config.getNoSort()) {
 
             /*
              * Sort ascending by duplicate count.  Collect counts before
              * sorting so that countEstimate is called only once per cursor.
              */
             final long[] counts = new long[cursors.length];
-            for (int i = 0; i < cursors.length; i += 1) {
+            for(int i = 0; i < cursors.length; i += 1) {
                 counts[i] = cursors[i].countEstimateInternal();
                 assert counts[i] >= 0;
             }
@@ -176,11 +176,12 @@ public class JoinCursor implements ForwardCursor, Closeable {
                      * Scan for objects in cursors not sortedCursors since
                      * sortedCursors is being sorted in place.
                      */
-                    for (int i = 0; i < cursors.length &&
-                                    (count1 < 0 || count2 < 0); i += 1) {
-                        if (cursors[i] == o1) {
+                    for(int i = 0; i < cursors.length &&
+                            (count1 < 0 || count2 < 0); i += 1) {
+                        if(cursors[i] == o1) {
                             count1 = counts[i];
-                        } else if (cursors[i] == o2) {
+                        }
+                        else if(cursors[i] == o2) {
                             count2 = counts[i];
                         }
                     }
@@ -197,20 +198,20 @@ public class JoinCursor implements ForwardCursor, Closeable {
          */
         try {
             secCursors = new Cursor[cursors.length];
-            for (int i = 0; i < cursors.length; i += 1) {
+            for(int i = 0; i < cursors.length; i += 1) {
                 secCursors[i] = sortedCursors[i].dup(true);
             }
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             close(e); /* will throw e */
         }
     }
 
     /**
      * Closes the cursors that have been opened by this join cursor.
-     *
+     * <p>
      * <p>The cursors passed to {@link Database#join Database.join} are not
      * closed by this method, and should be closed by the caller.</p>
-     *
+     * <p>
      * <p>WARNING: To guard against memory leaks, the application should
      * discard all references to the closed handle.  While BDB makes an effort
      * to discard references from closed objects to the allocated memory for an
@@ -219,12 +220,12 @@ public class JoinCursor implements ForwardCursor, Closeable {
      * objects.</p>
      *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      */
     public void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (priDb == null) {
+        if(priDb == null) {
             return;
         }
         close(null);
@@ -236,22 +237,22 @@ public class JoinCursor implements ForwardCursor, Closeable {
      * @param firstException an exception that has already occured, or null.
      */
     private void close(DatabaseException firstException)
-        throws DatabaseException {
+            throws DatabaseException {
 
         priDb = null;
-        for (int i = 0; i < secCursors.length; i += 1) {
-            if (secCursors[i] != null) {
+        for(int i = 0; i < secCursors.length; i += 1) {
+            if(secCursors[i] != null) {
                 try {
                     secCursors[i].close();
-                } catch (DatabaseException e) {
-                    if (firstException == null) {
+                } catch(DatabaseException e) {
+                    if(firstException == null) {
                         firstException = e;
                     }
                 }
                 secCursors[i] = null;
             }
         }
-        if (firstException != null) {
+        if(firstException != null) {
             throw firstException;
         }
     }
@@ -290,21 +291,21 @@ public class JoinCursor implements ForwardCursor, Closeable {
      */
     @Override
     public OperationResult get(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final Get getType,
-        final ReadOptions options) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final Get getType,
+            final ReadOptions options) {
 
-        if (getType != Get.NEXT) {
+        if(getType != Get.NEXT) {
             throw new IllegalArgumentException(
-                "Get type not allowed: " + getType);
+                    "Get type not allowed: " + getType);
         }
 
         final LockMode lockMode =
-            (options != null) ? options.getLockMode() : null;
+                (options != null) ? options.getLockMode() : null;
 
         final CacheMode cacheMode =
-            (options != null) ? options.getCacheMode() : null;
+                (options != null) ? options.getCacheMode() : null;
 
         try {
             secCursors[0].checkEnv();
@@ -312,7 +313,7 @@ public class JoinCursor implements ForwardCursor, Closeable {
 
             return retrieveNext(key, data, lockMode, cacheMode);
 
-        } catch (Error E) {
+        } catch(Error E) {
             priDb.getEnv().invalidate(E);
             throw E;
         }
@@ -331,38 +332,32 @@ public class JoinCursor implements ForwardCursor, Closeable {
 
     /**
      * Returns the next primary key resulting from the join operation.
-     *
+     * <p>
      * <p>An entry is returned by the join cursor for each primary key/data
      * pair having all secondary key values that were specified using the array
      * of secondary cursors passed to {@link Database#join Database.join}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening each cursor, unless read-uncommitted isolation is
      * specified via the {@code CursorConfig} or {@code LockMode}
      * parameters.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getNext(final DatabaseEntry key,
                                    final LockMode lockMode) {
@@ -371,11 +366,11 @@ public class JoinCursor implements ForwardCursor, Closeable {
 
     /**
      * Returns the next primary key and data resulting from the join operation.
-     *
+     * <p>
      * <p>An entry is returned by the join cursor for each primary key/data
      * pair having all secondary key values that were specified using the array
      * of secondary cursors passed to {@link Database#join Database.join}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening each cursor, unless read-uncommitted isolation is
      * specified via the {@code CursorConfig} or {@code LockMode}
@@ -386,10 +381,10 @@ public class JoinCursor implements ForwardCursor, Closeable {
                                    LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.NEXT, DbInternal.getReadOptions(lockMode));
+                key, data, Get.NEXT, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
@@ -416,49 +411,51 @@ public class JoinCursor implements ForwardCursor, Closeable {
                                          final LockMode lockMode,
                                          final CacheMode cacheMode) {
         boolean readUncommitted =
-            secCursors[0].isReadUncommittedMode(lockMode);
+                secCursors[0].isReadUncommittedMode(lockMode);
 
-        outerLoop: while (true) {
+        outerLoop:
+        while(true) {
 
             /* Process the first cursor to get a candidate key. */
             Cursor secCursor = secCursors[0];
             DatabaseEntry candidateKey = cursorScratchEntries[0];
             OperationResult result;
-            if (!cursorFetchedFirst[0]) {
+            if(!cursorFetchedFirst[0]) {
                 /* Get first duplicate at initial cursor position. */
                 result = secCursor.getCurrentInternal(
-                    firstSecKey, candidateKey, lockMode, cacheMode);
-                if (readUncommitted && result == null) {
+                        firstSecKey, candidateKey, lockMode, cacheMode);
+                if(readUncommitted && result == null) {
                     /* Deleted underneath read-uncommitted cursor; skip it. */
                     cursorFetchedFirst[0] = true;
                     continue;
                 }
                 cursorFetchedFirst[0] = true;
-            } else {
+            }
+            else {
                 /* Already initialized, move to the next candidate key. */
                 result = secCursor.retrieveNext(
-                    firstSecKey, candidateKey, lockMode, cacheMode,
-                    GetMode.NEXT_DUP);
+                        firstSecKey, candidateKey, lockMode, cacheMode,
+                        GetMode.NEXT_DUP);
             }
-            if (result == null) {
+            if(result == null) {
                 /* No more candidate keys. */
                 return null;
             }
 
             /* Process the second and following cursors. */
-            for (int i = 1; i < secCursors.length; i += 1) {
+            for(int i = 1; i < secCursors.length; i += 1) {
                 secCursor = secCursors[i];
                 DatabaseEntry secKey = cursorScratchEntries[i];
-                if (!cursorFetchedFirst[i]) {
+                if(!cursorFetchedFirst[i]) {
                     result = secCursor.getCurrentInternal(
-                        secKey, scratchEntry, lockMode, cacheMode);
-                    if (readUncommitted &&
-                        result == null) {
+                            secKey, scratchEntry, lockMode, cacheMode);
+                    if(readUncommitted &&
+                            result == null) {
                         /* Deleted underneath read-uncommitted; skip it. */
                         result = secCursor.retrieveNext(
-                            secKey, scratchEntry, lockMode, cacheMode,
-                            GetMode.NEXT_DUP);
-                        if (result == null) {
+                                secKey, scratchEntry, lockMode, cacheMode,
+                                GetMode.NEXT_DUP);
+                        if(result == null) {
                             /* All keys were deleted; no possible match. */
                             return null;
                         }
@@ -466,19 +463,19 @@ public class JoinCursor implements ForwardCursor, Closeable {
                     cursorFetchedFirst[i] = true;
                 }
                 scratchEntry.setData(secKey.getData(), secKey.getOffset(),
-                                     secKey.getSize());
+                        secKey.getSize());
                 result = secCursor.search(
-                    scratchEntry, candidateKey, lockMode, cacheMode,
-                    SearchMode.BOTH, true);
-                if (result == null) {
+                        scratchEntry, candidateKey, lockMode, cacheMode,
+                        SearchMode.BOTH, true);
+                if(result == null) {
                     /* No match, get another candidate key. */
                     continue outerLoop;
                 }
             }
 
             /* The candidate key was found for all cursors. */
-            if (dataParam != null) {
-                if (!secCursors[0].readPrimaryAfterGet(
+            if(dataParam != null) {
+                if(!secCursors[0].readPrimaryAfterGet(
                         priDb, firstSecKey, candidateKey, dataParam, lockMode,
                         readUncommitted, false /*lockPrimaryOnly*/)) {
                     /* Deleted underneath read-uncommitted cursor; skip it. */
@@ -490,12 +487,12 @@ public class JoinCursor implements ForwardCursor, Closeable {
                  * was updated above with the primary info.
                  */
                 final CursorImpl firstSecCursor = secCursors[0].cursorImpl;
-                for (int i = 1; i < secCursors.length; i += 1) {
+                for(int i = 1; i < secCursors.length; i += 1) {
                     secCursors[i].cursorImpl.setPriInfo(firstSecCursor);
                 }
             }
             keyParam.setData(candidateKey.getData(), candidateKey.getOffset(),
-                             candidateKey.getSize());
+                    candidateKey.getSize());
             return result;
         }
     }

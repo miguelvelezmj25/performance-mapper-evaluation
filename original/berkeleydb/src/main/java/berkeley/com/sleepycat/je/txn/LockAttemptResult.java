@@ -18,8 +18,8 @@ package berkeley.com.sleepycat.je.txn;
  */
 public class LockAttemptResult {
     public final boolean success;
-    final Lock useLock;
     public final LockGrantType lockGrant;
+    final Lock useLock;
 
     LockAttemptResult(Lock useLock,
                       LockGrantType lockGrant,

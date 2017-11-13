@@ -45,7 +45,7 @@ public interface ArbiterProvider {
     /**
      * Return the election quorum size that is dictated by arbitration, for
      * this quorum policy. The arbiter provider has the leeway to decide that
-     * the quorum policy takes precedence, and that arbitration does not 
+     * the quorum policy takes precedence, and that arbitration does not
      * reduce the election quorum size.
      */
     public int getElectionQuorumSize(QuorumPolicy quorumPolicy);

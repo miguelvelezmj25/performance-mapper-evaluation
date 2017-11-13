@@ -17,8 +17,8 @@ package berkeley.com.sleepycat.persist.evolve;
  * The event passed to the EvolveListener interface during eager entity
  * evolution.
  *
- * @see com.sleepycat.persist.evolve Class Evolution
  * @author Mark Hayes
+ * @see com.sleepycat.persist.evolve Class Evolution
  */
 public class EvolveEvent {
 

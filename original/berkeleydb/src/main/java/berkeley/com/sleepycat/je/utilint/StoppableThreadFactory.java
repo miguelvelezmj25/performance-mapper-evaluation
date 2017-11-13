@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
 /**
  * Create a thread factory that returns threads that are legitimate
@@ -24,7 +24,7 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * threads will invalidate if an exception is not handled, and are registered
  * with the exception listener.If a logger is provided, StoppableThreads log
  * exception information.
- *
+ * <p>
  * This factory is used in conjunction with the ExecutorService and
  * ThreadExecutorPool models.
  */

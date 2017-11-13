@@ -13,23 +13,14 @@
 
 package berkeley.com.sleepycat.je.jmx;
 
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-
-import javax.management.DynamicMBean;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanNotificationInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl.MBeanRegistrar;
+
+import javax.management.*;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 /*
  * Base class for all JE concrete MBeans. 
@@ -57,33 +48,26 @@ public abstract class JEMBean implements MBeanRegistrar {
      * Parameters for getting JE database, environment stats, etc.
      */
     public static final MBeanParameterInfo[] statParams = {
-        new MBeanParameterInfo("clear", "java.lang.Boolean",
-                               "If true, reset statistics after reading."),
-        new MBeanParameterInfo("fast", "java.lang.Boolean",
-                               "If true, only return statistics which do " +
-                               "not require expensive computation.")
+            new MBeanParameterInfo("clear", "java.lang.Boolean",
+                    "If true, reset statistics after reading."),
+            new MBeanParameterInfo("fast", "java.lang.Boolean",
+                    "If true, only return statistics which do " +
+                            "not require expensive computation.")
     };
-
-    /* Concrete MBean's visible interface. */
-    private MBeanInfo mbeanInfo;
-
     /* Fields used to register this concrete MBean. */
     protected MBeanServer server;
     protected ObjectName jeName;
-    
     /* Name for this class. */
     protected String className;
-
     protected String DESCRIPTION;
-    
     /* Class type for the MBean. */
     protected Class<?> currentClass;
-
     /* Environment used in this MBean. */
     protected Environment env;
-
-    protected ArrayList<MBeanOperationInfo> operationList = 
-        new ArrayList<MBeanOperationInfo>();
+    protected ArrayList<MBeanOperationInfo> operationList =
+            new ArrayList<MBeanOperationInfo>();
+    /* Concrete MBean's visible interface. */
+    private MBeanInfo mbeanInfo;
 
     protected JEMBean(Environment env) {
         this.env = env;
@@ -97,7 +81,7 @@ public abstract class JEMBean implements MBeanRegistrar {
 
     /* Initiate the class fields used in this MBean. */
     protected abstract void initClassFields();
-    
+
     /**
      * Create the available management interface for this environment.  The
      * attributes and operations available vary according to environment
@@ -106,11 +90,11 @@ public abstract class JEMBean implements MBeanRegistrar {
     protected void resetMBeanInfo() {
         /* Generate the MBean description. */
         mbeanInfo = new MBeanInfo(currentClass.getName(),
-                                  DESCRIPTION,
-                                  getAttributeList(),
-                                  getConstructors(),
-                                  getOperationList(),
-                                  getNotificationInfo());
+                DESCRIPTION,
+                getAttributeList(),
+                getConstructors(),
+                getOperationList(),
+                getNotificationInfo());
     }
 
     /**
@@ -128,7 +112,7 @@ public abstract class JEMBean implements MBeanRegistrar {
 
     /**
      * Get constructor metadata for this MBean.
-     *
+     * <p>
      * Since the process of getting constructors is the same for each concrete
      * MBean, define it here to reduce coding work.
      *
@@ -140,11 +124,11 @@ public abstract class JEMBean implements MBeanRegistrar {
 
         Constructor[] constructors = currentClass.getConstructors();
         MBeanConstructorInfo[] constructorInfo =
-            new MBeanConstructorInfo[constructors.length];
-        for (int i = 0; i < constructors.length; i++) {
+                new MBeanConstructorInfo[constructors.length];
+        for(int i = 0; i < constructors.length; i++) {
             constructorInfo[i] =
-                new MBeanConstructorInfo(currentClass.getName(),
-                                         constructors[i]);
+                    new MBeanConstructorInfo(currentClass.getName(),
+                            constructors[i]);
         }
 
         return constructorInfo;
@@ -159,7 +143,7 @@ public abstract class JEMBean implements MBeanRegistrar {
         addOperations();
 
         return operationList.toArray
-            (new MBeanOperationInfo[operationList.size()]);
+                (new MBeanOperationInfo[operationList.size()]);
     }
 
     /**
@@ -173,18 +157,18 @@ public abstract class JEMBean implements MBeanRegistrar {
 
     /**
      * For EnvironmentImpl.MBeanRegistrar interface.
-     *
+     * <p>
      * Register this MBean with the MBeanServer.
      */
     public void doRegister(Environment env)
-        throws Exception {
+            throws Exception {
 
         server = ManagementFactory.getPlatformMBeanServer();
 
         StringBuilder sb = new StringBuilder("com.sleepycat.je.jmx:name=");
         sb.append(className).append("(");
-        String noColonPathname = 
-            env.getHome().getPath().replaceAll(":", "<colon>");
+        String noColonPathname =
+                env.getHome().getPath().replaceAll(":", "<colon>");
         sb.append(noColonPathname).append(")");
         jeName = new ObjectName(sb.toString());
         doRegisterMBean(env);
@@ -192,24 +176,24 @@ public abstract class JEMBean implements MBeanRegistrar {
 
     /* Register the MBean with the server. */
     protected abstract void doRegisterMBean(Environment env)
-        throws Exception;
+            throws Exception;
 
     /**
      * For EnvironmentImpl.MBeanRegistrar interface.
-     *
+     * <p>
      * Remove this MBean from the MBeanServer.
      */
     public void doUnregister()
-        throws Exception {
+            throws Exception {
 
-        if (server != null) {
+        if(server != null) {
             server.unregisterMBean(jeName);
         }
     }
 
     /**
      * @see DynamicMBean#getMBeanInfo
-     *
+     * <p>
      * Implement the getMBeanInfo method of DynamicMBean.
      */
     public MBeanInfo getMBeanInfo() {
@@ -222,11 +206,11 @@ public abstract class JEMBean implements MBeanRegistrar {
      */
     protected StatsConfig getStatsConfig(Object[] params) {
         StatsConfig statsConfig = new StatsConfig();
-        if ((params != null) && (params.length > 0) && (params[0] != null)) {
+        if((params != null) && (params.length > 0) && (params[0] != null)) {
             Boolean clear = (Boolean) params[0];
             statsConfig.setClear(clear.booleanValue());
         }
-        if ((params != null) && (params.length > 1) && (params[1] != null)) {
+        if((params != null) && (params.length > 1) && (params[1] != null)) {
             Boolean fast = (Boolean) params[1];
             statsConfig.setFast(fast.booleanValue());
         }

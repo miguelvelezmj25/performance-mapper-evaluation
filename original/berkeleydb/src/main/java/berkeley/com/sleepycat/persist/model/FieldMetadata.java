@@ -18,7 +18,7 @@ import java.io.Serializable;
 /**
  * The metadata for a key field.  This class defines common properties for
  * singular and composite key fields.
- *
+ * <p>
  * <p>{@code FieldMetadata} objects are thread-safe.  Multiple threads may
  * safely call the methods of a shared {@code FieldMetadata} object.</p>
  *
@@ -35,10 +35,10 @@ public class FieldMetadata implements Serializable {
     /**
      * Used by an {@code EntityModel} to construct field metadata.
      *
-     * @param name the field name.
-     * @param className the class name.
+     * @param name               the field name.
+     * @param className          the class name.
      * @param declaringClassName the name of the class where the field is
-     * declared.
+     *                           declared.
      */
     public FieldMetadata(String name,
                          String className,
@@ -77,13 +77,14 @@ public class FieldMetadata implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof FieldMetadata) {
+        if(other instanceof FieldMetadata) {
             FieldMetadata o = (FieldMetadata) other;
             return ClassMetadata.nullOrEqual(name, o.name) &&
-                   ClassMetadata.nullOrEqual(className, o.className) &&
-                   ClassMetadata.nullOrEqual(declaringClassName,
-                                             o.declaringClassName);
-        } else {
+                    ClassMetadata.nullOrEqual(className, o.className) &&
+                    ClassMetadata.nullOrEqual(declaringClassName,
+                            o.declaringClassName);
+        }
+        else {
             return false;
         }
     }
@@ -91,13 +92,13 @@ public class FieldMetadata implements Serializable {
     @Override
     public int hashCode() {
         return ClassMetadata.hashCode(name) +
-               ClassMetadata.hashCode(className) +
-               ClassMetadata.hashCode(declaringClassName);
+                ClassMetadata.hashCode(className) +
+                ClassMetadata.hashCode(declaringClassName);
     }
 
     @Override
     public String toString() {
         return "[FieldMetadata name: " + name + " className: " + className +
-               " declaringClassName: " + declaringClassName + ']';
+                " declaringClassName: " + declaringClassName + ']';
     }
 }

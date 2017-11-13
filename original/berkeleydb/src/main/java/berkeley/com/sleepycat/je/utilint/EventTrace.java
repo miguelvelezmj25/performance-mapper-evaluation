@@ -22,16 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * events should be added by calling EventTrace.addEvent();
  */
 public class EventTrace {
-    private static int MAX_EVENTS = 100;
-
     public static final boolean TRACE_EVENTS = false;
-
+    public static volatile boolean disableEvents = false;
     static AtomicInteger currentEvent = new AtomicInteger(0);
-
+    private static int MAX_EVENTS = 100;
     static final EventTrace[] events = new EventTrace[MAX_EVENTS];
     static final int[] threadIdHashes = new int[MAX_EVENTS];
-    public static volatile boolean disableEvents = false;
-
     protected String comment;
 
     public EventTrace(String comment) {
@@ -42,23 +38,18 @@ public class EventTrace {
         comment = null;
     }
 
-    @Override
-    public String toString() {
-        return comment;
-    }
-
     /**
      * Always return true so this method can be used with asserts:
      * i.e. assert addEvent(xxx);
      */
     public static boolean addEvent(EventTrace event) {
-        if (disableEvents) {
+        if(disableEvents) {
             return true;
         }
         int nextEventIdx = currentEvent.getAndIncrement() % MAX_EVENTS;
         events[nextEventIdx] = event;
         threadIdHashes[nextEventIdx] =
-            System.identityHashCode(Thread.currentThread());
+                System.identityHashCode(Thread.currentThread());
         return true;
     }
 
@@ -67,7 +58,7 @@ public class EventTrace {
      * i.e. assert addEvent(xxx);
      */
     public static boolean addEvent(String comment) {
-        if (disableEvents) {
+        if(disableEvents) {
             return true;
         }
         return addEvent(new EventTrace(comment));
@@ -79,7 +70,7 @@ public class EventTrace {
 
     public static void dumpEvents(PrintStream out) {
 
-        if (disableEvents) {
+        if(disableEvents) {
             return;
         }
         out.println("----- Event Dump -----");
@@ -88,15 +79,20 @@ public class EventTrace {
         disableEvents = true;
 
         int j = 0;
-        for (int i = currentEvent.get(); j < MAX_EVENTS; i++) {
+        for(int i = currentEvent.get(); j < MAX_EVENTS; i++) {
             EventTrace ev = oldEvents[i % MAX_EVENTS];
-            if (ev != null) {
+            if(ev != null) {
                 int thisEventIdx = i % MAX_EVENTS;
                 out.print(oldThreadIdHashes[thisEventIdx] + " ");
                 out.println(j + "(" + thisEventIdx + "): " + ev);
             }
             j++;
         }
+    }
+
+    @Override
+    public String toString() {
+        return comment;
     }
 
     public static class ExceptionEventTrace extends EventTrace {

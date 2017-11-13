@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
@@ -25,6 +21,10 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 /**
  * A FileReader is an abstract class that traverses the log files, reading-in
@@ -47,28 +47,17 @@ public abstract class FileReader {
      * of the log. It is positioned against the log and filled up with data.
      */
     protected final ReadWindow window;
-
-    /* 
-     * For piecing together a log entry that is read from multiple read buffer
-     * calls.
-     */
-    private ByteBuffer saveBuffer;   
-
+    /* if true, we're reading forward; otherwise backwards */
+    protected final boolean forward;
+    protected final Logger logger;
     private final boolean singleFile;// if true, do not read across files
-
+    private final long finishLsn; // If going backwards, read up to this LSN.
     /*
      * true if at end of the log.
      * TODO: assess whether this is redundant  with the EOFException, and
      * could be streamlined.
      */
     protected boolean eof;
-
-    /* if true, we're reading forward; otherwise backwards */
-    protected final boolean forward;   
-
-    /* num entries we've seen */
-    private int nRead;
-
     /* The log entry header for the entry that was just read. */
     protected LogEntryHeader currentEntryHeader;
 
@@ -88,18 +77,21 @@ public abstract class FileReader {
     protected long nextEntryOffset;
 
     protected long startLsn;  // We start reading from this LSN.
-    private final long finishLsn; // If going backwards, read up to this LSN.
-
     /* For checking checksum on the read. */
     protected ChecksumValidator cksumValidator;
-
+    /*
+     * For piecing together a log entry that is read from multiple read buffer
+     * calls.
+     */
+    private ByteBuffer saveBuffer;
+    /* num entries we've seen */
+    private int nRead;
     private boolean doChecksumOnRead;       // Validate checksums
     private boolean alwaysValidateChecksum; // Validate for all entry types
 
-    protected final Logger logger;
-
     /**
      * A FileReader just needs to know what size chunks to read in.
+     *
      * @param endOfFileLsn indicates the end of the log file
      */
     public FileReader(EnvironmentImpl envImpl,
@@ -109,7 +101,7 @@ public abstract class FileReader {
                       Long singleFileNumber,
                       long endOfFileLsn,
                       long finishLsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         this.envImpl = envImpl;
         this.fileManager = envImpl.getFileManager();
@@ -117,7 +109,7 @@ public abstract class FileReader {
         this.forward = forward;
 
         this.doChecksumOnRead = envImpl.getLogManager().getChecksumOnRead();
-        if (this.doChecksumOnRead) {
+        if(this.doChecksumOnRead) {
             cksumValidator = new ChecksumValidator();
         }
 
@@ -138,11 +130,12 @@ public abstract class FileReader {
 
     /**
      * May be overridden by other FileReaders.
-     * @throws DatabaseException 
+     *
+     * @throws DatabaseException
      */
-    protected ReadWindow makeWindow(int readBufferSize) 
-        throws DatabaseException {
-        
+    protected ReadWindow makeWindow(int readBufferSize)
+            throws DatabaseException {
+
         return new ReadWindow(readBufferSize, envImpl);
     }
 
@@ -153,19 +146,21 @@ public abstract class FileReader {
     protected void initStartingPosition(long endOfFileLsn,
                                         Long ignoreSingleFileNumber) {
         eof = false;
-        if (forward) {
+        if(forward) {
 
             /*
              * Start off at the startLsn. If that's null, start at the
              * beginning of the log. If there are no log files, set eof.
              */
-            if (startLsn != DbLsn.NULL_LSN) {
+            if(startLsn != DbLsn.NULL_LSN) {
                 window.initAtFileStart(startLsn);
-            } else {
+            }
+            else {
                 Long firstNum = fileManager.getFirstFileNum();
-                if (firstNum == null) {
+                if(firstNum == null) {
                     eof = true;
-                } else {
+                }
+                else {
                     window.initAtFileStart(DbLsn.makeLsn(firstNum, 0));
                 }
             }
@@ -174,7 +169,8 @@ public abstract class FileReader {
              * After we read the first entry, the currentEntry will point here.
              */
             nextEntryOffset = window.getEndOffset();
-        } else {
+        }
+        else {
 
             /*
              * Make the read buffer look like it's positioned off the end of
@@ -189,10 +185,11 @@ public abstract class FileReader {
              * reading when going backwards. If it's 0, the entry we want to
              * read is in a different file.
              */
-            if (DbLsn.getFileNumber(startLsn) ==
-                DbLsn.getFileNumber(endOfFileLsn)) {
+            if(DbLsn.getFileNumber(startLsn) ==
+                    DbLsn.getFileNumber(endOfFileLsn)) {
                 currentEntryPrevOffset = DbLsn.getFileOffset(startLsn);
-            } else {
+            }
+            else {
                 currentEntryPrevOffset = 0;
             }
             currentEntryOffset = DbLsn.getFileOffset(endOfFileLsn);
@@ -236,19 +233,18 @@ public abstract class FileReader {
      * has hit an invalid portion.
      *
      * @return true if an element has been read, false at end-of-log.
-     *
      * @throws EnvironmentFailureException if a ChecksumException,
-     * FileNotFoundException, or another internal problem occurs.
+     *                                     FileNotFoundException, or another internal problem occurs.
      */
     public boolean readNextEntry() {
         try {
             return readNextEntryAllowExceptions();
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
-        } catch (ChecksumException e) {
+                    envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
+                    envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
         }
     }
 
@@ -261,20 +257,20 @@ public abstract class FileReader {
      * LastFileReader), to handle these exceptions specially.
      */
     public final boolean readNextEntryAllowExceptions()
-        throws FileNotFoundException, ChecksumException {
+            throws FileNotFoundException, ChecksumException {
 
         boolean foundEntry = false;
         long savedCurrentEntryOffset = currentEntryOffset;
         long savedNextEntryOffset = nextEntryOffset;
 
         try {
-            while ((!eof) && (!foundEntry)) {
+            while((!eof) && (!foundEntry)) {
 
                 /* Read the invariant portion of the next header. */
                 getLogEntryInReadBuffer();
                 ByteBuffer dataBuffer =
-                    readData(LogEntryHeader.MIN_HEADER_SIZE,
-                             true); // collectData
+                        readData(LogEntryHeader.MIN_HEADER_SIZE,
+                                true); // collectData
 
                 readBasicHeader(dataBuffer);
 
@@ -282,7 +278,7 @@ public abstract class FileReader {
                 boolean isChecksumTarget;
                 boolean collectData;
 
-                if (currentEntryHeader.isVariableLength()) {
+                if(currentEntryHeader.isVariableLength()) {
 
                     /*
                      * For all variable length entries, init the checksum w/the
@@ -300,7 +296,7 @@ public abstract class FileReader {
                     startChecksum(dataBuffer);
 
                     int optionalPortionLen =
-                        currentEntryHeader.getVariablePortionSize();
+                            currentEntryHeader.getVariablePortionSize();
 
                     /* Load the optional part of the header into a buffer. */
                     dataBuffer = readData(optionalPortionLen, true);
@@ -321,24 +317,24 @@ public abstract class FileReader {
                  * backwards, we set our offset before we read the header,
                  * because we knew where the entry started.
                  */
-                if (forward) {
+                if(forward) {
                     currentEntryOffset = nextEntryOffset;
                     nextEntryOffset +=
-                        currentEntryHeader.getSize() +    // header size
-                        currentEntryHeader.getItemSize(); // item size
+                            currentEntryHeader.getSize() +    // header size
+                                    currentEntryHeader.getItemSize(); // item size
                 }
-                
+
                 try {
                     isTarget = isTargetEntry();
 
                     isChecksumTarget = (isTarget || alwaysValidateChecksum);
 
-                    if (!currentEntryHeader.isVariableLength()) {
+                    if(!currentEntryHeader.isVariableLength()) {
                         startChecksum(dataBuffer, isChecksumTarget);
                     }
 
                     collectData =
-                        (isChecksumTarget && doChecksumOnRead) || isTarget;
+                            (isChecksumTarget && doChecksumOnRead) || isTarget;
 
                     /*
                      * Read in the body of the next entry. Note that even if
@@ -346,9 +342,9 @@ public abstract class FileReader {
                      * position along.
                      */
                     dataBuffer = readData(currentEntryHeader.getItemSize(),
-                                          collectData);
-                } catch (Throwable e) {
-                    if (forward) {
+                            collectData);
+                } catch(Throwable e) {
+                    if(forward) {
                         currentEntryOffset = savedCurrentEntryOffset;
                         nextEntryOffset = savedNextEntryOffset;
                     }
@@ -357,8 +353,8 @@ public abstract class FileReader {
 
                 /* Validate the log entry checksum. */
                 validateChecksum(dataBuffer, isChecksumTarget);
-                
-                if (isTarget) {
+
+                if(isTarget) {
 
                     /*
                      * For a target entry, call the subclass reader's
@@ -367,11 +363,12 @@ public abstract class FileReader {
                      * be returned.  Note that some entries, although targeted
                      * and read, are not returned.
                      */
-                    if (processEntry(dataBuffer)) {
+                    if(processEntry(dataBuffer)) {
                         foundEntry = true;
                         nRead++;
                     }
-                } else if (collectData) {
+                }
+                else if(collectData) {
 
                     /*
                      * For a non-target entry that was validated, the buffer is
@@ -380,9 +377,9 @@ public abstract class FileReader {
                     skipEntry(dataBuffer);
                 }
             }
-        } catch (EOFException e) {
+        } catch(EOFException e) {
             eof = true;
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             eof = true;
             /* Report on error. */
             reportProblem(e);
@@ -398,53 +395,53 @@ public abstract class FileReader {
      */
     protected void skipEntry(ByteBuffer entryBuffer) {
         entryBuffer.position(
-            entryBuffer.position() +
-            currentEntryHeader.getItemSize());
+                entryBuffer.position() +
+                        currentEntryHeader.getItemSize());
     }
 
     private void reportProblem(Exception e) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Halted log file reading at file 0x").
-            append(Long.toHexString(window.currentFileNum())).
-            append(" offset 0x").
-            append(Long.toHexString(nextEntryOffset)).
-            append(" offset(decimal)=").
-            append(nextEntryOffset).
-            append(" prev=0x").
-            append(Long.toHexString(currentEntryPrevOffset));
+                append(Long.toHexString(window.currentFileNum())).
+                append(" offset 0x").
+                append(Long.toHexString(nextEntryOffset)).
+                append(" offset(decimal)=").
+                append(nextEntryOffset).
+                append(" prev=0x").
+                append(Long.toHexString(currentEntryPrevOffset));
 
-            if (currentEntryHeader != null) {
-                LogEntryType problemType =
+        if(currentEntryHeader != null) {
+            LogEntryType problemType =
                     LogEntryType.findType(currentEntryHeader.getType());
             sb.append(":\nentry=").
-                append(problemType).
-                append("type=").
-                append(currentEntryHeader.getType()).
-                append(",version=").
-                append(currentEntryHeader.getVersion()).
-                append(")\nprev=0x").
-                append(Long.toHexString(currentEntryPrevOffset)).
-                append("\nsize=").
-                append(currentEntryHeader.getItemSize()).
-                append("\nNext entry should be at 0x").
-                append(Long.toHexString(nextEntryOffset +
-                                               currentEntryHeader.getSize() +
-                                        currentEntryHeader.getItemSize()));
+                    append(problemType).
+                    append("type=").
+                    append(currentEntryHeader.getType()).
+                    append(",version=").
+                    append(currentEntryHeader.getVersion()).
+                    append(")\nprev=0x").
+                    append(Long.toHexString(currentEntryPrevOffset)).
+                    append("\nsize=").
+                    append(currentEntryHeader.getItemSize()).
+                    append("\nNext entry should be at 0x").
+                    append(Long.toHexString(nextEntryOffset +
+                            currentEntryHeader.getSize() +
+                            currentEntryHeader.getItemSize()));
         }
 
         LoggerUtils.traceAndLogException
-            (envImpl, "FileReader", "readNextEntry", sb.toString(), e);
+                (envImpl, "FileReader", "readNextEntry", sb.toString(), e);
     }
 
     /**
-     * Make sure that the start of the target log entry is in the header. 
+     * Make sure that the start of the target log entry is in the header.
      */
     private void getLogEntryInReadBuffer()
-        throws ChecksumException,
-               EOFException,
-               FileNotFoundException,
-               DatabaseException {
+            throws ChecksumException,
+            EOFException,
+            FileNotFoundException,
+            DatabaseException {
 
         /*
          * If we're going forward, because we read every byte sequentially,
@@ -452,9 +449,10 @@ public abstract class FileReader {
          * If we go backwards, we need to jump the buffer position. These
          * methods may be overridden by subclasses.
          */
-        if (forward) {
+        if(forward) {
             setForwardPosition();
-        } else {
+        }
+        else {
             setBackwardPosition();
         }
     }
@@ -464,21 +462,22 @@ public abstract class FileReader {
      * that the next target is the next, following entry, so we can assume that
      * it's in the window.  All we have to do is to check if we've gone past
      * the specified end point.
-     * @throws DatabaseException 
-     * @throws FileNotFoundException 
-     * @throws ChecksumException 
+     *
+     * @throws DatabaseException
+     * @throws FileNotFoundException
+     * @throws ChecksumException
      */
-    protected void setForwardPosition() 
-        throws EOFException,
-               DatabaseException, 
-               ChecksumException, 
-               FileNotFoundException {
+    protected void setForwardPosition()
+            throws EOFException,
+            DatabaseException,
+            ChecksumException,
+            FileNotFoundException {
 
-        if (finishLsn != DbLsn.NULL_LSN) {
+        if(finishLsn != DbLsn.NULL_LSN) {
             /* The next log entry has passed the end LSN. */
             long nextLsn = DbLsn.makeLsn(window.currentFileNum(),
-                                         nextEntryOffset);
-            if (DbLsn.compareTo(nextLsn, finishLsn) >= 0) {
+                    nextEntryOffset);
+            if(DbLsn.compareTo(nextLsn, finishLsn) >= 0) {
                 throw new EOFException();
             }
         }
@@ -487,37 +486,39 @@ public abstract class FileReader {
     /**
      * Ensure that the next target is in the window. The default behavior is
      * that the next target is the next previous entry.
-     * @throws DatabaseException 
+     *
+     * @throws DatabaseException
      */
-    protected void setBackwardPosition() 
-        throws ChecksumException,
-               FileNotFoundException,
-               EOFException,
-               DatabaseException {
+    protected void setBackwardPosition()
+            throws ChecksumException,
+            FileNotFoundException,
+            EOFException,
+            DatabaseException {
 
         /*
          * currentEntryPrevOffset is the entry before the current entry.
          * currentEntryOffset is the entry we just read (or the end of the
          * file if we're starting out.
          */
-        if ((currentEntryPrevOffset != 0) &&
-            window.containsOffset(currentEntryPrevOffset)) {
+        if((currentEntryPrevOffset != 0) &&
+                window.containsOffset(currentEntryPrevOffset)) {
 
             /* The next log entry has passed the start LSN. */
             long nextLsn = DbLsn.makeLsn(window.currentFileNum(),
-                                         currentEntryPrevOffset);
-            if (finishLsn != DbLsn.NULL_LSN) {
-                if (DbLsn.compareTo(nextLsn, finishLsn) == -1) {
-                    throw new EOFException("finish=" + 
-                                           DbLsn.getNoFormatString(finishLsn) +
-                                           "next=" + 
-                                           DbLsn.getNoFormatString(nextLsn));
+                    currentEntryPrevOffset);
+            if(finishLsn != DbLsn.NULL_LSN) {
+                if(DbLsn.compareTo(nextLsn, finishLsn) == -1) {
+                    throw new EOFException("finish=" +
+                            DbLsn.getNoFormatString(finishLsn) +
+                            "next=" +
+                            DbLsn.getNoFormatString(nextLsn));
                 }
             }
 
             /* This log entry starts in this buffer, just reposition. */
             window.positionBuffer(currentEntryPrevOffset);
-        } else {
+        }
+        else {
 
             /*
              * The start of the log entry is not in this read buffer so
@@ -543,17 +544,17 @@ public abstract class FileReader {
             long nextWindowStart;
             long nextTarget;
 
-            if (currentEntryPrevOffset == 0) {
+            if(currentEntryPrevOffset == 0) {
                 /* Case 1: Go to another file. */
                 currentEntryPrevOffset = fileManager.getFileHeaderPrevOffset
-                    (window.currentFileNum());
+                        (window.currentFileNum());
 
                 Long prevFileNum =
-                    fileManager.getFollowingFileNum(window.currentFileNum(),
-                                                    false);
-                if (prevFileNum == null) {
+                        fileManager.getFollowingFileNum(window.currentFileNum(),
+                                false);
+                if(prevFileNum == null) {
                     throw new EOFException("No file following " +
-                                           window.currentFileNum());
+                            window.currentFileNum());
                 }
 
                 /*
@@ -564,22 +565,23 @@ public abstract class FileReader {
                  *  a cleaned file because the previous file had  been cleaned
                  *  away.
                  */
-                if (finishLsn != DbLsn.NULL_LSN &&
-                    prevFileNum < DbLsn.getFileNumber(finishLsn)) {
+                if(finishLsn != DbLsn.NULL_LSN &&
+                        prevFileNum < DbLsn.getFileNumber(finishLsn)) {
                     throw new EOFException(
-                        "finish=" + DbLsn.getNoFormatString(finishLsn) +
-                        " nextFile=0x" + Long.toHexString(prevFileNum));
+                            "finish=" + DbLsn.getNoFormatString(finishLsn) +
+                                    " nextFile=0x" + Long.toHexString(prevFileNum));
                 }
 
-                if (window.currentFileNum() - prevFileNum.longValue() != 1) {
+                if(window.currentFileNum() - prevFileNum.longValue() != 1) {
                     handleGapInBackwardsScan(prevFileNum);
                 }
 
                 nextFile = prevFileNum;
                 nextWindowStart = currentEntryPrevOffset;
                 nextTarget = currentEntryPrevOffset;
-            } else if ((currentEntryOffset - currentEntryPrevOffset) >
-                       window.capacity()) {
+            }
+            else if((currentEntryOffset - currentEntryPrevOffset) >
+                    window.capacity()) {
 
                 /*
                  * Case 2: The entry is in the same file, but is bigger
@@ -588,7 +590,8 @@ public abstract class FileReader {
                 nextFile = window.currentFileNum();
                 nextWindowStart = currentEntryPrevOffset;
                 nextTarget = currentEntryPrevOffset;
-            } else {
+            }
+            else {
 
                 /* 
                  * Case 3: In same file, but not in this buffer. The target
@@ -596,25 +599,25 @@ public abstract class FileReader {
                  */
                 nextFile = window.currentFileNum();
                 long newPosition = currentEntryOffset -
-                    window.capacity();
+                        window.capacity();
                 nextWindowStart = (newPosition < 0) ? 0 : newPosition;
                 nextTarget = currentEntryPrevOffset;
             }
 
             /* The next log entry has passed the start LSN. */
             long nextLsn = DbLsn.makeLsn(nextFile,
-                                         currentEntryPrevOffset);
-            if (finishLsn != DbLsn.NULL_LSN) {
-                if (DbLsn.compareTo(nextLsn, finishLsn) == -1) {
-                    throw new EOFException("finish=" + 
-                                           DbLsn.getNoFormatString(finishLsn) +
-                                           " next=" +
-                                           DbLsn.getNoFormatString(nextLsn));
+                    currentEntryPrevOffset);
+            if(finishLsn != DbLsn.NULL_LSN) {
+                if(DbLsn.compareTo(nextLsn, finishLsn) == -1) {
+                    throw new EOFException("finish=" +
+                            DbLsn.getNoFormatString(finishLsn) +
+                            " next=" +
+                            DbLsn.getNoFormatString(nextLsn));
                 }
             }
 
             window.slideAndFill
-                (nextFile, nextWindowStart, nextTarget, forward);
+                    (nextFile, nextWindowStart, nextTarget, forward);
         }
 
         /* The current entry will start at this offset. */
@@ -626,11 +629,11 @@ public abstract class FileReader {
      * beginning of the checksummed header data.
      */
     private void readBasicHeader(ByteBuffer dataBuffer)
-        throws ChecksumException, DatabaseException  {
+            throws ChecksumException, DatabaseException {
 
         /* Read the header for this entry. */
         currentEntryHeader = new LogEntryHeader(
-            dataBuffer, window.logVersion, window.getCurrentLsn());
+                dataBuffer, window.logVersion, window.getCurrentLsn());
 
         /*
          * currentEntryPrevOffset is a separate field, and is not obtained
@@ -644,23 +647,24 @@ public abstract class FileReader {
      * Reset the checksum validator and add the new header bytes. Assumes that
      * the data buffer is positioned just past the end of the invariant
      * portion of the log entry header.
-     * @throws DatabaseException 
+     *
+     * @throws DatabaseException
      */
-    private void startChecksum(ByteBuffer dataBuffer) 
-        throws ChecksumException {
+    private void startChecksum(ByteBuffer dataBuffer)
+            throws ChecksumException {
 
         startChecksum(dataBuffer, true  /* isChecksumTarget */);
     }
 
-    private void startChecksum(ByteBuffer dataBuffer, 
+    private void startChecksum(ByteBuffer dataBuffer,
                                boolean isChecksumTarget)
-        throws ChecksumException {
+            throws ChecksumException {
 
-        if (!doChecksumOnRead) {
+        if(!doChecksumOnRead) {
             return;
         }
 
-        if (!isChecksumTarget) {
+        if(!isChecksumTarget) {
             return;
         }
 
@@ -668,7 +672,7 @@ public abstract class FileReader {
         cksumValidator.reset();
 
         int originalPosition = dataBuffer.position();
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
 
             /* 
              * Turn off invisibility so that the checksum will succeed. When
@@ -678,12 +682,12 @@ public abstract class FileReader {
              * will never be read again.
              */
             LogEntryHeader.turnOffInvisible(dataBuffer, originalPosition -
-                                            LogEntryHeader.MIN_HEADER_SIZE);
+                    LogEntryHeader.MIN_HEADER_SIZE);
         }
 
         /* Position the buffer at the start of the data, after the checksum. */
         int headerSizeMinusChecksum =
-            currentEntryHeader.getInvariantSizeMinusChecksum();
+                currentEntryHeader.getInvariantSizeMinusChecksum();
         int entryTypeStart = originalPosition - headerSizeMinusChecksum;
         dataBuffer.position(entryTypeStart);
 
@@ -694,10 +698,10 @@ public abstract class FileReader {
         dataBuffer.position(originalPosition);
     }
 
-    private void addToChecksum(ByteBuffer dataBuffer, int length) 
-        throws ChecksumException {
+    private void addToChecksum(ByteBuffer dataBuffer, int length)
+            throws ChecksumException {
 
-        if (!doChecksumOnRead) {
+        if(!doChecksumOnRead) {
             return;
         }
 
@@ -708,87 +712,91 @@ public abstract class FileReader {
      * Add the entry bytes to the checksum and check the value.  This method
      * must be called with the buffer positioned at the start of the entry.
      */
-    private void validateChecksum(ByteBuffer dataBuffer, 
+    private void validateChecksum(ByteBuffer dataBuffer,
                                   boolean isChecksumTarget)
-        throws ChecksumException {
+            throws ChecksumException {
 
-        if (!doChecksumOnRead) {
+        if(!doChecksumOnRead) {
             return;
         }
 
-        if (!isChecksumTarget) {
+        if(!isChecksumTarget) {
             return;
         }
 
         cksumValidator.update(dataBuffer, currentEntryHeader.getItemSize());
         cksumValidator.validate(currentEntryHeader.getChecksum(),
-                                window.currentFileNum(),
-                                currentEntryOffset);
+                window.currentFileNum(),
+                currentEntryOffset);
     }
 
     /**
      * Try to read a specified number of bytes.
+     *
      * @param amountToRead is the number of bytes we need
-     * @param collectData is true if we need to actually look at the data.
-     *  If false, we know we're skipping this entry, and all we need to
-     *  do is to count until we get to the right spot.
+     * @param collectData  is true if we need to actually look at the data.
+     *                     If false, we know we're skipping this entry, and all we need to
+     *                     do is to count until we get to the right spot.
      * @return a byte buffer positioned at the head of the desired portion,
      * or null if we reached eof.
      */
     private ByteBuffer readData(int amountToRead, boolean collectData)
-        throws ChecksumException,
-               EOFException,
-               FileNotFoundException,
-               DatabaseException {
+            throws ChecksumException,
+            EOFException,
+            FileNotFoundException,
+            DatabaseException {
 
         int alreadyRead = 0;
         ByteBuffer completeBuffer = null;
         saveBuffer.clear();
 
-        while ((alreadyRead < amountToRead) && !eof) {
+        while((alreadyRead < amountToRead) && !eof) {
 
             int bytesNeeded = amountToRead - alreadyRead;
-            if (window.hasRemaining()) {
+            if(window.hasRemaining()) {
 
                 /* There's data in the window, process it. */
-                if (collectData) {
+                if(collectData) {
 
                     /*
                      * Save data in a buffer for processing.
                      */
-                    if ((alreadyRead > 0) ||
-                        (window.remaining() < bytesNeeded)) {
+                    if((alreadyRead > 0) ||
+                            (window.remaining() < bytesNeeded)) {
 
                         /* We need to piece an entry together. */
                         copyToSaveBuffer(bytesNeeded);
                         alreadyRead = saveBuffer.position();
                         completeBuffer = saveBuffer;
-                    } else {
+                    }
+                    else {
 
                         /* A complete entry is available in this buffer. */
                         completeBuffer = window.getBuffer();
                         alreadyRead = amountToRead;
                     }
-                } else {
+                }
+                else {
 
                     /*
                      * We're not processing the data, so need to save it. just
                      * move buffer positions.
                      */
                     int positionIncrement =
-                        (window.remaining() > bytesNeeded) ?
-                        bytesNeeded : window.remaining();
+                            (window.remaining() > bytesNeeded) ?
+                                    bytesNeeded : window.remaining();
 
                     alreadyRead += positionIncrement;
                     window.incrementBufferPosition(positionIncrement);
                     completeBuffer = window.getBuffer();
                 }
-            } else {
+            }
+            else {
 
                 /*
                  * Look for more data.
                  */
-                if (window.fillNext(singleFile, bytesNeeded)) {
+                if(window.fillNext(singleFile, bytesNeeded)) {
                     /* This call to fillNext slid the window to a new file. */
                     nextEntryOffset = 0;
                 }
@@ -800,20 +808,20 @@ public abstract class FileReader {
 
         return completeBuffer;
     }
-    
+
     /* Try to skip over a specified number of bytes. */
-    public void skipData(int amountToSkip) 
-        throws ChecksumException,
-               EOFException,
-               FileNotFoundException,
-               DatabaseException {
-               
+    public void skipData(int amountToSkip)
+            throws ChecksumException,
+            EOFException,
+            FileNotFoundException,
+            DatabaseException {
+
         try {
             readData(amountToSkip, false);
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             reportProblem(e);
             throw e;
-        }    
+        }
     }
 
     /**
@@ -823,9 +831,10 @@ public abstract class FileReader {
         /* How much can we get from this current read buffer? */
         int bytesFromThisBuffer;
 
-        if (bytesNeeded <= window.remaining()) {
+        if(bytesNeeded <= window.remaining()) {
             bytesFromThisBuffer = bytesNeeded;
-        } else {
+        }
+        else {
             bytesFromThisBuffer = window.remaining();
         }
 
@@ -833,11 +842,11 @@ public abstract class FileReader {
         ByteBuffer temp;
 
         /* Make sure the save buffer is big enough. */
-        if (saveBuffer.capacity() - saveBuffer.position() <
-            bytesFromThisBuffer) {
+        if(saveBuffer.capacity() - saveBuffer.position() <
+                bytesFromThisBuffer) {
             /* Grow the save buffer. */
             temp = ByteBuffer.allocate(saveBuffer.capacity() +
-                                       bytesFromThisBuffer);
+                    bytesFromThisBuffer);
             saveBuffer.flip();
             temp.put(saveBuffer);
             saveBuffer = temp;
@@ -866,18 +875,17 @@ public abstract class FileReader {
      * logrec has been de-serialized, but not the body. Based on header info
      * only, it may perform some actions and then decide whether the rest of
      * the logrec should be de-serialized or just skipped.
-     * 
+     *
      * @return true if this reader should process the current logrec further,
      * via the processEntry() method. A logrec must be passed to processEntry
      * if the full logrec (not just the header) must be de-serialized for
      * further processing. Return false if no further processing is needed,
      * in which case the current logrec will be skipped (i.e, not returned
      * to the caller of readNextEntry().
-     *
      * @throws DatabaseException from subclasses.
      */
     protected boolean isTargetEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return true;
     }
@@ -886,13 +894,37 @@ public abstract class FileReader {
      * Each file reader implements this method to process the entry data.
      *
      * @param entryBuffer A ByteBuffer that the logrec data and is positioned
-     * at the start of the logrec body (i.e., just after the logrec header).
-     *
+     *                    at the start of the logrec body (i.e., just after the logrec header).
      * @return true if this entry should be returned to the caller of
      * readNextEntry().
      */
     protected abstract boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException;
+            throws DatabaseException;
+
+    /**
+     * @return true if the current entry is part of replication stream.
+     */
+    public boolean entryIsReplicated() {
+
+        if(currentEntryHeader == null) {
+            throw EnvironmentFailureException.unexpectedState
+                    ("entryIsReplicated should not be used before reader is " +
+                            "initialized");
+        }
+        return currentEntryHeader.getReplicated();
+    }
+
+    /**
+     * TBW
+     */
+    protected void handleGapInBackwardsScan(long prevFileNum) {
+        throw new EnvironmentFailureException
+                (envImpl,
+                        EnvironmentFailureReason.LOG_INTEGRITY,
+                        "Cannot read backward over cleaned file" +
+                                " from " + window.currentFileNum() +
+                                " to " + prevFileNum);
+    }
 
     /**
      * Never seen by user, used to indicate that the file reader should stop.
@@ -903,8 +935,8 @@ public abstract class FileReader {
             super();
         }
 
-        /* 
-         * @param message The message is used to hold debugging 
+        /*
+         * @param message The message is used to hold debugging
          * information.
          */
         public EOFException(String message) {
@@ -913,35 +945,17 @@ public abstract class FileReader {
     }
 
     /**
-     * @return true if the current entry is part of replication stream.
-     */
-    public boolean entryIsReplicated() {
-
-        if (currentEntryHeader == null) {
-            throw EnvironmentFailureException.unexpectedState
-                ("entryIsReplicated should not be used before reader is " +
-                 "initialized");
-        } 
-        return currentEntryHeader.getReplicated();
-    }
-
-    /**
-     * TBW
-     */
-    protected void handleGapInBackwardsScan(long prevFileNum) {
-        throw new EnvironmentFailureException
-            (envImpl,
-             EnvironmentFailureReason.LOG_INTEGRITY,
-             "Cannot read backward over cleaned file" +
-             " from " + window.currentFileNum() +
-             " to " + prevFileNum);
-    }
-
-    /**
-     * A ReadWindow provides a swath of data read from the JE log. 
+     * A ReadWindow provides a swath of data read from the JE log.
      */
     protected static class ReadWindow {
 
+        protected final EnvironmentImpl envImpl;
+        protected final FileManager fileManager;
+        /* read buffer can't grow larger than this */
+        private final int maxReadBufferSize;
+        protected long startOffset;// file offset that maps to buf start
+        protected long endOffset;  // file offset that maps to buf end
+        protected ByteBuffer readBuffer;   // buffer for reading from the file
         /*
          * fileNum, startOffset and endOffset indicate how the read buffer maps
          * to the JE log. For example, if the read buffer size is 200 and the
@@ -954,16 +968,6 @@ public abstract class FileReader {
          */
         private long fileNum;      // file number we're pointing to
         private int logVersion;    // log version for fileNum/readBuffer
-        protected long startOffset;// file offset that maps to buf start
-        protected long endOffset;  // file offset that maps to buf end
-        protected ByteBuffer readBuffer;   // buffer for reading from the file
-
-        /* read buffer can't grow larger than this */
-        private final int maxReadBufferSize;   
-
-        protected final EnvironmentImpl envImpl;
-        protected final FileManager fileManager;
-
         /*
          * The number of times we've tried to read in a log entry that was too
          * large for the read buffer.
@@ -976,7 +980,7 @@ public abstract class FileReader {
         protected ReadWindow(int readBufferSize, EnvironmentImpl envImpl) {
             DbConfigManager configManager = envImpl.getConfigManager();
             maxReadBufferSize =
-                configManager.getInt(EnvironmentParams.LOG_ITERATOR_MAX_SIZE);
+                    configManager.getInt(EnvironmentParams.LOG_ITERATOR_MAX_SIZE);
             this.envImpl = envImpl;
             fileManager = envImpl.getFileManager();
 
@@ -990,14 +994,14 @@ public abstract class FileReader {
          */
         public void initAtFileStart(long startLsn) {
             setFileNum(DbLsn.getFileNumber(startLsn),
-                       LogEntryType.UNKNOWN_FILE_HEADER_VERSION);
+                    LogEntryType.UNKNOWN_FILE_HEADER_VERSION);
             startOffset = DbLsn.getFileOffset(startLsn);
             endOffset = startOffset;
         }
 
         public long getEndOffset() {
             return endOffset;
-        }        
+        }
 
         /**
          * Ensure that whenever we change the fileNum, the logVersion is also
@@ -1015,7 +1019,7 @@ public abstract class FileReader {
         /* Return true if this offset is contained with the readBuffer. */
         boolean containsOffset(long targetOffset) {
             return (targetOffset >= startOffset) &&
-                (targetOffset < endOffset);
+                    (targetOffset < endOffset);
         }
 
         /* Return true if this lsn  is contained with the readBuffer. */
@@ -1028,7 +1032,7 @@ public abstract class FileReader {
         public void positionBuffer(long targetOffset) {
 
             assert containsOffset(targetOffset) : this + " doesn't contain " +
-                DbLsn.getNoFormatString(targetOffset);
+                    DbLsn.getNoFormatString(targetOffset);
 
             readBuffer.position((int) (targetOffset - startOffset));
         }
@@ -1044,13 +1048,13 @@ public abstract class FileReader {
          * startOffset. Position the window's buffer to point at the log entry
          * indicated by targetOffset
          */
-        public void slideAndFill(long windowfileNum, 
-                                 long windowStartOffset, 
+        public void slideAndFill(long windowfileNum,
+                                 long windowStartOffset,
                                  long targetOffset,
                                  boolean forward)
-            throws ChecksumException,
-                   FileNotFoundException,
-                   DatabaseException {
+                throws ChecksumException,
+                FileNotFoundException,
+                DatabaseException {
 
             FileHandle fileHandle = fileManager.getFileHandle(windowfileNum);
             try {
@@ -1062,15 +1066,15 @@ public abstract class FileReader {
                  * When reading backwards, we need to guarantee there is no log
                  * gap, throws out an EnvironmentFailreException if it exists.
                  */
-                if (!foundData && !forward) {
+                if(!foundData && !forward) {
                     throw EnvironmentFailureException.unexpectedState
-                        ("Detected a log file gap when reading backwards. " + 
-                         "Target position = " + DbLsn.getNoFormatString
-                         (DbLsn.makeLsn(windowfileNum, targetOffset)) +
-                         " starting position = " + DbLsn.getNoFormatString
-                         (DbLsn.makeLsn(windowfileNum, windowStartOffset)) +
-                         " end position = " + DbLsn.getNoFormatString
-                         (DbLsn.makeLsn(windowfileNum, endOffset)));
+                            ("Detected a log file gap when reading backwards. " +
+                                    "Target position = " + DbLsn.getNoFormatString
+                                    (DbLsn.makeLsn(windowfileNum, targetOffset)) +
+                                    " starting position = " + DbLsn.getNoFormatString
+                                    (DbLsn.makeLsn(windowfileNum, windowStartOffset)) +
+                                    " end position = " + DbLsn.getNoFormatString
+                                    (DbLsn.makeLsn(windowfileNum, endOffset)));
                 }
             } finally {
                 fileHandle.release();
@@ -1080,13 +1084,14 @@ public abstract class FileReader {
         /**
          * Fill up the read buffer with more data, moving along to the
          * following file (next largest number) if needed.
+         *
          * @return true if the fill moved us to a new file.
          */
         protected boolean fillNext(boolean singleFile, int bytesNeeded)
-            throws ChecksumException,
-                   FileNotFoundException,
-                   EOFException,
-                   DatabaseException {
+                throws ChecksumException,
+                FileNotFoundException,
+                EOFException,
+                DatabaseException {
 
             adjustReadBufferSize(bytesNeeded);
 
@@ -1100,27 +1105,27 @@ public abstract class FileReader {
                  * get the next file.
                  */
                 startOffset = endOffset;
-                if (fillFromFile(fileHandle, startOffset)) {
+                if(fillFromFile(fileHandle, startOffset)) {
                     /* 
                      * Successfully filled the read buffer, but didn't move to 
                      * a new file. 
                      */
-                    return false; 
+                    return false;
                 }
 
                 /* This file is done -- can we read in the next file? */
-                if (singleFile) {
+                if(singleFile) {
                     throw new EOFException("Single file only");
                 }
 
-                Long nextFile = 
-                    fileManager.getFollowingFileNum(fileNum, 
-                                                    true /* forward */);
+                Long nextFile =
+                        fileManager.getFollowingFileNum(fileNum,
+                                true /* forward */);
 
-                if (nextFile == null) {
+                if(nextFile == null) {
                     throw new EOFException();
                 }
-                    
+
                 fileHandle.release();
                 fileHandle = null;
                 fileHandle = fileManager.getFileHandle(nextFile);
@@ -1129,7 +1134,7 @@ public abstract class FileReader {
                 fillFromFile(fileHandle, 0);
                 return true;
             } finally {
-                if (fileHandle != null) {
+                if(fileHandle != null) {
                     fileHandle.release();
                 }
             }
@@ -1148,17 +1153,17 @@ public abstract class FileReader {
          * be the same as starting offset.
          * @return true if more data was read, false if not.         
          */
-        protected boolean fillFromFile(FileHandle fileHandle, 
-                                       long targetOffset) 
-            throws DatabaseException {
+        protected boolean fillFromFile(FileHandle fileHandle,
+                                       long targetOffset)
+                throws DatabaseException {
 
             boolean foundData = false;
             readBuffer.clear();
-            if (fileManager.readFromFile(fileHandle.getFile(), 
-                                         readBuffer,
-                                         startOffset,
-                                         fileHandle.getFileNum(),
-                                         false /* dataKnownToBeInFile */)) {
+            if(fileManager.readFromFile(fileHandle.getFile(),
+                    readBuffer,
+                    startOffset,
+                    fileHandle.getFileNum(),
+                    false /* dataKnownToBeInFile */)) {
                 foundData = true;
                 nReadOperations += 1;
                 /*
@@ -1185,7 +1190,7 @@ public abstract class FileReader {
         /**
          * Change the read buffer size if we start hitting large log entries so
          * we don't get into an expensive cycle of multiple reads and piecing
-         * together of log entries.  
+         * together of log entries.
          */
         protected void adjustReadBufferSize(int amountToRead) {
 
@@ -1195,29 +1200,30 @@ public abstract class FileReader {
              * We need to read something larger than the current buffer
              * size. 
              */
-            if (amountToRead > readBufferSize) {
+            if(amountToRead > readBufferSize) {
 
                 /* We're not at the max yet. */
-                if (readBufferSize < maxReadBufferSize) {
+                if(readBufferSize < maxReadBufferSize) {
 
                     /*
                      * Make the buffer the minimum of amountToRead or a
                      * maxReadBufferSize.
                      */
-                    if (amountToRead < maxReadBufferSize) {
+                    if(amountToRead < maxReadBufferSize) {
                         readBufferSize = amountToRead;
                         /* Make it a multiple of 1K. */
                         int remainder = readBufferSize % 1024;
                         readBufferSize += 1024 - remainder;
                         readBufferSize = Math.min(readBufferSize,
-                                                  maxReadBufferSize);
-                    } else {
+                                maxReadBufferSize);
+                    }
+                    else {
                         readBufferSize = maxReadBufferSize;
                     }
                     readBuffer = ByteBuffer.allocate(readBufferSize);
                 }
 
-                if (amountToRead > readBuffer.capacity()) {
+                if(amountToRead > readBuffer.capacity()) {
                     nRepeatIteratorReads++;
                 }
             }

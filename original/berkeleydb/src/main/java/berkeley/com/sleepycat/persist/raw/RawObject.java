@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.persist.raw;
 
+import berkeley.com.sleepycat.persist.evolve.Conversion;
+import berkeley.com.sleepycat.persist.model.EntityModel;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeSet;
-
-import berkeley.com.sleepycat.persist.evolve.Conversion;
-import berkeley.com.sleepycat.persist.model.EntityModel;
 
 /**
  * A raw instance that can be used with a {@link RawStore} or {@link
@@ -27,7 +27,7 @@ import berkeley.com.sleepycat.persist.model.EntityModel;
  * is not used to represent non-enum simple types, which are represented as
  * simple objects.  This includes primitives, which are represented as
  * instances of their wrapper class.
- *
+ * <p>
  * <p>{@code RawObject} objects are thread-safe.  Multiple threads may safely
  * call the methods of a shared {@code RawObject} object.</p>
  *
@@ -47,22 +47,19 @@ public class RawObject {
      * Creates a raw object with a given set of field values for a complex
      * type.
      *
-     * @param type the type of this raw object.
-     *
-     * @param values a map of field name to value for each declared field in
-     * the class, or null to create an empty map.  Each value in the map is a
-     * {@link RawObject}, a <a href="../model/Entity.html#simpleTypes">simple
-     * type</a> instance, or null.
-     *
+     * @param type        the type of this raw object.
+     * @param values      a map of field name to value for each declared field in
+     *                    the class, or null to create an empty map.  Each value in the map is a
+     *                    {@link RawObject}, a <a href="../model/Entity.html#simpleTypes">simple
+     *                    type</a> instance, or null.
      * @param superObject the instance of the superclass, or null if the
-     * superclass is {@code Object}.
-     *
+     *                    superclass is {@code Object}.
      * @throws IllegalArgumentException if the type argument is an array type.
      */
     public RawObject(RawType type,
                      Map<String, Object> values,
                      RawObject superObject) {
-        if (type == null || values == null) {
+        if(type == null || values == null) {
             throw new NullPointerException();
         }
         this.type = type;
@@ -73,17 +70,15 @@ public class RawObject {
     /**
      * Creates a raw object with the given array elements for an array type.
      *
-     * @param type the type of this raw object.
-     *
+     * @param type     the type of this raw object.
      * @param elements an array of elements.  Each element in the array is a
-     * {@link RawObject}, a <a href="../model/Entity.html#simpleTypes">simple
-     * type</a> instance, or null.
-     *
+     *                 {@link RawObject}, a <a href="../model/Entity.html#simpleTypes">simple
+     *                 type</a> instance, or null.
      * @throws IllegalArgumentException if the type argument is not an array
-     * type.
+     *                                  type.
      */
     public RawObject(RawType type, Object[] elements) {
-        if (type == null || elements == null) {
+        if(type == null || elements == null) {
             throw new NullPointerException();
         }
         this.type = type;
@@ -93,25 +88,61 @@ public class RawObject {
     /**
      * Creates a raw object with the given enum value for an enum type.
      *
-     * @param type the type of this raw object.
-     *
+     * @param type         the type of this raw object.
      * @param enumConstant the String value of this enum constant; must be
-     * one of the Strings returned by {@link RawType#getEnumConstants}.
-     *
+     *                     one of the Strings returned by {@link RawType#getEnumConstants}.
      * @throws IllegalArgumentException if the type argument is not an array
-     * type.
+     *                                  type.
      */
     public RawObject(RawType type, String enumConstant) {
-        if (type == null || enumConstant == null) {
+        if(type == null || enumConstant == null) {
             throw new NullPointerException();
         }
         this.type = type;
         this.enumConstant = enumConstant;
     }
 
+    private static void formatValue(StringBuilder buf,
+                                    String indent,
+                                    String id,
+                                    Object val) {
+        if(val == null) {
+            buf.append(indent);
+            buf.append("<Null");
+            formatId(buf, id);
+            buf.append("/>\n");
+        }
+        else if(val instanceof RawObject) {
+            ((RawObject) val).formatRawObject(buf, indent, id, false);
+        }
+        else {
+            buf.append(indent);
+            buf.append("<Value");
+            formatId(buf, id);
+            buf.append(" class=\"");
+            buf.append(val.getClass().getName());
+            buf.append("\">");
+            buf.append(val.toString());
+            buf.append("</Value>\n");
+        }
+    }
+
+    private static void formatId(StringBuilder buf, String id) {
+        if(id != null) {
+            if(Character.isDigit(id.charAt(0))) {
+                buf.append(" index=\"");
+            }
+            else {
+                buf.append(" field=\"");
+            }
+            buf.append(id);
+            buf.append('"');
+        }
+    }
+
     /**
      * Returns the raw type information for this raw object.
-     *
+     * <p>
      * <p>Note that if this object is unevolved, the returned type may be
      * different from the current type returned by {@link
      * EntityModel#getRawType EntityModel.getRawType} for the same class name.
@@ -130,7 +161,7 @@ public class RawObject {
      * declared field in the class.  Each value in the map is a {@link
      * RawObject}, a <a href="../model/Entity.html#simpleTypes">simple
      * type</a> instance, or null.
-     *
+     * <p>
      * <p>There will be an entry in the map for every field declared in this
      * type, as determined by {@link RawType#getFields} for the type returned
      * by {@link #getType}.  Values in the map may be null for fields with
@@ -177,43 +208,46 @@ public class RawObject {
 
     @Override
     public boolean equals(Object other) {
-        if (other == this) {
+        if(other == this) {
             return true;
         }
-        if (!(other instanceof RawObject)) {
+        if(!(other instanceof RawObject)) {
             return false;
         }
         RawObject o = (RawObject) other;
-        if (type != o.type) {
+        if(type != o.type) {
             return false;
         }
-        if (!Arrays.deepEquals(elements, o.elements)) {
+        if(!Arrays.deepEquals(elements, o.elements)) {
             return false;
         }
-        if (enumConstant != null) {
-            if (!enumConstant.equals(o.enumConstant)) {
-                return false;
-            }
-        } else {
-            if (o.enumConstant != null) {
+        if(enumConstant != null) {
+            if(!enumConstant.equals(o.enumConstant)) {
                 return false;
             }
         }
-        if (values != null) {
-            if (!values.equals(o.values)) {
-                return false;
-            }
-        } else {
-            if (o.values != null) {
+        else {
+            if(o.enumConstant != null) {
                 return false;
             }
         }
-        if (superObject != null) {
-            if (!superObject.equals(o.superObject)) {
+        if(values != null) {
+            if(!values.equals(o.values)) {
                 return false;
             }
-        } else {
-            if (o.superObject != null) {
+        }
+        else {
+            if(o.values != null) {
+                return false;
+            }
+        }
+        if(superObject != null) {
+            if(!superObject.equals(o.superObject)) {
+                return false;
+            }
+        }
+        else {
+            if(o.superObject != null) {
                 return false;
             }
         }
@@ -223,10 +257,10 @@ public class RawObject {
     @Override
     public int hashCode() {
         return System.identityHashCode(type) +
-               Arrays.deepHashCode(elements) +
-               (enumConstant != null ? enumConstant.hashCode() : 0) +
-               (values != null ? values.hashCode() : 0) +
-               (superObject != null ? superObject.hashCode() : 0);
+                Arrays.deepHashCode(elements) +
+                (enumConstant != null ? enumConstant.hashCode() : 0) +
+                (values != null ? values.hashCode() : 0) +
+                (superObject != null ? superObject.hashCode() : 0);
     }
 
     /**
@@ -243,7 +277,7 @@ public class RawObject {
                                  String indent,
                                  String id,
                                  boolean isSuper) {
-        if (type.isEnum()) {
+        if(type.isEnum()) {
             buf.append(indent);
             buf.append("<Enum");
             formatId(buf, id);
@@ -254,22 +288,25 @@ public class RawObject {
             buf.append("\">");
             buf.append(enumConstant);
             buf.append("</Enum>\n");
-        } else {
+        }
+        else {
             String indent2 = indent + INDENT;
             String endTag;
             buf.append(indent);
-            if (type.isArray()) {
+            if(type.isArray()) {
                 buf.append("<Array");
                 endTag = "</Array>";
-            } else if (isSuper) {
+            }
+            else if(isSuper) {
                 buf.append("<Super");
                 endTag = "</Super>";
-            } else {
+            }
+            else {
                 buf.append("<Object");
                 endTag = "</Object>";
             }
             formatId(buf, id);
-            if (type.isArray()) {
+            if(type.isArray()) {
                 buf.append(" length=\"");
                 buf.append(elements.length);
                 buf.append('"');
@@ -280,57 +317,23 @@ public class RawObject {
             buf.append(type.getId());
             buf.append("\">\n");
 
-            if (superObject != null) {
+            if(superObject != null) {
                 superObject.formatRawObject(buf, indent2, null, true);
             }
-            if (type.isArray()) {
-                for (int i = 0; i < elements.length; i += 1) {
+            if(type.isArray()) {
+                for(int i = 0; i < elements.length; i += 1) {
                     formatValue(buf, indent2, String.valueOf(i), elements[i]);
                 }
-            } else {
+            }
+            else {
                 TreeSet<String> keys = new TreeSet<String>(values.keySet());
-                for (String name : keys) {
+                for(String name : keys) {
                     formatValue(buf, indent2, name, values.get(name));
                 }
             }
             buf.append(indent);
             buf.append(endTag);
             buf.append("\n");
-        }
-    }
-
-    private static void formatValue(StringBuilder buf,
-                                    String indent,
-                                    String id,
-                                    Object val) {
-        if (val == null) {
-            buf.append(indent);
-            buf.append("<Null");
-            formatId(buf, id);
-            buf.append("/>\n");
-        } else if (val instanceof RawObject) {
-            ((RawObject) val).formatRawObject(buf, indent, id, false);
-        } else {
-            buf.append(indent);
-            buf.append("<Value");
-            formatId(buf, id);
-            buf.append(" class=\"");
-            buf.append(val.getClass().getName());
-            buf.append("\">");
-            buf.append(val.toString());
-            buf.append("</Value>\n");
-        }
-    }
-
-    private static void formatId(StringBuilder buf, String id) {
-        if (id != null) {
-            if (Character.isDigit(id.charAt(0))) {
-                buf.append(" index=\"");
-            } else {
-                buf.append(" field=\"");
-            }
-            buf.append(id);
-            buf.append('"');
         }
     }
 }

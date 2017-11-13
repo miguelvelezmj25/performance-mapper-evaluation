@@ -21,5 +21,5 @@ public interface WithRootLatched {
      * doWork is called while the tree's root latch is held.
      */
     public IN doWork(ChildReference root)
-        throws DatabaseException;
+            throws DatabaseException;
 }

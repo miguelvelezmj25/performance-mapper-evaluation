@@ -16,14 +16,13 @@ package berkeley.com.sleepycat.je.rep.util.ldiff;
 public class LDiffConfig {
     private static final int DEFAULT_BLOCK_SIZE = 1 << 13; // 8k
     private static final int DEFAULT_MAX_ERRORS = 0;
-
+    public boolean verbose = false;
     private int maxErrors = DEFAULT_MAX_ERRORS;
     private boolean diffAnalysis = false;
     private int blockSize = DEFAULT_BLOCK_SIZE;
     private boolean waitIfBusy = false;
     private int maxConnectionAttempts = 1;
     private int reconnectDelay = 0;
-    public boolean verbose = false;
 
     /**
      * Return the maximum number of errors to analyze before ending the LDiff
@@ -42,16 +41,15 @@ public class LDiffConfig {
      * completion. The default value is 0.
      *
      * @param max the maximum number of errors to be analyzed before ending the
-     * LDiff operation.
+     *            LDiff operation.
      */
     public LDiffConfig setMaxErrors(int max) {
         setMaxErrorsVoid(max);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMaxErrorsVoid(int max) {
         this.maxErrors = max;
@@ -73,16 +71,15 @@ public class LDiffConfig {
      * failures. The default value is false.
      *
      * @param analysis if true, provides detailed analysis about the reason why
-     * the diff failed. The detailed analysis can be time consuming.
+     *                 the diff failed. The detailed analysis can be time consuming.
      */
     public LDiffConfig setDiffAnalysis(boolean analysis) {
         setDiffAnalysisVoid(analysis);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setDiffAnalysisVoid(boolean analysis) {
         diffAnalysis = analysis;
@@ -104,16 +101,15 @@ public class LDiffConfig {
      * LDiff operation. The default is 10240.
      *
      * @param size the number of records to include in each block analyzed by
-     * the LDiff operation.
+     *             the LDiff operation.
      */
     public LDiffConfig setBlockSize(int size) {
         setBlockSizeVoid(size);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setBlockSizeVoid(int size) {
         blockSize = size;
@@ -143,6 +139,14 @@ public class LDiffConfig {
     }
 
     /**
+     * @hidden For the completement of setter methods.
+     */
+    public LDiffConfig setMaxConnectionAttempts(int maxAttempts) {
+        setMaxConnectionAttemptsVoid(maxAttempts);
+        return this;
+    }
+
+    /**
      * Return the delay, in milliseconds, between reconnect attempts.
      *
      * @return the amount of time, in milliseconds, between reconnection
@@ -153,15 +157,23 @@ public class LDiffConfig {
     }
 
     /**
+     * @hidden For the completement of setter methods.
+     */
+    public LDiffConfig setReconnectDelay(int delay) {
+        setReconnectDelayVoid(delay);
+        return this;
+    }
+
+    /**
      * Configure whether or not the operation should wait for the remote
      * service to become available, if the remote service is busy.
      *
-     * @param wait if true, the LDiff operation will block until the remote
-     * node is available
+     * @param wait        if true, the LDiff operation will block until the remote
+     *                    node is available
      * @param maxAttempts the number of times to attempt connecting to
-     * the service before aborting.  Pass -1 to never abort.
-     * @param delay the number of milliseconds to wait between connection
-     * attempts.
+     *                    the service before aborting.  Pass -1 to never abort.
+     * @param delay       the number of milliseconds to wait between connection
+     *                    attempts.
      */
     public LDiffConfig setWaitIfBusy(boolean wait, int maxAttempts, int delay) {
         waitIfBusy = wait;
@@ -169,44 +181,23 @@ public class LDiffConfig {
         reconnectDelay = delay;
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setWaitIfBusyVoid(boolean wait) {
         this.waitIfBusy = wait;
     }
-    
+
     /**
-     * @hidden
-     * For the completement of setter methods.
-     */
-    public LDiffConfig setMaxConnectionAttempts(int maxAttempts) {
-        setMaxConnectionAttemptsVoid(maxAttempts);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMaxConnectionAttemptsVoid(int maxAttempts) {
         this.maxConnectionAttempts = maxAttempts;
     }
-    
+
     /**
-     * @hidden
-     * For the completement of setter methods.
-     */
-    public LDiffConfig setReconnectDelay(int delay) {
-        setReconnectDelayVoid(delay);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setReconnectDelayVoid(int delay) {
         this.reconnectDelay = delay;
@@ -227,16 +218,15 @@ public class LDiffConfig {
      * success or failure.
      *
      * @param verbose if true, the LDiff operation will output information
-     * as it compares databases
+     *                as it compares databases
      */
     public LDiffConfig setVerbose(boolean verbose) {
         this.verbose = verbose;
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setVerboseVoid(boolean verbose) {
         this.verbose = verbose;

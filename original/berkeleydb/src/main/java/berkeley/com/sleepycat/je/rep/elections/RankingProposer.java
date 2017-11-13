@@ -13,11 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.elections;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.rep.elections.Acceptor.SuggestionGenerator.Ranking;
 import berkeley.com.sleepycat.je.rep.elections.Protocol.Promise;
@@ -25,6 +20,11 @@ import berkeley.com.sleepycat.je.rep.elections.Protocol.Value;
 import berkeley.com.sleepycat.je.rep.impl.TextProtocol.MessageExchange;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * Extends the base proposer to choose a phase 2 value based on a suggestion's
@@ -38,6 +38,8 @@ public class RankingProposer extends Proposer {
      * skipPromiseDueToVersion method should always return false, for testing.
      */
     static volatile int testLogVersionReplicatePrevious = 0;
+    private final TimebasedProposalGenerator proposalGenerator =
+            new TimebasedProposalGenerator();
 
     public RankingProposer(Elections elections,
                            NameIdPair nameIdPair) {
@@ -55,7 +57,7 @@ public class RankingProposer extends Proposer {
     @Override
     protected Value choosePhase2Value(Set<MessageExchange> exchanges) {
         Ranking maxRanking =
-            new Ranking(Long.MIN_VALUE, Long.MIN_VALUE);
+                new Ranking(Long.MIN_VALUE, Long.MIN_VALUE);
         int maxPriority = Integer.MIN_VALUE;
         String maxTarget = null;
         int zeroPrioNodes = 0;
@@ -64,28 +66,28 @@ public class RankingProposer extends Proposer {
 
         /* Check log versions in this group. */
         VersionCalculator calculator =
-            new VersionCalculator(elections, exchanges);
+                new VersionCalculator(elections, exchanges);
 
         Value acceptorValue = null;
-        for (MessageExchange me : exchanges) {
-            if (me.getResponseMessage().getOp() !=
-                elections.getProtocol().PROMISE) {
+        for(MessageExchange me : exchanges) {
+            if(me.getResponseMessage().getOp() !=
+                    elections.getProtocol().PROMISE) {
                 continue;
             }
             final Promise p = (Promise) me.getResponseMessage();
-            if (p.getPriority() == 0) {
+            if(p.getPriority() == 0) {
                 zeroPrioNodes++;
                 continue;
             }
 
-            if (calculator.skipPromiseDueToVersion(p.getLogVersion())) {
+            if(calculator.skipPromiseDueToVersion(p.getLogVersion())) {
                 continue;
             }
 
             /* NULL name/ID pair means value came from arbiter */
             final Value suggestion = p.getSuggestion();
             final boolean isArb = (suggestion instanceof MasterValue) &&
-                ((MasterValue) suggestion).getNameId().equals(NameIdPair.NULL);
+                    ((MasterValue) suggestion).getNameId().equals(NameIdPair.NULL);
 
             /*
              * Ignore arbiter if there are replies from multiple non-arbiters.
@@ -94,34 +96,35 @@ public class RankingProposer extends Proposer {
              * existing data and should be allowed to proceed even if they have
              * lost data the arbiter remembers. [#25311]
              */
-            if (!isArb) {
+            if(!isArb) {
                 nonArbCount++;
-            } else {
-                 arbRanking = p.getSuggestionRanking();
-                 continue;
+            }
+            else {
+                arbRanking = p.getSuggestionRanking();
+                continue;
             }
 
             final int compareTo =
-                p.getSuggestionRanking().compareTo(maxRanking);
-            if (compareTo < 0) {
-               continue;
+                    p.getSuggestionRanking().compareTo(maxRanking);
+            if(compareTo < 0) {
+                continue;
             }
 
             /* Use priority as a tie breaker. */
-            if (compareTo == 0) {
-              if (p.getPriority() < maxPriority) {
-                  continue;
-              }
+            if(compareTo == 0) {
+                if(p.getPriority() < maxPriority) {
+                    continue;
+                }
 
               /*
                * Use socket address to choose in case of a tie, so we
                * always have a consistent ordering.
                */
-              if ((p.getPriority() == maxPriority) &&
-                  ((maxTarget != null) &&
-                   (me.target.toString().compareTo(maxTarget) <= 0))) {
-                  continue;
-              }
+                if((p.getPriority() == maxPriority) &&
+                        ((maxTarget != null) &&
+                                (me.target.toString().compareTo(maxTarget) <= 0))) {
+                    continue;
+                }
             }
 
             acceptorValue = p.getSuggestion();
@@ -130,16 +133,17 @@ public class RankingProposer extends Proposer {
             maxTarget = me.target.toString();
         }
 
-        if ((acceptorValue == null) && (zeroPrioNodes > 0)) {
+        if((acceptorValue == null) && (zeroPrioNodes > 0)) {
             LoggerUtils.logMsg(logger, elections.getRepImpl(),
-                               formatter, Level.INFO,
-                               "No positive election priority node responded."+
-                               " Zero election priority node count:" +
-                               zeroPrioNodes);
+                    formatter, Level.INFO,
+                    "No positive election priority node responded." +
+                            " Zero election priority node count:" +
+                            zeroPrioNodes);
             phase1NoNonZeroPrio.increment();
-        } else if (acceptorValue != null && arbRanking != null  && nonArbCount <= 1) {
+        }
+        else if(acceptorValue != null && arbRanking != null && nonArbCount <= 1) {
             /* Check if we have an arbiter response.  */
-            if (maxRanking.compareTo(arbRanking) < 0) {
+            if(maxRanking.compareTo(arbRanking) < 0) {
                 phase1Arbiter.increment();
                 acceptorValue = null;
             }
@@ -150,15 +154,13 @@ public class RankingProposer extends Proposer {
     /**
      * Returns a proposal number. Note that the proposal numbers must increase
      * over time, even across restarts of the proposer process.
+     *
      * @return a 24 character string representing the proposal number
      */
     @Override
     public synchronized Proposal nextProposal() {
         return proposalGenerator.nextProposal();
     }
-
-    private final TimebasedProposalGenerator proposalGenerator =
-        new TimebasedProposalGenerator();
 
     /* Adds versioning information as a factor for elections. */
     private static class VersionCalculator {
@@ -186,23 +188,24 @@ public class RankingProposer extends Proposer {
              * calculate the majority log version.
              */
             Map<Integer, Integer> logFormats = new HashMap<Integer, Integer>();
-            for (MessageExchange me : exchanges) {
-                if (me.getResponseMessage().getOp() !=
-                    elections.getProtocol().PROMISE) {
+            for(MessageExchange me : exchanges) {
+                if(me.getResponseMessage().getOp() !=
+                        elections.getProtocol().PROMISE) {
                     continue;
                 }
 
                 Promise p = (Promise) me.getResponseMessage();
 
-                if (p.getLogVersion() < lowestVersion) {
+                if(p.getLogVersion() < lowestVersion) {
                     lowestVersion = p.getLogVersion();
                 }
 
-                if (!logFormats.containsKey(p.getLogVersion())) {
+                if(!logFormats.containsKey(p.getLogVersion())) {
                     logFormats.put(p.getLogVersion(), 1);
-                } else {
+                }
+                else {
                     logFormats.put(p.getLogVersion(),
-                                   logFormats.get(p.getLogVersion()) + 1);
+                            logFormats.get(p.getLogVersion()) + 1);
                 }
             }
 
@@ -210,7 +213,7 @@ public class RankingProposer extends Proposer {
              * If there is only log version in the whole group, return and do
              * nothing.
              */
-            if (logFormats.size() == 1) {
+            if(logFormats.size() == 1) {
                 singleVersion = true;
                 return;
             }
@@ -219,15 +222,15 @@ public class RankingProposer extends Proposer {
              * If the RepNode is null, just return, so that the nodes with the
              * smallest log version can always be elected as master.
              */
-            if (elections.getRepNode() == null) {
+            if(elections.getRepNode() == null) {
                 return;
             }
 
             /* Calculate the majority log version. */
             int electableNodeCount =
-                elections.getRepNode().getGroup().getElectableGroupSize();
-            for (Map.Entry<Integer, Integer> entry : logFormats.entrySet()) {
-                if (entry.getValue() > (electableNodeCount / 2)) {
+                    elections.getRepNode().getGroup().getElectableGroupSize();
+            for(Map.Entry<Integer, Integer> entry : logFormats.entrySet()) {
+                if(entry.getValue() > (electableNodeCount / 2)) {
                     majorityVersion = entry.getKey();
                     break;
                 }
@@ -244,36 +247,36 @@ public class RankingProposer extends Proposer {
          * an upgrade until a majority of the nodes have been upgraded.  This
          * restriction no longer applies as of log version 9 in JE 6 -- see
          * [#22336].
-         *
+         * <p>
          * <p>Returns true if election will ignore the promise because there
          * are multiple log versions in the group, all log versions correspond
          * to JE 5 and earlier versions, and the log version of a replica
          * satisfies one of the following rules:
          * <ol>
          * <li> If there is no majority log version in the group, and log
-         *      version of this replica is not the lowest log version.
+         * version of this replica is not the lowest log version.
          * <li> If there exists a majority log version, and log version of this
-         *      replica is not the lowest log version, nor the majority log
-         *      version.
+         * replica is not the lowest log version, nor the majority log
+         * version.
          * </ol>
          */
         boolean skipPromiseDueToVersion(int logVersion) {
-            if (singleVersion) {
+            if(singleVersion) {
                 return false;
             }
             int logVersionReplicatePrevious = testLogVersionReplicatePrevious;
-            if (logVersionReplicatePrevious == 0) {
+            if(logVersionReplicatePrevious == 0) {
                 logVersionReplicatePrevious =
-                    LogEntryType.LOG_VERSION_REPLICATE_OLDER;
+                        LogEntryType.LOG_VERSION_REPLICATE_OLDER;
             }
-            if (lowestVersion >= logVersionReplicatePrevious - 1) {
+            if(lowestVersion >= logVersionReplicatePrevious - 1) {
                 return false;
             }
-            if ((majorityVersion == Integer.MIN_VALUE &&
-                 logVersion != lowestVersion) ||
-                (majorityVersion != Integer.MIN_VALUE &&
-                 logVersion != lowestVersion &&
-                 logVersion != majorityVersion)) {
+            if((majorityVersion == Integer.MIN_VALUE &&
+                    logVersion != lowestVersion) ||
+                    (majorityVersion != Integer.MIN_VALUE &&
+                            logVersion != lowestVersion &&
+                            logVersion != majorityVersion)) {
                 return true;
             }
 

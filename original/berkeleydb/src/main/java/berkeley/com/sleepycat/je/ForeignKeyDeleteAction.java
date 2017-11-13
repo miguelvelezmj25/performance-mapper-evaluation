@@ -16,11 +16,11 @@ package berkeley.com.sleepycat.je;
 /**
  * The action taken when a referenced record in the foreign key database is
  * deleted.
- *
+ * <p>
  * <p>The delete action applies to a secondary database that is configured to
  * have a foreign key integrity constraint.  The delete action is specified by
  * calling {@link SecondaryConfig#setForeignKeyDeleteAction}.</p>
- *
+ * <p>
  * <p>When a record in the foreign key database is deleted, it is checked to
  * see if it is referenced by any record in the associated secondary database.
  * If the key is referenced, the delete action is applied.  By default, the

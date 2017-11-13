@@ -20,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * A replacement for ByteArrayOutputStream that does not synchronize every
  * byte read.
- *
+ * <p>
  * <p>This class extends {@link OutputStream} and its <code>write()</code>
  * methods allow it to be used as a standard output stream.  In addition, it
  * provides <code>writeFast()</code> methods that are not declared to throw
@@ -42,15 +42,13 @@ public class FastOutputStream extends OutputStream {
      * constant is zero, which means to double the current buffer size.
      */
     public static final int DEFAULT_BUMP_SIZE = 0;
-
-    private int len;
-    private int bumpLen;
-    private byte[] buf;
-
     /*
      * We can return the same byte[] for 0 length arrays.
      */
     private static byte[] ZERO_LENGTH_BYTE_ARRAY = new byte[0];
+    private int len;
+    private int bumpLen;
+    private byte[] buf;
 
     /**
      * Creates an output stream with default sizes.
@@ -75,8 +73,7 @@ public class FastOutputStream extends OutputStream {
      * Creates an output stream with a given bump size and initial size.
      *
      * @param initialSize the initial size of the buffer.
-     *
-     * @param bumpSize the amount to increment the buffer.
+     * @param bumpSize    the amount to increment the buffer.
      */
     public FastOutputStream(int initialSize, int bumpSize) {
 
@@ -99,11 +96,10 @@ public class FastOutputStream extends OutputStream {
      * Creates an output stream with a given initial buffer and a given
      * bump size.
      *
-     * @param buffer the initial buffer; will be owned by this object.
-     *
+     * @param buffer   the initial buffer; will be owned by this object.
      * @param bumpSize the amount to increment the buffer.  If zero (the
-     * default), the current buffer size will be doubled when the buffer is
-     * full.
+     *                 default), the current buffer size will be doubled when the buffer is
+     *                 full.
      */
     public FastOutputStream(byte[] buffer, int bumpSize) {
 
@@ -158,14 +154,14 @@ public class FastOutputStream extends OutputStream {
     }
 
     public String toString(String encoding)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
 
         return new String(buf, 0, len, encoding);
     }
 
     public byte[] toByteArray() {
 
-        if (len == 0) {
+        if(len == 0) {
             return ZERO_LENGTH_BYTE_ARRAY;
         }
         byte[] toBuf = new byte[len];
@@ -181,13 +177,13 @@ public class FastOutputStream extends OutputStream {
      * <code>IOException</code>.
      *
      * @param b the byte to write.
-     *
      * @see #write(int)
      */
     public final void writeFast(int b) {
 
-        if (len + 1 > buf.length)
+        if(len + 1 > buf.length) {
             bump(1);
+        }
 
         buf[len++] = (byte) b;
     }
@@ -197,14 +193,14 @@ public class FastOutputStream extends OutputStream {
      * <code>IOException</code>.
      *
      * @param fromBuf the buffer to write.
-     *
      * @see #write(byte[])
      */
     public final void writeFast(byte[] fromBuf) {
 
         int needed = len + fromBuf.length - buf.length;
-        if (needed > 0)
+        if(needed > 0) {
             bump(needed);
+        }
 
         System.arraycopy(fromBuf, 0, buf, len, fromBuf.length);
         len += fromBuf.length;
@@ -215,18 +211,16 @@ public class FastOutputStream extends OutputStream {
      * <code>IOException</code>.
      *
      * @param fromBuf the buffer to write.
-     *
-     * @param offset the start offset in the buffer.
-     *
-     * @param length the number of bytes to write.
-     *
-     * @see #write(byte[],int,int)
+     * @param offset  the start offset in the buffer.
+     * @param length  the number of bytes to write.
+     * @see #write(byte[], int, int)
      */
     public final void writeFast(byte[] fromBuf, int offset, int length) {
 
         int needed = len + length - buf.length;
-        if (needed > 0)
+        if(needed > 0) {
             bump(needed);
+        }
 
         System.arraycopy(fromBuf, offset, buf, len, length);
         len += length;
@@ -272,8 +266,9 @@ public class FastOutputStream extends OutputStream {
     public void makeSpace(int sizeNeeded) {
 
         int needed = len + sizeNeeded - buf.length;
-        if (needed > 0)
+        if(needed > 0) {
             bump(needed);
+        }
     }
 
     /**

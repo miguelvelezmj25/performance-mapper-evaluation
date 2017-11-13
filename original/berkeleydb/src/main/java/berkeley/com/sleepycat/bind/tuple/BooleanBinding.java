@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a <code>Boolean</code> primitive
  * wrapper or a <code>boolean</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class BooleanBinding extends TupleBinding<Boolean> {
 
     private static final int BOOLEAN_SIZE = 1;
 
+    /**
+     * Converts an entry buffer into a simple <code>boolean</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static boolean entryToBoolean(DatabaseEntry entry) {
+
+        return entryToInput(entry).readBoolean();
+    }
+
+    /**
+     * Converts a simple <code>boolean</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void booleanToEntry(boolean val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeBoolean(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[BOOLEAN_SIZE]);
+    }
+
     // javadoc is inherited
     public Boolean entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class BooleanBinding extends TupleBinding<Boolean> {
     protected TupleOutput getTupleOutput(Boolean object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>boolean</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static boolean entryToBoolean(DatabaseEntry entry) {
-
-        return entryToInput(entry).readBoolean();
-    }
-
-    /**
-     * Converts a simple <code>boolean</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void booleanToEntry(boolean val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeBoolean(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[BOOLEAN_SIZE]);
     }
 }

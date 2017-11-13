@@ -38,8 +38,9 @@ public class TxnAbort extends VersionedWriteTxnEnd {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof TxnAbort))
+        if(!(other instanceof TxnAbort)) {
             return false;
+        }
 
         TxnAbort otherAbort = (TxnAbort) other;
 

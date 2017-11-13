@@ -18,7 +18,7 @@ import java.math.BigInteger;
 
 /**
  * Used for reading object fields.
- *
+ * <p>
  * <p>Unlike TupleInput, Strings are returned by {@link #readObject} when using
  * this class.</p>
  *
@@ -49,28 +49,28 @@ public interface EntityInput {
      * below).
      */
     Object readObject()
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called for a primary key field or a composite key field with a reference
      * type.
-     *
+     * <p>
      * <p>For such key fields, no formatId is present nor can the object
      * already be present in the visited object set.</p>
      */
     Object readKeyObject(Format format)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called for a String field, that is not a primary key field or a
      * composite key field with a reference type.
-     *
+     * <p>
      * <p>For the new String format, no formatId is present nor can the object
      * already be present in the visited object set.  For the old String
      * format, this method simply calls readObject for compatibility.</p>
      */
     Object readStringObject()
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called via Accessor.readSecKeyFields for a primary key field with a
@@ -78,9 +78,9 @@ public interface EntityInput {
      * fields.
      */
     void registerPriKeyObject(Object o);
-    
+
     /**
-     * Called via Accessor.readSecKeyFields for a primary String key field.  
+     * Called via Accessor.readSecKeyFields for a primary String key field.
      * This method must be called before reading any other fields.
      */
     void registerPriStringKeyObject(Object o);
@@ -101,30 +101,40 @@ public interface EntityInput {
      * field.  Also called during class evolution so skip deleted fields.
      */
     void skipField(Format declaredFormat)
-        throws RefreshException;
+            throws RefreshException;
 
     /* The following methods are a subset of the methods in TupleInput. */
 
     String readString()
-        throws RefreshException;
+            throws RefreshException;
+
     char readChar()
-        throws RefreshException;
+            throws RefreshException;
+
     boolean readBoolean()
-        throws RefreshException;
+            throws RefreshException;
+
     byte readByte()
-        throws RefreshException;
+            throws RefreshException;
+
     short readShort()
-        throws RefreshException;
+            throws RefreshException;
+
     int readInt()
-        throws RefreshException;
+            throws RefreshException;
+
     long readLong()
-        throws RefreshException;
+            throws RefreshException;
+
     float readSortedFloat()
-        throws RefreshException;
+            throws RefreshException;
+
     double readSortedDouble()
-        throws RefreshException;
+            throws RefreshException;
+
     BigInteger readBigInteger()
-        throws RefreshException;
+            throws RefreshException;
+
     BigDecimal readSortedBigDecimal()
-        throws RefreshException;
+            throws RefreshException;
 }

@@ -13,21 +13,12 @@
 
 package berkeley.com.sleepycat.je.rep.util.ldiff;
 
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.utilint.Adler32;
+
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.je.utilint.Adler32;
 
 public class LDiffUtil {
 
@@ -36,17 +27,18 @@ public class LDiffUtil {
 
     /* To compute a MD5 hash for each block. */
     static MessageDigest md = null;
+
     static {
         try {
             md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        } catch(NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
 
     /* Concatenate two byte arrays into one. */
     public static byte[] concatByteArray(byte[] a, byte[] b) {
-        if ((a == null) || (b == null)) {
+        if((a == null) || (b == null)) {
             return (a == null) ? b : a;
         }
 
@@ -63,7 +55,7 @@ public class LDiffUtil {
     /**
      * Each byte (Xi in the tech report) is replaced by a 32 bit Adler checksum
      * of the bytes representing the concatenation of the key/value pair.
-     * 
+     *
      * @return the checksum
      */
     public static int getXi(byte[] keyValue) {
@@ -73,7 +65,7 @@ public class LDiffUtil {
     }
 
     public static Block readBlock(int blockId, Cursor cursor, int numKeys)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* DatabaseEntry represents the key and data of each record. */
         DatabaseEntry key = new DatabaseEntry();
@@ -86,11 +78,11 @@ public class LDiffUtil {
         Block block = new Block(blockId);
 
         /* Please pay attention to the check order in while loop. */
-        while ((i < numKeys) &&
-               (cursor.getNext(key, data, LockMode.DEFAULT) ==
-                OperationStatus.SUCCESS)) {
+        while((i < numKeys) &&
+                (cursor.getNext(key, data, LockMode.DEFAULT) ==
+                        OperationStatus.SUCCESS)) {
             /* Indicates having a new block. */
-            if (i == 0) {
+            if(i == 0) {
                 block.setBeginKey(key.getData());
                 block.setBeginData(data.getData());
             }
@@ -124,9 +116,9 @@ public class LDiffUtil {
         envConfig.setReadOnly(true);
         try {
             return new Environment(new File(envDir), envConfig);
-        } catch (EnvironmentLockedException e) {
+        } catch(EnvironmentLockedException e) {
             e.printStackTrace();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
         }
         return null;
@@ -142,24 +134,24 @@ public class LDiffUtil {
         dbConfig.setSortedDuplicates(true);
         try {
             return env.openDatabase(null, dbName, dbConfig);
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
         }
         return null;
     }
 
     public static void close(Environment env, Database db) {
-        if (db != null) {
+        if(db != null) {
             try {
                 db.close();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 e.printStackTrace();
             }
         }
-        if (env != null) {
+        if(env != null) {
             try {
                 env.close();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 e.printStackTrace();
             }
         }

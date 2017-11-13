@@ -23,7 +23,9 @@ public class AtomicLongComponent
 
     final AtomicLong val;
 
-    /** Creates an instance of this class. */
+    /**
+     * Creates an instance of this class.
+     */
     AtomicLongComponent() {
         val = new AtomicLong();
     }
@@ -58,9 +60,10 @@ public class AtomicLongComponent
 
     @Override
     protected String getFormattedValue(boolean useCommas) {
-        if (useCommas) {
+        if(useCommas) {
             return Stat.FORMAT.format(val.get());
-        } else {
+        }
+        else {
             return val.toString();
         }
     }

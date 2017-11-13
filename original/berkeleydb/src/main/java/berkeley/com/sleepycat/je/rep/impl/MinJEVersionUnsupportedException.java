@@ -22,29 +22,35 @@ import berkeley.com.sleepycat.je.JEVersion;
 public class MinJEVersionUnsupportedException extends Exception {
     private static final long serialVersionUID = 1;
 
-    /** The minimum JE version. */
+    /**
+     * The minimum JE version.
+     */
     public final JEVersion minVersion;
 
-    /** The name of the node where the requested version is not supported. */
+    /**
+     * The name of the node where the requested version is not supported.
+     */
     public final String nodeName;
 
-    /** The node version, or null if not known. */
+    /**
+     * The node version, or null if not known.
+     */
     public final JEVersion nodeVersion;
 
     /**
      * Creates an instance of this class.
      *
-     * @param minVersion the minimum JE version
-     * @param nodeName the name of the node where the version is not supported
+     * @param minVersion  the minimum JE version
+     * @param nodeName    the name of the node where the version is not supported
      * @param nodeVersion the node version, or {@code null} if not known
      */
     public MinJEVersionUnsupportedException(final JEVersion minVersion,
                                             final String nodeName,
                                             final JEVersion nodeVersion) {
-        if (minVersion == null) {
+        if(minVersion == null) {
             throw new NullPointerException("The minVersion must not be null");
         }
-        if (nodeName == null) {
+        if(nodeName == null) {
             throw new NullPointerException("The nodeName must not be null");
         }
         this.minVersion = minVersion;
@@ -55,8 +61,8 @@ public class MinJEVersionUnsupportedException extends Exception {
     @Override
     public String getMessage() {
         return "Version is not supported:" +
-            " minVersion: " + minVersion +
-            ", nodeName: " + nodeName +
-            ", nodeVersion: " + nodeVersion;
+                " minVersion: " + minVersion +
+                ", nodeName: " + nodeName +
+                ", nodeVersion: " + nodeVersion;
     }
 }

@@ -100,7 +100,7 @@ class SecondaryExample {
                     envHomeDirectory,
                     startOffset);
             app.run();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
             System.exit(EXIT_FAILURE);
         }
@@ -233,7 +233,7 @@ class SecondaryExample {
             txn = exampleEnv.beginTransaction(null, null);
             Cursor cursor = exampleSecDb.openCursor(txn, null);
 
-            while (cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
+            while(cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
                     OperationStatus.SUCCESS) {
 
                 String key = secKeyBinding.entryToObject(keyEntry);

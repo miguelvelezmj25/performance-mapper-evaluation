@@ -12,8 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.IOException;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -21,6 +19,8 @@ import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
 
 /**
  * Implementation of a master node acting as a FeederSource. The
@@ -35,17 +35,17 @@ public class MasterFeederSource implements FeederSource {
     public MasterFeederSource(EnvironmentImpl envImpl,
                               VLSNIndex vlsnIndex,
                               NameIdPair nameIdPair)
-        throws DatabaseException {
+            throws DatabaseException {
 
         int readBufferSize =
-            envImpl.getConfigManager().getInt
-            (EnvironmentParams.LOG_ITERATOR_READ_SIZE);
+                envImpl.getConfigManager().getInt
+                        (EnvironmentParams.LOG_ITERATOR_READ_SIZE);
 
         feederReader = new FeederReader(envImpl,
-                                        vlsnIndex,
-                                        DbLsn.NULL_LSN, // startLsn
-                                        readBufferSize,
-                                        nameIdPair);
+                vlsnIndex,
+                DbLsn.NULL_LSN, // startLsn
+                readBufferSize,
+                nameIdPair);
     }
 
     /*
@@ -53,7 +53,7 @@ public class MasterFeederSource implements FeederSource {
      */
     @Override
     public void init(VLSN startVLSN)
-        throws DatabaseException, IOException {
+            throws DatabaseException, IOException {
 
         feederReader.initScan(startVLSN);
     }
@@ -64,15 +64,15 @@ public class MasterFeederSource implements FeederSource {
      */
     @Override
     public OutputWireRecord getWireRecord(VLSN vlsn, int waitTime)
-        throws DatabaseException, InterruptedException, IOException {
+            throws DatabaseException, InterruptedException, IOException {
 
         try {
             return feederReader.scanForwards(vlsn, waitTime);
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             /* Add more information */
             e.addErrorMessage
-                ("MasterFeederSource fetching vlsn=" + vlsn +
-                 " waitTime=" + waitTime);
+                    ("MasterFeederSource fetching vlsn=" + vlsn +
+                            " waitTime=" + waitTime);
             throw e;
         }
     }

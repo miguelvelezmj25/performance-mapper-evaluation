@@ -47,7 +47,7 @@ public class LongArrayStat extends Stat<long[]> {
     @Override
     public void add(Stat<long[]> other) {
         throw EnvironmentFailureException.unexpectedState
-            ("LongArrayStat doesn't support the add operation.");
+                ("LongArrayStat doesn't support the add operation.");
     }
 
     @Override
@@ -58,13 +58,13 @@ public class LongArrayStat extends Stat<long[]> {
     @Override
     public void negate() {
         throw EnvironmentFailureException.unexpectedState
-        ("LongArrayStat doesn't support the negate operation.");
+                ("LongArrayStat doesn't support the negate operation.");
     }
 
     @Override
     public void clear() {
-        if (array != null && array.length > 0) {
-            for (int i = 0; i < array.length; i++) {
+        if(array != null && array.length > 0) {
+            for(int i = 0; i < array.length; i++) {
                 array[i] = 0;
             }
         }
@@ -74,15 +74,15 @@ public class LongArrayStat extends Stat<long[]> {
     public LongArrayStat copy() {
         try {
             LongArrayStat ret = (LongArrayStat) super.clone();
-            if (array != null && array.length > 0) {
+            if(array != null && array.length > 0) {
                 long[] newArray = new long[array.length];
                 System.arraycopy
-                    (array, 0, newArray, array.length - 1, array.length);
+                        (array, 0, newArray, array.length - 1, array.length);
                 ret.set(newArray);
             }
 
             return ret;
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
     }
@@ -91,11 +91,11 @@ public class LongArrayStat extends Stat<long[]> {
     protected String getFormattedValue() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        if (array != null && array.length > 0) {
+        if(array != null && array.length > 0) {
             boolean first = true;
-            for (int i = 0; i < array.length; i++) {
-                if (array[i] > 0) {
-                    if (!first) {
+            for(int i = 0; i < array.length; i++) {
+                if(array[i] > 0) {
+                    if(!first) {
                         sb.append("; ");
                     }
                     first = false;
@@ -111,11 +111,11 @@ public class LongArrayStat extends Stat<long[]> {
 
     @Override
     public boolean isNotSet() {
-        if (array == null) {
+        if(array == null) {
             return true;
         }
 
-        if (array.length == 0) {
+        if(array.length == 0) {
             return true;
         }
 

@@ -16,15 +16,15 @@ package berkeley.com.sleepycat.je;
 /**
  * The configuration properties of a <code>JoinCursor</code>. The join cursor
  * configuration is specified when calling {@link Database#join Database.join}.
- *
+ * <p>
  * <p>To create a configuration object with default attributes:</p>
- *
+ * <p>
  * <pre>
  *     JoinConfig config = new JoinConfig();
  * </pre>
- *
+ * <p>
  * <p>To set custom attributes:</p>
- *
+ * <p>
  * <pre>
  *     JoinConfig config = new JoinConfig();
  *     config.setNoSort(true);
@@ -50,8 +50,25 @@ public class JoinConfig implements Cloneable {
     }
 
     /**
-     * Specifies whether automatic sorting of the input cursors is disabled.
+     * @hidden The void return setter for use by Bean editors.
+     */
+    public void setNoSortVoid(boolean noSort) {
+        this.noSort = noSort;
+    }
+
+    /**
+     * Returns whether automatic sorting of the input cursors is disabled.
      *
+     * @return whether automatic sorting of the input cursors is disabled.
+     * @see #setNoSort
+     */
+    public boolean getNoSort() {
+        return noSort;
+    }
+
+    /**
+     * Specifies whether automatic sorting of the input cursors is disabled.
+     * <p>
      * <p>Joined values are retrieved by doing a sequential iteration over the
      * first cursor in the cursor array, and a nested iteration over each
      * following cursor in the order they are specified in the array. This
@@ -62,7 +79,7 @@ public class JoinConfig implements Cloneable {
      * most. Unless this method is called with true, <code>Database.join</code>
      * does this sort on behalf of its caller using the {@link
      * Cursor#countEstimate} method.</p>
-     *
+     * <p>
      * <p>If the data are structured so that cursors with many data items also
      * share many common elements, higher performance will result from listing
      * those cursors before cursors with fewer data items; that is, a sort
@@ -71,34 +88,13 @@ public class JoinConfig implements Cloneable {
      * <code>Database.join</code>.</p>
      *
      * @param noSort whether automatic sorting of the input cursors is
-     * disabled.
-     *
-     * @see Database#join Database.join
-     *
+     *               disabled.
      * @return this
+     * @see Database#join Database.join
      */
     public JoinConfig setNoSort(boolean noSort) {
         setNoSortVoid(noSort);
         return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
-     */
-    public void setNoSortVoid(boolean noSort) {
-        this.noSort = noSort;
-    }
-
-    /**
-     * Returns whether automatic sorting of the input cursors is disabled.
-     *
-     * @return whether automatic sorting of the input cursors is disabled.
-     *
-     * @see #setNoSort
-     */
-    public boolean getNoSort() {
-        return noSort;
     }
 
     /**
@@ -108,7 +104,7 @@ public class JoinConfig implements Cloneable {
     public JoinConfig clone() {
         try {
             return (JoinConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -121,6 +117,6 @@ public class JoinConfig implements Cloneable {
     @Override
     public String toString() {
         return "noSort=" + noSort +
-            "\n";
+                "\n";
     }
 }

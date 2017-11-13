@@ -125,7 +125,7 @@ public class JEApplicationMBean implements DynamicMBean {
                 String name = attributes[i];
                 Object value = jeHelper.getAttribute(targetEnv, name);
                 results.add(new Attribute(name, value));
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -160,7 +160,7 @@ public class JEApplicationMBean implements DynamicMBean {
                 String name = attr.getName();
                 Object newValue = jeHelper.getAttribute(targetEnv, name);
                 results.add(new Attribute(name, newValue));
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -291,7 +291,7 @@ public class JEApplicationMBean implements DynamicMBean {
                                 jeHelper.getEnvironmentOpenConfig());
                 resetMBeanInfo();
             }
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             throw new MBeanException(e);
         }
     }
@@ -309,7 +309,7 @@ public class JEApplicationMBean implements DynamicMBean {
                 targetEnv = null;
                 resetMBeanInfo();
             }
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             throw new MBeanException(e);
         }
     }

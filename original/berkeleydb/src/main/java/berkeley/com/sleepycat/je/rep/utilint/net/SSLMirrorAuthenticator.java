@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
-import javax.net.ssl.SSLSession;
-
-import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
 import berkeley.com.sleepycat.je.rep.net.InstanceParams;
+import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
+
+import javax.net.ssl.SSLSession;
 
 /**
  * This is an implementation of SSLAuthenticator that authenticates based on
@@ -25,18 +25,18 @@ import berkeley.com.sleepycat.je.rep.net.InstanceParams;
  */
 
 public class SSLMirrorAuthenticator
-    extends SSLMirrorMatcher
-    implements SSLAuthenticator {
+        extends SSLMirrorMatcher
+        implements SSLAuthenticator {
 
     /**
      * Construct an SSLMirrorAuthenticator
      *
      * @param params the instantiation parameters.
      * @throws IllegalArgumentException if the instance cannot be created due
-     * to a problem related to the input parameters
+     *                                  to a problem related to the input parameters
      */
     public SSLMirrorAuthenticator(InstanceParams params)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super(params, false);
     }

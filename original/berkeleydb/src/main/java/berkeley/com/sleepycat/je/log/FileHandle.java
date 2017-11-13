@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.latch.Latch;
 import berkeley.com.sleepycat.je.latch.LatchFactory;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * A FileHandle embodies a File and its accompanying latch.
@@ -36,7 +36,7 @@ public class FileHandle {
      */
     FileHandle(EnvironmentImpl envImpl, long fileNum, String label) {
         fileLatch = LatchFactory.createExclusiveLatch(
-            envImpl, "file_" + label + "_fileHandle", false /*collectStats*/);
+                envImpl, "file_" + label + "_fileHandle", false /*collectStats*/);
         this.fileNum = fileNum;
     }
 
@@ -66,27 +66,27 @@ public class FileHandle {
     }
 
     void latch()
-        throws DatabaseException {
+            throws DatabaseException {
 
         fileLatch.acquireExclusive();
     }
 
     boolean latchNoWait()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return fileLatch.acquireExclusiveNoWait();
     }
 
     public void release()
-        throws DatabaseException {
+            throws DatabaseException {
 
         fileLatch.release();
     }
 
     void close()
-        throws IOException {
+            throws IOException {
 
-        if (file != null) {
+        if(file != null) {
             try {
                 file.close();
             } finally {

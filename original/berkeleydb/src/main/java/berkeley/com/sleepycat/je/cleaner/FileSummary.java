@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
+
+import java.nio.ByteBuffer;
 
 /**
  * Per-file utilization counters.  The UtilizationProfile stores a persistent
@@ -44,10 +44,20 @@ public class FileSummary implements Loggable, Cloneable {
     public FileSummary() {
     }
 
+    /**
+     * Calculates a utilization percentage.
+     */
+    public static int utilization(long obsoleteSize, long totalSize) {
+        if(totalSize == 0) {
+            return 0;
+        }
+        return Math.round(((100.0F * (totalSize - obsoleteSize)) / totalSize));
+    }
+
     public FileSummary clone() {
         try {
             return (FileSummary) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -58,9 +68,9 @@ public class FileSummary implements Loggable, Cloneable {
     public boolean isEmpty() {
 
         return totalCount == 0 &&
-               totalSize == 0 &&
-               obsoleteINCount == 0 &&
-               obsoleteLNCount == 0;
+                totalSize == 0 &&
+                obsoleteINCount == 0 &&
+                obsoleteLNCount == 0;
     }
 
     /**
@@ -69,7 +79,7 @@ public class FileSummary implements Loggable, Cloneable {
      */
     public int getObsoleteLNSize() {
 
-        if (totalLNCount == 0) {
+        if(totalLNCount == 0) {
             return 0;
         }
 
@@ -77,7 +87,7 @@ public class FileSummary implements Loggable, Cloneable {
         final int obsLNCount = Math.min(obsoleteLNCount, totalLNCount);
         final int obsLNSize = Math.min(obsoleteLNSize, totalLNSize);
         final int obsLNSizeCounted = Math.min(obsoleteLNSizeCounted,
-                                              obsLNCount);
+                obsLNCount);
 
         /*
          * Use the tracked obsolete size for all entries for which the size was
@@ -86,7 +96,7 @@ public class FileSummary implements Loggable, Cloneable {
          */
         long obsSize = obsLNSize;
         final int obsCountNotCounted = obsLNCount - obsLNSizeCounted;
-        if (obsCountNotCounted > 0) {
+        if(obsCountNotCounted > 0) {
 
             /*
              * When there are any obsolete LNs with sizes uncounted, we add an
@@ -94,7 +104,7 @@ public class FileSummary implements Loggable, Cloneable {
              * uncounted and the average LN size.
              */
             final float avgLNSizeNotCounted = getAvgObsoleteLNSizeNotCounted();
-            if (!Float.isNaN(avgLNSizeNotCounted)) {
+            if(!Float.isNaN(avgLNSizeNotCounted)) {
                 obsSize += (int) (obsCountNotCounted * avgLNSizeNotCounted);
             }
         }
@@ -106,17 +116,17 @@ public class FileSummary implements Loggable, Cloneable {
     /**
      * Returns the average size for LNs with sizes not counted, or NaN if
      * there are no such LNs.
-     *
+     * <p>
      * In FileSummaryLN version 3 and greater the obsolete size is normally
      * counted, but not in exceptional circumstances such as recovery.  If it
      * is not counted, obsoleteLNSizeCounted will be less than obsoleteLNCount.
-     *
+     * <p>
      * In log version 8 and greater, we don't count the size when the LN is not
      * resident in cache during update/delete, and CLEANER_FETCH_OBSOLETE_SIZE
      * is false (the default setting).
-     *
+     * <p>
      * We added maxLNSize in version 8 for use in estimating obsolete LN sizes.
-     *
+     * <p>
      * To compute the average LN size, we only consider the LNs (both obsolete
      * and non-obsolete) for which the size has not been counted.  This
      * increases accuracy when counted and uncounted LN sizes are not uniform.
@@ -130,17 +140,17 @@ public class FileSummary implements Loggable, Cloneable {
         final int obsLNCount = Math.min(obsoleteLNCount, totalLNCount);
         final int obsLNSize = Math.min(obsoleteLNSize, totalLNSize);
         final int obsLNSizeCounted = Math.min(obsoleteLNSizeCounted,
-                                              obsLNCount);
+                obsLNCount);
 
         final int obsCountNotCounted = obsLNCount - obsLNSizeCounted;
-        if (obsCountNotCounted <= 0) {
+        if(obsCountNotCounted <= 0) {
             return Float.NaN;
         }
 
         final int totalSizeNotCounted = totalLNSize - obsLNSize;
         final int totalCountNotCounted = totalLNCount - obsLNSizeCounted;
 
-        if (totalSizeNotCounted <= 0 || totalCountNotCounted <= 0) {
+        if(totalSizeNotCounted <= 0 || totalCountNotCounted <= 0) {
             return Float.NaN;
         }
 
@@ -158,11 +168,11 @@ public class FileSummary implements Loggable, Cloneable {
          * safe to use getObsoleteLNSize in that case, because LSN locking was
          * not used and the obsolete size was counted for updates and deletes.
          */
-        if (maxLNSize == 0) {
+        if(maxLNSize == 0) {
             return getObsoleteLNSize();
         }
 
-        if (totalLNCount == 0) {
+        if(totalLNCount == 0) {
             return 0;
         }
 
@@ -170,7 +180,7 @@ public class FileSummary implements Loggable, Cloneable {
         final int obsLNCount = Math.min(obsoleteLNCount, totalLNCount);
         final int obsLNSize = Math.min(obsoleteLNSize, totalLNSize);
         final int obsLNSizeCounted = Math.min(obsoleteLNSizeCounted,
-                                              obsLNCount);
+                obsLNCount);
 
         /*
          * Use the tracked obsolete size for all entries for which the size was
@@ -179,7 +189,7 @@ public class FileSummary implements Loggable, Cloneable {
          */
         long obsSize = obsLNSize;
         final long obsCountNotCounted = obsLNCount - obsLNSizeCounted;
-        if (obsCountNotCounted > 0) {
+        if(obsCountNotCounted > 0) {
 
             /*
              * When there are any obsolete LNs with sizes uncounted, we add an
@@ -205,7 +215,7 @@ public class FileSummary implements Loggable, Cloneable {
             final long maxLNSizeNotCounted = obsCountNotCounted * maxLNSize;
 
             final long maxObsSizeNotCounted = totalLNSize - obsLNSize -
-                ((totalLNCount - obsLNCount) * LNLogEntry.MIN_LOG_SIZE);
+                    ((totalLNCount - obsLNCount) * LNLogEntry.MIN_LOG_SIZE);
 
             obsSize += Math.min(maxLNSizeNotCounted, maxObsSizeNotCounted);
         }
@@ -219,7 +229,7 @@ public class FileSummary implements Loggable, Cloneable {
      */
     public int getObsoleteINSize() {
 
-        if (totalINCount == 0) {
+        if(totalINCount == 0) {
             return 0;
         }
 
@@ -249,22 +259,22 @@ public class FileSummary implements Loggable, Cloneable {
     }
 
     private int calculateObsoleteSize(int lnObsoleteSize) {
-        if (totalSize <= 0) {
+        if(totalSize <= 0) {
             return 0;
         }
             /* Leftover (non-IN non-LN) space is considered obsolete. */
         final int leftoverSize = totalSize - (totalINSize + totalLNSize);
 
         int obsoleteSize = lnObsoleteSize +
-            getObsoleteINSize() +
-            leftoverSize;
+                getObsoleteINSize() +
+                leftoverSize;
 
         /*
          * Don't report more obsolete bytes than the total.  We may
          * calculate more than the total because of (intentional)
          * double-counting during recovery.
          */
-        if (obsoleteSize > totalSize) {
+        if(obsoleteSize > totalSize) {
             obsoleteSize = totalSize;
         }
         return obsoleteSize;
@@ -284,16 +294,6 @@ public class FileSummary implements Loggable, Cloneable {
      */
     public int utilization() {
         return utilization(getObsoleteSize(), totalSize);
-    }
-
-    /**
-     * Calculates a utilization percentage.
-     */
-    public static int utilization(long obsoleteSize, long totalSize) {
-        if (totalSize == 0) {
-            return 0;
-        }
-        return Math.round(((100.0F * (totalSize - obsoleteSize)) / totalSize));
     }
 
     /**
@@ -325,7 +325,7 @@ public class FileSummary implements Loggable, Cloneable {
         totalINSize += o.totalINSize;
         totalLNCount += o.totalLNCount;
         totalLNSize += o.totalLNSize;
-        if (maxLNSize < o.maxLNSize) {
+        if(maxLNSize < o.maxLNSize) {
             maxLNSize = o.maxLNSize;
         }
         obsoleteINCount += o.obsoleteINCount;
@@ -362,11 +362,11 @@ public class FileSummary implements Loggable, Cloneable {
         totalINSize = LogUtils.readInt(buf);
         totalLNCount = LogUtils.readInt(buf);
         totalLNSize = LogUtils.readInt(buf);
-        if (entryVersion >= 8) {
+        if(entryVersion >= 8) {
             maxLNSize = LogUtils.readInt(buf);
         }
         obsoleteINCount = LogUtils.readInt(buf);
-        if (obsoleteINCount == -1) {
+        if(obsoleteINCount == -1) {
 
             /*
              * If INs were not counted in an older log file written by 1.5.3 or
@@ -381,10 +381,11 @@ public class FileSummary implements Loggable, Cloneable {
          * obsoleteLNSize and obsoleteLNSizeCounted were added in FileSummaryLN
          * version 3.
          */
-        if (entryVersion >= 3) {
+        if(entryVersion >= 3) {
             obsoleteLNSize = LogUtils.readInt(buf);
             obsoleteLNSizeCounted = LogUtils.readInt(buf);
-        } else {
+        }
+        else {
             obsoleteLNSize = 0;
             obsoleteLNSizeCounted = 0;
         }

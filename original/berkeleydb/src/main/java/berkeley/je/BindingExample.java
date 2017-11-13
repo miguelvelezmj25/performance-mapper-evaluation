@@ -103,7 +103,7 @@ class BindingExample {
                     envHomeDirectory,
                     startOffset);
             app.run();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
             System.exit(EXIT_FAILURE);
         }
@@ -203,7 +203,7 @@ class BindingExample {
             /* retrieve the data */
             Cursor cursor = exampleDb.openCursor(null, null);
 
-            while (cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
+            while(cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
                     OperationStatus.SUCCESS) {
 
                 int key = IntegerBinding.entryToInt(keyEntry);

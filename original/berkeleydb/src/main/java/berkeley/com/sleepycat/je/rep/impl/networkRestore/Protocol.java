@@ -13,45 +13,44 @@
 
 package berkeley.com.sleepycat.je.rep.impl.networkRestore;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+
 /**
  * The protocol used to obtain backup files from a LF Feeder. The message
  * exchange is always initiated by the client.
- *
+ * <p>
  * The following describes the request/response messages exchanged between the
  * two nodes:
- *
- *      FeederInfoReq -> FeederInfoResp
- *
- *      FileListReq -> FileListResp
- *
- *      FileInfoReq -> FileInfoResp
- *
- *      FileReq -> FileStart <byte stream> FileEnd
- *
- *      Done
- *
+ * <p>
+ * FeederInfoReq -> FeederInfoResp
+ * <p>
+ * FileListReq -> FileListResp
+ * <p>
+ * FileInfoReq -> FileInfoResp
+ * <p>
+ * FileReq -> FileStart <byte stream> FileEnd
+ * <p>
+ * Done
+ * <p>
  * So a complete sequence of successful request messages looks like:
- *
+ * <p>
  * FeederInfoReq FileListReq [[FileInfoReq] [FileReq] ]+ Done
- *
+ * <p>
  * A response sequence would look like:
- *
+ * <p>
  * FeederInfoResp FileListResp [[FileInfoResp] [FileStart <byte stream> FileEnd] ]+
- *
+ * <p>
  * The client may abandon its interaction with the server if it decides the
  * server is overloaded.
- *
+ * <p>
  * The client tries to minimize the number of files it actually requests based
  * upon its current state.
- *
  */
 public class Protocol extends BinaryProtocol {
 
@@ -59,34 +58,34 @@ public class Protocol extends BinaryProtocol {
 
     /* The messages defined by this class. */
     public final MessageOp FEEDER_INFO_REQ =
-        new MessageOp((short)1, FeederInfoReq.class);
+            new MessageOp((short) 1, FeederInfoReq.class);
 
     public final MessageOp FEEDER_INFO_RESP =
-        new MessageOp((short)2, FeederInfoResp.class);
+            new MessageOp((short) 2, FeederInfoResp.class);
 
     public final MessageOp FILE_LIST_REQ =
-        new MessageOp((short)3, FileListReq.class);
+            new MessageOp((short) 3, FileListReq.class);
 
     public final MessageOp FILE_LIST_RESP =
-        new MessageOp((short)4, FileListResp.class);
+            new MessageOp((short) 4, FileListResp.class);
 
     public final MessageOp FILE_REQ =
-        new MessageOp((short)5, FileReq.class);
+            new MessageOp((short) 5, FileReq.class);
 
     public final MessageOp FILE_START =
-        new MessageOp((short)6, FileStart.class);
+            new MessageOp((short) 6, FileStart.class);
 
     public final MessageOp FILE_END =
-        new MessageOp((short)7, FileEnd.class);
+            new MessageOp((short) 7, FileEnd.class);
 
     public final MessageOp FILE_INFO_REQ =
-        new MessageOp((short)8, FileInfoReq.class);
+            new MessageOp((short) 8, FileInfoReq.class);
 
     public final MessageOp FILE_INFO_RESP =
-        new MessageOp((short)9, FileInfoResp.class);
+            new MessageOp((short) 9, FileInfoResp.class);
 
     public final MessageOp DONE =
-        new MessageOp((short)10, Done.class);
+            new MessageOp((short) 10, Done.class);
 
     public Protocol(NameIdPair nameIdPair,
                     int configuredVersion,
@@ -95,16 +94,16 @@ public class Protocol extends BinaryProtocol {
         super(nameIdPair, VERSION, configuredVersion, envImpl);
 
         initializeMessageOps(new MessageOp[]
-                             {FEEDER_INFO_REQ,
-                              FEEDER_INFO_RESP,
-                              FILE_LIST_REQ,
-                              FILE_LIST_RESP,
-                              FILE_INFO_REQ,
-                              FILE_INFO_RESP,
-                              FILE_REQ,
-                              FILE_START,
-                              FILE_END,
-                              DONE});
+                {FEEDER_INFO_REQ,
+                        FEEDER_INFO_RESP,
+                        FILE_LIST_REQ,
+                        FILE_LIST_RESP,
+                        FILE_INFO_REQ,
+                        FILE_INFO_RESP,
+                        FILE_REQ,
+                        FILE_START,
+                        FILE_END,
+                        DONE});
     }
 
     /* Requests the list of log files that need to be backed up. */
@@ -210,7 +209,7 @@ public class Protocol extends BinaryProtocol {
 
         @Override
         public ByteBuffer wireFormat() {
-            return wireFormat((Object)fileNames);
+            return wireFormat((Object) fileNames);
         }
 
         public String[] getFileNames() {
@@ -307,9 +306,9 @@ public class Protocol extends BinaryProtocol {
         @Override
         public ByteBuffer wireFormat() {
             return wireFormat(fileName,
-                              fileLength,
-                              lastModifiedTime,
-                              digestSHA1);
+                    fileLength,
+                    lastModifiedTime,
+                    digestSHA1);
         }
 
         /**
@@ -323,7 +322,7 @@ public class Protocol extends BinaryProtocol {
 
     /**
      * The message starting the response triple:
-     *
+     * <p>
      * FileStart <byte stream> FileEnd
      */
     public class FileStart extends SimpleMessage {
@@ -370,7 +369,7 @@ public class Protocol extends BinaryProtocol {
 
     /**
      * The message ending the response triple:
-     *
+     * <p>
      * FileStart <byte stream> FileEnd
      */
     public class FileEnd extends FileInfoResp {

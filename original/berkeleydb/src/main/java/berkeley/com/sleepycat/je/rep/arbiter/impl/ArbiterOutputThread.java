@@ -12,14 +12,14 @@
  */
 package berkeley.com.sleepycat.je.rep.arbiter.impl;
 
-import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.ReplicaOutputThreadBase;
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.rep.stream.Protocol;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * The ArbiterOutputThread reads transaction identifiers
@@ -42,8 +42,8 @@ public class ArbiterOutputThread extends ReplicaOutputThreadBase {
     public void writeHeartbeat(Long txnId) throws IOException {
         VLSN vlsn = vlsnTracker.get();
         protocol.write(protocol.new HeartbeatResponse
-                (vlsn,
-                 vlsn),
-                 replicaFeederChannel);
+                        (vlsn,
+                                vlsn),
+                replicaFeederChannel);
     }
 }

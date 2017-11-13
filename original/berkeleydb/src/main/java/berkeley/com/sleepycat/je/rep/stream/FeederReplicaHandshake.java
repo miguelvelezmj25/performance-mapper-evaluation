@@ -12,11 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.IOException;
-import java.net.SocketAddress;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.JEVersion;
@@ -32,18 +27,18 @@ import berkeley.com.sleepycat.je.rep.impl.node.Feeder;
 import berkeley.com.sleepycat.je.rep.impl.node.Feeder.ExitException;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.JEVersions;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.JEVersionsReject;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.NodeGroupInfo;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.ReplicaJEVersions;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.ReplicaProtocolVersion;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.SNTPRequest;
+import berkeley.com.sleepycat.je.rep.stream.Protocol.*;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.Message;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
 import berkeley.com.sleepycat.je.rep.utilint.NamedChannel;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.TestHook;
 import berkeley.com.sleepycat.je.utilint.TestHookExecute;
+
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implements the Feeder side of the handshake between the Feeder and the
@@ -52,49 +47,43 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * @see <a href="https://sleepycat.oracle.com/pmwiki/pmwiki.php?n=JEHomePage.ReplicaFeederHandshake">FeederReplicaHandshake</a>
  */
 public class FeederReplicaHandshake {
+    /*
+     * Used during testing: A non-zero value overrides the actual log
+     * version.
+     */
+    private static int testCurrentLogVersion = 0;
     private final int GROUP_RETRY = 60;
     private final long GROUP_RETRY_SLEEP_MS = 1000;
     /* The rep node (server or replica) */
     private final RepNode repNode;
     private final NamedChannel namedChannel;
-
     private final NameIdPair feederNameIdPair;
-
-    /* Established during the first message. */
-    private NameIdPair replicaNameIdPair = null;
-
-    private ReplicaJEVersions replicaJEVersions;
-
-    /**
-     * The negotiated highest version associated with log records to be sent
-     * by this feeder in the HA stream.
-     */
-    private int streamLogVersion;
-
-    /** The node associated with the replica, or null if not known. */
-    private volatile RepNodeImpl replicaNode;
-
     private final Logger logger;
-
     /**
      * A test hook that is called before a message is written.  Note that the
      * hook is inherited by the ReplicaFeederHandshake, and will be kept in
      * place for the entire handshake.
      */
     private final TestHook<Message> writeMessageHook;
-
-    /*
-     * Used during testing: A non-zero value overrides the actual log
-     * version.
+    /* Established during the first message. */
+    private NameIdPair replicaNameIdPair = null;
+    private ReplicaJEVersions replicaJEVersions;
+    /**
+     * The negotiated highest version associated with log records to be sent
+     * by this feeder in the HA stream.
      */
-    private static int testCurrentLogVersion = 0;
+    private int streamLogVersion;
+    /**
+     * The node associated with the replica, or null if not known.
+     */
+    private volatile RepNodeImpl replicaNode;
 
     /**
      * An instance of this class is created with each new handshake preceding
      * the setting up of a connection.
      *
-     * @param repNode the replication node
-     * @param feeder the feeder instance
+     * @param repNode      the replication node
+     * @param feeder       the feeder instance
      * @param namedChannel the channel to be used for the handshake
      */
     public FeederReplicaHandshake(RepNode repNode,
@@ -105,6 +94,10 @@ public class FeederReplicaHandshake {
         feederNameIdPair = repNode.getNameIdPair();
         logger = LoggerUtils.getLogger(getClass());
         writeMessageHook = feeder.getWriteMessageHook();
+    }
+
+    public static void setTestLogVersion(int testLogVersion) {
+        testCurrentLogVersion = testLogVersion;
     }
 
     /**
@@ -126,8 +119,8 @@ public class FeederReplicaHandshake {
      */
     private int getCurrentLogVersion() {
         return (testCurrentLogVersion != 0) ?
-            testCurrentLogVersion :
-            LogEntryType.LOG_VERSION_HIGHEST_REPLICABLE;
+                testCurrentLogVersion :
+                LogEntryType.LOG_VERSION_HIGHEST_REPLICABLE;
     }
 
     /**
@@ -135,23 +128,23 @@ public class FeederReplicaHandshake {
      * between the feeder and the replica.
      */
     public int getStreamLogVersion() {
-        if (streamLogVersion <= 0) {
+        if(streamLogVersion <= 0) {
             throw new IllegalStateException("execute() method was not invoked");
         }
 
         return streamLogVersion;
     }
 
-    public static void setTestLogVersion(int testLogVersion) {
-        testCurrentLogVersion = testLogVersion;
-    }
-
-    /** Get the current JE version, supporting a test override. */
+    /**
+     * Get the current JE version, supporting a test override.
+     */
     private JEVersion getCurrentJEVersion() {
         return repNode.getRepImpl().getCurrentJEVersion();
     }
 
-    /** Get the current protocol version, supporting a test override. */
+    /**
+     * Get the current protocol version, supporting a test override.
+     */
     private int getCurrentProtocolVersion() {
         return Protocol.getJEVersionProtocolVersion(getCurrentJEVersion());
     }
@@ -161,13 +154,13 @@ public class FeederReplicaHandshake {
      * server would like to defer the rejection to the replica. Return a
      * JEVersionsReject message if the server does not wish to communicate with
      * the replica.
-     *
+     * <p>
      * This check requires the log version of the replicas to be greater than
      * or equal to {@value LogEntryType#LOG_VERSION_REPLICATE_OLDER} . Allowing
      * the replica version to be behind the feeder version supports replication
      * during upgrades where the feeder is upgraded before the replica.
      * [#22336]
-     *
+     * <p>
      * This check also requires that the JE version of the replica is at least
      * the minJEVersion specified by the RepGroupImpl, if any.  This check
      * makes sure that nodes running an older software version cannot join the
@@ -177,22 +170,22 @@ public class FeederReplicaHandshake {
                                                   final JEVersions jeVersions) {
 
         final int replicaLogVersion = jeVersions.getLogVersion();
-        if (replicaLogVersion < LogEntryType.LOG_VERSION_REPLICATE_OLDER - 1) {
+        if(replicaLogVersion < LogEntryType.LOG_VERSION_REPLICATE_OLDER - 1) {
             return protocol.new JEVersionsReject(
-                "Incompatible log versions. " +
-                "Feeder log version: " + getCurrentLogVersion() +
-                ", Feeder JE version: " + getCurrentJEVersion() +
-                ", Replica log version: " + replicaLogVersion +
-                ", Replica JE version: " + jeVersions.getVersion());
+                    "Incompatible log versions. " +
+                            "Feeder log version: " + getCurrentLogVersion() +
+                            ", Feeder JE version: " + getCurrentJEVersion() +
+                            ", Replica log version: " + replicaLogVersion +
+                            ", Replica JE version: " + jeVersions.getVersion());
         }
 
         final JEVersion minJEVersion = repNode.getGroup().getMinJEVersion();
-        if (minJEVersion.compareTo(jeVersions.getVersion()) > 0) {
+        if(minJEVersion.compareTo(jeVersions.getVersion()) > 0) {
             return protocol.new JEVersionsReject(
-                "Unsupported JE version. " +
-                "Feeder JE version: " + getCurrentJEVersion() +
-                ", Feeder min JE version: " + minJEVersion +
-                ", Replica JE version: " + jeVersions.getVersion());
+                    "Unsupported JE version. " +
+                            "Feeder JE version: " + getCurrentJEVersion() +
+                            ", Feeder min JE version: " + minJEVersion +
+                            ", Replica JE version: " + jeVersions.getVersion());
         }
 
         return null;
@@ -207,8 +200,8 @@ public class FeederReplicaHandshake {
      */
     public JEVersion getReplicaJEVersion() {
         return (replicaJEVersions != null) ?
-            replicaJEVersions.getVersion() :
-            null;
+                replicaJEVersions.getVersion() :
+                null;
     }
 
     /**
@@ -221,7 +214,7 @@ public class FeederReplicaHandshake {
      * @throws IllegalStateException if the handshake did not complete
      */
     public RepNodeImpl getReplicaNode() {
-        if (replicaNode == null) {
+        if(replicaNode == null) {
             throw new IllegalStateException("Handshake did not complete");
         }
         return replicaNode;
@@ -229,17 +222,18 @@ public class FeederReplicaHandshake {
 
     /**
      * Executes the feeder side of the handshake.
+     *
      * @throws ProtocolException
      * @throws ExitException
      */
     public Protocol execute()
-        throws DatabaseException,
-               IOException,
-               ProtocolException,
-               ExitException {
+            throws DatabaseException,
+            IOException,
+            ProtocolException,
+            ExitException {
 
         LoggerUtils.info(logger, repNode.getRepImpl(),
-                         "Feeder-replica handshake start");
+                "Feeder-replica handshake start");
 
         /* First negotiate a compatible protocol */
         Protocol protocol = negotiateProtocol();
@@ -247,19 +241,19 @@ public class FeederReplicaHandshake {
         /* Now exchange JE version information using the negotiated protocol */
         replicaJEVersions = (ReplicaJEVersions) protocol.read(namedChannel);
         final String versionMsg =
-            " Replica " + replicaNameIdPair.getName() +
-            " Versions" +
-            " JE: " + replicaJEVersions.getVersion().getVersionString() +
-            " Log: " + replicaJEVersions.getLogVersion() +
-            " Protocol: " + protocol.getVersion();
+                " Replica " + replicaNameIdPair.getName() +
+                        " Versions" +
+                        " JE: " + replicaJEVersions.getVersion().getVersionString() +
+                        " Log: " + replicaJEVersions.getLogVersion() +
+                        " Protocol: " + protocol.getVersion();
         LoggerUtils.fine(logger, repNode.getRepImpl(), versionMsg);
         JEVersionsReject reject =
-            checkJECompatibility(protocol, replicaJEVersions);
+                checkJECompatibility(protocol, replicaJEVersions);
 
-        if (reject != null) {
+        if(reject != null) {
             final String msg = "Version incompatibility: " +
-                reject.getErrorMessage() +
-                " with replica " + replicaNameIdPair.getName();
+                    reject.getErrorMessage() +
+                    " with replica " + replicaNameIdPair.getName();
             LoggerUtils.warning(logger, repNode.getRepImpl(), msg);
             writeMessage(protocol, reject);
             throw new ExitException(msg);
@@ -270,11 +264,11 @@ public class FeederReplicaHandshake {
          * can generate it and that the replica can understand it.
          */
         streamLogVersion =
-            Math.min(getCurrentLogVersion(), replicaJEVersions.getLogVersion());
+                Math.min(getCurrentLogVersion(), replicaJEVersions.getLogVersion());
 
         writeMessage(protocol,
-                     protocol.new FeederJEVersions(
-                         getCurrentJEVersion(), streamLogVersion));
+                protocol.new FeederJEVersions(
+                        getCurrentJEVersion(), streamLogVersion));
 
         /* Ensure that the feeder sends the agreed upon version. */
         protocol.setStreamLogVersion(streamLogVersion);
@@ -284,19 +278,21 @@ public class FeederReplicaHandshake {
 
         checkClockSkew(protocol);
         LoggerUtils.info
-            (logger, repNode.getRepImpl(),
-             "Feeder-replica " + replicaNameIdPair.getName() +
-             " handshake completed." +
-             versionMsg +
-             " Stream Log: " + protocol.getStreamLogVersion());
+                (logger, repNode.getRepImpl(),
+                        "Feeder-replica " + replicaNameIdPair.getName() +
+                                " handshake completed." +
+                                versionMsg +
+                                " Stream Log: " + protocol.getStreamLogVersion());
 
         return protocol;
     }
 
-    /** Write a protocol message to the channel. */
+    /**
+     * Write a protocol message to the channel.
+     */
     private void writeMessage(final Protocol protocol,
                               final Message message)
-        throws IOException {
+            throws IOException {
 
         assert TestHookExecute.doHookIfSet(writeMessageHook, message);
         protocol.write(message, namedChannel);
@@ -304,17 +300,18 @@ public class FeederReplicaHandshake {
 
     /**
      * Responds to message exchanges used to establish clock skew.
+     *
      * @throws ProtocolException
      */
     private void checkClockSkew(Protocol protocol)
-        throws IOException,
-               ProtocolException {
+            throws IOException,
+            ProtocolException {
         SNTPRequest request;
         do {
             request = protocol.read(namedChannel.getChannel(),
-                                    SNTPRequest.class);
+                    SNTPRequest.class);
             writeMessage(protocol, protocol.new SNTPResponse(request));
-        } while (!request.isLast());
+        } while(!request.isLast());
     }
 
     /**
@@ -322,55 +319,55 @@ public class FeederReplicaHandshake {
      * configuration of the replica.
      *
      * @param protocol the protocol to use for this verification
-     *
      * @throws IOException
      * @throws DatabaseException
      */
     private void verifyMembershipInfo(Protocol protocol)
-        throws IOException,
-               DatabaseException,
-               ExitException {
+            throws IOException,
+            DatabaseException,
+            ExitException {
 
         NodeGroupInfo nodeGroup =
-            (Protocol.NodeGroupInfo)(protocol.read(namedChannel));
+                (Protocol.NodeGroupInfo) (protocol.read(namedChannel));
         final RepGroupImpl group = repNode.getGroup();
         RepNodeImpl node = group.getNode(nodeGroup.getNodeName());
 
         try {
 
-            if (nodeGroup.getNodeId() != replicaNameIdPair.getId()) {
+            if(nodeGroup.getNodeId() != replicaNameIdPair.getId()) {
                 throw new ExitException
-                    ("The replica node ID sent during protocol negotiation: " +
-                     replicaNameIdPair +
-                     " differs from the one sent in the MembershipInfo " +
-                     "request: " + nodeGroup.getNodeId());
+                        ("The replica node ID sent during protocol negotiation: " +
+                                replicaNameIdPair +
+                                " differs from the one sent in the MembershipInfo " +
+                                "request: " + nodeGroup.getNodeId());
             }
 
-            if (nodeGroup.getNodeType().hasTransientId()) {
+            if(nodeGroup.getNodeType().hasTransientId()) {
 
                 /*
                  * Note the secondary or external node if this is a new node.
                  * Otherwise, fall through, and the subsequent code will
                  * notice the incompatible node type.
                  */
-                if (node == null) {
+                if(node == null) {
 
                     /* A new node with transient id */
                     node = new RepNodeImpl(nodeGroup);
                     try {
                         repNode.addTransientIdNode(node);
-                    } catch (IllegalStateException | NodeConflictException e) {
+                    } catch(IllegalStateException | NodeConflictException e) {
                         throw new ExitException(e, true);
                     }
                 }
-            } else if (node == null || !node.isQuorumAck()) {
+            }
+            else if(node == null || !node.isQuorumAck()) {
                 /* Not currently a confirmed member. */
-                if (nodeGroup.getNodeType().isArbiter()) {
+                if(nodeGroup.getNodeType().isArbiter()) {
                     Set<RepNodeImpl> arbMembers = group.getArbiterMembers();
-                    if (arbMembers.size() > 0) {
+                    if(arbMembers.size() > 0) {
                         throw new ExitException(
-                            "An Arbiter node already exists in the "+
-                            "replication group.");
+                                "An Arbiter node already exists in the " +
+                                        "replication group.");
                     }
                 }
                 try {
@@ -383,52 +380,53 @@ public class FeederReplicaHandshake {
                      * update the in memory structure.
                      */
                     repNode.getRepGroupDB().ensureMember(nodeGroup);
-                    for (int i=0; i < GROUP_RETRY; i++) {
+                    for(int i = 0; i < GROUP_RETRY; i++) {
                         node =
-                            repNode.getGroup().getMember(
-                                nodeGroup.getNodeName());
-                        if (node != null) {
+                                repNode.getGroup().getMember(
+                                        nodeGroup.getNodeName());
+                        if(node != null) {
                             break;
                         }
                         try {
                             Thread.sleep(GROUP_RETRY_SLEEP_MS);
-                        } catch (Exception e) {
+                        } catch(Exception e) {
 
                         }
                     }
-                    if (node == null) {
+                    if(node == null) {
                         throw EnvironmentFailureException.unexpectedState
-                            ("Node: " + nodeGroup.getNameIdPair() +
-                             " not found");
+                                ("Node: " + nodeGroup.getNameIdPair() +
+                                        " not found");
                     }
-                } catch (InsufficientReplicasException |
-                         InsufficientAcksException |
-                         LockTimeoutException e) {
+                } catch(InsufficientReplicasException |
+                        InsufficientAcksException |
+                        LockTimeoutException e) {
                     throw new ExitException(e, false);
-                } catch (NodeConflictException e) {
+                } catch(NodeConflictException e) {
                     throw new ExitException(e, true);
                 }
-            } else if (node.isRemoved()) {
+            }
+            else if(node.isRemoved()) {
                 throw new ExitException
-                    ("Node: " + nodeGroup.getNameIdPair() +
-                     " is no longer a member of the group." +
-                     " It was explicitly removed.");
+                        ("Node: " + nodeGroup.getNameIdPair() +
+                                " is no longer a member of the group." +
+                                " It was explicitly removed.");
             }
 
             doGroupChecks(nodeGroup, group);
             doNodeChecks(nodeGroup, node);
             maybeUpdateJEVersion(nodeGroup, group, node);
-        } catch (ExitException exception) {
+        } catch(ExitException exception) {
             LoggerUtils.info
-                (logger, repNode.getRepImpl(), exception.getMessage());
-            if (exception.failReplica()) {
+                    (logger, repNode.getRepImpl(), exception.getMessage());
+            if(exception.failReplica()) {
                 /*
                  * Explicit message to force replica to invalidate the
                  * environment.
                  */
                 writeMessage(protocol,
-                             protocol.new NodeGroupInfoReject(
-                             exception.getMessage()));
+                        protocol.new NodeGroupInfoReject(
+                                exception.getMessage()));
             }
             throw exception;
         }
@@ -437,49 +435,49 @@ public class FeederReplicaHandshake {
         replicaNameIdPair.update(node.getNameIdPair());
         namedChannel.setNameIdPair(replicaNameIdPair);
         LoggerUtils.fine(logger, repNode.getRepImpl(),
-                         "Channel Mapping: " + replicaNameIdPair + " is at " +
-                         namedChannel.getChannel());
+                "Channel Mapping: " + replicaNameIdPair + " is at " +
+                        namedChannel.getChannel());
         writeMessage(protocol,
-                     protocol.new NodeGroupInfoOK(
-                         group.getUUID(), replicaNameIdPair));
+                protocol.new NodeGroupInfoOK(
+                        group.getUUID(), replicaNameIdPair));
     }
 
     /**
      * Verifies that the group related information is consistent.
      *
      * @throws ExitException if the configuration in the group db differs
-     * from the supplied config
+     *                       from the supplied config
      */
     private void doGroupChecks(NodeGroupInfo nodeGroup,
                                final RepGroupImpl group)
-        throws ExitException {
+            throws ExitException {
 
-        if (nodeGroup.isDesignatedPrimary() &&
+        if(nodeGroup.isDesignatedPrimary() &&
                 repNode.getRepImpl().isDesignatedPrimary()) {
             throw new ExitException
-            ("Conflicting Primary designations. Feeder node: " +
-             repNode.getNodeName() +
-             " and replica node: " + nodeGroup.getNodeName() +
-            " cannot simultaneously be designated primaries");
+                    ("Conflicting Primary designations. Feeder node: " +
+                            repNode.getNodeName() +
+                            " and replica node: " + nodeGroup.getNodeName() +
+                            " cannot simultaneously be designated primaries");
         }
 
-        if (!nodeGroup.getGroupName().equals(group.getName())) {
+        if(!nodeGroup.getGroupName().equals(group.getName())) {
             throw new ExitException
-                ("The feeder belongs to the group: " +
-                 group.getName() + " but replica id" + replicaNameIdPair +
-                 " belongs to the group: " + nodeGroup.getGroupName());
+                    ("The feeder belongs to the group: " +
+                            group.getName() + " but replica id" + replicaNameIdPair +
+                            " belongs to the group: " + nodeGroup.getGroupName());
         }
 
-        if (!RepGroupImpl.isUnknownUUID(nodeGroup.getUUID()) &&
-            !nodeGroup.getUUID().equals(group.getUUID())) {
+        if(!RepGroupImpl.isUnknownUUID(nodeGroup.getUUID()) &&
+                !nodeGroup.getUUID().equals(group.getUUID())) {
             throw new ExitException
-                ("The environments have the same name: " +
-                 group.getName() +
-                 " but represent different environment instances." +
-                 " The environment at the master has UUID " +
-                 group.getUUID() +
-                 ", while the replica " + replicaNameIdPair.getName() +
-                 " has UUID: " + nodeGroup.getUUID());
+                    ("The environments have the same name: " +
+                            group.getName() +
+                            " but represent different environment instances." +
+                            " The environment at the master has UUID " +
+                            group.getUUID() +
+                            ", while the replica " + replicaNameIdPair.getName() +
+                            " has UUID: " + nodeGroup.getUUID());
         }
     }
 
@@ -487,43 +485,43 @@ public class FeederReplicaHandshake {
      * Verifies that the old and new node configurations are the same.
      *
      * @throws ExitException if the configuration in the group db differs
-     * from the supplied config
+     *                       from the supplied config
      */
     private void doNodeChecks(NodeGroupInfo nodeGroup,
                               RepNodeImpl node)
-        throws ExitException {
+            throws ExitException {
 
-        if (!nodeGroup.getHostName().equals(node.getHostName())) {
+        if(!nodeGroup.getHostName().equals(node.getHostName())) {
             throw new ExitException
-                ("Conflicting hostnames for replica id: " +
-                 replicaNameIdPair +
-                 " Feeder thinks it is: " + node.getHostName() +
-                 " Replica is configured to use: " +
-                 nodeGroup.getHostName());
+                    ("Conflicting hostnames for replica id: " +
+                            replicaNameIdPair +
+                            " Feeder thinks it is: " + node.getHostName() +
+                            " Replica is configured to use: " +
+                            nodeGroup.getHostName());
         }
 
-        if (nodeGroup.port() != node.getPort()) {
+        if(nodeGroup.port() != node.getPort()) {
             throw new ExitException
-                ("Conflicting ports for replica id: " + replicaNameIdPair +
-                 " Feeder thinks it uses: " + node.getPort() +
-                 " Replica is configured to use: " + nodeGroup.port());
+                    ("Conflicting ports for replica id: " + replicaNameIdPair +
+                            " Feeder thinks it uses: " + node.getPort() +
+                            " Replica is configured to use: " + nodeGroup.port());
         }
 
-        if (!((NodeType.ELECTABLE == node.getType()) ||
-              (NodeType.SECONDARY == node.getType()) ||
-              (NodeType.EXTERNAL == node.getType()) ||
-              (NodeType.ARBITER == node.getType()) ||
-              (NodeType.MONITOR == node.getType()))) {
+        if(!((NodeType.ELECTABLE == node.getType()) ||
+                (NodeType.SECONDARY == node.getType()) ||
+                (NodeType.EXTERNAL == node.getType()) ||
+                (NodeType.ARBITER == node.getType()) ||
+                (NodeType.MONITOR == node.getType()))) {
             throw new ExitException
-                ("The replica node: " + replicaNameIdPair +
-                 " is of type: " + node.getType());
+                    ("The replica node: " + replicaNameIdPair +
+                            " is of type: " + node.getType());
         }
 
-        if (!nodeGroup.getNodeType().equals(node.getType())) {
+        if(!nodeGroup.getNodeType().equals(node.getType())) {
             throw new ExitException
-                ("Conflicting node types for: " + replicaNameIdPair +
-                 " Feeder thinks it uses: " + node.getType() +
-                 " Replica is configured as type: " + nodeGroup.getNodeType());
+                    ("Conflicting node types for: " + replicaNameIdPair +
+                            " Feeder thinks it uses: " + node.getType() +
+                            " Replica is configured as type: " + nodeGroup.getNodeType());
         }
         replicaNode = node;
     }
@@ -535,16 +533,16 @@ public class FeederReplicaHandshake {
      * replicas or acknowledgments: we can try again the next time.
      *
      * @throws ExitException if the attempt fails because the updated node's
-     * socket address conflicts with another node
+     *                       socket address conflicts with another node
      */
     private void maybeUpdateJEVersion(final NodeGroupInfo nodeGroup,
                                       final RepGroupImpl group,
                                       final RepNodeImpl node)
-        throws ExitException {
+            throws ExitException {
 
-        if ((group.getFormatVersion() >= RepGroupImpl.FORMAT_VERSION_3) &&
-            (nodeGroup.getJEVersion() != null) &&
-            !nodeGroup.getJEVersion().equals(node.getJEVersion())) {
+        if((group.getFormatVersion() >= RepGroupImpl.FORMAT_VERSION_3) &&
+                (nodeGroup.getJEVersion() != null) &&
+                !nodeGroup.getJEVersion().equals(node.getJEVersion())) {
 
             /*
              * Try updating the JE version information, given that the group
@@ -556,12 +554,12 @@ public class FeederReplicaHandshake {
              */
             try {
                 repNode.getRepGroupDB().updateMember(
-                    new RepNodeImpl(nodeGroup), false);
-            } catch (InsufficientReplicasException |
-                     InsufficientAcksException |
-                     LockTimeoutException e) {
+                        new RepNodeImpl(nodeGroup), false);
+            } catch(InsufficientReplicasException |
+                    InsufficientAcksException |
+                    LockTimeoutException e) {
                 /* Ignored */
-            } catch (NodeConflictException e) {
+            } catch(NodeConflictException e) {
                 throw new ExitException(e, true);
             }
         }
@@ -572,44 +570,43 @@ public class FeederReplicaHandshake {
      * interactions with the Replica, if the replica accepts to it.
      *
      * @return the protocol instance to be used for subsequent interactions
-     *
      * @throws IOException
      * @throws ExitException
      */
     private Protocol negotiateProtocol()
-        throws IOException, ExitException {
+            throws IOException, ExitException {
 
         Protocol defaultProtocol =
-            Protocol.getProtocol(repNode, getCurrentProtocolVersion());
+                Protocol.getProtocol(repNode, getCurrentProtocolVersion());
 
         /*
          * Wait to receive the replica's version, decide which protocol version
          * to use ourselves, and then reply with our version.
          */
         ReplicaProtocolVersion message =
-            (ReplicaProtocolVersion) defaultProtocol.read(namedChannel);
+                (ReplicaProtocolVersion) defaultProtocol.read(namedChannel);
 
         replicaNameIdPair = message.getNameIdPair();
 
         Feeder dup =
-            repNode.feederManager().getFeeder(replicaNameIdPair.getName());
-        if ((dup != null) ||
-            (message.getNameIdPair().getName().
-                    equals(feederNameIdPair.getName()))) {
+                repNode.feederManager().getFeeder(replicaNameIdPair.getName());
+        if((dup != null) ||
+                (message.getNameIdPair().getName().
+                        equals(feederNameIdPair.getName()))) {
             /* Reject the connection. */
             writeMessage(defaultProtocol,
-                         defaultProtocol.new DuplicateNodeReject(
-                             "This node: " + replicaNameIdPair +
-                             " is already in active use at the feeder "));
+                    defaultProtocol.new DuplicateNodeReject(
+                            "This node: " + replicaNameIdPair +
+                                    " is already in active use at the feeder "));
             SocketAddress dupAddress =
-                namedChannel.getChannel().getSocketChannel().socket().
-                getRemoteSocketAddress();
+                    namedChannel.getChannel().getSocketChannel().socket().
+                            getRemoteSocketAddress();
 
             throw new ExitException
-                ("A replica with the id: " + replicaNameIdPair +
-                 " is already active with this feeder. " +
-                 " The duplicate replica resides at: " +
-                 dupAddress);
+                    ("A replica with the id: " + replicaNameIdPair +
+                            " is already active with this feeder. " +
+                            " The duplicate replica resides at: " +
+                            dupAddress);
         }
 
         /*
@@ -618,13 +615,13 @@ public class FeederReplicaHandshake {
          */
         final int replicaVersion = message.getVersion();
         Protocol protocol =
-            Protocol.get(repNode, replicaVersion, getCurrentProtocolVersion());
-        if (protocol == null) {
+                Protocol.get(repNode, replicaVersion, getCurrentProtocolVersion());
+        if(protocol == null) {
             protocol = defaultProtocol;
         }
         defaultProtocol.write
-             (defaultProtocol.new FeederProtocolVersion(protocol.getVersion()),
-              namedChannel);
+                (defaultProtocol.new FeederProtocolVersion(protocol.getVersion()),
+                        namedChannel);
         return protocol;
     }
 }

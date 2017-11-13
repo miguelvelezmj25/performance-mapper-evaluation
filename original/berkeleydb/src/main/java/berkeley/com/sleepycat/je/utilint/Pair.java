@@ -29,7 +29,7 @@ public class Pair<FIRST, SECOND> {
     public FIRST first() {
         return first;
     }
-    
+
     public SECOND second() {
         return second;
     }

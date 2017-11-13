@@ -19,19 +19,19 @@ import java.util.Set;
 
 /**
  * A subclass of Converter that allows specifying keys to be deleted.
- *
+ * <p>
  * <p>When a Converter is used with an entity class, secondary keys cannot be
  * automatically deleted based on field deletion, because field Deleter objects
  * are not used in conjunction with a Converter mutation.  The EntityConverter
  * can be used instead of a plain Converter to specify the key names to be
  * deleted.</p>
- *
+ * <p>
  * <p>It is not currently possible to rename or insert secondary keys when
  * using a Converter mutation with an entity class.</p>
  *
+ * @author Mark Hayes
  * @see Converter
  * @see com.sleepycat.persist.evolve Class Evolution
- * @author Mark Hayes
  */
 public class EntityConverter extends Converter {
 
@@ -44,9 +44,9 @@ public class EntityConverter extends Converter {
      * class version to the current version of the class.
      *
      * @param entityClassName the entity class to which this mutation applies.
-     * @param classVersion the class version to which this mutation applies.
-     * @param conversion converter instance.
-     * @param deletedKeys the set of key names that are to be deleted.
+     * @param classVersion    the class version to which this mutation applies.
+     * @param conversion      converter instance.
+     * @param deletedKeys     the set of key names that are to be deleted.
      */
     public EntityConverter(String entityClassName,
                            int classVersion,
@@ -55,9 +55,10 @@ public class EntityConverter extends Converter {
         super(entityClassName, classVersion, null, conversion);
 
         /* Eclipse objects to assigning with a ternary operator. */
-        if (deletedKeys != null) {
+        if(deletedKeys != null) {
             this.deletedKeys = new HashSet(deletedKeys);
-        } else {
+        }
+        else {
             this.deletedKeys = Collections.emptySet();
         }
     }
@@ -78,11 +79,12 @@ public class EntityConverter extends Converter {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof EntityConverter) {
+        if(other instanceof EntityConverter) {
             EntityConverter o = (EntityConverter) other;
             return deletedKeys.equals(o.deletedKeys) &&
-                   super.equals(other);
-        } else {
+                    super.equals(other);
+        }
+        else {
             return false;
         }
     }
@@ -95,6 +97,6 @@ public class EntityConverter extends Converter {
     @Override
     public String toString() {
         return "[EntityConverter " + super.toString() +
-               " DeletedKeys: " + deletedKeys + ']';
+                " DeletedKeys: " + deletedKeys + ']';
     }
 }

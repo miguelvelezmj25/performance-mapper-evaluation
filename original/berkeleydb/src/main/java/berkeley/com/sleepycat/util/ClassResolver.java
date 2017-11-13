@@ -32,11 +32,61 @@ import java.io.ObjectStreamClass;
  * then the default Java mechanisms for determining the class loader are used.
  */
 public class ClassResolver {
-    
+
+    /**
+     * A specialized Class.forName method that supports use of a user-specified
+     * ClassLoader.
+     * <p>
+     * If the loader param and thread-context loader are both null, of if they
+     * throw ClassNotFoundException, then Class.forName is called and the
+     * "current loader" (the one used to load JE) will be used.
+     *
+     * @param className   the class name.
+     * @param classLoader the ClassLoader.
+     * @return the Class.
+     * @throws ClassNotFoundException if the class is not found.
+     */
+    public static Class resolveClass(String className,
+                                     ClassLoader classLoader)
+            throws ClassNotFoundException {
+
+        ClassNotFoundException firstException = null;
+        if(classLoader != null) {
+            try {
+                return Class.forName(className, true /*initialize*/,
+                        classLoader);
+            } catch(ClassNotFoundException e) {
+                if(firstException == null) {
+                    firstException = e;
+                }
+            }
+        }
+        final ClassLoader threadLoader =
+                Thread.currentThread().getContextClassLoader();
+        if(threadLoader != null) {
+            try {
+                return Class.forName(className, true /*initialize*/,
+                        threadLoader);
+            } catch(ClassNotFoundException e) {
+                if(firstException == null) {
+                    firstException = e;
+                }
+            }
+        }
+        try {
+            return Class.forName(className);
+        } catch(ClassNotFoundException e) {
+            if(firstException == null) {
+                firstException = e;
+            }
+        }
+        throw firstException;
+    }
+
     /**
      * A specialized ObjectInputStream that supports use of a user-specified
      * ClassLoader.
-     *
+     * <p>
      * If the loader param and thread-context loader are both null, of if they
      * throw ClassNotFoundException, then ObjectInputStream.resolveClass is
      * called, which has its own special rules for class loading.
@@ -46,7 +96,7 @@ public class ClassResolver {
         private final ClassLoader classLoader;
 
         public Stream(InputStream in, ClassLoader classLoader)
-            throws IOException {
+                throws IOException {
 
             super(in);
             this.classLoader = classLoader;
@@ -54,89 +104,39 @@ public class ClassResolver {
 
         @Override
         protected Class resolveClass(ObjectStreamClass desc)
-            throws IOException, ClassNotFoundException {
+                throws IOException, ClassNotFoundException {
 
             ClassNotFoundException firstException = null;
-            if (classLoader != null) {
+            if(classLoader != null) {
                 try {
                     return Class.forName(desc.getName(), false /*initialize*/,
-                                         classLoader);
-                } catch (ClassNotFoundException e) {
-                    if (firstException == null) {
+                            classLoader);
+                } catch(ClassNotFoundException e) {
+                    if(firstException == null) {
                         firstException = e;
                     }
                 }
             }
-            final ClassLoader threadLoader = 
-                Thread.currentThread().getContextClassLoader();
-            if (threadLoader != null) {
+            final ClassLoader threadLoader =
+                    Thread.currentThread().getContextClassLoader();
+            if(threadLoader != null) {
                 try {
                     return Class.forName(desc.getName(), false /*initialize*/,
-                                         threadLoader);
-                } catch (ClassNotFoundException e) {
-                    if (firstException == null) {
+                            threadLoader);
+                } catch(ClassNotFoundException e) {
+                    if(firstException == null) {
                         firstException = e;
                     }
                 }
             }
             try {
                 return super.resolveClass(desc);
-            } catch (ClassNotFoundException e) {
-                if (firstException == null) {
+            } catch(ClassNotFoundException e) {
+                if(firstException == null) {
                     firstException = e;
                 }
             }
             throw firstException;
         }
-    }
-
-    /**
-     * A specialized Class.forName method that supports use of a user-specified
-     * ClassLoader.
-     *
-     * If the loader param and thread-context loader are both null, of if they
-     * throw ClassNotFoundException, then Class.forName is called and the
-     * "current loader" (the one used to load JE) will be used.
-     *
-     * @param className the class name.
-     * @param classLoader the ClassLoader.
-     * @return the Class.
-     * @throws ClassNotFoundException if the class is not found.
-     */
-    public static Class resolveClass(String className,
-                                     ClassLoader classLoader)
-        throws ClassNotFoundException {
-
-        ClassNotFoundException firstException = null;
-        if (classLoader != null) {
-            try {
-                return Class.forName(className, true /*initialize*/,
-                                     classLoader);
-            } catch (ClassNotFoundException e) {
-                if (firstException == null) {
-                    firstException = e;
-                }
-            }
-        }
-        final ClassLoader threadLoader = 
-            Thread.currentThread().getContextClassLoader();
-        if (threadLoader != null) {
-            try {
-                return Class.forName(className, true /*initialize*/,
-                                     threadLoader);
-            } catch (ClassNotFoundException e) {
-                if (firstException == null) {
-                    firstException = e;
-                }
-            }
-        }
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            if (firstException == null) {
-                firstException = e;
-            }
-        }
-        throw firstException;
     }
 }

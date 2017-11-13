@@ -13,20 +13,18 @@
 
 package berkeley.com.sleepycat.je.jmx.plugin;
 
+import com.sun.tools.jconsole.JConsoleContext;
+import com.sun.tools.jconsole.JConsoleContext.ConnectionState;
+import com.sun.tools.jconsole.JConsolePlugin;
+
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-
-import com.sun.tools.jconsole.JConsolePlugin;
-import com.sun.tools.jconsole.JConsoleContext;
-import com.sun.tools.jconsole.JConsoleContext.ConnectionState;
-
 public abstract class StatsPlugin extends JConsolePlugin
-    implements PropertyChangeListener {
+        implements PropertyChangeListener {
 
     protected ArrayList<Stats> stats = new ArrayList<Stats>();
     protected StatsSwingWorker worker;
@@ -54,8 +52,8 @@ public abstract class StatsPlugin extends JConsolePlugin
      * Returns a SwingWorker which is responsible for updating the JEStats tab.
      */
     @Override
-    public SwingWorker<?,?> newSwingWorker() {
-        if (stats.size() > 0) {
+    public SwingWorker<?, ?> newSwingWorker() {
+        if(stats.size() > 0) {
             return new StatsSwingWorker(stats);
         }
         return null;
@@ -71,16 +69,17 @@ public abstract class StatsPlugin extends JConsolePlugin
      */
     public void propertyChange(PropertyChangeEvent ev) {
         String prop = ev.getPropertyName();
-        if (prop == JConsoleContext.CONNECTION_STATE_PROPERTY) {
+        if(prop == JConsoleContext.CONNECTION_STATE_PROPERTY) {
             ConnectionState newState = (ConnectionState) ev.getNewValue();
-            if (newState == ConnectionState.CONNECTED && stats.size() != 0) {
-                for (Stats status : stats) {
+            if(newState == ConnectionState.CONNECTED && stats.size() != 0) {
+                for(Stats status : stats) {
                     status.setConnection(
                             getContext().getMBeanServerConnection());
                 }
-            } else if (newState == ConnectionState.DISCONNECTED &&
-                       stats.size() != 0) {
-                for (int i = 0; i < stats.size(); i++) {
+            }
+            else if(newState == ConnectionState.DISCONNECTED &&
+                    stats.size() != 0) {
+                for(int i = 0; i < stats.size(); i++) {
                     Stats status = stats.remove(i);
                     status.setConnection(null);
                     status = null;

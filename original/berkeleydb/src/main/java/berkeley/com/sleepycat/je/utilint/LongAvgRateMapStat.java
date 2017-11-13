@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
-import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
 
 /**
  * A JE stat that maintains a map of individual {@link LongAvgRate} values
@@ -28,10 +28,14 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
 
     private static final long serialVersionUID = 1L;
 
-    /** The averaging period in milliseconds. */
+    /**
+     * The averaging period in milliseconds.
+     */
     protected final long periodMillis;
 
-    /** The time unit for reporting rates. */
+    /**
+     * The time unit for reporting rates.
+     */
     private final TimeUnit reportTimeUnit;
 
     /**
@@ -45,9 +49,9 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
      * Creates an instance of this class.  The definition type must be
      * INCREMENTAL.
      *
-     * @param group the owning group
-     * @param definition the associated definition
-     * @param periodMillis the sampling period in milliseconds
+     * @param group          the owning group
+     * @param definition     the associated definition
+     * @param periodMillis   the sampling period in milliseconds
      * @param reportTimeUnit the time unit for reporting rates
      */
     public LongAvgRateMapStat(StatGroup group,
@@ -66,8 +70,8 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
         super(other);
         periodMillis = other.periodMillis;
         reportTimeUnit = other.reportTimeUnit;
-        synchronized (this) {
-            synchronized (other) {
+        synchronized(this) {
+            synchronized(other) {
                 removeStatTimestamp = other.removeStatTimestamp;
             }
         }
@@ -82,7 +86,7 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
     public synchronized LongAvgRate createStat(String key) {
         assert key != null;
         final LongAvgRate stat = new LongAvgRate(
-            definition.getName() + ":" + key, periodMillis, reportTimeUnit);
+                definition.getName() + ":" + key, periodMillis, reportTimeUnit);
         statMap.put(key, stat);
         return stat;
     }
@@ -96,7 +100,9 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
         removeStat(key, System.currentTimeMillis());
     }
 
-    /** Remove a stat and specify the time of the removal -- for testing. */
+    /**
+     * Remove a stat and specify the time of the removal -- for testing.
+     */
     synchronized void removeStat(String key, long time) {
         removeStatTimestamp = time;
         super.removeStat(key);
@@ -120,8 +126,8 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
         assert base instanceof LongAvgRateMapStat;
         final LongAvgRateMapStat copy = copy();
         final LongAvgRateMapStat baseCopy =
-            (LongAvgRateMapStat) base.copy();
-        if (copy.getLatestTime() < baseCopy.getLatestTime()) {
+                (LongAvgRateMapStat) base.copy();
+        if(copy.getLatestTime() < baseCopy.getLatestTime()) {
             return copy.updateLatest(baseCopy);
         }
         return baseCopy.updateLatest(copy);
@@ -133,26 +139,27 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
      * not in this instance.
      */
     private synchronized LongAvgRateMapStat updateLatest(
-        final LongAvgRateMapStat latest) {
+            final LongAvgRateMapStat latest) {
 
-        synchronized (latest) {
-            for (final Iterator<Entry<String, LongAvgRate>> i =
-                     statMap.entrySet().iterator();
-                 i.hasNext(); ) {
+        synchronized(latest) {
+            for(final Iterator<Entry<String, LongAvgRate>> i =
+                statMap.entrySet().iterator();
+                i.hasNext(); ) {
                 final Entry<String, LongAvgRate> e = i.next();
                 final LongAvgRate latestStat =
-                    latest.statMap.get(e.getKey());
-                if (latestStat != null) {
+                        latest.statMap.get(e.getKey());
+                if(latestStat != null) {
                     e.getValue().add(latestStat);
-                } else {
+                }
+                else {
                     i.remove();
                 }
             }
 
-            for (final Entry<String, LongAvgRate> e :
-                     latest.statMap.entrySet()) {
+            for(final Entry<String, LongAvgRate> e :
+                    latest.statMap.entrySet()) {
                 final String key = e.getKey();
-                if (!statMap.containsKey(key)) {
+                if(!statMap.containsKey(key)) {
                     statMap.put(key, e.getValue());
                 }
             }
@@ -166,13 +173,16 @@ public final class LongAvgRateMapStat extends MapStat<Long, LongAvgRate> {
      */
     private synchronized long getLatestTime() {
         long latestTime = removeStatTimestamp;
-        for (final LongAvgRate stat : statMap.values()) {
+        for(final LongAvgRate stat : statMap.values()) {
             latestTime = Math.max(latestTime, stat.getPrevTime());
         }
         return latestTime;
     }
 
-    /** Do nothing for this non-additive stat. */
+    /**
+     * Do nothing for this non-additive stat.
+     */
     @Override
-    public synchronized void negate() { }
+    public synchronized void negate() {
+    }
 }

@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.rep.arbitration;
 
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
 import berkeley.com.sleepycat.je.rep.QuorumPolicy;
 import berkeley.com.sleepycat.je.rep.ReplicationMutableConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.util.logging.Logger;
 
 /**
  * Designated Primary arbitration relies on the configuration parameter
@@ -52,22 +52,22 @@ public class DesignatedPrimaryProvider implements ArbiterProvider {
      * durability for availability. More specifically it's invoked when an
      * election fails, or there is an insufficient number of replicas during
      * a begin transaction or a transaction commit.
-     *
+     * <p>
      * Active arbitration ends when the Non-Primary contacts it.
      *
      * @return true if the primary was activated.
      */
     @Override
     public boolean attemptActivation() {
-        if (checkDesignatedPrimary()) {
+        if(checkDesignatedPrimary()) {
             LoggerUtils.info(logger, repImpl,
-                             "Primary activated; quorum is one.");
+                    "Primary activated; quorum is one.");
             return true;
         }
 
         LoggerUtils.fine(logger, repImpl,
-                         "Attempted unsuccessfully to activate designated " +
-                         "primary");
+                "Attempted unsuccessfully to activate designated " +
+                        "primary");
         return false;
     }
 
@@ -95,8 +95,8 @@ public class DesignatedPrimaryProvider implements ArbiterProvider {
      */
     private boolean checkDesignatedPrimary() {
         return (repImpl != null) && /* repImpl can be null in unit tests */
-            repImpl.isDesignatedPrimary() &&
-            repImpl.getRepNode().getGroup().getElectableGroupSize() == 2;
+                repImpl.isDesignatedPrimary() &&
+                repImpl.getRepNode().getGroup().getElectableGroupSize() == 2;
     }
 
     /**

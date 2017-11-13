@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.Loggable;
+
+import java.nio.ByteBuffer;
 
 /**
  * Contains no information, implying that the LogEntryType is the only

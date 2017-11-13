@@ -28,16 +28,21 @@ public class NoClearAtomicLongStat extends AtomicLongStat {
         super(definition, value);
     }
 
-    /** Never clear this stat. */
+    /**
+     * Never clear this stat.
+     */
     @Override
-    public void clear() { }
+    public void clear() {
+    }
 
     @Override
     public AtomicLongStat copy() {
         return new NoClearAtomicLongStat(definition, get());
     }
 
-    /** Never clear this stat. */
+    /**
+     * Never clear this stat.
+     */
     @Override
     public AtomicLongStat copyAndClear() {
         return copy();

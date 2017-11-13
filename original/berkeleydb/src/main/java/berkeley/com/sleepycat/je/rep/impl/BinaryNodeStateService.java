@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.rep.impl.BinaryNodeStateProtocol.BinaryNodeStateRequest;
@@ -26,26 +23,28 @@ import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingService;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.JVMSystemUtils;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * The service registered by a RepNode to answer the state request.
- *
+ * <p>
  * To support the new BinaryStateProtocol, we introduce this new
  * BinaryNodeStateService, it's used by "Ping" command.
- *
+ * <p>
  * Note: we can merge the two NodeState services together once we support
  * acitve version updates.
  */
 public class BinaryNodeStateService extends ExecutingService {
 
+    /* Identifies the Node State querying Service. */
+    public static final String SERVICE_NAME = "BinaryNodeState";
     private final RepNode repNode;
     private final ServiceDispatcher dispatcher;
     private final Logger logger;
-
-    /* Identifies the Node State querying Service. */
-    public static final String SERVICE_NAME = "BinaryNodeState";
 
     public BinaryNodeStateService(ServiceDispatcher dispatcher,
                                   RepNode repNode) {
@@ -75,7 +74,7 @@ public class BinaryNodeStateService extends ExecutingService {
 
         /* Create the NodeState for the request. */
         private BinaryNodeStateResponse createResponse
-            (BinaryNodeStateProtocol protocol) {
+        (BinaryNodeStateProtocol protocol) {
 
             long joinTime = repNode.getMonitorEventManager().getJoinTime();
             long txnEndVLSN = (repNode.getCurrentTxnEndVLSN() == null ?
@@ -84,11 +83,11 @@ public class BinaryNodeStateService extends ExecutingService {
             int activeFeeders = repNode.feederManager().activeReplicaCount();
 
             return protocol.new BinaryNodeStateResponse
-                (repNode.getNodeName(), repNode.getGroup().getName(),
-                 repNode.getMasterName(), JEVersion.CURRENT_VERSION, joinTime,
-                 repNode.getRepImpl().getState(), txnEndVLSN, masterTxnEndVLSN,
-                 activeFeeders, LogEntryType.LOG_VERSION,
-                 repNode.getAppState(), JVMSystemUtils.getSystemLoad());
+                    (repNode.getNodeName(), repNode.getGroup().getName(),
+                            repNode.getMasterName(), JEVersion.CURRENT_VERSION, joinTime,
+                            repNode.getRepImpl().getState(), txnEndVLSN, masterTxnEndVLSN,
+                            activeFeeders, LogEntryType.LOG_VERSION,
+                            repNode.getAppState(), JVMSystemUtils.getSystemLoad());
         }
 
         @Override
@@ -97,49 +96,49 @@ public class BinaryNodeStateService extends ExecutingService {
 
             try {
                 protocol = new BinaryNodeStateProtocol(NameIdPair.NOCHECK,
-                                                       repNode.getRepImpl());
+                        repNode.getRepImpl());
                 try {
                     channel.getSocketChannel().configureBlocking(true);
 
                     BinaryNodeStateRequest msg =
-                        protocol.read(channel, BinaryNodeStateRequest.class);
+                            protocol.read(channel, BinaryNodeStateRequest.class);
 
                     /*
                      * Response a protocol error if the group name doesn't
                      * match.
                      */
                     final String groupName = msg.getGroupName();
-                    if (!repNode.getGroup().getName().equals(groupName) ||
-                        !repNode.getNodeName().equals(msg.getNodeName())) {
+                    if(!repNode.getGroup().getName().equals(groupName) ||
+                            !repNode.getNodeName().equals(msg.getNodeName())) {
                         throw new ProtocolException("Sending the request to" +
                                 " a wrong group or a wrong node.");
                     }
 
                     /* Write the response the requested node. */
                     BinaryNodeStateResponse response =
-                        createResponse(protocol);
+                            createResponse(protocol);
                     protocol.write(response, channel);
                     LoggerUtils.finest(logger, repNode.getRepImpl(),
                             "Deal with a node state request successfully.");
-                } catch (ProtocolException e) {
+                } catch(ProtocolException e) {
                     LoggerUtils.info(logger, repNode.getRepImpl(),
                             "Get a ProtocolException with message: " +
-                            LoggerUtils.exceptionTypeAndMsg(e) +
-                            " while dealing with a node state request.");
+                                    LoggerUtils.exceptionTypeAndMsg(e) +
+                                    " while dealing with a node state request.");
                     protocol.write
-                        (protocol.new ProtocolError(e.getMessage()), channel);
-                } catch (Exception e) {
+                            (protocol.new ProtocolError(e.getMessage()), channel);
+                } catch(Exception e) {
                     LoggerUtils.info(logger, repNode.getRepImpl(),
                             "Unexpected exception: " +
-                             LoggerUtils.exceptionTypeAndMsg(e));
+                                    LoggerUtils.exceptionTypeAndMsg(e));
                     protocol.write
-                        (protocol.new ProtocolError(e.getMessage()), channel);
+                            (protocol.new ProtocolError(e.getMessage()), channel);
                 } finally {
-                    if (channel.isOpen()) {
+                    if(channel.isOpen()) {
                         channel.close();
                     }
                 }
-            } catch (IOException e) {
+            } catch(IOException e) {
 
                 /*
                  * Channel has already been closed, or the close itself

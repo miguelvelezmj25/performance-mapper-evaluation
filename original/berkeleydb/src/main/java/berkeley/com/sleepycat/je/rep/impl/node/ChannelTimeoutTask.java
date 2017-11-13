@@ -12,14 +12,9 @@
  */
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import berkeley.com.sleepycat.je.rep.utilint.NamedChannelWithTimeout;
+
+import java.util.*;
 
 /**
  * The ChannelTimeoutTask ensures that all channels registered with it are
@@ -29,7 +24,7 @@ import berkeley.com.sleepycat.je.rep.utilint.NamedChannelWithTimeout;
  * up in 1 second increments. Thus multiple seconds of real time may correspond
  * to a single second of "timer time" if the system is paricularly busy, or the
  * gc has been particularly active.
- *
+ * <p>
  * This property allows the underlying timeout implementation to compensate for
  * GC pauses in which activity on the channel at the java level would have been
  * suspended and thus reduces the number of false timeouts.
@@ -37,17 +32,16 @@ import berkeley.com.sleepycat.je.rep.utilint.NamedChannelWithTimeout;
 public class ChannelTimeoutTask extends TimerTask {
 
     private final long ONE_SECOND_MS = 1000l;
-
+    private final List<NamedChannelWithTimeout> channels =
+            Collections.synchronizedList(new LinkedList<NamedChannelWithTimeout>());
     /* Elapsed time as measured by the timer task. It's always incremented
      * in one second intervals.
      */
     private long elapsedMs = 0;
 
-    private final List<NamedChannelWithTimeout> channels =
-        Collections.synchronizedList(new LinkedList<NamedChannelWithTimeout>());
-
     /**
      * Creates and schedules the timer task.
+     *
      * @param timer the timer associated with this task
      */
     public ChannelTimeoutTask(Timer timer) {
@@ -63,11 +57,11 @@ public class ChannelTimeoutTask extends TimerTask {
     @Override
     public void run() {
         elapsedMs += ONE_SECOND_MS;
-        synchronized (channels) {
-            for (Iterator<NamedChannelWithTimeout> i = channels.iterator();
-                 i.hasNext();) {
-                if (!i.next().isActive(elapsedMs)) {
-                   i.remove();
+        synchronized(channels) {
+            for(Iterator<NamedChannelWithTimeout> i = channels.iterator();
+                i.hasNext(); ) {
+                if(!i.next().isActive(elapsedMs)) {
+                    i.remove();
                 }
             }
         }

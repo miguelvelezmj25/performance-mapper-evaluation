@@ -52,11 +52,11 @@ public class ExampleDatabasePut {
         ExampleDatabasePut edp = new ExampleDatabasePut();
         try {
             edp.run(args);
-        } catch (DatabaseException dbe) {
+        } catch(DatabaseException dbe) {
             System.err.println("ExampleDatabasePut: " + dbe.toString());
             dbe.printStackTrace();
             dbe.printStackTrace();
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.out.println("Exception: " + e.toString());
             e.printStackTrace();
         } finally {
@@ -68,7 +68,7 @@ public class ExampleDatabasePut {
     private static void parseArgs(String args[]) {
         for(int i = 0; i < args.length; ++i) {
             if(args[i].startsWith("-")) {
-                switch (args[i].charAt(1)) {
+                switch(args[i].charAt(1)) {
                     case 'h':
                         myDbEnvPath = new File(args[++i]);
                         break;
@@ -133,7 +133,7 @@ public class ExampleDatabasePut {
             String vendorName = theVendor.getVendorName();
             try {
                 theKey = new DatabaseEntry(vendorName.getBytes("UTF-8"));
-            } catch (IOException willNeverOccur) {
+            } catch(IOException willNeverOccur) {
             }
 
             // Convert the Vendor object to a DatabaseEntry object
@@ -170,7 +170,7 @@ public class ExampleDatabasePut {
             String sku = sArray[1];
             try {
                 theKey = new DatabaseEntry(sku.getBytes("UTF-8"));
-            } catch (IOException willNeverOccur) {
+            } catch(IOException willNeverOccur) {
             }
 
             Inventory theInventory = new Inventory();
@@ -189,11 +189,11 @@ public class ExampleDatabasePut {
             // to be automatically updated for us.
             try {
                 myDbEnv.getInventoryDB().put(txn, theKey, theData);
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 try {
                     System.out.println("Error putting entry " +
                             sku.getBytes("UTF-8"));
-                } catch (IOException willNeverOccur) {
+                } catch(IOException willNeverOccur) {
                 }
                 txn.abort();
                 throw dbe;
@@ -210,7 +210,7 @@ public class ExampleDatabasePut {
             String theLine = null;
             FileInputStream fis = new FileInputStream(theFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            while ((theLine = br.readLine()) != null) {
+            while((theLine = br.readLine()) != null) {
                 String[] theLineArray = theLine.split("#");
                 if(theLineArray.length != numFields) {
                     System.out.println("Malformed line found in " + theFile.getPath());
@@ -222,11 +222,11 @@ public class ExampleDatabasePut {
             }
             // Close the input stream handle
             fis.close();
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             System.err.println(theFile.getPath() + " does not exist.");
             e.printStackTrace();
             usage();
-        } catch (IOException e) {
+        } catch(IOException e) {
             System.err.println("IO Exception: " + e.toString());
             e.printStackTrace();
             System.exit(-1);

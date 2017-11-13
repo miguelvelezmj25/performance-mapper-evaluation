@@ -115,7 +115,7 @@ public class SimpleRouter {
         for(InetSocketAddress appAddress : appAddresses) {
             try {
                 QuoteUtil.forwardRequest(appAddress, "quit", System.err);
-            } catch (IOException e) {
+            } catch(IOException e) {
                 // Ignore exceptions during shutdown
             }
         }
@@ -130,13 +130,13 @@ public class SimpleRouter {
     private void routeCommand(String line) {
         IOException lastException = null;
         int retries = appAddresses.size();
-        while (retries-- > 0) {
+        while(retries-- > 0) {
             try {
                 QuoteUtil.forwardRequest(getNextDispatchAddress(),
                         line,
                         System.err);
                 return;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 lastException = e;
 
                 /*
@@ -160,7 +160,7 @@ public class SimpleRouter {
     void doWork() throws Exception {
         BufferedReader stdin =
                 new BufferedReader(new InputStreamReader(System.in));
-        while (true) {
+        while(true) {
             String line = QuoteUtil.promptAndRead
                     ("SRouter", null, false, System.out, stdin);
 
@@ -169,7 +169,7 @@ public class SimpleRouter {
             }
 
             try {
-                switch (Command.getCommand(line)) {
+                switch(Command.getCommand(line)) {
 
                     case NONE:
                         break;
@@ -188,7 +188,7 @@ public class SimpleRouter {
                         StockQuotes.usage();
                         break;
                 }
-            } catch (InvalidCommandException e) {
+            } catch(InvalidCommandException e) {
                 System.err.println(e.getMessage());
                 continue;
             }

@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
  * A class that implements Loggable knows how to read and write itself into
  * a ByteBuffer in a format suitable for the JE log or JE replication
  * messages.
- *
+ * <p>
  * <p>Classes that implement {@code Loggable} and are included in replication
  * data should implement {@code VersionedWriteLoggable}.
  */
@@ -36,6 +36,7 @@ public interface Loggable {
 
     /**
      * Serialize this object into the buffer.
+     *
      * @param logBuffer is the destination buffer
      */
     public void writeToLog(ByteBuffer logBuffer);
@@ -46,7 +47,8 @@ public interface Loggable {
 
     /**
      * Initialize this object from the data in itemBuf.
-     * @param itemBuffer the source buffer
+     *
+     * @param itemBuffer   the source buffer
      * @param entryVersion the log version of the data
      */
     public void readFromLog(ByteBuffer itemBuffer, int entryVersion);
@@ -55,7 +57,8 @@ public interface Loggable {
      * Write the object into the string buffer for log dumping. Each object
      * should be dumped without indentation or new lines and should be valid
      * XML.
-     * @param sb destination string buffer
+     *
+     * @param sb      destination string buffer
      * @param verbose if true, dump the full, verbose version
      */
     public void dumpLog(StringBuilder sb, boolean verbose);

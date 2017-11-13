@@ -13,16 +13,16 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.je.DatabaseEntry;
+import berkeley.com.sleepycat.persist.model.EntityModel;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.persist.model.EntityModel;
 
 /**
  * Format for simple types, including primitives.  Additional methods are
@@ -43,13 +43,13 @@ public abstract class SimpleFormat extends Format {
         this.primitive = primitive;
     }
 
-    void setWrapperFormat(SimpleFormat wrapperFormat) {
-        this.wrapperFormat = wrapperFormat;
-    }
-
     @Override
     Format getWrapperFormat() {
         return wrapperFormat;
+    }
+
+    void setWrapperFormat(SimpleFormat wrapperFormat) {
+        this.wrapperFormat = wrapperFormat;
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class SimpleFormat extends Format {
     /* -- Begin methods to be overridden by primitive formats only. -- */
 
     Object newPrimitiveArray(int len, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState();
     }
@@ -103,7 +103,7 @@ public abstract class SimpleFormat extends Format {
      * @throws IllegalAccessException from subclasses.
      */
     void readPrimitiveField(Object o, EntityInput input, Field field)
-        throws IllegalAccessException, RefreshException {
+            throws IllegalAccessException, RefreshException {
 
         throw DbCompat.unexpectedState();
     }
@@ -112,7 +112,7 @@ public abstract class SimpleFormat extends Format {
      * @throws IllegalAccessException from subclasses.
      */
     void writePrimitiveField(Object o, EntityOutput output, Field field)
-        throws IllegalAccessException {
+            throws IllegalAccessException {
 
         throw DbCompat.unexpectedState();
     }
@@ -127,9 +127,9 @@ public abstract class SimpleFormat extends Format {
                                        RecordInput input,
                                        Set results) {
         int primLen = getPrimitiveLength();
-        for (int i = 0; i < len; i += 1) {
+        for(int i = 0; i < len; i += 1) {
             DatabaseEntry entry = new DatabaseEntry
-                (input.getBufferBytes(), input.getBufferOffset(), primLen);
+                    (input.getBufferBytes(), input.getBufferOffset(), primLen);
             results.add(entry);
             input.skipFast(primLen);
         }
@@ -141,7 +141,7 @@ public abstract class SimpleFormat extends Format {
 
         FBool(Catalog catalog, boolean primitive) {
             super(catalog, primitive ? Boolean.TYPE : Boolean.class,
-                  primitive);
+                    primitive);
         }
 
         @Override
@@ -151,7 +151,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Boolean.valueOf(input.readBoolean());
         }
@@ -173,10 +173,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             boolean[] a = new boolean[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readBoolean();
             }
             return a;
@@ -187,7 +187,7 @@ public abstract class SimpleFormat extends Format {
             boolean[] a = (boolean[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeBoolean(a[i]);
             }
         }
@@ -199,14 +199,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setBoolean(o, input.readBoolean());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeBoolean(field.getBoolean(o));
         }
@@ -227,7 +227,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Byte.valueOf(input.readByte());
         }
@@ -249,10 +249,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             byte[] a = new byte[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readByte();
             }
             return a;
@@ -263,7 +263,7 @@ public abstract class SimpleFormat extends Format {
             byte[] a = (byte[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeByte(a[i]);
             }
         }
@@ -275,14 +275,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setByte(o, input.readByte());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeByte(field.getByte(o));
         }
@@ -308,7 +308,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Short.valueOf(input.readShort());
         }
@@ -331,10 +331,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             short[] a = new short[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readShort();
             }
             return a;
@@ -345,7 +345,7 @@ public abstract class SimpleFormat extends Format {
             short[] a = (short[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeShort(a[i]);
             }
         }
@@ -357,14 +357,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setShort(o, input.readShort());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeShort(field.getShort(o));
         }
@@ -381,7 +381,7 @@ public abstract class SimpleFormat extends Format {
 
         FInt(Catalog catalog, boolean primitive) {
             super(catalog, primitive ? Integer.TYPE : Integer.class,
-                  primitive);
+                    primitive);
         }
 
         @Override
@@ -391,7 +391,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Integer.valueOf(input.readInt());
         }
@@ -416,10 +416,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             int[] a = new int[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readInt();
             }
             return a;
@@ -430,7 +430,7 @@ public abstract class SimpleFormat extends Format {
             int[] a = (int[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeInt(a[i]);
             }
         }
@@ -442,14 +442,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setInt(o, input.readInt());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeInt(field.getInt(o));
         }
@@ -475,7 +475,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Long.valueOf(input.readLong());
         }
@@ -493,16 +493,16 @@ public abstract class SimpleFormat extends Format {
         @Override
         void copySecKey(RecordInput input, RecordOutput output) {
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), 8);
+                    (input.getBufferBytes(), input.getBufferOffset(), 8);
             input.skipFast(8);
         }
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             long[] a = new long[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readLong();
             }
             return a;
@@ -513,7 +513,7 @@ public abstract class SimpleFormat extends Format {
             long[] a = (long[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeLong(a[i]);
             }
         }
@@ -525,14 +525,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setLong(o, input.readLong());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeLong(field.getLong(o));
         }
@@ -558,7 +558,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Float.valueOf(input.readSortedFloat());
         }
@@ -583,10 +583,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             float[] a = new float[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readSortedFloat();
             }
             return a;
@@ -597,7 +597,7 @@ public abstract class SimpleFormat extends Format {
             float[] a = (float[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeSortedFloat(a[i]);
             }
         }
@@ -609,14 +609,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setFloat(o, input.readSortedFloat());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeSortedFloat(field.getFloat(o));
         }
@@ -637,7 +637,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Double.valueOf(input.readSortedDouble());
         }
@@ -655,16 +655,16 @@ public abstract class SimpleFormat extends Format {
         @Override
         void copySecKey(RecordInput input, RecordOutput output) {
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), 8);
+                    (input.getBufferBytes(), input.getBufferOffset(), 8);
             input.skipFast(8);
         }
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             double[] a = new double[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readSortedDouble();
             }
             return a;
@@ -675,7 +675,7 @@ public abstract class SimpleFormat extends Format {
             double[] a = (double[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeSortedDouble(a[i]);
             }
         }
@@ -687,14 +687,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setDouble(o, input.readSortedDouble());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeSortedDouble(field.getDouble(o));
         }
@@ -706,7 +706,7 @@ public abstract class SimpleFormat extends Format {
 
         FChar(Catalog catalog, boolean primitive) {
             super(catalog, primitive ? Character.TYPE : Character.class,
-                  primitive);
+                    primitive);
         }
 
         @Override
@@ -716,7 +716,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return Character.valueOf(input.readChar());
         }
@@ -739,10 +739,10 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         Object newPrimitiveArray(int len, EntityInput input)
-            throws RefreshException {
+                throws RefreshException {
 
             char[] a = new char[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 a[i] = input.readChar();
             }
             return a;
@@ -753,7 +753,7 @@ public abstract class SimpleFormat extends Format {
             char[] a = (char[]) o;
             int len = a.length;
             output.writeArrayLength(len);
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 output.writeChar(a[i]);
             }
         }
@@ -765,14 +765,14 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         void readPrimitiveField(Object o, EntityInput input, Field field)
-            throws IllegalAccessException, RefreshException {
+                throws IllegalAccessException, RefreshException {
 
             field.setChar(o, input.readChar());
         }
 
         @Override
         void writePrimitiveField(Object o, EntityOutput output, Field field)
-            throws IllegalAccessException {
+                throws IllegalAccessException {
 
             output.writeChar(field.getChar(o));
         }
@@ -793,7 +793,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return input.readString();
         }
@@ -812,7 +812,7 @@ public abstract class SimpleFormat extends Format {
         void copySecKey(RecordInput input, RecordOutput output) {
             int len = input.getStringByteLength();
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), len);
+                    (input.getBufferBytes(), input.getBufferOffset(), len);
             input.skipFast(len);
         }
     }
@@ -832,7 +832,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return input.readBigInteger();
         }
@@ -851,14 +851,14 @@ public abstract class SimpleFormat extends Format {
         void copySecKey(RecordInput input, RecordOutput output) {
             int len = input.getBigIntegerByteLength();
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), len);
+                    (input.getBufferBytes(), input.getBufferOffset(), len);
             input.skipFast(len);
         }
     }
-    
+
     public static class FBigDec extends SimpleFormat {
         private static final long serialVersionUID = 6108874887143696463L;
-        
+
         FBigDec(Catalog catalog) {
             super(catalog, BigDecimal.class, false);
         }
@@ -869,9 +869,9 @@ public abstract class SimpleFormat extends Format {
         }
 
         @Override
-        public Object newInstance(EntityInput input, boolean rawAccess) 
-            throws RefreshException {
-            
+        public Object newInstance(EntityInput input, boolean rawAccess)
+                throws RefreshException {
+
             return input.readSortedBigDecimal();
         }
 
@@ -889,10 +889,10 @@ public abstract class SimpleFormat extends Format {
         void copySecKey(RecordInput input, RecordOutput output) {
             int len = input.getSortedBigDecimalByteLength();
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), len);
+                    (input.getBufferBytes(), input.getBufferOffset(), len);
             input.skipFast(len);
         }
-        
+
         @Override
         public boolean allowEvolveFromProxy() {
             return true;
@@ -914,7 +914,7 @@ public abstract class SimpleFormat extends Format {
 
         @Override
         public Object newInstance(EntityInput input, boolean rawAccess)
-            throws RefreshException {
+                throws RefreshException {
 
             return new Date(input.readLong());
         }
@@ -932,7 +932,7 @@ public abstract class SimpleFormat extends Format {
         @Override
         void copySecKey(RecordInput input, RecordOutput output) {
             output.writeFast
-                (input.getBufferBytes(), input.getBufferOffset(), 8);
+                    (input.getBufferBytes(), input.getBufferOffset(), 8);
             input.skipFast(8);
         }
     }

@@ -24,6 +24,7 @@ public class MemberNotFoundException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public MemberNotFoundException(String message) {
@@ -32,15 +33,17 @@ public class MemberNotFoundException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private MemberNotFoundException(String message,
-                                      MemberNotFoundException cause) {
+                                    MemberNotFoundException cause) {
         super(message, cause);
     }
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

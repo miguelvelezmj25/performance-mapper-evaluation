@@ -14,11 +14,7 @@
 package berkeley.com.sleepycat.collections;
 
 import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.LockConflictException;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.util.ExceptionUnwrapper;
 
 /**
@@ -26,14 +22,14 @@ import berkeley.com.sleepycat.util.ExceptionUnwrapper;
  * transaction retry and exceptions.  To perform a transaction, the user
  * implements the {@link TransactionWorker} interface and passes an instance of
  * that class to the {@link #run run} method.
- *
+ * <p>
  * <p>A single TransactionRunner instance may be used by any number of threads
  * for any number of transactions.</p>
- *
+ * <p>
  * <p>The behavior of the run() method depends on whether the environment is
  * transactional, whether nested transactions are enabled, and whether a
  * transaction is already active.</p>
- *
+ * <p>
  * <ul>
  * <li>When the run() method is called in a transactional environment and no
  * transaction is active for the current thread, a new transaction is started
@@ -45,7 +41,7 @@ import berkeley.com.sleepycat.util.ExceptionUnwrapper;
  * thrown by doWork(), the transaction will be committed.  The run() method
  * will not attempt to commit or abort a transaction if it has already been
  * committed or aborted by doWork().</li>
- *
+ * <p>
  * <li>When the run() method is called and a transaction is active for the
  * current thread, and nested transactions are enabled, a nested transaction is
  * started before calling doWork().  The transaction that is active when
@@ -54,18 +50,18 @@ import berkeley.com.sleepycat.util.ExceptionUnwrapper;
  * following the same rules described above.  Note that nested transactions may
  * not be enabled for the JE product, since JE does not support nested
  * transactions.</li>
- *
+ * <p>
  * <li>When the run() method is called in a non-transactional environment, the
  * doWork() method is called without starting a transaction.  The run() method
  * will return without committing or aborting a transaction, and any exceptions
  * thrown by the doWork() method will be thrown by the run() method.</li>
- *
+ * <p>
  * <li>When the run() method is called and a transaction is active for the
  * current thread and nested transactions are not enabled (the default) the
  * same rules as above apply. All the operations performed by the doWork()
  * method will be part of the currently active transaction.</li>
  * </ul>
- *
+ * <p>
  * <p>In a transactional environment, the rules described above support nested
  * calls to the run() method and guarantee that the outermost call will cause
  * the transaction to be committed or aborted.  This is true whether or not
@@ -78,7 +74,9 @@ import berkeley.com.sleepycat.util.ExceptionUnwrapper;
  */
 public class TransactionRunner {
 
-    /** The default maximum number of retries. */
+    /**
+     * The default maximum number of retries.
+     */
     public static final int DEFAULT_MAX_RETRIES = 10;
 
     private CurrentTransaction currentTxn;
@@ -102,15 +100,13 @@ public class TransactionRunner {
      * Creates a transaction runner for a given Berkeley DB environment and
      * with a given number of maximum retries.
      *
-     * @param env is the environment for running transactions.
-     *
+     * @param env        is the environment for running transactions.
      * @param maxRetries is the maximum number of retries that will be
-     * performed when deadlocks are detected.
-     *
-     * @param config the transaction configuration used for calling
-     * {@link Environment#beginTransaction}, or null to use the default
-     * configuration.  The configuration object is not cloned, and
-     * any modifications to it will impact subsequent transactions.
+     *                   performed when deadlocks are detected.
+     * @param config     the transaction configuration used for calling
+     *                   {@link Environment#beginTransaction}, or null to use the default
+     *                   configuration.  The configuration object is not cloned, and
+     *                   any modifications to it will impact subsequent transactions.
      */
     public TransactionRunner(Environment env,
                              int maxRetries,
@@ -151,7 +147,7 @@ public class TransactionRunner {
      * By default this property is false.
      *
      * @return whether nested transactions will be created.
-     *
+     * <p>
      * <p>Note that this method always returns false in the JE product, since
      * nested transactions are not supported by JE.</p>
      */
@@ -167,15 +163,15 @@ public class TransactionRunner {
      * Calling this method does not impact transactions already running.
      *
      * @param allowNestedTxn whether nested transactions will be created.
-     *
-     * <p>Note that true may not be passed to this method in the JE product,
-     * since nested transactions are not supported by JE.</p>
+     *                       <p>
+     *                       <p>Note that true may not be passed to this method in the JE product,
+     *                       since nested transactions are not supported by JE.</p>
      */
     public void setAllowNestedTransactions(boolean allowNestedTxn) {
 
-        if (allowNestedTxn && !DbCompat.NESTED_TRANSACTIONS) {
+        if(allowNestedTxn && !DbCompat.NESTED_TRANSACTIONS) {
             throw new UnsupportedOperationException
-                ("Nested transactions are not supported.");
+                    ("Nested transactions are not supported.");
         }
         this.allowNestedTxn = allowNestedTxn;
     }
@@ -183,7 +179,7 @@ public class TransactionRunner {
     /**
      * Returns the transaction configuration used for calling
      * {@link Environment#beginTransaction}.
-     *
+     * <p>
      * <p>If this property is null, the default configuration is used.  The
      * configuration object is not cloned, and any modifications to it will
      * impact subsequent transactions.</p>
@@ -198,7 +194,7 @@ public class TransactionRunner {
     /**
      * Changes the transaction configuration used for calling
      * {@link Environment#beginTransaction}.
-     *
+     * <p>
      * <p>If this property is null, the default configuration is used.  The
      * configuration object is not cloned, and any modifications to it will
      * impact subsequent transactions.</p>
@@ -218,46 +214,44 @@ public class TransactionRunner {
      * information.
      *
      * @param worker the TransactionWorker.
-     *
      * @throws LockConflictException when it is thrown by doWork() and the
-     * maximum number of retries has occurred.  The transaction will have been
-     * aborted by this method.
-     *
-     * @throws Exception when any other exception is thrown by doWork().  The
-     * exception will first be unwrapped by calling {@link
-     * ExceptionUnwrapper#unwrap}.  The transaction will have been aborted by
-     * this method.
+     *                               maximum number of retries has occurred.  The transaction will have been
+     *                               aborted by this method.
+     * @throws Exception             when any other exception is thrown by doWork().  The
+     *                               exception will first be unwrapped by calling {@link
+     *                               ExceptionUnwrapper#unwrap}.  The transaction will have been aborted by
+     *                               this method.
      */
     public void run(TransactionWorker worker)
-        throws DatabaseException, Exception {
+            throws DatabaseException, Exception {
 
-        if (currentTxn != null &&
-            (allowNestedTxn || currentTxn.getTransaction() == null)) {
+        if(currentTxn != null &&
+                (allowNestedTxn || currentTxn.getTransaction() == null)) {
             /* Transactional and (not nested or nested txns allowed). */
             int useMaxRetries = maxRetries;
-            for (int retries = 0;; retries += 1) {
+            for(int retries = 0; ; retries += 1) {
                 Transaction txn = null;
                 try {
                     txn = currentTxn.beginTransaction(config);
                     worker.doWork();
-                    if (txn != null && txn == currentTxn.getTransaction()) {
+                    if(txn != null && txn == currentTxn.getTransaction()) {
                         currentTxn.commitTransaction();
                     }
                     return;
-                } catch (Throwable e) {
+                } catch(Throwable e) {
                     e = ExceptionUnwrapper.unwrapAny(e);
-                    if (txn != null && txn == currentTxn.getTransaction()) {
+                    if(txn != null && txn == currentTxn.getTransaction()) {
                         try {
                             currentTxn.abortTransaction();
-                        } catch (Throwable e2) {
+                        } catch(Throwable e2) {
 
                             /*
                              * We print this stack trace so that the
                              * information is not lost when we throw the
                              * original exception.
                              */
-                            if (DbCompat.
-                                TRANSACTION_RUNNER_PRINT_STACK_TRACES) {
+                            if(DbCompat.
+                                    TRANSACTION_RUNNER_PRINT_STACK_TRACES) {
                                 e2.printStackTrace();
                             }
                             /* Force the original exception to be thrown. */
@@ -265,23 +259,24 @@ public class TransactionRunner {
                         }
                     }
                     /* An Error should not require special handling. */
-                    if (e instanceof Error) {
+                    if(e instanceof Error) {
                         throw (Error) e;
                     }
                     /* Allow a subclass to determine retry policy. */
                     Exception ex = (Exception) e;
                     useMaxRetries =
-                        handleException(ex, retries, useMaxRetries);
-                    if (retries >= useMaxRetries) {
+                            handleException(ex, retries, useMaxRetries);
+                    if(retries >= useMaxRetries) {
                         throw ex;
                     }
                 }
             }
-        } else {
+        }
+        else {
             /* Non-transactional or (nested and no nested txns allowed). */
             try {
                 worker.doWork();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 throw ExceptionUnwrapper.unwrap(e);
             }
         }
@@ -291,7 +286,7 @@ public class TransactionRunner {
      * Handles exceptions that occur during a transaction, and may implement
      * transaction retry policy.  The transaction is aborted by the {@link
      * #run run} method before calling this method.
-     *
+     * <p>
      * <p>The default implementation of this method throws the {@code
      * exception} parameter if it is not an instance of {@link
      * LockConflictException} and otherwise returns the {@code maxRetries}
@@ -300,49 +295,45 @@ public class TransactionRunner {
      * <ul>
      * <li>This method could call {@code Thread.sleep} for a short interval to
      * allow other transactions to finish.</li>
-     *
+     * <p>
      * <li>This method could return a different {@code maxRetries} value
      * depending on the {@code exception} that occurred.</li>
-     *
+     * <p>
      * <li>This method could throw an application-defined exception when the
      * {@code retries} value is greater or equal to the {@code maxRetries} and
      * a {@link LockConflictException} occurs, to override the default behavior
      * which is to throw the {@link LockConflictException}.</li>
      * </ul>
      *
-     * @param exception an exception that was thrown by the {@link
-     * TransactionWorker#doWork} method or thrown when beginning or committing
-     * the transaction.  If the {@code retries} value is greater or equal to
-     * {@code maxRetries} when this method returns normally, this exception
-     * will be thrown by the {@link #run run} method.
-     *
-     * @param retries the current value of a counter that starts out at zero
-     * and is incremented when each retry is performed.
-     *
+     * @param exception  an exception that was thrown by the {@link
+     *                   TransactionWorker#doWork} method or thrown when beginning or committing
+     *                   the transaction.  If the {@code retries} value is greater or equal to
+     *                   {@code maxRetries} when this method returns normally, this exception
+     *                   will be thrown by the {@link #run run} method.
+     * @param retries    the current value of a counter that starts out at zero
+     *                   and is incremented when each retry is performed.
      * @param maxRetries the maximum retries to be performed.  By default,
-     * this value is set to {@link #getMaxRetries}.  This method may return a
-     * different maximum retries value to override that default.
-     *
+     *                   this value is set to {@link #getMaxRetries}.  This method may return a
+     *                   different maximum retries value to override that default.
      * @return the maximum number of retries to perform.  The
      * default policy is to return the {@code maxRetries} parameter value
      * if the {@code exception} parameter value is an instance of {@link
      * LockConflictException}.
-     *
      * @throws Exception to cause the exception to be thrown by the {@link
-     * #run run} method.  The default policy is to throw the {@code exception}
-     * parameter value if it is not an instance of {@link
-     * LockConflictException}.
-     *
+     *                   #run run} method.  The default policy is to throw the {@code exception}
+     *                   parameter value if it is not an instance of {@link
+     *                   LockConflictException}.
      * @since 3.4
      */
     public int handleException(Exception exception,
                                int retries,
                                int maxRetries)
-        throws Exception {
+            throws Exception {
 
-        if (exception instanceof LockConflictException) {
+        if(exception instanceof LockConflictException) {
             return maxRetries;
-        } else {
+        }
+        else {
             throw exception;
         }
     }

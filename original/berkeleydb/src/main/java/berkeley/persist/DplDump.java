@@ -77,7 +77,7 @@ public class DplDump {
             dump.open();
             dump.execute();
             dump.close();
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -149,7 +149,7 @@ public class DplDump {
                     final PrimaryIndex<Object, RawObject> index;
                     try {
                         index = store.getPrimaryIndex(clsName);
-                    } catch (IndexNotAvailableException e) {
+                    } catch(IndexNotAvailableException e) {
                         System.err.println("Skipping primary index that is " +
                                 "not yet available: " + clsName);
                         continue;

@@ -26,7 +26,7 @@ class FileHandleSource extends FileSource {
                      int readBufferSize,
                      FileManager fileManager) {
         super(fileHandle.getFile(), readBufferSize, fileManager,
-              fileHandle.getFileNum(), fileHandle.getLogVersion());
+                fileHandle.getFileNum(), fileHandle.getLogVersion());
         this.fileHandle = fileHandle;
     }
 
@@ -35,7 +35,7 @@ class FileHandleSource extends FileSource {
      */
     @Override
     public void release()
-        throws DatabaseException {
+            throws DatabaseException {
 
         fileHandle.release();
     }

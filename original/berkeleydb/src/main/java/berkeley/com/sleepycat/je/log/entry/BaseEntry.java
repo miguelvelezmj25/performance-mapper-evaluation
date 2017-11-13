@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
@@ -24,15 +21,18 @@ import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * A Log entry allows you to read, write and dump a database log entry.  Each
  * entry may be made up of one or more loggable items.
- *
+ * <p>
  * The log entry on disk consists of
- *  a. a log header defined by LogManager
- *  b. a VLSN, if this entry type requires it, and replication is on.
- *  c. the specific contents of the log entry.
- *
+ * a. a log header defined by LogManager
+ * b. a VLSN, if this entry type requires it, and replication is on.
+ * c. the specific contents of the log entry.
+ * <p>
  * This class encompasses (b and c).
  *
  * @param <T> the type of the loggable items in this entry
@@ -64,11 +64,28 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
         noArgsConstructor = getNoArgsConstructor(logClass);
     }
 
+    /**
+     * Constructor to write an entry.
+     */
+    BaseEntry() {
+        noArgsConstructor = null;
+    }
+
     static <T extends Loggable> Constructor<T> getNoArgsConstructor(
-        final Class<T> logClass) {
+            final Class<T> logClass) {
         try {
             return logClass.getConstructor((Class<T>[]) null);
-        } catch (SecurityException | NoSuchMethodException e) {
+        } catch(SecurityException | NoSuchMethodException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        }
+    }
+
+    static <T extends Loggable> T newInstanceOfType(
+            final Constructor<T> noArgsConstructor) {
+        try {
+            return noArgsConstructor.newInstance((Object[]) null);
+        } catch(IllegalAccessException | InstantiationException |
+                IllegalArgumentException | InvocationTargetException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
     }
@@ -80,23 +97,6 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
         return newInstanceOfType(noArgsConstructor);
     }
 
-    static <T extends Loggable> T newInstanceOfType(
-        final Constructor<T> noArgsConstructor) {
-        try {
-            return noArgsConstructor.newInstance((Object[]) null);
-        } catch (IllegalAccessException | InstantiationException |
-                IllegalArgumentException | InvocationTargetException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        }
-    }
-
-    /**
-     * Constructor to write an entry.
-     */
-    BaseEntry() {
-        noArgsConstructor = null;
-    }
-
     /**
      * Returns the class of the contained loggable item or items, or null if
      * the instance was created to write an entry.
@@ -105,8 +105,13 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
      */
     public Class<T> getLogClass() {
         return (noArgsConstructor != null) ?
-            noArgsConstructor.getDeclaringClass() :
-            null;
+                noArgsConstructor.getDeclaringClass() :
+                null;
+    }
+
+    @Override
+    public LogEntryType getLogType() {
+        return entryType;
     }
 
     /**
@@ -115,11 +120,6 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
     @Override
     public void setLogType(LogEntryType entryType) {
         this.entryType = entryType;
-    }
-
-    @Override
-    public LogEntryType getLogType() {
-        return entryType;
     }
 
     /**
@@ -144,6 +144,7 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
     /**
      * Do any processing we need to do after logging, while under the logging
      * latch.
+     *
      * @throws DatabaseException from subclasses.
      */
     @Override
@@ -155,7 +156,7 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
     }
 
     public void postFetchInit(@SuppressWarnings("unused")
-                              DatabaseImpl dbImpl) {
+                                      DatabaseImpl dbImpl) {
     }
 
     @Override
@@ -163,7 +164,7 @@ abstract class BaseEntry<T extends Loggable> implements LogEntry {
 
         try {
             return (LogEntry) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
     }

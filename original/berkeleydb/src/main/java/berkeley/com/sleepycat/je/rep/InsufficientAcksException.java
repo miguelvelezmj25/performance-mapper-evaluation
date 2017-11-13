@@ -14,8 +14,8 @@
 package berkeley.com.sleepycat.je.rep;
 
 import berkeley.com.sleepycat.je.Durability;
-import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
+import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.rep.txn.MasterTxn;
 
 /**
@@ -62,29 +62,27 @@ public class InsufficientAcksException extends OperationFailureException {
     private final String feederState;
 
     /**
-     * @hidden
-     * Creates a InsufficientAcksException.
-     *
-     * @param acksPending the number of missing acknowledgments
+     * @param acksPending  the number of missing acknowledgments
      * @param ackTimeoutMs the current acknowledgment timeout value in
-     * milliseconds
+     *                     milliseconds
+     * @hidden Creates a InsufficientAcksException.
      */
     public InsufficientAcksException(MasterTxn txn,
                                      int acksPending,
                                      int ackTimeoutMs,
                                      String feederState) {
         super(null, false /*abortOnly*/,
-              "Transaction: " + txn.getId() +
-              "  VLSN: " + txn.getCommitVLSN() +
-              ", initiated at: " + String.format("%1tT. ", txn.getStartMs()) +
-              " Insufficient acks for policy:" +
-              txn.getCommitDurability().getReplicaAck() + ". " +
-              "Need replica acks: " + txn.getRequiredAckCount() + ". " +
-              "Missing replica acks: " + acksPending + ". " +
-              "Timeout: " + ackTimeoutMs + "ms. " +
-              "FeederState=" + feederState,
-              null /*cause*/);
-        assert(acksPending <= txn.getRequiredAckCount());
+                "Transaction: " + txn.getId() +
+                        "  VLSN: " + txn.getCommitVLSN() +
+                        ", initiated at: " + String.format("%1tT. ", txn.getStartMs()) +
+                        " Insufficient acks for policy:" +
+                        txn.getCommitDurability().getReplicaAck() + ". " +
+                        "Need replica acks: " + txn.getRequiredAckCount() + ". " +
+                        "Missing replica acks: " + acksPending + ". " +
+                        "Timeout: " + ackTimeoutMs + "ms. " +
+                        "FeederState=" + feederState,
+                null /*cause*/);
+        assert (acksPending <= txn.getRequiredAckCount());
         this.acksPending = acksPending;
         this.acksRequired = txn.getRequiredAckCount();
         this.ackTimeoutMs = ackTimeoutMs;
@@ -93,6 +91,7 @@ public class InsufficientAcksException extends OperationFailureException {
 
     /**
      * For testing only.
+     *
      * @hidden
      */
     public InsufficientAcksException(String message) {
@@ -105,6 +104,7 @@ public class InsufficientAcksException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private InsufficientAcksException(String message,
@@ -118,6 +118,7 @@ public class InsufficientAcksException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

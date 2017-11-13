@@ -36,7 +36,6 @@ public class EnumConfigParam<T extends Enum<T>> extends ConfigParam {
      * Returns the enumerator associated with the name
      *
      * @param enumName the string naming the enumerator
-     *
      * @return the enumerator
      */
     public T getEnumerator(String enumName) {
@@ -45,14 +44,14 @@ public class EnumConfigParam<T extends Enum<T>> extends ConfigParam {
 
     @Override
     public void validateValue(String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         /*
          * If validateValue() is called by through the ConfigParam
          * constructor, enumVal is not assigned yet, so we guard against
          * that happening.
          */
-        if (enumClass != null) {
+        if(enumClass != null) {
             Enum.valueOf(enumClass, value);
         }
     }

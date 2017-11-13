@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
+import berkeley.com.sleepycat.je.rep.net.InstanceParams;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-
-import berkeley.com.sleepycat.je.rep.net.InstanceParams;
 
 /**
  * This is an implementation of HostnameVerifier, which is intended to verify
@@ -28,18 +28,18 @@ import berkeley.com.sleepycat.je.rep.net.InstanceParams;
  */
 
 public class SSLMirrorHostVerifier
-    extends SSLMirrorMatcher
-    implements HostnameVerifier {
+        extends SSLMirrorMatcher
+        implements HostnameVerifier {
 
     /**
      * Construct an SSLMirrorHostVerifier
      *
      * @param params the instantiation parameters.
      * @throws IllegalArgumentException if the instance cannot be created due
-     * to a problem related to the input parameters
+     *                                  to a problem related to the input parameters
      */
     public SSLMirrorHostVerifier(InstanceParams params)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super(params, true);
     }
@@ -49,7 +49,7 @@ public class SSLMirrorHostVerifier
      * This should be called only after the SSL handshake has completed.
      *
      * @param targetHost the host to which a connection is being established.
-     *   This parameter is not used by this implementation.
+     *                   This parameter is not used by this implementation.
      * @param sslSession the established SSL session
      * @return true if the sslSession is set up with the correct host
      */

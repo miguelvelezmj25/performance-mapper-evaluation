@@ -22,7 +22,7 @@ import berkeley.com.sleepycat.je.log.entry.LogEntry;
  */
 public interface VLSNRecoveryProxy {
 
-    public void trackMapping(long lsn, 
+    public void trackMapping(long lsn,
                              LogEntryHeader currentEntryHeader,
                              LogEntry logEntry);
 }

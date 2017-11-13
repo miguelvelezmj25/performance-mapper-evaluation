@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 /**
  * Delta file summary info for a tracked file.  Tracked files are managed by
  * the UtilizationTracker.
- *
+ * <p>
  * <p>The methods in this class for reading obsolete offsets may be used by
  * multiple threads without synchronization even while another thread is adding
  * offsets.  This is possible because elements are never deleted from the
@@ -81,7 +81,7 @@ public class TrackedFileSummary extends FileSummary {
     /**
      * Overrides reset for a tracked file, and is called when a FileSummaryLN
      * is written to the log.
-     *
+     * <p>
      * <p>Must be called under the log write latch.</p>
      */
     @Override
@@ -92,7 +92,7 @@ public class TrackedFileSummary extends FileSummary {
 
         tracker.resetFile(this);
 
-        if (memSize > 0) {
+        if(memSize > 0) {
             updateMemoryBudget(0 - memSize);
         }
 
@@ -101,26 +101,26 @@ public class TrackedFileSummary extends FileSummary {
 
     /**
      * Tracks the given offset as obsolete or non-obsolete.
-     *
+     * <p>
      * <p>Must be called under the log write latch.</p>
      */
     void trackObsolete(long offset, boolean checkDupOffsets) {
 
-        if (!trackDetail) {
+        if(!trackDetail) {
             return;
         }
 
         int adjustMem = 0;
-        if (obsoleteOffsets == null) {
+        if(obsoleteOffsets == null) {
             obsoleteOffsets = new OffsetList();
             adjustMem += MemoryBudget.TFS_LIST_INITIAL_OVERHEAD;
         }
 
-        if (obsoleteOffsets.add(offset, checkDupOffsets)) {
+        if(obsoleteOffsets.add(offset, checkDupOffsets)) {
             adjustMem += MemoryBudget.TFS_LIST_SEGMENT_OVERHEAD;
         }
 
-        if (adjustMem != 0) {
+        if(adjustMem != 0) {
             updateMemoryBudget(adjustMem);
         }
     }
@@ -140,15 +140,16 @@ public class TrackedFileSummary extends FileSummary {
          * segment when we merge them.
          */
         memSize += other.memSize;
-        if (other.obsoleteOffsets != null) {
-            if (obsoleteOffsets != null) {
+        if(other.obsoleteOffsets != null) {
+            if(obsoleteOffsets != null) {
                 /* Merge the other offsets into our list. */
-                if (obsoleteOffsets.merge(other.obsoleteOffsets)) {
+                if(obsoleteOffsets.merge(other.obsoleteOffsets)) {
                     /* There is one segment less as a result of the merge. */
                     updateMemoryBudget
-                        (- MemoryBudget.TFS_LIST_SEGMENT_OVERHEAD);
+                            (-MemoryBudget.TFS_LIST_SEGMENT_OVERHEAD);
                 }
-            } else {
+            }
+            else {
                 /* Adopt the other's offsets as our own. */
                 obsoleteOffsets = other.obsoleteOffsets;
             }
@@ -160,9 +161,10 @@ public class TrackedFileSummary extends FileSummary {
      */
     public long[] getObsoleteOffsets() {
 
-        if (obsoleteOffsets != null) {
+        if(obsoleteOffsets != null) {
             return obsoleteOffsets.toArray();
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -175,9 +177,10 @@ public class TrackedFileSummary extends FileSummary {
      */
     boolean containsObsoleteOffset(long offset) {
 
-        if (obsoleteOffsets != null) {
+        if(obsoleteOffsets != null) {
             return obsoleteOffsets.contains(offset);
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -194,7 +197,7 @@ public class TrackedFileSummary extends FileSummary {
      */
     void close() {
         assert tracker != null;
-        tracker.env.getMemoryBudget().updateAdminMemoryUsage(0-memSize);
+        tracker.env.getMemoryBudget().updateAdminMemoryUsage(0 - memSize);
         tracker = null;
         memSize = 0;
     }

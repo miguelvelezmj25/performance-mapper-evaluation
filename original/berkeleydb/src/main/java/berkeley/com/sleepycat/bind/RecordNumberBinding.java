@@ -18,15 +18,14 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 
 /**
  * <!-- begin JE only -->
- * @hidden
- * <!-- end JE only -->
- * An <code>EntryBinding</code> that treats a record number key entry as a
- * <code>Long</code> key object.
- *
- * <p>Record numbers are returned as <code>Long</code> objects, although on
- * input any <code>Number</code> object may be used.</p>
  *
  * @author Mark Hayes
+ * @hidden <!-- end JE only -->
+ * An <code>EntryBinding</code> that treats a record number key entry as a
+ * <code>Long</code> key object.
+ * <p>
+ * <p>Record numbers are returned as <code>Long</code> objects, although on
+ * input any <code>Number</code> object may be used.</p>
  */
 public class RecordNumberBinding implements EntryBinding {
 
@@ -36,24 +35,11 @@ public class RecordNumberBinding implements EntryBinding {
     public RecordNumberBinding() {
     }
 
-    // javadoc is inherited
-    public Long entryToObject(DatabaseEntry entry) {
-
-        return Long.valueOf(entryToRecordNumber(entry));
-    }
-
-    // javadoc is inherited
-    public void objectToEntry(Object object, DatabaseEntry entry) {
-
-        recordNumberToEntry(((Number) object).longValue(), entry);
-    }
-
     /**
      * Utility method for use by bindings to translate a entry buffer to an
      * record number integer.
      *
      * @param entry the entry buffer.
-     *
      * @return the record number.
      */
     public static long entryToRecordNumber(DatabaseEntry entry) {
@@ -66,12 +52,23 @@ public class RecordNumberBinding implements EntryBinding {
      * to a entry buffer.
      *
      * @param recordNumber the record number.
-     *
-     * @param entry the entry buffer to hold the record number.
+     * @param entry        the entry buffer to hold the record number.
      */
     public static void recordNumberToEntry(long recordNumber,
                                            DatabaseEntry entry) {
         entry.setData(new byte[4], 0, 4);
         DbCompat.setRecordNumber(entry, (int) recordNumber);
+    }
+
+    // javadoc is inherited
+    public Long entryToObject(DatabaseEntry entry) {
+
+        return Long.valueOf(entryToRecordNumber(entry));
+    }
+
+    // javadoc is inherited
+    public void objectToEntry(Object object, DatabaseEntry entry) {
+
+        recordNumberToEntry(((Number) object).longValue(), entry);
     }
 }

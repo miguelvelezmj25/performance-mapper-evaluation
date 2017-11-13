@@ -15,11 +15,10 @@ package berkeley.com.sleepycat.persist.evolve;
 
 /**
  * <!-- begin JE only -->
- * @hidden
- * <!-- end JE only -->
- * Internal access class that should not be used by applications.
  *
  * @author Mark Hayes
+ * @hidden <!-- end JE only -->
+ * Internal access class that should not be used by applications.
  */
 public class EvolveInternal {
 
@@ -35,10 +34,10 @@ public class EvolveInternal {
     /**
      * Internal access method that should not be used by applications.
      *
-     * @param event the EvolveEvent.
+     * @param event           the EvolveEvent.
      * @param entityClassName the class name.
-     * @param nRead the number read.
-     * @param nConverted the number converted.
+     * @param nRead           the number read.
+     * @param nConverted      the number converted.
      */
     public static void updateEvent(EvolveEvent event,
                                    String entityClassName,

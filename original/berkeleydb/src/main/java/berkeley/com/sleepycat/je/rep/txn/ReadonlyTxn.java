@@ -13,12 +13,7 @@
 
 package berkeley.com.sleepycat.je.rep.txn;
 
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.LockConflictException;
-import berkeley.com.sleepycat.je.LockNotAvailableException;
-import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
-import berkeley.com.sleepycat.je.ThreadInterruptedException;
-import berkeley.com.sleepycat.je.TransactionConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
@@ -33,16 +28,16 @@ import berkeley.com.sleepycat.je.txn.Txn;
 
 /**
  * A ReadonlyTxn represents
- *  - a user initiated Txn executed on the Master node, when local-write or
- *    read-only is configured, or
- *  - a user initiated Txn executed on the Replica node, whether or not
- *    local-write is configured, or
- *  - an auto-commit Txn on a Replica node for a replicated DB.
- *
+ * - a user initiated Txn executed on the Master node, when local-write or
+ * read-only is configured, or
+ * - a user initiated Txn executed on the Replica node, whether or not
+ * local-write is configured, or
+ * - an auto-commit Txn on a Replica node for a replicated DB.
+ * <p>
  * As its name implies it is used to implement the read-only semantics for
  * access to replicated DBs on the Replica. It is not replicated txn, i.e.,
  * it is not part of the rep stream.
- *
+ * <p>
  * In addition, it uses the transaction hooks defined on Txn to implement the
  * ReplicaConsistencyPolicy.  This must be done for all access to replicated
  * DBs, including when local-write is configured.
@@ -52,11 +47,35 @@ public class ReadonlyTxn extends Txn {
     private final boolean localWrite;
 
     public ReadonlyTxn(EnvironmentImpl envImpl, TransactionConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(envImpl, config, ReplicationContext.NO_REPLICATE);
 
         localWrite = config.getLocalWrite();
+    }
+
+    /**
+     * Utility method used here and by ReplicaThreadLocker.
+     */
+    static void checkConsistency(final RepImpl repImpl,
+                                 final ReplicaConsistencyPolicy policy) {
+        if(State.DETACHED.equals(repImpl.getState()) ||
+                State.MASTER.equals(repImpl.getState())) {
+            /* Detached state, permit read-only access to the environment. */
+            return;
+        }
+        assert (policy != null) : "Missing default consistency policy";
+        try {
+            policy.ensureConsistency(repImpl);
+        } catch(InterruptedException e) {
+            throw new ThreadInterruptedException(repImpl, e);
+        } catch(MasterStateException e) {
+            /*
+             * Transitioned to master, while waiting for consistency, so the
+             * txn is free to go ahead on the master.
+             */
+            return;
+        }
     }
 
     @Override
@@ -79,26 +98,26 @@ public class ReadonlyTxn extends Txn {
                                    boolean noWait,
                                    boolean jumpAheadOfWaiters,
                                    DatabaseImpl database)
-        throws LockNotAvailableException, LockConflictException,
-               DatabaseException {
+            throws LockNotAvailableException, LockConflictException,
+            DatabaseException {
 
-        if (lockType.isWriteLock() && !database.allowReplicaWrite()) {
+        if(lockType.isWriteLock() && !database.allowReplicaWrite()) {
             disallowReplicaWrite();
         }
         return super.lockInternal
-            (lsn, lockType, noWait, jumpAheadOfWaiters, database);
+                (lsn, lockType, noWait, jumpAheadOfWaiters, database);
     }
 
     /**
      * If logging occurs before locking, we must screen out write locks here.
-     *
+     * <p>
      * If we allow the operation (e.g., for a NameLN), then be sure to call the
      * base class method to prepare to undo in the (very unlikely) event that
      * logging succeeds but locking fails. [#22875]
      */
     @Override
     public void preLogWithoutLock(DatabaseImpl database) {
-        if (!database.allowReplicaWrite()) {
+        if(!database.allowReplicaWrite()) {
             disallowReplicaWrite();
         }
         super.preLogWithoutLock(database);
@@ -111,7 +130,7 @@ public class ReadonlyTxn extends Txn {
     @Override
     public void disallowReplicaWrite() {
         throw new ReplicaWriteException
-            (this, ((RepImpl) envImpl).getStateChangeEvent());
+                (this, ((RepImpl) envImpl).getStateChangeEvent());
     }
 
     /**
@@ -120,32 +139,8 @@ public class ReadonlyTxn extends Txn {
      */
     @Override
     protected void txnBeginHook(TransactionConfig config)
-        throws ReplicaConsistencyException, DatabaseException {
+            throws ReplicaConsistencyException, DatabaseException {
 
         checkConsistency((RepImpl) envImpl, config.getConsistencyPolicy());
-    }
-
-    /**
-     * Utility method used here and by ReplicaThreadLocker.
-     */
-    static void checkConsistency(final RepImpl repImpl,
-                                 final ReplicaConsistencyPolicy policy) {
-        if (State.DETACHED.equals(repImpl.getState()) ||
-            State.MASTER.equals(repImpl.getState())) {
-            /* Detached state, permit read-only access to the environment. */
-            return;
-        }
-        assert (policy != null) : "Missing default consistency policy";
-        try {
-            policy.ensureConsistency(repImpl);
-        } catch (InterruptedException e) {
-            throw new ThreadInterruptedException(repImpl, e);
-        } catch (MasterStateException e) {
-            /*
-             * Transitioned to master, while waiting for consistency, so the
-             * txn is free to go ahead on the master.
-             */
-            return;
-        }
     }
 }

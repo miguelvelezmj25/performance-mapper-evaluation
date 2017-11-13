@@ -29,7 +29,7 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * threads see data as it is changing but do not see inconsistent data (corrupt
  * longs) and do not require synchronization for thread safety.</li>
  * </ul>
- *
+ * <p>
  * <p>The algorithms here use traversal of the list segments rather than
  * recursion to avoid using a lot of stack space.</p>
  */
@@ -60,10 +60,10 @@ public class OffsetList {
 
         /* Each value added should be unique. */
         assert !checkDupOffsets ||
-               size > TOO_BIG_FOR_SELF_CHECK ||
-               !contains(value) :
-               LoggerUtils.getStackTrace
-                   (new Exception("Dup Offset " + Long.toHexString(value)));
+                size > TOO_BIG_FOR_SELF_CHECK ||
+                !contains(value) :
+                LoggerUtils.getStackTrace
+                        (new Exception("Dup Offset " + Long.toHexString(value)));
 
         /*
          * Do not increment the size until the value is added so that reader
@@ -86,17 +86,18 @@ public class OffsetList {
 
         boolean oneSegFreed = true;
         Segment seg = other.head;
-        while (true) {
+        while(true) {
             Segment next = seg.next();
-            if (next != null) {
+            if(next != null) {
                 /* Insert a full segment at the beginning of the list. */
                 seg.setNext(head);
                 head = seg;
                 seg = next;
-            } else {
+            }
+            else {
                 /* Copy the last segment and discard it. */
-                for (int i = 0; i < seg.size(); i += 1) {
-                    if (add(seg.get(i), false)) {
+                for(int i = 0; i < seg.size(); i += 1) {
+                    if(add(seg.get(i), false)) {
                         /* The two partial segments did not fit into one. */
                         oneSegFreed = false;
                     }
@@ -117,9 +118,10 @@ public class OffsetList {
         long[] a = new long[size];
         int next = 0;
 
-        segments: for (Segment seg = head; seg != null; seg = seg.next()) {
-            for (int i = 0; i < seg.size(); i += 1) {
-                if (next >= a.length) {
+        segments:
+        for(Segment seg = head; seg != null; seg = seg.next()) {
+            for(int i = 0; i < seg.size(); i += 1) {
+                if(next >= a.length) {
                     break segments;
                 }
                 a[next] = seg.get(i);
@@ -135,9 +137,9 @@ public class OffsetList {
      */
     boolean contains(long offset) {
 
-        for (Segment seg = head; seg != null; seg = seg.next()) {
-            for (int i = 0; i < seg.size(); i += 1) {
-                if (seg.get(i) == offset) {
+        for(Segment seg = head; seg != null; seg = seg.next()) {
+            for(int i = 0; i < seg.size(); i += 1) {
+                if(seg.get(i) == offset) {
                     return true;
                 }
             }
@@ -152,9 +154,9 @@ public class OffsetList {
      */
     public static class Segment {
 
+        private final int[] values;
         private int index;
         private Segment next;
-        private final int[] values;
 
         /* public for Sizeof. */
         public Segment() {
@@ -166,7 +168,7 @@ public class OffsetList {
          * allocating a new tail is necessary.
          */
         Segment add(long value) {
-            if (index < values.length) {
+            if(index < values.length) {
 
                 /*
                  * Increment index after adding the offset so that reader
@@ -175,7 +177,8 @@ public class OffsetList {
                 values[index] = (int) value;
                 index += 1;
                 return this;
-            } else {
+            }
+            else {
 
                 /*
                  * Add the value to the new segment before assigning the next

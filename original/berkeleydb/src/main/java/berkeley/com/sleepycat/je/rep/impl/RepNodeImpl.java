@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.io.Serializable;
-import java.net.InetSocketAddress;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.rep.NodeType;
@@ -27,50 +24,43 @@ import berkeley.com.sleepycat.je.rep.stream.Protocol;
 import berkeley.com.sleepycat.je.rep.utilint.HostPortPair;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.io.Serializable;
+import java.net.InetSocketAddress;
+
 /**
  * Describes a node that is a member of the replication group.
  */
 public class RepNodeImpl implements ReplicationNode, Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    private static final int NULL_CHANGE = -1;
     /* Identifies the node both by external name and internal node ID. */
     private final NameIdPair nameIdPair;
-
     /* The node type, electable, monitor, etc. */
     private final NodeType type;
-
     /*
      * True if the node was acknowledged by a quorum and its entry is therefore
      * considered durable.  SECONDARY and EXTERNAL nodes are always considered
      * acknowledged.
      */
     private boolean quorumAck;
-
     /*
      * True if the node has been removed and is no longer an active part of the
      * group
      */
     private boolean isRemoved;
-
     /* The hostname used for communications with the node. */
     private String hostName;
-
     /* The port used by a node. */
     private int port;
-
     /* The Cleaner Barrier state associated with the node. */
     private BarrierState barrierState;
-
     /*
      * This version is used in conjunction with the group level change
      * version to identify the incremental changes made to individual
      * changes made to a group.
      */
     private int changeVersion = NULL_CHANGE;
-
-    private static final int NULL_CHANGE = -1;
-
     /**
      * The JE version most recently noted running on this node, or null if not
      * known.
@@ -78,9 +68,7 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
     private volatile JEVersion jeVersion;
 
     /**
-     * @hidden
-     *
-     * Constructor used to de-serialize a Node. All other convenience
+     * @hidden Constructor used to de-serialize a Node. All other convenience
      * constructors funnel through this one so that argument checks can
      * be systematically enforced.
      */
@@ -94,19 +82,19 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
                        final int changeVersion,
                        final JEVersion jeVersion) {
 
-        if (nameIdPair.getName().equals(RepGroupDB.GROUP_KEY)) {
+        if(nameIdPair.getName().equals(RepGroupDB.GROUP_KEY)) {
             throw EnvironmentFailureException.unexpectedState
-            ("Member node ID is the reserved key value: " + nameIdPair);
+                    ("Member node ID is the reserved key value: " + nameIdPair);
         }
 
-        if (hostName == null) {
+        if(hostName == null) {
             throw EnvironmentFailureException.unexpectedState
-            ("The hostname argument must not be null");
+                    ("The hostname argument must not be null");
         }
 
-        if (type == null) {
+        if(type == null) {
             throw EnvironmentFailureException.unexpectedState
-            ("The nodeType argument must not be null");
+                    ("The nodeType argument must not be null");
         }
 
         this.nameIdPair = nameIdPair;
@@ -121,9 +109,7 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
     }
 
     /**
-     * @hidden
-     *
-     * Convenience constructor for the above.
+     * @hidden Convenience constructor for the above.
      */
     public RepNodeImpl(final NameIdPair nameIdPair,
                        final NodeType type,
@@ -134,13 +120,12 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
                        final int changeVersion,
                        final JEVersion jeVersion) {
         this(nameIdPair, type, quorumAck, isRemoved, hostName, port,
-             new BarrierState(VLSN.NULL_VLSN, System.currentTimeMillis()),
-             changeVersion, jeVersion);
+                new BarrierState(VLSN.NULL_VLSN, System.currentTimeMillis()),
+                changeVersion, jeVersion);
     }
 
     /**
-     * @hidden
-     * Convenience constructor for transient nodes
+     * @hidden Convenience constructor for transient nodes
      */
     public RepNodeImpl(final NameIdPair nameIdPair,
                        final NodeType type,
@@ -148,45 +133,40 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
                        final int port,
                        final JEVersion jeVersion) {
         this(nameIdPair, type, false, false, hostName, port, NULL_CHANGE,
-             jeVersion);
+                jeVersion);
     }
 
     /**
-     * @hidden
-     * Convenience constructor for transient nodes during unit tests.
+     * @hidden Convenience constructor for transient nodes during unit tests.
      */
     public RepNodeImpl(final ReplicationConfig repConfig) {
         this(new NameIdPair(repConfig.getNodeName(), NameIdPair.NULL_NODE_ID),
-             repConfig.getNodeType(),
-             repConfig.getNodeHostname(),
-             repConfig.getNodePort(),
-             JEVersion.CURRENT_VERSION);
+                repConfig.getNodeType(),
+                repConfig.getNodeHostname(),
+                repConfig.getNodePort(),
+                JEVersion.CURRENT_VERSION);
     }
 
     /**
-     * @hidden
-     *
-     * Convenience constructor for the above.
+     * @hidden Convenience constructor for the above.
      */
     public RepNodeImpl(final String nodeName,
                        final String hostName,
                        final int port,
                        final JEVersion jeVersion) {
         this(new NameIdPair(nodeName, NameIdPair.NULL.getId()),
-             NodeType.ELECTABLE, hostName, port, jeVersion);
+                NodeType.ELECTABLE, hostName, port, jeVersion);
     }
 
     /**
-     * @hidden
-     *
-     * Convenience constructor for the above.
+     * @hidden Convenience constructor for the above.
      */
     public RepNodeImpl(Protocol.NodeGroupInfo mi) {
         this(mi.getNameIdPair(),
-             mi.getNodeType(),
-             mi.getHostName(),
-             mi.port(),
-             mi.getJEVersion());
+                mi.getNodeType(),
+                mi.getHostName(),
+                mi.port(),
+                mi.getJEVersion());
     }
 
     /* (non-Javadoc)
@@ -206,18 +186,26 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
         return quorumAck;
     }
 
+    public void setQuorumAck(boolean quorumAck) {
+        this.quorumAck = quorumAck;
+    }
+
     public boolean isRemoved() {
         assert !(isRemoved && type.hasTransientId())
-            : "Nodes with transient IDs are never marked removed";
+                : "Nodes with transient IDs are never marked removed";
         return isRemoved;
     }
 
-    public void setChangeVersion(int changeVersion) {
-        this.changeVersion = changeVersion;
+    public void setRemoved(boolean isRemoved) {
+        this.isRemoved = isRemoved;
     }
 
     public int getChangeVersion() {
         return changeVersion;
+    }
+
+    public void setChangeVersion(int changeVersion) {
+        this.changeVersion = changeVersion;
     }
 
     public NameIdPair getNameIdPair() {
@@ -280,14 +268,6 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
         return this.barrierState = barrierState;
     }
 
-    public void setQuorumAck(boolean quorumAck) {
-        this.quorumAck = quorumAck;
-    }
-
-    public void setRemoved(boolean isRemoved) {
-        this.isRemoved = isRemoved;
-    }
-
     /**
      * Returns the JE Version most recently noted running on this node, or
      * {@code null} if not known.
@@ -303,7 +283,7 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
      * @param otherJEVersion the version or {@code null}
      */
     public void updateJEVersion(final JEVersion otherJEVersion) {
-        if (otherJEVersion != null) {
+        if(otherJEVersion != null) {
             jeVersion = otherJEVersion;
         }
     }
@@ -313,24 +293,24 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
 
         String acked = " (is member)";
 
-        if (!quorumAck) {
+        if(!quorumAck) {
             acked = " (not yet a durable member)";
         }
 
-        if (isRemoved) {
+        if(isRemoved) {
             acked = " (is removed)";
         }
 
         String info =
-            String.format("Node:%s %s:%d%s%s changeVersion:%d %s%s\n",
-                          getName(), getHostName(), getPort(),
-                          acked,
-                          (!type.isElectable() ? " " + type : ""),
-                          getChangeVersion(),
-                          barrierState,
-                          ((jeVersion != null) ?
-                           " jeVersion:" + jeVersion :
-                           ""));
+                String.format("Node:%s %s:%d%s%s changeVersion:%d %s%s\n",
+                        getName(), getHostName(), getPort(),
+                        acked,
+                        (!type.isElectable() ? " " + type : ""),
+                        getChangeVersion(),
+                        barrierState,
+                        ((jeVersion != null) ?
+                                " jeVersion:" + jeVersion :
+                                ""));
         return info;
 
     }
@@ -344,36 +324,36 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
      * (which can change over time).
      *
      * @param mi the other object in the comparison
-     *
      * @return true if the two are equivalent
      */
     public boolean equivalent(RepNodeImpl mi) {
-        if (this == mi) {
+        if(this == mi) {
             return true;
         }
 
-        if (mi == null) {
+        if(mi == null) {
             return false;
         }
 
-        if (port != mi.port) {
+        if(port != mi.port) {
             return false;
         }
 
-        if (hostName == null) {
-            if (mi.hostName != null) {
+        if(hostName == null) {
+            if(mi.hostName != null) {
                 return false;
             }
-        } else if (!hostName.equals(mi.hostName)) {
+        }
+        else if(!hostName.equals(mi.hostName)) {
             return false;
         }
 
         /* Ignore the id. */
-        if (!nameIdPair.getName().equals(mi.nameIdPair.getName())) {
+        if(!nameIdPair.getName().equals(mi.nameIdPair.getName())) {
             return false;
         }
 
-        if (getType() != mi.getType()) {
+        if(getType() != mi.getType()) {
             return false;
         }
 
@@ -395,46 +375,48 @@ public class RepNodeImpl implements ReplicationNode, Serializable {
         result = prime * result + port;
         result = prime * result + (isQuorumAck() ? 1231 : 1237);
         result = prime * result +
-            (jeVersion == null ? 0 : jeVersion.hashCode());
+                (jeVersion == null ? 0 : jeVersion.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (!(obj instanceof RepNodeImpl)) {
+        if(!(obj instanceof RepNodeImpl)) {
             return false;
         }
         final RepNodeImpl other = (RepNodeImpl) obj;
-        if (hostName == null) {
-            if (other.hostName != null) {
+        if(hostName == null) {
+            if(other.hostName != null) {
                 return false;
             }
-        } else if (!hostName.equals(other.hostName)) {
+        }
+        else if(!hostName.equals(other.hostName)) {
             return false;
         }
-        if (!nameIdPair.equals(other.nameIdPair)) {
+        if(!nameIdPair.equals(other.nameIdPair)) {
             return false;
         }
-        if (getType() != other.getType()) {
+        if(getType() != other.getType()) {
             return false;
         }
-        if (port != other.port) {
+        if(port != other.port) {
             return false;
         }
-        if (isQuorumAck() != other.isQuorumAck()) {
+        if(isQuorumAck() != other.isQuorumAck()) {
             return false;
         }
-        if (jeVersion == null) {
-            if (other.jeVersion != null) {
+        if(jeVersion == null) {
+            if(other.jeVersion != null) {
                 return false;
             }
-        } else if (!jeVersion.equals(other.getJEVersion())) {
+        }
+        else if(!jeVersion.equals(other.getJEVersion())) {
             return false;
         }
         return true;

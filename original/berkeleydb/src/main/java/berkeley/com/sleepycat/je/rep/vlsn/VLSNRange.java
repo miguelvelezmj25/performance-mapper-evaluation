@@ -13,32 +13,26 @@
 
 package berkeley.com.sleepycat.je.rep.vlsn;
 
-import static berkeley.com.sleepycat.je.utilint.VLSN.NULL_VLSN;
-
 import berkeley.com.sleepycat.bind.tuple.LongBinding;
 import berkeley.com.sleepycat.bind.tuple.TupleBinding;
 import berkeley.com.sleepycat.bind.tuple.TupleInput;
 import berkeley.com.sleepycat.bind.tuple.TupleOutput;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.txn.Txn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import static berkeley.com.sleepycat.je.utilint.VLSN.NULL_VLSN;
+
 public class VLSNRange {
 
-    /* On-disk version. */
-    private static final int VERSION = 1;
     public static final long RANGE_KEY = -1L;
     static final VLSNRange EMPTY = new VLSNRange(NULL_VLSN, NULL_VLSN,
-                                                 NULL_VLSN, NULL_VLSN);
-
+            NULL_VLSN, NULL_VLSN);
+    /* On-disk version. */
+    private static final int VERSION = 1;
     /*
      * Information about the range of contiguous VLSN entries on this node.
      * All the range values must be viewed together, to ensure a consistent set
@@ -66,10 +60,18 @@ public class VLSNRange {
         this.lastTxnEnd = lastTxnEnd;
     }
 
+    public static VLSNRange readFromDatabase(DatabaseEntry data) {
+        VLSNRangeBinding binding = new VLSNRangeBinding();
+        VLSNRange range = binding.entryToObject(data);
+
+        return range;
+    }
+
     /**
      * When the range is written out by the VLSNTracker, we must always be sure
-     * to update the tracker's lastVSLNOnDisk field. Return the last VLSN in 
+     * to update the tracker's lastVSLNOnDisk field. Return the last VLSN in
      * the range as part of this method, to help ensure that update.
+     *
      * @param envImpl
      * @param dbImpl
      * @param txn
@@ -87,29 +89,22 @@ public class VLSNRange {
 
         Cursor c = null;
         try {
-            c = DbInternal.makeCursor(dbImpl, 
-                                      txn,
-                                      CursorConfig.DEFAULT);
+            c = DbInternal.makeCursor(dbImpl,
+                    txn,
+                    CursorConfig.DEFAULT);
             DbInternal.getCursorImpl(c).setAllowEviction(false);
 
             OperationStatus status = c.put(key, data);
-            if (status != OperationStatus.SUCCESS) {
+            if(status != OperationStatus.SUCCESS) {
                 throw EnvironmentFailureException.unexpectedState
-                    (envImpl, "Unable to write VLSNRange, status = " + status);
+                        (envImpl, "Unable to write VLSNRange, status = " + status);
             }
         } finally {
-            if (c != null) {
+            if(c != null) {
                 c.close();
             }
         }
         return last;
-    }
-
-    public static VLSNRange readFromDatabase(DatabaseEntry data) {
-        VLSNRangeBinding binding = new VLSNRangeBinding();
-        VLSNRange range = binding.entryToObject(data);
-
-        return range;
     }
 
     public VLSN getFirst() {
@@ -139,11 +134,11 @@ public class VLSNRange {
      * @return true if this VLSN is within the range described by this class.
      */
     public boolean contains(final VLSN vlsn) {
-        if (first.equals(NULL_VLSN)) {
+        if(first.equals(NULL_VLSN)) {
             return false;
         }
 
-        if ((first.compareTo(vlsn) <= 0) && (last.compareTo(vlsn) >= 0)) {
+        if((first.compareTo(vlsn) <= 0) && (last.compareTo(vlsn) >= 0)) {
             return true;
         }
 
@@ -161,22 +156,22 @@ public class VLSNRange {
         VLSN newLastSync = lastSync;
         VLSN newLastTxnEnd = lastTxnEnd;
 
-        if (first.equals(NULL_VLSN) || first.compareTo(newValue) > 0) {
+        if(first.equals(NULL_VLSN) || first.compareTo(newValue) > 0) {
             newFirst = newValue;
         }
 
-        if (last.compareTo(newValue) < 0) {
+        if(last.compareTo(newValue) < 0) {
             newLast = newValue;
         }
 
-        if (LogEntryType.isSyncPoint(entryTypeNum)) {
-            if (lastSync.compareTo(newValue) < 0) {
+        if(LogEntryType.isSyncPoint(entryTypeNum)) {
+            if(lastSync.compareTo(newValue) < 0) {
                 newLastSync = newValue;
             }
         }
 
-        if ((entryTypeNum == commitType) || (entryTypeNum == abortType)) {
-            if (lastTxnEnd.compareTo(newValue) < 0) {
+        if((entryTypeNum == commitType) || (entryTypeNum == abortType)) {
+            if(lastTxnEnd.compareTo(newValue) < 0) {
                 newLastTxnEnd = newValue;
             }
         }
@@ -189,15 +184,15 @@ public class VLSNRange {
      */
     VLSNRange getUpdate(final VLSNRange other) {
         VLSN newFirst = getComparison(first, other.first,
-                                      other.first.compareTo(first) < 0);
+                other.first.compareTo(first) < 0);
         VLSN newLast = getComparison(last, other.last,
-                                     other.last.compareTo(last) > 0);
+                other.last.compareTo(last) > 0);
         VLSN newLastSync =
-            getComparison(lastSync, other.lastSync,
-                          other.lastSync.compareTo(lastSync) > 0);
+                getComparison(lastSync, other.lastSync,
+                        other.lastSync.compareTo(lastSync) > 0);
         VLSN newLastTxnEnd =
-            getComparison(lastTxnEnd, other.lastTxnEnd,
-                          other.lastTxnEnd.compareTo(lastTxnEnd) > 0);
+                getComparison(lastTxnEnd, other.lastTxnEnd,
+                        other.lastTxnEnd.compareTo(lastTxnEnd) > 0);
         return new VLSNRange(newFirst, newLast, newLastSync, newLastTxnEnd);
     }
 
@@ -221,10 +216,10 @@ public class VLSNRange {
         VLSN newLast = deleteStart.getPrev();
 
         assert newLast.compareTo(lastTxnEnd) >= 0 :
-        "Can't truncate at " + newLast +
-            " because it overwrites a commit at " +  lastTxnEnd;
+                "Can't truncate at " + newLast +
+                        " because it overwrites a commit at " + lastTxnEnd;
 
-        if (newLast.equals(NULL_VLSN)) {
+        if(newLast.equals(NULL_VLSN)) {
             return new VLSNRange(NULL_VLSN, NULL_VLSN, NULL_VLSN, NULL_VLSN);
         }
         return new VLSNRange(first, newLast, newLast, lastTxnEnd);
@@ -238,19 +233,20 @@ public class VLSNRange {
 
         VLSN newFirst = null;
         VLSN newLast = last;
-        if (deleteEnd.compareTo(last) == 0) {
+        if(deleteEnd.compareTo(last) == 0) {
             newFirst = NULL_VLSN;
             newLast = NULL_VLSN;
-        } else {
+        }
+        else {
             newFirst = deleteEnd.getNext();
         }
 
         assert (lastSync.equals(NULL_VLSN) ||
-                lastSync.compareTo(newFirst) >= 0 ) :
-            "Can't truncate lastSync= " + lastSync + " deleteEnd=" + deleteEnd;
+                lastSync.compareTo(newFirst) >= 0) :
+                "Can't truncate lastSync= " + lastSync + " deleteEnd=" + deleteEnd;
 
         VLSN newTxnEnd = lastTxnEnd.compareTo(newFirst) > 0 ?
-            lastTxnEnd : NULL_VLSN;
+                lastTxnEnd : NULL_VLSN;
 
         return new VLSNRange(newFirst, newLast, lastSync, newTxnEnd);
     }
@@ -264,15 +260,15 @@ public class VLSNRange {
     private VLSN getComparison(final VLSN thisVLSN,
                                final VLSN otherVLSN,
                                final boolean better) {
-        if (thisVLSN.equals(NULL_VLSN)) {
+        if(thisVLSN.equals(NULL_VLSN)) {
             return otherVLSN;
         }
 
-        if (otherVLSN.equals(NULL_VLSN)) {
+        if(otherVLSN.equals(NULL_VLSN)) {
             return thisVLSN;
         }
 
-        if (better) {
+        if(better) {
             return otherVLSN;
         }
 
@@ -293,73 +289,38 @@ public class VLSNRange {
         return sb.toString();
     }
 
-    /**
-     * Marshals a VLSNRange to a byte buffer to store in the database.
-     */
-    static class VLSNRangeBinding extends TupleBinding<VLSNRange> {
-
-        @Override
-        public VLSNRange entryToObject(final TupleInput ti) {
-            int onDiskVersion = ti.readPackedInt();
-            if (onDiskVersion != VERSION) {
-                throw EnvironmentFailureException.unexpectedState
-                    ("Don't expect version diff " +
-                     "on_disk=" + onDiskVersion +
-                     " source=" +
-                     VERSION);
-            }
-
-            VLSNRange range =
-                new VLSNRange(new VLSN(ti.readPackedLong()), // first
-                              new VLSN(ti.readPackedLong()), // last
-                              new VLSN(ti.readPackedLong()), // lastSync
-                              new VLSN(ti.readPackedLong())); // lastTxnEnd
-            return range;
-        }
-
-        @Override
-        public void objectToEntry(final VLSNRange range,
-                                  final TupleOutput to) {
-            /* No need to store the file number -- that's the key */
-            to.writePackedInt(VERSION);
-            to.writePackedLong(range.getFirst().getSequence());
-            to.writePackedLong(range.getLast().getSequence());
-            to.writePackedLong(range.getLastSync().getSequence());
-            to.writePackedLong(range.getLastTxnEnd().getSequence());
-        }
-    }
-
     boolean verify(final boolean verbose) {
-        if (first.equals(NULL_VLSN)) {
-            if (!(last.equals(NULL_VLSN) &&
-                  (lastSync.equals(NULL_VLSN)) &&
-                  (lastTxnEnd.equals(NULL_VLSN)))) {
-                if (verbose) {
+        if(first.equals(NULL_VLSN)) {
+            if(!(last.equals(NULL_VLSN) &&
+                    (lastSync.equals(NULL_VLSN)) &&
+                    (lastTxnEnd.equals(NULL_VLSN)))) {
+                if(verbose) {
                     System.out.println("Range: All need to be NULL_VLSN " +
-                                       this);
+                            this);
                 }
                 return false;
             }
-        } else {
-            if (first.compareTo(last) > 0) {
-                if (verbose) {
+        }
+        else {
+            if(first.compareTo(last) > 0) {
+                if(verbose) {
                     System.out.println("Range: first > last " + this);
                 }
                 return false;
             }
 
-            if (!lastSync.equals(NULL_VLSN)) {
-                if (lastSync.compareTo(last) > 0) {
-                    if (verbose) {
+            if(!lastSync.equals(NULL_VLSN)) {
+                if(lastSync.compareTo(last) > 0) {
+                    if(verbose) {
                         System.out.println("Range: lastSync > last " + this);
                     }
                     return false;
                 }
             }
 
-            if (!lastTxnEnd.equals(NULL_VLSN)) {
-                if (lastTxnEnd.compareTo(last) > 0) {
-                    if (verbose) {
+            if(!lastTxnEnd.equals(NULL_VLSN)) {
+                if(lastTxnEnd.compareTo(last) > 0) {
+                    if(verbose) {
                         System.out.println("Range: lastTxnEnd > last " + this);
                     }
                     return false;
@@ -373,36 +334,72 @@ public class VLSNRange {
      * @return true if subsetRange is a subset of this range.
      */
     boolean verifySubset(final boolean verbose, final VLSNRange subsetRange) {
-        if (subsetRange == null) {
+        if(subsetRange == null) {
             return true;
         }
 
-        if ((subsetRange.getFirst().equals(NULL_VLSN)) &&
-            (subsetRange.getLast().equals(NULL_VLSN)) &&
-            (subsetRange.getLastSync().equals(NULL_VLSN)) &&
-            (subsetRange.getLastTxnEnd().equals(NULL_VLSN))) {
+        if((subsetRange.getFirst().equals(NULL_VLSN)) &&
+                (subsetRange.getLast().equals(NULL_VLSN)) &&
+                (subsetRange.getLastSync().equals(NULL_VLSN)) &&
+                (subsetRange.getLastTxnEnd().equals(NULL_VLSN))) {
             return true;
         }
-    
-        if (first.compareTo(subsetRange.getFirst()) >  0) {
-            if (verbose) {
+
+        if(first.compareTo(subsetRange.getFirst()) > 0) {
+            if(verbose) {
                 System.out.println("Range: subset must be LTE: this=" + this +
-                                   " subset=" + subsetRange);
+                        " subset=" + subsetRange);
             }
             return false;
         }
 
-        if (first.equals(NULL_VLSN)) {
+        if(first.equals(NULL_VLSN)) {
             return true;
         }
 
-        if (last.compareTo(subsetRange.getLast()) < 0) {
-            if (verbose) {
+        if(last.compareTo(subsetRange.getLast()) < 0) {
+            if(verbose) {
                 System.out.println("Range: last must be GTE: this=" + this +
-                                   " subsetRange=" + subsetRange);
+                        " subsetRange=" + subsetRange);
             }
             return false;
         }
         return true;
+    }
+
+    /**
+     * Marshals a VLSNRange to a byte buffer to store in the database.
+     */
+    static class VLSNRangeBinding extends TupleBinding<VLSNRange> {
+
+        @Override
+        public VLSNRange entryToObject(final TupleInput ti) {
+            int onDiskVersion = ti.readPackedInt();
+            if(onDiskVersion != VERSION) {
+                throw EnvironmentFailureException.unexpectedState
+                        ("Don't expect version diff " +
+                                "on_disk=" + onDiskVersion +
+                                " source=" +
+                                VERSION);
+            }
+
+            VLSNRange range =
+                    new VLSNRange(new VLSN(ti.readPackedLong()), // first
+                            new VLSN(ti.readPackedLong()), // last
+                            new VLSN(ti.readPackedLong()), // lastSync
+                            new VLSN(ti.readPackedLong())); // lastTxnEnd
+            return range;
+        }
+
+        @Override
+        public void objectToEntry(final VLSNRange range,
+                                  final TupleOutput to) {
+            /* No need to store the file number -- that's the key */
+            to.writePackedInt(VERSION);
+            to.writePackedLong(range.getFirst().getSequence());
+            to.writePackedLong(range.getLast().getSequence());
+            to.writePackedLong(range.getLastSync().getSequence());
+            to.writePackedLong(range.getLastTxnEnd().getSequence());
+        }
     }
 }

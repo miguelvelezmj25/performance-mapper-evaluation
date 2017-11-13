@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a <code>Long</code> primitive
  * wrapper or a <code>long</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class LongBinding extends TupleBinding<Long> {
 
     private static final int LONG_SIZE = 8;
 
+    /**
+     * Converts an entry buffer into a simple <code>long</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static long entryToLong(DatabaseEntry entry) {
+
+        return entryToInput(entry).readLong();
+    }
+
+    /**
+     * Converts a simple <code>long</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void longToEntry(long val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeLong(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[LONG_SIZE]);
+    }
+
     // javadoc is inherited
     public Long entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class LongBinding extends TupleBinding<Long> {
     protected TupleOutput getTupleOutput(Long object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>long</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static long entryToLong(DatabaseEntry entry) {
-
-        return entryToInput(entry).readLong();
-    }
-
-    /**
-     * Converts a simple <code>long</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void longToEntry(long val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeLong(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[LONG_SIZE]);
     }
 }

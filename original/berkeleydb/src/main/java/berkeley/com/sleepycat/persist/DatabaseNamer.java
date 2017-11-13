@@ -13,22 +13,22 @@
 
 package berkeley.com.sleepycat.persist;
 
-import berkeley.com.sleepycat.je.Database; // for javadoc
+import berkeley.com.sleepycat.je.Database;
 
 /**
  * <!-- begin JE only -->
- * @hidden
- * <!-- end JE only -->
- * Determines the file names to use for primary and secondary databases.
  *
+ * @hidden <!-- end JE only -->
+ * Determines the file names to use for primary and secondary databases.
+ * <p>
  * <p>Each {@link PrimaryIndex} and {@link SecondaryIndex} is represented
  * internally as a Berkeley DB {@link Database}.  The file names of primary and
  * secondary indices must be unique within the environment, so that each index
  * is stored in a separate database file.</p>
- *
+ * <p>
  * <p>By default, the file names of primary and secondary databases are
  * defined as follows.</p>
- *
+ * <p>
  * <p>The syntax of a primary index database file name is:</p>
  * <pre>   STORE_NAME-ENTITY_CLASS</pre>
  * <p>Where STORE_NAME is the name parameter passed to {@link
@@ -72,35 +72,17 @@ import berkeley.com.sleepycat.je.Database; // for javadoc
 public interface DatabaseNamer {
 
     /**
-     * Returns the name of the file to be used to store the dataabase for the
-     * given store, entity class and key.  This method may not return null.
-     *
-     * @param storeName the name of the {@link EntityStore}.
-     *
-     * @param entityClassName the complete name of the entity class for a
-     * primary or secondary index.
-     *
-     * @param keyName the key name identifying a secondary index, or null for
-     * a primary index.
-     *
-     * @return the file name.
-     */
-    public String getFileName(String storeName,
-                              String entityClassName,
-                              String keyName);
-
-    /**
      * The default database namer.
-     *
+     * <p>
      * <p>The {@link #getFileName getFileName} method of this namer returns the
      * {@code storeName}, {@code entityClassName} and {@code keyName}
      * parameters as follows:</p>
-     *
+     * <p>
      * <pre class="code">
      * if (keyName != null) {
-     *     return storeName + '-' + entityClassName + '-' + keyName;
+     * return storeName + '-' + entityClassName + '-' + keyName;
      * } else {
-     *     return storeName + '-' + entityClassName;
+     * return storeName + '-' + entityClassName;
      * }</pre>
      */
     public static final DatabaseNamer DEFAULT = new DatabaseNamer() {
@@ -108,11 +90,27 @@ public interface DatabaseNamer {
         public String getFileName(String storeName,
                                   String entityClassName,
                                   String keyName) {
-            if (keyName != null) {
+            if(keyName != null) {
                 return storeName + '-' + entityClassName + '-' + keyName;
-            } else {
+            }
+            else {
                 return storeName + '-' + entityClassName;
             }
         }
     };
+
+    /**
+     * Returns the name of the file to be used to store the dataabase for the
+     * given store, entity class and key.  This method may not return null.
+     *
+     * @param storeName       the name of the {@link EntityStore}.
+     * @param entityClassName the complete name of the entity class for a
+     *                        primary or secondary index.
+     * @param keyName         the key name identifying a secondary index, or null for
+     *                        a primary index.
+     * @return the file name.
+     */
+    public String getFileName(String storeName,
+                              String entityClassName,
+                              String keyName);
 }

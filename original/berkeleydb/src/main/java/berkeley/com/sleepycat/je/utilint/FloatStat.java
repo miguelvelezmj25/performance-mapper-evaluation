@@ -50,7 +50,7 @@ public class FloatStat extends Stat<Float> {
     @Override
     public Stat<Float> computeInterval(Stat<Float> base) {
         Stat<Float> ret = copy();
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
             ret.set(get() - base.get());
         }
         return ret;

@@ -12,10 +12,10 @@
  */
 package berkeley.com.sleepycat.je.rep;
 
-import java.io.Serializable;
-
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment.State;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+
+import java.io.Serializable;
 
 /**
  * Communicates the {@link ReplicatedEnvironment.State state} change at a node
@@ -27,6 +27,7 @@ import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
  * {@link StateChangeException} has a method called {@link
  * StateChangeException#getEvent()} that can be used to associate an event with
  * an exception.
+ *
  * @see StateChangeListener
  */
 public class StateChangeEvent implements Serializable {
@@ -39,18 +40,16 @@ public class StateChangeEvent implements Serializable {
     final private long eventTime = System.currentTimeMillis();
 
     /**
-     * @hidden
-     * For internal use only.
+     * @param state        the new state
+     * @param masterNameId the new master or <code>NULL</code> if there isn't
+     *                     one.
+     * @hidden For internal use only.
      * Creates a StateChangeEvent identifying the new state and the new master
      * if there is a master in the new state.
-     *
-     * @param state the new state
-     * @param masterNameId the new master or <code>NULL</code> if there isn't
-     * one.
      */
     public StateChangeEvent(State state, NameIdPair masterNameId) {
-        assert((masterNameId.getId() == NameIdPair.NULL_NODE_ID) ||
-               ((state == State.MASTER) || (state == State.REPLICA))):
+        assert ((masterNameId.getId() == NameIdPair.NULL_NODE_ID) ||
+                ((state == State.MASTER) || (state == State.REPLICA))) :
                 "state=" + state + " masterId=" + masterNameId.getId();
         this.state = state;
         this.masterNameId = masterNameId;
@@ -79,16 +78,15 @@ public class StateChangeEvent implements Serializable {
      * Returns the node name identifying the master at the time of the event.
      *
      * @return the master node name
-     *
      * @throws IllegalStateException if the node is in the
-     *  <code>DETACHED</code> or <code>UNKNOWN</code> state.
+     *                               <code>DETACHED</code> or <code>UNKNOWN</code> state.
      */
     public String getMasterNodeName()
-        throws IllegalStateException {
-        if ((state == State.MASTER) || (state == State.REPLICA)) {
+            throws IllegalStateException {
+        if((state == State.MASTER) || (state == State.REPLICA)) {
             return masterNameId.getName();
         }
         throw new IllegalStateException("No current master in state: " +
-                                        state);
+                state);
     }
 }

@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 /**
  * A concrete <code>TupleBinding</code> that delegates to the
  * <code>MarshalledTupleEntry</code> interface of the data or key object.
- *
+ * <p>
  * <p>This class works by calling the methods of the {@link
  * MarshalledTupleEntry} interface, which must be implemented by the key or
  * data class, to convert between the key or data entry and the object.</p>
@@ -26,13 +26,13 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class TupleMarshalledBinding<E extends MarshalledTupleEntry>
-    extends TupleBinding<E> {
+        extends TupleBinding<E> {
 
     private Class<E> cls;
 
     /**
      * Creates a tuple marshalled binding object.
-     *
+     * <p>
      * <p>The given class is used to instantiate key or data objects using
      * {@link Class#newInstance}, and therefore must be a public class and have
      * a public no-arguments constructor.  It must also implement the {@link
@@ -45,9 +45,9 @@ public class TupleMarshalledBinding<E extends MarshalledTupleEntry>
         this.cls = cls;
 
         /* The class will be used to instantiate the object.  */
-        if (!MarshalledTupleEntry.class.isAssignableFrom(cls)) {
+        if(!MarshalledTupleEntry.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException
-                (cls.toString() + " does not implement MarshalledTupleEntry");
+                    (cls.toString() + " does not implement MarshalledTupleEntry");
         }
     }
 
@@ -58,9 +58,9 @@ public class TupleMarshalledBinding<E extends MarshalledTupleEntry>
             E obj = cls.newInstance();
             obj.unmarshalEntry(input);
             return obj;
-        } catch (IllegalAccessException e) {
+        } catch(IllegalAccessException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
-        } catch (InstantiationException e) {
+        } catch(InstantiationException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
     }

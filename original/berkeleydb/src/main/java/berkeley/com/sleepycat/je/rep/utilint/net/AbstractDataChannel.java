@@ -14,6 +14,7 @@
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
+
 import java.nio.channels.SocketChannel;
 
 /**
@@ -30,9 +31,10 @@ abstract public class AbstractDataChannel implements DataChannel {
 
     /**
      * Constructor for sub-classes.
+     *
      * @param socketChannel The underlying SocketChannel over which data will
-     *        be sent.  This should be the lowest-level socket so that select
-     *        operations can be performed on it.
+     *                      be sent.  This should be the lowest-level socket so that select
+     *                      operations can be performed on it.
      */
     protected AbstractDataChannel(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;

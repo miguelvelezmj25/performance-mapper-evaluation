@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Mark Hayes
  */
 public class IOExceptionWrapper
-    extends IOException implements ExceptionWrapper {
+        extends IOException implements ExceptionWrapper {
 
     private static final long serialVersionUID = 753416466L;
 

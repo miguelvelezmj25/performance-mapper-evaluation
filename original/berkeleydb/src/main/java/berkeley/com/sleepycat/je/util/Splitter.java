@@ -21,20 +21,19 @@ import java.util.List;
  * Support includes double quoted strings, and the escape character.
  * Raw tokens are returned that include the double quotes, white space,
  * and escape characters.
- *
  */
 public class Splitter {
     private static final char QUOTECHAR = '"';
     private static final char ESCAPECHAR = '\\';
     private final char delimiter;
     private final List<String> tokens = new ArrayList<String>();
-    private enum StateType {COLLECT, COLLECTANY, QUOTE};
     private StateType prevState;
+
+    ;
     private StateType state;
     private int startIndex;
     private int curIndex;
     private String row;
-
     public Splitter(char delimiter) {
         this.delimiter = delimiter;
     }
@@ -45,18 +44,20 @@ public class Splitter {
         tokens.clear();
         startIndex = 0;
         curIndex = 0;
-        for (int cur = 0; cur < row.length(); cur++) {
+        for(int cur = 0; cur < row.length(); cur++) {
             char c = row.charAt(cur);
-            switch (state) {
-                case COLLECT :
-                    if (isDelimiter(c)) {
+            switch(state) {
+                case COLLECT:
+                    if(isDelimiter(c)) {
                         outputToken();
                         startIndex = cur + 1;
                         curIndex = startIndex;
-                    } else {
-                        if (isQuote(c) && isQuoteState()) {
+                    }
+                    else {
+                        if(isQuote(c) && isQuoteState()) {
                             state = StateType.QUOTE;
-                        } else if (isEscape(c)) {
+                        }
+                        else if(isEscape(c)) {
                             prevState = state;
                             state = StateType.COLLECTANY;
                         }
@@ -68,10 +69,11 @@ public class Splitter {
                     state = prevState;
                     break;
                 case QUOTE:
-                    if (isEscape(c)) {
+                    if(isEscape(c)) {
                         prevState = state;
                         state = StateType.COLLECTANY;
-                    } else if (isQuote(c)) {
+                    }
+                    else if(isQuote(c)) {
                         state = StateType.COLLECT;
                     }
                     curIndex++;
@@ -97,19 +99,22 @@ public class Splitter {
     }
 
     private void outputToken() {
-        if (startIndex < curIndex) {
+        if(startIndex < curIndex) {
             tokens.add(row.substring(startIndex, curIndex));
-        } else {
+        }
+        else {
             tokens.add("");
         }
     }
 
     private boolean isQuoteState() {
-        for (int i = startIndex; i < curIndex; i++) {
-            if (!Character.isWhitespace(row.charAt(i))) {
+        for(int i = startIndex; i < curIndex; i++) {
+            if(!Character.isWhitespace(row.charAt(i))) {
                 return false;
             }
         }
         return true;
     }
+
+    private enum StateType {COLLECT, COLLECTANY, QUOTE}
 }

@@ -80,7 +80,7 @@ public class Sample {
         try {
             sample = new Sample(homeDir);
             sample.run();
-        } catch (Exception e) {
+        } catch(Exception e) {
             // If an exception reaches this point, the last transaction did not
             // complete.  If the exception is RunRecoveryException, follow
             // the Berkeley DB recovery procedures before running again.
@@ -90,7 +90,7 @@ public class Sample {
                 try {
                     // Always attempt to close the database cleanly.
                     sample.close();
-                } catch (Exception e) {
+                } catch(Exception e) {
                     System.err.println("Exception during database close:");
                     e.printStackTrace();
                 }
@@ -192,7 +192,7 @@ public class Sample {
     private void printValues(String label, Iterator iterator) {
 
         System.out.println("\n--- " + label + " ---");
-        while (iterator.hasNext()) {
+        while(iterator.hasNext()) {
             System.out.println(iterator.next().toString());
         }
     }

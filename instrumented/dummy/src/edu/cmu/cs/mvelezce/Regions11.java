@@ -3,9 +3,6 @@ package edu.cmu.cs.mvelezce;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
-/**
- * Remove regions. 3 regions are left
- */
 public class Regions11 {
 
     static boolean A;
@@ -20,11 +17,11 @@ public class Regions11 {
         boolean a = false;
         boolean b = false;
 
-        if(A) { // A
+        if(A) {
             a = true;
         }
 
-        if(B) { // B
+        if(B) {
             b = true;
         }
 
@@ -32,13 +29,13 @@ public class Regions11 {
     }
 
     public static void foo(boolean x, boolean y) {
-        if(x) { // A
+        if(x) {
             boo(y);
         }
     }
 
     public static void boo(boolean decision) {
-        if(decision) { // AB
+        if(decision) {
             System.out.println();
         }
     }

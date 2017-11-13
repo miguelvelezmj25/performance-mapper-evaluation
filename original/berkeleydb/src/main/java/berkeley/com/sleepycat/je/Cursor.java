@@ -13,25 +13,9 @@
 
 package berkeley.com.sleepycat.je;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.dbi.CursorImpl.LockStanding;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DupKeyData;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.ExpirationInfo;
-import berkeley.com.sleepycat.je.dbi.GetMode;
-import berkeley.com.sleepycat.je.dbi.PutMode;
-import berkeley.com.sleepycat.je.dbi.RangeConstraint;
-import berkeley.com.sleepycat.je.dbi.RangeRestartException;
-import berkeley.com.sleepycat.je.dbi.SearchMode;
-import berkeley.com.sleepycat.je.dbi.TTL;
-import berkeley.com.sleepycat.je.dbi.TriggerManager;
 import berkeley.com.sleepycat.je.latch.LatchSupport;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
@@ -46,65 +30,70 @@ import berkeley.com.sleepycat.je.txn.LockerFactory;
 import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * A database cursor. Cursors are used for operating on collections of records,
  * for iterating over a database, and for saving handles to individual records,
  * so that they can be modified after they have been read.
- *
+ * <p>
  * <p>Cursors which are opened with a transaction instance are transactional
  * cursors and may be used by multiple threads, but only serially.  That is,
  * the application must serialize access to the handle. Non-transactional
  * cursors, opened with a null transaction instance, may not be used by
  * multiple threads.</p>
- *
+ * <p>
  * <p>If the cursor is to be used to perform operations on behalf of a
  * transaction, the cursor must be opened and closed within the context of that
  * single transaction.</p>
- *
+ * <p>
  * <p>Once the cursor {@link #close} method has been called, the handle may not
  * be accessed again, regardless of the {@code close} method's success or
  * failure, with one exception:  the {@code close} method itself may be called
  * any number of times to simplify error handling.</p>
- *
+ * <p>
  * <p>To obtain a cursor with default attributes:</p>
- *
+ * <p>
  * <blockquote><pre>
  *     Cursor cursor = myDatabase.openCursor(txn, null);
  * </pre></blockquote>
- *
+ * <p>
  * <p>To customize the attributes of a cursor, use a CursorConfig object.</p>
- *
+ * <p>
  * <blockquote><pre>
  *     CursorConfig config = new CursorConfig();
  *     config.setReadUncommitted(true);
  *     Cursor cursor = myDatabase.openCursor(txn, config);
  * </pre></blockquote>
- *
+ * <p>
  * <p>Modifications to the database during a sequential scan will be reflected
  * in the scan; that is, records inserted behind a cursor will not be returned
  * while records inserted in front of a cursor will be returned.</p>
- *
+ * <p>
  * <p>By default, a cursor is "sticky", meaning that the prior position is
  * maintained by cursor movement operations, and the cursor stays at the
  * prior position when the operation does not succeed. However, it is possible
  * to configure a cursor as non-sticky to enable certain performance benefits.
  * See {@link CursorConfig#setNonSticky} for details.</p>
- *
+ * <p>
  * <h3><a name="partialEntry">Using Null and Partial DatabaseEntry
  * Parameters</a></h3>
- *
+ * <p>
  * <p>Null can be passed for DatabaseEntry output parameters if the value is
  * not needed. The {@link DatabaseEntry#setPartial DatabaseEntry Partial}
  * property can also be used to optimize in certain cases. These provide
  * varying degrees of performance benefits that depend on the specific
  * operation, as described below.</p>
- *
+ * <p>
  * <p>When retrieving a record with a {@link Database} or {@link Cursor}
  * method, if only the key is needed by the application then the retrieval of
  * the data item can be suppressed by passing null. If null is passed as
  * the data parameter, the data item will not be returned by the {@code
  * Database} or {@code Cursor} method.</p>
- *
+ * <p>
  * <p>Suppressing the return of the data item potentially has a large
  * performance benefit. In this case, if the record data is not already in the
  * JE cache, it will not be read from disk. The performance benefit is
@@ -115,13 +104,13 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * <li>Skipping over records quickly with {@code READ_UNCOMMITTED} isolation to
  * select records for further processing by examining the key value.</li>
  * </ul>
- *
+ * <p>
  * <p>Note that by "record data" we mean both the {@code data} parameter for a
  * regular or primary DB, and the {@code pKey} parameter for a secondary DB.
  * However, the performance advantage of a key-only operation does not apply to
  * databases configured for duplicates. For a duplicates DB, the data is always
  * available along with the key and does not have to be fetched separately.</p>
- *
+ * <p>
  * <p>The Partial property may also be used to retrieve or update only a
  * portion of a data item.  This avoids copying the entire record between the
  * JE cache and the application data parameter. However, this feature has less
@@ -129,13 +118,13 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * always read or written to the database, and the entire record is cached. A
  * partial update may be performed only with
  * {@link Cursor#putCurrent Cursor.putCurrent}.</p>
- *
+ * <p>
  * <p>A null or partial DatabaseEntry output parameter may also be used in
  * other cases, for example, to retrieve a partial key item. However, in
  * practice this has limited value since the entire key is usually needed by
  * the application, and the benefit of copying a portion of the key is
  * generally very small.</p>
- *
+ * <p>
  * <p>Historical note: Prior to JE 7.0, null could not be passed for output
  * parameters. Instead, {@code DatabaseEntry.setPartial(0, 0, true)} was called
  * for a data parameter to avoid reading the record's data. Now, null can be
@@ -145,11 +134,9 @@ public class Cursor implements ForwardCursor {
 
     static final ReadOptions DEFAULT_READ_OPTIONS = new ReadOptions();
     static final WriteOptions DEFAULT_WRITE_OPTIONS = new WriteOptions();
-
-    private static final DatabaseEntry EMPTY_DUP_DATA =
-        new DatabaseEntry(new byte[0]);
-
     static final DatabaseEntry NO_RETURN_DATA = new DatabaseEntry();
+    private static final DatabaseEntry EMPTY_DUP_DATA =
+            new DatabaseEntry(new byte[0]);
 
     static {
         NO_RETURN_DATA.setPartial(0, 0, true);
@@ -159,26 +146,21 @@ public class Cursor implements ForwardCursor {
      * The CursorConfig used to configure this cursor.
      */
     CursorConfig config;
-
+    /**
+     * The underlying cursor.
+     */
+    CursorImpl cursorImpl; // Used by subclasses.
     /* User Transacational, or null if none. */
     private Transaction transaction;
-
     /**
      * Handle under which this cursor was created; may be null when the cursor
      * is used internally.
      */
     private Database dbHandle;
-
     /**
      * Database implementation.
      */
     private DatabaseImpl dbImpl;
-
-    /**
-     * The underlying cursor.
-     */
-    CursorImpl cursorImpl; // Used by subclasses.
-
     private boolean updateOperationsProhibited;
 
     /* Attributes */
@@ -200,7 +182,7 @@ public class Cursor implements ForwardCursor {
     /**
      * Creates a cursor for a given user transaction with
      * retainNonTxnLocks=false.
-     *
+     * <p>
      * <p>If txn is null, a non-transactional cursor will be created that
      * releases locks for the prior operation when the next operation
      * succeeds.</p>
@@ -209,7 +191,7 @@ public class Cursor implements ForwardCursor {
            final Transaction txn,
            CursorConfig cursorConfig) {
 
-        if (cursorConfig == null) {
+        if(cursorConfig == null) {
             cursorConfig = CursorConfig.DEFAULT;
         }
 
@@ -218,22 +200,22 @@ public class Cursor implements ForwardCursor {
 
         /* Do not allow auto-commit when creating a user cursor. */
         Locker locker = LockerFactory.getReadableLocker(
-            dbHandle, txn, cursorConfig.getReadCommitted());
+                dbHandle, txn, cursorConfig.getReadCommitted());
 
         init(dbHandle, dbImpl, locker, cursorConfig,
-             false /*retainNonTxnLocks*/);
+                false /*retainNonTxnLocks*/);
     }
 
     /**
      * Creates a cursor for a given locker with retainNonTxnLocks=false.
-     *
+     * <p>
      * <p>If locker is null or is non-transactional, a non-transactional cursor
      * will be created that releases locks for the prior operation when the
      * next operation succeeds.</p>
      */
     Cursor(final Database dbHandle, Locker locker, CursorConfig cursorConfig) {
 
-        if (cursorConfig == null) {
+        if(cursorConfig == null) {
             cursorConfig = CursorConfig.DEFAULT;
         }
 
@@ -241,15 +223,15 @@ public class Cursor implements ForwardCursor {
         final DatabaseImpl dbImpl = dbHandle.checkOpen();
 
         locker = LockerFactory.getReadableLocker(
-            dbHandle, locker, cursorConfig.getReadCommitted());
+                dbHandle, locker, cursorConfig.getReadCommitted());
 
         init(dbHandle, dbImpl, locker, cursorConfig,
-             false /*retainNonTxnLocks*/);
+                false /*retainNonTxnLocks*/);
     }
 
     /**
      * Creates a cursor for a given locker and retainNonTxnLocks parameter.
-     *
+     * <p>
      * <p>The locker parameter must be non-null.  With this constructor, we use
      * the given locker and retainNonTxnLocks parameter without applying any
      * special rules for different lockers -- the caller must supply the
@@ -260,7 +242,7 @@ public class Cursor implements ForwardCursor {
            CursorConfig cursorConfig,
            final boolean retainNonTxnLocks) {
 
-        if (cursorConfig == null) {
+        if(cursorConfig == null) {
             cursorConfig = CursorConfig.DEFAULT;
         }
 
@@ -273,7 +255,7 @@ public class Cursor implements ForwardCursor {
     /**
      * Creates a cursor for a given locker and retainNonTxnLocks parameter,
      * without a Database handle.
-     *
+     * <p>
      * <p>The locker parameter must be non-null.  With this constructor, we use
      * the given locker and retainNonTxnLocks parameter without applying any
      * special rules for different lockers -- the caller must supply the
@@ -284,17 +266,56 @@ public class Cursor implements ForwardCursor {
            CursorConfig cursorConfig,
            final boolean retainNonTxnLocks) {
 
-        if (cursorConfig == null) {
+        if(cursorConfig == null) {
             cursorConfig = CursorConfig.DEFAULT;
         }
 
         /* Check that Database is open for internal Cursor usage. */
-        if (dbHandle != null) {
+        if(dbHandle != null) {
             dbHandle.checkOpen();
         }
 
         init(null /*dbHandle*/, databaseImpl, locker, cursorConfig,
-             retainNonTxnLocks);
+                retainNonTxnLocks);
+    }
+
+    /**
+     * Copy constructor.
+     */
+    Cursor(final Cursor cursor, final boolean samePosition) {
+
+        readUncommittedDefault = cursor.readUncommittedDefault;
+        serializableIsolationDefault = cursor.serializableIsolationDefault;
+        updateOperationsProhibited = cursor.updateOperationsProhibited;
+
+        cursorImpl = cursor.cursorImpl.cloneCursor(samePosition);
+        dbImpl = cursor.dbImpl;
+        dbHandle = cursor.dbHandle;
+        if(dbHandle != null) {
+            dbHandle.addCursor(this);
+        }
+        config = cursor.config;
+        logger = dbImpl.getEnv().getLogger();
+        defaultCacheMode = cursor.defaultCacheMode;
+        nonSticky = cursor.nonSticky;
+    }
+
+    /**
+     * Clone entry contents in a new returned entry.
+     */
+    private static DatabaseEntry cloneEntry(DatabaseEntry from) {
+        final DatabaseEntry to = new DatabaseEntry();
+        setEntry(from, to);
+        return to;
+    }
+
+    /**
+     * Copy entry contents to another entry.
+     */
+    private static void setEntry(DatabaseEntry from, DatabaseEntry to) {
+        to.setPartial(from.getPartialOffset(), from.getPartialLength(),
+                from.getPartial());
+        to.setData(from.getData(), from.getOffset(), from.getSize());
     }
 
     private void init(final Database dbHandle,
@@ -310,13 +331,13 @@ public class Cursor implements ForwardCursor {
          */
         try {
             locker.openCursorHook(databaseImpl);
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             locker.operationEnd();
             throw e;
         }
 
         cursorImpl = new CursorImpl(
-            databaseImpl, locker, retainNonTxnLocks, isSecondaryCursor());
+                databaseImpl, locker, retainNonTxnLocks, isSecondaryCursor());
 
         transaction = locker.getTransaction();
 
@@ -324,21 +345,21 @@ public class Cursor implements ForwardCursor {
         cursorImpl.setAllowEviction(true);
 
         readUncommittedDefault =
-            cursorConfig.getReadUncommitted() ||
-            locker.isReadUncommittedDefault();
+                cursorConfig.getReadUncommitted() ||
+                        locker.isReadUncommittedDefault();
 
         serializableIsolationDefault =
-            cursorImpl.getLocker().isSerializableIsolation();
+                cursorImpl.getLocker().isSerializableIsolation();
 
         /* Be sure to keep this logic in sync with checkUpdatesAllowed. */
         updateOperationsProhibited =
-            locker.isReadOnly() ||
-            (dbHandle != null && !dbHandle.isWritable()) ||
-            (databaseImpl.isTransactional() && !locker.isTransactional()) ||
-            (databaseImpl.isReplicated() == locker.isLocalWrite());
+                locker.isReadOnly() ||
+                        (dbHandle != null && !dbHandle.isWritable()) ||
+                        (databaseImpl.isTransactional() && !locker.isTransactional()) ||
+                        (databaseImpl.isReplicated() == locker.isLocalWrite());
 
         this.dbImpl = databaseImpl;
-        if (dbHandle != null) {
+        if(dbHandle != null) {
             this.dbHandle = dbHandle;
             dbHandle.addCursor(this);
         }
@@ -349,27 +370,6 @@ public class Cursor implements ForwardCursor {
         nonSticky = cursorConfig.getNonSticky();
 
         setCacheMode(null);
-    }
-
-    /**
-     * Copy constructor.
-     */
-    Cursor(final Cursor cursor, final boolean samePosition) {
-
-        readUncommittedDefault = cursor.readUncommittedDefault;
-        serializableIsolationDefault = cursor.serializableIsolationDefault;
-        updateOperationsProhibited = cursor.updateOperationsProhibited;
-
-        cursorImpl = cursor.cursorImpl.cloneCursor(samePosition);
-        dbImpl = cursor.dbImpl;
-        dbHandle = cursor.dbHandle;
-        if (dbHandle != null) {
-            dbHandle.addCursor(this);
-        }
-        config = cursor.config;
-        logger = dbImpl.getEnv().getLogger();
-        defaultCacheMode = cursor.defaultCacheMode;
-        nonSticky = cursor.nonSticky;
     }
 
     boolean isSecondaryCursor() {
@@ -411,7 +411,7 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Returns this cursor's configuration.
-     *
+     * <p>
      * <p>This may differ from the configuration used to open this object if
      * the cursor existed previously.</p>
      *
@@ -420,7 +420,7 @@ public class Cursor implements ForwardCursor {
     public CursorConfig getConfig() {
         try {
             return config.clone();
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -448,31 +448,29 @@ public class Cursor implements ForwardCursor {
      * {@link ReadOptions} or {@link WriteOptions}.
      *
      * @param cacheMode is the default {@code CacheMode} used for subsequent
-     * operations using this cursor, or null to configure the Database or
-     * Environment default.
-     *
+     *                  operations using this cursor, or null to configure the Database or
+     *                  Environment default.
      * @see CacheMode for further details.
      */
     public void setCacheMode(final CacheMode cacheMode) {
 
         this.defaultCacheMode =
-            (cacheMode != null) ? cacheMode : dbImpl.getDefaultCacheMode();
+                (cacheMode != null) ? cacheMode : dbImpl.getDefaultCacheMode();
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      * Used by KVStore.
-     *
+     * <p>
      * A RangeConstraint is used by search-range and next/previous methods to
      * prevent keys that are not inside the range from being returned.
-     *
+     * <p>
      * This method is not yet part of the public API because it has not been
      * designed with future-proofing or generality in mind, and has not been
      * reviewed.
      */
     public void setRangeConstraint(RangeConstraint rangeConstraint) {
-        if (dbImpl.getSortedDuplicates()) {
+        if(dbImpl.getSortedDuplicates()) {
             throw new UnsupportedOperationException("Not allowed with dups");
         }
         this.rangeConstraint = rangeConstraint;
@@ -482,7 +480,7 @@ public class Cursor implements ForwardCursor {
         c.rangeConstraint = new RangeConstraint() {
             public boolean inBounds(byte[] checkKey) {
                 return DupKeyData.compareMainKey(
-                    checkKey, keyBytes2, dbImpl.getBtreeComparator()) == 0;
+                        checkKey, keyBytes2, dbImpl.getBtreeComparator()) == 0;
             }
         };
     }
@@ -492,8 +490,8 @@ public class Cursor implements ForwardCursor {
         c.rangeConstraint = new RangeConstraint() {
             public boolean inBounds(byte[] checkKey) {
                 return DupKeyData.compareMainKey(
-                    checkKey, key2.getData(), key2.getOffset(),
-                    key2.getSize(), dbImpl.getBtreeComparator()) == 0;
+                        checkKey, key2.getData(), key2.getOffset(),
+                        key2.getSize(), dbImpl.getBtreeComparator()) == 0;
             }
         };
     }
@@ -502,7 +500,7 @@ public class Cursor implements ForwardCursor {
         assert key.getOffset() == 0;
         assert key.getData().length == key.getSize();
 
-        if (rangeConstraint == null) {
+        if(rangeConstraint == null) {
             return true;
         }
 
@@ -511,12 +509,12 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Discards the cursor.
-     *
+     * <p>
      * <p>The cursor handle may not be used again after this method has been
      * called, regardless of the method's success or failure, with one
      * exception:  the {@code close} method itself may be called any number of
      * times.</p>
-     *
+     * <p>
      * <p>WARNING: To guard against memory leaks, the application should
      * discard all references to the closed handle.  While BDB makes an effort
      * to discard references from closed objects to the allocated memory for an
@@ -525,11 +523,11 @@ public class Cursor implements ForwardCursor {
      * objects.</p>
      *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      */
     public void close() {
         try {
-            if (cursorImpl.isClosed()) {
+            if(cursorImpl.isClosed()) {
                 return;
             }
 
@@ -539,11 +537,11 @@ public class Cursor implements ForwardCursor {
              */
             checkEnv();
             cursorImpl.close();
-            if (dbHandle != null) {
+            if(dbHandle != null) {
                 dbHandle.removeCursor(this);
                 dbHandle = null;
             }
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -552,36 +550,31 @@ public class Cursor implements ForwardCursor {
     /**
      * Returns a new cursor with the same transaction and locker ID as the
      * original cursor.
-     *
+     * <p>
      * <p>This is useful when an application is using locking and requires
      * two or more cursors in the same thread of control.</p>
      *
      * @param samePosition If true, the newly created cursor is initialized
-     * to refer to the same position in the database as the original cursor
-     * (if any) and hold the same locks (if any). If false, or the original
-     * cursor does not hold a database position and locks, the returned
-     * cursor is uninitialized and will behave like a newly created cursor.
-     *
+     *                     to refer to the same position in the database as the original cursor
+     *                     (if any) and hold the same locks (if any). If false, or the original
+     *                     cursor does not hold a database position and locks, the returned
+     *                     cursor is uninitialized and will behave like a newly created cursor.
      * @return A new cursor with the same transaction and locker ID as the
      * original cursor.
-     *
      * @throws com.sleepycat.je.rep.DatabasePreemptedException in a replicated
-     * environment if the master has truncated, removed or renamed the
-     * database.
-     *
-     * @throws OperationFailureException if this exception occurred earlier and
-     * caused the transaction to be invalidated.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed.
+     *                                                         environment if the master has truncated, removed or renamed the
+     *                                                         database.
+     * @throws OperationFailureException                       if this exception occurred earlier and
+     *                                                         caused the transaction to be invalidated.
+     * @throws EnvironmentFailureException                     if an unexpected, internal or
+     *                                                         environment-wide failure occurs.
+     * @throws IllegalStateException                           if the cursor or database has been closed.
      */
     public Cursor dup(final boolean samePosition) {
         try {
             checkOpenAndState(false);
             return new Cursor(this, samePosition);
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -591,31 +584,25 @@ public class Cursor implements ForwardCursor {
      * Deletes the record to which the cursor refers. When the database has
      * associated secondary databases, this method also deletes the associated
      * index records.
-     *
+     * <p>
      * <p>The cursor position is unchanged after a delete, and subsequent calls
      * to cursor functions expecting the cursor to refer to an existing record
      * will fail.</p>
      *
      * @param options the WriteOptions, or null to use default options.
-     *
      * @return the OperationResult if the record is deleted, else null if the
      * record at the cursor position has already been deleted.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the cursor is uninitialized (not positioned on a record), or the
+     *                                       non-transactional cursor was created in a different thread.
      * @since 7.0
      */
     public OperationResult delete(final WriteOptions options) {
@@ -625,7 +612,7 @@ public class Cursor implements ForwardCursor {
         trace(Level.FINEST, "Cursor.delete: ", null);
 
         final CacheMode cacheMode =
-            options != null ? options.getCacheMode() : null;
+                options != null ? options.getCacheMode() : null;
 
         return deleteInternal(dbImpl.getRepContext(), cacheMode);
     }
@@ -634,11 +621,11 @@ public class Cursor implements ForwardCursor {
      * Deletes the record to which the cursor refers. When the database has
      * associated secondary databases, this method also deletes the associated
      * index records.
-     *
+     * <p>
      * <p>The cursor position is unchanged after a delete, and subsequent calls
      * to cursor functions expecting the cursor to refer to an existing record
      * will fail.</p>
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #delete(WriteOptions)}.</p>
      *
@@ -646,147 +633,132 @@ public class Cursor implements ForwardCursor {
      * OperationStatus.KEYEMPTY} if the record at the cursor position has
      * already been deleted; otherwise, {@link
      * com.sleepycat.je.OperationStatus#SUCCESS OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the cursor is uninitialized (not positioned on a record), or the
+     *                                       non-transactional cursor was created in a different thread.
      */
     public OperationStatus delete() {
         final OperationResult result = delete(null);
         return result == null ?
-            OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
+                OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
     }
 
     /**
      * Inserts or updates a record according to the specified {@link Put}
      * type.
-     *
+     * <p>
      * <p>If the operation succeeds, the record will be locked according to the
      * {@link ReadOptions#getLockMode() lock mode} specified, the cursor will
      * be positioned on the record, and a non-null OperationResult will be
      * returned. If the operation fails because the record already exists (or
      * does not exist, depending on the putType), null is returned.</p>
-     *
+     * <p>
      * <p>When the database has associated secondary databases, this method
      * also inserts or deletes associated index records as necessary.</p>
-     *
+     * <p>
      * <p>The following table lists each allowed operation. See the individual
      * {@link Put} operations for more information.</p>
-     *
+     * <p>
      * <div><table border="1" summary="">
      * <tr>
-     *     <th>Put operation</th>
-     *     <th>Description</th>
-     *     <th>Returns null when?</th>
-     *     <th>Other special rules</th>
+     * <th>Put operation</th>
+     * <th>Description</th>
+     * <th>Returns null when?</th>
+     * <th>Other special rules</th>
      * </tr>
      * <tr>
-     *     <td>{@link Put#OVERWRITE}</td>
-     *     <td>Inserts or updates a record depending on whether a matching
-     *     record is already present.</td>
-     *     <td>Never returns null.</td>
-     *     <td>Without duplicates, a matching record is one with the same key;
-     *     with duplicates, it is one with the same key and data.</td>
+     * <td>{@link Put#OVERWRITE}</td>
+     * <td>Inserts or updates a record depending on whether a matching
+     * record is already present.</td>
+     * <td>Never returns null.</td>
+     * <td>Without duplicates, a matching record is one with the same key;
+     * with duplicates, it is one with the same key and data.</td>
      * </tr>
      * <tr>
-     *     <td>{@link Put#NO_OVERWRITE}</td>
-     *     <td>Inserts a record if a record with a matching key is not already
-     *     present.</td>
-     *     <td>When an existing record matches.</td>
-     *     <td>If the database has duplicate keys, a record is inserted only if
-     *     there are no records with a matching key.</td>
+     * <td>{@link Put#NO_OVERWRITE}</td>
+     * <td>Inserts a record if a record with a matching key is not already
+     * present.</td>
+     * <td>When an existing record matches.</td>
+     * <td>If the database has duplicate keys, a record is inserted only if
+     * there are no records with a matching key.</td>
      * </tr>
      * <tr>
-     *     <td>{@link Put#NO_DUP_DATA}</td>
-     *     <td>Inserts a record in a database with duplicate keys if a record
-     *     with a matching key and data is not already present.</td>
-     *     <td>When an existing record matches.</td>
-     *     <td>Without duplicates, this operation is not allowed.</td>
+     * <td>{@link Put#NO_DUP_DATA}</td>
+     * <td>Inserts a record in a database with duplicate keys if a record
+     * with a matching key and data is not already present.</td>
+     * <td>When an existing record matches.</td>
+     * <td>Without duplicates, this operation is not allowed.</td>
      * </tr>
      * <tr>
-     *     <td>{@link Put#CURRENT}</td>
-     *     <td>Updates the data of the record at the cursor position.</td>
-     *     <td>When the record at the cursor position has been deleted.</td>
-     *     <td>With duplicates, the data must be considered equal by the
-     *     duplicate comparator, meaning that changing the data is only
-     *     possible if a custom duplicate comparator is configured.
-     *     <p>
-     *     Cannot be used to update the key of an existing record and in
-     *     fact the key parameter must be null.
-     *     <p>
-     *     A <a href="Cursor.html#partialEntry">partial data item</a> may be
-     *     specified to optimize for partial data update.
-     *     </td>
+     * <td>{@link Put#CURRENT}</td>
+     * <td>Updates the data of the record at the cursor position.</td>
+     * <td>When the record at the cursor position has been deleted.</td>
+     * <td>With duplicates, the data must be considered equal by the
+     * duplicate comparator, meaning that changing the data is only
+     * possible if a custom duplicate comparator is configured.
+     * <p>
+     * Cannot be used to update the key of an existing record and in
+     * fact the key parameter must be null.
+     * <p>
+     * A <a href="Cursor.html#partialEntry">partial data item</a> may be
+     * specified to optimize for partial data update.
+     * </td>
      * </tr>
      * </table></div>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>. Must be null when
-     * putType is {@code Put.CURRENT}.
-     *
-     * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>. May be partial only when
-     * putType is {@code Put.CURRENT}.
-     *
+     * @param key     the key used as
+     *                <a href="DatabaseEntry.html#inParam">input</a>. Must be null when
+     *                putType is {@code Put.CURRENT}.
+     * @param data    the data used as
+     *                <a href="DatabaseEntry.html#inParam">input</a>. May be partial only when
+     *                putType is {@code Put.CURRENT}.
      * @param putType the Put operation type. May not be null.
-     *
      * @param options the WriteOptions, or null to use default options.
-     *
      * @return the OperationResult if the record is written, else null.
-     *
-     * @throws DuplicateDataException if putType is Put.CURRENT and the old and
-     * new data are not equal according to the configured duplicate comparator
-     * or default comparator.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws DuplicateDataException        if putType is Put.CURRENT and the old and
+     *                                       new data are not equal according to the configured duplicate comparator
+     *                                       or default comparator.
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only, or putType is Put.NO_DUP_DATA and the
-     * database is not configured for duplicates.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
-     * This includes passing a null putType, a null input key/data parameter,
-     * an input key/data parameter with a null data array, a partial key/data
-     * input parameter.
-     *
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only, or putType is Put.NO_DUP_DATA and the
+     *                                       database is not configured for duplicates.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException      if an invalid parameter is specified.
+     *                                       This includes passing a null putType, a null input key/data parameter,
+     *                                       an input key/data parameter with a null data array, a partial key/data
+     *                                       input parameter.
      * @since 7.0
      */
     public OperationResult put(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final Put putType,
-        final WriteOptions options) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final Put putType,
+            final WriteOptions options) {
 
         try {
             checkOpen();
 
             trace(
-                Level.FINEST, "Cursor.put: ", String.valueOf(putType),
-                key, data, null);
+                    Level.FINEST, "Cursor.put: ", String.valueOf(putType),
+                    key, data, null);
 
             return putInternal(key, data, putType, options);
 
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -794,28 +766,29 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Performs the put() operation except for state checking and tracing.
-     *
+     * <p>
      * Allows passing a throughput stat index so it can be called for Database
      * and SecondaryCursor operations.
      */
     OperationResult putInternal(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final Put putType,
-        WriteOptions options) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final Put putType,
+            WriteOptions options) {
 
         DatabaseUtil.checkForNullParam(putType, "putType");
 
-        if (putType == Put.CURRENT) {
-            if (key != null) {
+        if(putType == Put.CURRENT) {
+            if(key != null) {
                 throw new IllegalArgumentException(
-                    "The key must be null for Put.Current");
+                        "The key must be null for Put.Current");
             }
-        } else {
+        }
+        else {
             DatabaseUtil.checkForNullDbt(key, "key", true);
         }
 
-        if (key != null) {
+        if(key != null) {
             DatabaseUtil.checkForPartial(key, "key");
         }
 
@@ -823,26 +796,26 @@ public class Cursor implements ForwardCursor {
 
         checkState(putType == Put.CURRENT /*mustBeInitialized*/);
 
-        if (options == null) {
+        if(options == null) {
             options = DEFAULT_WRITE_OPTIONS;
         }
 
         return putInternal(
-            key, data, options.getCacheMode(),
-            ExpirationInfo.getInfo(options),
-            putType.getPutMode());
+                key, data, options.getCacheMode(),
+                ExpirationInfo.getInfo(options),
+                putType.getPutMode());
     }
 
     /**
      * Stores a key/data pair into the database.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #put(DatabaseEntry, DatabaseEntry, Put, WriteOptions)} with
      * {@link Put#OVERWRITE}.</p>
-     *
+     * <p>
      * <p>If the put method succeeds, the cursor is positioned to refer to the
      * newly inserted item.</p>
-     *
+     * <p>
      * <p>If the key already appears in the database and duplicates are
      * supported, the new data value is inserted at the correct sorted
      * location, unless the new data value also appears in the database
@@ -853,34 +826,27 @@ public class Cursor implements ForwardCursor {
      * database and duplicates are not supported, the data associated with
      * the key will be replaced.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>..
-     *
+     * @param key  the key used as
+     *             <a href="DatabaseEntry.html#inParam">input</a>..
      * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
+     *             <a href="DatabaseEntry.html#inParam">input</a>.
      * @return {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException      if an invalid parameter is specified.
      */
     public OperationStatus put(
-        final DatabaseEntry key,
-        final DatabaseEntry data) {
+            final DatabaseEntry key,
+            final DatabaseEntry data) {
 
         final OperationResult result = put(key, data, Put.OVERWRITE, null);
 
@@ -890,131 +856,117 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Stores a key/data pair into the database.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #put(DatabaseEntry, DatabaseEntry, Put, WriteOptions)} with
      * {@link Put#NO_OVERWRITE}.</p>
-     *
+     * <p>
      * <p>If the putNoOverwrite method succeeds, the cursor is positioned to
      * refer to the newly inserted item.</p>
-     *
+     * <p>
      * <p>If the key already appears in the database, putNoOverwrite will
      * return {@link com.sleepycat.je.OperationStatus#KEYEXIST
      * OperationStatus.KEYEXIST}.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>..
-     *
+     * @param key  the key used as
+     *             <a href="DatabaseEntry.html#inParam">input</a>..
      * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
+     *             <a href="DatabaseEntry.html#inParam">input</a>.
      * @return {@link com.sleepycat.je.OperationStatus#KEYEXIST
      * OperationStatus.KEYEXIST} if the key already appears in the database,
      * else {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException      if an invalid parameter is specified.
      */
     public OperationStatus putNoOverwrite(
-        final DatabaseEntry key,
-        final DatabaseEntry data) {
+            final DatabaseEntry key,
+            final DatabaseEntry data) {
 
         final OperationResult result = put(
-            key, data, Put.NO_OVERWRITE, null);
+                key, data, Put.NO_OVERWRITE, null);
 
         return result == null ?
-            OperationStatus.KEYEXIST : OperationStatus.SUCCESS;
+                OperationStatus.KEYEXIST : OperationStatus.SUCCESS;
     }
 
     /**
      * Stores a key/data pair into the database. The database must be
      * configured for duplicates.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #put(DatabaseEntry, DatabaseEntry, Put, WriteOptions)} with
      * {@link Put#NO_DUP_DATA}.</p>
-     *
+     * <p>
      * <p>If the putNoDupData method succeeds, the cursor is positioned to
      * refer to the newly inserted item.</p>
-     *
+     * <p>
      * <p>Insert the specified key/data pair into the database, unless a
      * key/data pair comparing equally to it already exists in the database.
      * If a matching key/data pair already exists in the database, {@link
      * com.sleepycat.je.OperationStatus#KEYEXIST OperationStatus.KEYEXIST} is
      * returned.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>..
-     *
+     * @param key  the key used as
+     *             <a href="DatabaseEntry.html#inParam">input</a>..
      * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
+     *             <a href="DatabaseEntry.html#inParam">input</a>.
      * @return {@link com.sleepycat.je.OperationStatus#KEYEXIST
      * OperationStatus.KEYEXIST} if the key/data pair already appears in the
      * database, else {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter, or
-     * the database is read-only, or the database is not configured for
-     * duplicates.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                       but this cursor was not opened with a non-null transaction parameter, or
+     *                                       the database is read-only, or the database is not configured for
+     *                                       duplicates.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException      if an invalid parameter is specified.
      */
     public OperationStatus putNoDupData(
-        final DatabaseEntry key,
-        final DatabaseEntry data) {
+            final DatabaseEntry key,
+            final DatabaseEntry data) {
 
         final OperationResult result = put(
-            key, data, Put.NO_DUP_DATA, null);
+                key, data, Put.NO_DUP_DATA, null);
 
         return result == null ?
-            OperationStatus.KEYEXIST : OperationStatus.SUCCESS;
+                OperationStatus.KEYEXIST : OperationStatus.SUCCESS;
     }
 
     /**
      * Replaces the data in the key/data pair at the current cursor position.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #put(DatabaseEntry, DatabaseEntry, Put, WriteOptions)} with
      * {@link Put#CURRENT}.</p>
-     *
+     * <p>
      * <p>Overwrite the data of the key/data pair to which the cursor refers
      * with the specified data item. This method will return
      * OperationStatus.NOTFOUND if the cursor currently refers to an
      * already-deleted key/data pair.</p>
-     *
+     * <p>
      * <p>For a database that does not support duplicates, the data may be
      * changed by this method.  If duplicates are supported, the data may be
      * changed only if a custom partial comparator is configured and the
      * comparator considers the old and new data to be equal (that is, the
      * comparator returns zero).  For more information on partial comparators
      * see {@link DatabaseConfig#setDuplicateComparator}.</p>
-     *
+     * <p>
      * <p>If the old and new data are unequal according to the comparator, a
      * {@link DuplicateDataException} is thrown.  Changing the data in this
      * case would change the sort order of the record, which would change the
@@ -1022,222 +974,206 @@ public class Cursor implements ForwardCursor {
      * record, delete it and then re-insert it.</p>
      *
      * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     * A <a href="Cursor.html#partialEntry">partial data item</a> may be
-     * specified to optimize for partial data update.
-     *
+     *             <a href="DatabaseEntry.html#inParam">input</a>.
+     *             A <a href="Cursor.html#partialEntry">partial data item</a> may be
+     *             specified to optimize for partial data update.
      * @return {@link com.sleepycat.je.OperationStatus#KEYEMPTY
      * OperationStatus.KEYEMPTY} if the key/pair at the cursor position has
      * been deleted; otherwise, {@link
      * com.sleepycat.je.OperationStatus#SUCCESS OperationStatus.SUCCESS}.
-     *
-     * @throws DuplicateDataException if the old and new data are not equal
-     * according to the configured duplicate comparator or default comparator.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws DuplicateDataException        if the old and new data are not equal
+     *                                       according to the configured duplicate comparator or default comparator.
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the database is transactional
-     * but this cursor was not opened with a non-null transaction parameter,
-     * or the database is read-only.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                       but this cursor was not opened with a non-null transaction parameter,
+     *                                       or the database is read-only.
+     * @throws IllegalStateException         if the cursor or database has been closed,
+     *                                       or the cursor is uninitialized (not positioned on a record), or the
+     *                                       non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException      if an invalid parameter is specified.
      */
     public OperationStatus putCurrent(final DatabaseEntry data) {
 
         final OperationResult result = put(null, data, Put.CURRENT, null);
 
         return result == null ?
-            OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
+                OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to a record according to the specified {@link Get}
      * type.
-     *
+     * <p>
      * <p>If the operation succeeds, the record at the resulting cursor
      * position will be locked according to the {@link
      * ReadOptions#getLockMode() lock mode} specified, the key and/or data will
      * be returned via the (non-null) DatabaseEntry parameters, and a non-null
      * OperationResult will be returned. If the operation fails because the
      * record requested is not found, null is returned.</p>
-     *
+     * <p>
      * <p>The following table lists each allowed operation and whether the key
      * and data parameters are <a href="DatabaseEntry.html#params">input or
      * output parameters</a>. Also specified is whether the cursor must be
      * initialized (positioned on a record) before calling this method. See the
      * individual {@link Get} operations for more information.</p>
-     *
+     * <p>
      * <div><table border="1" summary="">
      * <tr>
-     *     <th>Get operation</th>
-     *     <th>Description</th>
-     *     <th>'key' parameter</th>
-     *     <th>'data' parameter</th>
-     *     <th>Cursor position<br/>must be initialized?</th>
+     * <th>Get operation</th>
+     * <th>Description</th>
+     * <th>'key' parameter</th>
+     * <th>'data' parameter</th>
+     * <th>Cursor position<br/>must be initialized?</th>
      * </tr>
      * <tr>
-     *     <td>{@link Get#SEARCH}</td>
-     *     <td>Searches using an exact match by key.</td>
-     *     <td><a href="DatabaseEntry.html#inParam">input</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#SEARCH}</td>
+     * <td>Searches using an exact match by key.</td>
+     * <td><a href="DatabaseEntry.html#inParam">input</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#SEARCH_BOTH}</td>
-     *     <td>Searches using an exact match by key and data.</td>
-     *     <td><a href="DatabaseEntry.html#inParam">input</a></td>
-     *     <td><a href="DatabaseEntry.html#inParam">input</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#SEARCH_BOTH}</td>
+     * <td>Searches using an exact match by key and data.</td>
+     * <td><a href="DatabaseEntry.html#inParam">input</a></td>
+     * <td><a href="DatabaseEntry.html#inParam">input</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#SEARCH_GTE}</td>
-     *     <td>Searches using a GTE match by key.</td>
-     *     <td><a href="DatabaseEntry.html#inParam">input/output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#SEARCH_GTE}</td>
+     * <td>Searches using a GTE match by key.</td>
+     * <td><a href="DatabaseEntry.html#inParam">input/output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#SEARCH_BOTH_GTE}</td>
-     *     <td>Searches using an exact match by key and a GTE match by data.</td>
-     *     <td><a href="DatabaseEntry.html#inParam">input</a></td>
-     *     <td><a href="DatabaseEntry.html#inParam">input/output</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#SEARCH_BOTH_GTE}</td>
+     * <td>Searches using an exact match by key and a GTE match by data.</td>
+     * <td><a href="DatabaseEntry.html#inParam">input</a></td>
+     * <td><a href="DatabaseEntry.html#inParam">input/output</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#CURRENT}</td>
-     *     <td>Accesses the current record</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>yes</td>
+     * <td>{@link Get#CURRENT}</td>
+     * <td>Accesses the current record</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>yes</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#FIRST}</td>
-     *     <td>Finds the first record in the database.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#FIRST}</td>
+     * <td>Finds the first record in the database.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#LAST}</td>
-     *     <td>Finds the last record in the database.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no</td>
+     * <td>{@link Get#LAST}</td>
+     * <td>Finds the last record in the database.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#NEXT}</td>
-     *     <td>Moves to the next record.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no**</td>
+     * <td>{@link Get#NEXT}</td>
+     * <td>Moves to the next record.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no**</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#NEXT_DUP}</td>
-     *     <td>Moves to the next record with the same key.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>yes</td>
+     * <td>{@link Get#NEXT_DUP}</td>
+     * <td>Moves to the next record with the same key.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>yes</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#NEXT_NO_DUP}</td>
-     *     <td>Moves to the next record with a different key.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no**</td>
+     * <td>{@link Get#NEXT_NO_DUP}</td>
+     * <td>Moves to the next record with a different key.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no**</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#PREV}</td>
-     *     <td>Moves to the previous record.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no**</td>
+     * <td>{@link Get#PREV}</td>
+     * <td>Moves to the previous record.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no**</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#PREV_DUP}</td>
-     *     <td>Moves to the previous record with the same key.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>yes</td>
+     * <td>{@link Get#PREV_DUP}</td>
+     * <td>Moves to the previous record with the same key.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>yes</td>
      * </tr>
      * <tr>
-     *     <td>{@link Get#PREV_NO_DUP}</td>
-     *     <td>Moves to the previous record with a different key.</td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td><a href="DatabaseEntry.html#outParam">output</a></td>
-     *     <td>no**</td>
+     * <td>{@link Get#PREV_NO_DUP}</td>
+     * <td>Moves to the previous record with a different key.</td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td><a href="DatabaseEntry.html#outParam">output</a></td>
+     * <td>no**</td>
      * </tr>
      * </table></div>
-     *
+     * <p>
      * <p>** - For these 'next' and 'previous' operations the cursor may be
      * uninitialized, in which case the cursor will be moved to the first or
      * last record, respectively.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link
      * ReadOptions#getLockMode() lock mode}.</p>
      *
-     * @param key the key input or output parameter, depending on getType.
-     *
-     * @param data the data input or output parameter, depending on getType.
-     *
+     * @param key     the key input or output parameter, depending on getType.
+     * @param data    the data input or output parameter, depending on getType.
      * @param getType the Get operation type. May not be null.
-     *
      * @param options the ReadOptions, or null to use default options.
-     *
      * @return the OperationResult if the record requested is found, else null.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * the cursor is uninitialized (not positioned on a record) and this is not
-     * permitted (see above), or the non-transactional cursor was created in a
-     * different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
-     * This includes passing a null getType, a null input key/data parameter,
-     * an input key/data parameter with a null data array, a partial key/data
-     * input parameter, and specifying a {@link ReadOptions#getLockMode()
-     * lock mode} of READ_COMMITTED.
-     *
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     the cursor is uninitialized (not positioned on a record) and this is not
+     *                                     permitted (see above), or the non-transactional cursor was created in a
+     *                                     different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
+     *                                     This includes passing a null getType, a null input key/data parameter,
+     *                                     an input key/data parameter with a null data array, a partial key/data
+     *                                     input parameter, and specifying a {@link ReadOptions#getLockMode()
+     *                                     lock mode} of READ_COMMITTED.
      * @since 7.0
      */
     public OperationResult get(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final Get getType,
-        ReadOptions options) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final Get getType,
+            ReadOptions options) {
 
         try {
             checkOpen();
 
-            if (options == null) {
+            if(options == null) {
                 options = DEFAULT_READ_OPTIONS;
             }
 
             final LockMode lockMode = options.getLockMode();
 
             trace(
-                Level.FINEST, "Cursor.get: ", String.valueOf(getType),
-                key, data, lockMode);
+                    Level.FINEST, "Cursor.get: ", String.valueOf(getType),
+                    key, data, lockMode);
 
             return getInternal(key, data, getType, options, lockMode);
 
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -1245,36 +1181,37 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Performs the get() operation except for state checking and tracing.
-     *
+     * <p>
      * The LockMode is passed because for Database operations it is sometimes
      * different than ReadOptions.getLockMode.
-     *
+     * <p>
      * Allows passing a throughput stat index so it can be called for Database
      * and SecondaryCursor operations.
      */
     OperationResult getInternal(
-        DatabaseEntry key,
-        DatabaseEntry data,
-        Get getType,
-        final ReadOptions options,
-        final LockMode lockMode) {
+            DatabaseEntry key,
+            DatabaseEntry data,
+            Get getType,
+            final ReadOptions options,
+            final LockMode lockMode) {
 
         DatabaseUtil.checkForNullParam(getType, "getType");
 
         final CacheMode cacheMode = options.getCacheMode();
         final SearchMode searchMode = getType.getSearchMode();
 
-        if (searchMode != null) {
+        if(searchMode != null) {
             checkState(false /*mustBeInitialized*/);
 
             DatabaseUtil.checkForNullDbt(key, "key", true);
             DatabaseUtil.checkForPartial(key, "key");
 
-            if (searchMode.isDataSearch()) {
+            if(searchMode.isDataSearch()) {
                 DatabaseUtil.checkForNullDbt(data, "data", true);
                 DatabaseUtil.checkForPartial(data, "data");
-            } else {
-                if (data == null) {
+            }
+            else {
+                if(data == null) {
                     data = NO_RETURN_DATA;
                 }
             }
@@ -1282,30 +1219,30 @@ public class Cursor implements ForwardCursor {
             return search(key, data, lockMode, cacheMode, searchMode, true);
         }
 
-        if (key == null) {
+        if(key == null) {
             key = NO_RETURN_DATA;
         }
-        if (data == null) {
+        if(data == null) {
             data = NO_RETURN_DATA;
         }
 
         GetMode getMode = getType.getGetMode();
 
-        if (getType.getAllowNextPrevUninitialized() &&
-            cursorImpl.isNotInitialized()) {
+        if(getType.getAllowNextPrevUninitialized() &&
+                cursorImpl.isNotInitialized()) {
 
             assert getMode != null;
             getType = getMode.isForward() ? Get.FIRST : Get.LAST;
             getMode = null;
         }
 
-        if (getMode != null) {
+        if(getMode != null) {
             checkState(true /*mustBeInitialized*/);
 
             return retrieveNext(key, data, lockMode, cacheMode, getMode);
         }
 
-        if (getType == Get.CURRENT) {
+        if(getType == Get.CURRENT) {
             checkState(true /*mustBeInitialized*/);
 
             return getCurrentInternal(key, data, lockMode, cacheMode);
@@ -1319,501 +1256,438 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Returns the key/data pair to which the cursor refers.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#CURRENT}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#KEYEMPTY
      * OperationStatus.KEYEMPTY} if the key/pair at the cursor position has
      * been deleted; otherwise, {@link
      * com.sleepycat.je.OperationStatus#SUCCESS OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getCurrent(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.CURRENT, DbInternal.getReadOptions(lockMode));
+                key, data, Get.CURRENT, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
+                OperationStatus.KEYEMPTY : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the first key/data pair of the database, and returns
      * that pair.  If the first key has duplicate values, the first data item
      * in the set of duplicates is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#FIRST}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getFirst(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.FIRST, DbInternal.getReadOptions(lockMode));
+                key, data, Get.FIRST, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the last key/data pair of the database, and returns
      * that pair.  If the last key has duplicate values, the last data item in
      * the set of duplicates is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#LAST}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getLast(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.LAST, DbInternal.getReadOptions(lockMode));
+                key, data, Get.LAST, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the next key/data pair and returns that pair.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#NEXT}.</p>
-     *
+     * <p>
      * <p>If the cursor is not yet initialized, move the cursor to the first
      * key/data pair of the database, and return that pair.  Otherwise, the
      * cursor is moved to the next key/data pair of the database, and that pair
      * is returned.  In the presence of duplicate key values, the value of the
      * key may not change.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getNext(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.NEXT, DbInternal.getReadOptions(lockMode));
+                key, data, Get.NEXT, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * If the next key/data pair of the database is a duplicate data record for
      * the current key/data pair, moves the cursor to the next key/data pair of
      * the database and returns that pair.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#NEXT_DUP}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getNextDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.NEXT_DUP, DbInternal.getReadOptions(lockMode));
+                key, data, Get.NEXT_DUP, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the next non-duplicate key/data pair and returns
      * that pair.  If the matching key has duplicate values, the first data
      * item in the set of duplicates is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#NEXT_NO_DUP}.</p>
-     *
+     * <p>
      * <p>If the cursor is not yet initialized, move the cursor to the first
      * key/data pair of the database, and return that pair.  Otherwise, the
      * cursor is moved to the next non-duplicate key of the database, and that
      * key/data pair is returned.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getNextNoDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.NEXT_NO_DUP, DbInternal.getReadOptions(lockMode));
+                key, data, Get.NEXT_NO_DUP, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the previous key/data pair and returns that pair.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#PREV}.</p>
-     *
+     * <p>
      * <p>If the cursor is not yet initialized, move the cursor to the last
      * key/data pair of the database, and return that pair.  Otherwise, the
      * cursor is moved to the previous key/data pair of the database, and that
      * pair is returned. In the presence of duplicate key values, the value of
      * the key may not change.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getPrev(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.PREV, DbInternal.getReadOptions(lockMode));
+                key, data, Get.PREV, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * If the previous key/data pair of the database is a duplicate data record
      * for the current key/data pair, moves the cursor to the previous key/data
      * pair of the database and returns that pair.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#PREV_DUP}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getPrevDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.PREV_DUP, DbInternal.getReadOptions(lockMode));
+                key, data, Get.PREV_DUP, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the previous non-duplicate key/data pair and returns
      * that pair.  If the matching key has duplicate values, the last data item
      * in the set of duplicates is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#PREV_NO_DUP}.</p>
-     *
+     * <p>
      * <p>If the cursor is not yet initialized, move the cursor to the last
      * key/data pair of the database, and return that pair.  Otherwise, the
      * cursor is moved to the previous non-duplicate key of the database, and
      * that key/data pair is returned.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getPrevNoDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.PREV_NO_DUP, DbInternal.getReadOptions(lockMode));
+                key, data, Get.PREV_NO_DUP, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Skips forward a given number of key/data pairs and returns the number by
      * which the cursor is moved.
-     *
+     * <p>
      * <p>Without regard to performance, calling this method is equivalent to
      * repeatedly calling {@link #getNext getNext} with {@link
      * LockMode#READ_UNCOMMITTED} to skip over the desired number of key/data
      * pairs, and then calling {@link #getCurrent getCurrent} with the {@code
      * lockMode} parameter to return the final key/data pair.</p>
-     *
+     * <p>
      * <p>With regard to performance, this method is optimized to skip over
      * key/value pairs using a smaller number of Btree operations.  When there
      * is no contention on the bottom internal nodes (BINs) and all BINs are in
@@ -1822,74 +1696,66 @@ public class Cursor implements ForwardCursor {
      * EnvironmentConfig#NODE_MAX_ENTRIES} setting.  When there is contention
      * on BINs or fetching BINs is required, the scan is broken up into smaller
      * operations to avoid blocking other threads for long time periods.</p>
-     *
+     * <p>
      * <p>If the returned count is greater than zero, then the key/data pair at
      * the new cursor position is also returned.  If zero is returned, then
      * there are no key/value pairs that follow the cursor position and a
      * key/data pair is not returned.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
      * @param maxCount the maximum number of key/data pairs to skip, i.e., the
-     * maximum number by which the cursor should be moved; must be greater
-     * than zero.
-     *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     *                 maximum number by which the cursor should be moved; must be greater
+     *                 than zero.
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return the number of key/data pairs skipped, i.e., the number by which
      * the cursor has moved; if zero is returned, the cursor position is
      * unchanged and the key/data pair is not returned.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public long skipNext(
-        final long maxCount,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final long maxCount,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         checkOpenAndState(true);
-        if (maxCount <= 0) {
+        if(maxCount <= 0) {
             throw new IllegalArgumentException("maxCount must be positive: " +
-                                               maxCount);
+                    maxCount);
         }
         trace(Level.FINEST, "Cursor.skipNext: ", lockMode);
 
         return skipInternal(
-            maxCount, true /*forward*/, key, data, lockMode, null);
+                maxCount, true /*forward*/, key, data, lockMode, null);
     }
 
     /**
      * Skips backward a given number of key/data pairs and returns the number
      * by which the cursor is moved.
-     *
+     * <p>
      * <p>Without regard to performance, calling this method is equivalent to
      * repeatedly calling {@link #getPrev getPrev} with {@link
      * LockMode#READ_UNCOMMITTED} to skip over the desired number of key/data
      * pairs, and then calling {@link #getCurrent getCurrent} with the {@code
      * lockMode} parameter to return the final key/data pair.</p>
-     *
+     * <p>
      * <p>With regard to performance, this method is optimized to skip over
      * key/value pairs using a smaller number of Btree operations.  When there
      * is no contention on the bottom internal nodes (BINs) and all BINs are in
@@ -1898,114 +1764,99 @@ public class Cursor implements ForwardCursor {
      * EnvironmentConfig#NODE_MAX_ENTRIES} setting.  When there is contention
      * on BINs or fetching BINs is required, the scan is broken up into smaller
      * operations to avoid blocking other threads for long time periods.</p>
-     *
+     * <p>
      * <p>If the returned count is greater than zero, then the key/data pair at
      * the new cursor position is also returned.  If zero is returned, then
      * there are no key/value pairs that follow the cursor position and a
      * key/data pair is not returned.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
      * @param maxCount the maximum number of key/data pairs to skip, i.e., the
-     * maximum number by which the cursor should be moved; must be greater
-     * than zero.
-     *
-     * @param key the key returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     *                 maximum number by which the cursor should be moved; must be greater
+     *                 than zero.
+     * @param key      the key returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return the number of key/data pairs skipped, i.e., the number by which
      * the cursor has moved; if zero is returned, the cursor position is
      * unchanged and the key/data pair is not returned.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public long skipPrev(
-        final long maxCount,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final long maxCount,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         checkOpenAndState(true);
-        if (maxCount <= 0) {
+        if(maxCount <= 0) {
             throw new IllegalArgumentException("maxCount must be positive: " +
-                                               maxCount);
+                    maxCount);
         }
         trace(Level.FINEST, "Cursor.skipPrev: ", lockMode);
 
         return skipInternal(
-            maxCount, false /*forward*/, key, data, lockMode, null);
+                maxCount, false /*forward*/, key, data, lockMode, null);
     }
 
     /**
      * Moves the cursor to the given key of the database, and returns the datum
      * associated with the given key.  If the matching key has duplicate
      * values, the first data item in the set of duplicates is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#SEARCH}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a>.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getSearchKey(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.SEARCH, DbInternal.getReadOptions(lockMode));
+                key, data, Get.SEARCH, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
@@ -2013,200 +1864,176 @@ public class Cursor implements ForwardCursor {
      * returns the data item associated with the matching key.  If the matching
      * key has duplicate values, the first data item in the set of duplicates
      * is returned.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#SEARCH_GTE}.</p>
-     *
+     * <p>
      * <p>The returned key/data pair is for the smallest key greater than or
      * equal to the specified key (as determined by the key comparison
      * function), permitting partial key matches and range searches.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a> and returned as output.
-     *
-     * @param data the data returned as
-     * <a href="DatabaseEntry.html#outParam">output</a>.
-     *
+     * @param key      the key used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a> and returned as output.
+     * @param data     the data returned as
+     *                 <a href="DatabaseEntry.html#outParam">output</a>.
      * @param lockMode the locking attributes; if null, default attributes
-     * are used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 are used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getSearchKeyRange(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.SEARCH_GTE, DbInternal.getReadOptions(lockMode));
+                key, data, Get.SEARCH_GTE, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the specified key/data pair, where both the key and
      * data items must match.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#SEARCH_BOTH}.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
-     * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
+     * @param key      the key used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a>.
+     * @param data     the data used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a>.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getSearchBoth(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.SEARCH_BOTH, DbInternal.getReadOptions(lockMode));
+                key, data, Get.SEARCH_BOTH, DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Moves the cursor to the specified key and closest matching data item of
      * the database.
-     *
+     * <p>
      * <p>Calling this method is equivalent to calling {@link
      * #get(DatabaseEntry, DatabaseEntry, Get, ReadOptions)} with
      * {@link Get#SEARCH_BOTH_GTE}.</p>
-     *
+     * <p>
      * <p>In the case of any database supporting sorted duplicate sets, the
      * returned key/data pair is for the smallest data item greater than or
      * equal to the specified data item (as determined by the duplicate
      * comparison function), permitting partial matches and range searches in
      * duplicate data sets.</p>
-     *
+     * <p>
      * <p>In the case of databases that do not support sorted duplicate sets,
      * this method is equivalent to getSearchBoth.</p>
-     *
+     * <p>
      * <p>In a replicated environment, an explicit transaction must have been
      * specified when opening the cursor, unless read-uncommitted isolation is
      * specified via the {@link CursorConfig} or {@link LockMode}
      * parameter.</p>
      *
-     * @param key the key used as
-     * <a href="DatabaseEntry.html#inParam">input</a>.
-     *
-     * @param data the data used as
-     * <a href="DatabaseEntry.html#inParam">input</a> and returned as output.
-     *
+     * @param key      the key used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a>.
+     * @param data     the data used as
+     *                 <a href="DatabaseEntry.html#inParam">input</a> and returned as output.
      * @param lockMode the locking attributes; if null, default attributes are
-     * used. {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     *                 used. {@link LockMode#READ_COMMITTED} is not allowed.
      * @return {@link com.sleepycat.je.OperationStatus#NOTFOUND
      * OperationStatus.NOTFOUND} if no matching key/data pair is found;
      * otherwise, {@link com.sleepycat.je.OperationStatus#SUCCESS
      * OperationStatus.SUCCESS}.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the non-transactional cursor was created in a different thread.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the non-transactional cursor was created in a different thread.
+     * @throws IllegalArgumentException    if an invalid parameter is specified.
      */
     public OperationStatus getSearchBothRange(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
         final OperationResult result = get(
-            key, data, Get.SEARCH_BOTH_GTE,
-            DbInternal.getReadOptions(lockMode));
+                key, data, Get.SEARCH_BOTH_GTE,
+                DbInternal.getReadOptions(lockMode));
 
         return result == null ?
-            OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
+                OperationStatus.NOTFOUND : OperationStatus.SUCCESS;
     }
 
     /**
      * Returns a count of the number of data items for the key to which the
      * cursor refers.
-     *
+     * <p>
      * <p>If the database is configured for duplicates, the database is scanned
      * internally, without taking any record locks, to count the number of
      * non-deleted entries.  Although the internal scan is more efficient under
      * some conditions, the result is the same as if a cursor were used to
      * iterate over the entries using {@link LockMode#READ_UNCOMMITTED}.</p>
-     *
+     * <p>
      * <p>If the database is not configured for duplicates, the count returned
      * is always zero or one, depending on the record at the cursor position is
      * deleted or not.</p>
-     *
+     * <p>
      * <p>The cost of this method is directly proportional to the number of
      * records scanned.</p>
      *
      * @return A count of the number of data items for the key to which the
      * cursor refers.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
      */
     public int count() {
 
@@ -2219,18 +2046,18 @@ public class Cursor implements ForwardCursor {
     /**
      * Returns a rough estimate of the count of the number of data items for
      * the key to which the cursor refers.
-     *
+     * <p>
      * <p>If the database is configured for duplicates, a quick estimate of the
      * number of records is computed using information in the Btree.  Because
      * the Btree is unbalanced, in some cases the estimate may be off by a
      * factor of two or more.  The estimate is accurate when the number of
      * records is less than the configured {@link
      * DatabaseConfig#setNodeMaxEntries NodeMaxEntries}.</p>
-     *
+     * <p>
      * <p>If the database is not configured for duplicates, the count returned
      * is always zero or one, depending on the record at the cursor position is
      * deleted or not.</p>
-     *
+     * <p>
      * <p>The cost of this method is fixed, rather than being proportional to
      * the number of records scanned.  Because its accuracy is variable, this
      * method should normally be used when accuracy is not required, such as
@@ -2240,17 +2067,14 @@ public class Cursor implements ForwardCursor {
      *
      * @return an estimate of the count of the number of data items for the key
      * to which the cursor refers.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if the cursor or database has been closed,
-     * or the cursor is uninitialized (not positioned on a record), or the
-     * non-transactional cursor was created in a different thread.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if the cursor or database has been closed,
+     *                                     or the cursor is uninitialized (not positioned on a record), or the
+     *                                     non-transactional cursor was created in a different thread.
      */
     public long countEstimate() {
 
@@ -2263,7 +2087,7 @@ public class Cursor implements ForwardCursor {
     /**
      * Internal version of delete() that does no parameter checking.  Notify
      * triggers, update secondaries and enforce foreign key constraints.
-     *
+     * <p>
      * Note that this algorithm is duplicated in Database and Cursor for
      * efficiency reasons: in Cursor delete we must separately fetch the key
      * and data, while in Database delete we know the key and have to search
@@ -2276,23 +2100,24 @@ public class Cursor implements ForwardCursor {
 
         final boolean hasUserTriggers = (dbImpl.getTriggers() != null);
         final boolean hasAssociations = (dbHandle != null) &&
-            dbHandle.hasSecondaryOrForeignKeyAssociations();
+                dbHandle.hasSecondaryOrForeignKeyAssociations();
 
-        if (hasAssociations) {
+        if(hasAssociations) {
             try {
                 dbImpl.getEnv().getSecondaryAssociationLock().
-                    readLock().lockInterruptibly();
-            } catch (InterruptedException e) {
+                        readLock().lockInterruptibly();
+            } catch(InterruptedException e) {
                 throw new ThreadInterruptedException(dbImpl.getEnv(), e);
             }
         }
         try {
             /* The key is needed if there are secondaries or triggers. */
             final DatabaseEntry key;
-            if (hasAssociations || hasUserTriggers) {
+            if(hasAssociations || hasUserTriggers) {
                 key = new DatabaseEntry();
                 key.setData(cursorImpl.getCurrentKey());
-            } else {
+            }
+            else {
                 key = null;
             }
 
@@ -2303,12 +2128,13 @@ public class Cursor implements ForwardCursor {
             final Collection<SecondaryDatabase> secondaries;
             final Collection<SecondaryDatabase> fkSecondaries;
             final boolean needOldData;
-            if (hasAssociations) {
+            if(hasAssociations) {
                 secondaries = dbHandle.secAssoc.getSecondaries(key);
                 fkSecondaries = dbHandle.foreignKeySecondaries;
                 needOldData = hasUserTriggers ||
-                    SecondaryDatabase.needOldDataForDelete(secondaries);
-            } else {
+                        SecondaryDatabase.needOldDataForDelete(secondaries);
+            }
+            else {
                 secondaries = null;
                 fkSecondaries = null;
                 needOldData = hasUserTriggers;
@@ -2320,18 +2146,19 @@ public class Cursor implements ForwardCursor {
              * RMW before calling onForeignKeyDelete.
              */
             final DatabaseEntry oldData =
-                needOldData ? (new DatabaseEntry()) : null;
+                    needOldData ? (new DatabaseEntry()) : null;
 
             final OperationResult readResult;
 
-            if (needOldData || hasAssociations) {
+            if(needOldData || hasAssociations) {
                 readResult = getCurrentInternal(
-                    key, oldData, LockMode.RMW, cacheMode);
+                        key, oldData, LockMode.RMW, cacheMode);
 
-                if (readResult == null) {
+                if(readResult == null) {
                     return null;
                 }
-            } else {
+            }
+            else {
                 readResult = null;
             }
 
@@ -2340,8 +2167,8 @@ public class Cursor implements ForwardCursor {
              * ForeignKeyDeleteAction.ABORT is applied before deletions.
              */
             final Locker locker = cursorImpl.getLocker();
-            if (fkSecondaries != null) {
-                for (final SecondaryDatabase secDb : fkSecondaries) {
+            if(fkSecondaries != null) {
+                for(final SecondaryDatabase secDb : fkSecondaries) {
                     secDb.onForeignKeyDelete(locker, key, cacheMode);
                 }
             }
@@ -2350,9 +2177,9 @@ public class Cursor implements ForwardCursor {
              * The actual deletion.
              */
             final OperationResult deleteResult =
-                deleteNoNotify(cacheMode, repContext);
+                    deleteNoNotify(cacheMode, repContext);
 
-            if (deleteResult == null) {
+            if(deleteResult == null) {
                 return null;
             }
 
@@ -2361,33 +2188,33 @@ public class Cursor implements ForwardCursor {
              * will lock the primary before the secondaries. This locking order
              * is required for secondary deadlock avoidance.
              */
-            if (secondaries != null) {
+            if(secondaries != null) {
                 int nWrites = 0;
 
-                for (final SecondaryDatabase secDb : secondaries) {
+                for(final SecondaryDatabase secDb : secondaries) {
                     nWrites += secDb.updateSecondary(
-                        locker, null /*cursor*/, key,
-                        oldData, null /*newData*/, cacheMode,
-                        0 /*expirationTime*/, false /*expirationUpdated*/,
-                        readResult.getExpirationTime());
+                            locker, null /*cursor*/, key,
+                            oldData, null /*newData*/, cacheMode,
+                            0 /*expirationTime*/, false /*expirationUpdated*/,
+                            readResult.getExpirationTime());
                 }
 
                 cursorImpl.setNSecondaryWrites(nWrites);
             }
 
             /* Run triggers after actual deletion. */
-            if (hasUserTriggers) {
+            if(hasUserTriggers) {
                 TriggerManager.runDeleteTriggers(locker, dbImpl, key, oldData);
             }
 
             return deleteResult;
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         } finally {
-            if (hasAssociations) {
+            if(hasAssociations) {
                 dbImpl.getEnv().getSecondaryAssociationLock().
-                    readLock().unlock();
+                        readLock().unlock();
             }
         }
     }
@@ -2399,7 +2226,7 @@ public class Cursor implements ForwardCursor {
     OperationResult deleteNoNotify(final CacheMode cacheMode,
                                    final ReplicationContext repContext) {
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             checkTxnState();
 
             /*
@@ -2409,15 +2236,15 @@ public class Cursor implements ForwardCursor {
             beginUseExistingCursor(cacheMode);
 
             final OperationResult result =
-                cursorImpl.deleteCurrentRecord(repContext);
+                    cursorImpl.deleteCurrentRecord(repContext);
 
-            if (result != null) {
+            if(result != null) {
                 dbImpl.getEnv().incDeleteOps(dbImpl);
             }
 
             endUseExistingCursor();
             return result;
-       }
+        }
     }
 
     /**
@@ -2428,24 +2255,24 @@ public class Cursor implements ForwardCursor {
      * associated Database handle.
      */
     OperationResult putForReplay(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LN ln,
-        final int expiration,
-        final boolean expirationInHours,
-        final PutMode putMode,
-        final ReplicationContext repContext) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LN ln,
+            final int expiration,
+            final boolean expirationInHours,
+            final PutMode putMode,
+            final ReplicationContext repContext) {
 
         assert putMode != PutMode.CURRENT;
 
         final ExpirationInfo expInfo = new ExpirationInfo(
-            expiration, expirationInHours, true /*updateExpiration*/);
+                expiration, expirationInHours, true /*updateExpiration*/);
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             checkTxnState();
 
             return putNotify(
-                key, data, ln, null, expInfo, putMode, repContext);
+                    key, data, ln, null, expInfo, putMode, repContext);
         }
     }
 
@@ -2454,29 +2281,29 @@ public class Cursor implements ForwardCursor {
      * duplicates, notifies triggers, and prevents phantoms.
      */
     OperationResult putInternal(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo,
-        final PutMode putMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo,
+            final PutMode putMode) {
 
         checkUpdatesAllowed(expInfo);
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             checkTxnState();
 
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
                 return putHandleDups(
-                    key, data, cacheMode, expInfo, putMode);
+                        key, data, cacheMode, expInfo, putMode);
             }
 
-            if (putMode == PutMode.NO_DUP_DATA) {
+            if(putMode == PutMode.NO_DUP_DATA) {
                 throw new UnsupportedOperationException(
-                    "Database is not configured for duplicate data.");
+                        "Database is not configured for duplicate data.");
             }
 
             return putNoDups(
-                key, data, cacheMode, expInfo, putMode);
+                    key, data, cacheMode, expInfo, putMode);
         }
     }
 
@@ -2484,24 +2311,24 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for the various 'putXXX' operations.
      */
     private OperationResult putHandleDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo,
-        final PutMode putMode) {
-        
-        switch (putMode) {
-        case OVERWRITE:
-            return dupsPutOverwrite(key, data, cacheMode, expInfo);
-        case NO_OVERWRITE:
-            return dupsPutNoOverwrite(key, data, cacheMode, expInfo);
-        case NO_DUP_DATA:
-            return dupsPutNoDupData(key, data, cacheMode, expInfo);
-        case CURRENT:
-            return dupsPutCurrent(data, cacheMode, expInfo);
-        default:
-            throw EnvironmentFailureException.unexpectedState(
-                putMode.toString());
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo,
+            final PutMode putMode) {
+
+        switch(putMode) {
+            case OVERWRITE:
+                return dupsPutOverwrite(key, data, cacheMode, expInfo);
+            case NO_OVERWRITE:
+                return dupsPutNoOverwrite(key, data, cacheMode, expInfo);
+            case NO_DUP_DATA:
+                return dupsPutNoDupData(key, data, cacheMode, expInfo);
+            case CURRENT:
+                return dupsPutCurrent(data, cacheMode, expInfo);
+            default:
+                throw EnvironmentFailureException.unexpectedState(
+                        putMode.toString());
         }
     }
 
@@ -2509,30 +2336,30 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for the put() operation.
      */
     private OperationResult dupsPutOverwrite(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo) {
 
         final DatabaseEntry twoPartKey = DupKeyData.combine(key, data);
-        
+
         return putNoDups(
-            twoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
-            PutMode.OVERWRITE);
+                twoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
+                PutMode.OVERWRITE);
     }
 
     /**
      * Interpret duplicates for putNoOverwrite() operation.
-     *
+     * <p>
      * The main purpose of this method is to guarantee that when two threads
      * call putNoOverwrite concurrently, only one of them will succeed. In
      * other words, if putNoOverwrite is called for all dup insertions, there
      * will always be at most one dup per key.
-     *
+     * <p>
      * Next key locking must be used to prevent two insertions, since there is
      * no other way to block an insertion of dup Y in another thread, while
      * inserting dup X in the current thread.  This is tested by AtomicPutTest.
-     *
+     * <p>
      * Although this method does extra searching and locking compared to
      * putNoOverwrite for a non-dup DB (or to putNoDupData for a dup DB), that
      * is not considered a significant issue because this method is rarely, if
@@ -2540,28 +2367,28 @@ public class Cursor implements ForwardCursor {
      * for compatibility with the DB core API.
      */
     private OperationResult dupsPutNoOverwrite(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo) {
 
         final DatabaseEntry key2 = new DatabaseEntry();
         final DatabaseEntry data2 = new DatabaseEntry();
 
-        try (final Cursor c = dup(false /*samePosition*/)) {
+        try(final Cursor c = dup(false /*samePosition*/)) {
             c.setNonSticky(true);
 
             /* Lock next key (or EOF if none) exclusively, before we insert. */
             setEntry(key, key2);
 
             OperationResult result = c.dupsGetSearchKeyRange(
-                key2, data2, LockMode.RMW, cacheMode);
+                    key2, data2, LockMode.RMW, cacheMode);
 
-            if (result != null && key.equals(key2)) {
+            if(result != null && key.equals(key2)) {
                 /* Key exists, no need for further checks. */
                 return null;
             }
-            if (result == null) {
+            if(result == null) {
                 /* No next key exists, lock EOF. */
                 c.cursorImpl.lockEof(LockType.WRITE);
             }
@@ -2571,14 +2398,14 @@ public class Cursor implements ForwardCursor {
 
             result = c.dupsGetSearchKey(key2, data2, LockMode.RMW, cacheMode);
 
-            if (result != null) {
+            if(result != null) {
                 return null;
             }
 
             /* Insertion can safely be done now. */
             result = c.dupsPutNoDupData(key, data, cacheMode, expInfo);
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
 
@@ -2592,68 +2419,68 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for putNoDupData operation.
      */
     private OperationResult dupsPutNoDupData(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo) {
 
         final DatabaseEntry twoPartKey = DupKeyData.combine(key, data);
-        
+
         return putNoDups(
-            twoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
-            PutMode.NO_OVERWRITE);
+                twoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
+                PutMode.NO_OVERWRITE);
     }
 
     /**
      * Interpret duplicates for putCurrent operation.
-     *
+     * <p>
      * Get old key/data, replace data portion, and put new key/data.
-     *
+     * <p>
      * Arguably we could skip the replacement if there is no user defined
      * comparison function and the new data is the same.
      */
     private OperationResult dupsPutCurrent(
-        final DatabaseEntry newData,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo) {
+            final DatabaseEntry newData,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo) {
 
         final DatabaseEntry oldTwoPartKey =
-            new DatabaseEntry(cursorImpl.getCurrentKey());
+                new DatabaseEntry(cursorImpl.getCurrentKey());
 
         final DatabaseEntry key = new DatabaseEntry();
         DupKeyData.split(oldTwoPartKey, key, null);
 
         final DatabaseEntry newTwoPartKey = DupKeyData.combine(key, newData);
-        
+
         return putNoDups(
-            newTwoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
-            PutMode.CURRENT);
+                newTwoPartKey, EMPTY_DUP_DATA, cacheMode, expInfo,
+                PutMode.CURRENT);
     }
 
     /**
      * Eventually, all insertions/updates are happening via this method.
      */
     private OperationResult putNoDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo,
-        final PutMode putMode) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo,
+            final PutMode putMode) {
+
         final LN ln = (putMode == PutMode.CURRENT) ?
-            null :
-            LN.makeLN(dbImpl.getEnv(), data);
+                null :
+                LN.makeLN(dbImpl.getEnv(), data);
 
         return putNotify(
-            key, data, ln, cacheMode, expInfo, putMode,
-            dbImpl.getRepContext());
+                key, data, ln, cacheMode, expInfo, putMode,
+                dbImpl.getRepContext());
     }
 
     /**
      * This single method is used for all put operations in order to notify
      * triggers and perform secondary updates in one place.  Prevents phantoms.
      * Does not interpret duplicates.
-     *
+     * <p>
      * WARNING: When the cursor has no Database handle, which is true when
      * called from the replication replayer, this method notifies user triggers
      * but does not do secondary updates.  This is correct for replication
@@ -2664,46 +2491,43 @@ public class Cursor implements ForwardCursor {
      * fragile and needs work.
      *
      * @param putMode One of OVERWRITE, NO_OVERWITE, CURRENT. (NO_DUPS_DATA
-     * has been converted to NO_OVERWRITE).  Note: OVERWRITE may perform an
-     * insertion or an update, NO_OVERWRITE performs insertion only, and
-     * CURRENT updates the slot where the cursor is currently positioned at.
-     *
-     * @param key The new key value for the BIN slot S to be inserted/updated.
-     * Cannot be partial. For a no-dups DB, it is null if the putMode is
-     * CURRENT. For dups DBs it is a 2-part key: if the putMode is CURRENT,
-     * it combines the current primary key of slot S with the original,
-     * user-provided data; for OVERWRITE and NO_OVERWRITE, it combines the
-     * original, user-provided key and data. In case of update, "key" must
-     * compare equal to S.key (otherwise DuplicateDataException is thrown),
-     * but the 2 keys may not be identical if custom comparators are used.
-     * So, S.key will actually be replaced by "key".
-     *
-     * @param data The new data for the LN associated with the BIN slot. For
-     * dups DBs it is EMPTY_DUPS_DATA. Note: for dups DBs the original,
-     * user-provided "data" must not be partial.
-     *
-     * @param ln LN to be inserted, if insertion is allowed by putMode. null
-     * for CURRENT (since insertion is not allowed), not null for other modes.
+     *                has been converted to NO_OVERWRITE).  Note: OVERWRITE may perform an
+     *                insertion or an update, NO_OVERWRITE performs insertion only, and
+     *                CURRENT updates the slot where the cursor is currently positioned at.
+     * @param key     The new key value for the BIN slot S to be inserted/updated.
+     *                Cannot be partial. For a no-dups DB, it is null if the putMode is
+     *                CURRENT. For dups DBs it is a 2-part key: if the putMode is CURRENT,
+     *                it combines the current primary key of slot S with the original,
+     *                user-provided data; for OVERWRITE and NO_OVERWRITE, it combines the
+     *                original, user-provided key and data. In case of update, "key" must
+     *                compare equal to S.key (otherwise DuplicateDataException is thrown),
+     *                but the 2 keys may not be identical if custom comparators are used.
+     *                So, S.key will actually be replaced by "key".
+     * @param data    The new data for the LN associated with the BIN slot. For
+     *                dups DBs it is EMPTY_DUPS_DATA. Note: for dups DBs the original,
+     *                user-provided "data" must not be partial.
+     * @param ln      LN to be inserted, if insertion is allowed by putMode. null
+     *                for CURRENT (since insertion is not allowed), not null for other modes.
      */
     private OperationResult putNotify(
-        DatabaseEntry key,
-        final DatabaseEntry data,
-        final LN ln,
-        final CacheMode cacheMode,
-        ExpirationInfo expInfo,
-        final PutMode putMode,
-        final ReplicationContext repContext) {
+            DatabaseEntry key,
+            final DatabaseEntry data,
+            final LN ln,
+            final CacheMode cacheMode,
+            ExpirationInfo expInfo,
+            final PutMode putMode,
+            final ReplicationContext repContext) {
 
         final boolean hasUserTriggers = (dbImpl.getTriggers() != null);
         final boolean hasAssociations = (dbHandle != null) &&
-            dbHandle.hasSecondaryOrForeignKeyAssociations();
+                dbHandle.hasSecondaryOrForeignKeyAssociations();
 
-        if (hasAssociations) {
+        if(hasAssociations) {
             try {
                 dbImpl.getEnv().getSecondaryAssociationLock().
-                    readLock().lockInterruptibly();
+                        readLock().lockInterruptibly();
 
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 throw new ThreadInterruptedException(dbImpl.getEnv(), e);
             }
         }
@@ -2712,8 +2536,8 @@ public class Cursor implements ForwardCursor {
             final OperationResult result;
             DatabaseEntry replaceKey = null;
 
-            if (putMode == PutMode.CURRENT) {
-                if (key == null) {
+            if(putMode == PutMode.CURRENT) {
+                if(key == null) {
                     /*
                      * This is a no-dups DB. The slot key will not be affected
                      * by the update. However, if there are indexes/triggers,
@@ -2727,18 +2551,19 @@ public class Cursor implements ForwardCursor {
                      * value of the key here by what is effectively a
                      * dirty-read.
                      */
-                    if (hasAssociations || hasUserTriggers) {
+                    if(hasAssociations || hasUserTriggers) {
                         key = new DatabaseEntry();
                         /*
                          * Latch this.bin and make "key" point to the
-                         * slot key; then unlatch this.bin. 
+                         * slot key; then unlatch this.bin.
                          */
                         key.setData(cursorImpl.getCurrentKey());
                     }
-                } else {
+                }
+                else {
                     /*
                      * This is a dups DB. The slot key must be replaced by the
-                     * given 2-part key. We don't need the pre-update slot key. 
+                     * given 2-part key. We don't need the pre-update slot key.
                      */
                     replaceKey = key;
                 }
@@ -2749,7 +2574,7 @@ public class Cursor implements ForwardCursor {
              *   update.
              * - newData: if needed, will be set to the full LN data after
              *   the update; may be different than newData only if newData
-             *   is partial. 
+             *   is partial.
              */
             DatabaseEntry oldData = null;
             DatabaseEntry newData = null;
@@ -2760,20 +2585,20 @@ public class Cursor implements ForwardCursor {
              */
             Collection<SecondaryDatabase> secondaries = null;
 
-            if (hasAssociations || hasUserTriggers) {
+            if(hasAssociations || hasUserTriggers) {
 
-                if (data.getPartial()) {
+                if(data.getPartial()) {
                     newData = new DatabaseEntry();
                 }
 
-                if (hasUserTriggers) {
+                if(hasUserTriggers) {
                     oldData = new DatabaseEntry();
                 }
 
-                if (hasAssociations) {
+                if(hasAssociations) {
                     secondaries = dbHandle.secAssoc.getSecondaries(key);
-                    if (oldData == null &&
-                        SecondaryDatabase.needOldDataForUpdate(secondaries)) {
+                    if(oldData == null &&
+                            SecondaryDatabase.needOldDataForUpdate(secondaries)) {
                         oldData = new DatabaseEntry();
                     }
 
@@ -2782,27 +2607,28 @@ public class Cursor implements ForwardCursor {
                      * ExpirationUpdated and OldExpirationTime for the
                      * secondary update.
                      */
-                    if (expInfo == null) {
+                    if(expInfo == null) {
                         expInfo = new ExpirationInfo(0, false, false);
                     }
                 }
             }
 
             /* Perform the actual put operation. */
-            if (putMode == PutMode.CURRENT) {
+            if(putMode == PutMode.CURRENT) {
 
                 result = putCurrentNoNotify(
-                    replaceKey, data, oldData, newData, cacheMode,
-                    expInfo, repContext);
+                        replaceKey, data, oldData, newData, cacheMode,
+                        expInfo, repContext);
 
-            } else {
+            }
+            else {
 
                 result = putNoNotify(
-                    key, data, ln, cacheMode, expInfo, putMode,
-                    oldData, newData, repContext);
+                        key, data, ln, cacheMode, expInfo, putMode,
+                        oldData, newData, repContext);
             }
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
 
@@ -2817,11 +2643,11 @@ public class Cursor implements ForwardCursor {
              * expirationTime is passed to updateSecondary below, which will
              * prevent secondary integrity errors.
              */
-            if (oldData != null && oldData.getData() == null) {
+            if(oldData != null && oldData.getData() == null) {
                 oldData = null;
             }
 
-            if (newData == null) {
+            if(newData == null) {
                 newData = data;
             }
 
@@ -2831,40 +2657,40 @@ public class Cursor implements ForwardCursor {
              */
             final Locker locker = cursorImpl.getLocker();
 
-            if (secondaries != null) {
+            if(secondaries != null) {
                 int nWrites = 0;
 
-                for (final SecondaryDatabase secDb : secondaries) {
+                for(final SecondaryDatabase secDb : secondaries) {
 
-                    if (!result.isUpdate() ||
-                        secDb.updateMayChangeSecondary()) {
+                    if(!result.isUpdate() ||
+                            secDb.updateMayChangeSecondary()) {
 
                         nWrites += secDb.updateSecondary(
-                            locker, null, key, oldData, newData,
-                            cacheMode,
-                            result.getExpirationTime(),
-                            expInfo.getExpirationUpdated(),
-                            expInfo.getOldExpirationTime());
+                                locker, null, key, oldData, newData,
+                                cacheMode,
+                                result.getExpirationTime(),
+                                expInfo.getExpirationUpdated(),
+                                expInfo.getOldExpirationTime());
                     }
                 }
 
                 cursorImpl.setNSecondaryWrites(nWrites);
             }
 
-            if (hasUserTriggers) {
+            if(hasUserTriggers) {
                 TriggerManager.runPutTriggers(
-                    locker, dbImpl, key, oldData, newData);
+                        locker, dbImpl, key, oldData, newData);
             }
 
             return result;
 
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         } finally {
-            if (hasAssociations) {
+            if(hasAssociations) {
                 dbImpl.getEnv().getSecondaryAssociationLock().
-                    readLock().unlock();
+                        readLock().unlock();
             }
         }
     }
@@ -2873,47 +2699,41 @@ public class Cursor implements ForwardCursor {
      * Search for the key and perform insertion or update. Does not notify
      * triggers or perform secondary updates.  Prevents phantoms.
      *
-     * @param putMode is either OVERWRITE, NO_OEVERWRITE, or BLIND_INSERTION
-     *
-     * @param key The new key value for the BIN slot S to be inserted/updated.
-     * Cannot be partial. For dups DBs it is a 2-part key combining the
-     * original, user-provided key and data. In case of update, "key" must
-     * compare equal to S.key (otherwise DuplicateDataException is thrown),
-     * but the 2 keys may not be identical if custom comparators are used.
-     * So, S.key will actually be replaced by "key".
-     *
-     * @param data In case of update, the new data to (perhaps partially)
-     * replace the data of the LN associated with the BIN slot. For dups DBs
-     * it is EMPTY_DUPS_DATA. Note: for dups DBs the original, user-provided
-     * "data" must not be partial.
-     *
-     * @param ln is normally a new LN node that is created for insertion, and
-     * will be discarded if an update occurs.  However, HA will pass an
-     * existing node.
-     *
+     * @param putMode       is either OVERWRITE, NO_OEVERWRITE, or BLIND_INSERTION
+     * @param key           The new key value for the BIN slot S to be inserted/updated.
+     *                      Cannot be partial. For dups DBs it is a 2-part key combining the
+     *                      original, user-provided key and data. In case of update, "key" must
+     *                      compare equal to S.key (otherwise DuplicateDataException is thrown),
+     *                      but the 2 keys may not be identical if custom comparators are used.
+     *                      So, S.key will actually be replaced by "key".
+     * @param data          In case of update, the new data to (perhaps partially)
+     *                      replace the data of the LN associated with the BIN slot. For dups DBs
+     *                      it is EMPTY_DUPS_DATA. Note: for dups DBs the original, user-provided
+     *                      "data" must not be partial.
+     * @param ln            is normally a new LN node that is created for insertion, and
+     *                      will be discarded if an update occurs.  However, HA will pass an
+     *                      existing node.
      * @param returnOldData To receive, in case of update, the old LN data
-     * (before the update). It is needed only by DBs with indexes/triggers;
-     * will be null otherwise.
-     *
+     *                      (before the update). It is needed only by DBs with indexes/triggers;
+     *                      will be null otherwise.
      * @param returnNewData To receive the full data of the new or updated LN.
-     * It is needed only by DBs with indexes/triggers and only if "data" is
-     * partial; will be null otherwise. Note: "returnNewData" may be different
-     * than "data" only if "data" is partial.
-
+     *                      It is needed only by DBs with indexes/triggers and only if "data" is
+     *                      partial; will be null otherwise. Note: "returnNewData" may be different
+     *                      than "data" only if "data" is partial.
      * @return OperationResult where isUpdate() distinguishes insertions and
      * updates.
      */
     private OperationResult putNoNotify(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LN ln,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo,
-        final PutMode putMode,
-        final DatabaseEntry returnOldData,
-        final DatabaseEntry returnNewData,
-        final ReplicationContext repContext) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LN ln,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo,
+            final PutMode putMode,
+            final DatabaseEntry returnOldData,
+            final DatabaseEntry returnNewData,
+            final ReplicationContext repContext) {
+
         assert key != null;
         assert ln != null;
         assert putMode != null;
@@ -2936,8 +2756,8 @@ public class Cursor implements ForwardCursor {
              */
             Locker cursorLocker = cursorImpl.getLocker();
 
-            if (envImpl.getTxnManager().
-                areOtherSerializableTransactionsActive(cursorLocker)) {
+            if(envImpl.getTxnManager().
+                    areOtherSerializableTransactionsActive(cursorLocker)) {
 
                 /*
                  * nextKeyCursor is created with retainNonTxnLocks == true,
@@ -2947,7 +2767,7 @@ public class Cursor implements ForwardCursor {
                  * nextKeyLocker.operationEnd()
                  */
                 nextKeyLocker = BuddyLocker.createBuddyLocker(
-                    envImpl, cursorLocker);
+                        envImpl, cursorLocker);
 
                 nextKeyCursor = new CursorImpl(dbImpl, nextKeyLocker);
 
@@ -2960,17 +2780,19 @@ public class Cursor implements ForwardCursor {
 
             /* Perform operation. */
             result = dup.insertOrUpdateRecord(
-                key, data, ln, expInfo, putMode,
-                returnOldData, returnNewData, repContext);
+                    key, data, ln, expInfo, putMode,
+                    returnOldData, returnNewData, repContext);
 
-            if (result == null) {
-                if (putMode == PutMode.NO_OVERWRITE) {
+            if(result == null) {
+                if(putMode == PutMode.NO_OVERWRITE) {
                     envImpl.incInsertFailOps(dbImpl);
                 }
-            } else {
-                if (!result.isUpdate()) {
+            }
+            else {
+                if(!result.isUpdate()) {
                     envImpl.incInsertOps(dbImpl);
-                } else {
+                }
+                else {
                     envImpl.incUpdateOps(dbImpl);
                 }
             }
@@ -2982,28 +2804,29 @@ public class Cursor implements ForwardCursor {
         } finally {
 
             try {
-                if (dup != null) {
+                if(dup != null) {
                     endMoveCursor(dup, result != null);
                 }
 
-                if (nextKeyCursor != null) {
+                if(nextKeyCursor != null) {
                     nextKeyCursor.close();
                 }
 
                 /* Release the next-key lock. */
-                if (nextKeyLocker != null) {
+                if(nextKeyLocker != null) {
                     nextKeyLocker.operationEnd();
                 }
-            } catch (Exception e) {
-                if (success) {
+            } catch(Exception e) {
+                if(success) {
                     throw e;
-                } else {
+                }
+                else {
                     /*
                      * Log the exception thrown by the cleanup actions and
                      * allow the original exception to be thrown
                      */
                     LoggerUtils.traceAndLogException(
-                        dbImpl.getEnv(), "Cursor", "putNoNotify", "", e);
+                            dbImpl.getEnv(), "Cursor", "putNoNotify", "", e);
                 }
             }
         }
@@ -3013,44 +2836,41 @@ public class Cursor implements ForwardCursor {
      * Update the data at the current position.  No new LN, dup cursor, or
      * phantom handling is needed.  Does not interpret duplicates.
      *
-     * @param key The new key value for the BIN slot S to be updated. Cannot
-     * be partial. For a no-dups DB, it is null. For dups DBs it is a 2-part
-     * key combining the current primary key of slot S with the original,
-     * user-provided data. "key" (if not null) must compare equal to S.key
-     * (otherwise DuplicateDataException is thrown), but the 2 keys may not
-     * be identical if custom comparators are used. So, S.key will actually
-     * be replaced by "key".
-     *
-     * @param data The new data to (perhaps partially) replace the data of the
-     * LN associated with the BIN slot. For dups DBs it is EMPTY_DUPS_DATA.
-     * Note: for dups DBs the original, user-provided "data" must not be
-     * partial.
-     *
+     * @param key           The new key value for the BIN slot S to be updated. Cannot
+     *                      be partial. For a no-dups DB, it is null. For dups DBs it is a 2-part
+     *                      key combining the current primary key of slot S with the original,
+     *                      user-provided data. "key" (if not null) must compare equal to S.key
+     *                      (otherwise DuplicateDataException is thrown), but the 2 keys may not
+     *                      be identical if custom comparators are used. So, S.key will actually
+     *                      be replaced by "key".
+     * @param data          The new data to (perhaps partially) replace the data of the
+     *                      LN associated with the BIN slot. For dups DBs it is EMPTY_DUPS_DATA.
+     *                      Note: for dups DBs the original, user-provided "data" must not be
+     *                      partial.
      * @param returnOldData To receive the old LN data (before the update).
-     * It is needed only by DBs with indexes/triggers; will be null otherwise.
-     *
+     *                      It is needed only by DBs with indexes/triggers; will be null otherwise.
      * @param returnNewData To receive the full data of the updated LN.
-     * It is needed only by DBs with indexes/triggers and only if "data" is
-     * partial; will be null otherwise. Note: "returnNewData" may be different
-     * than "data" only if "data" is partial.
+     *                      It is needed only by DBs with indexes/triggers and only if "data" is
+     *                      partial; will be null otherwise. Note: "returnNewData" may be different
+     *                      than "data" only if "data" is partial.
      */
     private OperationResult putCurrentNoNotify(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final DatabaseEntry returnOldData,
-        final DatabaseEntry returnNewData,
-        final CacheMode cacheMode,
-        final ExpirationInfo expInfo,
-        final ReplicationContext repContext) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final DatabaseEntry returnOldData,
+            final DatabaseEntry returnNewData,
+            final CacheMode cacheMode,
+            final ExpirationInfo expInfo,
+            final ReplicationContext repContext) {
+
         assert data != null;
 
         beginUseExistingCursor(cacheMode);
 
         final OperationResult result = cursorImpl.updateCurrentRecord(
-            key, data, expInfo, returnOldData, returnNewData, repContext);
+                key, data, expInfo, returnOldData, returnNewData, repContext);
 
-        if (result != null) {
+        if(result != null) {
             dbImpl.getEnv().incUpdateOps(dbImpl);
         }
 
@@ -3063,16 +2883,16 @@ public class Cursor implements ForwardCursor {
      * or prevent phantoms.
      */
     OperationResult getCurrentInternal(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
-        
-        synchronized (getTxnSynchronizer()) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
+
+        synchronized(getTxnSynchronizer()) {
 
             checkTxnState();
 
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
                 return getCurrentHandleDups(key, data, lockMode, cacheMode);
             }
 
@@ -3094,17 +2914,17 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for getCurrent operation.
      */
     private OperationResult getCurrentHandleDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final DatabaseEntry twoPartKey = new DatabaseEntry();
 
         final OperationResult result = getCurrentNoDups(
-            twoPartKey, NO_RETURN_DATA, lockMode, cacheMode);
+                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
 
@@ -3113,10 +2933,10 @@ public class Cursor implements ForwardCursor {
     }
 
     private OperationResult getCurrentNoDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         boolean success = false;
 
@@ -3126,18 +2946,18 @@ public class Cursor implements ForwardCursor {
 
         try {
             final OperationResult result = cursorImpl.lockAndGetCurrent(
-                key, data, lockType, lockMode == LockMode.READ_UNCOMMITTED_ALL,
-                false /*isLatched*/, false /*unlatch*/);
+                    key, data, lockType, lockMode == LockMode.READ_UNCOMMITTED_ALL,
+                    false /*isLatched*/, false /*unlatch*/);
 
             success = true;
             return result;
 
         } finally {
 
-            if (success &&
-                !dbImpl.isInternalDb() &&
-                cursorImpl.getBIN() != null &&
-                cursorImpl.getBIN().isBINDelta()) {
+            if(success &&
+                    !dbImpl.isInternalDb() &&
+                    cursorImpl.getBIN() != null &&
+                    cursorImpl.getBIN().isBINDelta()) {
                 dbImpl.getEnv().incBinDeltaGets();
             }
 
@@ -3151,27 +2971,28 @@ public class Cursor implements ForwardCursor {
      * Interprets duplicates.
      */
     OperationResult position(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final boolean first) {
-        
-        synchronized (getTxnSynchronizer()) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final boolean first) {
+
+        synchronized(getTxnSynchronizer()) {
 
             checkTxnState();
 
             final OperationResult result;
 
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
                 result = positionHandleDups(
-                    key, data, lockMode, cacheMode, first);
-            } else {
+                        key, data, lockMode, cacheMode, first);
+            }
+            else {
                 result = positionNoDups(
-                    key, data, lockMode, cacheMode, first);
+                        key, data, lockMode, cacheMode, first);
             }
 
-            if (result != null) {
+            if(result != null) {
                 dbImpl.getEnv().incPositionOps(dbImpl);
             }
 
@@ -3183,18 +3004,18 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for getFirst and getLast operations.
      */
     private OperationResult positionHandleDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final boolean first) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final boolean first) {
+
         final DatabaseEntry twoPartKey = new DatabaseEntry();
 
         final OperationResult result = positionNoDups(
-            twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, first);
+                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, first);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
 
@@ -3206,48 +3027,48 @@ public class Cursor implements ForwardCursor {
      * Does not interpret duplicates.  Prevents phantoms.
      */
     private OperationResult positionNoDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final boolean first) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final boolean first) {
+
         try {
-            if (!isSerializableIsolation(lockMode)) {
+            if(!isSerializableIsolation(lockMode)) {
 
                 return positionAllowPhantoms(
-                    key, data, lockMode, cacheMode, false /*rangeLock*/,
-                    first);
+                        key, data, lockMode, cacheMode, false /*rangeLock*/,
+                        first);
             }
 
             /*
              * Perform range locking to prevent phantoms and handle restarts.
              */
-            while (true) {
+            while(true) {
                 try {
                     /* Range lock the EOF node before getLast. */
-                    if (!first) {
+                    if(!first) {
                         cursorImpl.lockEof(LockType.RANGE_READ);
                     }
 
                     /* Perform operation. Use a range lock for getFirst. */
                     final OperationResult result = positionAllowPhantoms(
-                        key, data, lockMode, cacheMode, first /*rangeLock*/,
-                        first);
+                            key, data, lockMode, cacheMode, first /*rangeLock*/,
+                            first);
 
                     /*
                      * Range lock the EOF node when getFirst returns null.
                      */
-                    if (first && result == null) {
+                    if(first && result == null) {
                         cursorImpl.lockEof(LockType.RANGE_READ);
                     }
 
                     return result;
-                } catch (RangeRestartException e) {
+                } catch(RangeRestartException e) {
                     // continue
                 }
             }
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -3257,54 +3078,55 @@ public class Cursor implements ForwardCursor {
      * Positions without preventing phantoms.
      */
     private OperationResult positionAllowPhantoms(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final boolean rangeLock,
-        final boolean first) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final boolean rangeLock,
+            final boolean first) {
+
         assert (key != null && data != null);
 
         OperationResult result = null;
 
         final CursorImpl dup =
-            beginMoveCursor(false /*samePosition*/, cacheMode);
+                beginMoveCursor(false /*samePosition*/, cacheMode);
 
         try {
             /* Search for first or last slot. */
-            if (!dup.positionFirstOrLast(first)) {
+            if(!dup.positionFirstOrLast(first)) {
                 /* Tree is empty. */
                 result = null;
-                if (LatchSupport.TRACK_LATCHES) {
+                if(LatchSupport.TRACK_LATCHES) {
                     LatchSupport.expectBtreeLatchesHeld(0);
                 }
-            } else {
+            }
+            else {
                 /*
                  * Found and latched first/last BIN in this tree.
                  * BIN may be empty.
                  */
-                if (LatchSupport.TRACK_LATCHES) {
+                if(LatchSupport.TRACK_LATCHES) {
                     LatchSupport.expectBtreeLatchesHeld(1);
                 }
 
                 final LockType lockType = getLockType(lockMode, rangeLock);
 
                 final boolean dirtyReadAll =
-                    lockMode == LockMode.READ_UNCOMMITTED_ALL;
+                        lockMode == LockMode.READ_UNCOMMITTED_ALL;
 
                 result = dup.lockAndGetCurrent(
-                    key, data, lockType, dirtyReadAll,
-                    true /*isLatched*/, false /*unlatch*/);
+                        key, data, lockType, dirtyReadAll,
+                        true /*isLatched*/, false /*unlatch*/);
 
-                if (result == null) {
+                if(result == null) {
                     /*
                      * The BIN may be empty or the slot we're pointing at may
                      * be deleted.
                      */
                     result = dup.getNext(
-                        key, data, lockType, dirtyReadAll, first,
-                        true /*isLatched*/, null /*rangeConstraint*/);
+                            key, data, lockType, dirtyReadAll, first,
+                            true /*isLatched*/, null /*rangeConstraint*/);
                 }
             }
         } finally {
@@ -3318,24 +3140,25 @@ public class Cursor implements ForwardCursor {
      * Retrieves the next or previous record. Prevents phantoms.
      */
     OperationResult retrieveNext(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final GetMode getMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final GetMode getMode) {
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             final OperationResult result;
 
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
                 result = retrieveNextHandleDups(
-                    key, data, lockMode, cacheMode, getMode);
-            } else {
+                        key, data, lockMode, cacheMode, getMode);
+            }
+            else {
                 result = retrieveNextNoDups(
-                    key, data, lockMode, cacheMode, getMode);
+                        key, data, lockMode, cacheMode, getMode);
             }
 
-            if (result != null) {
+            if(result != null) {
                 dbImpl.getEnv().incPositionOps(dbImpl);
             }
 
@@ -3347,29 +3170,29 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for getNext/Prev/etc operations.
      */
     private OperationResult retrieveNextHandleDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final GetMode getMode) {
-        
-        switch (getMode) {
-        case NEXT:
-        case PREV:
-            return dupsGetNextOrPrev(key, data, lockMode, cacheMode, getMode);
-        case NEXT_DUP:
-            return dupsGetNextOrPrevDup(
-                key, data, lockMode, cacheMode, GetMode.NEXT);
-        case PREV_DUP:
-            return dupsGetNextOrPrevDup(
-                key, data, lockMode, cacheMode, GetMode.PREV);
-        case NEXT_NODUP:
-            return dupsGetNextNoDup(key, data, lockMode, cacheMode);
-        case PREV_NODUP:
-            return dupsGetPrevNoDup(key, data, lockMode, cacheMode);
-        default:
-            throw EnvironmentFailureException.unexpectedState(
-                getMode.toString());
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final GetMode getMode) {
+
+        switch(getMode) {
+            case NEXT:
+            case PREV:
+                return dupsGetNextOrPrev(key, data, lockMode, cacheMode, getMode);
+            case NEXT_DUP:
+                return dupsGetNextOrPrevDup(
+                        key, data, lockMode, cacheMode, GetMode.NEXT);
+            case PREV_DUP:
+                return dupsGetNextOrPrevDup(
+                        key, data, lockMode, cacheMode, GetMode.PREV);
+            case NEXT_NODUP:
+                return dupsGetNextNoDup(key, data, lockMode, cacheMode);
+            case PREV_NODUP:
+                return dupsGetPrevNoDup(key, data, lockMode, cacheMode);
+            default:
+                throw EnvironmentFailureException.unexpectedState(
+                        getMode.toString());
         }
     }
 
@@ -3377,18 +3200,18 @@ public class Cursor implements ForwardCursor {
      * Interpret duplicates for getNext and getPrev.
      */
     private OperationResult dupsGetNextOrPrev(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final GetMode getMode) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final GetMode getMode) {
+
         final DatabaseEntry twoPartKey = new DatabaseEntry();
 
         final OperationResult result = retrieveNextNoDups(
-            twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, getMode);
+                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, getMode);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
         DupKeyData.split(twoPartKey, key, data);
@@ -3397,28 +3220,28 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getNextDup and getPrevDup.
-     *
+     * <p>
      * Move the cursor forward or backward by one record, and check the key
      * prefix to detect going out of the bounds of the duplicate set.
      */
     private OperationResult dupsGetNextOrPrevDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final GetMode getMode) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final GetMode getMode) {
+
         final byte[] currentKey = cursorImpl.getCurrentKey();
 
-        try (final Cursor c = dup(true /*samePosition*/)) {
+        try(final Cursor c = dup(true /*samePosition*/)) {
             c.setNonSticky(true);
             setPrefixConstraint(c, currentKey);
             final DatabaseEntry twoPartKey = new DatabaseEntry();
 
             final OperationResult result = c.retrieveNextNoDups(
-                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, getMode);
+                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, getMode);
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
             DupKeyData.split(twoPartKey, key, data);
@@ -3429,32 +3252,32 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getNextNoDup.
-     *
+     * <p>
      * Using a special comparator, search for first duplicate in the duplicate
      * set following the one for the current key.  For details see
      * DupKeyData.NextNoDupComparator.
      */
     private OperationResult dupsGetNextNoDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final byte[] currentKey = cursorImpl.getCurrentKey();
         final DatabaseEntry twoPartKey = DupKeyData.removeData(currentKey);
 
-        try (final Cursor c = dup(false /*samePosition*/)) {
+        try(final Cursor c = dup(false /*samePosition*/)) {
             c.setNonSticky(true);
 
             final Comparator<byte[]> searchComparator =
-                new DupKeyData.NextNoDupComparator(
-                    dbImpl.getBtreeComparator());
+                    new DupKeyData.NextNoDupComparator(
+                            dbImpl.getBtreeComparator());
 
             final OperationResult result = c.searchNoDups(
-                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                SearchMode.SET_RANGE, searchComparator);
+                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                    SearchMode.SET_RANGE, searchComparator);
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
 
@@ -3467,19 +3290,19 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getPrevNoDup.
-     *
+     * <p>
      * Move the cursor to the first duplicate in the duplicate set, then to the
      * previous record. If this fails because all dups at the current position
      * have been deleted, move the cursor backward to find the previous key.
-     *
+     * <p>
      * Note that we lock the first duplicate to enforce Serializable isolation.
      */
     private OperationResult dupsGetPrevNoDup(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
+
         final byte[] currentKey = cursorImpl.getCurrentKey();
         final DatabaseEntry twoPartKey = DupKeyData.removeData(currentKey);
         Cursor c = dup(false /*samePosition*/);
@@ -3488,17 +3311,17 @@ public class Cursor implements ForwardCursor {
             setPrefixConstraint(c, currentKey);
 
             OperationResult result = c.searchNoDups(
-                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                SearchMode.SET_RANGE, null /*comparator*/);
+                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                    SearchMode.SET_RANGE, null /*comparator*/);
 
-            if (result != null) {
+            if(result != null) {
                 c.rangeConstraint = null;
 
                 result = c.retrieveNextNoDups(
-                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                    GetMode.PREV);
+                        twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                        GetMode.PREV);
 
-                if (result == null) {
+                if(result == null) {
                     return null;
                 }
 
@@ -3514,17 +3337,17 @@ public class Cursor implements ForwardCursor {
 
         try {
             c.setNonSticky(true);
-            while (true) {
+            while(true) {
                 final OperationResult result =
-                    c.retrieveNextNoDups(
-                        twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                        GetMode.PREV);
+                        c.retrieveNextNoDups(
+                                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                                GetMode.PREV);
 
-                if (result == null) {
+                if(result == null) {
                     return null;
                 }
 
-                if (!haveSameDupPrefix(twoPartKey, currentKey)) {
+                if(!haveSameDupPrefix(twoPartKey, currentKey)) {
                     DupKeyData.split(twoPartKey, key, data);
                     swapCursor(c);
                     return result;
@@ -3539,29 +3362,29 @@ public class Cursor implements ForwardCursor {
      * Does not interpret duplicates.  Prevents phantoms.
      */
     private OperationResult retrieveNextNoDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final GetMode getModeParam) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final GetMode getModeParam) {
 
         final GetMode getMode;
-        switch (getModeParam) {
-        case NEXT_DUP:
-        case PREV_DUP:
-            return null;
-        case NEXT_NODUP:
-            getMode = GetMode.NEXT;
-            break;
-        case PREV_NODUP:
-            getMode = GetMode.PREV;
-            break;
-        default:
-            getMode = getModeParam;
+        switch(getModeParam) {
+            case NEXT_DUP:
+            case PREV_DUP:
+                return null;
+            case NEXT_NODUP:
+                getMode = GetMode.NEXT;
+                break;
+            case PREV_NODUP:
+                getMode = GetMode.PREV;
+                break;
+            default:
+                getMode = getModeParam;
         }
 
         try {
-            if (!isSerializableIsolation(lockMode)) {
+            if(!isSerializableIsolation(lockMode)) {
 
                 /*
                  * No need to prevent phantoms.
@@ -3569,15 +3392,15 @@ public class Cursor implements ForwardCursor {
                 assert (getMode == GetMode.NEXT || getMode == GetMode.PREV);
 
                 final CursorImpl dup =
-                    beginMoveCursor(true /*samePosition*/, cacheMode);
+                        beginMoveCursor(true /*samePosition*/, cacheMode);
 
                 OperationResult result = null;
                 try {
                     result = dup.getNext(
-                        key, data, getLockType(lockMode, false),
-                        lockMode == LockMode.READ_UNCOMMITTED_ALL,
-                        getMode.isForward(), false /*isLatched*/,
-                        rangeConstraint);
+                            key, data, getLockType(lockMode, false),
+                            lockMode == LockMode.READ_UNCOMMITTED_ALL,
+                            getMode.isForward(), false /*isLatched*/,
+                            rangeConstraint);
 
                     return result;
                 } finally {
@@ -3588,15 +3411,15 @@ public class Cursor implements ForwardCursor {
             /*
              * Perform range locking to prevent phantoms and handle restarts.
              */
-            while (true) {
+            while(true) {
                 try {
                     /* Get a range lock for 'prev' operations. */
-                    if (!getMode.isForward()) {
+                    if(!getMode.isForward()) {
                         rangeLockCurrentPosition();
                     }
                     /* Use a range lock if performing a 'next' operation. */
                     final LockType lockType =
-                        getLockType(lockMode, getMode.isForward());
+                            getLockType(lockMode, getMode.isForward());
 
                     /* Do not modify key/data params until SUCCESS. */
                     final DatabaseEntry tryKey = cloneEntry(key);
@@ -3604,32 +3427,32 @@ public class Cursor implements ForwardCursor {
 
                     /* Perform the operation with a null rangeConstraint. */
                     OperationResult result = retrieveNextCheckForInsertion(
-                        tryKey, tryData, lockType, cacheMode, getMode);
+                            tryKey, tryData, lockType, cacheMode, getMode);
 
-                    if (getMode.isForward() && result == null) {
+                    if(getMode.isForward() && result == null) {
                         /* NEXT: lock the EOF node. */
                         cursorImpl.lockEof(LockType.RANGE_READ);
                     }
 
                     /* Finally check rangeConstraint. */
-                    if (result != null && !checkRangeConstraint(tryKey)) {
+                    if(result != null && !checkRangeConstraint(tryKey)) {
                         result = null;
                     }
 
                     /*
                      * Only overwrite key/data on SUCCESS, after all locking.
                      */
-                    if (result != null) {
+                    if(result != null) {
                         setEntry(tryKey, key);
                         setEntry(tryData, data);
                     }
 
                     return result;
-                } catch (RangeRestartException e) {
+                } catch(RangeRestartException e) {
                     // continue
                 }
             }
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -3654,27 +3477,27 @@ public class Cursor implements ForwardCursor {
 
         try {
             result = dup.lockAndGetCurrent(
-                tempKey, tempData, LockType.RANGE_READ);
+                    tempKey, tempData, LockType.RANGE_READ);
 
-            if (result == null) {
+            if(result == null) {
 
-                while (true) {
-                    if (LatchSupport.TRACK_LATCHES) {
+                while(true) {
+                    if(LatchSupport.TRACK_LATCHES) {
                         LatchSupport.expectBtreeLatchesHeld(0);
                     }
 
                     result = dup.getNext(
-                        tempKey, tempData, LockType.RANGE_READ,
-                        false /*dirtyReadAll*/, true /*forward*/,
-                        false /*isLatched*/, null /*rangeConstraint*/);
+                            tempKey, tempData, LockType.RANGE_READ,
+                            false /*dirtyReadAll*/, true /*forward*/,
+                            false /*isLatched*/, null /*rangeConstraint*/);
 
-                    if (cursorImpl.checkForInsertion(GetMode.NEXT, dup)) {
+                    if(cursorImpl.checkForInsertion(GetMode.NEXT, dup)) {
                         dup.close(cursorImpl);
                         dup = cursorImpl.cloneCursor(true /*samePosition*/);
                         continue;
                     }
 
-                    if (LatchSupport.TRACK_LATCHES) {
+                    if(LatchSupport.TRACK_LATCHES) {
                         LatchSupport.expectBtreeLatchesHeld(0);
                     }
                     break;
@@ -3684,7 +3507,7 @@ public class Cursor implements ForwardCursor {
             dup.close(cursorImpl);
         }
 
-        if (result == null) {
+        if(result == null) {
             cursorImpl.lockEof(LockType.RANGE_READ);
         }
     }
@@ -3693,18 +3516,18 @@ public class Cursor implements ForwardCursor {
      * Retrieves and checks for insertions, for serializable isolation.
      */
     private OperationResult retrieveNextCheckForInsertion(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockType lockType,
-        final CacheMode cacheMode,
-        final GetMode getMode) {
-        
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockType lockType,
+            final CacheMode cacheMode,
+            final GetMode getMode) {
+
         assert (key != null && data != null);
         assert (getMode == GetMode.NEXT || getMode == GetMode.PREV);
 
-        while (true) {
+        while(true) {
 
-            if (LatchSupport.TRACK_LATCHES) {
+            if(LatchSupport.TRACK_LATCHES) {
                 LatchSupport.expectBtreeLatchesHeld(0);
             }
 
@@ -3715,29 +3538,29 @@ public class Cursor implements ForwardCursor {
              * comparison, at the old and new position.
              */
             final CursorImpl dup = beginMoveCursor(
-                true /*samePosition*/, true /*forceClone*/, cacheMode);
+                    true /*samePosition*/, true /*forceClone*/, cacheMode);
 
             boolean doEndMoveCursor = true;
 
             try {
                 final OperationResult result = dup.getNext(
-                    key, data, lockType, false /*dirtyReadAll*/,
-                    getMode.isForward(), false /*isLatched*/,
-                    null /*rangeConstraint*/);
+                        key, data, lockType, false /*dirtyReadAll*/,
+                        getMode.isForward(), false /*isLatched*/,
+                        null /*rangeConstraint*/);
 
-                if (!cursorImpl.checkForInsertion(getMode, dup)) {
+                if(!cursorImpl.checkForInsertion(getMode, dup)) {
 
                     doEndMoveCursor = false;
                     endMoveCursor(dup, result != null);
 
-                    if (LatchSupport.TRACK_LATCHES) {
+                    if(LatchSupport.TRACK_LATCHES) {
                         LatchSupport.expectBtreeLatchesHeld(0);
                     }
 
                     return result;
                 }
             } finally {
-                if (doEndMoveCursor) {
+                if(doEndMoveCursor) {
                     endMoveCursor(dup, false);
                 }
             }
@@ -3745,36 +3568,36 @@ public class Cursor implements ForwardCursor {
     }
 
     private long skipInternal(
-        final long maxCount,
-        final boolean forward,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final long maxCount,
+            final boolean forward,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final LockType lockType = getLockType(lockMode, false);
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             checkTxnState();
-            while (true) {
+            while(true) {
 
                 /*
                  * Force cloning of the cursor since we may need to restart
                  * the operation at the previous position.
                  */
                 final CursorImpl dup = beginMoveCursor(
-                    true /*samePosition*/, true /*forceClone*/, cacheMode);
+                        true /*samePosition*/, true /*forceClone*/, cacheMode);
                 boolean success = false;
                 try {
                     final long count = dup.skip(forward, maxCount,
-                                                null /*rangeConstraint*/);
-                    if (count <= 0) {
+                            null /*rangeConstraint*/);
+                    if(count <= 0) {
                         return 0;
                     }
                     final OperationResult result =
-                        getCurrentWithCursorImpl(dup, key, data, lockType);
+                            getCurrentWithCursorImpl(dup, key, data, lockType);
 
-                    if (result == null) {
+                    if(result == null) {
                         /* Retry if deletion occurs while unlatched. */
                         continue;
                     }
@@ -3792,21 +3615,21 @@ public class Cursor implements ForwardCursor {
      * using a CursorImpl.  Does no setup or save/restore of cursor state.
      */
     private OperationResult getCurrentWithCursorImpl(
-        final CursorImpl c,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockType lockType) {
-        
-        if (!dbImpl.getSortedDuplicates()) {
+            final CursorImpl c,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockType lockType) {
+
+        if(!dbImpl.getSortedDuplicates()) {
             return c.lockAndGetCurrent(key, data, lockType);
         }
 
         final DatabaseEntry twoPartKey = new DatabaseEntry();
 
         final OperationResult result =
-            c.lockAndGetCurrent(twoPartKey, NO_RETURN_DATA, lockType);
+                c.lockAndGetCurrent(twoPartKey, NO_RETURN_DATA, lockType);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
 
@@ -3818,52 +3641,54 @@ public class Cursor implements ForwardCursor {
      * Performs search by key, data, or both.  Prevents phantoms.
      */
     OperationResult search(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        SearchMode searchMode,
-        final boolean countOpStat) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            SearchMode searchMode,
+            final boolean countOpStat) {
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             final OperationResult result;
 
             checkTxnState();
 
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
 
-                switch (searchMode) {
-                case SET:
-                    result = dupsGetSearchKey(key, data, lockMode, cacheMode);
-                    break;
-                case SET_RANGE:
-                    result = dupsGetSearchKeyRange(
-                        key, data, lockMode, cacheMode);
-                    break;
-                case BOTH:
-                    result = dupsGetSearchBoth(key, data, lockMode, cacheMode);
-                    break;
-                case BOTH_RANGE:
-                    result = dupsGetSearchBothRange(
-                        key, data, lockMode, cacheMode);
-                    break;
-                default:
-                    throw EnvironmentFailureException.unexpectedState(
-                        searchMode.toString());
+                switch(searchMode) {
+                    case SET:
+                        result = dupsGetSearchKey(key, data, lockMode, cacheMode);
+                        break;
+                    case SET_RANGE:
+                        result = dupsGetSearchKeyRange(
+                                key, data, lockMode, cacheMode);
+                        break;
+                    case BOTH:
+                        result = dupsGetSearchBoth(key, data, lockMode, cacheMode);
+                        break;
+                    case BOTH_RANGE:
+                        result = dupsGetSearchBothRange(
+                                key, data, lockMode, cacheMode);
+                        break;
+                    default:
+                        throw EnvironmentFailureException.unexpectedState(
+                                searchMode.toString());
                 }
-            } else {
-                if (searchMode == SearchMode.BOTH_RANGE) {
+            }
+            else {
+                if(searchMode == SearchMode.BOTH_RANGE) {
                     searchMode = SearchMode.BOTH;
                 }
                 result = searchNoDups(
-                    key, data, lockMode, cacheMode, searchMode,
-                    null /*comparator*/);
+                        key, data, lockMode, cacheMode, searchMode,
+                        null /*comparator*/);
             }
 
-            if (countOpStat) {
-                if (result != null) {
+            if(countOpStat) {
+                if(result != null) {
                     dbImpl.getEnv().incSearchOps(dbImpl);
-                } else {
+                }
+                else {
                     dbImpl.getEnv().incSearchFailOps(dbImpl);
                 }
             }
@@ -3877,29 +3702,29 @@ public class Cursor implements ForwardCursor {
      * replication stream replay.  Prevents phantoms.
      */
     OperationResult searchForReplay(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final SearchMode searchMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final SearchMode searchMode) {
 
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
 
             checkTxnState();
 
             return searchNoDups(
-                key, data, lockMode, cacheMode, searchMode,
-                null /*comparator*/);
+                    key, data, lockMode, cacheMode, searchMode,
+                    null /*comparator*/);
         }
     }
 
     /**
      * Interpret duplicates for getSearchKey operation.
-     *
+     * <p>
      * Use key as prefix to find first duplicate using a range search.  Compare
      * result to prefix to see whether we went out of the bounds of the
      * duplicate set, i.e., whether NOTFOUND should be returned.
-     *
+     * <p>
      * Even if the user-provided "key" exists in the DB, the twoPartKey built
      * here out of "key" compares < any of the BIN-slot keys that comprise the
      * duplicates-set of "key". So there is no way to get an exact key match
@@ -3908,15 +3733,15 @@ public class Cursor implements ForwardCursor {
      * appropriate range constraint.
      */
     private OperationResult dupsGetSearchKey(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final DatabaseEntry twoPartKey = new DatabaseEntry(
-            DupKeyData.makePrefixKey(key.getData(),
-                                     key.getOffset(),
-                                     key.getSize()));
+                DupKeyData.makePrefixKey(key.getData(),
+                        key.getOffset(),
+                        key.getSize()));
 
         final RangeConstraint savedRangeConstraint = rangeConstraint;
 
@@ -3924,10 +3749,10 @@ public class Cursor implements ForwardCursor {
             setPrefixConstraint(this, key);
 
             final OperationResult result = searchNoDups(
-                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                SearchMode.SET_RANGE, null /*comparator*/);
+                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                    SearchMode.SET_RANGE, null /*comparator*/);
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
 
@@ -3941,25 +3766,25 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getSearchKeyRange operation.
-     *
+     * <p>
      * Do range search for key prefix.
      */
     private OperationResult dupsGetSearchKeyRange(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final DatabaseEntry twoPartKey = new DatabaseEntry(
-            DupKeyData.makePrefixKey(key.getData(),
-                                     key.getOffset(),
-                                     key.getSize()));
+                DupKeyData.makePrefixKey(key.getData(),
+                        key.getOffset(),
+                        key.getSize()));
 
         final OperationResult result = searchNoDups(
-            twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-            SearchMode.SET_RANGE, null /*comparator*/);
+                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                SearchMode.SET_RANGE, null /*comparator*/);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
 
@@ -3969,22 +3794,22 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getSearchBoth operation.
-     *
+     * <p>
      * Do exact search for combined key.
      */
     private OperationResult dupsGetSearchBoth(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final DatabaseEntry twoPartKey = DupKeyData.combine(key, data);
 
         final OperationResult result = searchNoDups(
-            twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, SearchMode.BOTH,
-            null /*comparator*/);
+                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode, SearchMode.BOTH,
+                null /*comparator*/);
 
-        if (result == null) {
+        if(result == null) {
             return null;
         }
 
@@ -3994,16 +3819,16 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Interpret duplicates for getSearchBothRange operation.
-     *
+     * <p>
      * Do range search for combined key.  Compare result to prefix to see
      * whether we went out of the bounds of the duplicate set, i.e., whether
      * null should be returned.
      */
     private OperationResult dupsGetSearchBothRange(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode) {
 
         final DatabaseEntry twoPartKey = DupKeyData.combine(key, data);
 
@@ -4013,10 +3838,10 @@ public class Cursor implements ForwardCursor {
             setPrefixConstraint(this, key);
 
             final OperationResult result = searchNoDups(
-                twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
-                SearchMode.SET_RANGE, null /*comparator*/);
+                    twoPartKey, NO_RETURN_DATA, lockMode, cacheMode,
+                    SearchMode.SET_RANGE, null /*comparator*/);
 
-            if (result == null) {
+            if(result == null) {
                 return null;
             }
 
@@ -4032,36 +3857,36 @@ public class Cursor implements ForwardCursor {
      * Does not interpret duplicates.  Prevents phantoms.
      */
     private OperationResult searchNoDups(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final SearchMode searchMode,
-        final Comparator<byte[]> comparator) {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final SearchMode searchMode,
+            final Comparator<byte[]> comparator) {
 
         /*
          * searchMode cannot be BOTH_RANGE, because for non-dups DBs BOTH_RANGE
          * is converted to BOTH, and for dup DBs BOTH_RANGE is converted to
          * SET_RANGE.
          */
-        assert(searchMode != SearchMode.BOTH_RANGE);
+        assert (searchMode != SearchMode.BOTH_RANGE);
 
         try {
-            if (!isSerializableIsolation(lockMode)) {
+            if(!isSerializableIsolation(lockMode)) {
 
-                if (searchMode.isExactSearch()) {
+                if(searchMode.isExactSearch()) {
 
-                    assert(comparator == null);
+                    assert (comparator == null);
 
                     return searchExact(
-                        key, data, lockMode, cacheMode, searchMode);
+                            key, data, lockMode, cacheMode, searchMode);
                 }
 
-                while (true) {
+                while(true) {
                     try {
                         return searchRange(
-                            key, data, lockMode, cacheMode, comparator);
-                    } catch (RangeRestartException e) {
+                                key, data, lockMode, cacheMode, comparator);
+                    } catch(RangeRestartException e) {
                         // continue
                     }
                 }
@@ -4070,7 +3895,7 @@ public class Cursor implements ForwardCursor {
             /*
              * Perform range locking to prevent phantoms and handle restarts.
              */
-            while (true) {
+            while(true) {
 
                 OperationResult result;
 
@@ -4102,20 +3927,20 @@ public class Cursor implements ForwardCursor {
                      * the checkForExactKey parameter.
                      */
                     result = searchRangeSerializable(
-                        tryKey, tryData, searchLockType, advanceLockType,
-                        comparator, cacheMode, searchMode);
+                            tryKey, tryData, searchLockType, advanceLockType,
+                            comparator, cacheMode, searchMode);
 
-                    if (result != null) {
+                    if(result != null) {
                         setEntry(tryKey, key);
                         setEntry(tryData, data);
                     }
 
                     return result;
-                } catch (RangeRestartException e) {
+                } catch(RangeRestartException e) {
                     // continue
                 }
             }
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -4129,71 +3954,68 @@ public class Cursor implements ForwardCursor {
      * (if "key"/"data" request so) and return either NOTFOUND if searchMode
      * == BOTH and "data" does not match the LN of the found slot, or SUCCESS
      * otherwise.
-     *
+     * <p>
      * Note: On return from this method no latches are held by this cursor.
-     *
+     * <p>
      * Note: If the method returns NOTFOUND or raises an exception, any non-
      * transactional locks acquired by this method are released.
-     *
+     * <p>
      * Note: On SUCCESS, if this is a sticky cursor, any non-transactional
      * locks held by this cursor before calling this method are released.
-     *
+     * <p>
      * Note: this method is never called when the desired isolation is
      * "serializable", because in order to do next-slot-locking, a range
      * search is required.
      *
-     * @param key It is used as the search key, as well as to receive the key
-     * of the BIN slot found by this method, if any. If the DB contains
-     * duplicates, the key is in the "two-part-key" format (see
-     * dbi/DupKeyData.java) so that it can be compared with the two-part keys
-     * stored in the BTree (which contain both a primary key and a data
-     * portion). The search key itself may or may not contain a data portion. 
-     *
-     * @param data A DatabaseEntry to compare against the LN of the slot found
-     * by the search (if searchMode == BOTH) as well as to receive the data of
-     * that LN. If the DB contains duplicates, it is equal to NO_RETURN_DATA,
-     * because the LN will be emtpy (the full record is contained in the key).
-     *
+     * @param key        It is used as the search key, as well as to receive the key
+     *                   of the BIN slot found by this method, if any. If the DB contains
+     *                   duplicates, the key is in the "two-part-key" format (see
+     *                   dbi/DupKeyData.java) so that it can be compared with the two-part keys
+     *                   stored in the BTree (which contain both a primary key and a data
+     *                   portion). The search key itself may or may not contain a data portion.
+     * @param data       A DatabaseEntry to compare against the LN of the slot found
+     *                   by the search (if searchMode == BOTH) as well as to receive the data of
+     *                   that LN. If the DB contains duplicates, it is equal to NO_RETURN_DATA,
+     *                   because the LN will be emtpy (the full record is contained in the key).
      * @param searchMode Either SET or BOTH.
-     *
      * @return NOTFOUND if (a) no valid slot exists with a key == the search
      * key, or (b) searchMode == BOTH and "data" does not match the LN of the
      * found slot. SUCCESS otherwise.
      */
     private OperationResult searchExact(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        final SearchMode searchMode) {
-        
-        assert(key != null && data != null);
-        assert(searchMode == SearchMode.SET || searchMode == SearchMode.BOTH);
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            final SearchMode searchMode) {
+
+        assert (key != null && data != null);
+        assert (searchMode == SearchMode.SET || searchMode == SearchMode.BOTH);
 
         boolean success = false;
         OperationResult result = null;
 
         DatabaseEntry origData = new DatabaseEntry(
-            data.getData(), data.getOffset(), data.getSize());
+                data.getData(), data.getOffset(), data.getSize());
 
         final boolean dataRequested =
-            !data.getPartial() || data.getPartialLength() != 0;
+                !data.getPartial() || data.getPartialLength() != 0;
 
         final LockType lockType = getLockType(lockMode, false);
 
         final boolean dirtyReadAll =
-            lockMode == LockMode.READ_UNCOMMITTED_ALL;
+                lockMode == LockMode.READ_UNCOMMITTED_ALL;
 
         final CursorImpl dup =
-            beginMoveCursor(false /*samePosition*/, cacheMode);
+                beginMoveCursor(false /*samePosition*/, cacheMode);
 
         try {
             /*
              * Search for a BIN slot whose key is == the search key. If such a
              * slot is found, lock it and check whether it is valid.
              */
-            if (dup.searchExact(
-                key, lockType, dirtyReadAll, dataRequested) == null) {
+            if(dup.searchExact(
+                    key, lockType, dirtyReadAll, dataRequested) == null) {
                 success = true;
                 return null;
             }
@@ -4206,12 +4028,12 @@ public class Cursor implements ForwardCursor {
              * it may be different than the given key.
              */
             result = dup.getCurrent(
-                dbImpl.allowsKeyUpdates() ? key : null, data);
+                    dbImpl.allowsKeyUpdates() ? key : null, data);
 
             /* Check for data match, if asked so. */
-            if (result != null &&
-                searchMode == SearchMode.BOTH &&
-                !checkDataMatch(origData, data)) {
+            if(result != null &&
+                    searchMode == SearchMode.BOTH &&
+                    !checkDataMatch(origData, data)) {
                 result = null;
             }
 
@@ -4219,17 +4041,17 @@ public class Cursor implements ForwardCursor {
 
         } finally {
 
-            if (success &&
-                !dbImpl.isInternalDb() &&
-                dup.getBIN() != null &&
-                dup.getBIN().isBINDelta()) {
+            if(success &&
+                    !dbImpl.isInternalDb() &&
+                    dup.getBIN() != null &&
+                    dup.getBIN().isBINDelta()) {
                 dbImpl.getEnv().incBinDeltaGets();
             }
 
             dup.releaseBIN();
             endMoveCursor(dup, result != null);
         }
-    
+
         return result;
     }
 
@@ -4239,49 +4061,45 @@ public class Cursor implements ForwardCursor {
      * this.rangeConstraint, or is +INFINITY if this.rangeConstraint == null,
      * and (c) a slot is "valid" only if after locking it, neither its PD nor
      * its KD flags are set.
-     *
+     * <p>
      * If such a slot is found, copy its key and its associated LN into "key"
      * and "data" respectively (if "key"/"data" request so). Note that the
      * fact that the slot is valid implies that it has been locked.
-     *
+     * <p>
      * Note: On return from this method no latches are held by this cursor.
-     *
+     * <p>
      * Note: If the method returns NOTFOUND or raises an exception, any non-
      * transactional locks acquired by this method are released.
-     *
+     * <p>
      * Note: On SUCCESS, if this is a sticky cursor, any non-transactional
      * locks held by this cursor before calling this method are released.
      *
-     * @param key It is used as the search key, as well as to receive the key
-     * of the BIN slot found by this method, if any. If the DB contains
-     * duplicates, the key is in the "two-part-key" format (see
-     * dbi/DupKeyData.java) so that it can be compared with the two-part keys
-     * stored in the BTree (which contain both a primary key and a data
-     * portion). The search key itself may or may not contain a data portion. 
-     *
-     * @param data A DatabaseEntry to receive the data of the LN associated
-     * with the found slot, if any. If the DB contains duplicates, it is equal
-     * to NO_RETURN_DATA, because the LN will be empty (the full record is
-     * contained in the key).
-     *
+     * @param key        It is used as the search key, as well as to receive the key
+     *                   of the BIN slot found by this method, if any. If the DB contains
+     *                   duplicates, the key is in the "two-part-key" format (see
+     *                   dbi/DupKeyData.java) so that it can be compared with the two-part keys
+     *                   stored in the BTree (which contain both a primary key and a data
+     *                   portion). The search key itself may or may not contain a data portion.
+     * @param data       A DatabaseEntry to receive the data of the LN associated
+     *                   with the found slot, if any. If the DB contains duplicates, it is equal
+     *                   to NO_RETURN_DATA, because the LN will be empty (the full record is
+     *                   contained in the key).
      * @param comparator Comparator to use to compare the search key against
-     * the BTree keys.
-     *
+     *                   the BTree keys.
      * @return NOTFOUND if no valid slot exists in the [K1, K2) range; SUCCESS
      * otherwise.
-     *
      * @throws RangeRestartException if the search should be restarted by the
-     * caller.
+     *                               caller.
      */
     private OperationResult searchRange(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode,
-        final CacheMode cacheMode,
-        Comparator<byte[]> comparator)
-        throws RangeRestartException {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode,
+            final CacheMode cacheMode,
+            Comparator<byte[]> comparator)
+            throws RangeRestartException {
 
-        assert(key != null && data != null);
+        assert (key != null && data != null);
 
         boolean success = false;
         boolean incStats = !dbImpl.isInternalDb();
@@ -4290,16 +4108,16 @@ public class Cursor implements ForwardCursor {
         final LockType lockType = getLockType(lockMode, false);
 
         final boolean dirtyReadAll =
-            lockMode == LockMode.READ_UNCOMMITTED_ALL;
+                lockMode == LockMode.READ_UNCOMMITTED_ALL;
 
         final CursorImpl dup =
-            beginMoveCursor(false /*samePosition*/, cacheMode);
+                beginMoveCursor(false /*samePosition*/, cacheMode);
 
         try {
             /* Search for a BIN slot whose key is the max key <= K1. */
             final int searchResult = dup.searchRange(key, comparator);
 
-            if ((searchResult & CursorImpl.FOUND) == 0) {
+            if((searchResult & CursorImpl.FOUND) == 0) {
                 /* The tree is completely empty (has no nodes at all) */
                 success = true;
                 return null;
@@ -4314,18 +4132,18 @@ public class Cursor implements ForwardCursor {
              * true, dup is positioned on the very last slot of the BTree.
              */
             final boolean exactKeyMatch =
-                ((searchResult & CursorImpl.EXACT_KEY) != 0);
+                    ((searchResult & CursorImpl.EXACT_KEY) != 0);
             final boolean foundLast =
-                ((searchResult & CursorImpl.FOUND_LAST) != 0);
+                    ((searchResult & CursorImpl.FOUND_LAST) != 0);
 
             /*
              * If we found K1, lock the slot and check whether it is valid.
              * If so, copy out its key and associated LN.
              */
-            if (exactKeyMatch) {
+            if(exactKeyMatch) {
                 result = dup.lockAndGetCurrent(
-                    key, data, lockType, dirtyReadAll,
-                    true /*isLatched*/, false /*unlatch*/);
+                        key, data, lockType, dirtyReadAll,
+                        true /*isLatched*/, false /*unlatch*/);
             }
 
             /*
@@ -4339,12 +4157,12 @@ public class Cursor implements ForwardCursor {
              * the slot key and LN are copied into "key" and "data" (if
              * "key"/"data" request so).
              */
-            if (!exactKeyMatch || result == null) {
+            if(!exactKeyMatch || result == null) {
                 result = null;
-                if (!foundLast) {
+                if(!foundLast) {
                     result = searchRangeAdvanceAndCheckKey(
-                        dup, key, data, lockType, dirtyReadAll,
-                        comparator, rangeConstraint);
+                            dup, key, data, lockType, dirtyReadAll,
+                            comparator, rangeConstraint);
 
                     /*
                      * Don't inc thput stats because the bin is released by
@@ -4360,10 +4178,10 @@ public class Cursor implements ForwardCursor {
 
         } finally {
 
-            if (success &&
-                incStats &&
-                dup.getBIN() != null &&
-                dup.getBIN().isBINDelta()) {
+            if(success &&
+                    incStats &&
+                    dup.getBIN() != null &&
+                    dup.getBIN().isBINDelta()) {
                 dbImpl.getEnv().incBinDeltaGets();
             }
 
@@ -4380,66 +4198,59 @@ public class Cursor implements ForwardCursor {
      * this.rangeConstraint, or is +INFINITY if this.rangeConstraint == null,
      * and (c) a slot is "valid" only if after locking it, neither its PD nor
      * its KD flags are set.
-     *
+     * <p>
      * If such a slot is found, copy its key and it associated LN into "key"
      * and "data" respectively (if "key"/"data" request so). Note that the
      * fact that the slot is valid implies that it has been locked. If the
      * key of the found slot is == K1, it is locked in a non-range lock. If
      * the key is > K1, the slot is locked in a range lock.
-     *
+     * <p>
      * If no slot is found, lock the EOF with a range lock.
-     *
+     * <p>
      * Note: On return from this method no latches are held by this cursor.
-     *
+     * <p>
      * Note: This Cursor's locker should be a Txn, so there are no non-
      * transactional locks to be released.
      *
-     * @param key It is used as the search key, as well as to receive the key
-     * of the BIN slot found by this method, if any. If the DB contains
-     * duplicates, the key is in the "two-part-key" format (see
-     * dbi/DupKeyData.java) so that it can be compared with the two-part keys
-     * stored in the BTree (which contain both a primary key and a data
-     * portion). The search key itself may or may not contain a data portion. 
-     *
-     * @param data A DatabaseEntry to receive the data of the LN associated
-     * with the found slot, if any. If the DB contains duplicates, it is equal
-     * to NO_RETURN_DATA, because the LN will be emtpy (the full record is
-     * contained in the key).
-     *
-     * @param searchLockType LockType to use for locking the slot if its key
-     * is == search key. Normally, this is a READ or WRITE lock.
-     *
-     * @param advanceLockType LockType to use for locking the slot if its key 
-     * is > search key. Normally, this is a READ_RANGE or WRITE_RANGE lock.
-     *
-     * @param comparator Comparator to use to compare the search key against
-     * the BTree keys.
-     *
-     * @param searchMode If SET or BOTH, we are actually looking for an exact
-     * match on K1. If so and K1 is not in the BTree, we want the cursor to
-     * advance temporarily to the next slot in order to range-lock it, but
-     * then return NOTFOUND. NOTFOUND is returned also if K1 is found, but
-     * searchMode is BOTH and the data associated with the K1 slot does not
-     * match the given data.
-     *
+     * @param key             It is used as the search key, as well as to receive the key
+     *                        of the BIN slot found by this method, if any. If the DB contains
+     *                        duplicates, the key is in the "two-part-key" format (see
+     *                        dbi/DupKeyData.java) so that it can be compared with the two-part keys
+     *                        stored in the BTree (which contain both a primary key and a data
+     *                        portion). The search key itself may or may not contain a data portion.
+     * @param data            A DatabaseEntry to receive the data of the LN associated
+     *                        with the found slot, if any. If the DB contains duplicates, it is equal
+     *                        to NO_RETURN_DATA, because the LN will be emtpy (the full record is
+     *                        contained in the key).
+     * @param searchLockType  LockType to use for locking the slot if its key
+     *                        is == search key. Normally, this is a READ or WRITE lock.
+     * @param advanceLockType LockType to use for locking the slot if its key
+     *                        is > search key. Normally, this is a READ_RANGE or WRITE_RANGE lock.
+     * @param comparator      Comparator to use to compare the search key against
+     *                        the BTree keys.
+     * @param searchMode      If SET or BOTH, we are actually looking for an exact
+     *                        match on K1. If so and K1 is not in the BTree, we want the cursor to
+     *                        advance temporarily to the next slot in order to range-lock it, but
+     *                        then return NOTFOUND. NOTFOUND is returned also if K1 is found, but
+     *                        searchMode is BOTH and the data associated with the K1 slot does not
+     *                        match the given data.
      * @return NOTFOUND if no valid slot exists in the [K1, K2) range, or
      * checkForExactKey == true and the key of the found slot is > K1; SUCCESS
      * otherwise.
-     *
      * @throws RangeRestartException if the search should be restarted by the
-     * caller.
+     *                               caller.
      */
     private OperationResult searchRangeSerializable(
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockType searchLockType,
-        final LockType advanceLockType,
-        final Comparator<byte[]> comparator,
-        final CacheMode cacheMode,
-        final SearchMode searchMode)
-        throws RangeRestartException {
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockType searchLockType,
+            final LockType advanceLockType,
+            final Comparator<byte[]> comparator,
+            final CacheMode cacheMode,
+            final SearchMode searchMode)
+            throws RangeRestartException {
 
-        assert(key != null && data != null);
+        assert (key != null && data != null);
 
         boolean success = false;
         boolean incStats = !dbImpl.isInternalDb();
@@ -4450,19 +4261,19 @@ public class Cursor implements ForwardCursor {
         boolean mustLockEOF = false;
 
         DatabaseEntry origData = null;
-        if (exactSearch) {
+        if(exactSearch) {
             origData = new DatabaseEntry(
-                data.getData(), data.getOffset(), data.getSize());
+                    data.getData(), data.getOffset(), data.getSize());
         }
 
         final CursorImpl dup =
-            beginMoveCursor(false /*samePosition*/, cacheMode);
+                beginMoveCursor(false /*samePosition*/, cacheMode);
 
         try {
             /* Search for a BIN slot whose key is the max key <= K1. */
             final int searchResult = dup.searchRange(key, comparator);
 
-            if ((searchResult & CursorImpl.FOUND) != 0) {
+            if((searchResult & CursorImpl.FOUND) != 0) {
 
                 /*
                  * The search positioned dup on the BIN that should contain K1
@@ -4473,18 +4284,18 @@ public class Cursor implements ForwardCursor {
                  * true, dup is positioned on the very last slot of the BTree.
                  */
                 final boolean exactKeyMatch =
-                    ((searchResult & CursorImpl.EXACT_KEY) != 0);
+                        ((searchResult & CursorImpl.EXACT_KEY) != 0);
                 final boolean foundLast =
-                    ((searchResult & CursorImpl.FOUND_LAST) != 0);
+                        ((searchResult & CursorImpl.FOUND_LAST) != 0);
 
                 /*
                  * If we found K1, lock the slot and check whether it is valid.
                  * If so, copy out its key and associated LN.
                  */
-                if (exactKeyMatch) {
+                if(exactKeyMatch) {
                     result = dup.lockAndGetCurrent(
-                        key, data, searchLockType, false /*dirtyReadAll*/,
-                        true /*isLatched*/, false /*unlatch*/);
+                            key, data, searchLockType, false /*dirtyReadAll*/,
+                            true /*isLatched*/, false /*unlatch*/);
                 }
 
                 /*
@@ -4497,13 +4308,13 @@ public class Cursor implements ForwardCursor {
                  * thrown. Otherwise, the slot key and LN are copied into "key"
                  * and "data" (if "key"/"data" request so).
                  */
-                if (!exactKeyMatch || result == null) {
+                if(!exactKeyMatch || result == null) {
                     result = null;
-                    if (!foundLast) {
+                    if(!foundLast) {
                         result = searchRangeAdvanceAndCheckKey(
-                            dup, key, data, advanceLockType,
-                            false /*dirtyReadAll*/, comparator,
-                            null /*rangeConstraint*/);
+                                dup, key, data, advanceLockType,
+                                false /*dirtyReadAll*/, comparator,
+                                null /*rangeConstraint*/);
 
                         keyChange = (result != null);
                         incStats = false;
@@ -4516,22 +4327,24 @@ public class Cursor implements ForwardCursor {
                  * Consider this search op a failure if we are actually looking
                  * for an exact key match and we didn't find the search key.
                  */
-                if (result != null && exactSearch) {
-                    if (keyChange) {
+                if(result != null && exactSearch) {
+                    if(keyChange) {
                         result = null;
-                    } else if (searchMode == SearchMode.BOTH &&
-                               !checkDataMatch(origData, data)) {
+                    }
+                    else if(searchMode == SearchMode.BOTH &&
+                            !checkDataMatch(origData, data)) {
                         result = null;
                     }
                 }
 
                 /* Finally check rangeConstraint. */
-                if (result != null &&
-                    !exactSearch &&
-                    !checkRangeConstraint(key)) {
+                if(result != null &&
+                        !exactSearch &&
+                        !checkRangeConstraint(key)) {
                     result = null;
                 }
-            } else {
+            }
+            else {
                 /* The tree is completely empty (has no nodes at all) */
                 mustLockEOF = true;
             }
@@ -4540,10 +4353,10 @@ public class Cursor implements ForwardCursor {
 
         } finally {
 
-            if (success &&
-                incStats &&
-                dup.getBIN() != null &&
-                dup.getBIN().isBINDelta()) {
+            if(success &&
+                    incStats &&
+                    dup.getBIN() != null &&
+                    dup.getBIN().isBINDelta()) {
                 dbImpl.getEnv().incBinDeltaGets();
             }
 
@@ -4560,7 +4373,7 @@ public class Cursor implements ForwardCursor {
          * non-blocking mode with the BIN latched and restart the search
          * if the lock is denied.
          */
-        if (mustLockEOF) {
+        if(mustLockEOF) {
             cursorImpl.lockEof(LockType.RANGE_READ);
         }
 
@@ -4574,31 +4387,31 @@ public class Cursor implements ForwardCursor {
      * caller.
      */
     private OperationResult searchRangeAdvanceAndCheckKey(
-        final CursorImpl dup,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockType lockType,
-        final boolean dirtyReadAll,
-        Comparator<byte[]> comparator,
-        final RangeConstraint rangeConstraint)
-        throws RangeRestartException {
+            final CursorImpl dup,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockType lockType,
+            final boolean dirtyReadAll,
+            Comparator<byte[]> comparator,
+            final RangeConstraint rangeConstraint)
+            throws RangeRestartException {
 
-        if (comparator == null) {
+        if(comparator == null) {
             comparator = dbImpl.getKeyComparator();
         }
 
         DatabaseEntry origKey = new DatabaseEntry(
-            key.getData(), key.getOffset(), key.getSize());
+                key.getData(), key.getOffset(), key.getSize());
 
         DatabaseEntry nextKey = key;
-        if (key.getPartial()) {
+        if(key.getPartial()) {
             nextKey = new DatabaseEntry(
-                key.getData(), key.getOffset(), key.getSize());
+                    key.getData(), key.getOffset(), key.getSize());
         }
 
         OperationResult result = dup.getNext(
-            nextKey, data, lockType, dirtyReadAll, true /*forward*/,
-            true /*isLatched*/, rangeConstraint);
+                nextKey, data, lockType, dirtyReadAll, true /*forward*/,
+                true /*isLatched*/, rangeConstraint);
 
         /*
          * Check whether the dup.getNext() landed on slot whose key is < K1.
@@ -4610,16 +4423,17 @@ public class Cursor implements ForwardCursor {
          * BIN and insert its keys on the right split-sibling. Finally, dup
          * moves to the right split-sibling and lands on a wrong slot.
          */
-        if (result != null) {
+        if(result != null) {
             int c = Key.compareKeys(nextKey, origKey, comparator);
-            if (c < 0) {
+            if(c < 0) {
                 key.setData(origKey.getData(),
-                            origKey.getOffset(),
-                            origKey.getSize());
+                        origKey.getOffset(),
+                        origKey.getSize());
 
                 throw new RangeRestartException();
 
-            } else if (key.getPartial()) {
+            }
+            else if(key.getPartial()) {
                 LN.setEntry(key, nextKey);
             }
         }
@@ -4632,17 +4446,17 @@ public class Cursor implements ForwardCursor {
      * getSearchBoth or getSearchBothRange is called.
      */
     private boolean checkDataMatch(
-        DatabaseEntry data1,
-        DatabaseEntry data2) {
+            DatabaseEntry data1,
+            DatabaseEntry data2) {
 
         final int size1 = data1.getSize();
         final int size2 = data2.getSize();
-        if (size1 != size2) {
+        if(size1 != size2) {
             return false;
         }
         return Key.compareUnsignedBytes(
-            data1.getData(), data1.getOffset(), size1,
-            data2.getData(), data2.getOffset(), size2) == 0;
+                data1.getData(), data1.getOffset(), size1,
+                data2.getData(), data2.getOffset(), size2) == 0;
     }
 
     /**
@@ -4650,9 +4464,9 @@ public class Cursor implements ForwardCursor {
      * because we never change the position.
      */
     int countInternal() {
-        synchronized (getTxnSynchronizer()) {
+        synchronized(getTxnSynchronizer()) {
             checkTxnState();
-            if (dbImpl.getSortedDuplicates()) {
+            if(dbImpl.getSortedDuplicates()) {
                 return countHandleDups();
             }
             return countNoDups();
@@ -4666,26 +4480,26 @@ public class Cursor implements ForwardCursor {
         final byte[] currentKey = cursorImpl.getCurrentKey();
         final DatabaseEntry twoPartKey = DupKeyData.removeData(currentKey);
 
-        try (final Cursor c = dup(false /*samePosition*/)) {
+        try(final Cursor c = dup(false /*samePosition*/)) {
             c.setNonSticky(true);
             setPrefixConstraint(c, currentKey);
 
             /* Move cursor to first key in this dup set. */
             OperationResult result = c.searchNoDups(
-                twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
-                CacheMode.UNCHANGED, SearchMode.SET_RANGE, null /*comparator*/);
+                    twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
+                    CacheMode.UNCHANGED, SearchMode.SET_RANGE, null /*comparator*/);
 
-            if (result == null) {
+            if(result == null) {
                 return 0;
             }
 
             /* Skip over entries in the dup set. */
             long count = 1 + c.cursorImpl.skip(
-                true /*forward*/, 0 /*maxCount*/, c.rangeConstraint);
+                    true /*forward*/, 0 /*maxCount*/, c.rangeConstraint);
 
-            if (count > Integer.MAX_VALUE) {
+            if(count > Integer.MAX_VALUE) {
                 throw new IllegalStateException(
-                    "count exceeded integer size: " + count);
+                        "count exceeded integer size: " + count);
             }
 
             return (int) count;
@@ -4702,12 +4516,12 @@ public class Cursor implements ForwardCursor {
             beginUseExistingCursor(CacheMode.UNCHANGED);
 
             final OperationResult result = cursorImpl.lockAndGetCurrent(
-                null /*foundKey*/, null /*foundData*/, LockType.NONE);
+                    null /*foundKey*/, null /*foundData*/, LockType.NONE);
 
             endUseExistingCursor();
 
             return (result != null) ? 1 : 0;
-        } catch (Error E) {
+        } catch(Error E) {
             dbImpl.getEnv().invalidate(E);
             throw E;
         }
@@ -4718,7 +4532,7 @@ public class Cursor implements ForwardCursor {
      * the cursor because we never change the position.
      */
     long countEstimateInternal() {
-        if (dbImpl.getSortedDuplicates()) {
+        if(dbImpl.getSortedDuplicates()) {
             return countEstimateHandleDups();
         }
         return countNoDups();
@@ -4731,32 +4545,33 @@ public class Cursor implements ForwardCursor {
         final byte[] currentKey = cursorImpl.getCurrentKey();
         final DatabaseEntry twoPartKey = DupKeyData.removeData(currentKey);
 
-        try (final Cursor c1 = dup(false /*samePosition*/)) {
+        try(final Cursor c1 = dup(false /*samePosition*/)) {
             c1.setNonSticky(true);
             setPrefixConstraint(c1, currentKey);
 
             /* Move cursor 1 to first key in this dup set. */
             OperationResult result = c1.searchNoDups(
-                twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
-                CacheMode.UNCHANGED, SearchMode.SET_RANGE,
-                null /*comparator*/);
+                    twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
+                    CacheMode.UNCHANGED, SearchMode.SET_RANGE,
+                    null /*comparator*/);
 
-            if (result == null) {
+            if(result == null) {
                 return 0;
             }
 
             /* Move cursor 2 to first key in the following dup set. */
-            try (Cursor c2 = c1.dup(true /*samePosition*/)) {
+            try(Cursor c2 = c1.dup(true /*samePosition*/)) {
                 c2.setNonSticky(true);
 
                 result = c2.dupsGetNextNoDup(
-                    twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
-                    CacheMode.UNCHANGED);
+                        twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
+                        CacheMode.UNCHANGED);
 
                 final boolean c2Inclusive;
-                if (result != null) {
+                if(result != null) {
                     c2Inclusive = false;
-                } else {
+                }
+                else {
                     c2Inclusive = true;
 
                     /*
@@ -4766,20 +4581,20 @@ public class Cursor implements ForwardCursor {
                      * the original dup set.
                      */
                     result = c2.positionNoDups(
-                        twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
-                        CacheMode.UNCHANGED, false /*first*/);
+                            twoPartKey, NO_RETURN_DATA, LockMode.READ_UNCOMMITTED,
+                            CacheMode.UNCHANGED, false /*first*/);
 
-                    if (result == null) {
+                    if(result == null) {
                         return 0;
                     }
 
-                    while (!haveSameDupPrefix(twoPartKey, currentKey)) {
+                    while(!haveSameDupPrefix(twoPartKey, currentKey)) {
                         result = c2.retrieveNextNoDups(
-                            twoPartKey, NO_RETURN_DATA,
-                            LockMode.READ_UNCOMMITTED, CacheMode.UNCHANGED,
-                            GetMode.PREV);
+                                twoPartKey, NO_RETURN_DATA,
+                                LockMode.READ_UNCOMMITTED, CacheMode.UNCHANGED,
+                                GetMode.PREV);
 
-                        if (result == null) {
+                        if(result == null) {
                             return 0;
                         }
                     }
@@ -4787,7 +4602,7 @@ public class Cursor implements ForwardCursor {
 
                 /* Estimate the count between the two cursor positions. */
                 return CountEstimator.count(
-                    dbImpl, c1.cursorImpl, true, c2.cursorImpl, c2Inclusive);
+                        dbImpl, c1.cursorImpl, true, c2.cursorImpl, c2Inclusive);
 
             }
         }
@@ -4799,7 +4614,7 @@ public class Cursor implements ForwardCursor {
      * Cursor in the role of a secondary cursor).  This method is in the
      * Cursor class, rather than in SecondaryCursor, to support joins with
      * plain Cursors [#21258].
-     *
+     * <p>
      * When a true status is returned by this method, the caller should return
      * a successful result. When false is returned, the caller should treat
      * this as a deleted record and either skip the record (in the case of
@@ -4807,48 +4622,40 @@ public class Cursor implements ForwardCursor {
      * of getCurrent). False can be returned only when read-uncommitted is used
      * or the primary record has expired.
      *
-     * @param priDb primary database as input.
-     *
-     * @param key secondary key as input.
-     *
-     * @param pKey key as input.
-     *
-     * @param data the data returned as output.
-     *
-     * @param lockMode the lock mode to use for the primary read; if null, use
-     * the default lock mode.
-     *
-     * @param secDirtyRead whether we used dirty-read for reading the secondary
-     * record.  It is true if the user's configured isolation mode (or lockMode
-     * param) is dirty-read, or we used dirty-read for the secondary read to
-     * avoid deadlocks (this is done when the user's isolation mode is
-     * READ_COMMITTED or REPEATABLE_READ).
-     *
+     * @param priDb           primary database as input.
+     * @param key             secondary key as input.
+     * @param pKey            key as input.
+     * @param data            the data returned as output.
+     * @param lockMode        the lock mode to use for the primary read; if null, use
+     *                        the default lock mode.
+     * @param secDirtyRead    whether we used dirty-read for reading the secondary
+     *                        record.  It is true if the user's configured isolation mode (or lockMode
+     *                        param) is dirty-read, or we used dirty-read for the secondary read to
+     *                        avoid deadlocks (this is done when the user's isolation mode is
+     *                        READ_COMMITTED or REPEATABLE_READ).
      * @param lockPrimaryOnly If false, then we are not using dirty-read for
-     * secondary deadlock avoidance.  If true, this secondary cursor's
-     * reference to the primary will be checked after the primary record has
-     * been locked.
-     *
+     *                        secondary deadlock avoidance.  If true, this secondary cursor's
+     *                        reference to the primary will be checked after the primary record has
+     *                        been locked.
      * @return true if the primary was read successfully, or false in one of
      * the following cases:
-     *  + When using read-uncommitted and the primary has been deleted.
-     *  + When using read-uncommitted and the primary has been updated and no
-     *    longer contains the secondary key.
-     *  + When the primary record has expired (whether or not read-uncommitted
-     *    is used).
-     *
+     * + When using read-uncommitted and the primary has been deleted.
+     * + When using read-uncommitted and the primary has been updated and no
+     * longer contains the secondary key.
+     * + When the primary record has expired (whether or not read-uncommitted
+     * is used).
      * @throws SecondaryIntegrityException to indicate a corrupt secondary
-     * reference if the primary record is deleted (as opposed to expired) and
-     * read-uncommitted is not used.
+     *                                     reference if the primary record is deleted (as opposed to expired) and
+     *                                     read-uncommitted is not used.
      */
     boolean readPrimaryAfterGet(
-        final Database priDb,
-        final DatabaseEntry key,
-        final DatabaseEntry pKey,
-        DatabaseEntry data,
-        final LockMode lockMode,
-        final boolean secDirtyRead,
-        final boolean lockPrimaryOnly) {
+            final Database priDb,
+            final DatabaseEntry key,
+            final DatabaseEntry pKey,
+            DatabaseEntry data,
+            final LockMode lockMode,
+            final boolean secDirtyRead,
+            final boolean lockPrimaryOnly) {
 
         final boolean priDirtyRead = isReadUncommittedMode(lockMode);
         final DatabaseImpl priDbImpl = priDb.getDbImpl();
@@ -4859,9 +4666,10 @@ public class Cursor implements ForwardCursor {
          * requested dirty-read). Otherwise, we should be using sec dirty-read
          * iff the user requested it.
          */
-        if (lockPrimaryOnly) {
+        if(lockPrimaryOnly) {
             assert secDirtyRead && !priDirtyRead;
-        } else {
+        }
+        else {
             assert secDirtyRead == priDirtyRead;
         }
 
@@ -4870,7 +4678,7 @@ public class Cursor implements ForwardCursor {
          * this case a lock on the secondary has been acquired (if the caller
          * did not specify dirty-read).
          */
-        if (data.getPartial() && data.getPartialLength() == 0) {
+        if(data.getPartial() && data.getPartialLength() == 0) {
             data.setData(LogUtils.ZERO_LENGTH_BYTE_ARRAY);
             return true;
         }
@@ -4881,7 +4689,7 @@ public class Cursor implements ForwardCursor {
          */
         DatabaseEntry copyToPartialEntry = null;
 
-        if (priDirtyRead && data.getPartial()) {
+        if(priDirtyRead && data.getPartial()) {
             copyToPartialEntry = data;
             data = new DatabaseEntry();
         }
@@ -4892,21 +4700,21 @@ public class Cursor implements ForwardCursor {
          * released by the secondary cursor.  [#15573]
          */
         final CursorImpl priCursor = new CursorImpl(
-            priDbImpl, cursorImpl.getLocker(),
-            true /*retainNonTxnLocks*/, false /*isSecondaryCursor*/);
+                priDbImpl, cursorImpl.getLocker(),
+                true /*retainNonTxnLocks*/, false /*isSecondaryCursor*/);
 
         try {
             final LockType priLockType = getLockType(lockMode, false);
 
             final boolean dirtyReadAll =
-                lockMode == LockMode.READ_UNCOMMITTED_ALL;
+                    lockMode == LockMode.READ_UNCOMMITTED_ALL;
 
             LockStanding priLockStanding = priCursor.searchExact(
-                pKey, priLockType, dirtyReadAll, true /*dataRequested*/);
+                    pKey, priLockType, dirtyReadAll, true /*dataRequested*/);
 
             try {
-                if (priLockStanding != null) {
-                    if (priCursor.getCurrent(null, data) == null) {
+                if(priLockStanding != null) {
+                    if(priCursor.getCurrent(null, data) == null) {
                         priCursor.revertLock(priLockStanding);
                         priLockStanding = null;
                     }
@@ -4915,14 +4723,14 @@ public class Cursor implements ForwardCursor {
                 priCursor.releaseBIN();
             }
 
-            if (priLockStanding != null && lockPrimaryOnly) {
-                if (!ensureReferenceToPrimary(pKey, priLockType)) {
+            if(priLockStanding != null && lockPrimaryOnly) {
+                if(!ensureReferenceToPrimary(pKey, priLockType)) {
                     priCursor.revertLock(priLockStanding);
                     priLockStanding = null;
                 }
             }
 
-            if (priLockStanding == null) {
+            if(priLockStanding == null) {
                 /*
                  * If using read-uncommitted and the primary is deleted, the
                  * primary must have been deleted after reading the secondary.
@@ -4934,7 +4742,7 @@ public class Cursor implements ForwardCursor {
                  *
                  * In either case, return false to skip this record.
                  */
-                if (secDirtyRead || cursorImpl.isProbablyExpired()) {
+                if(secDirtyRead || cursorImpl.isProbablyExpired()) {
                     return false;
                 }
 
@@ -4944,8 +4752,8 @@ public class Cursor implements ForwardCursor {
                  * reference is corrupt.
                  */
                 throw dbHandle.secondaryRefersToMissingPrimaryKey(
-                    cursorImpl.getLocker(), key, pKey,
-                    cursorImpl.getExpirationTime());
+                        cursorImpl.getLocker(), key, pKey,
+                        cursorImpl.getExpirationTime());
             }
 
             /*
@@ -4953,7 +4761,7 @@ public class Cursor implements ForwardCursor {
              * see if primary was updated so that it no longer contains the
              * secondary key.  If it has been, return false.
              */
-            if (priDirtyRead && checkForPrimaryUpdate(key, pKey, data)) {
+            if(priDirtyRead && checkForPrimaryUpdate(key, pKey, data)) {
                 return false;
             }
 
@@ -4961,7 +4769,7 @@ public class Cursor implements ForwardCursor {
              * When a partial entry was requested but we read all the data,
              * copy the requested partial data to the caller's entry. [#14966]
              */
-            if (copyToPartialEntry != null) {
+            if(copyToPartialEntry != null) {
                 LN.setEntry(copyToPartialEntry, data.getData());
             }
 
@@ -4979,28 +4787,28 @@ public class Cursor implements ForwardCursor {
     /**
      * Checks whether this secondary cursor still refers to the primary key,
      * and locks the secondary record if necessary.
-     *
+     * <p>
      * This is used for deadlock avoidance with secondary DBs.  The initial
      * secondary index read is done without locking.  After the primary has
      * been locked, we check here to insure that the primary/secondary
      * relationship is still in place. There are two cases:
-     *
+     * <p>
      * 1. If the secondary DB has duplicates, the key contains the sec/pri
-     *    relationship and the presence of the secondary record (that is not
-     *    deleted) is sufficient to insure the sec/pri relationship.
-     *
+     * relationship and the presence of the secondary record (that is not
+     * deleted) is sufficient to insure the sec/pri relationship.
+     * <p>
      * 2. If the secondary DB does not allow duplicates, then the primary key
-     *    (the data of the secondary record) must additionally be compared to
-     *    the original search key. This detects the case where the secondary
-     *    record was updated to refer to a different primary key.
-     *
+     * (the data of the secondary record) must additionally be compared to
+     * the original search key. This detects the case where the secondary
+     * record was updated to refer to a different primary key.
+     * <p>
      * In addition, this method locks the secondary record if it would expire
      * within {@link EnvironmentParams#ENV_TTL_MAX_TXN_TIME}. This is needed to
      * support repeatable-read. The lock prevents expiration of the secondary.
      */
     private boolean ensureReferenceToPrimary(
-        final DatabaseEntry matchPriKey,
-        final LockType lockType) {
+            final DatabaseEntry matchPriKey,
+            final LockType lockType) {
 
         assert lockType != LockType.NONE;
 
@@ -5022,7 +4830,7 @@ public class Cursor implements ForwardCursor {
             final BIN bin = cursorImpl.getBIN();
             final int index = cursorImpl.getIndex();
 
-            if (bin.isDeleted(index)) {
+            if(bin.isDeleted(index)) {
                 return false;
             }
 
@@ -5030,10 +4838,10 @@ public class Cursor implements ForwardCursor {
 
             /* Additionally, lock the secondary if it expires soon. */
             final long expirationTime = TTL.expirationToSystemTime(
-                bin.getExpiration(index), bin.isExpirationInHours());
+                    bin.getExpiration(index), bin.isExpirationInHours());
 
-            if (envImpl.expiresWithin(
-                expirationTime, envImpl.getTtlMaxTxnTime())) {
+            if(envImpl.expiresWithin(
+                    expirationTime, envImpl.getTtlMaxTxnTime())) {
                 cursorImpl.lockLN(lockType);
             }
         } finally {
@@ -5045,15 +4853,15 @@ public class Cursor implements ForwardCursor {
          * No need to actually lock (use LockType.NONE) since the primary lock
          * protects the secondary from changes.
          */
-        if (!cursorImpl.hasDuplicates()) {
+        if(!cursorImpl.hasDuplicates()) {
             final DatabaseEntry secData = new DatabaseEntry();
 
-            if (cursorImpl.lockAndGetCurrent(
-                null, secData, LockType.NONE) == null) {
+            if(cursorImpl.lockAndGetCurrent(
+                    null, secData, LockType.NONE) == null) {
                 return false;
             }
 
-            if (!secData.equals(matchPriKey)) {
+            if(!secData.equals(matchPriKey)) {
                 return false;
             }
         }
@@ -5066,14 +4874,14 @@ public class Cursor implements ForwardCursor {
      * during a read-uncommitted read.  Checking in this method is not possible
      * because there is no secondary key creator available.  It is overridden
      * by SecondaryCursor.
-     *
+     * <p>
      * This method is in the Cursor class, rather than in SecondaryCursor, to
      * support joins with plain Cursors [#21258].
      */
     boolean checkForPrimaryUpdate(
-        final DatabaseEntry key,
-        final DatabaseEntry pKey,
-        final DatabaseEntry data) {
+            final DatabaseEntry key,
+            final DatabaseEntry pKey,
+            final DatabaseEntry data) {
         return false;
     }
 
@@ -5081,85 +4889,82 @@ public class Cursor implements ForwardCursor {
      * Returns whether the two keys have the same prefix.
      *
      * @param twoPartKey1 combined key with zero offset and size equal to the
-     * data array length.
-     *
-     * @param keyBytes2 combined key byte array.
+     *                    data array length.
+     * @param keyBytes2   combined key byte array.
      */
     private boolean haveSameDupPrefix(
-        final DatabaseEntry twoPartKey1,
-        final byte[] keyBytes2) {
-        
+            final DatabaseEntry twoPartKey1,
+            final byte[] keyBytes2) {
+
         assert twoPartKey1.getOffset() == 0;
         assert twoPartKey1.getData().length == twoPartKey1.getSize();
 
         return DupKeyData.compareMainKey(
-            twoPartKey1.getData(), keyBytes2,
-            dbImpl.getBtreeComparator()) == 0;
+                twoPartKey1.getData(), keyBytes2,
+                dbImpl.getBtreeComparator()) == 0;
     }
 
     /**
      * Called to start an operation that potentially moves the cursor.
-     *
+     * <p>
      * If the cursor is not initialized already, the method simply returns
      * this.cursorImpl. This avoids the overhead of cloning this.cursorImpl
      * when this is a sticky cursor or forceClone is true.
-     *
+     * <p>
      * If the cursor is initialized, the actions taken here depend on whether
      * cloning is required (either because this is a sticky cursor or
      * because forceClone is true).
-     *
+     * <p>
      * (a) No cloning:
      * - If same position is true, (1) the current LN (if any) is evicted, if
-     *   the cachemode so dictates, and (2) non-txn locks are released, if
-     *   retainNonTxnLocks is false. this.cursorImpl remains registered at its
-     *   current BIN.
+     * the cachemode so dictates, and (2) non-txn locks are released, if
+     * retainNonTxnLocks is false. this.cursorImpl remains registered at its
+     * current BIN.
      * - If same position is false, this.cursorImpl is "reset", i.e., (1) it is
-     *   deregistered from its current position, (2) cachemode eviction is
-     *   performed, (3) non-txn locks are released, if retainNonTxnLocks is
-     *   false, and (4) this.cursorImpl is marked uninitialized.
+     * deregistered from its current position, (2) cachemode eviction is
+     * performed, (3) non-txn locks are released, if retainNonTxnLocks is
+     * false, and (4) this.cursorImpl is marked uninitialized.
      * - this.cursorImpl is returned.
-     *
+     * <p>
      * Note: In cases where only non-transactional locks are held, releasing
      * them before the move prevents more than one lock from being held during
      * a cursor move, which helps to avoid deadlocks.
-     *
+     * <p>
      * (b) Cloning:
      * - this.cursorImpl is cloned.
      * - If same position is true, the clone is registered at the same position
-     *   as this.cursorImpl.
+     * as this.cursorImpl.
      * - If same position is false, the clone is marked uninitialized.
      * - If this.cursorImpl uses a locker that may acquire non-txn locks and
-     *   retainNonTxnLocks is false, the clone cursorImpl gets a new locker
-     *   of the same kind as this.cursorImpl. This allows for the non-txn locks
-     *   acquired by the clone to be released independently from the non-txn
-     *   locks of this.cursorImpl.
+     * retainNonTxnLocks is false, the clone cursorImpl gets a new locker
+     * of the same kind as this.cursorImpl. This allows for the non-txn locks
+     * acquired by the clone to be released independently from the non-txn
+     * locks of this.cursorImpl.
      * - The clone cursorImpl is returned.
-     *
+     * <p>
      * In all cases, critical eviction is performed, if necessary, before the
      * method returns. This is done by CursorImpl.cloneCursor()/reset(), or is
      * done here explicitly when the cursor is not cloned or reset.
-     *
+     * <p>
      * In all cases, the cursor returned must be passed to endMoveCursor() to
      * close the correct cursor.
      *
      * @param samePosition If true, this cursor's position is used for the new
-     * cursor and addCursor is called on the new cursor; if non-sticky, this
-     * cursor's position is unchanged.  If false, the new cursor will be
-     * uninitialized; if non-sticky, this cursor is reset.
-     *
-     * @param forceClone is true to clone an initialized cursor even if
-     * non-sticky is configured.  Used when cloning is needed to support
-     * internal algorithms, namely when the algorithm may restart the operation
-     * and samePosition is true.
-     *
+     *                     cursor and addCursor is called on the new cursor; if non-sticky, this
+     *                     cursor's position is unchanged.  If false, the new cursor will be
+     *                     uninitialized; if non-sticky, this cursor is reset.
+     * @param forceClone   is true to clone an initialized cursor even if
+     *                     non-sticky is configured.  Used when cloning is needed to support
+     *                     internal algorithms, namely when the algorithm may restart the operation
+     *                     and samePosition is true.
      * @see CursorImpl#performCacheModeEviction for a description of how the
      * cache mode is used.  This method ensures that the correct cache mode
      * is used before each operation.
      */
     private CursorImpl beginMoveCursor(
-        final boolean samePosition,
-        final boolean forceClone,
-        final CacheMode cacheMode) {
+            final boolean samePosition,
+            final boolean forceClone,
+            final CacheMode cacheMode) {
 
         /*
          * It don't make sense to force cloning if the new cursor will be
@@ -5169,17 +4974,18 @@ public class Cursor implements ForwardCursor {
 
         /* Must set cache mode before calling criticalEviction or reset. */
         cursorImpl.setCacheMode(
-            cacheMode != null ? cacheMode : defaultCacheMode);
+                cacheMode != null ? cacheMode : defaultCacheMode);
 
-        if (cursorImpl.isNotInitialized()) {
+        if(cursorImpl.isNotInitialized()) {
             cursorImpl.criticalEviction();
             return cursorImpl;
         }
 
-        if (nonSticky && !forceClone) {
-            if (samePosition) {
+        if(nonSticky && !forceClone) {
+            if(samePosition) {
                 cursorImpl.beforeNonStickyOp();
-            } else {
+            }
+            else {
                 cursorImpl.reset();
             }
             return cursorImpl;
@@ -5197,28 +5003,28 @@ public class Cursor implements ForwardCursor {
 
     /**
      * Called to end an operation that potentially moves the cursor.
-     *
+     * <p>
      * The actions taken here depend on whether cloning was done in
      * beginMoveCursor() or not:
-     *
+     * <p>
      * (a) No cloning:
      * - If the op is successfull, only critical eviction is done.
      * - If the op is not successfull, this.cursorImpl is "reset", i.e.,
-     *   (1) it is deregistered from its current position, (2) cachemode
-     *   eviction is performed, (3) non-txn locks are released, if
-     *   retainNonTxnLocks is false, and (4) this.cursorImpl is marked
-     *   unintialized.
-     *
+     * (1) it is deregistered from its current position, (2) cachemode
+     * eviction is performed, (3) non-txn locks are released, if
+     * retainNonTxnLocks is false, and (4) this.cursorImpl is marked
+     * unintialized.
+     * <p>
      * (b) Cloning:
      * - If the op is successful, this.cursorImpl is closed and then it is
-     *   set to the clone cursorImpl.
+     * set to the clone cursorImpl.
      * - If the op is not successfull, the clone cursorImpl is closed.
      * - In either case, closing a cursorImpl involves deregistering it from
-     *   its current position, performing cachemode eviction, releasing its
-     *   non-transactional locks and closing its locker, if retainNonTxnLocks
-     *   is false and the locker is not a Txn, and finally marking the
-     *   cursorImpl as closed.
-     *
+     * its current position, performing cachemode eviction, releasing its
+     * non-transactional locks and closing its locker, if retainNonTxnLocks
+     * is false and the locker is not a Txn, and finally marking the
+     * cursorImpl as closed.
+     * <p>
      * In all cases, critical eviction is performed after each cursor operation.
      * This is done by CursorImpl.reset() and close(), or is done here explicitly
      * when the cursor is not cloned.
@@ -5227,17 +5033,20 @@ public class Cursor implements ForwardCursor {
 
         dup.clearClosingLocker();
 
-        if (dup == cursorImpl) {
-            if (success) {
+        if(dup == cursorImpl) {
+            if(success) {
                 cursorImpl.afterNonStickyOp();
-            } else {
+            }
+            else {
                 cursorImpl.reset();
             }
-        } else {
-            if (success) {
+        }
+        else {
+            if(success) {
                 cursorImpl.close(dup);
                 cursorImpl = dup;
-            } else {
+            }
+            else {
                 dup.close(cursorImpl);
             }
         }
@@ -5252,7 +5061,7 @@ public class Cursor implements ForwardCursor {
     private void beginUseExistingCursor(final CacheMode cacheMode) {
         /* Must set cache mode before calling criticalEviction. */
         cursorImpl.setCacheMode(
-            cacheMode != null ? cacheMode : defaultCacheMode);
+                cacheMode != null ? cacheMode : defaultCacheMode);
         cursorImpl.criticalEviction();
     }
 
@@ -5277,20 +5086,24 @@ public class Cursor implements ForwardCursor {
     }
 
     private LockType getLockType(
-        final LockMode lockMode,
-        final boolean rangeLock) {
+            final LockMode lockMode,
+            final boolean rangeLock) {
 
-        if (isReadUncommittedMode(lockMode)) {
+        if(isReadUncommittedMode(lockMode)) {
             return LockType.NONE;
-        } else if (lockMode == null || lockMode == LockMode.DEFAULT) {
-            return rangeLock ? LockType.RANGE_READ: LockType.READ;
-        } else if (lockMode == LockMode.RMW) {
-            return rangeLock ? LockType.RANGE_WRITE: LockType.WRITE;
-        } else if (lockMode == LockMode.READ_COMMITTED) {
+        }
+        else if(lockMode == null || lockMode == LockMode.DEFAULT) {
+            return rangeLock ? LockType.RANGE_READ : LockType.READ;
+        }
+        else if(lockMode == LockMode.RMW) {
+            return rangeLock ? LockType.RANGE_WRITE : LockType.WRITE;
+        }
+        else if(lockMode == LockMode.READ_COMMITTED) {
             throw new IllegalArgumentException(
-                lockMode.toString() + " not allowed with Cursor methods, " +
-                "use CursorConfig.setReadCommitted instead.");
-        } else {
+                    lockMode.toString() + " not allowed with Cursor methods, " +
+                            "use CursorConfig.setReadCommitted instead.");
+        }
+        else {
             assert false : lockMode;
             return LockType.NONE;
         }
@@ -5306,21 +5119,21 @@ public class Cursor implements ForwardCursor {
         return (lockMode == LockMode.READ_UNCOMMITTED ||
                 lockMode == LockMode.READ_UNCOMMITTED_ALL ||
                 (readUncommittedDefault &&
-                 (lockMode == null || lockMode == LockMode.DEFAULT)));
+                        (lockMode == null || lockMode == LockMode.DEFAULT)));
     }
 
     boolean isSerializableIsolation(final LockMode lockMode) {
 
         return serializableIsolationDefault &&
-               !isReadUncommittedMode(lockMode);
+                !isReadUncommittedMode(lockMode);
     }
 
     void checkUpdatesAllowed(final ExpirationInfo expInfo) {
 
         checkUpdatesAllowed();
 
-        if (dbImpl.isReplicated() &&
-            expInfo != null && expInfo.expiration > 0) {
+        if(dbImpl.isReplicated() &&
+                expInfo != null && expInfo.expiration > 0) {
 
             /* Throws IllegalStateException if TTL is not available. */
             dbImpl.getEnv().checkTTLAvailable();
@@ -5329,7 +5142,7 @@ public class Cursor implements ForwardCursor {
 
     void checkUpdatesAllowed() {
 
-        if (!updateOperationsProhibited) {
+        if(!updateOperationsProhibited) {
             return;
         }
 
@@ -5339,20 +5152,25 @@ public class Cursor implements ForwardCursor {
         str.append("Write operation is not allowed because ");
 
         /* Be sure to keep this logic in sync with init(). */
-        if (locker.isReadOnly()) {
+        if(locker.isReadOnly()) {
             str.append("the Transaction is configured as read-only.");
-        } else if (dbHandle != null && !dbHandle.isWritable()) {
+        }
+        else if(dbHandle != null && !dbHandle.isWritable()) {
             str.append("the Database is configured as read-only.");
-        } else if (dbImpl.isTransactional() && !locker.isTransactional()) {
+        }
+        else if(dbImpl.isTransactional() && !locker.isTransactional()) {
             str.append("a Transaction was not supplied to openCursor ");
             str.append("and the Database is transactional.");
-        } else if (dbImpl.isReplicated() && locker.isLocalWrite()) {
+        }
+        else if(dbImpl.isReplicated() && locker.isLocalWrite()) {
             str.append("the Database is replicated and Transaction is ");
             str.append("configured as local-write.");
-        } else if (!dbImpl.isReplicated() && !locker.isLocalWrite()) {
+        }
+        else if(!dbImpl.isReplicated() && !locker.isLocalWrite()) {
             str.append("the Database is not replicated and the ");
             str.append("Transaction is not configured as local-write.");
-        } else {
+        }
+        else {
             assert false;
         }
 
@@ -5364,7 +5182,7 @@ public class Cursor implements ForwardCursor {
      */
     void checkState(final boolean mustBeInitialized) {
         cursorImpl.checkCursorState(
-            mustBeInitialized, false /*mustNotBeInitialized*/);
+                mustBeInitialized, false /*mustNotBeInitialized*/);
     }
 
     /**
@@ -5381,14 +5199,14 @@ public class Cursor implements ForwardCursor {
      */
     void checkOpen() {
         checkEnv();
-        if (dbHandle != null) {
+        if(dbHandle != null) {
             dbHandle.checkOpen();
         }
     }
 
     /**
      * @throws EnvironmentFailureException if the underlying environment is
-     * invalid.
+     *                                     invalid.
      */
     void checkEnv() {
         cursorImpl.checkEnv();
@@ -5397,14 +5215,14 @@ public class Cursor implements ForwardCursor {
     /**
      * Returns an object used for synchronizing transactions that are used in
      * multiple threads.
-     *
+     * <p>
      * For a transactional locker, the Transaction is returned to prevent
      * concurrent access using this transaction from multiple threads.  The
      * Transaction.commit and abort methods are synchronized so they do not run
      * concurrently with operations using the Transaction.  Note that the Txn
      * cannot be used for synchronization because locking order is BIN first,
      * then Txn.
-     *
+     * <p>
      * For a non-transactional locker, 'this' is returned because no special
      * blocking is needed.  Other mechanisms are used to prevent
      * non-transactional usage access by multiple threads (see ThreadLocker).
@@ -5417,7 +5235,7 @@ public class Cursor implements ForwardCursor {
     }
 
     private void checkTxnState() {
-        if (transaction == null) {
+        if(transaction == null) {
             return;
         }
         transaction.checkOpen();
@@ -5430,29 +5248,29 @@ public class Cursor implements ForwardCursor {
      * to construct the message if the level is not enabled.
      */
     void trace(
-        final Level level,
-        final String methodName,
-        final String getOrPutType,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
+            final Level level,
+            final String methodName,
+            final String getOrPutType,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
 
-        if (logger.isLoggable(level)) {
+        if(logger.isLoggable(level)) {
             final StringBuilder sb = new StringBuilder();
             sb.append(methodName);
             sb.append(getOrPutType);
             traceCursorImpl(sb);
-            if (key != null) {
+            if(key != null) {
                 sb.append(" key=").append(key.dumpData());
             }
-            if (data != null) {
+            if(data != null) {
                 sb.append(" data=").append(data.dumpData());
             }
-            if (lockMode != null) {
+            if(lockMode != null) {
                 sb.append(" lockMode=").append(lockMode);
             }
             LoggerUtils.logMsg(
-                logger, dbImpl.getEnv(), level, sb.toString());
+                    logger, dbImpl.getEnv(), level, sb.toString());
         }
     }
 
@@ -5462,27 +5280,27 @@ public class Cursor implements ForwardCursor {
      * to construct the message if the level is not enabled.
      */
     void trace(
-        final Level level,
-        final String methodName,
-        final DatabaseEntry key,
-        final DatabaseEntry data,
-        final LockMode lockMode) {
-        
-        if (logger.isLoggable(level)) {
+            final Level level,
+            final String methodName,
+            final DatabaseEntry key,
+            final DatabaseEntry data,
+            final LockMode lockMode) {
+
+        if(logger.isLoggable(level)) {
             final StringBuilder sb = new StringBuilder();
             sb.append(methodName);
             traceCursorImpl(sb);
-            if (key != null) {
+            if(key != null) {
                 sb.append(" key=").append(key.dumpData());
             }
-            if (data != null) {
+            if(data != null) {
                 sb.append(" data=").append(data.dumpData());
             }
-            if (lockMode != null) {
+            if(lockMode != null) {
                 sb.append(" lockMode=").append(lockMode);
             }
             LoggerUtils.logMsg(
-                logger, dbImpl.getEnv(), level, sb.toString());
+                    logger, dbImpl.getEnv(), level, sb.toString());
         }
     }
 
@@ -5492,19 +5310,19 @@ public class Cursor implements ForwardCursor {
      * to construct the message if the level is not enabled.
      */
     void trace(
-        final Level level,
-        final String methodName,
-        final LockMode lockMode) {
-        
-        if (logger.isLoggable(level)) {
+            final Level level,
+            final String methodName,
+            final LockMode lockMode) {
+
+        if(logger.isLoggable(level)) {
             final StringBuilder sb = new StringBuilder();
             sb.append(methodName);
             traceCursorImpl(sb);
-            if (lockMode != null) {
+            if(lockMode != null) {
                 sb.append(" lockMode=").append(lockMode);
             }
             LoggerUtils.logMsg(
-                logger, dbImpl.getEnv(), level, sb.toString());
+                    logger, dbImpl.getEnv(), level, sb.toString());
         }
     }
 
@@ -5512,23 +5330,5 @@ public class Cursor implements ForwardCursor {
         sb.append(" locker=").append(cursorImpl.getLocker().getId());
         sb.append(" bin=").append(cursorImpl.getCurrentNodeId());
         sb.append(" idx=").append(cursorImpl.getIndex());
-    }
-
-    /**
-     * Clone entry contents in a new returned entry.
-     */
-    private static DatabaseEntry cloneEntry(DatabaseEntry from) {
-        final DatabaseEntry to = new DatabaseEntry();
-        setEntry(from, to);
-        return to;
-    }
-
-    /**
-     * Copy entry contents to another entry.
-     */
-    private static void setEntry(DatabaseEntry from, DatabaseEntry to) {
-        to.setPartial(from.getPartialOffset(), from.getPartialLength(),
-                      from.getPartial());
-        to.setData(from.getData(), from.getOffset(), from.getSize());
     }
 }

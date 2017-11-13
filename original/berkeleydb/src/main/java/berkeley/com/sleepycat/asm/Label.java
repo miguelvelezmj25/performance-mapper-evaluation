@@ -35,7 +35,7 @@ package berkeley.com.sleepycat.asm;
  * designates the <i>instruction</i> that is just after. Note however that there
  * can be other elements between a label and the instruction it designates (such
  * as other labels, stack map frames, line numbers, etc.).
- * 
+ *
  * @author Eric Bruneton
  */
 public class Label {
@@ -117,7 +117,7 @@ public class Label {
 
     /**
      * Flags that indicate the status of this label.
-     * 
+     *
      * @see #DEBUG
      * @see #RESOLVED
      * @see #RESIZED
@@ -139,26 +139,27 @@ public class Label {
      * The position of this label in the code, if known.
      */
     int position;
-
     /**
-     * Number of forward references to this label, times two.
+     * Start of the output stack relatively to the input stack. The exact
+     * semantics of this field depends on the algorithm that is used.
+     * <p>
+     * When only the maximum stack size is computed, this field is the number of
+     * elements in the input stack.
+     * <p>
+     * When the stack map frames are completely computed, this field is the
+     * offset of the first output stack element relatively to the top of the
+     * input stack. This offset is always negative or null. A null offset means
+     * that the output stack must be appended to the input stack. A -n offset
+     * means that the first n output stack elements must replace the top n input
+     * stack elements, and that the other elements must be appended to the input
+     * stack.
      */
-    private int referenceCount;
-
+    int inputStackTop;
     /**
-     * Informations about forward references. Each forward reference is
-     * described by two consecutive integers in this array: the first one is the
-     * position of the first byte of the bytecode instruction that contains the
-     * forward reference, while the second is the position of the first byte of
-     * the forward reference itself. In fact the sign of the first integer
-     * indicates if this reference uses 2 or 4 bytes, and its absolute value
-     * gives the position of the bytecode instruction. This array is also used
-     * as a bitset to store the subroutines to which a basic block belongs. This
-     * information is needed in {@linked MethodWriter#visitMaxs}, after all
-     * forward references have been resolved. Hence the same array can be used
-     * for both purposes without problems.
+     * Maximum height reached by the output stack, relatively to the top of the
+     * input stack. This maximum is always positive or null.
      */
-    private int[] srcAndRefPositions;
+    int outputStackMax;
 
     // ------------------------------------------------------------------------
 
@@ -188,37 +189,12 @@ public class Label {
      * used to compute stack map frames computes relative output frames and
      * absolute input frames.
      */
-
-    /**
-     * Start of the output stack relatively to the input stack. The exact
-     * semantics of this field depends on the algorithm that is used.
-     * 
-     * When only the maximum stack size is computed, this field is the number of
-     * elements in the input stack.
-     * 
-     * When the stack map frames are completely computed, this field is the
-     * offset of the first output stack element relatively to the top of the
-     * input stack. This offset is always negative or null. A null offset means
-     * that the output stack must be appended to the input stack. A -n offset
-     * means that the first n output stack elements must replace the top n input
-     * stack elements, and that the other elements must be appended to the input
-     * stack.
-     */
-    int inputStackTop;
-
-    /**
-     * Maximum height reached by the output stack, relatively to the top of the
-     * input stack. This maximum is always positive or null.
-     */
-    int outputStackMax;
-
     /**
      * Information about the input and output stack map frames of this basic
      * block. This field is only used when {@link ClassWriter#COMPUTE_FRAMES}
      * option is used.
      */
     Frame frame;
-
     /**
      * The successor of this label, in the order they are visited. This linked
      * list does not include labels used for debug info only. If
@@ -227,23 +203,39 @@ public class Label {
      * (in this case only the first label appears in this list).
      */
     Label successor;
-
     /**
      * The successors of this node in the control flow graph. These successors
      * are stored in a linked list of {@link Edge Edge} objects, linked to each
      * other by their {@link Edge#next} field.
      */
     Edge successors;
-
     /**
      * The next basic block in the basic block stack. This stack is used in the
      * main loop of the fix point algorithm used in the second step of the
      * control flow analysis algorithms. It is also used in
      * {@link #visitSubroutine} to avoid using a recursive method.
-     * 
+     *
      * @see MethodWriter#visitMaxs
      */
     Label next;
+    /**
+     * Number of forward references to this label, times two.
+     */
+    private int referenceCount;
+    /**
+     * Informations about forward references. Each forward reference is
+     * described by two consecutive integers in this array: the first one is the
+     * position of the first byte of the bytecode instruction that contains the
+     * forward reference, while the second is the position of the first byte of
+     * the forward reference itself. In fact the sign of the first integer
+     * indicates if this reference uses 2 or 4 bytes, and its absolute value
+     * gives the position of the bytecode instruction. This array is also used
+     * as a bitset to store the subroutines to which a basic block belongs. This
+     * information is needed in {@linked MethodWriter#visitMaxs}, after all
+     * forward references have been resolved. Hence the same array can be used
+     * for both purposes without problems.
+     */
+    private int[] srcAndRefPositions;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -264,13 +256,12 @@ public class Label {
      * from the start of the method's bytecode. <i>This method is intended for
      * {@link Attribute} sub classes, and is normally not needed by class
      * generators or adapters.</i>
-     * 
+     *
      * @return the offset corresponding to this label.
-     * @throws IllegalStateException
-     *             if this label is not resolved yet.
+     * @throws IllegalStateException if this label is not resolved yet.
      */
     public int getOffset() {
-        if ((status & RESOLVED) == 0) {
+        if((status & RESOLVED) == 0) {
             throw new IllegalStateException(
                     "Label offset position has not been resolved yet");
         }
@@ -282,34 +273,32 @@ public class Label {
      * position of the label is known, the offset is computed and written
      * directly. Otherwise, a null offset is written and a new forward reference
      * is declared for this label.
-     * 
-     * @param owner
-     *            the code writer that calls this method.
-     * @param out
-     *            the bytecode of the method.
-     * @param source
-     *            the position of first byte of the bytecode instruction that
-     *            contains this label.
-     * @param wideOffset
-     *            <tt>true</tt> if the reference must be stored in 4 bytes, or
-     *            <tt>false</tt> if it must be stored with 2 bytes.
-     * @throws IllegalArgumentException
-     *             if this label has not been created by the given code writer.
+     *
+     * @param owner      the code writer that calls this method.
+     * @param out        the bytecode of the method.
+     * @param source     the position of first byte of the bytecode instruction that
+     *                   contains this label.
+     * @param wideOffset <tt>true</tt> if the reference must be stored in 4 bytes, or
+     *                   <tt>false</tt> if it must be stored with 2 bytes.
+     * @throws IllegalArgumentException if this label has not been created by the given code writer.
      */
     void put(final MethodWriter owner, final ByteVector out, final int source,
-            final boolean wideOffset) {
-        if ((status & RESOLVED) == 0) {
-            if (wideOffset) {
+             final boolean wideOffset) {
+        if((status & RESOLVED) == 0) {
+            if(wideOffset) {
                 addReference(-1 - source, out.length);
                 out.putInt(-1);
-            } else {
+            }
+            else {
                 addReference(source, out.length);
                 out.putShort(-1);
             }
-        } else {
-            if (wideOffset) {
+        }
+        else {
+            if(wideOffset) {
                 out.putInt(position - source);
-            } else {
+            }
+            else {
                 out.putShort(position - source);
             }
         }
@@ -320,20 +309,18 @@ public class Label {
      * for a true forward reference, i.e. only if this label is not resolved
      * yet. For backward references, the offset of the reference can be, and
      * must be, computed and stored directly.
-     * 
-     * @param sourcePosition
-     *            the position of the referencing instruction. This position
-     *            will be used to compute the offset of this forward reference.
-     * @param referencePosition
-     *            the position where the offset for this forward reference must
-     *            be stored.
+     *
+     * @param sourcePosition    the position of the referencing instruction. This position
+     *                          will be used to compute the offset of this forward reference.
+     * @param referencePosition the position where the offset for this forward reference must
+     *                          be stored.
      */
     private void addReference(final int sourcePosition,
-            final int referencePosition) {
-        if (srcAndRefPositions == null) {
+                              final int referencePosition) {
+        if(srcAndRefPositions == null) {
             srcAndRefPositions = new int[6];
         }
-        if (referenceCount >= srcAndRefPositions.length) {
+        if(referenceCount >= srcAndRefPositions.length) {
             int[] a = new int[srcAndRefPositions.length + 6];
             System.arraycopy(srcAndRefPositions, 0, a, 0,
                     srcAndRefPositions.length);
@@ -348,37 +335,33 @@ public class Label {
      * when this label is added to the bytecode of the method, i.e. when its
      * position becomes known. This method fills in the blanks that where left
      * in the bytecode by each forward reference previously added to this label.
-     * 
-     * @param owner
-     *            the code writer that calls this method.
-     * @param position
-     *            the position of this label in the bytecode.
-     * @param data
-     *            the bytecode of the method.
+     *
+     * @param owner    the code writer that calls this method.
+     * @param position the position of this label in the bytecode.
+     * @param data     the bytecode of the method.
      * @return <tt>true</tt> if a blank that was left for this label was to
-     *         small to store the offset. In such a case the corresponding jump
-     *         instruction is replaced with a pseudo instruction (using unused
-     *         opcodes) using an unsigned two bytes offset. These pseudo
-     *         instructions will need to be replaced with true instructions with
-     *         wider offsets (4 bytes instead of 2). This is done in
-     *         {@link MethodWriter#resizeInstructions}.
-     * @throws IllegalArgumentException
-     *             if this label has already been resolved, or if it has not
-     *             been created by the given code writer.
+     * small to store the offset. In such a case the corresponding jump
+     * instruction is replaced with a pseudo instruction (using unused
+     * opcodes) using an unsigned two bytes offset. These pseudo
+     * instructions will need to be replaced with true instructions with
+     * wider offsets (4 bytes instead of 2). This is done in
+     * {@link MethodWriter#resizeInstructions}.
+     * @throws IllegalArgumentException if this label has already been resolved, or if it has not
+     *                                  been created by the given code writer.
      */
     boolean resolve(final MethodWriter owner, final int position,
-            final byte[] data) {
+                    final byte[] data) {
         boolean needUpdate = false;
         this.status |= RESOLVED;
         this.position = position;
         int i = 0;
-        while (i < referenceCount) {
+        while(i < referenceCount) {
             int source = srcAndRefPositions[i++];
             int reference = srcAndRefPositions[i++];
             int offset;
-            if (source >= 0) {
+            if(source >= 0) {
                 offset = position - source;
-                if (offset < Short.MIN_VALUE || offset > Short.MAX_VALUE) {
+                if(offset < Short.MIN_VALUE || offset > Short.MAX_VALUE) {
                     /*
                      * changes the opcode of the jump instruction, in order to
                      * be able to find it later (see resizeInstructions in
@@ -389,10 +372,11 @@ public class Label {
                      * limited to 65535 bytes).
                      */
                     int opcode = data[reference - 1] & 0xFF;
-                    if (opcode <= Opcodes.JSR) {
+                    if(opcode <= Opcodes.JSR) {
                         // changes IFEQ ... JSR to opcodes 202 to 217
                         data[reference - 1] = (byte) (opcode + 49);
-                    } else {
+                    }
+                    else {
                         // changes IFNULL and IFNONNULL to opcodes 218 and 219
                         data[reference - 1] = (byte) (opcode + 20);
                     }
@@ -400,7 +384,8 @@ public class Label {
                 }
                 data[reference++] = (byte) (offset >>> 8);
                 data[reference] = (byte) offset;
-            } else {
+            }
+            else {
                 offset = position + source + 1;
                 data[reference++] = (byte) (offset >>> 24);
                 data[reference++] = (byte) (offset >>> 16);
@@ -416,7 +401,7 @@ public class Label {
      * isolated label or for the first label in a series of successive labels,
      * this method returns the label itself. For other labels it returns the
      * first label of the series.
-     * 
+     *
      * @return the first label of the series to which this label belongs.
      */
     Label getFirst() {
@@ -429,13 +414,12 @@ public class Label {
 
     /**
      * Returns true is this basic block belongs to the given subroutine.
-     * 
-     * @param id
-     *            a subroutine id.
+     *
+     * @param id a subroutine id.
      * @return true is this basic block belongs to the given subroutine.
      */
     boolean inSubroutine(final long id) {
-        if ((status & Label.VISITED) != 0) {
+        if((status & Label.VISITED) != 0) {
             return (srcAndRefPositions[(int) (id >>> 32)] & (int) id) != 0;
         }
         return false;
@@ -444,18 +428,17 @@ public class Label {
     /**
      * Returns true if this basic block and the given one belong to a common
      * subroutine.
-     * 
-     * @param block
-     *            another basic block.
+     *
+     * @param block another basic block.
      * @return true if this basic block and the given one belong to a common
-     *         subroutine.
+     * subroutine.
      */
     boolean inSameSubroutine(final Label block) {
-        if ((status & VISITED) == 0 || (block.status & VISITED) == 0) {
+        if((status & VISITED) == 0 || (block.status & VISITED) == 0) {
             return false;
         }
-        for (int i = 0; i < srcAndRefPositions.length; ++i) {
-            if ((srcAndRefPositions[i] & block.srcAndRefPositions[i]) != 0) {
+        for(int i = 0; i < srcAndRefPositions.length; ++i) {
+            if((srcAndRefPositions[i] & block.srcAndRefPositions[i]) != 0) {
                 return true;
             }
         }
@@ -464,14 +447,12 @@ public class Label {
 
     /**
      * Marks this basic block as belonging to the given subroutine.
-     * 
-     * @param id
-     *            a subroutine id.
-     * @param nbSubroutines
-     *            the total number of subroutines in the method.
+     *
+     * @param id            a subroutine id.
+     * @param nbSubroutines the total number of subroutines in the method.
      */
     void addToSubroutine(final long id, final int nbSubroutines) {
-        if ((status & VISITED) == 0) {
+        if((status & VISITED) == 0) {
             status |= VISITED;
             srcAndRefPositions = new int[nbSubroutines / 32 + 1];
         }
@@ -483,34 +464,31 @@ public class Label {
      * blocks as belonging to this subroutine. This method follows the control
      * flow graph to find all the blocks that are reachable from the current
      * block WITHOUT following any JSR target.
-     * 
-     * @param JSR
-     *            a JSR block that jumps to this subroutine. If this JSR is not
-     *            null it is added to the successor of the RET blocks found in
-     *            the subroutine.
-     * @param id
-     *            the id of this subroutine.
-     * @param nbSubroutines
-     *            the total number of subroutines in the method.
+     *
+     * @param JSR           a JSR block that jumps to this subroutine. If this JSR is not
+     *                      null it is added to the successor of the RET blocks found in
+     *                      the subroutine.
+     * @param id            the id of this subroutine.
+     * @param nbSubroutines the total number of subroutines in the method.
      */
     void visitSubroutine(final Label JSR, final long id, final int nbSubroutines) {
         // user managed stack of labels, to avoid using a recursive method
         // (recursivity can lead to stack overflow with very large methods)
         Label stack = this;
-        while (stack != null) {
+        while(stack != null) {
             // removes a label l from the stack
             Label l = stack;
             stack = l.next;
             l.next = null;
 
-            if (JSR != null) {
-                if ((l.status & VISITED2) != 0) {
+            if(JSR != null) {
+                if((l.status & VISITED2) != 0) {
                     continue;
                 }
                 l.status |= VISITED2;
                 // adds JSR to the successors of l, if it is a RET block
-                if ((l.status & RET) != 0) {
-                    if (!l.inSameSubroutine(JSR)) {
+                if((l.status & RET) != 0) {
+                    if(!l.inSameSubroutine(JSR)) {
                         Edge e = new Edge();
                         e.info = l.inputStackTop;
                         e.successor = JSR.successors.successor;
@@ -518,9 +496,10 @@ public class Label {
                         l.successors = e;
                     }
                 }
-            } else {
+            }
+            else {
                 // if the l block already belongs to subroutine 'id', continue
-                if (l.inSubroutine(id)) {
+                if(l.inSubroutine(id)) {
                     continue;
                 }
                 // marks the l block as belonging to subroutine 'id'
@@ -528,13 +507,13 @@ public class Label {
             }
             // pushes each successor of l on the stack, except JSR targets
             Edge e = l.successors;
-            while (e != null) {
+            while(e != null) {
                 // if the l block is a JSR block, then 'l.successors.next' leads
                 // to the JSR target (see {@link #visitJumpInsn}) and must
                 // therefore not be followed
-                if ((l.status & Label.JSR) == 0 || e != l.successors.next) {
+                if((l.status & Label.JSR) == 0 || e != l.successors.next) {
                     // pushes e.successor on the stack if it not already added
-                    if (e.successor.next == null) {
+                    if(e.successor.next == null) {
                         e.successor.next = stack;
                         stack = e.successor;
                     }
@@ -550,7 +529,7 @@ public class Label {
 
     /**
      * Returns a string representation of this label.
-     * 
+     *
      * @return a string representation of this label.
      */
     @Override

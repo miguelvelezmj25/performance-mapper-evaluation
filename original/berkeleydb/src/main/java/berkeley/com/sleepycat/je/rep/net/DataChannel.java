@@ -20,14 +20,13 @@ import java.nio.channels.ScatteringByteChannel;
 import java.nio.channels.SocketChannel;
 
 /**
- * @hidden
- * An interface that associates a delegate socketChannel for network I/O, which
+ * @hidden An interface that associates a delegate socketChannel for network I/O, which
  * provides ByteChannel, GatheringByteChannel, and ScatteringByteChannel,
  * interfaces for callers.
  */
 public interface DataChannel extends ByteChannel,
-                                     GatheringByteChannel,
-                                     ScatteringByteChannel {
+        GatheringByteChannel,
+        ScatteringByteChannel {
 
     /**
      * Accessor for the underlying SocketChannel.
@@ -62,30 +61,6 @@ public interface DataChannel extends ByteChannel,
     public boolean isTrusted();
 
     /**
-     * The status of the flush method.
-     */
-    public enum FlushStatus {
-
-        /** Flushes are not being used. */
-        DISABLED,
-
-        /** Nothing needs to be flushed. */
-        DONE,
-
-        /** Flush not complete because there is something left to flush. */
-        AGAIN,
-
-        /** Flush not complete because socket is busy for write. */
-        WRITE_BUSY,
-
-        /** Flush not complete due to read data dependency. */
-        NEED_READ,
-
-        /** Flush not complete due to task execution dependency. */
-        NEED_TASK,
-    }
-
-    /**
      * Attempt to flush any pending writes to the underlying socket buffer.
      * The caller should ensure that it is the only thread accessing the
      * DataChannel in order that the return value be meaningful.
@@ -93,5 +68,41 @@ public interface DataChannel extends ByteChannel,
      * @return the flush status
      */
     public FlushStatus flush() throws IOException;
+
+    /**
+     * The status of the flush method.
+     */
+    public enum FlushStatus {
+
+        /**
+         * Flushes are not being used.
+         */
+        DISABLED,
+
+        /**
+         * Nothing needs to be flushed.
+         */
+        DONE,
+
+        /**
+         * Flush not complete because there is something left to flush.
+         */
+        AGAIN,
+
+        /**
+         * Flush not complete because socket is busy for write.
+         */
+        WRITE_BUSY,
+
+        /**
+         * Flush not complete due to read data dependency.
+         */
+        NEED_READ,
+
+        /**
+         * Flush not complete due to task execution dependency.
+         */
+        NEED_TASK,
+    }
 }
 

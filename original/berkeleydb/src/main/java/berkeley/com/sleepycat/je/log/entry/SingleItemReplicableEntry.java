@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
+import berkeley.com.sleepycat.je.log.LogEntryType;
+import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Collections;
-
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
 
 /**
  * A basic implementation of a replicable log entry that has a single loggable
@@ -46,7 +46,7 @@ abstract class SingleItemReplicableEntry<T extends VersionedWriteLoggable>
      * Creates an instance of this class for writing a log entry.
      *
      * @param entryType the associated log entry type
-     * @param item the contained loggable item
+     * @param item      the contained loggable item
      */
     SingleItemReplicableEntry(final LogEntryType entryType, final T item) {
         super(entryType, item);
@@ -56,7 +56,7 @@ abstract class SingleItemReplicableEntry<T extends VersionedWriteLoggable>
     public Collection<VersionedWriteLoggable> getEmbeddedLoggables() {
         /* The cast is needed due to quirks of Java generics. */
         return Collections.singleton(
-            (VersionedWriteLoggable) newInstanceOfType());
+                (VersionedWriteLoggable) newInstanceOfType());
     }
 
     @Override
@@ -68,7 +68,7 @@ abstract class SingleItemReplicableEntry<T extends VersionedWriteLoggable>
     public void writeEntry(final ByteBuffer logBuffer,
                            final int logVersion,
                            final boolean forReplication) {
-        getMainItem().writeToLog(logBuffer, logVersion,forReplication);
+        getMainItem().writeToLog(logBuffer, logVersion, forReplication);
     }
 
     @Override
@@ -81,6 +81,6 @@ abstract class SingleItemReplicableEntry<T extends VersionedWriteLoggable>
                                                  final int srcVersion,
                                                  final int destVersion) {
         return newInstanceOfType().isReplicationFormatWorthwhile(
-            logBuffer, srcVersion, destVersion);
+                logBuffer, srcVersion, destVersion);
     }
 }

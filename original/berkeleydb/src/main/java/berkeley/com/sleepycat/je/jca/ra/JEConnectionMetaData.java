@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.je.jca.ra;
 import javax.resource.spi.ManagedConnectionMetaData;
 
 public class JEConnectionMetaData
-    implements ManagedConnectionMetaData {
+        implements ManagedConnectionMetaData {
 
     public JEConnectionMetaData() {
     }
@@ -35,6 +35,6 @@ public class JEConnectionMetaData
     }
 
     public String getUserName() {
-            return null;
+        return null;
     }
 }

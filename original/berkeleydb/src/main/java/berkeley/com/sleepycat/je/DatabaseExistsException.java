@@ -18,7 +18,7 @@ package berkeley.com.sleepycat.je;
  * {@link Environment#openSecondaryDatabase Environment.openSecondaryDatabase}
  * if the database already exists and the {@code DatabaseConfig
  * ExclusiveCreate} parameter is true.
- *
+ * <p>
  * <p>The {@link Transaction} handle is <em>not</em> invalidated as a result of
  * this exception.</p>
  *
@@ -28,26 +28,29 @@ public class DatabaseExistsException extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public DatabaseExistsException(String message) {
         super(null /*locker*/, false /*abortOnly*/, message, null /*cause*/);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private DatabaseExistsException(String message,
                                     DatabaseExistsException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

@@ -13,25 +13,22 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.LOG_FLUSH_NO_SYNC_INTERVAL;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.LOG_FLUSH_SYNC_INTERVAL;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.OLD_REP_LOG_FLUSH_TASK_INTERVAL;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.OLD_REP_RUN_LOG_FLUSH_TASK;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static berkeley.com.sleepycat.je.config.EnvironmentParams.*;
 
 /**
  * Flush the log buffers (and write queue) periodically to disk and to the file
  * system, as specified by
  * {@link com.sleepycat.je.EnvironmentConfig#LOG_FLUSH_SYNC_INTERVAL} and
  * {@link com.sleepycat.je.EnvironmentConfig#LOG_FLUSH_NO_SYNC_INTERVAL}.
- *
+ * <p>
  * Currently flushing occurs if any transactions were committed during the
  * interval. In the future we may want to flush if there were no writes or
  * fynscs in the interval, to allow specifying an even smaller interval for
@@ -53,8 +50,8 @@ public class LogFlusher {
         this.envImpl = envImpl;
 
         this.timer = new Timer(
-            envImpl.makeDaemonThreadName(Environment.LOG_FLUSHER_NAME),
-            true /*isDaemon*/);
+                envImpl.makeDaemonThreadName(Environment.LOG_FLUSHER_NAME),
+                true /*isDaemon*/);
     }
 
     /**
@@ -62,42 +59,42 @@ public class LogFlusher {
      * tasks as needed.
      *
      * @throws IllegalArgumentException if an illegal combination of old and
-     * new flush params were specified.
+     *                                  new flush params were specified.
      */
     public void configFlushTask(DbConfigManager configMgr) {
 
-        if (!updateConfig(configMgr)) {
+        if(!updateConfig(configMgr)) {
             return;
         }
 
-        synchronized (this) {
-            if (!shutdownRequest) {
+        synchronized(this) {
+            if(!shutdownRequest) {
                 cancel();
 
-                if (flushSyncInterval > 0) {
+                if(flushSyncInterval > 0) {
                     flushSyncTask = new FlushTask(envImpl, true /*fsync*/);
-        
+
                     timer.schedule(
-                        flushSyncTask, flushSyncInterval, flushSyncInterval);
+                            flushSyncTask, flushSyncInterval, flushSyncInterval);
                 }
-        
-                if (flushNoSyncInterval > 0) {
+
+                if(flushNoSyncInterval > 0) {
                     flushNoSyncTask = new FlushTask(envImpl, false /*fsync*/);
-        
+
                     timer.schedule(
-                        flushNoSyncTask, flushNoSyncInterval,
-                        flushNoSyncInterval);
+                            flushNoSyncTask, flushNoSyncInterval,
+                            flushNoSyncInterval);
                 }
             }
         }
     }
 
     private void cancel() {
-        if (flushSyncTask != null) {
+        if(flushSyncTask != null) {
             flushSyncTask.cancel();
             flushSyncTask = null;
         }
-        if (flushNoSyncTask != null) {
+        if(flushNoSyncTask != null) {
             flushNoSyncTask.cancel();
             flushNoSyncTask = null;
         }
@@ -108,7 +105,7 @@ public class LogFlusher {
     }
 
     public void shutdown() {
-        synchronized (this) {
+        synchronized(this) {
             shutdownRequest = true;
             cancel();
             timer.cancel();
@@ -119,7 +116,7 @@ public class LogFlusher {
      * Applies the new configuration and returns whether it changed.
      *
      * @throws IllegalArgumentException if an illegal combination of old and
-     * new flush params were specified.
+     *                                  new flush params were specified.
      */
     private boolean updateConfig(DbConfigManager configMgr) {
 
@@ -130,51 +127,53 @@ public class LogFlusher {
          * If specified and set to false (which is not the default), the
          * deprecated OLD_REP_RUN_LOG_FLUSH_TASK overrides other settings.
          */
-        if (configMgr.isSpecified(OLD_REP_RUN_LOG_FLUSH_TASK) &&
-            !configMgr.getBoolean(OLD_REP_RUN_LOG_FLUSH_TASK)) {
+        if(configMgr.isSpecified(OLD_REP_RUN_LOG_FLUSH_TASK) &&
+                !configMgr.getBoolean(OLD_REP_RUN_LOG_FLUSH_TASK)) {
 
-            if (configMgr.isSpecified(LOG_FLUSH_SYNC_INTERVAL) ||
-                configMgr.isSpecified(LOG_FLUSH_NO_SYNC_INTERVAL)) {
+            if(configMgr.isSpecified(LOG_FLUSH_SYNC_INTERVAL) ||
+                    configMgr.isSpecified(LOG_FLUSH_NO_SYNC_INTERVAL)) {
 
                 throw new IllegalArgumentException(
-                    "When " + OLD_REP_RUN_LOG_FLUSH_TASK.getName() +
-                    " is set to false, " + LOG_FLUSH_SYNC_INTERVAL +
-                    " and " + LOG_FLUSH_NO_SYNC_INTERVAL +
-                    " must not be specified.");
+                        "When " + OLD_REP_RUN_LOG_FLUSH_TASK.getName() +
+                                " is set to false, " + LOG_FLUSH_SYNC_INTERVAL +
+                                " and " + LOG_FLUSH_NO_SYNC_INTERVAL +
+                                " must not be specified.");
             }
 
             newSyncInternal = 0;
             newNoSyncInterval = 0;
 
-        } else {
+        }
+        else {
 
             /*
              * If specified, the deprecated OLD_REP_LOG_FLUSH_TASK_INTERVAL
              * overrides LOG_FLUSH_SYNC_INTERVAL.
              */
-            if (configMgr.isSpecified(OLD_REP_LOG_FLUSH_TASK_INTERVAL)) {
+            if(configMgr.isSpecified(OLD_REP_LOG_FLUSH_TASK_INTERVAL)) {
 
-                if (configMgr.isSpecified(LOG_FLUSH_SYNC_INTERVAL)) {
+                if(configMgr.isSpecified(LOG_FLUSH_SYNC_INTERVAL)) {
 
                     throw new IllegalArgumentException(
-                        "Both " + OLD_REP_LOG_FLUSH_TASK_INTERVAL.getName() +
-                        " and " + LOG_FLUSH_SYNC_INTERVAL +
-                        " must not be specified.");
+                            "Both " + OLD_REP_LOG_FLUSH_TASK_INTERVAL.getName() +
+                                    " and " + LOG_FLUSH_SYNC_INTERVAL +
+                                    " must not be specified.");
                 }
 
                 newSyncInternal =
-                    configMgr.getDuration(OLD_REP_LOG_FLUSH_TASK_INTERVAL);
-            } else {
+                        configMgr.getDuration(OLD_REP_LOG_FLUSH_TASK_INTERVAL);
+            }
+            else {
                 newSyncInternal =
-                    configMgr.getDuration(LOG_FLUSH_SYNC_INTERVAL);
+                        configMgr.getDuration(LOG_FLUSH_SYNC_INTERVAL);
             }
 
             newNoSyncInterval =
-                configMgr.getDuration(LOG_FLUSH_NO_SYNC_INTERVAL);
+                    configMgr.getDuration(LOG_FLUSH_NO_SYNC_INTERVAL);
         }
 
-        if (newSyncInternal == flushSyncInterval &&
-            newNoSyncInterval == flushNoSyncInterval) {
+        if(newSyncInternal == flushSyncInterval &&
+                newNoSyncInterval == flushNoSyncInterval) {
             return false;
         }
 
@@ -219,27 +218,28 @@ public class LogFlusher {
         public void run() {
             try {
                 final long newNCommits =
-                    envImpl.getTxnManager().getNTotalCommits();
+                        envImpl.getTxnManager().getNTotalCommits();
 
                 /* Do nothing if there have been no new commits. */
-                if (newNCommits <= lastNCommits) {
+                if(newNCommits <= lastNCommits) {
                     return;
                 }
 
-                if (fsync) {
+                if(fsync) {
                     envImpl.getLogManager().flushSync();
-                } else {
+                }
+                else {
                     envImpl.getLogManager().flushNoSync();
                 }
 
                 lastNCommits = newNCommits;
                 flushCount++;
 
-            } catch (Throwable e) {
-                if (envImpl.isValid()) {
+            } catch(Throwable e) {
+                if(envImpl.isValid()) {
                     StoppableThread.handleUncaughtException(
-                        envImpl.getLogger(), envImpl, Thread.currentThread(),
-                        e);
+                            envImpl.getLogger(), envImpl, Thread.currentThread(),
+                            e);
                 }
             }
         }

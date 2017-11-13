@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Shared implementation for all local utilization trackers.  Per-database
@@ -30,18 +30,18 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
 
     /**
      * Map of per-database utilization info.
-     *
+     * <p>
      * In LocalUtilizationTracker:
-     *    IdentityHashMap of DatabaseImpl to DbFileSummaryMap
-     *
+     * IdentityHashMap of DatabaseImpl to DbFileSummaryMap
+     * <p>
      * In RecoveryUtilizationTracker:
-     *    HashMap of DatabaseId to DbFileSummaryMap
+     * HashMap of DatabaseId to DbFileSummaryMap
      */
     private Map<Object, DbFileSummaryMap> dbMap;
 
     /**
      * Creates a local tracker with a map keyed by DatabaseId or DatabaseImpl.
-     *
+     * <p>
      * When used by this class dbMap is an IdentityHashMap keyed by
      * DatabaseImpl. When used by RecoveryUtilizationTracker dbMap is a HashMap
      * keyed by DatabaseId.
@@ -62,40 +62,40 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
     /**
      * Transfers counts and offsets from this local tracker to the given
      * (global) UtilizationTracker and to the live DatabaseImpl objects.
-     *
+     * <p>
      * <p>When called after recovery has finished, must be called under the log
      * write latch.</p>
      */
     public void transferToUtilizationTracker(UtilizationTracker tracker)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Add file summary information, including obsolete offsets. */
-        for (TrackedFileSummary localSummary : getTrackedFiles()) {
+        for(TrackedFileSummary localSummary : getTrackedFiles()) {
             TrackedFileSummary fileSummary =
-                tracker.getFileSummary(localSummary.getFileNumber());
+                    tracker.getFileSummary(localSummary.getFileNumber());
             fileSummary.addTrackedSummary(localSummary);
         }
 
         /* Add DbFileSummary information. */
         Iterator<Object> dbMapKeys = dbMap.keySet().iterator();
-        while (dbMapKeys.hasNext()) {
+        while(dbMapKeys.hasNext()) {
             Object key = dbMapKeys.next();
             DatabaseImpl db = databaseKeyToDatabaseImpl(key);
             /* If db is null, it was deleted. */
             DbFileSummaryMap fileMap = dbMap.get(key);
 
-            if (db != null) {
+            if(db != null) {
                 Iterator<Map.Entry<Long, DbFileSummary>> fileEntries =
-                    fileMap.entrySet().iterator();
+                        fileMap.entrySet().iterator();
 
-                while (fileEntries.hasNext()) {
+                while(fileEntries.hasNext()) {
                     Map.Entry<Long, DbFileSummary> fileEntry =
-                        fileEntries.next();
+                            fileEntries.next();
 
                     Long fileNum = fileEntry.getKey();
                     DbFileSummary dbFileSummary =
-                        db.getDbFileSummary(fileNum, true /*willModify*/);
-                    if (dbFileSummary != null) {
+                            db.getDbFileSummary(fileNum, true /*willModify*/);
+                    if(dbFileSummary != null) {
                         DbFileSummary localSummary = fileEntry.getValue();
                         dbFileSummary.add(localSummary);
                     }
@@ -114,12 +114,12 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
      * with the DatabaseImpl returned by this method.
      */
     abstract DatabaseImpl databaseKeyToDatabaseImpl(Object databaseKey)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * Must be called after calling databaseKeyToDatabaseImpl.  The db
      * parameter may be null, in which case no action is taken.
-     *
+     * <p>
      * If DbTree.getDb is called by the implementation of
      * databaseKeyToDatabaseImpl, then DbTree.releaseDb must be called by the
      * implementation of this method.
@@ -131,15 +131,14 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
      * in the DatabaseImpl.
      *
      * @param databaseKey is either a DatabaseId or DatabaseImpl depending on
-     * whether called from the RecoveryUtilizationTracker or
-     * LocalUtilizationTracker, respectively.
-     *
+     *                    whether called from the RecoveryUtilizationTracker or
+     *                    LocalUtilizationTracker, respectively.
      * @return the summary, or null if the databaseKey param is null.
      */
     DbFileSummary getDbFileSummary(Object databaseKey, long fileNum) {
-        if (databaseKey != null) {
+        if(databaseKey != null) {
             DbFileSummaryMap fileMap = dbMap.get(databaseKey);
-            if (fileMap == null) {
+            if(fileMap == null) {
                 fileMap = new DbFileSummaryMap(true /* countParentMapEntry */);
                 fileMap.init(env);
                 dbMap.put(databaseKey, fileMap);
@@ -150,9 +149,10 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
              * at any time when counting with a local tracker.
              */
             return fileMap.get
-                (Long.valueOf(fileNum), true /*adjustMemBudget*/,
-                 false /*checkResurrected*/, env.getFileManager());
-        } else {
+                    (Long.valueOf(fileNum), true /*adjustMemBudget*/,
+                            false /*checkResurrected*/, env.getFileManager());
+        }
+        else {
             return null;
         }
     }
@@ -164,7 +164,7 @@ abstract class BaseLocalUtilizationTracker extends BaseUtilizationTracker {
     void removeDbFileSummaries(Object databaseKey) {
         /* The dbMap entry is budgeted by the DbFileSummaryMap. */
         DbFileSummaryMap fileMap = dbMap.remove(databaseKey);
-        if (fileMap != null) {
+        if(fileMap != null) {
             fileMap.subtractFromMemoryBudget();
         }
     }

@@ -13,22 +13,16 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.persist.model.EntityModel;
 import berkeley.com.sleepycat.persist.raw.RawObject;
 
+import java.lang.reflect.Array;
+import java.util.*;
+
 /**
  * Format for all enum types.
- *
+ * <p>
  * In this class we resort to using reflection to allocate arrays of enums.
  * If there is a need for it, reflection could be avoided in the future by
  * generating code as new array formats are encountered.
@@ -46,7 +40,7 @@ public class EnumFormat extends Format {
         super(catalog, type);
         values = type.getEnumConstants();
         names = new String[values.length];
-        for (int i = 0; i < names.length; i += 1) {
+        for(int i = 0; i < names.length; i += 1) {
             names[i] = ((Enum) values[i]).name();
         }
     }
@@ -83,22 +77,22 @@ public class EnumFormat extends Format {
 
     @Override
     void initialize(Catalog catalog, EntityModel model, int initVersion) {
-        if (values == null) {
+        if(values == null) {
             initValues();
         }
     }
 
     private void initValues() {
         Class cls = getType();
-        if (cls != null) {
+        if(cls != null) {
             values = new Object[names.length];
-            for (int i = 0; i < names.length; i += 1) {
+            for(int i = 0; i < names.length; i += 1) {
                 try {
                     values[i] = Enum.valueOf(cls, names[i]);
-                } catch (IllegalArgumentException e) {
+                } catch(IllegalArgumentException e) {
                     throw new IllegalArgumentException
-                        ("Deletion and renaming of enum values is not " +
-                         "supported: " + names[i], e);
+                            ("Deletion and renaming of enum values is not " +
+                                    "supported: " + names[i], e);
                 }
             }
         }
@@ -112,9 +106,10 @@ public class EnumFormat extends Format {
     @Override
     public Object newInstance(EntityInput input, boolean rawAccess) {
         int index = input.readEnumConstant(names);
-        if (rawAccess) {
+        if(rawAccess) {
             return new RawObject(this, names[index]);
-        } else {
+        }
+        else {
             return values[index];
         }
     }
@@ -127,17 +122,18 @@ public class EnumFormat extends Format {
 
     @Override
     void writeObject(Object o, EntityOutput output, boolean rawAccess) {
-        if (rawAccess) {
+        if(rawAccess) {
             String name = ((RawObject) o).getEnum();
-            for (int i = 0; i < names.length; i += 1) {
-                if (names[i].equals(name)) {
+            for(int i = 0; i < names.length; i += 1) {
+                if(names[i].equals(name)) {
                     output.writeEnumConstant(names, i);
                     return;
                 }
             }
-        } else {
-            for (int i = 0; i < values.length; i += 1) {
-                if (o == values[i]) {
+        }
+        else {
+            for(int i = 0; i < values.length; i += 1) {
+                if(o == values[i]) {
                     output.writeEnumConstant(names, i);
                     return;
                 }
@@ -152,15 +148,15 @@ public class EnumFormat extends Format {
                             RawObject rawObject,
                             IdentityHashMap converted) {
         String name = rawObject.getEnum();
-        for (int i = 0; i < names.length; i += 1) {
-            if (names[i].equals(name)) {
+        for(int i = 0; i < names.length; i += 1) {
+            if(names[i].equals(name)) {
                 Object o = values[i];
                 converted.put(rawObject, o);
                 return o;
             }
         }
         throw new IllegalArgumentException
-            ("Enum constant is not defined: " + name);
+                ("Enum constant is not defined: " + name);
     }
 
     @Override
@@ -172,17 +168,17 @@ public class EnumFormat extends Format {
     void copySecKey(RecordInput input, RecordOutput output) {
         int len = input.getPackedIntByteLength();
         output.writeFast
-            (input.getBufferBytes(), input.getBufferOffset(), len);
+                (input.getBufferBytes(), input.getBufferOffset(), len);
         input.skipFast(len);
     }
 
     @Override
     boolean evolve(Format newFormatParam, Evolver evolver) {
-        if (!(newFormatParam instanceof EnumFormat)) {
+        if(!(newFormatParam instanceof EnumFormat)) {
             evolver.addEvolveError
-                (this, newFormatParam,
-                 "Incompatible enum type changed detected",
-                 "An enum class may not be changed to a non-enum type");
+                    (this, newFormatParam,
+                            "Incompatible enum type changed detected",
+                            "An enum class may not be changed to a non-enum type");
             /* For future:
             evolver.addMissingMutation
                 (this, newFormatParam,
@@ -195,7 +191,7 @@ public class EnumFormat extends Format {
         final EnumFormat newFormat = (EnumFormat) newFormatParam;
 
         /* Return quickly if the enum was not changed at all. */
-        if (Arrays.equals(names, newFormat.names)) {
+        if(Arrays.equals(names, newFormat.names)) {
             evolver.useOldFormat(this, newFormat);
             return true;
         }
@@ -205,18 +201,18 @@ public class EnumFormat extends Format {
         final List<String> oldNamesList = Arrays.asList(names);
 
         /* Deletion (or renaming, which appears as deletion) is not allowed. */
-        if (!newNamesSet.containsAll(oldNamesList)) {
+        if(!newNamesSet.containsAll(oldNamesList)) {
             final Set<String> oldNamesSet = new HashSet<String>(oldNamesList);
             oldNamesSet.removeAll(newNamesSet);
             evolver.addEvolveError
-                (this, newFormat,
-                 "Incompatible enum type changed detected",
-                 "Enum values may not be removed: " + oldNamesSet);
+                    (this, newFormat,
+                            "Incompatible enum type changed detected",
+                            "Enum values may not be removed: " + oldNamesSet);
         }
 
         /* Use a List for additional names to preserve ordinal order. */
         final List<String> additionalNamesList =
-            new ArrayList<String>(newNamesList);
+                new ArrayList<String>(newNamesList);
         additionalNamesList.removeAll(oldNamesList);
         final int nAdditionalNames = additionalNamesList.size();
 
@@ -225,7 +221,7 @@ public class EnumFormat extends Format {
          * equivalent.  This is the case where only the declaration order was
          * changed.
          */
-        if (nAdditionalNames == 0) {
+        if(nAdditionalNames == 0) {
             evolver.useOldFormat(this, newFormat);
             return true;
         }
@@ -237,7 +233,7 @@ public class EnumFormat extends Format {
         final int nOldNames = names.length;
         newFormat.names = new String[nOldNames + nAdditionalNames];
         System.arraycopy(names, 0, newFormat.names, 0, nOldNames);
-        for (int i = 0; i < nAdditionalNames; i += 1) {
+        for(int i = 0; i < nAdditionalNames; i += 1) {
             newFormat.names[nOldNames + i] = additionalNamesList.get(i);
         }
         newFormat.initValues();

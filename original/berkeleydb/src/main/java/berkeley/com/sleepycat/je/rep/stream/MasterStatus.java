@@ -12,9 +12,9 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.net.InetSocketAddress;
-
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+
+import java.net.InetSocketAddress;
 
 /**
  * Class used by a node to track changes in Master Status. It's updated by
@@ -53,8 +53,8 @@ public class MasterStatus implements Cloneable {
     public synchronized Object clone() {
         try {
             return super.clone();
-        } catch (CloneNotSupportedException e) {
-            assert(false);
+        } catch(CloneNotSupportedException e) {
+            assert (false);
         }
         return null;
     }
@@ -65,7 +65,7 @@ public class MasterStatus implements Cloneable {
     public synchronized boolean isGroupMaster() {
         final int id = nameIdPair.getId();
         return (id != NameIdPair.NULL_NODE_ID) &&
-            (id == groupMasterNameId.getId());
+                (id == groupMasterNameId.getId());
     }
 
     /**
@@ -74,7 +74,7 @@ public class MasterStatus implements Cloneable {
     public synchronized boolean isNodeMaster() {
         final int id = nameIdPair.getId();
         return (id != NameIdPair.NULL_NODE_ID) &&
-            (id == nodeMasterNameId.getId());
+                (id == nodeMasterNameId.getId());
     }
 
     public synchronized void setGroupMaster(String hostname,
@@ -95,7 +95,7 @@ public class MasterStatus implements Cloneable {
 
     public synchronized boolean inSync() {
         return !nodeMasterNameId.hasNullId() &&
-               (groupMasterNameId.getId() == nodeMasterNameId.getId());
+                (groupMasterNameId.getId() == nodeMasterNameId.getId());
     }
 
     public synchronized void unSync() {
@@ -112,9 +112,9 @@ public class MasterStatus implements Cloneable {
      * @throws MasterSyncException
      */
     public synchronized void assertSync()
-        throws MasterSyncException {
+            throws MasterSyncException {
 
-        if (!inSync()) {
+        if(!inSync()) {
             throw new MasterSyncException();
         }
     }
@@ -133,7 +133,7 @@ public class MasterStatus implements Cloneable {
      * with the Group's notion of the Master
      */
     public synchronized InetSocketAddress getNodeMaster() {
-        if (nodeMasterHostName == null) {
+        if(nodeMasterHostName == null) {
             return null;
         }
         return new InetSocketAddress(nodeMasterHostName, nodeMasterPort);
@@ -149,8 +149,8 @@ public class MasterStatus implements Cloneable {
      * groupMasterNameId is NULL.
      */
     public synchronized InetSocketAddress getGroupMaster() {
-        if (groupMasterHostName == null) {
-             return null;
+        if(groupMasterHostName == null) {
+            return null;
         }
         return new InetSocketAddress(groupMasterHostName, groupMasterPort);
     }
@@ -164,7 +164,7 @@ public class MasterStatus implements Cloneable {
         private final NameIdPair savedGroupMasterId;
         private final NameIdPair savedNodeMasterId;
 
-        MasterSyncException () {
+        MasterSyncException() {
             savedGroupMasterId = MasterStatus.this.getGroupMasterNameId();
             savedNodeMasterId = MasterStatus.this.getNodeMasterNameId();
         }
@@ -172,7 +172,7 @@ public class MasterStatus implements Cloneable {
         @Override
         public String getMessage() {
             return "Master change. Node master id: " + savedNodeMasterId +
-            " Group master id: " + savedGroupMasterId;
+                    " Group master id: " + savedGroupMasterId;
         }
     }
 }

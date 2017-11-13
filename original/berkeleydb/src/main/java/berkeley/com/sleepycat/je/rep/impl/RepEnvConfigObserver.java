@@ -27,5 +27,5 @@ public interface RepEnvConfigObserver {
      */
     void repEnvConfigUpdate(RepConfigManager configMgr,
                             ReplicationMutableConfig newConfig)
-        throws DatabaseException;
+            throws DatabaseException;
 }

@@ -52,6 +52,7 @@ public class EnvironmentWedgedException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public EnvironmentWedgedException(EnvironmentImpl envImpl,
@@ -61,6 +62,7 @@ public class EnvironmentWedgedException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private EnvironmentWedgedException(String message,
@@ -70,6 +72,7 @@ public class EnvironmentWedgedException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

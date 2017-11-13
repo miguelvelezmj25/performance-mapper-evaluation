@@ -19,18 +19,15 @@ package berkeley.com.sleepycat.je.dbi;
  * and does state change validation.
  */
 class DbEnvState {
-    private static final boolean DEBUG = false;
-
-    private String name;
-
     /* Valid environment states. */
     public static final DbEnvState INIT = new DbEnvState("initialized");
     public static final DbEnvState OPEN = new DbEnvState("open");
     public static final DbEnvState CLOSED = new DbEnvState("closed");
     public static final DbEnvState INVALID = new DbEnvState("invalid");
-
     /* Valid previous states, for state transition checking. */
-    public static final DbEnvState[] VALID_FOR_CLOSE =  {INIT, OPEN, INVALID};
+    public static final DbEnvState[] VALID_FOR_CLOSE = {INIT, OPEN, INVALID};
+    private static final boolean DEBUG = false;
+    private String name;
     /* Not currently used:
     public static final DbEnvState[] VALID_FOR_OPEN =   {INIT, CLOSED};
     public static final DbEnvState[] VALID_FOR_REMOVE = {INIT, CLOSED};
@@ -47,21 +44,21 @@ class DbEnvState {
 
     /* Check for valid state transitions. */
     void checkState(DbEnvState[] validPrevStates, DbEnvState newState) {
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("newState = " + newState +
-                               " currentState = " + name);
+                    " currentState = " + name);
         }
         boolean transitionOk = false;
-        for (int i = 0; i < validPrevStates.length; i++) {
-            if (this == validPrevStates[i]) {
+        for(int i = 0; i < validPrevStates.length; i++) {
+            if(this == validPrevStates[i]) {
                 transitionOk = true;
                 break;
             }
         }
-        if (!transitionOk) {
+        if(!transitionOk) {
             throw new IllegalStateException
-                ("Can't go from environment state " + toString() +
-                 " to " + newState.toString());
+                    ("Can't go from environment state " + toString() +
+                            " to " + newState.toString());
         }
     }
 }

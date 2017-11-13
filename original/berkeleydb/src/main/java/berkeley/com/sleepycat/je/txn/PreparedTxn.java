@@ -26,9 +26,9 @@ import berkeley.com.sleepycat.je.log.ReplicationContext;
 public class PreparedTxn extends Txn {
 
     private PreparedTxn(EnvironmentImpl envImpl,
-                       TransactionConfig config,
-                       long mandatedId)
-        throws DatabaseException {
+                        TransactionConfig config,
+                        long mandatedId)
+            throws DatabaseException {
 
         super(envImpl, config, ReplicationContext.NO_REPLICATE, mandatedId);
     }
@@ -36,12 +36,12 @@ public class PreparedTxn extends Txn {
     public static PreparedTxn createPreparedTxn(EnvironmentImpl envImpl,
                                                 TransactionConfig config,
                                                 long mandatedId)
-        throws DatabaseException {
+            throws DatabaseException {
 
         PreparedTxn ret = null;
         try {
             ret = new PreparedTxn(envImpl, config, mandatedId);
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             ret.close(false);
             throw DE;
         }

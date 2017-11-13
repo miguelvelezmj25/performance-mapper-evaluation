@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.rep.NodeType;
 import berkeley.com.sleepycat.je.rep.QuorumPolicy;
 import berkeley.com.sleepycat.je.rep.arbitration.Arbiter;
@@ -22,6 +20,8 @@ import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.rep.stream.MasterStatus;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.util.logging.Logger;
 
 /**
  * ElectionQuorum centralizes decision making about what constitutes a
@@ -44,34 +44,36 @@ public class ElectionQuorum {
         logger = LoggerUtils.getLogger(getClass());
 
         electableGroupSizeOverride = repImpl.getConfigManager().
-            getInt(RepParams.ELECTABLE_GROUP_SIZE_OVERRIDE);
-        if (electableGroupSizeOverride > 0) {
+                getInt(RepParams.ELECTABLE_GROUP_SIZE_OVERRIDE);
+        if(electableGroupSizeOverride > 0) {
             LoggerUtils.warning(logger, repImpl,
-                                "Electable group size override set to:" +
-                                electableGroupSizeOverride);
+                    "Electable group size override set to:" +
+                            electableGroupSizeOverride);
         }
     }
 
-    /** For unit testing */
+    /**
+     * For unit testing
+     */
     public ElectionQuorum() {
         repImpl = null;
         logger = null;
+    }
+
+    public int getElectableGroupSizeOverride() {
+        return electableGroupSizeOverride;
     }
 
     /*
      * Sets the override value for the Electable Group size.
      */
     public void setElectableGroupSizeOverride(int override) {
-        if (electableGroupSizeOverride != override) {
+        if(electableGroupSizeOverride != override) {
             LoggerUtils.warning(logger, repImpl,
-                                "Electable group size override changed to:" +
-                                override);
+                    "Electable group size override changed to:" +
+                            override);
         }
         this.electableGroupSizeOverride = override;
-    }
-
-    public int getElectableGroupSizeOverride() {
-        return electableGroupSizeOverride;
     }
 
     /**
@@ -96,12 +98,12 @@ public class ElectionQuorum {
      */
     boolean isAuthoritativeMaster(MasterStatus masterStatus,
                                   FeederManager feederManager) {
-        if (!masterStatus.isGroupMaster()) {
+        if(!masterStatus.isGroupMaster()) {
             return false;
         }
 
         return (feederManager.activeReplicaCount() + 1) >=
-            getElectionQuorumSize(QuorumPolicy.SIMPLE_MAJORITY);
+                getElectionQuorumSize(QuorumPolicy.SIMPLE_MAJORITY);
     }
 
     /**
@@ -109,7 +111,7 @@ public class ElectionQuorum {
      * election. Over time, this may evolve to be a more detailed description
      * than simply the size of the quorum. Instead, it may return the set of
      * possible voters.
-     *
+     * <p>
      * Special situations, like an active designated primary or an election
      * group override will change the default quorum size.
      *
@@ -117,7 +119,7 @@ public class ElectionQuorum {
      * @return the number of nodes required for a quorum
      */
     private int getElectionQuorumSize(QuorumPolicy quorumPolicy) {
-        if (electableGroupSizeOverride > 0) {
+        if(electableGroupSizeOverride > 0) {
             return quorumPolicy.quorumSize(electableGroupSizeOverride);
         }
 
@@ -127,12 +129,12 @@ public class ElectionQuorum {
          */
         RepNode repNode = repImpl.getRepNode();
         Arbiter arbiter = repNode.getArbiter();
-        if (arbiter.isApplicable(quorumPolicy)) {
+        if(arbiter.isApplicable(quorumPolicy)) {
             return arbiter.getElectionQuorumSize(quorumPolicy);
         }
 
         return quorumPolicy.quorumSize
-            (repNode.getGroup().getElectableGroupSize());
+                (repNode.getGroup().getElectableGroupSize());
     }
 
     /**

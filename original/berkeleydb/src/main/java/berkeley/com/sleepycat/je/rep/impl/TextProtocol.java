@@ -13,11 +13,21 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.config.DurationConfigParam;
+import berkeley.com.sleepycat.je.dbi.DbConfigManager;
+import berkeley.com.sleepycat.je.rep.elections.Utils;
+import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+import berkeley.com.sleepycat.je.rep.net.DataChannel;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
+import berkeley.com.sleepycat.je.rep.utilint.ReplicationFormatter;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+import berkeley.com.sleepycat.je.utilint.TestHook;
+
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,36 +43,22 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.config.DurationConfigParam;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
-import berkeley.com.sleepycat.je.rep.elections.Utils;
-import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
-import berkeley.com.sleepycat.je.rep.net.DataChannel;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
-import berkeley.com.sleepycat.je.rep.utilint.ReplicationFormatter;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-
 /**
  * TextProtocol provides the support for implementing simple low performance
  * protocols involving replication nodes. The protocol is primarily text based,
  * and checks group membership and version matches with every message favoring
  * flexibility over performance.
- *
+ * <p>
  * The base class is primarily responsible for the message formatting and
  * message envelope validation. The subclasses define the specific messages
  * that constitute the protocol and the request/response semantics.
- *
+ * <p>
  * Every message has the format:
  * <version>|<name>|<id>|<op>|<op-specific payload>
- *
+ * <p>
  * <version> is the version of the protocol in use.
  * <name>    identifies a group participating in an election. It avoids
- *           accidental cross-talk across groups holding concurrent elections.
+ * accidental cross-talk across groups holding concurrent elections.
  * <id>      identifies the originator of the message within the group.
  * <op>      the operation identified by the specific message.
  * <op-specific payload> the payload associated with the particular operation.
@@ -70,63 +66,9 @@ import berkeley.com.sleepycat.je.utilint.TestHook;
 
 public abstract class TextProtocol {
 
-    /* The name of the class associated with this protocol. */
-    private final String name;
-
-    /*
-     * Protocol version string. Format: <major version>.<minor version>
-     * It's used to ensure compatibility across versions.
-     */
-    private final String VERSION;
-
-    /* The name of the group executing this protocol. */
-    private final String groupName;
-
-    /*
-     * The set of ids of nodes that are permitted to communicate via this
-     * protocol, or null if not restricted. It's updated as nodes enter and
-     * leave the dynamic group.
-     */
-    private Set<Integer> memberIds;
-
-    /* The id associated with this protocol participant. */
-    private final NameIdPair nameIdPair;
-
-    /*
-     * The suffix of message prefix constituting the "fixed" part of the
-     * message for this group and node, it does not include the version
-     * information, which goes in front of this prefix.
-     */
-    protected final String messageNocheckSuffix;
-
-    /*
-     * Timeouts used for network communications. Use setTimeouts() to override
-     * the defaults.
-     */
-    private int openTimeoutMs = 10000; // Default to 10 sec
-    private int readTimeoutMs = 10000; // Default to 10 sec
-
     /* The token separator in messages */
     public static final String SEPARATOR = "|";
-    public static final String SEPARATOR_REGEXP="\\" + SEPARATOR;
-
-    /* A message defined by the base class to deal with all errors. */
-    public final MessageOp PROTOCOL_ERROR =
-                new MessageOp("PE", ProtocolError.class);
-    public final MessageOp OK_RESP = new MessageOp("OK", OK.class);
-    public final MessageOp FAIL_RESP = new MessageOp("FAIL", Fail.class);
-
-    /* The number of message types defined by the subclass. */
-    private int nonDefaultMessageCount;
-
-    /* Maps request Ops to the corresponding enumerator. */
-    private final Map<String,MessageOp> ops = new HashMap<>();
-
-    protected final Logger logger;
-    protected final Formatter formatter;
-    protected final RepImpl repImpl;
-    protected final DataChannelFactory channelFactory;
-
+    public static final String SEPARATOR_REGEXP = "\\" + SEPARATOR;
     /**
      * Hook used to modify messages in the serialized form. The hook is invoked
      * on a serialized Request immediately before it's written to the network
@@ -134,18 +76,60 @@ public abstract class TextProtocol {
      * deserialized. The hook implementation must be re-entrant.
      */
     private static TestHook<String> serDeHook;
+    /* A message defined by the base class to deal with all errors. */
+    public final MessageOp PROTOCOL_ERROR =
+            new MessageOp("PE", ProtocolError.class);
+    public final MessageOp OK_RESP = new MessageOp("OK", OK.class);
+    public final MessageOp FAIL_RESP = new MessageOp("FAIL", Fail.class);
+    /*
+     * The suffix of message prefix constituting the "fixed" part of the
+     * message for this group and node, it does not include the version
+     * information, which goes in front of this prefix.
+     */
+    protected final String messageNocheckSuffix;
+    protected final Logger logger;
+    protected final Formatter formatter;
+    protected final RepImpl repImpl;
+    protected final DataChannelFactory channelFactory;
+    /* The name of the class associated with this protocol. */
+    private final String name;
+    /*
+     * Protocol version string. Format: <major version>.<minor version>
+     * It's used to ensure compatibility across versions.
+     */
+    private final String VERSION;
+    /* The name of the group executing this protocol. */
+    private final String groupName;
+    /* The id associated with this protocol participant. */
+    private final NameIdPair nameIdPair;
+    /* Maps request Ops to the corresponding enumerator. */
+    private final Map<String, MessageOp> ops = new HashMap<>();
+    /*
+     * The set of ids of nodes that are permitted to communicate via this
+     * protocol, or null if not restricted. It's updated as nodes enter and
+     * leave the dynamic group.
+     */
+    private Set<Integer> memberIds;
+    /*
+     * Timeouts used for network communications. Use setTimeouts() to override
+     * the defaults.
+     */
+    private int openTimeoutMs = 10000; // Default to 10 sec
+    private int readTimeoutMs = 10000; // Default to 10 sec
+    /* The number of message types defined by the subclass. */
+    private int nonDefaultMessageCount;
 
     /**
      * Creates an instance of the Protocol.
      *
+     * @param nameIdPair     a unique identifier for this node
+     * @param repImpl        for logging, may be null
+     * @param channelFactory the factory for channel creation
      * @parameter version the protocol version number
      * @parameter groupName the name of the group executing this protocol
-     * @param nameIdPair a unique identifier for this node
-     * @param repImpl for logging, may be null
-     * @param channelFactory the factory for channel creation
      */
     public TextProtocol(String version,
-                        String  groupName,
+                        String groupName,
                         NameIdPair nameIdPair,
                         RepImpl repImpl,
                         DataChannelFactory channelFactory) {
@@ -157,11 +141,12 @@ public abstract class TextProtocol {
         name = getClass().getName();
 
         messageNocheckSuffix =
-            groupName + SEPARATOR + NameIdPair.NOCHECK_NODE_ID;
+                groupName + SEPARATOR + NameIdPair.NOCHECK_NODE_ID;
 
-        if (repImpl != null) {
+        if(repImpl != null) {
             this.logger = LoggerUtils.getLogger(getClass());
-        } else {
+        }
+        else {
             this.logger = LoggerUtils.getLoggerFormatterNeeded(getClass());
         }
         this.formatter = new ReplicationFormatter(nameIdPair);
@@ -170,8 +155,8 @@ public abstract class TextProtocol {
     /**
      * Sets the hook that is invoked post serialization on request messages and
      * pre deserialization on response messages.
-     *
-     *  The hook implementation must be re-entrant.
+     * <p>
+     * The hook implementation must be re-entrant.
      */
     public static void setSerDeHook(TestHook<String> serDeHook) {
         TextProtocol.serDeHook = serDeHook;
@@ -183,7 +168,7 @@ public abstract class TextProtocol {
     protected void setTimeouts(RepImpl repImpl,
                                DurationConfigParam openTimeoutConfig,
                                DurationConfigParam readTimeoutConfig) {
-        if (repImpl == null) {
+        if(repImpl == null) {
             return;
         }
         final DbConfigManager configManager = repImpl.getConfigManager();
@@ -203,7 +188,7 @@ public abstract class TextProtocol {
      * @param protocolOps the message ops defined by the subclass.
      */
     protected void initializeMessageOps(MessageOp[] protocolOps) {
-        for (MessageOp op : protocolOps) {
+        for(MessageOp op : protocolOps) {
             ops.put(op.opId, op);
         }
         nonDefaultMessageCount = protocolOps.length;
@@ -224,9 +209,9 @@ public abstract class TextProtocol {
      */
     public Set<String> getOps(Class<? extends Message> messageType) {
         final Set<String> reqOps = new HashSet<>();
-        for (Entry<String, MessageOp> e : ops.entrySet()) {
-            if (messageType.
-                isAssignableFrom(e.getValue().getMessageClass())) {
+        for(Entry<String, MessageOp> e : ops.entrySet()) {
+            if(messageType.
+                    isAssignableFrom(e.getValue().getMessageClass())) {
                 reqOps.add(e.getKey());
             }
         }
@@ -269,6 +254,195 @@ public abstract class TextProtocol {
     }
 
     /**
+     * Parses a line into a Request/Response message.
+     *
+     * @param line containing the message
+     * @return a message instance
+     * @throws InvalidMessageException
+     */
+    public Message parse(String line)
+            throws InvalidMessageException {
+
+        String[] tokens = line.split(SEPARATOR_REGEXP);
+
+        final int index = TOKENS.OP_TOKEN.ordinal();
+        if(index >= tokens.length) {
+            throw new InvalidMessageException(
+                    MessageError.BAD_FORMAT,
+                    "Missing message op in message: " + line);
+        }
+        final MessageOp op = ops.get(tokens[index]);
+        if(op == null) {
+            throw new InvalidMessageException(MessageError.BAD_FORMAT,
+                    "Text Protocol" +
+                            " unknown op:" + tokens[index] +
+                            " in message: " + line);
+        }
+
+        try {
+            Class<? extends Message> c = op.getMessageClass();
+            Constructor<? extends Message> cons =
+                    c.getConstructor(c.getEnclosingClass(),
+                            line.getClass(),
+                            tokens.getClass());
+            Message message = cons.newInstance(this, line, tokens);
+            return message;
+        } catch(InstantiationException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        } catch(IllegalAccessException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        } catch(SecurityException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        } catch(NoSuchMethodException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        } catch(InvocationTargetException e) {
+            /* Unwrap the exception. */
+            Throwable target = e.getTargetException();
+            if(target instanceof RuntimeException) {
+                final String message = "message: " + line +
+                        " exception:" + target.getClass().getName() +
+                        " exception message:" + target.getMessage();
+                throw new InvalidMessageException(MessageError.BAD_FORMAT,
+                        message);
+
+            }
+            else if(target instanceof InvalidMessageException) {
+                throw (InvalidMessageException) target;
+            }
+            throw EnvironmentFailureException.unexpectedException(e);
+        }
+    }
+
+    /**
+     * Converts a response line into a ResponseMessage.
+     *
+     * @param responseLine
+     * @return the response message
+     * @throws InvalidMessageException
+     */
+    ResponseMessage parseResponse(String responseLine)
+            throws InvalidMessageException {
+
+        return (ResponseMessage) parse(responseLine);
+    }
+
+    /**
+     * Converts a request line into a requestMessage.
+     *
+     * @param requestLine
+     * @return the request message
+     * @throws InvalidMessageException
+     */
+    public RequestMessage parseRequest(String requestLine)
+            throws InvalidMessageException {
+
+        return (RequestMessage) parse(requestLine);
+    }
+
+    /**
+     * Reads the channel and returns a read request. If the message format
+     * was bad, it sends a ProtocolError response back over the channel and
+     * no further action is needed by the caller.
+     *
+     * @param channel the channel delivering the request
+     * @return null if EOF was reached or the message format was bad
+     * @throws IOException
+     */
+    public RequestMessage getRequestMessage(DataChannel channel)
+            throws IOException {
+
+        BufferedReader in = new BufferedReader
+                (new InputStreamReader(Channels.newInputStream(channel)));
+
+        String requestLine = in.readLine();
+        if(requestLine == null) {
+            /* EOF */
+            return null;
+        }
+        try {
+            return parseRequest(requestLine);
+        } catch(InvalidMessageException e) {
+            processIME(channel, e);
+            return null;
+        }
+    }
+
+    /**
+     * Process an IME encountered during request processing by writing a
+     * ProtocolError message as a response and logging it.
+     *
+     * @param channel the channel used to write the ProtocolError message
+     * @param ime     the exception
+     */
+    public void processIME(DataChannel channel,
+                           InvalidMessageException ime) {
+        LoggerUtils.logMsg(logger, repImpl, formatter, Level.WARNING,
+                name + " format error:" +
+                        LoggerUtils.exceptionTypeAndMsg(ime));
+        PrintWriter out =
+                new PrintWriter(Channels.newOutputStream(channel), true);
+        out.println(new ProtocolError(ime).wireFormat());
+        out.close();
+    }
+
+    public ResponseMessage process(Object requestProcessor,
+                                   RequestMessage requestMessage) {
+
+        Class<? extends Object> cl = requestProcessor.getClass();
+        try {
+            Method method =
+                    cl.getMethod("process", requestMessage.getClass());
+            return (ResponseMessage) method.invoke
+                    (requestProcessor, requestMessage);
+        } catch(NoSuchMethodException e) {
+            LoggerUtils.logMsg(logger, repImpl, formatter, Level.SEVERE,
+                    name +
+                            " Method: process(" +
+                            requestMessage.getClass().getName() +
+                            ") was missing");
+            throw EnvironmentFailureException.unexpectedException(e);
+        } catch(Exception e) {
+            LoggerUtils.logMsg(logger, repImpl, formatter, Level.SEVERE,
+                    name +
+                            " Unexpected exception: " +
+                            LoggerUtils.exceptionTypeAndMsg(e));
+            throw EnvironmentFailureException.unexpectedException(e);
+        }
+    }
+
+    /**
+     * Represents the tokens on a message line. The order of the enumerators
+     * represents the order of the tokens in the wire format.
+     */
+    public enum TOKENS {
+        VERSION_TOKEN,
+        NAME_TOKEN,
+        ID_TOKEN,
+        OP_TOKEN,
+        FIRST_PAYLOAD_TOKEN;
+    }
+
+    /*
+     * The type associated with an invalid Message. It's used by the exception
+     * below and by ProtocolError.
+     */
+    static public enum MessageError {
+        BAD_FORMAT, VERSION_MISMATCH, GROUP_MISMATCH, NOT_A_MEMBER
+    }
+
+    /* Used to indicate that an entity is formatable and can be serialized and
+     * de-serialized.
+     */
+    protected interface WireFormatable {
+
+        /*
+         * Returns the string representation suitable for use in a network
+         * request.
+         */
+        abstract String wireFormat();
+    }
+
+    /**
      * The Operations that are part of the protocol.
      */
     public static class MessageOp {
@@ -298,86 +472,71 @@ public abstract class TextProtocol {
         }
     }
 
-    /**
-     * Represents the tokens on a message line. The order of the enumerators
-     * represents the order of the tokens in the wire format.
-     */
-    public enum TOKENS {
-        VERSION_TOKEN,
-        NAME_TOKEN,
-        ID_TOKEN,
-        OP_TOKEN,
-        FIRST_PAYLOAD_TOKEN;
-    }
+    protected static class StringFormatable implements WireFormatable {
+        protected String s;
 
-    /* Used to indicate that an entity is formatable and can be serialized and
-     * de-serialized.
-     */
-    protected interface WireFormatable {
-
-        /*
-         * Returns the string representation suitable for use in a network
-         * request.
-         */
-        abstract String wireFormat();
-    }
-
-    /**
-     * Parses a line into a Request/Response message.
-     *
-     * @param line containing the message
-     * @return a message instance
-     * @throws InvalidMessageException
-     */
-    public Message parse(String line)
-        throws InvalidMessageException {
-
-        String[] tokens = line.split(SEPARATOR_REGEXP);
-
-        final int index = TOKENS.OP_TOKEN.ordinal();
-        if (index >= tokens.length) {
-            throw new InvalidMessageException(
-                MessageError.BAD_FORMAT,
-                "Missing message op in message: " + line);
-        }
-        final MessageOp op = ops.get(tokens[index]);
-        if (op == null) {
-            throw new InvalidMessageException(MessageError.BAD_FORMAT,
-                                              "Text Protocol" +
-                                              " unknown op:" + tokens[index] +
-                                              " in message: " + line);
+        StringFormatable() {
         }
 
-        try {
-            Class<? extends Message> c = op.getMessageClass();
-            Constructor<? extends Message> cons =
-                c.getConstructor(c.getEnclosingClass(),
-                                 line.getClass(),
-                                 tokens.getClass());
-            Message message = cons.newInstance(this, line, tokens);
-            return message;
-        } catch (InstantiationException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        } catch (IllegalAccessException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        } catch (SecurityException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        } catch (NoSuchMethodException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        } catch (InvocationTargetException e) {
-            /* Unwrap the exception. */
-            Throwable target = e.getTargetException();
-            if (target instanceof RuntimeException) {
-                final String message = "message: " + line +
-                  " exception:" + target.getClass().getName() +
-                  " exception message:" + target.getMessage();
-                throw new InvalidMessageException(MessageError.BAD_FORMAT,
-                                                  message);
+        protected StringFormatable(String s) {
+            this.s = s;
+        }
 
-            } else if (target instanceof InvalidMessageException) {
-                throw (InvalidMessageException) target;
+        public void init(String wireFormat) {
+            s = wireFormat;
+        }
+
+        @Override
+        public String wireFormat() {
+            return s;
+        }
+
+        @Override
+        public int hashCode() {
+            return ((s == null) ? 0 : s.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(this == obj) {
+                return true;
             }
-            throw EnvironmentFailureException.unexpectedException(e);
+            if(obj == null) {
+                return false;
+            }
+            if(!(obj instanceof StringFormatable)) {
+                return false;
+            }
+
+            final StringFormatable other = (StringFormatable) obj;
+            if(s == null) {
+                if(other.s != null) {
+                    return false;
+                }
+            }
+            else if(!s.equals(other.s)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Used to indicate a message format or invalid content exception.
+     */
+    @SuppressWarnings("serial")
+    public static class InvalidMessageException extends Exception {
+        private final MessageError errorType;
+
+        public InvalidMessageException(MessageError errorType,
+                                       String message) {
+            super(message);
+
+            this.errorType = errorType;
+        }
+
+        public MessageError getErrorType() {
+            return errorType;
         }
     }
 
@@ -385,9 +544,10 @@ public abstract class TextProtocol {
      * Base message class for all messages exchanged in the protocol.
      */
     public abstract class Message implements WireFormatable {
-        /* The sender of the message. */
-        private int senderId = 0;
-
+        /* The line representing the message. */
+        private final String line;
+        /* The tokenized form of the above line. */
+        private final String[] tokens;
         /*
          * The version of this message, as it's deserialized and sent across
          * the network. The default is that messages are sent in the VERSION of
@@ -402,17 +562,11 @@ public abstract class TextProtocol {
          * requester is an older version of JE.
          */
         protected String sendVersion;
-
-        /* The line representing the message. */
-        private final String line;
-
-        /* The tokenized form of the above line. */
-        private final String[] tokens;
-
+        protected String messagePrefixNocheck;
+        /* The sender of the message. */
+        private int senderId = 0;
         /* The current variable arg token */
         private int currToken = TOKENS.FIRST_PAYLOAD_TOKEN.ordinal();
-
-        protected String messagePrefixNocheck;
 
         /**
          * The constructor used for the original non-serialized instance of the
@@ -429,25 +583,25 @@ public abstract class TextProtocol {
          * be de-serialized. The constructor is invoked using reflection by the
          * parse() method.
          *
-         * @param line the line constituting the message
+         * @param line   the line constituting the message
          * @param tokens the line in token form
          * @throws InvalidMessageException
          * @throws EnvironmentFailureException on format errors
          */
         protected Message(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             this.line = line;
             this.tokens = tokens;
 
             /* Validate the leading fixed fields. */
             final String version = getTokenString(TOKENS.VERSION_TOKEN);
-            if (new Double(VERSION) < new Double(version)) {
+            if(new Double(VERSION) < new Double(version)) {
                 throw new InvalidMessageException
-                    (MessageError.VERSION_MISMATCH,
-                     "Version argument mismatch." +
-                     " Expected: " + VERSION + ", found: " + version +
-                     ", in message: " + line);
+                        (MessageError.VERSION_MISMATCH,
+                                "Version argument mismatch." +
+                                        " Expected: " + VERSION + ", found: " + version +
+                                        ", in message: " + line);
             }
 
             /*
@@ -458,33 +612,38 @@ public abstract class TextProtocol {
             setSendVersion(version);
 
             final String messageGroupName = getTokenString(TOKENS.NAME_TOKEN);
-            if (!groupName.equals(messageGroupName)) {
+            if(!groupName.equals(messageGroupName)) {
                 throw new InvalidMessageException
-                (MessageError.GROUP_MISMATCH,
-                 "Group name mismatch; this group name: " + groupName +
-                 ", message group name: " + messageGroupName +
-                 ", in message: " + line);
+                        (MessageError.GROUP_MISMATCH,
+                                "Group name mismatch; this group name: " + groupName +
+                                        ", message group name: " + messageGroupName +
+                                        ", in message: " + line);
             }
 
             senderId =
-                new Integer(getTokenString(TOKENS.ID_TOKEN)).intValue();
-            if ((memberIds != null) &&
-                (memberIds.size() > 0) &&
-                (nameIdPair.getId() != NameIdPair.NOCHECK_NODE_ID) &&
-                (senderId != NameIdPair.NOCHECK_NODE_ID) &&
-                (senderId != nameIdPair.getId()) &&
-                !memberIds.contains(senderId)) {
+                    new Integer(getTokenString(TOKENS.ID_TOKEN)).intValue();
+            if((memberIds != null) &&
+                    (memberIds.size() > 0) &&
+                    (nameIdPair.getId() != NameIdPair.NOCHECK_NODE_ID) &&
+                    (senderId != NameIdPair.NOCHECK_NODE_ID) &&
+                    (senderId != nameIdPair.getId()) &&
+                    !memberIds.contains(senderId)) {
                 throw new InvalidMessageException
-                   (MessageError.NOT_A_MEMBER,
-                    "Sender's member id: " + senderId +
-                    ", message op: " + getTokenString(TOKENS.OP_TOKEN) +
-                    ", was not a member of the group: " + memberIds +
-                    ", in message: " + line);
+                        (MessageError.NOT_A_MEMBER,
+                                "Sender's member id: " + senderId +
+                                        ", message op: " + getTokenString(TOKENS.OP_TOKEN) +
+                                        ", was not a member of the group: " + memberIds +
+                                        ", in message: " + line);
             }
         }
 
         public int getSenderId() {
             return senderId;
+        }
+
+        /* Get the send version of a message. */
+        public String getSendVersion() {
+            return sendVersion;
         }
 
         /*
@@ -493,27 +652,22 @@ public abstract class TextProtocol {
          * version should be used for the response message.
          */
         public void setSendVersion(String version) {
-            if (new Double(VERSION) < new Double(version)) {
+            if(new Double(VERSION) < new Double(version)) {
                 throw new IllegalStateException
-                    ("Send version: " + version + " shouldn't be larger " +
-                     "than the current version: " + VERSION);
+                        ("Send version: " + version + " shouldn't be larger " +
+                                "than the current version: " + VERSION);
             }
 
-            if (!version.equals(sendVersion)) {
+            if(!version.equals(sendVersion)) {
                 sendVersion = version;
                 messagePrefixNocheck =
-                    sendVersion + SEPARATOR + messageNocheckSuffix;
+                        sendVersion + SEPARATOR + messageNocheckSuffix;
             }
-        }
-
-        /* Get the send version of a message. */
-        public String getSendVersion() {
-            return sendVersion;
         }
 
         protected String getMessagePrefix() {
             return sendVersion + SEPARATOR + groupName + SEPARATOR +
-                   nameIdPair.getId();
+                    nameIdPair.getId();
         }
 
         public abstract MessageOp getOp();
@@ -533,10 +687,10 @@ public abstract class TextProtocol {
          */
         private String getTokenString(TOKENS tokenType) {
             final int index = tokenType.ordinal();
-            if (index >= tokens.length) {
+            if(index >= tokens.length) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Bad format; missing token: " + tokenType +
-                     "at position: " + index + "in message: " + line);
+                        ("Bad format; missing token: " + tokenType +
+                                "at position: " + index + "in message: " + line);
             }
             return tokens[index];
         }
@@ -548,13 +702,13 @@ public abstract class TextProtocol {
          * @throws InvalidMessageException
          */
         protected String nextPayloadToken()
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
-            if (currToken >= tokens.length) {
+            if(currToken >= tokens.length) {
                 throw new InvalidMessageException
-                (MessageError.BAD_FORMAT,
-                 "Bad format; missing token at position: " + currToken +
-                 ", in message: " + line);
+                        (MessageError.BAD_FORMAT,
+                                "Bad format; missing token at position: " + currToken +
+                                        ", in message: " + line);
             }
             return tokens[currToken++];
         }
@@ -592,7 +746,7 @@ public abstract class TextProtocol {
         }
 
         protected ResponseMessage(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
         }
@@ -607,16 +761,16 @@ public abstract class TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (obj == null) {
+            if(obj == null) {
                 return false;
             }
-            if (!(obj instanceof ResponseMessage)) {
+            if(!(obj instanceof ResponseMessage)) {
                 return false;
             }
-            return getOp().equals(((ResponseMessage)obj).getOp());
+            return getOp().equals(((ResponseMessage) obj).getOp());
         }
 
         @Override
@@ -631,7 +785,7 @@ public abstract class TextProtocol {
 
         public ProtocolError(InvalidMessageException messageException) {
             this(messageException.getErrorType(),
-                 messageException.getMessage());
+                    messageException.getMessage());
         }
 
         public ProtocolError(MessageError messageError, String message) {
@@ -640,7 +794,7 @@ public abstract class TextProtocol {
         }
 
         public ProtocolError(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
             errorType = MessageError.valueOf(nextPayloadToken());
@@ -658,21 +812,22 @@ public abstract class TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof ProtocolError)) {
+            if(!(obj instanceof ProtocolError)) {
                 return false;
             }
             final ProtocolError other = (ProtocolError) obj;
-            if (message == null) {
-                if (other.message != null) {
+            if(message == null) {
+                if(other.message != null) {
                     return false;
                 }
-            } else if (!message.equals(other.message)) {
+            }
+            else if(!message.equals(other.message)) {
                 return false;
             }
 
@@ -687,7 +842,7 @@ public abstract class TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR +
-                errorType.toString() + SEPARATOR + message;
+                    errorType.toString() + SEPARATOR + message;
         }
 
         public MessageError getErrorType() {
@@ -711,14 +866,14 @@ public abstract class TextProtocol {
         }
 
         public OK(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
         }
 
         @Override
         public MessageOp getOp() {
-           return OK_RESP;
+            return OK_RESP;
         }
 
         @Override
@@ -728,7 +883,7 @@ public abstract class TextProtocol {
 
         @Override
         public String wireFormat() {
-           return wireFormatPrefix();
+            return wireFormatPrefix();
         }
     }
 
@@ -751,7 +906,7 @@ public abstract class TextProtocol {
         }
 
         public Fail(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(line, tokens);
 
             message = nextPayloadToken();
@@ -773,24 +928,25 @@ public abstract class TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof Fail)) {
+            if(!(obj instanceof Fail)) {
                 return false;
             }
             Fail other = (Fail) obj;
-            if (!getOuterType().equals(other.getOuterType())) {
+            if(!getOuterType().equals(other.getOuterType())) {
                 return false;
             }
-            if (message == null) {
-                if (other.message != null) {
+            if(message == null) {
+                if(other.message != null) {
                     return false;
                 }
-            } else if (!message.equals(other.message)) {
+            }
+            else if(!message.equals(other.message)) {
                 return false;
             }
             return true;
@@ -798,7 +954,7 @@ public abstract class TextProtocol {
 
         @Override
         public MessageOp getOp() {
-           return FAIL_RESP;
+            return FAIL_RESP;
         }
 
         @Override
@@ -808,7 +964,7 @@ public abstract class TextProtocol {
 
         @Override
         public String wireFormat() {
-           return wireFormatPrefix() + SEPARATOR + message;
+            return wireFormatPrefix() + SEPARATOR + message;
         }
 
         private TextProtocol getOuterType() {
@@ -831,10 +987,11 @@ public abstract class TextProtocol {
      */
     public abstract class RequestMessage extends Message {
 
-        protected RequestMessage() {}
+        protected RequestMessage() {
+        }
 
         protected RequestMessage(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(line, tokens);
         }
 
@@ -848,13 +1005,13 @@ public abstract class TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (obj == null) {
+            if(obj == null) {
                 return false;
             }
-            if (!(obj instanceof RequestMessage)) {
+            if(!(obj instanceof RequestMessage)) {
                 return false;
             }
             return getOp().equals(((RequestMessage) obj).getOp());
@@ -863,103 +1020,6 @@ public abstract class TextProtocol {
         @Override
         public int hashCode() {
             return getOp().getOpId().hashCode();
-        }
-    }
-
-    /**
-     * Converts a response line into a ResponseMessage.
-     *
-     * @param responseLine
-     * @return the response message
-     * @throws InvalidMessageException
-     */
-    ResponseMessage parseResponse(String responseLine)
-        throws InvalidMessageException {
-
-        return (ResponseMessage) parse(responseLine);
-    }
-
-    /**
-     * Converts a request line into a requestMessage.
-     *
-     * @param requestLine
-     * @return the request message
-     * @throws InvalidMessageException
-     */
-    public RequestMessage parseRequest(String requestLine)
-        throws InvalidMessageException {
-
-        return (RequestMessage) parse(requestLine);
-    }
-
-    /**
-     * Reads the channel and returns a read request. If the message format
-     * was bad, it sends a ProtocolError response back over the channel and
-     * no further action is needed by the caller.
-     *
-     * @param channel the channel delivering the request
-     * @return null if EOF was reached or the message format was bad
-     * @throws IOException
-     */
-    public RequestMessage getRequestMessage(DataChannel channel)
-        throws IOException {
-
-        BufferedReader in = new BufferedReader
-            (new InputStreamReader(Channels.newInputStream(channel)));
-
-        String requestLine = in.readLine();
-        if (requestLine == null) {
-            /* EOF */
-            return null;
-        }
-        try {
-            return parseRequest(requestLine);
-        } catch (InvalidMessageException e) {
-            processIME(channel, e);
-            return null;
-        }
-    }
-
-    /**
-     * Process an IME encountered during request processing by writing a
-     * ProtocolError message as a response and logging it.
-     *
-     * @param channel the channel used to write the ProtocolError message
-     * @param ime the exception
-     */
-    public void processIME(DataChannel channel,
-                           InvalidMessageException ime) {
-        LoggerUtils.logMsg(logger, repImpl, formatter, Level.WARNING,
-                           name + " format error:" +
-                           LoggerUtils.exceptionTypeAndMsg(ime));
-        PrintWriter out =
-            new PrintWriter(Channels.newOutputStream(channel), true);
-        out.println(new ProtocolError(ime).wireFormat());
-        out.close();
-    }
-
-    public ResponseMessage process(Object requestProcessor,
-                                   RequestMessage requestMessage) {
-
-        Class<? extends Object> cl = requestProcessor.getClass();
-        try {
-            Method method =
-                cl.getMethod("process", requestMessage.getClass());
-            return (ResponseMessage) method.invoke
-                (requestProcessor, requestMessage);
-        } catch (NoSuchMethodException e) {
-            LoggerUtils.logMsg(logger, repImpl, formatter, Level.SEVERE,
-                               name +
-                               " Method: process(" +
-                               requestMessage.getClass().getName() +
-                               ") was missing");
-            throw EnvironmentFailureException.unexpectedException(e);
-        } catch (Exception e) {
-            LoggerUtils.logMsg(logger, repImpl, formatter, Level.SEVERE,
-                               name +
-                               " Unexpected exception: " +
-                                LoggerUtils.exceptionTypeAndMsg(e));
-            throw EnvironmentFailureException.unexpectedException(e);
         }
     }
 
@@ -974,8 +1034,8 @@ public abstract class TextProtocol {
         public final InetSocketAddress target;
         private final RequestMessage requestMessage;
         private final String serviceName;
-        private ResponseMessage responseMessage;
         public Exception exception;
+        private ResponseMessage responseMessage;
 
         public MessageExchange(InetSocketAddress target,
                                String serviceName,
@@ -997,20 +1057,20 @@ public abstract class TextProtocol {
         public void run() {
             messageExchange();
 
-            if (responseMessage != null &&
-                responseMessage.getOp() == PROTOCOL_ERROR) {
+            if(responseMessage != null &&
+                    responseMessage.getOp() == PROTOCOL_ERROR) {
                 ProtocolError error = (ProtocolError) responseMessage;
-                if (error.getErrorType() == MessageError.VERSION_MISMATCH) {
+                if(error.getErrorType() == MessageError.VERSION_MISMATCH) {
                     requestMessage.setSendVersion(error.getSendVersion());
                     messageExchange();
                     LoggerUtils.logMsg
-                        (logger, repImpl, formatter, Level.INFO,
-                          name +
-                         " Resend message: " + requestMessage.toString() +
-                         " in version: " + requestMessage.getSendVersion() +
-                         " while protocol version is: " + VERSION +
-                         " because of the version mismatch, the returned" +
-                         " response message is: " + responseMessage);
+                            (logger, repImpl, formatter, Level.INFO,
+                                    name +
+                                            " Resend message: " + requestMessage.toString() +
+                                            " in version: " + requestMessage.getSendVersion() +
+                                            " while protocol version is: " + VERSION +
+                                            " because of the version mismatch, the returned" +
+                                            " response message is: " + responseMessage);
                 }
             }
         }
@@ -1027,81 +1087,78 @@ public abstract class TextProtocol {
             PrintWriter out = null;
             try {
                 dataChannel =
-                    channelFactory.connect(
-                        target,
-                        new ConnectOptions().
-                        setTcpNoDelay(true).
-                        setOpenTimeout(openTimeoutMs).
-                        setReadTimeout(readTimeoutMs).
-                        setBlocking(true).
-                        setReuseAddr(true));
+                        channelFactory.connect(
+                                target,
+                                new ConnectOptions().
+                                        setTcpNoDelay(true).
+                                        setOpenTimeout(openTimeoutMs).
+                                        setReadTimeout(readTimeoutMs).
+                                        setBlocking(true).
+                                        setReuseAddr(true));
 
                 ServiceDispatcher.doServiceHandshake(dataChannel,
-                                                     serviceName);
+                        serviceName);
 
                 OutputStream ostream =
-                    Channels.newOutputStream(dataChannel);
+                        Channels.newOutputStream(dataChannel);
                 out = new PrintWriter(ostream, true);
                 String wireFormat = requestMessage.wireFormat();
-                if (serDeHook != null) {
+                if(serDeHook != null) {
                     serDeHook.doHook(wireFormat);
                     wireFormat = serDeHook.getHookValue();
                 }
                 LoggerUtils.logMsg(logger, repImpl, formatter, Level.FINE,
-                                   name +
-                                   " request: " + wireFormat+ " to " + target);
+                        name +
+                                " request: " + wireFormat + " to " + target);
                 out.println(wireFormat);
                 out.flush();
                 in = new BufferedReader
-                    (new InputStreamReader(
-                        Channels.newInputStream(dataChannel)));
+                        (new InputStreamReader(
+                                Channels.newInputStream(dataChannel)));
                 String line = in.readLine();
-                if (serDeHook != null) {
+                if(serDeHook != null) {
                     serDeHook.doHook(line);
                     line = serDeHook.getHookValue();
                 }
 
                 LoggerUtils.logMsg(logger, repImpl, formatter, Level.FINE,
-                                   name +
-                                   " response: " + line + " from " + target);
-                if (line == null) {
+                        name +
+                                " response: " + line + " from " + target);
+                if(line == null) {
                     setResponseMessage
-                        (new ProtocolError(MessageError.BAD_FORMAT,
-                                           "Premature EOF for request: " +
-                                           wireFormat));
-                } else {
+                            (new ProtocolError(MessageError.BAD_FORMAT,
+                                    "Premature EOF for request: " +
+                                            wireFormat));
+                }
+                else {
                     setResponseMessage(parseResponse(line));
                 }
-            } catch (java.net.SocketTimeoutException e){
+            } catch(java.net.SocketTimeoutException e) {
                 this.exception = e;
-            } catch (SocketException e) {
+            } catch(SocketException e) {
                 this.exception = e;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 this.exception = e;
-            } catch (TextProtocol.InvalidMessageException ime) {
+            } catch(TextProtocol.InvalidMessageException ime) {
                 LoggerUtils.logMsg(logger, repImpl, formatter, Level.WARNING,
-                                   name + " response format error:" +
-                                   LoggerUtils.exceptionTypeAndMsg(ime) +
-                                   " from:" + target);
+                        name + " response format error:" +
+                                LoggerUtils.exceptionTypeAndMsg(ime) +
+                                " from:" + target);
                 this.exception = ime;
-            } catch (ServiceConnectFailedException e) {
+            } catch(ServiceConnectFailedException e) {
                 this.exception = e;
-            } catch (Exception e) {
+            } catch(Exception e) {
                 this.exception = e;
                 LoggerUtils.logMsg(logger, repImpl, formatter, Level.SEVERE,
-                                   name + " Unexpected exception:" +
-                                   LoggerUtils.exceptionTypeAndMsg(e));
+                        name + " Unexpected exception:" +
+                                LoggerUtils.exceptionTypeAndMsg(e));
                 throw EnvironmentFailureException.unexpectedException
-                    ("Service: " + serviceName +
-                     " failed; attempting request: " + requestMessage.getOp(),
-                     e);
+                        ("Service: " + serviceName +
+                                        " failed; attempting request: " + requestMessage.getOp(),
+                                e);
             } finally {
                 Utils.cleanup(logger, repImpl, formatter, dataChannel, in, out);
             }
-        }
-
-        public void setResponseMessage(ResponseMessage responseMessage) {
-            this.responseMessage = responseMessage;
         }
 
         /**
@@ -1121,85 +1178,16 @@ public abstract class TextProtocol {
             return responseMessage;
         }
 
+        public void setResponseMessage(ResponseMessage responseMessage) {
+            this.responseMessage = responseMessage;
+        }
+
         public RequestMessage getRequestMessage() {
             return requestMessage;
         }
 
         public Exception getException() {
             return exception;
-        }
-    }
-
-    protected static class StringFormatable implements WireFormatable {
-        protected String s;
-
-        StringFormatable() {}
-
-        protected StringFormatable(String s) {
-            this.s = s;
-        }
-
-        public void init(String wireFormat) {
-            s = wireFormat;
-        }
-
-        @Override
-        public String wireFormat() {
-            return s;
-        }
-
-        @Override
-        public int hashCode() {
-            return ((s == null) ? 0 : s.hashCode());
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (!(obj instanceof StringFormatable)) {
-                return false;
-            }
-
-            final StringFormatable other = (StringFormatable) obj;
-            if (s == null) {
-                if (other.s != null) {
-                    return false;
-                }
-            } else if (!s.equals(other.s)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /*
-     * The type associated with an invalid Message. It's used by the exception
-     * below and by ProtocolError.
-     */
-    static public enum MessageError
-        {BAD_FORMAT, VERSION_MISMATCH, GROUP_MISMATCH, NOT_A_MEMBER}
-
-    /**
-     * Used to indicate a message format or invalid content exception.
-     */
-    @SuppressWarnings("serial")
-    public static class InvalidMessageException extends Exception {
-        private final MessageError errorType;
-
-        public InvalidMessageException(MessageError errorType,
-                                       String message) {
-            super(message);
-
-            this.errorType = errorType;
-        }
-
-        public MessageError getErrorType() {
-            return errorType;
         }
     }
 }

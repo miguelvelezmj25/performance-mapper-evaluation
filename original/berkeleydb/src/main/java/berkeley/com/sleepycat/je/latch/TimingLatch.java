@@ -22,7 +22,7 @@ import berkeley.com.sleepycat.je.utilint.EventTrace;
  * who the previous holder was.  It crudely writes to System.out, but this can
  * easily be changed to a java.util.Log or EventTrace as desired.  You can
  * specify a threshold for the wait and previous holder time (nanos).
- *
+ * <p>
  * Note that this class has not recently been used because it is not
  * implemented for shared (Btree) latches.  The next time it is used, it should
  * be integrated with the LatchFactory.
@@ -30,13 +30,12 @@ import berkeley.com.sleepycat.je.utilint.EventTrace;
 public class TimingLatch extends LatchImpl {
     private static final int WAIT_THRESHOLD_NANOS = 50000;
     private static final int PREV_HOLD_THRESHOLD_NANOS = 50000;
-
-    private long acquireTime;
-    private long releaseTime;
-    private Thread lastThread;
     private final boolean debug;
     private final int waitThreshold;
     private final int holdThreshold;
+    private long acquireTime;
+    private long releaseTime;
+    private Thread lastThread;
 
     public TimingLatch(LatchContext context, boolean debug) {
         super(context);
@@ -55,10 +54,54 @@ public class TimingLatch extends LatchImpl {
         this.holdThreshold = holdThreshold;
     }
 
+    public void release() {
+        releaseTime = System.nanoTime();
+        EventTrace.addEvent(new ReleaseEvent(releaseTime));
+        super.release();
+    }
+
+    public void acquireExclusive() {
+        if(!debug) {
+            super.acquireExclusive();
+            return;
+        }
+
+        try {
+            EventTrace.addEvent(new AcquireRequestEvent());
+            if(acquireExclusiveNoWait()) {
+                EventTrace.addEvent
+                        (new AcquireCompleteEvent(System.nanoTime(), 0));
+                return;
+            }
+
+            long startWait = System.nanoTime();
+            super.acquireExclusive();
+            long endWait = System.nanoTime();
+            long ourWaitTime = endWait - startWait;
+            EventTrace.addEvent
+                    (new AcquireCompleteEvent(System.nanoTime(), ourWaitTime));
+            long previousHoldTime = releaseTime - acquireTime;
+            if(previousHoldTime > holdThreshold ||
+                    ourWaitTime > waitThreshold) {
+                System.out.println
+                        (String.format("%1tT %s waited %,d nanosec for %s\n" +
+                                        " Previous held by %s for %,d nanosec.",
+                                System.currentTimeMillis(),
+                                Thread.currentThread(), ourWaitTime,
+                                getName(), lastThread, previousHoldTime));
+                EventTrace.dumpEvents(System.out);
+                EventTrace.disableEvents = false;
+            }
+        } finally {
+            acquireTime = System.nanoTime();
+            lastThread = Thread.currentThread();
+        }
+    }
+
     public class AcquireRequestEvent extends EventTrace {
+        Thread us;
         private long startTime;
         private String name;
-        Thread us;
 
         public AcquireRequestEvent() {
             super();
@@ -69,18 +112,18 @@ public class TimingLatch extends LatchImpl {
 
         public String toString() {
             StringBuilder sb =
-                new StringBuilder("AcquireRequestEvent for " + name + " ");
+                    new StringBuilder("AcquireRequestEvent for " + name + " ");
             sb.append(us).append(" at ").
-                append(String.format("%,d", startTime));
+                    append(String.format("%,d", startTime));
             return sb.toString();
         }
     }
 
     public class AcquireCompleteEvent extends EventTrace {
+        Thread us;
         private long startTime;
         private long waitTime;
         private String name;
-        Thread us;
 
         public AcquireCompleteEvent(long startTime, long waitTime) {
             super();
@@ -92,18 +135,18 @@ public class TimingLatch extends LatchImpl {
 
         public String toString() {
             StringBuilder sb =
-                new StringBuilder("AcquireCompleteEvent for " + name + " ");
+                    new StringBuilder("AcquireCompleteEvent for " + name + " ");
             sb.append(us).append(" at ").
-                append(String.format("%,d", startTime)).
-                append(" Took: ").append(String.format("%,d", waitTime));
+                    append(String.format("%,d", startTime)).
+                    append(" Took: ").append(String.format("%,d", waitTime));
             return sb.toString();
         }
     }
 
     public class ReleaseEvent extends EventTrace {
+        Thread us;
         private long startTime;
         private String name;
-        Thread us;
 
         public ReleaseEvent(long time) {
             super();
@@ -114,54 +157,10 @@ public class TimingLatch extends LatchImpl {
 
         public String toString() {
             StringBuilder sb =
-                new StringBuilder("ReleaseEvent for " + name + " ");
+                    new StringBuilder("ReleaseEvent for " + name + " ");
             sb.append(us).append(" at ").
-                append(String.format("%,d", startTime));
+                    append(String.format("%,d", startTime));
             return sb.toString();
-        }
-    }
-
-    public void release() {
-        releaseTime = System.nanoTime();
-        EventTrace.addEvent(new ReleaseEvent(releaseTime));
-        super.release();
-    }
-
-    public void acquireExclusive() {
-        if (!debug) {
-            super.acquireExclusive();
-            return;
-        }
-
-        try {
-            EventTrace.addEvent(new AcquireRequestEvent());
-            if (acquireExclusiveNoWait()) {
-                EventTrace.addEvent
-                    (new AcquireCompleteEvent(System.nanoTime(), 0));
-                return;
-            }
-
-            long startWait = System.nanoTime();
-            super.acquireExclusive();
-            long endWait = System.nanoTime();
-            long ourWaitTime = endWait - startWait;
-            EventTrace.addEvent
-                (new AcquireCompleteEvent(System.nanoTime(), ourWaitTime));
-            long previousHoldTime = releaseTime - acquireTime;
-            if (previousHoldTime > holdThreshold ||
-                ourWaitTime > waitThreshold) {
-                System.out.println
-                    (String.format("%1tT %s waited %,d nanosec for %s\n" +
-                                   " Previous held by %s for %,d nanosec.",
-                                   System.currentTimeMillis(),
-                                   Thread.currentThread(), ourWaitTime,
-                                   getName(), lastThread, previousHoldTime));
-                EventTrace.dumpEvents(System.out);
-                EventTrace.disableEvents = false;
-            }
-        } finally {
-            acquireTime = System.nanoTime();
-            lastThread = Thread.currentThread();
         }
     }
 }

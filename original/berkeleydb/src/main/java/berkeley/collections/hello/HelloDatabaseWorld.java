@@ -160,7 +160,7 @@ public class HelloDatabaseWorld implements TransactionWorker {
         // get iterator over map entries
         Iterator<Map.Entry<Integer, String>> iter = map.entrySet().iterator();
         System.out.println("Reading data");
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Map.Entry<Integer, String> entry = iter.next();
             System.out.println(entry.getKey().toString() + ' ' +
                     entry.getValue());

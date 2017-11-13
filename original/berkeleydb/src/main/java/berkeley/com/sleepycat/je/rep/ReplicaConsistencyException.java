@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This exception is thrown by a Replica to indicate it could not meet the
@@ -60,37 +60,37 @@ public class ReplicaConsistencyException extends OperationFailureException {
     final ReplicaConsistencyPolicy consistencyPolicy;
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      */
     public ReplicaConsistencyException(ReplicaConsistencyPolicy
-                                       consistencyPolicy,
+                                               consistencyPolicy,
                                        String rnName,
                                        boolean unknownMaster) {
         /* No need to set abortOnly, beginTransaction will fail. */
         super(null /*locker*/, false /*abortOnly*/,
-              "Unable to achieve consistency at rep node:" + rnName +
-              ", despite waiting for " +
-              consistencyPolicy.getTimeout(TimeUnit.MILLISECONDS) + " ms." +
-              (unknownMaster ?
-               " The node is not currently in contact with a master." :
-               ""),
-              null /*cause*/);
+                "Unable to achieve consistency at rep node:" + rnName +
+                        ", despite waiting for " +
+                        consistencyPolicy.getTimeout(TimeUnit.MILLISECONDS) + " ms." +
+                        (unknownMaster ?
+                                " The node is not currently in contact with a master." :
+                                ""),
+                null /*cause*/);
         this.consistencyPolicy = consistencyPolicy;
     }
 
     public ReplicaConsistencyException(String message,
                                        ReplicaConsistencyPolicy
-                                       consistencyPolicy) {
+                                               consistencyPolicy) {
         /* No need to set abortOnly, beginTransaction will fail. */
         super(null /*locker*/, false /*abortOnly*/,
-              message,
-              null /*cause*/);
+                message,
+                null /*cause*/);
         this.consistencyPolicy = consistencyPolicy;
     }
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private ReplicaConsistencyException(String message,
@@ -101,6 +101,7 @@ public class ReplicaConsistencyException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override
@@ -114,6 +115,6 @@ public class ReplicaConsistencyException extends OperationFailureException {
      * @return the Replica consistency policy
      */
     public ReplicaConsistencyPolicy getConsistencyPolicy() {
-        return  consistencyPolicy;
+        return consistencyPolicy;
     }
 }

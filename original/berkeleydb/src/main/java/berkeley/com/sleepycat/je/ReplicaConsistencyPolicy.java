@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * The interface for Consistency policies used to provide consistency
@@ -36,18 +36,16 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 public interface ReplicaConsistencyPolicy {
 
     /**
-     * @hidden
-     * For internal use only.
-     *
+     * @param repInstance identifies the replicated environment that must meet
+     *                    this consistency requirement.
+     * @hidden For internal use only.
+     * <p>
      * Ensures that the replica is within the constraints specified by this
      * policy. If it isn't the method waits until the constraint is satisfied
      * by the replica.
-     *
-     * @param repInstance identifies the replicated environment that must meet
-     * this consistency requirement.
      */
     public void ensureConsistency(EnvironmentImpl repInstance)
-        throws InterruptedException;
+            throws InterruptedException;
 
     /**
      * Returns the name used to identify the policy. The name is used when

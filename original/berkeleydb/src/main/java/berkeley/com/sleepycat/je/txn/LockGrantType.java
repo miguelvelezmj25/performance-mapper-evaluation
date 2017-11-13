@@ -49,7 +49,7 @@ public enum LockGrantType {
     EXISTING,
 
     /**
-     * The lock request was a non-blocking one and the lock has not been 
+     * The lock request was a non-blocking one and the lock has not been
      * granted because a conflicting lock is held by another locker.
      */
     DENIED,

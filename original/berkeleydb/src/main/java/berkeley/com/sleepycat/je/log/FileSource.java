@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 /**
  * FileSource is used as a channel to a log file when faulting in objects
@@ -48,14 +48,14 @@ class FileSource implements LogSource {
      * @see LogSource#release
      */
     public void release()
-        throws DatabaseException {
+            throws DatabaseException {
     }
 
     /**
      * @see LogSource#getBytes
      */
     public ByteBuffer getBytes(long fileOffset)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return getBytes(fileOffset, readBufferSize);
     }
@@ -64,7 +64,7 @@ class FileSource implements LogSource {
      * @see LogSource#getBytes
      */
     public ByteBuffer getBytes(long fileOffset, int numBytes)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Fill up buffer from file. */
         ByteBuffer destBuf = ByteBuffer.allocate(numBytes);

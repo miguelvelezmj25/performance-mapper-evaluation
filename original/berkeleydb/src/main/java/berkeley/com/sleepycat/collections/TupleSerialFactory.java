@@ -17,7 +17,7 @@ import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.bind.serial.ClassCatalog;
 import berkeley.com.sleepycat.bind.serial.TupleSerialMarshalledBinding;
 import berkeley.com.sleepycat.bind.serial.TupleSerialMarshalledKeyCreator;
-import berkeley.com.sleepycat.bind.tuple.MarshalledTupleEntry; // for javadoc
+import berkeley.com.sleepycat.bind.tuple.MarshalledTupleEntry;
 import berkeley.com.sleepycat.bind.tuple.MarshalledTupleKeyEntity;
 import berkeley.com.sleepycat.bind.tuple.TupleBinding;
 import berkeley.com.sleepycat.bind.tuple.TupleMarshalledBinding;
@@ -59,69 +59,57 @@ public class TupleSerialFactory {
     /**
      * Creates a map from a previously opened Database object.
      *
-     * @param db the previously opened Database object.
-     *
-     * @param keyClass is the class used for map keys.  It must implement the
-     * {@link MarshalledTupleEntry} interface or be one of the Java primitive
-     * type classes.
-     *
+     * @param db             the previously opened Database object.
+     * @param keyClass       is the class used for map keys.  It must implement the
+     *                       {@link MarshalledTupleEntry} interface or be one of the Java primitive
+     *                       type classes.
      * @param valueBaseClass the base class of the entity values for this
-     * store.  It must implement the  {@link MarshalledTupleKeyEntity}
-     * interface.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
-     * @param <K> the key class.
-     *
-     * @param <V> the value base class.
-     *
+     *                       store.  It must implement the  {@link MarshalledTupleKeyEntity}
+     *                       interface.
+     * @param writeAllowed   is true to create a read-write collection or false
+     *                       to create a read-only collection.
+     * @param <K>            the key class.
+     * @param <V>            the value base class.
      * @return the map.
      */
     public <K, V extends MarshalledTupleKeyEntity> StoredMap<K, V>
-        newMap(Database db,
-               Class<K> keyClass,
-               Class<V> valueBaseClass,
-               boolean writeAllowed) {
+    newMap(Database db,
+           Class<K> keyClass,
+           Class<V> valueBaseClass,
+           boolean writeAllowed) {
 
         return new StoredMap<K, V>(db,
-                        getKeyBinding(keyClass),
-                        getEntityBinding(valueBaseClass),
-                        writeAllowed);
+                getKeyBinding(keyClass),
+                getEntityBinding(valueBaseClass),
+                writeAllowed);
     }
 
     /**
      * Creates a sorted map from a previously opened Database object.
      *
-     * @param db the previously opened Database object.
-     *
-     * @param keyClass is the class used for map keys.  It must implement the
-     * {@link MarshalledTupleEntry} interface or be one of the Java primitive
-     * type classes.
-     *
+     * @param db             the previously opened Database object.
+     * @param keyClass       is the class used for map keys.  It must implement the
+     *                       {@link MarshalledTupleEntry} interface or be one of the Java primitive
+     *                       type classes.
      * @param valueBaseClass the base class of the entity values for this
-     * store.  It must implement the  {@link MarshalledTupleKeyEntity}
-     * interface.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
-     * @param <K> the key class.
-     *
-     * @param <V> the value base class.
-     *
+     *                       store.  It must implement the  {@link MarshalledTupleKeyEntity}
+     *                       interface.
+     * @param writeAllowed   is true to create a read-write collection or false
+     *                       to create a read-only collection.
+     * @param <K>            the key class.
+     * @param <V>            the value base class.
      * @return the sorted map.
      */
     public <K, V extends MarshalledTupleKeyEntity> StoredSortedMap<K, V>
-        newSortedMap(Database db,
-                     Class<K> keyClass,
-                     Class<V> valueBaseClass,
-                     boolean writeAllowed) {
+    newSortedMap(Database db,
+                 Class<K> keyClass,
+                 Class<V> valueBaseClass,
+                 boolean writeAllowed) {
 
         return new StoredSortedMap(db,
-                        getKeyBinding(keyClass),
-                        getEntityBinding(valueBaseClass),
-                        writeAllowed);
+                getKeyBinding(keyClass),
+                getEntityBinding(valueBaseClass),
+                writeAllowed);
     }
 
     /**
@@ -130,28 +118,25 @@ public class TupleSerialFactory {
      * the {@link com.sleepycat.je.SecondaryKeyCreator} interface.
      *
      * @param valueBaseClass the base class of the entity values for this
-     * store.  It must implement the  {@link MarshalledTupleKeyEntity}
-     * interface.
-     *
-     * @param keyName is the key name passed to the {@link
-     * MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
-     * secondary key.
-     *
-     * @param <V> the value base class.
-     *
+     *                       store.  It must implement the  {@link MarshalledTupleKeyEntity}
+     *                       interface.
+     * @param keyName        is the key name passed to the {@link
+     *                       MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
+     *                       secondary key.
+     * @param <V>            the value base class.
      * @return the key creator.
      */
     public <V extends MarshalledTupleKeyEntity>
-        TupleSerialMarshalledKeyCreator<V>
-        getKeyCreator(Class<V> valueBaseClass, String keyName) {
+    TupleSerialMarshalledKeyCreator<V>
+    getKeyCreator(Class<V> valueBaseClass, String keyName) {
 
         return new TupleSerialMarshalledKeyCreator<V>
-            (getEntityBinding(valueBaseClass), keyName);
+                (getEntityBinding(valueBaseClass), keyName);
     }
 
     public <V extends MarshalledTupleKeyEntity>
-        TupleSerialMarshalledBinding<V>
-        getEntityBinding(Class<V> baseClass) {
+    TupleSerialMarshalledBinding<V>
+    getEntityBinding(Class<V> baseClass) {
 
         return new TupleSerialMarshalledBinding<V>(catalog, baseClass);
     }
@@ -159,7 +144,7 @@ public class TupleSerialFactory {
     private <K> EntryBinding<K> getKeyBinding(Class<K> keyClass) {
 
         EntryBinding<K> binding = TupleBinding.getPrimitiveBinding(keyClass);
-        if (binding == null) {
+        if(binding == null) {
 
             /*
              * Cannot use type param <K> here because it does not implement

@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.Replica;
 import berkeley.com.sleepycat.je.utilint.PropUtil;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A consistency policy which describes the amount of time the Replica is
@@ -57,36 +57,33 @@ public class TimeConsistencyPolicy implements ReplicaConsistencyPolicy {
      * transactions that were committed on the Master before this lag interval
      * are available at the Replica before allowing a transaction to proceed
      * with Environment.beginTransaction.
-     *
+     * <p>
      * Effective use of this policy requires that the clocks on the Master and
      * Replica are synchronized by using a protocol like NTP.
      *
-     * @param permissibleLag the time interval by which the Replica may be out
-     * of date with respect to the Master when a transaction is initiated on
-     * the Replica.
-     *
+     * @param permissibleLag     the time interval by which the Replica may be out
+     *                           of date with respect to the Master when a transaction is initiated on
+     *                           the Replica.
      * @param permissibleLagUnit the {@code TimeUnit} for the permissibleLag
-     * parameter.
-     *
-     * @param timeout the amount of time to wait for the consistency to be
-     * reached.
-     *
-     * @param timeoutUnit the {@code TimeUnit} for the timeout parameter.
-     *
+     *                           parameter.
+     * @param timeout            the amount of time to wait for the consistency to be
+     *                           reached.
+     * @param timeoutUnit        the {@code TimeUnit} for the timeout parameter.
      * @throws IllegalArgumentException if the permissibleLagUnit or
-     * timeoutUnit is null.
+     *                                  timeoutUnit is null.
      */
     public TimeConsistencyPolicy(long permissibleLag,
                                  TimeUnit permissibleLagUnit,
                                  long timeout,
                                  TimeUnit timeoutUnit) {
         this.permissibleLag = PropUtil.durationToMillis(permissibleLag,
-                                                        permissibleLagUnit);
+                permissibleLagUnit);
         this.timeout = PropUtil.durationToMillis(timeout, timeoutUnit);
     }
 
     /**
      * Returns the name:{@value #NAME}, associated with this policy.
+     *
      * @see #NAME
      */
     @Override
@@ -98,7 +95,6 @@ public class TimeConsistencyPolicy implements ReplicaConsistencyPolicy {
      * Returns the allowed time lag associated with this policy.
      *
      * @param unit the {@code TimeUnit} of the returned value.
-     *
      * @return the permissible lag time in the specified unit.
      */
     public long getPermissibleLag(TimeUnit unit) {
@@ -109,7 +105,6 @@ public class TimeConsistencyPolicy implements ReplicaConsistencyPolicy {
      * Returns the consistency timeout associated with this policy.
      *
      * @param unit the {@code TimeUnit} of the returned value.
-     *
      * @return the consistency timeout in the specified unit.
      */
     @Override
@@ -118,16 +113,15 @@ public class TimeConsistencyPolicy implements ReplicaConsistencyPolicy {
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      * Ensures that the replica has replayed the replication stream to the
      * point identified by the lag period. If it isn't the method waits until
      * the constraint is satisfied by the replica.
      */
     @Override
     public void ensureConsistency(EnvironmentImpl replicatorImpl)
-        throws InterruptedException,
-               ReplicaConsistencyException{
+            throws InterruptedException,
+            ReplicaConsistencyException {
 
         /*
          * Cast is done to preserve replication/non replication code
@@ -149,28 +143,28 @@ public class TimeConsistencyPolicy implements ReplicaConsistencyPolicy {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if(getClass() != obj.getClass()) {
             return false;
         }
         TimeConsistencyPolicy other =
-            (TimeConsistencyPolicy) obj;
-        if (permissibleLag != other.permissibleLag) {
+                (TimeConsistencyPolicy) obj;
+        if(permissibleLag != other.permissibleLag) {
             return false;
         }
-        if (timeout != other.timeout) {
+        if(timeout != other.timeout) {
             return false;
         }
         return true;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return getName() + " permissibleLag=" + permissibleLag;
     }
 }

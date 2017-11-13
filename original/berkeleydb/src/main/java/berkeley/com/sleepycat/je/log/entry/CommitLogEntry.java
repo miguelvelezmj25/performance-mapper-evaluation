@@ -30,12 +30,16 @@ public class CommitLogEntry extends SingleItemReplicableEntry<TxnCommit> {
      */
     private static final int LAST_FORMAT_CHANGE = 13;
 
-    /** Construct a log entry for reading a {@link TxnCommit} object. */
+    /**
+     * Construct a log entry for reading a {@link TxnCommit} object.
+     */
     public CommitLogEntry() {
         super(TxnCommit.class);
     }
 
-    /** Construct a log entry for writing a {@link TxnCommit} object. */
+    /**
+     * Construct a log entry for writing a {@link TxnCommit} object.
+     */
     public CommitLogEntry(final TxnCommit commit) {
         super(LogEntryType.LOG_TXN_COMMIT, commit);
     }

@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.bind.tuple;
 
-import berkeley.com.sleepycat.util.UtfOps;
 import berkeley.com.sleepycat.je.DatabaseEntry;
+import berkeley.com.sleepycat.util.UtfOps;
 
 /**
  * A concrete <code>TupleBinding</code> for a simple <code>String</code> value.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -33,6 +33,40 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
  * @see <a href="package-summary.html#stringFormats">String Formats</a>
  */
 public class StringBinding extends TupleBinding<String> {
+
+    /**
+     * Converts an entry buffer into a simple <code>String</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static String entryToString(DatabaseEntry entry) {
+
+        return entryToInput(entry).readString();
+    }
+
+    /**
+     * Converts a simple <code>String</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void stringToEntry(String val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput(val).writeString(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput(String val) {
+
+        int stringLength =
+                (val == null) ? 1 : UtfOps.getByteLength(val.toCharArray());
+        stringLength++;           // null terminator
+        return new TupleOutput(new byte[stringLength]);
+    }
 
     // javadoc is inherited
     public String entryToObject(TupleInput input) {
@@ -50,41 +84,5 @@ public class StringBinding extends TupleBinding<String> {
     protected TupleOutput getTupleOutput(String object) {
 
         return sizedOutput(object);
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>String</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static String entryToString(DatabaseEntry entry) {
-
-        return entryToInput(entry).readString();
-    }
-
-    /**
-     * Converts a simple <code>String</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void stringToEntry(String val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput(val).writeString(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput(String val) {
-
-        int stringLength =
-            (val == null) ? 1 : UtfOps.getByteLength(val.toCharArray());
-        stringLength++;           // null terminator
-        return new TupleOutput(new byte[stringLength]);
     }
 }

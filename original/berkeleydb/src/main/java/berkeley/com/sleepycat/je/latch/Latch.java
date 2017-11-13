@@ -25,7 +25,7 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  * 2) To support instrumentation for debugging (see LatchSupport).
  * 3) Automatic use of configured latch timeout.
  * 4) Built-in thread interrupt handling.
- *
+ * <p>
  * Latches are expected to be held for short, defined periods of time.  No
  * deadlock detection is provided so it is the caller's responsibility to
  * sequence latch acquisition in an ordered fashion to avoid deadlocks.
@@ -36,7 +36,7 @@ public interface Latch {
      * Acquires a latch for exclusive/write access.
      *
      * @throws EnvironmentFailureException if the latch is already held by the
-     * calling thread.
+     *                                     calling thread.
      */
     void acquireExclusive();
 
@@ -45,9 +45,8 @@ public interface Latch {
      * not available.
      *
      * @return true if the latch was acquired, false if it is not available.
-     *
      * @throws EnvironmentFailureException if the latch is already held by the
-     * calling thread.
+     *                                     calling thread.
      */
     boolean acquireExclusiveNoWait();
 
@@ -92,7 +91,7 @@ public interface Latch {
      * Returns a stats group with information about this latch.
      *
      * @throws EnvironmentFailureException if stats were not requested when the
-     * latch was created.  See LatchFactory.
+     *                                     latch was created.  See LatchFactory.
      */
     StatGroup getStats();
 
@@ -100,7 +99,7 @@ public interface Latch {
      * Resets collected stat values to zero.
      *
      * @throws EnvironmentFailureException if stats were not requested when the
-     * latch was created.  See LatchFactory.
+     *                                     latch was created.  See LatchFactory.
      */
     void clearStats();
 

@@ -13,176 +13,167 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.persist.evolve.Converter;
-import berkeley.com.sleepycat.persist.model.ClassMetadata;
-import berkeley.com.sleepycat.persist.model.EntityMetadata;
-import berkeley.com.sleepycat.persist.model.EntityModel;
-import berkeley.com.sleepycat.persist.model.FieldMetadata;
-import berkeley.com.sleepycat.persist.model.PrimaryKeyMetadata;
-import berkeley.com.sleepycat.persist.model.SecondaryKeyMetadata;
+import berkeley.com.sleepycat.persist.model.*;
 import berkeley.com.sleepycat.persist.raw.RawField;
 import berkeley.com.sleepycat.persist.raw.RawObject;
 import berkeley.com.sleepycat.persist.raw.RawType;
 
+import java.io.Serializable;
+import java.util.*;
+
 /**
  * The base class for all object formats.  Formats are used to define the
  * stored layout for all persistent classes, including simple types.
- *
+ * <p>
  * The design documentation below describes the storage format for entities and
  * its relationship to information stored per format in the catalog.
- *
+ * <p>
  * Requirements
  * ------------
  * + Provides EntityBinding for objects and EntryBinding for keys.
  * + Provides SecondaryKeyCreator, SecondaryMultiKeyCreator and
- *   SecondaryMultiKeyNullifier (SecondaryKeyNullifier is redundant).
+ * SecondaryMultiKeyNullifier (SecondaryKeyNullifier is redundant).
  * + Works with reflection and bytecode enhancement.
  * + For reflection only, works with any entity model not just annotations.
  * + Bindings are usable independently of the persist API.
  * + Performance is almost equivalent to hand coded tuple bindings.
  * + Small performance penalty for compatible class changes (new fields,
- *   widening).
+ * widening).
  * + Secondary key create/nullify do not have to deserialize the entire record;
- *   in other words, store secondary keys at the start of the data.
- *
+ * in other words, store secondary keys at the start of the data.
+ * <p>
  * Class Format
  * ------------
  * Every distinct class format is given a unique format ID.  Class IDs are not
  * equivalent to class version numbers (as in the version property of @Entity
  * and @Persistent) because the format can change when the version number does
  * not.  Changes that cause a unique format ID to be assigned are:
- *
+ * <p>
  * + Add field.
  * + Widen field type.
  * + Change primitive type to primitive wrapper class.
  * + Add or drop secondary key.
  * + Any incompatible class change.
- *
+ * <p>
  * The last item, incompatible class changes, also correspond to a class
  * version change.
- *
+ * <p>
  * For each distinct class format the following information is conceptually
  * stored in the catalog, keyed by format ID.
- *
+ * <p>
  * - Class name
  * - Class version number
  * - Superclass format
  * - Kind: simple, enum, complex, array
  * - For kind == simple:
- *     - Primitive class
+ * - Primitive class
  * - For kind == enum:
- *     - Array of constant names, sorted by name.
+ * - Array of constant names, sorted by name.
  * - For kind == complex:
- *     - Primary key fieldInfo, or null if no primary key is declared
- *     - Array of secondary key fieldInfo, sorted by field name
- *     - Array of other fieldInfo, sorted by field name
+ * - Primary key fieldInfo, or null if no primary key is declared
+ * - Array of secondary key fieldInfo, sorted by field name
+ * - Array of other fieldInfo, sorted by field name
  * - For kind == array:
- *     - Component class format
- *     - Number of array dimensions
+ * - Component class format
+ * - Number of array dimensions
  * - Other metadata for RawType
- *
+ * <p>
  * Where fieldInfo is:
- *     - Field name
- *     - Field class
- *     - Other metadata for RawField
- *
+ * - Field name
+ * - Field class
+ * - Other metadata for RawField
+ * <p>
  * Data Layout
  * -----------
  * For each entity instance the data layout is as follows:
- *
- *   instanceData: formatId keyFields... nonKeyFields...
- *   keyFields:    fieldValue...
- *   nonKeyFields: fieldValue...
- *
+ * <p>
+ * instanceData: formatId keyFields... nonKeyFields...
+ * keyFields:    fieldValue...
+ * nonKeyFields: fieldValue...
+ * <p>
  * The formatId is the (positive non-zero) ID of a class format, defined above.
  * This is ID of the most derived class of the instance.  It is stored as a
  * packed integer.
- *
+ * <p>
  * Following the format ID, zero or more sets of secondary key field values
  * appear, followed by zero or more sets of other class field values.
- *
+ * <p>
  * The keyFields are the sets of secondary key fields for each class in order
  * of the highest superclass first.  Within a class, fields are ordered by
  * field name.
- *
+ * <p>
  * The nonKeyFields are the sets of other non-key fields for each class in
  * order of the highest superclass first.  Within a class, fields are ordered
  * by field name.
- *
+ * <p>
  * A field value is:
- *
- *   fieldValue:   primitiveValue
- *               | nullId
- *               | instanceRef
- *               | instanceData
- *               | simpleValue
- *               | enumValue
- *               | arrayValue
- *
+ * <p>
+ * fieldValue:   primitiveValue
+ * | nullId
+ * | instanceRef
+ * | instanceData
+ * | simpleValue
+ * | enumValue
+ * | arrayValue
+ * <p>
  * For a primitive type, a primitive value is used as defined for tuple
  * bindings.  For float and double, sorted float and sorted double tuple values
  * are used.
- *
+ * <p>
  * For a non-primitive type with a null value, a nullId is used that has a zero
  * (illegal formatId) value.  This includes String and other simple reference
  * types.  The formatId is stored as a packed integer, meaning that it is
  * stored as a single zero byte.
- *
+ * <p>
  * For a non-primitive type, an instanceRef is used for a non-null instance
  * that appears earlier in the data byte array.  An instanceRef is the negation
  * of the byte offset of the instanceData that appears earlier.  It is stored
  * as a packed integer.
- *
+ * <p>
  * The remaining rules apply only to reference types with non-null values that
  * do not appear earlier in the data array.
- *
+ * <p>
  * For an array type, an array formatId is used that identifies the component
  * type and the number of array dimensions.  This is followed by an array
  * length (stored as a packed integer) and zero or more fieldValue elements.
  * For an array with N+1 dimensions where N is greater than zero, the leftmost
  * dimension is enumerated such that each fieldValue element is itself an array
  * of N dimensions or null.
- *
- *   arrayValue:  formatId length fieldValue...
- *
+ * <p>
+ * arrayValue:  formatId length fieldValue...
+ * <p>
  * For an enum type, an enumValue is used, consisting of a formatId that
  * identifies the enum class and an enumIndex (stored as a packed integer) that
  * identifies the constant name in the enum constant array of the enum class
  * format:
- *
- *   enumValue:   formatId enumIndex
- *
+ * <p>
+ * enumValue:   formatId enumIndex
+ * <p>
  * For a simple type, a simpleValue is used.  This consists of the formatId
  * that identifies the class followed by the simple type value.  For a
  * primitive wrapper type the simple type value is the corresponding primitive,
  * for a Date it is the milliseconds as a long primitive, and for BigInteger or
  * BigDecimal it is a byte array as defined for tuple bindings of these types.
- *
- *   simpleValue: formatId value
- *
+ * <p>
+ * simpleValue: formatId value
+ * <p>
  * For all other complex types, an instanceData is used, which is defined
  * above.
- *
+ * <p>
  * Secondary Keys
  * --------------
  * For secondary key support we must account for writing and nullifying
  * specific keys.  Rather than instantiating the entity and then performing
  * the secondary key operation, we strive to perform the secondary key
  * operation directly on the byte format.
- *
+ * <p>
  * To create a secondary key we skip over other fields and then copy the bytes
  * of the embedded key.  This approach is very efficient because a) the entity
  * is not instantiated, and b) the secondary keys are stored at the beginning
  * of the byte format and can be quickly read.
- *
+ * <p>
  * To nullify we currently instantiate the raw entity, set the key field to null
  * (or remove it from the array/collection), and convert the raw entity back to
  * bytes.  Although the performance of this approach is not ideal because it
@@ -191,112 +182,141 @@ import berkeley.com.sleepycat.persist.raw.RawType;
  * when we nullify a key we are going to write the record, so the serialization
  * overhead may not be significant.  For the record, I tried implementing
  * nullification of the bytes directly and found it was much too complex.
- *
+ * <p>
  * Lifecycle
  * ---------
  * Format are managed by a Catalog class.  Simple formats are managed by
  * SimpleCatalog, and are copied from the SimpleCatalog by PersistCatalog.
  * Other formats are managed by PersistCatalog.  The lifecycle of a format
  * instance is:
- *
+ * <p>
  * - Constructed by the catalog when a format is requested for a Class
- *   that currently has no associated format.
- *
+ * that currently has no associated format.
+ * <p>
  * - The catalog calls setId() and adds the format to its format list
- *   (indexed by format id) and map (keyed by class name).
- *
+ * (indexed by format id) and map (keyed by class name).
+ * <p>
  * - The catalog calls collectRelatedFormats(), where a format can create
- *   additional formats that it needs, or that should also be persistent.
- *
+ * additional formats that it needs, or that should also be persistent.
+ * <p>
  * - The catalog calls initializeIfNeeded(), which calls the initialize()
- *   method of the format class.
- *
+ * method of the format class.
+ * <p>
  * - initialize() should initialize any transient fields in the format.
- *   initialize() can assume that all related formats are available in the
- *   catalog.  It may call initializeIfNeeded() for those related formats, if
- *   it needs to interact with an initialized related format; this does not
- *   cause a cycle, because initializeIfNeeded() does nothing for an already
- *   initialized format.
- *
+ * initialize() can assume that all related formats are available in the
+ * catalog.  It may call initializeIfNeeded() for those related formats, if
+ * it needs to interact with an initialized related format; this does not
+ * cause a cycle, because initializeIfNeeded() does nothing for an already
+ * initialized format.
+ * <p>
  * - The catalog creates a group of related formats at one time, and then
- *   writes its entire list of formats to the catalog DB as a single record.
- *   This grouping reduces the number of writes.
- *
+ * writes its entire list of formats to the catalog DB as a single record.
+ * This grouping reduces the number of writes.
+ * <p>
  * - When a catalog is opened and the list of existing formats is read.  After
- *   a format is deserialized, its initializeIfNeeded() method is called.
- *   setId() and collectRelatedFormats() are not called, since the ID and
- *   related formats are stored in serialized fields.
- *
+ * a format is deserialized, its initializeIfNeeded() method is called.
+ * setId() and collectRelatedFormats() are not called, since the ID and
+ * related formats are stored in serialized fields.
+ * <p>
  * - There are two modes for opening an existing catalog: raw mode and normal
- *   mode.  In raw mode, the old format is used regardless of whether it
- *   matches the current class definition; in fact the class is not accessed
- *   and does not need to be present.
- *
+ * mode.  In raw mode, the old format is used regardless of whether it
+ * matches the current class definition; in fact the class is not accessed
+ * and does not need to be present.
+ * <p>
  * - In normal mode, for each existing format that is initialized, a new format
- *   is also created based on the current class and metadata definition.  If
- *   the two formats are equal, the new format is discarded.  If they are
- *   unequal, the new format becomes the current format and the old format's
- *   evolve() method is called.  evolve() is responsible for adjusting the
- *   old format for class evolution.  Any number of non-current formats may
- *   exist for a given class, and are setup to evolve the single current format
- *   for the class.
+ * is also created based on the current class and metadata definition.  If
+ * the two formats are equal, the new format is discarded.  If they are
+ * unequal, the new format becomes the current format and the old format's
+ * evolve() method is called.  evolve() is responsible for adjusting the
+ * old format for class evolution.  Any number of non-current formats may
+ * exist for a given class, and are setup to evolve the single current format
+ * for the class.
  *
  * @author Mark Hayes
  */
 public abstract class Format implements Reader, RawType, Serializable {
 
-    private static final long serialVersionUID = 545633644568489850L;
-
-    /** Null reference. */
-    static final int ID_NULL     = 0;
-    /** Object */
-    static final int ID_OBJECT   = 1;
-    /** Boolean */
-    static final int ID_BOOL     = 2;
-    static final int ID_BOOL_W   = 3;
-    /** Byte */
-    static final int ID_BYTE     = 4;
-    static final int ID_BYTE_W   = 5;
-    /** Short */
-    static final int ID_SHORT    = 6;
-    static final int ID_SHORT_W  = 7;
-    /** Integer */
-    static final int ID_INT      = 8;
-    static final int ID_INT_W    = 9;
-    /** Long */
-    static final int ID_LONG     = 10;
-    static final int ID_LONG_W   = 11;
-    /** Float */
-    static final int ID_FLOAT    = 12;
-    static final int ID_FLOAT_W  = 13;
-    /** Double */
-    static final int ID_DOUBLE   = 14;
+    /**
+     * Null reference.
+     */
+    static final int ID_NULL = 0;
+    /**
+     * Object
+     */
+    static final int ID_OBJECT = 1;
+    /**
+     * Boolean
+     */
+    static final int ID_BOOL = 2;
+    static final int ID_BOOL_W = 3;
+    /**
+     * Byte
+     */
+    static final int ID_BYTE = 4;
+    static final int ID_BYTE_W = 5;
+    /**
+     * Short
+     */
+    static final int ID_SHORT = 6;
+    static final int ID_SHORT_W = 7;
+    /**
+     * Integer
+     */
+    static final int ID_INT = 8;
+    static final int ID_INT_W = 9;
+    /**
+     * Long
+     */
+    static final int ID_LONG = 10;
+    static final int ID_LONG_W = 11;
+    /**
+     * Float
+     */
+    static final int ID_FLOAT = 12;
+    static final int ID_FLOAT_W = 13;
+    /**
+     * Double
+     */
+    static final int ID_DOUBLE = 14;
     static final int ID_DOUBLE_W = 15;
-    /** Character */
-    static final int ID_CHAR     = 16;
-    static final int ID_CHAR_W   = 17;
-    /** String */
-    static final int ID_STRING   = 18;
-    /** BigInteger */
-    static final int ID_BIGINT   = 19;
-    /** BigDecimal */
-    static final int ID_BIGDEC   = 20;
-    /** Date */
-    static final int ID_DATE     = 21;
-    /** Number */
-    static final int ID_NUMBER   = 22;
-
-    /** First simple type. */
-    static final int ID_SIMPLE_MIN  = 2;
-    /** Last simple type. */
-    static final int ID_SIMPLE_MAX  = 21;
-    /** Last predefined ID, after which dynamic IDs are assigned. */
-    static final int ID_PREDEFINED  = 30;
-
-    static boolean isPredefined(Format format) {
-        return format.getId() <= ID_PREDEFINED;
-    }
-
+    /**
+     * Character
+     */
+    static final int ID_CHAR = 16;
+    static final int ID_CHAR_W = 17;
+    /**
+     * String
+     */
+    static final int ID_STRING = 18;
+    /**
+     * BigInteger
+     */
+    static final int ID_BIGINT = 19;
+    /**
+     * BigDecimal
+     */
+    static final int ID_BIGDEC = 20;
+    /**
+     * Date
+     */
+    static final int ID_DATE = 21;
+    /**
+     * Number
+     */
+    static final int ID_NUMBER = 22;
+    /**
+     * First simple type.
+     */
+    static final int ID_SIMPLE_MIN = 2;
+    /**
+     * Last simple type.
+     */
+    static final int ID_SIMPLE_MAX = 21;
+    /**
+     * Last predefined ID, after which dynamic IDs are assigned.
+     */
+    static final int ID_PREDEFINED = 30;
+    private static final long serialVersionUID = 545633644568489850L;
     private int id;
     private String className;
     private Reader reader;
@@ -310,7 +330,6 @@ public abstract class Format implements Reader, RawType, Serializable {
     private transient Class type;
     private transient Format proxiedFormat;
     private transient boolean initialized;
-
     /**
      * Creates a new format for a given class.
      */
@@ -332,11 +351,15 @@ public abstract class Format implements Reader, RawType, Serializable {
         supertypes = new HashSet<String>();
     }
 
+    static boolean isPredefined(Format format) {
+        return format.getId() <= ID_PREDEFINED;
+    }
+
     /**
      * Special handling for JE 3.0.12 beta formats.
      */
     void migrateFromBeta(Map<String, Format> formatMap) {
-        if (latestFormat == null) {
+        if(latestFormat == null) {
             latestFormat = this;
         }
     }
@@ -387,10 +410,10 @@ public abstract class Format implements Reader, RawType, Serializable {
      */
     final Class getExistingType() {
         assert catalog != null;
-        if (type == null) {
+        if(type == null) {
             try {
                 type = catalog.resolveClass(className);
-            } catch (ClassNotFoundException e) {
+            } catch(ClassNotFoundException e) {
                 throw DbCompat.unexpectedException(e);
             }
         }
@@ -408,7 +431,7 @@ public abstract class Format implements Reader, RawType, Serializable {
          * For unit testing, record whether any un-evolved formats are
          * encountered.
          */
-        if (this != reader) {
+        if(this != reader) {
             PersistCatalog.unevolvedFormatsEncountered = true;
         }
 
@@ -461,14 +484,6 @@ public abstract class Format implements Reader, RawType, Serializable {
     }
 
     /**
-     * Returns the previous version of this format in the linked list of
-     * versions, or null if this is the only version.
-     */
-    public final Format getPreviousVersion() {
-        return previousFormat;
-    }
-
-    /**
      * Called by Evolver to set the latest format when this old format is
      * evolved.
      */
@@ -479,11 +494,19 @@ public abstract class Format implements Reader, RawType, Serializable {
          * latest version.  This creates a singly linked list of versions
          * starting with the latest.
          */
-        if (latestFormat == this) {
+        if(latestFormat == this) {
             newFormat.previousFormat = this;
         }
 
         latestFormat = newFormat;
+    }
+
+    /**
+     * Returns the previous version of this format in the linked list of
+     * versions, or null if this is the only version.
+     */
+    public final Format getPreviousVersion() {
+        return previousFormat;
     }
 
     /**
@@ -508,6 +531,13 @@ public abstract class Format implements Reader, RawType, Serializable {
     }
 
     /**
+     * Overridden by ComplexFormat.
+     */
+    boolean getEvolveNeeded() {
+        throw DbCompat.unexpectedState();
+    }
+
+    /**
      * Called by the Evolver with true when an entity format or any of its
      * nested format were changed.  Called by Store.evolve when an entity has
      * been fully converted.  Overridden by ComplexFormat.
@@ -517,17 +547,10 @@ public abstract class Format implements Reader, RawType, Serializable {
     }
 
     /**
-     * Overridden by ComplexFormat.
-     */
-    boolean getEvolveNeeded() {
-        throw DbCompat.unexpectedState();
-    }
-
-    /**
      * For an entity format, returns whether the entity was written using the
      * new String format.  For a non-entity format, this method should not be
      * called.
-     *
+     * <p>
      * Overridden by ComplexFormat.
      */
     boolean getNewStringFormat() {
@@ -548,15 +571,15 @@ public abstract class Format implements Reader, RawType, Serializable {
     final void initializeIfNeeded(Catalog catalog, EntityModel model) {
         assert catalog != null;
 
-        if (!initialized) {
+        if(!initialized) {
             initialized = true;
             this.catalog = catalog;
 
             /* Initialize objects serialized by an older Format class. */
-            if (latestFormat == null) {
+            if(latestFormat == null) {
                 latestFormat = this;
             }
-            if (reader == null) {
+            if(reader == null) {
                 reader = this;
             }
 
@@ -564,19 +587,19 @@ public abstract class Format implements Reader, RawType, Serializable {
              * The class is only guaranteed to be available in live (not raw)
              * mode, for the current version of the format.
              */
-            if (type == null &&
-                isCurrentVersion() &&
-                (isSimple() || !catalog.isRawAccess())) {
+            if(type == null &&
+                    isCurrentVersion() &&
+                    (isSimple() || !catalog.isRawAccess())) {
                 getExistingType();
             }
 
             /* Perform subclass-specific initialization. */
             initialize(catalog, model,
-                       catalog.getInitVersion(this, false /*forReader*/));
+                    catalog.getInitVersion(this, false /*forReader*/));
             reader.initializeReader
-                (catalog, model,
-                 catalog.getInitVersion(this, true /*forReader*/),
-                 this);
+                    (catalog, model,
+                            catalog.getInitVersion(this, true /*forReader*/),
+                            this);
         }
     }
 
@@ -596,7 +619,7 @@ public abstract class Format implements Reader, RawType, Serializable {
     private void addSupertypes() {
         addInterfaces(type);
         Class stype = type.getSuperclass();
-        while (stype != null && stype != Object.class) {
+        while(stype != null && stype != Object.class) {
             supertypes.add(stype.getName());
             addInterfaces(stype);
             stype = stype.getSuperclass();
@@ -608,8 +631,8 @@ public abstract class Format implements Reader, RawType, Serializable {
      */
     private void addInterfaces(Class cls) {
         Class[] interfaces = cls.getInterfaces();
-        for (Class iface : interfaces) {
-            if (iface != Enhanced.class) {
+        for(Class iface : interfaces) {
+            if(iface != Enhanced.class) {
                 supertypes.add(iface.getName());
                 addInterfaces(iface);
             }
@@ -632,9 +655,10 @@ public abstract class Format implements Reader, RawType, Serializable {
 
     public int getVersion() {
         ClassMetadata meta = getClassMetadata();
-        if (meta != null) {
+        if(meta != null) {
             return meta.getVersion();
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -694,12 +718,13 @@ public abstract class Format implements Reader, RawType, Serializable {
      * type is allowed to be assigned to a given field type.
      */
     boolean isAssignableTo(Format format) {
-        if (proxiedFormat != null) {
+        if(proxiedFormat != null) {
             return proxiedFormat.isAssignableTo(format);
-        } else {
+        }
+        else {
             return format == this ||
-                   format.id == ID_OBJECT ||
-                   supertypes.contains(format.className);
+                    format.id == ID_OBJECT ||
+                    supertypes.contains(format.className);
         }
     }
 
@@ -736,14 +761,14 @@ public abstract class Format implements Reader, RawType, Serializable {
     /**
      * Called for an existing format that may not equal the current format for
      * the same class.
-     *
+     * <p>
      * <p>If this method returns true, then it must have determined one of two
      * things:
-     *  - that the old and new formats are equal, and it must have called
-     *  Evolver.useOldFormat; or
-     *  - that the old format can be evolved to the new format, and it must
-     *  have called Evolver.useEvolvedFormat.</p>
-     *
+     * - that the old and new formats are equal, and it must have called
+     * Evolver.useOldFormat; or
+     * - that the old format can be evolved to the new format, and it must
+     * have called Evolver.useEvolvedFormat.</p>
+     * <p>
      * <p>If this method returns false, then it must have determined that the
      * old format could not be evolved to the new format, and it must have
      * called Evolver.addInvalidMutation, addMissingMutation or
@@ -822,7 +847,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      * the instance to be registered by EntityInput before reading the
      * contents.  This allows the fields in an object or a nested object to
      * refer to the parent object in a graph.
-     *
+     * <p>
      * Alternatively, this method may read all or the first portion of the
      * data, rather than that being done by readObject().  This is required for
      * simple types and enums, where the object cannot be created without
@@ -830,20 +855,20 @@ public abstract class Format implements Reader, RawType, Serializable {
      * parent object will be referenced by the child object in the graph.  It
      * should not be done in other cases, or the graph references may not be
      * maintained faithfully.
-     *
+     * <p>
      * Is public only in order to implement the Reader interface.  Note that
      * this method should only be called directly in raw conversion mode or
      * during conversion of an old format.  Normally it should be called via
      * the getReader method and the Reader interface.
      */
     public abstract Object newInstance(EntityInput input, boolean rawAccess)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called after newInstance() to read the rest of the data bytes and fill
      * in the object contents.  If the object was read completely by
      * newInstance(), this method does nothing.
-     *
+     * <p>
      * Is public only in order to implement the Reader interface.  Note that
      * this method should only be called directly in raw conversion mode or
      * during conversion of an old format.  Normally it should be called via
@@ -852,14 +877,14 @@ public abstract class Format implements Reader, RawType, Serializable {
     public abstract Object readObject(Object o,
                                       EntityInput input,
                                       boolean rawAccess)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Writes a given instance of the target class to the output data bytes.
      * This is the complement of the newInstance()/readObject() pair.
      */
     abstract void writeObject(Object o, EntityOutput output, boolean rawAccess)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Skips over the object's contents, as if readObject() were called, but
@@ -869,7 +894,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      * responsible for skipping everything following the format ID.
      */
     abstract void skipContents(RecordInput input)
-        throws RefreshException;
+            throws RefreshException;
 
     /* -- More methods that may optionally be overridden by subclasses. -- */
 
@@ -879,7 +904,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      * found, or null if the field is not present (nullified) in the object.
      */
     Format skipToSecKey(RecordInput input, String keyName)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState(toString());
     }
@@ -897,7 +922,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      * collection (XXX_TO_MANY) key field.
      */
     void copySecMultiKey(RecordInput input, Format keyFormat, Set results)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState(toString());
     }
@@ -928,7 +953,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      * record.
      */
     void writePriKey(Object o, EntityOutput output, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState(toString());
     }
@@ -936,14 +961,14 @@ public abstract class Format implements Reader, RawType, Serializable {
     /**
      * Reads the primary key from the given input bytes and sets the primary
      * key field in the given object.  This is complement of writePriKey().
-     *
+     * <p>
      * Is public only in order to implement the Reader interface.  Note that
      * this method should only be called directly in raw conversion mode or
      * during conversion of an old format.  Normally it should be called via
      * the getReader method and the Reader interface.
      */
     public void readPriKey(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState(toString());
     }
@@ -960,7 +985,7 @@ public abstract class Format implements Reader, RawType, Serializable {
     /**
      * Validates and returns the simple integer key format for a sequence key
      * associated with this format.
-     *
+     * <p>
      * For a composite key type, the format of the one and only field is
      * returned.  For a simple integer type, this format is returned.
      * Otherwise (the default implementation), an IllegalArgumentException is
@@ -968,7 +993,7 @@ public abstract class Format implements Reader, RawType, Serializable {
      */
     Format getSequenceKeyFormat() {
         throw new IllegalArgumentException
-            ("Type not allowed for sequence: " + getClassName());
+                ("Type not allowed for sequence: " + getClassName());
     }
 
     /**
@@ -979,11 +1004,11 @@ public abstract class Format implements Reader, RawType, Serializable {
                             boolean rawAccess,
                             RawObject rawObject,
                             IdentityHashMap converted)
-        throws RefreshException {
+            throws RefreshException {
 
         throw DbCompat.unexpectedState(toString());
     }
-    
+
     /**
      * Currently, only FBigDec will return true. It is a workaround for reading
      * the BigDecimal data stored by BigDecimal proxy before je4.1.
@@ -991,7 +1016,7 @@ public abstract class Format implements Reader, RawType, Serializable {
     public boolean allowEvolveFromProxy() {
         return false;
     }
-    
+
     public Accessor getAccessor(boolean rawAccess) {
         return null;
     }
@@ -1001,22 +1026,24 @@ public abstract class Format implements Reader, RawType, Serializable {
         final String INDENT = "  ";
         final String INDENT2 = INDENT + "  ";
         StringBuilder buf = new StringBuilder(500);
-        if (isSimple()) {
+        if(isSimple()) {
             addTypeHeader(buf, "SimpleType");
             buf.append(" primitive=\"");
             buf.append(isPrimitive());
             buf.append("\"/>\n");
-        } else if (isEnum()) {
+        }
+        else if(isEnum()) {
             addTypeHeader(buf, "EnumType");
             buf.append(">\n");
-            for (String constant : getEnumConstants()) {
+            for(String constant : getEnumConstants()) {
                 buf.append(INDENT);
                 buf.append("<Constant>");
                 buf.append(constant);
                 buf.append("</Constant>\n");
             }
             buf.append("</EnumType>\n");
-        } else if (isArray()) {
+        }
+        else if(isArray()) {
             addTypeHeader(buf, "ArrayType");
             buf.append(" componentId=\"");
             buf.append(getComponentType().getVersion());
@@ -1025,10 +1052,11 @@ public abstract class Format implements Reader, RawType, Serializable {
             buf.append("\" dimensions=\"");
             buf.append(getDimensions());
             buf.append("\"/>\n");
-        } else {
+        }
+        else {
             addTypeHeader(buf, "ComplexType");
             Format superType = getSuperType();
-            if (superType != null) {
+            if(superType != null) {
                 buf.append(" superTypeId=\"");
                 buf.append(superType.getId());
                 buf.append("\" superTypeClass=\"");
@@ -1036,7 +1064,7 @@ public abstract class Format implements Reader, RawType, Serializable {
                 buf.append('"');
             }
             Format proxiedFormat = getProxiedFormat();
-            if (proxiedFormat != null) {
+            if(proxiedFormat != null) {
                 buf.append(" proxiedTypeId=\"");
                 buf.append(proxiedFormat.getId());
                 buf.append("\" proxiedTypeClass=\"");
@@ -1047,19 +1075,19 @@ public abstract class Format implements Reader, RawType, Serializable {
             Map<String, SecondaryKeyMetadata> secondaryKeys = null;
             List<FieldMetadata> compositeKeyFields = null;
             ClassMetadata clsMeta = getClassMetadata();
-            if (clsMeta != null) {
+            if(clsMeta != null) {
                 compositeKeyFields = clsMeta.getCompositeKeyFields();
                 priMeta = clsMeta.getPrimaryKey();
                 secondaryKeys = clsMeta.getSecondaryKeys();
             }
             buf.append(" kind=\"");
             buf.append(isEntity() ? "entity" :
-                       ((compositeKeyFields != null) ? "compositeKey" :
-                        "persistent"));
+                    ((compositeKeyFields != null) ? "compositeKey" :
+                            "persistent"));
             buf.append("\">\n");
             Map<String, RawField> fields = getFields();
-            if (fields != null) {
-                for (RawField field : fields.values()) {
+            if(fields != null) {
+                for(RawField field : fields.values()) {
                     String name = field.getName();
                     RawType type = field.getType();
                     buf.append(INDENT);
@@ -1071,27 +1099,27 @@ public abstract class Format implements Reader, RawType, Serializable {
                     buf.append("\" typeClass=\"");
                     buf.append(type.getClassName());
                     buf.append('"');
-                    if (priMeta != null &&
-                        priMeta.getName().equals(name)) {
+                    if(priMeta != null &&
+                            priMeta.getName().equals(name)) {
                         buf.append(" primaryKey=\"true\"");
-                        if (priMeta.getSequenceName() != null) {
+                        if(priMeta.getSequenceName() != null) {
                             buf.append(" sequence=\"");
                             buf.append(priMeta.getSequenceName());
                             buf.append('"');
                         }
                     }
-                    if (secondaryKeys != null) {
+                    if(secondaryKeys != null) {
                         SecondaryKeyMetadata secMeta =
-                            ComplexFormat.getSecondaryKeyMetadataByFieldName
-                                (secondaryKeys, name);
-                        if (secMeta != null) {
+                                ComplexFormat.getSecondaryKeyMetadataByFieldName
+                                        (secondaryKeys, name);
+                        if(secMeta != null) {
                             buf.append(" secondaryKey=\"true\" keyName=\"");
                             buf.append(secMeta.getKeyName());
                             buf.append("\" relate=\"");
                             buf.append(secMeta.getRelationship());
                             buf.append('"');
                             String related = secMeta.getRelatedEntity();
-                            if (related != null) {
+                            if(related != null) {
                                 buf.append("\" relatedEntity=\"");
                                 buf.append(related);
                                 buf.append("\" onRelatedEntityDelete=\"");
@@ -1100,11 +1128,11 @@ public abstract class Format implements Reader, RawType, Serializable {
                             }
                         }
                     }
-                    if (compositeKeyFields != null) {
+                    if(compositeKeyFields != null) {
                         int nFields = compositeKeyFields.size();
-                        for (int i = 0; i < nFields; i += 1) {
+                        for(int i = 0; i < nFields; i += 1) {
                             FieldMetadata fldMeta = compositeKeyFields.get(i);
-                            if (fldMeta.getName().equals(name)) {
+                            if(fldMeta.getName().equals(name)) {
                                 buf.append(" compositeKeyField=\"");
                                 buf.append(i + 1);
                                 buf.append('"');
@@ -1114,11 +1142,11 @@ public abstract class Format implements Reader, RawType, Serializable {
                     buf.append("/>\n");
                 }
                 EntityMetadata entMeta = getEntityMetadata();
-                if (entMeta != null) {
+                if(entMeta != null) {
                     buf.append(INDENT);
                     buf.append("<EntityKeys>\n");
                     priMeta = entMeta.getPrimaryKey();
-                    if (priMeta != null) {
+                    if(priMeta != null) {
                         buf.append(INDENT2);
                         buf.append("<Primary class=\"");
                         buf.append(priMeta.getDeclaringClassName());
@@ -1127,9 +1155,9 @@ public abstract class Format implements Reader, RawType, Serializable {
                         buf.append("\"/>\n");
                     }
                     secondaryKeys = entMeta.getSecondaryKeys();
-                    if (secondaryKeys != null) {
-                        for (SecondaryKeyMetadata secMeta :
-                             secondaryKeys.values()) {
+                    if(secondaryKeys != null) {
+                        for(SecondaryKeyMetadata secMeta :
+                                secondaryKeys.values()) {
                             buf.append(INDENT2);
                             buf.append("<Secondary class=\"");
                             buf.append(secMeta.getDeclaringClassName());
@@ -1157,13 +1185,13 @@ public abstract class Format implements Reader, RawType, Serializable {
         buf.append(getVersion());
         buf.append('"');
         Format currVersion = getLatestVersion();
-        if (currVersion != null) {
+        if(currVersion != null) {
             buf.append(" currentVersionId=\"");
             buf.append(currVersion.getId());
             buf.append('"');
         }
         Format prevVersion = getPreviousVersion();
-        if (prevVersion != null) {
+        if(prevVersion != null) {
             buf.append(" previousVersionId=\"");
             buf.append(prevVersion.getId());
             buf.append('"');

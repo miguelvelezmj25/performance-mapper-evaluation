@@ -17,12 +17,11 @@ import java.beans.BeanDescriptor;
 import java.beans.PropertyDescriptor;
 
 /**
- * @hidden
- * Getter/Setters for JavaBean based tools.
+ * @hidden Getter/Setters for JavaBean based tools.
  */
-public class EnvironmentConfigBeanInfo 
-    extends EnvironmentMutableConfigBeanInfo {
-    
+public class EnvironmentConfigBeanInfo
+        extends EnvironmentMutableConfigBeanInfo {
+
     @Override
     public BeanDescriptor getBeanDescriptor() {
         return getBdescriptor(EnvironmentConfig.class);

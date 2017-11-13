@@ -30,7 +30,7 @@ import java.io.File;
  */
 public class SQLApp {
 
-//    private static String envDir = "./tmp";
+    //    private static String envDir = "./tmp";
     private static String envDir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/env";
     private static boolean cleanEnvOnExit = false;
     private static Environment env = null;
@@ -50,7 +50,7 @@ public class SQLApp {
             s.setup();
             s.runApp();
             s.close();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
             System.exit(-1);
         }
@@ -60,7 +60,7 @@ public class SQLApp {
     private static void parseArgs(String args[]) {
         for(int i = 0; i < args.length; ++i) {
             if(args[i].startsWith("-")) {
-                switch (args[i].charAt(1)) {
+                switch(args[i].charAt(1)) {
                     case 'h':
                         envDir = args[++i];
                         break;
@@ -301,7 +301,7 @@ public class SQLApp {
         if(store != null) {
             try {
                 store.close();
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 System.err.println("Error closing store: " +
                         dbe.toString());
                 System.exit(-1);
@@ -312,7 +312,7 @@ public class SQLApp {
             try {
                 // Finally, close environment.
                 env.close();
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 System.err.println("Error closing env: " +
                         dbe.toString());
                 System.exit(-1);

@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
@@ -22,63 +20,67 @@ import berkeley.com.sleepycat.je.rep.utilint.StatCaptureRepDefinitions;
 import berkeley.com.sleepycat.je.statcap.StatManager;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 
+import java.util.Map;
+
 /**
- * @hidden
- * For internal use only.
+ * @hidden For internal use only.
  */
 public class RepStatManager extends StatManager {
 
     private final UpdateMinMax updateRepMinMaxStat =
-        new UpdateMinMax(StatCaptureRepDefinitions.minStats,
-                         StatCaptureRepDefinitions.maxStats);
+            new UpdateMinMax(StatCaptureRepDefinitions.minStats,
+                    StatCaptureRepDefinitions.maxStats);
 
     public RepStatManager(RepImpl env) {
         super(env);
     }
 
     public synchronized ReplicatedEnvironmentStats getRepStats(
-        StatsConfig config,
-        Integer contextKey) {
+            StatsConfig config,
+            Integer contextKey) {
 
         StatContext sc = statContextMap.get(contextKey);
-        if (sc == null) {
+        if(sc == null) {
             throw EnvironmentFailureException.unexpectedState(
-                "Internal error stat context is not registered");
+                    "Internal error stat context is not registered");
         }
         ReplicatedEnvironmentStats rstat =
-            ((RepImpl)env).getStatsInternal(config);
-        if (rstat == null) {
+                ((RepImpl) env).getStatsInternal(config);
+        if(rstat == null) {
             return null;
         }
         Map<String, StatGroup> cur = rstat.getStatGroupsMap();
         Map<String, StatGroup> base = sc.getRepBase();
 
         ReplicatedEnvironmentStats intervalStats;
-        if (base != null) {
+        if(base != null) {
             intervalStats = computeRepIntervalStats(cur, base);
-        } else {
+        }
+        else {
             intervalStats = rstat;
         }
 
-        if (config.getClear()) {
+        if(config.getClear()) {
 
-            for (StatContext context : statContextMap.values()) {
-                if (context.getRepBase() != null) {
+            for(StatContext context : statContextMap.values()) {
+                if(context.getRepBase() != null) {
                     updateRepMinMaxStat.updateBase(context.getRepBase(), cur);
                 }
             }
 
-            for (StatContext context : statContextMap.values()) {
-                if (context == sc) {
+            for(StatContext context : statContextMap.values()) {
+                if(context == sc) {
                     context.setRepBase(null);
-                } else {
-                    if (context.getRepBase() == null) {
+                }
+                else {
+                    if(context.getRepBase() == null) {
                         context.setRepBase(cloneAndNegate(cur));
-                    } else {
+                    }
+                    else {
                         // reset base
                         context.setRepBase(
-                            computeRepIntervalStats(
-                                context.getRepBase(),cur).getStatGroupsMap());
+                                computeRepIntervalStats(
+                                        context.getRepBase(), cur).getStatGroupsMap());
                     }
                 }
             }
@@ -88,15 +90,16 @@ public class RepStatManager extends StatManager {
     }
 
     private ReplicatedEnvironmentStats computeRepIntervalStats(
-        Map<String, StatGroup>current,
-        Map<String, StatGroup> base) {
+            Map<String, StatGroup> current,
+            Map<String, StatGroup> base) {
 
         ReplicatedEnvironmentStats envStats = new ReplicatedEnvironmentStats();
-        for (StatGroup cg : current.values()) {
-            if (base != null) {
+        for(StatGroup cg : current.values()) {
+            if(base != null) {
                 StatGroup bg = base.get(cg.getName());
                 envStats.setStatGroup(cg.computeInterval(bg));
-            } else {
+            }
+            else {
                 envStats.setStatGroup(cg.cloneGroup(false));
             }
         }

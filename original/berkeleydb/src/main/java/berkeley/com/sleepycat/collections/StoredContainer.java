@@ -13,25 +13,22 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.util.Collection;
 import java.util.Iterator;
 
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.DatabaseException;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * A abstract base class for all stored collections and maps.  This class
  * provides implementations of methods that are common to the {@link
  * java.util.Collection} and the {@link java.util.Map} interfaces, namely
  * {@link #clear}, {@link #isEmpty} and {@link #size}.
- *
+ * <p>
  * <p>In addition, this class provides the following methods for stored
  * collections only.  Note that the use of these methods is not compatible with
  * the standard Java collections interface.</p>
@@ -56,6 +53,11 @@ public abstract class StoredContainer implements Cloneable {
     StoredContainer(DataView view) {
 
         this.view = view;
+    }
+
+    static RuntimeException convertException(Exception e) {
+
+        return RuntimeExceptionWrapper.wrapIfNeeded(e);
     }
 
     /**
@@ -113,7 +115,9 @@ public abstract class StoredContainer implements Cloneable {
             cont.view = cont.view.configuredView(config);
             cont.initAfterClone();
             return cont;
-        } catch (CloneNotSupportedException willNeverOccur) { return null; }
+        } catch(CloneNotSupportedException willNeverOccur) {
+            return null;
+        }
     }
 
     /**
@@ -127,7 +131,7 @@ public abstract class StoredContainer implements Cloneable {
      * Duplicates are optionally allowed for HASH and BTREE databases.
      * This method does not exist in the standard {@link java.util.Map} or
      * {@link java.util.Collection} interfaces.
-     *
+     * <p>
      * <p>Note that the JE product only supports BTREE databases.</p>
      *
      * @return whether duplicates are allowed.
@@ -142,7 +146,7 @@ public abstract class StoredContainer implements Cloneable {
      * Duplicates are optionally sorted for HASH and BTREE databases.
      * This method does not exist in the standard {@link java.util.Map} or
      * {@link java.util.Collection} interfaces.
-     *
+     * <p>
      * <p>Note that the JE product only supports BTREE databases, and
      * duplicates are always sorted.</p>
      *
@@ -158,7 +162,7 @@ public abstract class StoredContainer implements Cloneable {
      * Keys are optionally renumbered for RECNO databases.
      * This method does not exist in the standard {@link java.util.Map} or
      * {@link java.util.Collection} interfaces.
-     *
+     * <p>
      * <p>Note that the JE product does not support RECNO databases, and
      * therefore keys are never renumbered.</p>
      *
@@ -174,7 +178,7 @@ public abstract class StoredContainer implements Cloneable {
      * Keys are ordered for BTREE, RECNO and QUEUE databases.
      * This method does not exist in the standard {@link java.util.Map} or
      * {@link java.util.Collection} interfaces.
-     *
+     * <p>
      * <p>Note that the JE product only support BTREE databases, and
      * therefore keys are always ordered.</p>
      *
@@ -190,7 +194,7 @@ public abstract class StoredContainer implements Cloneable {
      * Key ranges are allowed only for BTREE databases.
      * This method does not exist in the standard {@link java.util.Map} or
      * {@link java.util.Collection} interfaces.
-     *
+     * <p>
      * <p>Note that the JE product only supports BTREE databases, and
      * therefore key ranges are always allowed.</p>
      *
@@ -218,7 +222,7 @@ public abstract class StoredContainer implements Cloneable {
      * Returns a non-transactional count of the records in the collection or
      * map.  This method conforms to the {@link java.util.Collection#size} and
      * {@link java.util.Map#size} interfaces.
-     *
+     * <p>
      * <!-- begin JE only -->
      * <p>This operation is faster than obtaining a count by scanning the
      * collection manually, and will not perturb the current contents of the
@@ -227,18 +231,16 @@ public abstract class StoredContainer implements Cloneable {
      * <!-- end JE only -->
      *
      * @return the number of records.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public abstract int size();
 
@@ -248,24 +250,22 @@ public abstract class StoredContainer implements Cloneable {
      * {@link java.util.Map#isEmpty} interfaces.
      *
      * @return whether the container is empty.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean isEmpty() {
 
         try {
             return view.isEmpty();
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -275,20 +275,18 @@ public abstract class StoredContainer implements Cloneable {
      * operation).
      * This method conforms to the {@link java.util.Collection#clear} and
      * {@link java.util.Map#clear} interfaces.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the container is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public void clear() {
 
@@ -296,7 +294,7 @@ public abstract class StoredContainer implements Cloneable {
         try {
             view.clear();
             commitAutoCommit(doAutoCommit);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw handleException(e, doAutoCommit);
         }
     }
@@ -306,13 +304,14 @@ public abstract class StoredContainer implements Cloneable {
         DataCursor cursor = null;
         try {
             cursor = new DataCursor(view, false);
-            if (OperationStatus.SUCCESS ==
-                cursor.getSearchKey(key, null, false)) {
+            if(OperationStatus.SUCCESS ==
+                    cursor.getSearchKey(key, null, false)) {
                 return cursor.getCurrentValue();
-            } else {
+            }
+            else {
                 return null;
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             closeCursor(cursor);
@@ -330,7 +329,7 @@ public abstract class StoredContainer implements Cloneable {
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return oldValue[0];
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -344,19 +343,19 @@ public abstract class StoredContainer implements Cloneable {
             cursor = new DataCursor(view, true);
             boolean found = false;
             OperationStatus status = cursor.getSearchKey(key, null, true);
-            while (status == OperationStatus.SUCCESS) {
+            while(status == OperationStatus.SUCCESS) {
                 cursor.delete();
                 found = true;
-                if (oldVal != null && oldVal[0] == null) {
+                if(oldVal != null && oldVal[0] == null) {
                     oldVal[0] = cursor.getCurrentValue();
                 }
                 status = areDuplicatesAllowed() ?
-                    cursor.getNextDup(true): OperationStatus.NOTFOUND;
+                        cursor.getNextDup(true) : OperationStatus.NOTFOUND;
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return found;
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -369,7 +368,7 @@ public abstract class StoredContainer implements Cloneable {
             cursor = new DataCursor(view, false);
             return (OperationStatus.SUCCESS ==
                     cursor.getSearchKey(key, null, false));
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             closeCursor(cursor);
@@ -383,13 +382,13 @@ public abstract class StoredContainer implements Cloneable {
         try {
             cursor = new DataCursor(view, true);
             OperationStatus status = cursor.findValue(value, true);
-            if (status == OperationStatus.SUCCESS) {
+            if(status == OperationStatus.SUCCESS) {
                 cursor.delete();
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return (status == OperationStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -402,7 +401,7 @@ public abstract class StoredContainer implements Cloneable {
             cursor = new DataCursor(view, false);
             OperationStatus status = cursor.findValue(value, true);
             return (status == OperationStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             closeCursor(cursor);
@@ -416,33 +415,34 @@ public abstract class StoredContainer implements Cloneable {
      */
     final Iterator storedOrExternalIterator(Collection coll) {
 
-        if (coll instanceof StoredCollection) {
+        if(coll instanceof StoredCollection) {
             return ((StoredCollection) coll).storedIterator();
-        } else {
+        }
+        else {
             return coll.iterator();
         }
     }
 
     final void closeCursor(DataCursor cursor) {
 
-        if (cursor != null) {
+        if(cursor != null) {
             try {
                 cursor.close();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 throw StoredContainer.convertException(e);
             }
         }
     }
 
     final boolean beginAutoCommit() {
-        if (view.transactional) {
+        if(view.transactional) {
             final CurrentTransaction currentTxn = view.getCurrentTxn();
             try {
-                if (currentTxn.isAutoCommitAllowed()) {
+                if(currentTxn.isAutoCommitAllowed()) {
                     currentTxn.beginTransaction(null);
                     return true;
                 }
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 throw RuntimeExceptionWrapper.wrapIfNeeded(e);
             }
         }
@@ -450,27 +450,22 @@ public abstract class StoredContainer implements Cloneable {
     }
 
     final void commitAutoCommit(boolean doAutoCommit)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (doAutoCommit) {
+        if(doAutoCommit) {
             view.getCurrentTxn().commitTransaction();
         }
     }
 
     final RuntimeException handleException(Exception e, boolean doAutoCommit) {
 
-        if (doAutoCommit) {
+        if(doAutoCommit) {
             try {
                 view.getCurrentTxn().abortTransaction();
-            } catch (DatabaseException ignored) {
+            } catch(DatabaseException ignored) {
                 /* Klockwork - ok */
             }
         }
         return StoredContainer.convertException(e);
-    }
-
-    static RuntimeException convertException(Exception e) {
-
-        return RuntimeExceptionWrapper.wrapIfNeeded(e);
     }
 }

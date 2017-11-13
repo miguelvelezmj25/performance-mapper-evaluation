@@ -13,27 +13,24 @@
 
 package berkeley.com.sleepycat.collections;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-
 import berkeley.com.sleepycat.bind.EntityBinding;
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.je.Database;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
-/* <!-- end JE only --> */
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.OperationStatus;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 import berkeley.com.sleepycat.util.keyrange.KeyRangeException;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+
 /**
  * A Map view of a {@link Database}.
- *
+ * <p>
  * <p>In addition to the standard Map methods, this class provides the
  * following methods for stored maps only.  Note that the use of these methods
  * is not compatible with the standard Java collections interface.</p>
@@ -46,7 +43,7 @@ import berkeley.com.sleepycat.util.keyrange.KeyRangeException;
  * @author Mark Hayes
  */
 public class StoredMap<K, V> extends StoredContainer
-    implements ConcurrentMap<K, V> {
+        implements ConcurrentMap<K, V> {
 
     private StoredKeySet<K> keySet;
     private StoredEntrySet<K, V> entrySet;
@@ -55,22 +52,17 @@ public class StoredMap<K, V> extends StoredContainer
     /**
      * Creates a map view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param valueBinding is the binding used to translate between value
-     * buffers and value objects.
-     *
+     *                     buffers and value objects.
      * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                     to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredMap(Database database,
                      EntryBinding<K> keyBinding,
@@ -78,7 +70,7 @@ public class StoredMap<K, V> extends StoredContainer
                      boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, valueBinding, null,
-                           writeAllowed, null));
+                writeAllowed, null));
         initView();
     }
 
@@ -86,22 +78,17 @@ public class StoredMap<K, V> extends StoredContainer
      * Creates a map view of a {@link Database} with a {@link
      * PrimaryKeyAssigner}.  Writing is allowed for the created map.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param valueBinding is the binding used to translate between value
-     * buffers and value objects.
-     *
-     * @param keyAssigner is used by the {@link #append} method to assign
-     * primary keys.
-     *
+     *                     buffers and value objects.
+     * @param keyAssigner  is used by the {@link #append} method to assign
+     *                     primary keys.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredMap(Database database,
                      EntryBinding<K> keyBinding,
@@ -109,29 +96,24 @@ public class StoredMap<K, V> extends StoredContainer
                      PrimaryKeyAssigner keyAssigner) {
 
         super(new DataView(database, keyBinding, valueBinding, null,
-                           true, keyAssigner));
+                true, keyAssigner));
         initView();
     }
 
     /**
      * Creates a map entity view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database           is the Database underlying the new collection.
+     * @param keyBinding         is the binding used to translate between key buffers
+     *                           and key objects.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param writeAllowed       is true to create a read-write collection or false
+     *                           to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredMap(Database database,
                      EntryBinding<K> keyBinding,
@@ -139,7 +121,7 @@ public class StoredMap<K, V> extends StoredContainer
                      boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, null, valueEntityBinding,
-                           writeAllowed, null));
+                writeAllowed, null));
         initView();
     }
 
@@ -147,22 +129,17 @@ public class StoredMap<K, V> extends StoredContainer
      * Creates a map entity view of a {@link Database} with a {@link
      * PrimaryKeyAssigner}.  Writing is allowed for the created map.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database           is the Database underlying the new collection.
+     * @param keyBinding         is the binding used to translate between key buffers
+     *                           and key objects.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param keyAssigner is used by the {@link #append} method to assign
-     * primary keys.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param keyAssigner        is used by the {@link #append} method to assign
+     *                           primary keys.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredMap(Database database,
                      EntryBinding<K> keyBinding,
@@ -170,7 +147,7 @@ public class StoredMap<K, V> extends StoredContainer
                      PrimaryKeyAssigner keyAssigner) {
 
         super(new DataView(database, keyBinding, null, valueEntityBinding,
-                           true, keyAssigner));
+                true, keyAssigner));
         initView();
     }
 
@@ -198,25 +175,28 @@ public class StoredMap<K, V> extends StoredContainer
     private void initView() {
 
         /* entrySet */
-        if (areKeyRangesAllowed()) {
+        if(areKeyRangesAllowed()) {
             entrySet = new StoredSortedEntrySet<K, V>(view);
-        } else {
+        }
+        else {
             entrySet = new StoredEntrySet<K, V>(view);
         }
 
         /* keySet */
         DataView newView = view.keySetView();
-        if (areKeyRangesAllowed()) {
+        if(areKeyRangesAllowed()) {
             keySet = new StoredSortedKeySet<K>(newView);
-        } else {
+        }
+        else {
             keySet = new StoredKeySet<K>(newView);
         }
 
         /* valueSet */
         newView = view.valueSetView();
-        if (areKeyRangesAllowed() && newView.canDeriveKeyFromValue()) {
+        if(areKeyRangesAllowed() && newView.canDeriveKeyFromValue()) {
             valueSet = new StoredSortedValueSet<V>(newView);
-        } else {
+        }
+        else {
             valueSet = new StoredValueSet<V>(newView);
         }
     }
@@ -226,20 +206,19 @@ public class StoredMap<K, V> extends StoredContainer
      * duplicates are allowed, this method returns the first duplicate, in the
      * order in which duplicates are configured, that maps to the specified
      * key.
-     *
+     * <p>
      * This method conforms to the {@link Map#get} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public V get(Object key) {
 
@@ -252,7 +231,7 @@ public class StoredMap<K, V> extends StoredContainer
      * is already mapped to a value, this method appends the new duplicate
      * after the existing duplicates.  This method conforms to the {@link
      * Map#put} interface.
-     *
+     * <p>
      * <p>The key parameter may be null if an entity binding is used and the
      * key will be derived from the value (entity) parameter.  If an entity
      * binding is used and the key parameter is non-null, then the key
@@ -260,25 +239,21 @@ public class StoredMap<K, V> extends StoredContainer
      *
      * @return the previous value associated with specified key, or null if
      * there was no mapping for the key or if duplicates are allowed.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is indexed, or
-     * if the collection is read-only.
-     *
-     * @throws IllegalArgumentException if an entity value binding is used and
-     * the primary key of the value given is different than the existing stored
-     * primary key.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                       if the collection is read-only.
+     * @throws IllegalArgumentException      if an entity value binding is used and
+     *                                       the primary key of the value given is different than the existing stored
+     *                                       primary key.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public V put(K key, V value) {
 
@@ -292,30 +267,26 @@ public class StoredMap<K, V> extends StoredContainer
      * or RECNO database and the next available record number is assigned as
      * the key.  This method does not exist in the standard {@link Map}
      * interface.
-     *
+     * <p>
      * <p>Note that for the JE product, QUEUE and RECNO databases are not
      * supported, and therefore a PrimaryKeyAssigner must be associated with
      * the map in order to call this method.</p>
      *
      * @param value the value to be appended.
-     *
      * @return the assigned key.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is indexed, or
-     * if the collection is read-only, or if the Store has no {@link
-     * PrimaryKeyAssigner} and is not a QUEUE or RECNO database.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                       if the collection is read-only, or if the Store has no {@link
+     *                                       PrimaryKeyAssigner} and is not a QUEUE or RECNO database.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public K append(V value) {
 
@@ -325,7 +296,7 @@ public class StoredMap<K, V> extends StoredContainer
             view.append(value, key, null);
             commitAutoCommit(doAutoCommit);
             return (K) key[0];
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw handleException(e, doAutoCommit);
         }
     }
@@ -335,20 +306,18 @@ public class StoredMap<K, V> extends StoredContainer
      * operation).  If duplicates are allowed, this method removes all
      * duplicates for the given key.  This method conforms to the {@link
      * Map#remove} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public V remove(Object key) {
 
@@ -361,18 +330,17 @@ public class StoredMap<K, V> extends StoredContainer
      * If the specified key is not already associated with a value, associate
      * it with the given value.  This method conforms to the {@link
      * ConcurrentMap#putIfAbsent} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public V putIfAbsent(K key, V value) {
         DataCursor cursor = null;
@@ -380,21 +348,23 @@ public class StoredMap<K, V> extends StoredContainer
         try {
             cursor = new DataCursor(view, true);
             V oldValue;
-            while (true) {
+            while(true) {
                 OperationStatus status =
-                    cursor.putNoOverwrite(key, value, false /*useCurrentKey*/);
-                if (status == OperationStatus.SUCCESS) {
+                        cursor.putNoOverwrite(key, value, false /*useCurrentKey*/);
+                if(status == OperationStatus.SUCCESS) {
                     /* We inserted the key.  Return null.  */
                     oldValue = null;
                     break;
-                } else {
+                }
+                else {
                     status = cursor.getSearchKey(key, null /*value*/,
-                                                 false /*lockForWrite*/);
-                    if (status == OperationStatus.SUCCESS) {
+                            false /*lockForWrite*/);
+                    if(status == OperationStatus.SUCCESS) {
                         /* The key is present. Return the current value. */
                         oldValue = (V) cursor.getCurrentValue();
                         break;
-                    } else {
+                    }
+                    else {
 
                         /*
                          * If Serializable isolation is not configured, another
@@ -408,7 +378,7 @@ public class StoredMap<K, V> extends StoredContainer
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return oldValue;
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -416,20 +386,19 @@ public class StoredMap<K, V> extends StoredContainer
 
     /**
      * Remove entry for key only if currently mapped to given value.  This
-     * method conforms to the {@link ConcurrentMap#remove(Object,Object)}
+     * method conforms to the {@link ConcurrentMap#remove(Object, Object)}
      * interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean remove(Object key, Object value) {
         DataCursor cursor = null;
@@ -438,17 +407,18 @@ public class StoredMap<K, V> extends StoredContainer
             cursor = new DataCursor(view, true, key);
             OperationStatus status = cursor.getFirst(true /*lockForWrite*/);
             boolean removed;
-            if (status == OperationStatus.SUCCESS &&
-                cursor.getCurrentValue().equals(value)) {
+            if(status == OperationStatus.SUCCESS &&
+                    cursor.getCurrentValue().equals(value)) {
                 cursor.delete();
                 removed = true;
-            } else {
+            }
+            else {
                 removed = false;
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return removed;
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -456,20 +426,19 @@ public class StoredMap<K, V> extends StoredContainer
 
     /**
      * Replace entry for key only if currently mapped to some value.  This
-     * method conforms to the {@link ConcurrentMap#replace(Object,Object)}
+     * method conforms to the {@link ConcurrentMap#replace(Object, Object)}
      * interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public V replace(K key, V value) {
         DataCursor cursor = null;
@@ -478,16 +447,17 @@ public class StoredMap<K, V> extends StoredContainer
             cursor = new DataCursor(view, true, key);
             OperationStatus status = cursor.getFirst(true /*lockForWrite*/);
             V oldValue;
-            if (status == OperationStatus.SUCCESS) {
+            if(status == OperationStatus.SUCCESS) {
                 oldValue = (V) cursor.getCurrentValue();
                 cursor.putCurrent(value);
-            } else {
+            }
+            else {
                 oldValue = null;
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return oldValue;
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -496,19 +466,18 @@ public class StoredMap<K, V> extends StoredContainer
     /**
      * Replace entry for key only if currently mapped to given value.  This
      * method conforms to the {@link
-     * ConcurrentMap#replace(Object,Object,Object)} interface.
-     *
+     * ConcurrentMap#replace(Object, Object, Object)} interface.
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean replace(K key, V oldValue, V newValue) {
         DataCursor cursor = null;
@@ -517,17 +486,18 @@ public class StoredMap<K, V> extends StoredContainer
             cursor = new DataCursor(view, true, key);
             OperationStatus status = cursor.getFirst(true /*lockForWrite*/);
             boolean replaced;
-            if (status == OperationStatus.SUCCESS &&
-                cursor.getCurrentValue().equals(oldValue)) {
+            if(status == OperationStatus.SUCCESS &&
+                    cursor.getCurrentValue().equals(oldValue)) {
                 cursor.putCurrent(newValue);
                 replaced = true;
-            } else {
+            }
+            else {
                 replaced = false;
             }
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return replaced;
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -536,18 +506,17 @@ public class StoredMap<K, V> extends StoredContainer
     /**
      * Returns true if this map contains the specified key.  This method
      * conforms to the {@link Map#containsKey} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean containsKey(Object key) {
 
@@ -559,18 +528,17 @@ public class StoredMap<K, V> extends StoredContainer
      * binding is used, this method returns whether the map contains the
      * primary key and value mapping of the entity.  This method conforms to
      * the {@link Map#containsValue} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean containsValue(Object value) {
 
@@ -583,21 +551,19 @@ public class StoredMap<K, V> extends StoredContainer
      * map are effectively appended to the existing mappings in this map, that
      * is no previously existing mappings in this map are replaced.  This
      * method conforms to the {@link Map#putAll} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only, or
-     * if the collection is indexed.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                       if the collection is indexed.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C edition).
      */
     public void putAll(Map<? extends K, ? extends V> map) {
 
@@ -606,13 +572,13 @@ public class StoredMap<K, V> extends StoredContainer
         try {
             Collection coll = map.entrySet();
             i = storedOrExternalIterator(coll);
-            while (i.hasNext()) {
+            while(i.hasNext()) {
                 Map.Entry entry = (Map.Entry) i.next();
                 putKeyValue(entry.getKey(), entry.getValue());
             }
             StoredIterator.close(i);
             commitAutoCommit(doAutoCommit);
-        } catch (Exception e) {
+        } catch(Exception e) {
             StoredIterator.close(i);
             throw handleException(e, doAutoCommit);
         }
@@ -623,16 +589,14 @@ public class StoredMap<K, V> extends StoredContainer
      * java.util.SortedSet} is returned if the map supports key ranges.  The
      * returned collection will be read-only if the map is read-only.  This
      * method conforms to the {@link Map#keySet()} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @return a {@link StoredKeySet} or a {@link StoredSortedKeySet} for this
      * map.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
-     *
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      * @see #areKeyRangesAllowed
      * @see #isWriteAllowed
      */
@@ -646,16 +610,14 @@ public class StoredMap<K, V> extends StoredContainer
      * java.util.SortedSet} is returned if the map supports key ranges.  The
      * returned collection will be read-only if the map is read-only.  This
      * method conforms to the {@link Map#entrySet()} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @return a {@link StoredEntrySet} or a {@link StoredSortedEntrySet} for
      * this map.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
-     *
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      * @see #areKeyRangesAllowed
      * @see #isWriteAllowed
      */
@@ -671,16 +633,14 @@ public class StoredMap<K, V> extends StoredContainer
      * value/entity object.  The returned collection will be read-only if the
      * map is read-only.  This method conforms to the {@link Map#values()}
      * interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @return a {@link StoredValueSet} or a {@link StoredSortedValueSet} for
      * this map.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
-     *
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      * @see #areKeyRangesAllowed
      * @see #isWriteAllowed
      */
@@ -695,7 +655,7 @@ public class StoredMap<K, V> extends StoredContainer
      * for iterating over the duplicates for a given key, since this is not
      * supported by the standard Map interface.  This method does not exist in
      * the standard {@link Map} interface.
-     *
+     * <p>
      * <p>If no mapping for the given key is present, an empty collection is
      * returned.  If duplicates are not allowed, at most a single value will be
      * in the collection returned.  If duplicates are allowed, the returned
@@ -703,20 +663,18 @@ public class StoredMap<K, V> extends StoredContainer
      * key.</p>
      *
      * @param key is the key for which values are to be returned.
-     *
      * @return the new collection.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public Collection<V> duplicates(K key) {
 
         try {
             DataView newView = view.valueSetView(key);
             return new StoredValueSet(newView);
-        } catch (KeyRangeException e) {
+        } catch(KeyRangeException e) {
             return Collections.EMPTY_SET;
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -725,37 +683,34 @@ public class StoredMap<K, V> extends StoredContainer
      * Returns a new map from primary key to value for the subset of records
      * having a given secondary key (duplicates).  This method does not exist
      * in the standard {@link Map} interface.
-     *
+     * <p>
      * <p>If no mapping for the given key is present, an empty collection is
      * returned.  If duplicates are not allowed, at most a single value will be
      * in the collection returned.  If duplicates are allowed, the returned
      * collection's add() method may be used to add values for the given
      * key.</p>
      *
-     * @param secondaryKey is the secondary key for which duplicates values
-     * will be represented by the returned map.
-     *
+     * @param secondaryKey      is the secondary key for which duplicates values
+     *                          will be represented by the returned map.
      * @param primaryKeyBinding is the binding used for keys in the returned
-     * map.
-     *
-     * @param <PK> the primary key class.
-     *
+     *                          map.
+     * @param <PK>              the primary key class.
      * @return the new map.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public <PK> Map<PK, V> duplicatesMap(K secondaryKey,
                                          EntryBinding primaryKeyBinding) {
         try {
             DataView newView =
-                view.duplicatesView(secondaryKey, primaryKeyBinding);
-            if (isOrdered()) {
+                    view.duplicatesView(secondaryKey, primaryKeyBinding);
+            if(isOrdered()) {
                 return new StoredSortedMap(newView);
-            } else {
+            }
+            else {
                 return new StoredMap(newView);
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -765,24 +720,24 @@ public class StoredMap<K, V> extends StoredContainer
      * comparison is performed by this method and the stored values are
      * compared rather than calling the equals() method of each element.  This
      * method conforms to the {@link Map#equals} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean equals(Object other) {
 
-        if (other instanceof Map) {
+        if(other instanceof Map) {
             return entrySet().equals(((Map) other).entrySet());
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -806,9 +761,8 @@ public class StoredMap<K, V> extends StoredContainer
      * returned string may be very large.
      *
      * @return the string representation.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public String toString() {
 

@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedException;
-
 import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
+
+import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedException;
 
 /**
  * Options for calling methods that read records.
@@ -37,27 +37,9 @@ public class ReadOptions implements Cloneable {
     public ReadOptions clone() {
         try {
             return (ReadOptions) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             throw unexpectedException(e);
         }
-    }
-
-    /**
-     * Sets the {@code CacheMode} to be used for the operation.
-     * <p>
-     * By default this property is null, meaning that the default specified
-     * using {@link Cursor#setCacheMode},
-     * {@link DatabaseConfig#setCacheMode} or
-     * {@link EnvironmentConfig#setCacheMode} will be used.
-     *
-     * @param cacheMode is the {@code CacheMode} used for the operation, or
-     * null to use the Cursor, Database or Environment default.
-     *
-     * @return 'this'.
-     */
-    public ReadOptions setCacheMode(final CacheMode cacheMode) {
-        this.cacheMode = cacheMode;
-        return this;
     }
 
     /**
@@ -71,18 +53,19 @@ public class ReadOptions implements Cloneable {
     }
 
     /**
-     * Sets the {@code LockMode} to be used for the operation.
+     * Sets the {@code CacheMode} to be used for the operation.
      * <p>
-     * By default this property is {@link LockMode#DEFAULT}.
+     * By default this property is null, meaning that the default specified
+     * using {@link Cursor#setCacheMode},
+     * {@link DatabaseConfig#setCacheMode} or
+     * {@link EnvironmentConfig#setCacheMode} will be used.
      *
-     * @param lockMode the locking attributes. Specifying null or
-     * {@link LockMode#READ_COMMITTED} is not allowed.
-     *
+     * @param cacheMode is the {@code CacheMode} used for the operation, or
+     *                  null to use the Cursor, Database or Environment default.
      * @return 'this'.
      */
-    public ReadOptions setLockMode(final LockMode lockMode) {
-        DatabaseUtil.checkForNullParam(lockMode, "lockMode");
-        this.lockMode = lockMode;
+    public ReadOptions setCacheMode(final CacheMode cacheMode) {
+        this.cacheMode = cacheMode;
         return this;
     }
 
@@ -93,5 +76,20 @@ public class ReadOptions implements Cloneable {
      */
     public LockMode getLockMode() {
         return lockMode;
+    }
+
+    /**
+     * Sets the {@code LockMode} to be used for the operation.
+     * <p>
+     * By default this property is {@link LockMode#DEFAULT}.
+     *
+     * @param lockMode the locking attributes. Specifying null or
+     *                 {@link LockMode#READ_COMMITTED} is not allowed.
+     * @return 'this'.
+     */
+    public ReadOptions setLockMode(final LockMode lockMode) {
+        DatabaseUtil.checkForNullParam(lockMode, "lockMode");
+        this.lockMode = lockMode;
+        return this;
     }
 }

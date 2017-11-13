@@ -13,37 +13,15 @@
 
 package berkeley.com.sleepycat.compat;
 
+import berkeley.com.sleepycat.je.*;
+
 import java.util.Comparator;
 import java.util.regex.Pattern;
-
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DatabaseExistsException;
-import berkeley.com.sleepycat.je.DatabaseNotFoundException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Durability;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationResult;
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.je.ReadOptions;
-import berkeley.com.sleepycat.je.SecondaryConfig;
-import berkeley.com.sleepycat.je.SecondaryCursor;
-import berkeley.com.sleepycat.je.SecondaryDatabase;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
-import berkeley.com.sleepycat.je.WriteOptions;
 
 /**
  * A minimal set of BDB DB-JE compatibility constants and static methods, for
  * internal use only.
- *
+ * <p>
  * Two versions of this class, with the same public interface but different
  * implementations, are maintained in parallel in the DB and JE source trees.
  * By the use of the constants and methods in this class, along with a script
@@ -51,87 +29,87 @@ import berkeley.com.sleepycat.je.WriteOptions;
  * packages is kept "portable" and is shared by the two products.  The script
  * translates the package names from com.sleepycat.je to com.sleepycat.db, and
  * perform other fix-ups as described further below.
- *
+ * <p>
  * The JE directories that contain portable code are:
- *
- *  src/com/sleepycat/bind
- *                   /collections
- *                   /persist
- *                   /util
- *  test/com/sleepycat/bind
- *                    /collections
- *                    /persist
- *                    /util
- *
+ * <p>
+ * src/com/sleepycat/bind
+ * /collections
+ * /persist
+ * /util
+ * test/com/sleepycat/bind
+ * /collections
+ * /persist
+ * /util
+ * <p>
  * In DB, these sources are stored in the following locations:
- *
- *  Sources:
- *    src/java
- *  Tests:
- *    test/java/compat
- *
+ * <p>
+ * Sources:
+ * src/java
+ * Tests:
+ * test/java/compat
+ * <p>
  * To keep this source code portable there are additional coding rules, above
  * and beyond the standard rules (such as coding style) for all JE code.
+ * <p>
+ * + In general we should try to use the JE/DB public API, since it is usually
+ * the same or similar in both products.  If we use internal APIs, they will
+ * always be different and will require special handling.
+ * <p>
+ * + When there are differences between products, the first choice for
+ * handling the difference is to use a DbCompat static method or constant.
+ * This keeps the source code the same for both products (except in this
+ * DbCompat class).
+ * <p>
+ * + When JE-only code is needed -- for example, some APIs only exist in JE,
+ * and special handling of JE exceptions is sometimes needed -- the
+ * following special comment syntax can be used to bracket the JE-only code:
+ * <p>
+ * <!-- begin JE only -->
+ * JE-only code goes here
+ * <!-- end JE only -->
+ * <p>
+ * This syntax must be used inside of a comment: either inside a javadoc
+ * section as shown above, or inside a single-line comment (space before
+ * last slash is to prevent ending this javadoc comment):
+ * <p>
+ * /* <!-- begin JE only --> * /
+ * JE-only code goes here
+ * /* <!-- end JE only --> * /
+ * <p>
+ * All lines between the <!-- begin JE only --> and <!-- end JE only -->
+ * lines, and including these lines, will be removed by the script that
+ * transfers code from JE to DB.
+ * <p>
+ * + When DB-only code is needed, the code will exist in the JE product but
+ * will never be executed.  For DB-only APIs, we hide the API from the user
+ * with the @hidden javadoc tag.  The @hidden tag is ignored on the DB side.
+ * We do not have a way to remove DB-only code completely from the JE
+ * product, because we do not use a proprocessor for building JE.
+ * <p>
+ * + Because DatabaseException (and all subclasses) are checked exceptions in
+ * DB but runtime exceptions in JE, we cannot omit the 'throws' declaration.
+ * Another difference is that DB normally throws DatabaseException for all
+ * errors, while JE has many specific subclasses for specific errors.
+ * Therefore, any method that calls a DB API method (for example,
+ * Database.get or put) will have a "throws DatabaseException" clause.
+ * <p>
+ * + Special consideration is needed for the @throws clauses in javadoc. We do
+ * want to javadoc the JE-only exceptions that are thrown, so the @throws
+ * for these exceptions should be inside the "begin/end JE only" brackets.
+ * We also need to document the fact that DB may throw DatabaseException for
+ * almost any method, so we do that with a final @throws clause that looks
+ * like this:
  *
- *  + In general we should try to use the JE/DB public API, since it is usually
- *    the same or similar in both products.  If we use internal APIs, they will
- *    always be different and will require special handling.
- *
- *  + When there are differences between products, the first choice for
- *    handling the difference is to use a DbCompat static method or constant.
- *    This keeps the source code the same for both products (except in this
- *    DbCompat class).
- *
- *  + When JE-only code is needed -- for example, some APIs only exist in JE,
- *    and special handling of JE exceptions is sometimes needed -- the
- *    following special comment syntax can be used to bracket the JE-only code:
- *
- *    <!-- begin JE only -->
- *       JE-only code goes here
- *    <!-- end JE only -->
- *    
- *    This syntax must be used inside of a comment: either inside a javadoc
- *    section as shown above, or inside a single-line comment (space before
- *    last slash is to prevent ending this javadoc comment):
- *
- *    /* <!-- begin JE only --> * /
- *       JE-only code goes here
- *    /* <!-- end JE only --> * /
- *
- *    All lines between the <!-- begin JE only --> and <!-- end JE only -->
- *    lines, and including these lines, will be removed by the script that
- *    transfers code from JE to DB.
- *
- *  + When DB-only code is needed, the code will exist in the JE product but
- *    will never be executed.  For DB-only APIs, we hide the API from the user
- *    with the @hidden javadoc tag.  The @hidden tag is ignored on the DB side.
- *    We do not have a way to remove DB-only code completely from the JE
- *    product, because we do not use a proprocessor for building JE.
- *
- *  + Because DatabaseException (and all subclasses) are checked exceptions in
- *    DB but runtime exceptions in JE, we cannot omit the 'throws' declaration.
- *    Another difference is that DB normally throws DatabaseException for all
- *    errors, while JE has many specific subclasses for specific errors.
- *    Therefore, any method that calls a DB API method (for example,
- *    Database.get or put) will have a "throws DatabaseException" clause.
- *
- *  + Special consideration is needed for the @throws clauses in javadoc. We do
- *    want to javadoc the JE-only exceptions that are thrown, so the @throws
- *    for these exceptions should be inside the "begin/end JE only" brackets.
- *    We also need to document the fact that DB may throw DatabaseException for
- *    almost any method, so we do that with a final @throws clause that looks
- *    like this:
- *
- *    @throws DatabaseException the base class for all BDB exceptions.
- *
- *    This is a compromise.  JE doesn't throw this exception, but we've
- *    described it in a way that still makes some sense for JE, sort of.
- *
- *  + Other special handling can be implemented in the transfer script, which
- *    uses SED.  Entire files can be excluded from the transfer, for example,
- *    the JE-only exception classes.  Name changes can also be made using SED,
- *    for example: s/LockConflictException/DeadlockException/. See the
- *    db/dist/s_je2db script for details.
+ * @throws DatabaseException the base class for all BDB exceptions.
+ * <p>
+ * This is a compromise.  JE doesn't throw this exception, but we've
+ * described it in a way that still makes some sense for JE, sort of.
+ * <p>
+ * + Other special handling can be implemented in the transfer script, which
+ * uses SED.  Entire files can be excluded from the transfer, for example,
+ * the JE-only exception classes.  Name changes can also be made using SED,
+ * for example: s/LockConflictException/DeadlockException/. See the
+ * db/dist/s_je2db script for details.
  */
 public class DbCompat {
 
@@ -150,11 +128,9 @@ public class DbCompat {
     public static final boolean BTREE_RECNUM_METHOD = false;
     public static final boolean OPTIONAL_READ_UNCOMMITTED = false;
     public static final boolean SECONDARIES = true;
-    public static boolean TRANSACTION_RUNNER_PRINT_STACK_TRACES = true;
     public static final boolean DATABASE_COUNT = true;
     public static final boolean NEW_JE_EXCEPTIONS = true;
     public static final boolean POPULATE_ENFORCES_CONSTRAINTS = true;
-
     /**
      * For read-only cursor operations on a replicated node, we must use a
      * transaction to satisfy HA requirements.  However, we use a Durability
@@ -163,9 +139,11 @@ public class DbCompat {
      * cursor: locks are released when the cursor is moved or closed.
      */
     public static final TransactionConfig READ_ONLY_TXN_CONFIG;
-
-    /** Used on JE only, simply to avoid warnings about "if (true) ...". */
+    /**
+     * Used on JE only, simply to avoid warnings about "if (true) ...".
+     */
     public static final boolean IS_JE = true;
+    public static boolean TRANSACTION_RUNNER_PRINT_STACK_TRACES = true;
 
     static {
         READ_ONLY_TXN_CONFIG = new TransactionConfig();
@@ -242,7 +220,7 @@ public class DbCompat {
     }
 
     public static void setWriteCursor(CursorConfig config, boolean write) {
-        if (write) {
+        if(write) {
             throw new UnsupportedOperationException();
         }
     }
@@ -260,7 +238,7 @@ public class DbCompat {
     }
 
     public static long getDatabaseCount(Database db)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return db.count();
     }
@@ -268,7 +246,7 @@ public class DbCompat {
     public static OperationStatus getCurrentRecordNumber(Cursor cursor,
                                                          DatabaseEntry key,
                                                          LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw new UnsupportedOperationException();
     }
@@ -277,7 +255,7 @@ public class DbCompat {
                                                         DatabaseEntry key,
                                                         DatabaseEntry data,
                                                         LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw new UnsupportedOperationException();
     }
@@ -287,7 +265,7 @@ public class DbCompat {
                                                         DatabaseEntry pKey,
                                                         DatabaseEntry data,
                                                         LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw new UnsupportedOperationException();
     }
@@ -295,7 +273,7 @@ public class DbCompat {
     public static OperationStatus putAfter(Cursor cursor,
                                            DatabaseEntry key,
                                            DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw new UnsupportedOperationException();
     }
@@ -303,7 +281,7 @@ public class DbCompat {
     public static OperationStatus putBefore(Cursor cursor,
                                             DatabaseEntry key,
                                             DatabaseEntry data)
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw new UnsupportedOperationException();
     }
@@ -316,7 +294,7 @@ public class DbCompat {
     }
 
     public static Transaction getThreadTransaction(Environment env)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return env.getThreadTransaction();
     }
@@ -329,21 +307,21 @@ public class DbCompat {
 
     public static void setInitializeCache(EnvironmentConfig config,
                                           boolean val) {
-        if (!val) {
+        if(!val) {
             throw new UnsupportedOperationException();
         }
     }
 
     public static void setInitializeLocking(EnvironmentConfig config,
                                             boolean val) {
-        if (!val) {
+        if(!val) {
             throw new UnsupportedOperationException();
         }
     }
 
     public static void setInitializeCDB(EnvironmentConfig config,
                                         boolean val) {
-        if (val) {
+        if(val) {
             throw new UnsupportedOperationException();
         }
     }
@@ -405,7 +383,7 @@ public class DbCompat {
 
     public static void setUnsortedDuplicates(DatabaseConfig dbConfig,
                                              boolean val) {
-        if (val) {
+        if(val) {
             throw new UnsupportedOperationException();
         }
     }
@@ -415,7 +393,7 @@ public class DbCompat {
     }
 
     public static void setRecordLength(DatabaseConfig dbConfig, int val) {
-        if (val != 0) {
+        if(val != 0) {
             throw new UnsupportedOperationException();
         }
     }
@@ -443,9 +421,9 @@ public class DbCompat {
         assert fileName == null;
         try {
             return env.openDatabase(txn, dbName, config);
-        } catch (DatabaseNotFoundException e) {
+        } catch(DatabaseNotFoundException e) {
             return null;
-        } catch (DatabaseExistsException e) {
+        } catch(DatabaseExistsException e) {
             return null;
         }
     }
@@ -455,19 +433,19 @@ public class DbCompat {
      * already exists (and ExclusiveCreate is true).
      */
     public static SecondaryDatabase
-        openSecondaryDatabase(Environment env,
-                              Transaction txn,
-                              String fileName,
-                              String dbName,
-                              Database primaryDatabase,
-                              SecondaryConfig config) {
+    openSecondaryDatabase(Environment env,
+                          Transaction txn,
+                          String fileName,
+                          String dbName,
+                          Database primaryDatabase,
+                          SecondaryConfig config) {
         assert fileName == null;
         try {
             return env.openSecondaryDatabase(txn, dbName, primaryDatabase,
-                                             config);
-        } catch (DatabaseNotFoundException e) {
+                    config);
+        } catch(DatabaseNotFoundException e) {
             return null;
-        } catch (DatabaseExistsException e) {
+        } catch(DatabaseExistsException e) {
             return null;
         }
     }
@@ -483,7 +461,7 @@ public class DbCompat {
         try {
             env.truncateDatabase(txn, dbName, false /*returnCount*/);
             return true;
-        } catch (DatabaseNotFoundException e) {
+        } catch(DatabaseNotFoundException e) {
             return false;
         }
     }
@@ -499,7 +477,7 @@ public class DbCompat {
         try {
             env.removeDatabase(txn, dbName);
             return true;
-        } catch (DatabaseNotFoundException e) {
+        } catch(DatabaseNotFoundException e) {
             return false;
         }
     }
@@ -518,7 +496,7 @@ public class DbCompat {
         try {
             env.renameDatabase(txn, oldDbName, newDbName);
             return true;
-        } catch (DatabaseNotFoundException e) {
+        } catch(DatabaseNotFoundException e) {
             return false;
         }
     }
@@ -534,10 +512,10 @@ public class DbCompat {
                                             DatabaseConfig config) {
         try {
             return env.openDatabase(txn, makeTestDbName(file, name), config);
-        } catch (DatabaseNotFoundException e) {
+        } catch(DatabaseNotFoundException e) {
             assert false;
             return null;
-        } catch (DatabaseExistsException e) {
+        } catch(DatabaseExistsException e) {
             assert false;
             return null;
         }
@@ -548,31 +526,33 @@ public class DbCompat {
      * false) or already exists (and ExclusiveCreate is true).
      */
     public static SecondaryDatabase
-                  testOpenSecondaryDatabase(Environment env,
-                                            Transaction txn,
-                                            String file,
-                                            String name,
-                                            Database primary,
-                                            SecondaryConfig config) {
+    testOpenSecondaryDatabase(Environment env,
+                              Transaction txn,
+                              String file,
+                              String name,
+                              Database primary,
+                              SecondaryConfig config) {
         try {
             return env.openSecondaryDatabase(txn, makeTestDbName(file, name),
-                                             primary, config);
-        } catch (DatabaseNotFoundException e) {
+                    primary, config);
+        } catch(DatabaseNotFoundException e) {
             assert false;
             return null;
-        } catch (DatabaseExistsException e) {
+        } catch(DatabaseExistsException e) {
             assert false;
             return null;
         }
     }
 
     private static String makeTestDbName(String file, String name) {
-        if (file == null) {
+        if(file == null) {
             return name;
-        } else {
-            if (name != null) {
+        }
+        else {
+            if(name != null) {
                 return file + '.' + name;
-            } else {
+            }
+            else {
                 return file;
             }
         }
@@ -582,7 +562,7 @@ public class DbCompat {
         return EnvironmentFailureException.unexpectedException(cause);
     }
 
-    public static RuntimeException unexpectedException(String msg, 
+    public static RuntimeException unexpectedException(String msg,
                                                        Exception cause) {
         return EnvironmentFailureException.unexpectedException(msg, cause);
     }
@@ -601,18 +581,18 @@ public class DbCompat {
     }
 
     public static Object getErrorHandler(Environment env)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return null;
     }
 
     public static void setErrorHandler(Environment env, Object errHandler)
-        throws DatabaseException {
+            throws DatabaseException {
     }
 
     public static void suppressError(Environment env,
                                      final Pattern errPattern)
-        throws DatabaseException{
+            throws DatabaseException {
     }
 
     /*
@@ -624,7 +604,7 @@ public class DbCompat {
     public static class OpResult {
 
         public static final OpResult SUCCESS =
-            new OpResult(DbInternal.DEFAULT_RESULT);
+                new OpResult(DbInternal.DEFAULT_RESULT);
 
         public static final OpResult FAILURE = new OpResult(null);
 
@@ -634,22 +614,22 @@ public class DbCompat {
             jeResult = result;
         }
 
-        public boolean isSuccess() {
-            return jeResult != null;
-        }
-
-        public OperationStatus status() {
-            return isSuccess() ?
-                OperationStatus.SUCCESS : OperationStatus.NOTFOUND;
-        }
-
         public static OpResult make(OperationResult result) {
             return (result != null) ? (new OpResult(result)) : FAILURE;
         }
 
         public static OpResult make(OperationStatus status) {
             return (status == OperationStatus.SUCCESS) ?
-                SUCCESS : FAILURE;
+                    SUCCESS : FAILURE;
+        }
+
+        public boolean isSuccess() {
+            return jeResult != null;
+        }
+
+        public OperationStatus status() {
+            return isSuccess() ?
+                    OperationStatus.SUCCESS : OperationStatus.NOTFOUND;
         }
     }
 
@@ -662,7 +642,7 @@ public class DbCompat {
     public static class OpReadOptions {
 
         public static final OpReadOptions EMPTY =
-            new OpReadOptions(null);
+                new OpReadOptions(null);
 
         public final ReadOptions jeOptions;
 
@@ -670,18 +650,18 @@ public class DbCompat {
             jeOptions = options;
         }
 
-        public LockMode getLockMode() {
-            return (jeOptions != null) ? jeOptions.getLockMode() : null;
-        }
-
         public static OpReadOptions make(ReadOptions options) {
             return (options != null) ?
-                new OpReadOptions(options) : EMPTY;
+                    new OpReadOptions(options) : EMPTY;
         }
 
         public static OpReadOptions make(LockMode lockMode) {
             return (lockMode != null) ?
-                new OpReadOptions(lockMode.toReadOptions()) : EMPTY;
+                    new OpReadOptions(lockMode.toReadOptions()) : EMPTY;
+        }
+
+        public LockMode getLockMode() {
+            return (jeOptions != null) ? jeOptions.getLockMode() : null;
         }
     }
 
@@ -693,7 +673,7 @@ public class DbCompat {
     public static class OpWriteOptions {
 
         public static final OpWriteOptions EMPTY =
-            new OpWriteOptions(null);
+                new OpWriteOptions(null);
 
         public final WriteOptions jeOptions;
 
@@ -703,7 +683,7 @@ public class DbCompat {
 
         public static OpWriteOptions make(WriteOptions options) {
             return (options != null) ?
-                new OpWriteOptions(options) : EMPTY;
+                    new OpWriteOptions(options) : EMPTY;
         }
     }
 }

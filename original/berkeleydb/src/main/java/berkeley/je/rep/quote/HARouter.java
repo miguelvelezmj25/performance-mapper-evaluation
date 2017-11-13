@@ -167,7 +167,7 @@ public class HARouter {
         final int retryPeriodMins = 5;
         int maxRetries = (retryPeriodMins * 60 * 1000) / retrySleepMs;
 
-        while (true) {
+        while(true) {
             try {
 
                  /*
@@ -190,7 +190,7 @@ public class HARouter {
                 monitor.startListener(router.new RouterChangeListener());
 
                 break;
-            } catch (UnknownMasterException unknownMasterException) {
+            } catch(UnknownMasterException unknownMasterException) {
                 if(maxRetries-- == 0) {
                      /* Don't have a functioning group. */
                     throw unknownMasterException;
@@ -212,7 +212,7 @@ public class HARouter {
      * @return the next dispatch address
      */
     private InetSocketAddress getNextDispatchAddress() {
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             lastReadAddress++;
             if(lastReadAddress == activeAppAddresses.size()) {
                 lastReadAddress = 0;
@@ -226,11 +226,11 @@ public class HARouter {
      * shutting them down.
      */
     private void routeQuit() {
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             for(InetSocketAddress address : nodeAddressMapping.values()) {
                 try {
                     QuoteUtil.forwardRequest(address, "quit", System.err);
-                } catch (IOException e) {
+                } catch(IOException e) {
                     // Ignore exceptions during shutdown
                 }
             }
@@ -246,16 +246,16 @@ public class HARouter {
     private void routeReadCommand(String line) {
         IOException lastException = null;
         int retries = 0;
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             retries = activeAppAddresses.size();
         }
-        while (retries-- > 0) {
+        while(retries-- > 0) {
             try {
                 QuoteUtil.forwardRequest(getNextDispatchAddress(),
                         line,
                         System.err);
                 return;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 lastException = e;
 
                 /*
@@ -279,14 +279,14 @@ public class HARouter {
     private void routeUpdateCommand(String line) {
         final InetSocketAddress targetAddress;
         final String targetNodeName;
-        synchronized (masterLock) {
+        synchronized(masterLock) {
             /* Copy a consistent pair. */
             targetAddress = appMasterAddress;
             targetNodeName = masterName;
         }
         try {
             QuoteUtil.forwardRequest(targetAddress, line, System.err);
-        } catch (IOException e) {
+        } catch(IOException e) {
             /* Group could be in the midst of a transition to a new master. */
             System.err.println("Could not connect to master: " +
                     targetNodeName + " Exception: " + e);
@@ -302,7 +302,7 @@ public class HARouter {
         BufferedReader stdin =
                 new BufferedReader(new InputStreamReader(System.in));
 
-        while (true) {
+        while(true) {
 
             /**
              * Generate prompt, read input. Valid inputs are: 1) quit
@@ -315,7 +315,7 @@ public class HARouter {
                 return;
             }
             try {
-                switch (Command.getCommand(line)) {
+                switch(Command.getCommand(line)) {
                     case NONE:
                         break;
                     case PRINT:
@@ -329,7 +329,7 @@ public class HARouter {
                         routeUpdateCommand(line);
                         break;
                 }
-            } catch (InvalidCommandException e) {
+            } catch(InvalidCommandException e) {
                 System.err.println(e.getMessage());
                 continue;
             }
@@ -351,7 +351,7 @@ public class HARouter {
             usage("-nodeName, -nodeHost, and -helperHost are required.");
         }
         String nodeName = null;
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
 
             if(thisArg.equals("-nodeName")) {
@@ -424,7 +424,7 @@ public class HARouter {
      */
     private void initGroup(Set<ReplicationNode> electableNodes) {
         System.err.println("Group size: " + electableNodes.size());
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             nodeAddressMapping.clear();
             for(ReplicationNode node : electableNodes) {
                 nodeAddressMapping.put
@@ -442,11 +442,11 @@ public class HARouter {
      * @param event the GroupChangeEvent fired
      */
     private void updateGroup(GroupChangeEvent event) {
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             ReplicationGroup group = event.getRepGroup();
             String nodeName = event.getNodeName();
 
-            switch (event.getChangeType()) {
+            switch(event.getChangeType()) {
                 case REMOVE:
                     System.err.println("Node: " + nodeName +
                             " is removed from the group.");
@@ -478,7 +478,7 @@ public class HARouter {
         System.err.println("Node: " + event.getNodeName() +
                 " with current master: " + event.getMasterName() +
                 " joins the group at: " + event.getJoinTime());
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             InetSocketAddress address =
                     nodeAddressMapping.get(event.getNodeName());
             activeAppAddresses.add(address);
@@ -497,7 +497,7 @@ public class HARouter {
                 " joins the group at: " + event.getJoinTime() +
                 ", leaves the group at: " + event.getLeaveTime() +
                 ", because of: " + event.getLeaveReason());
-        synchronized (groupLock) {
+        synchronized(groupLock) {
             removeActiveNode(event.getNodeName());
         }
     }
@@ -522,7 +522,7 @@ public class HARouter {
     private void updateMaster(String newMasterName,
                               InetSocketAddress masterNodeAddress) {
         System.err.println("Current Master node: " + newMasterName);
-        synchronized (masterLock) {
+        synchronized(masterLock) {
             masterName = newMasterName;
             appMasterAddress = getAppSocketAddress(masterNodeAddress);
         }

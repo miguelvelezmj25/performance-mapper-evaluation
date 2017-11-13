@@ -13,14 +13,13 @@
 
 package berkeley.com.sleepycat.je.rep;
 
+import berkeley.com.sleepycat.util.ConfigBeanInfoBase;
+
 import java.beans.BeanDescriptor;
 import java.beans.PropertyDescriptor;
 
-import berkeley.com.sleepycat.util.ConfigBeanInfoBase;
-
 /**
- * @hidden
- * Getter/Setters for JavaBean based tools.
+ * @hidden Getter/Setters for JavaBean based tools.
  */
 public class ReplicationMutableConfigBeanInfo extends ConfigBeanInfoBase {
 

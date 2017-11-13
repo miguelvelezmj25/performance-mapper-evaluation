@@ -22,17 +22,17 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * timeout interval. It may also occur if the application fails to close a
  * cursor, or fails to commit or abort a transaction, since any locks held by
  * the cursor or transaction will be held indefinitely.
- *
+ * <p>
  * <p>This exception is not thrown if a deadlock is detected, even if the
  * timeout elapses before the deadlock is broken. If a deadlock is detected,
  * {@link DeadlockException} is always thrown instead.</p>
- *
+ * <p>
  * <p>The transaction timeout interval may be set using
  * {@link Transaction#setTxnTimeout}.</p>
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
- *
+ * <p>
  * <p>Normally, applications should catch the base class {@link
  * LockConflictException} rather than catching one of its subclasses.  All lock
  * conflicts are typically handled in the same way, which is normally to abort
@@ -45,26 +45,29 @@ public class TransactionTimeoutException extends LockConflictException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public TransactionTimeoutException(Locker locker, String message) {
         super(locker, message);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private TransactionTimeoutException(String message,
                                         TransactionTimeoutException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

@@ -12,10 +12,10 @@
  */
 package berkeley.com.sleepycat.je.trigger;
 
-import java.io.Serializable;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.Transaction;
+
+import java.io.Serializable;
 
 /**
  * Placeholder to be used when persistent triggers are supported in the future.
@@ -65,7 +65,7 @@ public interface PersistentTrigger extends Trigger, Serializable {
     /**
      * The trigger method invoked after the open of the first {@link Database}
      * writable handle.
-     *
+     * <p>
      * A call to the open trigger always precedes any subsequent calls to the
      * {@link #put} and {@link #delete} triggers defined below, since the
      * <code>put</code> and <code>delete</code> operations can only be invoked
@@ -84,16 +84,13 @@ public interface PersistentTrigger extends Trigger, Serializable {
      * result, a call to this trigger is always preceded by a call to the
      * {@link #addTrigger(Transaction) addTrigger} trigger method.
      *
-     * @param txn the active transaction associated with the operation. The
-     * argument is null if the operation is not transactional.
-     *
+     * @param txn         the active transaction associated with the operation. The
+     *                    argument is null if the operation is not transactional.
      * @param environment a handle to the environment associated with the
-     * database being opened. The trigger code must not close the environment
-     * handle.
-     *
-     * @param isNew is true if the database was newly created as a result of
-     * the call to {@link Environment#openDatabase}
-     *
+     *                    database being opened. The trigger code must not close the environment
+     *                    handle.
+     * @param isNew       is true if the database was newly created as a result of
+     *                    the call to {@link Environment#openDatabase}
      * @see Environment#openDatabase
      */
     public void open(Transaction txn, Environment environment, boolean isNew);
@@ -110,6 +107,7 @@ public interface PersistentTrigger extends Trigger, Serializable {
      * <code>ReplicationConfig.REPLAY_MAX_OPEN_DB_HANDLES</code> and
      * <code>ReplicationConfig.REPLAY_DB_HANDLE_TIMEOUT</code> respectively.
      * <p>
+     *
      * @see Database#close
      */
     public void close();
@@ -119,8 +117,7 @@ public interface PersistentTrigger extends Trigger, Serializable {
      * {@link Database}.
      *
      * @param txn the transaction associated with the operation. The argument
-     * is null if the environment is non-transactional.
-     *
+     *            is null if the environment is non-transactional.
      * @see Environment#removeDatabase
      */
     public void remove(Transaction txn);
@@ -130,8 +127,7 @@ public interface PersistentTrigger extends Trigger, Serializable {
      * {@link Database}.
      *
      * @param txn the transaction associated with the operation. The argument
-     * is null if the environment is non-transactional.
-     *
+     *            is null if the environment is non-transactional.
      * @see Environment#truncateDatabase
      */
     public void truncate(Transaction txn);
@@ -140,11 +136,9 @@ public interface PersistentTrigger extends Trigger, Serializable {
      * The trigger method invoked after the successful renaming of a primary
      * {@link Database}.
      *
-     * @param txn the transaction associated with the operation. The argument
-     * is null if the environment is non-transactional.
-     *
+     * @param txn     the transaction associated with the operation. The argument
+     *                is null if the environment is non-transactional.
      * @param newName it's current (new) name
-     *
      * @see Environment#renameDatabase
      */
     public void rename(Transaction txn, String newName);

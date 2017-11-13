@@ -13,17 +13,17 @@
 
 package berkeley.com.sleepycat.je.evictor;
 
+import sun.misc.Unsafe;
+
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicLong;
 
-import sun.misc.Unsafe;
-
 /**
  * The default implementation of the off-heap allocator.
- *
+ * <p>
  * Uses the sun.misc.Unsafe class to call the native 'malloc' and 'free'
  * functions to allocate memory from the 'C' runtime heap.
- *
+ * <p>
  * This class should not be referenced symbolically by any other other class.
  * This is necessary to avoid a linkage error if JE is run on a JVM without the
  * Unsafe class. The {@link OffHeapAllocatorFactory} loads this class by name,
@@ -56,29 +56,29 @@ class CHeapAllocator implements OffHeapAllocator {
             final Field field = Unsafe.class.getDeclaredField("theUnsafe");
             field.setAccessible(true);
             unsafe = (Unsafe) field.get(null);
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             throw new UnsupportedOperationException(
-                "Unable to get Unsafe object", e);
+                    "Unable to get Unsafe object", e);
         }
 
-        if (unsafe == null) {
+        if(unsafe == null) {
             throw new UnsupportedOperationException(
-                "Unsafe singleton is null");
+                    "Unsafe singleton is null");
         }
 
         /*
          * Check for seemingly obvious byte and int sizes, to ensure that the
          * JVM isn't doing something strange.
          */
-        if (Unsafe.ARRAY_BYTE_INDEX_SCALE != 1) {
+        if(Unsafe.ARRAY_BYTE_INDEX_SCALE != 1) {
             throw new UnsupportedOperationException(
-                "Unexpected Unsafe.ARRAY_BYTE_INDEX_SCALE: " +
-                Unsafe.ARRAY_BYTE_INDEX_SCALE);
+                    "Unexpected Unsafe.ARRAY_BYTE_INDEX_SCALE: " +
+                            Unsafe.ARRAY_BYTE_INDEX_SCALE);
         }
-        if (Unsafe.ARRAY_INT_INDEX_SCALE != SIZE_BYTES) {
+        if(Unsafe.ARRAY_INT_INDEX_SCALE != SIZE_BYTES) {
             throw new UnsupportedOperationException(
-                "Unexpected Unsafe.ARRAY_INT_INDEX_SCALE: " +
-                    Unsafe.ARRAY_INT_INDEX_SCALE);
+                    "Unexpected Unsafe.ARRAY_INT_INDEX_SCALE: " +
+                            Unsafe.ARRAY_INT_INDEX_SCALE);
         }
     }
 
@@ -140,61 +140,61 @@ class CHeapAllocator implements OffHeapAllocator {
     @Override
     public void copy(long memId, int memOff, byte[] buf, int bufOff, int len) {
 
-        if (CHECK_BOUNDS) {
-            if (memId == 0) {
+        if(CHECK_BOUNDS) {
+            if(memId == 0) {
                 throw new NullPointerException("memId is 0");
             }
-            if (buf == null) {
+            if(buf == null) {
                 throw new NullPointerException("buf is null");
             }
-            if (memOff < 0 || memOff + len > size(memId)) {
+            if(memOff < 0 || memOff + len > size(memId)) {
                 throw new IndexOutOfBoundsException(
-                    "memOff=" + memOff +
-                    " memSize=" + size(memId) +
-                    " copyLen=" + len);
+                        "memOff=" + memOff +
+                                " memSize=" + size(memId) +
+                                " copyLen=" + len);
             }
-            if (bufOff < 0 || bufOff + len > buf.length) {
+            if(bufOff < 0 || bufOff + len > buf.length) {
                 throw new IndexOutOfBoundsException(
-                    "bufOff=" + bufOff +
-                    " bufSize=" + buf.length +
-                    " copyLen=" + len);
+                        "bufOff=" + bufOff +
+                                " bufSize=" + buf.length +
+                                " copyLen=" + len);
             }
         }
 
         unsafe.copyMemory(
-            null, memId + SIZE_BYTES + memOff,
-            buf, Unsafe.ARRAY_BYTE_BASE_OFFSET + bufOff,
-            len);
+                null, memId + SIZE_BYTES + memOff,
+                buf, Unsafe.ARRAY_BYTE_BASE_OFFSET + bufOff,
+                len);
     }
 
     @Override
     public void copy(byte[] buf, int bufOff, long memId, int memOff, int len) {
 
-        if (CHECK_BOUNDS) {
-            if (memId == 0) {
+        if(CHECK_BOUNDS) {
+            if(memId == 0) {
                 throw new NullPointerException("memId is 0");
             }
-            if (buf == null) {
+            if(buf == null) {
                 throw new NullPointerException("buf is null");
             }
-            if (memOff < 0 || memOff + len > size(memId)) {
+            if(memOff < 0 || memOff + len > size(memId)) {
                 throw new IndexOutOfBoundsException(
-                    "memOff=" + memOff +
-                    " memSize=" + size(memId) +
-                    " copyLen=" + len);
+                        "memOff=" + memOff +
+                                " memSize=" + size(memId) +
+                                " copyLen=" + len);
             }
-            if (bufOff < 0 || bufOff + len > buf.length) {
+            if(bufOff < 0 || bufOff + len > buf.length) {
                 throw new IndexOutOfBoundsException(
-                    "bufOff=" + bufOff +
-                    " bufSize=" + buf.length +
-                    " copyLen=" + len);
+                        "bufOff=" + bufOff +
+                                " bufSize=" + buf.length +
+                                " copyLen=" + len);
             }
         }
 
         unsafe.copyMemory(
-            buf, Unsafe.ARRAY_BYTE_BASE_OFFSET + bufOff,
-            null, memId + SIZE_BYTES + memOff,
-            len);
+                buf, Unsafe.ARRAY_BYTE_BASE_OFFSET + bufOff,
+                null, memId + SIZE_BYTES + memOff,
+                len);
     }
 
     @Override
@@ -204,27 +204,27 @@ class CHeapAllocator implements OffHeapAllocator {
                      int toMemOff,
                      int len) {
 
-        if (CHECK_BOUNDS) {
-            if (fromMemId == 0 || toMemId == 0) {
+        if(CHECK_BOUNDS) {
+            if(fromMemId == 0 || toMemId == 0) {
                 throw new NullPointerException("memId is 0");
             }
-            if (fromMemOff < 0 || fromMemOff + len > size(fromMemId)) {
+            if(fromMemOff < 0 || fromMemOff + len > size(fromMemId)) {
                 throw new IndexOutOfBoundsException(
-                    "memOff=" + fromMemOff +
-                    " memSize=" + size(fromMemId) +
-                    " copyLen=" + len);
+                        "memOff=" + fromMemOff +
+                                " memSize=" + size(fromMemId) +
+                                " copyLen=" + len);
             }
-            if (toMemOff < 0 || toMemOff + len > size(toMemId)) {
+            if(toMemOff < 0 || toMemOff + len > size(toMemId)) {
                 throw new IndexOutOfBoundsException(
-                    "memOff=" + toMemOff +
-                    " memSize=" + size(toMemId) +
-                    " copyLen=" + len);
+                        "memOff=" + toMemOff +
+                                " memSize=" + size(toMemId) +
+                                " copyLen=" + len);
             }
         }
 
         unsafe.copyMemory(
-            null, fromMemId + SIZE_BYTES + fromMemOff,
-            null, toMemId + SIZE_BYTES + toMemOff,
-            len);
+                null, fromMemId + SIZE_BYTES + fromMemOff,
+                null, toMemId + SIZE_BYTES + toMemOff,
+                len);
     }
 }

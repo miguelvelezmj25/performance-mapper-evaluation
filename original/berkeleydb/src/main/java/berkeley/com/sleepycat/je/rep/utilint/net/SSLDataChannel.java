@@ -13,11 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
-import static java.util.logging.Level.FINE;
-import static java.util.logging.Level.INFO;
-import static javax.net.ssl.SSLEngineResult.HandshakeStatus;
-import static javax.net.ssl.SSLEngineResult.Status;
+import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
+import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.SocketException;
 import java.nio.BufferOverflowException;
@@ -26,24 +25,20 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLException;
-
-import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
-import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.INFO;
+import static javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import static javax.net.ssl.SSLEngineResult.Status;
 
 /**
  * SSLDataChannel provides SSL-based communications on top of a SocketChannel.
  * We attempt to maintain a degree of compatibility with SocketChannel
  * in terms of request completion semantics.  In particular,
- *    If in blocking mode:
- *       read() will return at least one byte if the buffer has room
- *       write() will write the entire buffer
- *    If in non-blocking mode:
- *       read() and write are not guaranteed to consume or produce anything.
+ * If in blocking mode:
+ * read() will return at least one byte if the buffer has room
+ * write() will write the entire buffer
+ * If in non-blocking mode:
+ * read() and write are not guaranteed to consume or produce anything.
  */
 public class SSLDataChannel extends AbstractDataChannel {
     /**
@@ -82,50 +77,43 @@ public class SSLDataChannel extends AbstractDataChannel {
      * operations
      */
     private final ReentrantLock writeLock = new ReentrantLock();
-
-    /* Set to true if we have closed the underlying socketChannel */
-    private boolean channelClosed = false;
-
-    /*
-     * Remember whether we did a closeInbound already.
-     */
-    private volatile boolean sslInboundClosed = false;
-
     /**
      * The String identifying the target host that we are connecting to, if
      * this channel was created in client context.
      */
     private final String targetHost;
-
     /**
      * Possibly null authenticator object used for checking whether the
      * peer for the negotiated session should be trusted.
      */
     private final SSLAuthenticator authenticator;
-
     /**
      * Possibly null host verifier object used for checking whether the
      * peer for the negotiated session is correct based on the connection
      * target.
      */
     private final HostnameVerifier hostVerifier;
-
+    private final InstanceLogger logger;
+    /* Set to true if we have closed the underlying socketChannel */
+    private boolean channelClosed = false;
+    /*
+     * Remember whether we did a closeInbound already.
+     */
+    private volatile boolean sslInboundClosed = false;
     /**
      * Set to true when a handshake completes and a non-null authenticator
      * acknowledges the session as trusted.
      */
     private volatile boolean peerTrusted = false;
 
-    private final InstanceLogger logger;
-
     /**
      * Construct an SSLDataChannel given a SocketChannel and an SSLEngine
      *
      * @param socketChannel a SocketChannel over which SSL communcation will
-     *     occur.  This should generally be connected, but that is not
-     *     absolutely required until the first read/write operation.
-     * @param sslEngine an SSLEngine instance that will control the SSL
-     *     interaction with the peer.
+     *                      occur.  This should generally be connected, but that is not
+     *                      absolutely required until the first read/write operation.
+     * @param sslEngine     an SSLEngine instance that will control the SSL
+     *                      interaction with the peer.
      */
     public SSLDataChannel(SocketChannel socketChannel,
                           SSLEngine sslEngine,
@@ -148,13 +136,14 @@ public class SSLDataChannel extends AbstractDataChannel {
 
         /* allocate the buffers */
         this.emptyXmitBuffer = ByteBuffer.allocate(1);
-        this.netXmitBuffer = ByteBuffer.allocate(3*netBufferSize);
-        this.appRecvBuffer = ByteBuffer.allocate(2*appBufferSize);
-        this.netRecvBuffer = ByteBuffer.allocate(2*netBufferSize);
+        this.netXmitBuffer = ByteBuffer.allocate(3 * netBufferSize);
+        this.appRecvBuffer = ByteBuffer.allocate(2 * appBufferSize);
+        this.netRecvBuffer = ByteBuffer.allocate(2 * netBufferSize);
     }
 
     /**
      * Is the channel encrypted?
+     *
      * @return true if the channel is encrypted
      */
     @Override
@@ -192,12 +181,12 @@ public class SSLDataChannel extends AbstractDataChannel {
      * Read data into the toFill data buffer.
      *
      * @param toFill the data buffer into which data will be read.  This buffer
-     *        is expected to be ready for a put.  It need not be empty.
+     *               is expected to be ready for a put.  It need not be empty.
      * @return the count of bytes read into toFill.
      */
     @Override
     public int read(ByteBuffer toFill) throws IOException, SSLException {
-        return (int) read(new ByteBuffer[] { toFill }, 0, 1);
+        return (int) read(new ByteBuffer[]{toFill}, 0, 1);
     }
 
     @Override
@@ -207,11 +196,11 @@ public class SSLDataChannel extends AbstractDataChannel {
 
     @Override
     public long read(ByteBuffer toFill[], int offset, int length)
-        throws IOException, SSLException {
+            throws IOException, SSLException {
 
-        if ((offset < 0) ||
-            (length < 0) ||
-            (offset > toFill.length - length)) {
+        if((offset < 0) ||
+                (length < 0) ||
+                (offset > toFill.length - length)) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -220,10 +209,10 @@ public class SSLDataChannel extends AbstractDataChannel {
          * avoids an unnecessary read() operation from blocking.
          */
         int toFillRemaining = 0;
-        for (int i = offset; i < offset + length; ++i) {
+        for(int i = offset; i < offset + length; ++i) {
             toFillRemaining += toFill[i].remaining();
         }
-        if (toFillRemaining <= 0) {
+        if(toFillRemaining <= 0) {
             return 0;
         }
 
@@ -231,7 +220,7 @@ public class SSLDataChannel extends AbstractDataChannel {
          * In non-blocking mode, a preceding write operation might not have
          * completed.
          */
-        if (!socketChannel.isBlocking()) {
+        if(!socketChannel.isBlocking()) {
             flush_internal();
         }
 
@@ -241,7 +230,7 @@ public class SSLDataChannel extends AbstractDataChannel {
          */
         readLock.lock();
         try {
-            if (appRecvBuffer.position() > 0) {
+            if(appRecvBuffer.position() > 0) {
                 appRecvBuffer.flip();
                 final int count = transfer(appRecvBuffer,
                         toFill, offset, length);
@@ -253,8 +242,8 @@ public class SSLDataChannel extends AbstractDataChannel {
         }
 
         int readCount = 0;
-        while (readCount == 0) {
-            if (sslEngine.isInboundDone()) {
+        while(readCount == 0) {
+            if(sslEngine.isInboundDone()) {
                 return -1;
             }
 
@@ -263,7 +252,7 @@ public class SSLDataChannel extends AbstractDataChannel {
             /* See if we have unwrapped data available */
             readLock.lock();
             try {
-                if (appRecvBuffer.position() > 0) {
+                if(appRecvBuffer.position() > 0) {
                     appRecvBuffer.flip();
                     readCount = transfer(appRecvBuffer,
                             toFill, offset, length);
@@ -274,13 +263,13 @@ public class SSLDataChannel extends AbstractDataChannel {
                 readLock.unlock();
             }
 
-            if (sslEngine.getHandshakeStatus() ==
-                HandshakeStatus.NOT_HANDSHAKING) {
+            if(sslEngine.getHandshakeStatus() ==
+                    HandshakeStatus.NOT_HANDSHAKING) {
 
                 boolean progress = false;
                 readLock.lock();
                 try {
-                    if (netRecvBuffer.position() > 0) {
+                    if(netRecvBuffer.position() > 0) {
                         /* There is some data in the network buffer that may be
                          * able to be unwrapped.  If so, we'll try to unwrap it.
                          * If that fails, then we may need more network data.
@@ -288,41 +277,42 @@ public class SSLDataChannel extends AbstractDataChannel {
                         final int initialPos = netRecvBuffer.position();
                         netRecvBuffer.flip();
                         final SSLEngineResult engineResult =
-                            sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
+                                sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
                         netRecvBuffer.compact();
 
                         final int updatedPos = netRecvBuffer.position();
-                        if (updatedPos != initialPos) {
+                        if(updatedPos != initialPos) {
                             /* We did something */
                             progress = true;
                         }
 
-                        switch (engineResult.getStatus()) {
-                        case BUFFER_UNDERFLOW:
+                        switch(engineResult.getStatus()) {
+                            case BUFFER_UNDERFLOW:
                             /* Not enough data to do anything useful. */
-                            break;
+                                break;
 
-                        case BUFFER_OVERFLOW:
+                            case BUFFER_OVERFLOW:
                             /* Shouldn't happen, but apparently there's not
                              * enough space in the application receive buffer */
-                            throw new BufferOverflowException();
+                                throw new BufferOverflowException();
 
-                        case CLOSED:
+                            case CLOSED:
                             /* We apparently got a CLOSE_NOTIFY */
-                            socketChannel.socket().shutdownInput();
-                            break;
+                                socketChannel.socket().shutdownInput();
+                                break;
 
-                        case OK:
-                            break;
+                            case OK:
+                                break;
                         }
                     }
 
-                    if (!progress) {
+                    if(!progress) {
                         final int count = socketChannel.read(netRecvBuffer);
 
-                        if (count < 0) {
+                        if(count < 0) {
                             readCount = count;
-                        } else if (count == 0) {
+                        }
+                        else if(count == 0) {
                             /* Presumably we are in non-blocking mode */
                             break;
                         }
@@ -333,7 +323,7 @@ public class SSLDataChannel extends AbstractDataChannel {
             }
         }
 
-        if (readCount < 0) {
+        if(readCount < 0) {
             /*
              * This will throw an SSLException if we haven't yet received a
              * close_notify.
@@ -342,7 +332,7 @@ public class SSLDataChannel extends AbstractDataChannel {
             sslInboundClosed = true;
         }
 
-        if (sslEngine.isInboundDone()) {
+        if(sslEngine.isInboundDone()) {
             return -1;
         }
 
@@ -351,7 +341,7 @@ public class SSLDataChannel extends AbstractDataChannel {
 
     @Override
     public int write(ByteBuffer toSend) throws IOException, SSLException {
-        return (int) write(new ByteBuffer[] { toSend }, 0, 1);
+        return (int) write(new ByteBuffer[]{toSend}, 0, 1);
     }
 
     @Override
@@ -361,19 +351,19 @@ public class SSLDataChannel extends AbstractDataChannel {
 
     @Override
     public long write(ByteBuffer[] toSend, int offset, int length)
-        throws IOException, SSLException {
+            throws IOException, SSLException {
 
-        if ((offset < 0) ||
-            (length < 0) ||
-            (offset > toSend.length - length)) {
+        if((offset < 0) ||
+                (length < 0) ||
+                (offset > toSend.length - length)) {
             throw new IndexOutOfBoundsException();
         }
 
         int toSendRemaining = 0;
-        for (int i = offset; i < offset + length; ++i) {
+        for(int i = offset; i < offset + length; ++i) {
             toSendRemaining += toSend[i].remaining();
         }
-        if (toSendRemaining == 0) {
+        if(toSendRemaining == 0) {
             return 0;
         }
         final int toSendTotal = toSendRemaining;
@@ -384,33 +374,33 @@ public class SSLDataChannel extends AbstractDataChannel {
          */
         flush_internal();
 
-        while (true) {
+        while(true) {
             writeLock.lock();
             try {
                 final SSLEngineResult engineResult =
-                    sslEngine.wrap(toSend, offset, length, netXmitBuffer);
+                        sslEngine.wrap(toSend, offset, length, netXmitBuffer);
 
                 toSendRemaining -= engineResult.bytesConsumed();
 
-                switch (engineResult.getStatus()) {
-                case BUFFER_OVERFLOW:
+                switch(engineResult.getStatus()) {
+                    case BUFFER_OVERFLOW:
                     /*
                      * Although we are flushing as part of the loop, we can
                      * still receive this because flush_internal isn't
                      * guaranteed to flush everything.
                      */
-                    break;
+                        break;
 
-                case BUFFER_UNDERFLOW:
+                    case BUFFER_UNDERFLOW:
                     /* Should not be possible here */
-                    throw new BufferUnderflowException();
+                        throw new BufferUnderflowException();
 
-                case CLOSED:
-                    throw new SSLException(
-                        "Attempt to write to a closed SSL Channel");
+                    case CLOSED:
+                        throw new SSLException(
+                                "Attempt to write to a closed SSL Channel");
 
-                case OK:
-                    break;
+                    case OK:
+                        break;
                 }
             } finally {
                 writeLock.unlock();
@@ -419,7 +409,7 @@ public class SSLDataChannel extends AbstractDataChannel {
             processAnyHandshakes();
             flush_internal();
 
-            if (toSendRemaining == 0 || !socketChannel.isBlocking()) {
+            if(toSendRemaining == 0 || !socketChannel.isBlocking()) {
                 break;
             }
         }
@@ -436,33 +426,33 @@ public class SSLDataChannel extends AbstractDataChannel {
      */
     @Override
     public FlushStatus flush()
-        throws IOException {
+            throws IOException {
 
         int n = flush_internal();
-        if (writeLock.tryLock()) {
+        if(writeLock.tryLock()) {
             try {
                 SSLEngineResult.HandshakeStatus hstatus =
-                    sslEngine.getHandshakeStatus();
-                switch (hstatus) {
-                case NEED_TASK:
-                    return FlushStatus.NEED_TASK;
-                case NEED_UNWRAP:
-                    return FlushStatus.NEED_READ;
-                case NEED_WRAP:
+                        sslEngine.getHandshakeStatus();
+                switch(hstatus) {
+                    case NEED_TASK:
+                        return FlushStatus.NEED_TASK;
+                    case NEED_UNWRAP:
+                        return FlushStatus.NEED_READ;
+                    case NEED_WRAP:
                     /*
                      * We should not be here if we are the only thread doing
                      * handshake, so there must be another thread, they will
                      * flush after they wrap, our job is done here.
                      */
-                    return FlushStatus.DONE;
-                case FINISHED:
-                case NOT_HANDSHAKING:
-                    break;
-                default:
-                    assert false : "Unexpected handshake status.";
+                        return FlushStatus.DONE;
+                    case FINISHED:
+                    case NOT_HANDSHAKING:
+                        break;
+                    default:
+                        assert false : "Unexpected handshake status.";
                 }
 
-                if (n == 0) {
+                if(n == 0) {
                     /*
                      * It is possible that there was nothing to flush last time
                      * we flushed but someone wrote something before we
@@ -473,11 +463,11 @@ public class SSLDataChannel extends AbstractDataChannel {
 
                 final int pos = netXmitBuffer.position();
 
-                if (pos == 0) {
+                if(pos == 0) {
                     return FlushStatus.DONE;
                 }
 
-                if (n != 0) {
+                if(n != 0) {
                     return FlushStatus.AGAIN;
                 }
 
@@ -509,9 +499,9 @@ public class SSLDataChannel extends AbstractDataChannel {
          * Don't insist on getting a lock.  If someone else has it, they will
          * probably flush it for us.
          */
-        if (writeLock.tryLock()) {
+        if(writeLock.tryLock()) {
             try {
-                if (netXmitBuffer.position() == 0) {
+                if(netXmitBuffer.position() == 0) {
                     return 0;
                 }
                 netXmitBuffer.flip();
@@ -538,11 +528,12 @@ public class SSLDataChannel extends AbstractDataChannel {
         try {
             flush_internal();
 
-            if (!sslEngine.isOutboundDone()) {
+            if(!sslEngine.isOutboundDone()) {
                 sslEngine.closeOutbound();
                 processAnyHandshakes();
-            } else if (!sslEngine.isInboundDone()) {
-                if (sslInboundClosed) {
+            }
+            else if(!sslEngine.isInboundDone()) {
+                if(sslInboundClosed) {
                     /*
                      * We only expect one handshake operation (the close) to
                      * happen at this point
@@ -552,7 +543,7 @@ public class SSLDataChannel extends AbstractDataChannel {
             }
         } finally {
             synchronized(this) {
-                if (!channelClosed) {
+                if(!channelClosed) {
                     channelClosed = true;
                     socketChannel.close();
                 }
@@ -569,11 +560,11 @@ public class SSLDataChannel extends AbstractDataChannel {
      * Transfer as much data as possible from the src buffer to the dst
      * buffers.
      *
-     * @param src the source ByteBuffer - it is expected to be ready for a get.
-     * @param dsts the destination array of ByteBuffers, each of which is
-     * expected to be ready for a put.
+     * @param src    the source ByteBuffer - it is expected to be ready for a get.
+     * @param dsts   the destination array of ByteBuffers, each of which is
+     *               expected to be ready for a put.
      * @param offset the offset within the buffer array of the first buffer
-     * into which bytes are to be transferred.
+     *               into which bytes are to be transferred.
      * @param length the maximum number of buffers to be accessed
      * @return The number of bytes transfered from src to dst
      */
@@ -583,18 +574,19 @@ public class SSLDataChannel extends AbstractDataChannel {
                          int length) {
 
         int transferred = 0;
-        for (int i = offset; i < offset + length; ++i) {
+        for(int i = offset; i < offset + length; ++i) {
             final ByteBuffer dst = dsts[i];
             final int space = dst.remaining();
 
-            if (src.remaining() > space) {
+            if(src.remaining() > space) {
                 /* not enough room for it all */
                 final ByteBuffer slice = src.slice();
                 slice.limit(space);
                 dst.put(slice);
                 src.position(src.position() + space);
                 transferred += space;
-            } else {
+            }
+            else {
                 transferred += src.remaining();
                 dst.put(src);
                 break;
@@ -609,7 +601,7 @@ public class SSLDataChannel extends AbstractDataChannel {
      */
     private void processAnyHandshakes() throws IOException {
 
-        while (processOneHandshake()) {
+        while(processOneHandshake()) {
             /* do nothing */
         }
     }
@@ -625,31 +617,30 @@ public class SSLDataChannel extends AbstractDataChannel {
         int flushCount = 0;
         SSLEngineResult engineResult = null;
 
-        switch (sslEngine.getHandshakeStatus()) {
-        case FINISHED:
+        switch(sslEngine.getHandshakeStatus()) {
+            case FINISHED:
             /*
              * Just finished handshaking. We shouldn't actually see this here
              * as it is only supposed to be produced by a wrap or unwrap.
              */
-            return false;
+                return false;
 
-        case NEED_TASK:
+            case NEED_TASK:
             /*
              * Need results from delegated tasks before handshaking can
              * continue, so do them now.  We assume that the tasks are done
              * inline, and so we can return true here.
              */
-            runDelegatedTasks();
-            return true;
+                runDelegatedTasks();
+                return true;
 
-        case NEED_UNWRAP:
-            {
+            case NEED_UNWRAP: {
                 boolean unwrapped = false;
 
                 /* Attempt to flush anything that is pending */
                 try {
                     flush_internal();
-                } catch (SocketException se) {
+                } catch(SocketException se) {
                 }
 
                 /*
@@ -658,17 +649,17 @@ public class SSLDataChannel extends AbstractDataChannel {
                  */
                 readLock.lock();
                 try {
-                    if (netRecvBuffer.position() > 0) {
+                    if(netRecvBuffer.position() > 0) {
                         netRecvBuffer.flip();
                         engineResult =
-                            sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
+                                sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
                         netRecvBuffer.compact();
-                        if (engineResult.getStatus() == Status.OK) {
+                        if(engineResult.getStatus() == Status.OK) {
                             unwrapped = true;
                         }
                     }
 
-                    if (!unwrapped && !sslEngine.isInboundDone()) {
+                    if(!unwrapped && !sslEngine.isInboundDone()) {
                         /*
                          * Either we had nothing in the netRecvBuffer or there
                          * was not enough data to unwrap, so let's try getting
@@ -681,18 +672,18 @@ public class SSLDataChannel extends AbstractDataChannel {
                          * a rare occurrence, so we won't worry about it.
                          */
                         readCount = socketChannel.read(netRecvBuffer);
-                        if (readCount < 0) {
+                        if(readCount < 0) {
                             try {
                                 sslEngine.closeInbound();
                                 sslInboundClosed = true;
-                            } catch (SSLException ssle) {
+                            } catch(SSLException ssle) {
                                 // ignore
                             }
                         }
 
                         netRecvBuffer.flip();
                         engineResult =
-                            sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
+                                sslEngine.unwrap(netRecvBuffer, appRecvBuffer);
                         netRecvBuffer.compact();
                     }
                 } finally {
@@ -702,92 +693,96 @@ public class SSLDataChannel extends AbstractDataChannel {
 
             break;
 
-        case NEED_WRAP:
+            case NEED_WRAP:
             /*
              * Must send data to the remote side before handshaking can
              * continue, so wrap() must be called.
              */
-            writeLock.lock();
-            try {
-                engineResult = sslEngine.wrap(emptyXmitBuffer, netXmitBuffer);
-            } finally {
-                writeLock.unlock();
-            }
+                writeLock.lock();
+                try {
+                    engineResult = sslEngine.wrap(emptyXmitBuffer, netXmitBuffer);
+                } finally {
+                    writeLock.unlock();
+                }
 
-            if (engineResult.getStatus() == SSLEngineResult.Status.CLOSED) {
+                if(engineResult.getStatus() == SSLEngineResult.Status.CLOSED) {
                 /*
                  * If the engine is already closed, flush may fail, and that's
                  * ok, so squash any exceptions that happen
                  */
-                try {
+                    try {
                     /* ignore the flush count */
-                    flush_internal();
-                } catch (SocketException se) {
+                        flush_internal();
+                    } catch(SocketException se) {
+                    }
                 }
-            } else {
-                flushCount = flush_internal();
-            }
-            break;
+                else {
+                    flushCount = flush_internal();
+                }
+                break;
 
-        case NOT_HANDSHAKING:
+            case NOT_HANDSHAKING:
             /* Not currently handshaking */
-            return false;
+                return false;
         }
 
         /*
          * We may have done a wrap or unwrap above.  Check the engineResult
          */
 
-        if (engineResult != null) {
-            if (engineResult.getHandshakeStatus() == HandshakeStatus.FINISHED) {
+        if(engineResult != null) {
+            if(engineResult.getHandshakeStatus() == HandshakeStatus.FINISHED) {
                 /*
                  * Handshaking just completed.   Here is our chance to do any
                  * session validation that might be required.
                  */
-                if (sslEngine.getUseClientMode()) {
-                    if (hostVerifier != null) {
+                if(sslEngine.getUseClientMode()) {
+                    if(hostVerifier != null) {
                         peerTrusted =
-                            hostVerifier.verify(targetHost,
-                                                sslEngine.getSession());
-                        if (peerTrusted) {
+                                hostVerifier.verify(targetHost,
+                                        sslEngine.getSession());
+                        if(peerTrusted) {
                             logger.log(FINE,
-                                          "SSL host verifier reports that " +
-                                          "connection target is valid");
-                        } else {
+                                    "SSL host verifier reports that " +
+                                            "connection target is valid");
+                        }
+                        else {
                             logger.log(INFO,
-                                       "SSL host verifier reports that " +
-                                       "connection target is NOT valid");
+                                    "SSL host verifier reports that " +
+                                            "connection target is NOT valid");
                             throw new IOException(
-                                "Server identity could not be verified");
+                                    "Server identity could not be verified");
                         }
                     }
-                } else {
-                    if (authenticator != null) {
+                }
+                else {
+                    if(authenticator != null) {
                         peerTrusted =
-                            authenticator.isTrusted(sslEngine.getSession());
-                        if (peerTrusted) {
+                                authenticator.isTrusted(sslEngine.getSession());
+                        if(peerTrusted) {
                             logger.log(FINE,
-                                       "SSL authenticator reports that " +
-                                       "channel is trusted");
-                        } else {
+                                    "SSL authenticator reports that " +
+                                            "channel is trusted");
+                        }
+                        else {
                             logger.log(INFO,
-                                       "SSL authenticator reports that " +
-                                       "channel is NOT trusted");
+                                    "SSL authenticator reports that " +
+                                            "channel is NOT trusted");
                         }
                     }
                 }
             }
 
-            switch (engineResult.getStatus()) {
-            case BUFFER_UNDERFLOW:
+            switch(engineResult.getStatus()) {
+                case BUFFER_UNDERFLOW:
                 /*
                  * This must have resulted from an unwrap, meaning we need to
                  * do another read.  If the last read did something useful,
                  * tell the caller to call us again.
                  */
-                return readCount > 0;
+                    return readCount > 0;
 
-            case BUFFER_OVERFLOW:
+                case BUFFER_OVERFLOW:
                 /*
                  * Either we were processing an unwrap and the appRecvBuffer is
                  * full or we were processing a wrap and the netXmitBuffer is
@@ -796,24 +791,24 @@ public class SSLDataChannel extends AbstractDataChannel {
                  * case, we may be able to make progress if the flush
                  * did something useful.
                  */
-                if ((sslEngine.getHandshakeStatus() ==
-                     HandshakeStatus.NEED_WRAP) &&
-                    flushCount > 0) {
-                    return true;
-                }
-                return false;
-
-            case CLOSED:
-                if (sslEngine.isOutboundDone()) {
-                    try {
-                        socketChannel.socket().shutdownOutput();
-                    } catch (Exception e) {
+                    if((sslEngine.getHandshakeStatus() ==
+                            HandshakeStatus.NEED_WRAP) &&
+                            flushCount > 0) {
+                        return true;
                     }
-                }
-                return false;
+                    return false;
 
-            case OK:
-                break;
+                case CLOSED:
+                    if(sslEngine.isOutboundDone()) {
+                        try {
+                            socketChannel.socket().shutdownOutput();
+                        } catch(Exception e) {
+                        }
+                    }
+                    return false;
+
+                case OK:
+                    break;
             }
         }
 
@@ -831,7 +826,7 @@ public class SSLDataChannel extends AbstractDataChannel {
          * that level of complication.  Our server doesn't serve a large number
          * of clients.
          */
-        while ((task = sslEngine.getDelegatedTask()) != null) {
+        while((task = sslEngine.getDelegatedTask()) != null) {
             task.run();
         }
     }

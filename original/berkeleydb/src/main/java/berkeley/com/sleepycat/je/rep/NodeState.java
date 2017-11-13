@@ -22,15 +22,15 @@ import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment.State;
  * This includes the following information:
  * <p>
  * <ul>
- * <li>the replication {@link ReplicatedEnvironment.State state} of this 
+ * <li>the replication {@link ReplicatedEnvironment.State state} of this
  * node</li>
  * <li>the name of the current master, as known by this node</li>
  * <li>the time when this node joined the replication group</li>
  * <li>the latest transaction end (abort or commit) VLSN on this node</li>
- * <li>the transaction end (abort or commit) VLSN on the master known by this 
+ * <li>the transaction end (abort or commit) VLSN on the master known by this
  * node. The difference between transaction end VLSNs on the master versus on
  * this node gives an indication of how current this node's data is. The gap
- * in VLSN values indicates the number of replication records that must be 
+ * in VLSN values indicates the number of replication records that must be
  * processed by this node, to be caught up to the master.</li>
  * <li>the number of feeders running on this node</li>
  * <li>the system load average for the last minute</li>
@@ -40,6 +40,7 @@ import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment.State;
  * Users are responsible for serializing and deserializing information for this
  * field.</li>
  * </ul>
+ *
  * @since 5.0
  */
 public class NodeState {
@@ -69,24 +70,23 @@ public class NodeState {
     private final long masterTxnEndVLSN;
 
     /* The number of active feeders that running on this node. */
-    private final int activeFeeders;  
+    private final int activeFeeders;
 
     /* The current log version of this node. */
-    private final int logVersion; 
+    private final int logVersion;
 
     /* The current application state. */
-    private final byte[] appState; 
+    private final byte[] appState;
 
     /* The system load average for the last minute. */
     private final double systemLoad;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public NodeState(String nodeName,
                      String groupName,
-                     State currentState, 
+                     State currentState,
                      String masterName,
                      JEVersion jeVersion,
                      long joinTime,
@@ -129,7 +129,7 @@ public class NodeState {
     }
 
     /**
-     * Returns the replication {@link ReplicatedEnvironment.State state} of 
+     * Returns the replication {@link ReplicatedEnvironment.State state} of
      * this node.
      *
      * @return the replication state of this node.
@@ -139,7 +139,7 @@ public class NodeState {
     }
 
     /**
-     * Returns the name of the current 
+     * Returns the name of the current
      * {@link State#MASTER master} known by this node.
      *
      * @return the name of the current master
@@ -215,7 +215,7 @@ public class NodeState {
     /**
      * Returns the system load average for the last minute.
      *
-     * @return the system average load, -1.0 if the node is running on jdk5 or 
+     * @return the system average load, -1.0 if the node is running on jdk5 or
      * exceptions thrown while getting this information.
      */
     public double getSystemLoad() {
@@ -225,16 +225,16 @@ public class NodeState {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Current state of node: " + nodeName + 
-                  " from group: " + groupName + "\n");
+        sb.append("Current state of node: " + nodeName +
+                " from group: " + groupName + "\n");
         sb.append("  Current state: " + currentState + "\n");
         sb.append("  Current master: " + masterName + "\n");
         sb.append("  Current JE version: " + jeVersion + "\n");
         sb.append("  Current log version: " + logVersion + "\n");
-        sb.append("  Current transaction end (abort or commit) VLSN: " + 
-                  currentTxnEndVLSN + "\n");
-        sb.append("  Current master transaction end (abort or commit) VLSN: " + 
-                  masterTxnEndVLSN + "\n");
+        sb.append("  Current transaction end (abort or commit) VLSN: " +
+                currentTxnEndVLSN + "\n");
+        sb.append("  Current master transaction end (abort or commit) VLSN: " +
+                masterTxnEndVLSN + "\n");
         sb.append("  Current active feeders on node: " + activeFeeders + "\n");
         sb.append("  Current system load average: " + systemLoad + "\n");
 

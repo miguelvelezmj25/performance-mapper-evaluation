@@ -94,7 +94,7 @@ public class SimpleBean implements SessionBean {
                     dc.close();
                 }
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Failure in put" + e);
         }
     }
@@ -119,7 +119,7 @@ public class SimpleBean implements SessionBean {
                     dc.close();
                 }
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Failure in remove " + e);
             e.printStackTrace();
         }
@@ -162,7 +162,7 @@ public class SimpleBean implements SessionBean {
                     dc.close();
                 }
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Failure in get" + e);
             e.printStackTrace();
         }
@@ -180,7 +180,7 @@ public class SimpleBean implements SessionBean {
             JEConnectionFactory dcf = (JEConnectionFactory) ref;
             JEConnection dc = dcf.getConnection(envDir, envConfig);
             return dc;
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Failure in getConnection " + e);
         }
         return null;

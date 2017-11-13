@@ -13,9 +13,11 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import static berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMapStatDefinition.N_NO_WAITS;
-import static berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMapStatDefinition.N_REAL_WAITS;
-import static berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMapStatDefinition.N_WAIT_TIME;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.rep.utilint.RepUtils.ExceptionAwareCountDownLatch;
+import berkeley.com.sleepycat.je.utilint.LongStat;
+import berkeley.com.sleepycat.je.utilint.StatGroup;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,11 +26,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.rep.utilint.RepUtils.ExceptionAwareCountDownLatch;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import static berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMapStatDefinition.*;
 
 /**
  * Creates a Map that Threads can conveniently wait on to contain a specific
@@ -52,37 +50,35 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
      * thread.
      */
     private final HashMap<Integer, ExceptionAwareCountDownLatch>
-        thresholdLatches;
+            thresholdLatches;
 
     /* The underlying map of interest to threads. */
     private final Map<K, V> map = new HashMap<K, V>();
-
+    private final StatGroup stats;
+    private final LongStat nNoWaits;
+    private final LongStat nRealWaits;
+    private final LongStat nWaitTime;
     /*
      * The number of entries with values matching the predicate, or the total
      * number of entries if the predicate is null.
      */
     private int count = 0;
 
-    private final StatGroup stats;
-    private final LongStat nNoWaits;
-    private final LongStat nRealWaits;
-    private final LongStat nWaitTime;
-
     /**
      * Creates an instance of this class.
      *
-     * @param envImpl the environment, used for exception handling
+     * @param envImpl   the environment, used for exception handling
      * @param predicate the predicate for counting matching entries, or
-     *        {@code null} to match all entries
+     *                  {@code null} to match all entries
      */
     public SizeAwaitMap(final EnvironmentImpl envImpl,
                         final Predicate<V> predicate) {
         this.envImpl = envImpl;
         this.predicate = predicate;
         thresholdLatches =
-            new HashMap<Integer, ExceptionAwareCountDownLatch>();
+                new HashMap<Integer, ExceptionAwareCountDownLatch>();
         stats = new StatGroup(SizeAwaitMapStatDefinition.GROUP_NAME,
-                              SizeAwaitMapStatDefinition.GROUP_DESC);
+                SizeAwaitMapStatDefinition.GROUP_DESC);
         nNoWaits = new LongStat(stats, N_NO_WAITS);
         nRealWaits = new LongStat(stats, N_REAL_WAITS);
         nWaitTime = new LongStat(stats, N_WAIT_TIME);
@@ -97,27 +93,24 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
      * size or the thread is interrupted.
      *
      * @param thresholdSize the size to wait for.
-     *
      * @return true if the threshold was reached, false, if the wait timed out.
-     *
      * @throws InterruptedException for the usual reasons, or if the map
-     * was cleared and the size threshold was not actually reached.
-     *
+     *                              was cleared and the size threshold was not actually reached.
      */
     public boolean sizeAwait(int thresholdSize,
                              long timeout,
                              TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
 
-        assert(thresholdSize >= 0);
+        assert (thresholdSize >= 0);
         ExceptionAwareCountDownLatch l = null;
-        synchronized (this) {
-            if (thresholdSize <= count) {
+        synchronized(this) {
+            if(thresholdSize <= count) {
                 nNoWaits.increment();
                 return true;
             }
             l = thresholdLatches.get(thresholdSize);
-            if (l == null) {
+            if(l == null) {
                 l = new ExceptionAwareCountDownLatch(envImpl, 1);
                 thresholdLatches.put(thresholdSize, l);
             }
@@ -133,6 +126,7 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
 
     /**
      * Used for unit tests only
+     *
      * @return
      */
     synchronized int latchCount() {
@@ -145,26 +139,28 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
      */
     @Override
     public synchronized V put(final K key, final V value) {
-        if (value == null) {
+        if(value == null) {
             throw new IllegalArgumentException("Value must not be null");
         }
         int countDelta = checkPredicate(value) ? 1 : 0;
         final V oldValue = map.put(key, value);
-        if ((oldValue != null) && checkPredicate(oldValue)) {
+        if((oldValue != null) && checkPredicate(oldValue)) {
             countDelta--;
         }
         count += countDelta;
-        if (countDelta > 0) {
+        if(countDelta > 0) {
             /* Incremented count */
             final CountDownLatch l = thresholdLatches.remove(count);
-            if (l != null) {
+            if(l != null) {
                 l.countDown();
             }
         }
         return oldValue;
     }
 
-    /** Checks if the value matches the predicate. */
+    /**
+     * Checks if the value matches the predicate.
+     */
     private boolean checkPredicate(final V value) {
         return (predicate == null) || predicate.match(value);
     }
@@ -172,7 +168,7 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
     @Override
     public synchronized V remove(Object key) {
         final V oldValue = map.remove(key);
-        if ((oldValue != null) && checkPredicate(oldValue)) {
+        if((oldValue != null) && checkPredicate(oldValue)) {
             count--;
         }
         return oldValue;
@@ -197,7 +193,7 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
      * shutdown, in which case no exception is thrown.
      */
     public synchronized void clear(Exception cause) {
-        for (ExceptionAwareCountDownLatch l : thresholdLatches.values()) {
+        for(ExceptionAwareCountDownLatch l : thresholdLatches.values()) {
             l.releaseAwait(cause);
         }
         thresholdLatches.clear();
@@ -248,7 +244,7 @@ public class SizeAwaitMap<K, V> implements Map<K, V> {
     @Override
     public void putAll(Map<? extends K, ? extends V> t) {
         throw EnvironmentFailureException.unexpectedState
-            ("putAll not supported");
+                ("putAll not supported");
     }
 
     @Override

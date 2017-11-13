@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.recovery;
 
-import java.nio.ByteBuffer;
-import java.util.Calendar;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
+
+import java.nio.ByteBuffer;
+import java.util.Calendar;
 
 /**
  * CheckpointStart creates a log entry that marks the beginning of a
@@ -40,9 +40,10 @@ public class CheckpointStart implements Loggable {
         Calendar cal = Calendar.getInstance();
         this.startTime = new Timestamp(cal.getTime().getTime());
         this.id = id;
-        if (invoker == null) {
+        if(invoker == null) {
             this.invoker = "";
-        } else {
+        }
+        else {
             this.invoker = invoker;
         }
     }
@@ -60,8 +61,8 @@ public class CheckpointStart implements Loggable {
      */
     public int getLogSize() {
         return LogUtils.getTimestampLogSize(startTime) +
-            LogUtils.getPackedLongLogSize(id) +
-            LogUtils.getStringLogSize(invoker);
+                LogUtils.getPackedLongLogSize(id) +
+                LogUtils.getStringLogSize(invoker);
     }
 
     /**
@@ -100,7 +101,7 @@ public class CheckpointStart implements Loggable {
         return 0;
     }
 
-   /**
+    /**
      * @see Loggable#logicalEquals
      * Always return false, this item should never be compared.
      */

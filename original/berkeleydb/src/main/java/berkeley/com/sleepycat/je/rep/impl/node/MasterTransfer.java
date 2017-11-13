@@ -13,16 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.ThreadInterruptedException;
 import berkeley.com.sleepycat.je.rep.MasterTransferFailureException;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
@@ -37,6 +27,12 @@ import berkeley.com.sleepycat.je.rep.impl.RepNodeImpl;
 import berkeley.com.sleepycat.je.rep.utilint.RepUtils.ExceptionAwareBlockingQueue;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A Master Transfer operation.
@@ -57,8 +53,8 @@ public class MasterTransfer {
     final private long deadlineTimeMs;
     final private RepNode repNode;
     final private Map<String, VLSN> readyReplicas;
+    final private Logger logger = LoggerUtils.getLogger(getClass());
     volatile private CountDownLatch blocker;
-
     /**
      * Flag that indicates we've reached the point where we're committed to
      * proceeding with the transfer: we've completed phase 2, chosen a winner,
@@ -67,7 +63,6 @@ public class MasterTransfer {
      * attempt to supersede us.
      */
     volatile private boolean done;
-
     /**
      * Queue which communicates key events of interest from Feeders regarding
      * the progress of their efforts to catch up with the end of the log.  The
@@ -82,8 +77,6 @@ public class MasterTransfer {
      */
     private ExceptionAwareBlockingQueue<VLSNProgress> eventQueue;
 
-    final private Logger logger = LoggerUtils.getLogger(getClass());
-
     MasterTransfer(Set<String> replicas, long timeout, RepNode repNode) {
         this.replicas = replicas;
         this.timeout = timeout;
@@ -92,12 +85,12 @@ public class MasterTransfer {
         this.repNode = repNode;
 
         LoggerUtils.info(logger, repNode.getRepImpl(),
-                         "Start Master Transfer for " +
-                         timeout + " msec, targeting: " +
-                         Arrays.toString(replicas.toArray()));
+                "Start Master Transfer for " +
+                        timeout + " msec, targeting: " +
+                        Arrays.toString(replicas.toArray()));
         readyReplicas = new HashMap<String, VLSN>(replicas.size());
         eventQueue = new ExceptionAwareBlockingQueue<VLSNProgress>
-            (repNode.getRepImpl(), new VLSNProgress(null, null));
+                (repNode.getRepImpl(), new VLSNProgress(null, null));
     }
 
     /**
@@ -109,11 +102,11 @@ public class MasterTransfer {
      */
     synchronized public boolean abort(Exception e) {
         assert (e != null);
-        if (done) {
+        if(done) {
             return false;
         }
         final ExceptionAwareBlockingQueue<VLSNProgress> queue = getQueue();
-        if (queue != null) {
+        if(queue != null) {
             queue.releasePoll(e);
         }
         return true;
@@ -125,7 +118,7 @@ public class MasterTransfer {
      */
     synchronized void noteProgress(VLSNProgress p) {
         final ExceptionAwareBlockingQueue<VLSNProgress> queue = getQueue();
-        if (queue != null) {
+        if(queue != null) {
             queue.add(p);
         }
     }
@@ -167,24 +160,24 @@ public class MasterTransfer {
     String transfer() {
         try {
             String result = chooseReplica();
-            if (result == null) {
+            if(result == null) {
                 throw new MasterTransferFailureException(getTimeoutMsg());
             }
             done = true;
-            synchronized (this) {
+            synchronized(this) {
                 eventQueue = null;
             }
             annouceWinner(result);
             return result;
-        } catch (MasterTransferFailureException e) {
+        } catch(MasterTransferFailureException e) {
             LoggerUtils.warning(logger, repNode.getRepImpl(),
-                                "Master Transfer operation failed: " + e);
+                    "Master Transfer operation failed: " + e);
             throw e;
-        } catch (InterruptedException ie) {
+        } catch(InterruptedException ie) {
             throw new ThreadInterruptedException(repNode.getRepImpl(), ie);
         } finally {
             eventQueue = null;
-            if (!done && blocker != null) {
+            if(!done && blocker != null) {
                 blocker.countDown();
             }
         }
@@ -204,15 +197,15 @@ public class MasterTransfer {
      */
     private String chooseReplica() throws InterruptedException {
         final ExceptionAwareBlockingQueue<VLSNProgress> queue = getQueue();
-        if (queue == null) {
+        if(queue == null) {
             return null;
         }
         final FeederManager feederManager = repNode.feederManager();
         final Map<String, Feeder> activeReplicas =
-            feederManager.activeReplicasMap();
-        for (String nodeName : replicas) {
+                feederManager.activeReplicasMap();
+        for(String nodeName : replicas) {
             final Feeder feeder = activeReplicas.get(nodeName);
-            if (feeder != null) {
+            if(feeder != null) {
                 feeder.setMasterTransfer(this);
             }
         }
@@ -225,20 +218,20 @@ public class MasterTransfer {
          * tell whether we're in phase 2 by whether we have a non-null blocker.
          */
         String result = null;
-        for (;;) {
+        for(; ; ) {
             final long pollTimeout =
-                deadlineTimeMs - System.currentTimeMillis();
+                    deadlineTimeMs - System.currentTimeMillis();
             final VLSNProgress event =
-                queue.pollOrException(pollTimeout, TimeUnit.MILLISECONDS);
-            if (event == null) {
+                    queue.pollOrException(pollTimeout, TimeUnit.MILLISECONDS);
+            if(event == null) {
                 return null;
             }
             final VLSN endVLSN = repNode.getCurrentTxnEndVLSN();
 
             Level level = Level.INFO;
-            if (event.isFeederDeathEvent()) {
+            if(event.isFeederDeathEvent()) {
                 readyReplicas.remove(event.replicaNodeName);
-                if (blocker != null && readyReplicas.isEmpty()) {
+                if(blocker != null && readyReplicas.isEmpty()) {
 
                     /*
                      * Must revert back to phase 1.  The latch will still
@@ -249,7 +242,8 @@ public class MasterTransfer {
                     blocker.countDown();
                     blocker = null;
                 }
-            } else if (blocker == null) {   /* phase 1 */
+            }
+            else if(blocker == null) {   /* phase 1 */
                 assert readyReplicas.isEmpty();
                 readyReplicas.put(event.replicaNodeName, event.vlsn);
                 blocker = new CountDownLatch(1);
@@ -258,13 +252,15 @@ public class MasterTransfer {
                  * >= comparison, here and below, since currentTxnEndVLSN can
                  * lag the latest txnEndVLSN actually written to the log.
                  */
-                if (event.getVLSN().compareTo(endVLSN) >= 0) {
+                if(event.getVLSN().compareTo(endVLSN) >= 0) {
                     result = event.replicaNodeName;
                 }
-            } else {            /* phase 2 */
-                if (event.getVLSN().compareTo(endVLSN) >= 0) {
+            }
+            else {            /* phase 2 */
+                if(event.getVLSN().compareTo(endVLSN) >= 0) {
                     result = event.replicaNodeName;
-                } else {
+                }
+                else {
 
                     /*
                      * The present VLSN does not match the ultimate target
@@ -279,11 +275,11 @@ public class MasterTransfer {
 
             /* Emit log message after the fact */
             LoggerUtils.logMsg(logger, repNode.getRepImpl(), level,
-                               "Master Transfer progress: " +
-                               event.replicaNodeName + ", " + event.vlsn +
-                               ", phase: " + (blocker == null ? 1 : 2) +
-                               ", endVLSN: " + endVLSN);
-            if (result != null) {
+                    "Master Transfer progress: " +
+                            event.replicaNodeName + ", " + event.vlsn +
+                            ", phase: " + (blocker == null ? 1 : 2) +
+                            ", endVLSN: " + endVLSN);
+            if(result != null) {
                 return result;
             }
         }
@@ -299,21 +295,21 @@ public class MasterTransfer {
         final RepGroupImpl group = repNode.getGroup();
         RepNodeImpl node = group.getNode(nodeName);
         MasterValue newMaster = new MasterValue
-            (node.getSocketAddress().getHostName(),
-             node.getSocketAddress().getPort(),
-             node.getNameIdPair());
+                (node.getSocketAddress().getHostName(),
+                        node.getSocketAddress().getPort(),
+                        node.getNameIdPair());
         Proposal proposal =
-            new TimebasedProposalGenerator().nextProposal();
+                new TimebasedProposalGenerator().nextProposal();
         final Elections elections = repNode.getElections();
         elections.getLearner();
         Learner.informLearners
-            (group.getAllLearnerSockets(),
-             new WinningProposal(proposal, newMaster, null),
-             elections.getProtocol(),
-             elections.getThreadPool(),
-             elections.getLogger(),
-             repNode.getRepImpl(),
-             null);
+                (group.getAllLearnerSockets(),
+                        new WinningProposal(proposal, newMaster, null),
+                        elections.getProtocol(),
+                        elections.getThreadPool(),
+                        elections.getLogger(),
+                        repNode.getRepImpl(),
+                        null);
     }
 
     /**
@@ -324,10 +320,10 @@ public class MasterTransfer {
      */
     void addFeeder(Feeder f) {
         String name = f.getReplicaNameIdPair().getName();
-        if (replicas.contains(name)) {
+        if(replicas.contains(name)) {
             LoggerUtils.info(logger, repNode.getRepImpl(),
-                             "Add node " + name +
-                             " to existing Master Transfer");
+                    "Add node " + name +
+                            " to existing Master Transfer");
             f.setMasterTransfer(this);
         }
     }
@@ -342,9 +338,9 @@ public class MasterTransfer {
      */
     private String getTimeoutMsg() {
         return "Timed out: started at " + new Date(startTimeMs) +
-            " for " + timeout + " milliseconds\n" +
-            "master's VLSN: " + repNode.getCurrentTxnEndVLSN() +
-            repNode.dumpAckFeederState();
+                " for " + timeout + " milliseconds\n" +
+                "master's VLSN: " + repNode.getCurrentTxnEndVLSN() +
+                repNode.dumpAckFeederState();
     }
 
     /**
@@ -357,6 +353,7 @@ public class MasterTransfer {
     static class VLSNProgress {
         final VLSN vlsn;
         final String replicaNodeName;
+
         VLSNProgress(VLSN vlsn, String replicaNodeName) {
             this.vlsn = vlsn;
             this.replicaNodeName = replicaNodeName;

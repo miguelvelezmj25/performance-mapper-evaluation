@@ -13,17 +13,11 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.LogEntryHeader;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.LogItem;
-import berkeley.com.sleepycat.je.log.LogUtils;
-import berkeley.com.sleepycat.je.log.Loggable;
+import berkeley.com.sleepycat.je.log.*;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.log.entry.ReplicableLogEntry;
@@ -33,11 +27,13 @@ import berkeley.com.sleepycat.je.txn.TxnCommit;
 import berkeley.com.sleepycat.je.txn.TxnEnd;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+
 /**
  * Format for log entries sent across the wire for replication. In most
  * cases, the bytes are read directly from the log and never need to be
  * serialized into the backing object.
- *
+ * <p>
  * Note that the ByteBuffer held within the OutputWireRecord has a limited
  * lifetime. Often it's just sliced, rather than copied from the underlying
  * buffer.
@@ -48,19 +44,29 @@ public class OutputWireRecord extends WireRecord {
     protected final EnvironmentImpl envImpl;
     private final LogItem logItem;
 
-    /** A shared entry of the type specified by the header, or null */
+    /**
+     * A shared entry of the type specified by the header, or null
+     */
     private ReplicableLogEntry sharedEntry = null;
 
-    /** A log entry created from the data in the entry buffer, or null */
+    /**
+     * A log entry created from the data in the entry buffer, or null
+     */
     private ReplicableLogEntry logEntry = null;
 
-    /** Whether the log entry will be re-serialized, or null if unknown. */
+    /**
+     * Whether the log entry will be re-serialized, or null if unknown.
+     */
     private Boolean reserialize = null;
 
-    /** Size of re-serialized log entry, or -1 if reserialize != true. */
+    /**
+     * Size of re-serialized log entry, or -1 if reserialize != true.
+     */
     private int reSerializedSize = -1;
 
-    /** Whether an old log format must be used, or null if unknown. */
+    /**
+     * Whether an old log format must be used, or null if unknown.
+     */
     private Boolean oldFormatRequired = null;
 
     /**
@@ -89,7 +95,7 @@ public class OutputWireRecord extends WireRecord {
         buffer.position(header.getSize());
         entryBuffer = buffer.slice();
         assert entryBuffer.limit() == header.getItemSize() :
-            "Limit:" + entryBuffer.limit() + " size:" + header.getItemSize();
+                "Limit:" + entryBuffer.limit() + " size:" + header.getItemSize();
     }
 
     /* For unit test support. */
@@ -109,13 +115,13 @@ public class OutputWireRecord extends WireRecord {
      * header.
      */
     private synchronized ReplicableLogEntry getSharedEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (sharedEntry == null) {
+        if(sharedEntry == null) {
             final LogEntryType entryType = getLogEntryType();
-            if (!entryType.isReplicationPossible()) {
+            if(!entryType.isReplicationPossible()) {
                 throw EnvironmentFailureException.unexpectedState(
-                    "Log entry type does not support replication: " + entryType);
+                        "Log entry type does not support replication: " + entryType);
             }
             sharedEntry = (ReplicableLogEntry) entryType.getSharedLogEntry();
         }
@@ -125,31 +131,31 @@ public class OutputWireRecord extends WireRecord {
     /**
      * Returns a log entry corresponding to the entry buffer. Note that the log
      * entry will only be created once, at most.
-     *
+     * <p>
      * When a LogItem from the LogItemCache was used to construct this record,
      * we cache the materialized entry in LogItem to try to avoid redundant
      * materialization in multiple feeders.
      */
     public synchronized ReplicableLogEntry instantiateEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (logEntry != null) {
+        if(logEntry != null) {
             return logEntry;
         }
-        if (logItem != null) {
+        if(logItem != null) {
             logEntry = logItem.cachedEntry;
-            if (logEntry != null) {
+            if(logEntry != null) {
                 return logEntry;
             }
         }
         final LogEntry entry = instantiateEntry(envImpl, entryBuffer);
-        if (!(entry instanceof ReplicableLogEntry)) {
+        if(!(entry instanceof ReplicableLogEntry)) {
             throw EnvironmentFailureException.unexpectedState(
-                "Log entry type does not support replication: " +
-                entry.getClass().getName());
+                    "Log entry type does not support replication: " +
+                            entry.getClass().getName());
         }
         logEntry = (ReplicableLogEntry) entry;
-        if (logItem != null) {
+        if(logItem != null) {
             logItem.cachedEntry = logEntry;
         }
         return logEntry;
@@ -174,14 +180,14 @@ public class OutputWireRecord extends WireRecord {
      * @throws DatabaseException
      */
     public boolean match(final InputWireRecord input)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Ignore the log version check if the log versions on the feeder and
          * replica don't match. This would happen if the group is doing an
          * upgrade that requires a log version change.
          */
-        if (!header.logicalEqualsIgnoreVersion(input.header)) {
+        if(!header.logicalEqualsIgnoreVersion(input.header)) {
             return false;
         }
 
@@ -191,20 +197,21 @@ public class OutputWireRecord extends WireRecord {
 
     /**
      * For unit tests.
+     *
      * @return true if this OutputWireRecord has the same logical contents as
      * "other".
      * @throws DatabaseException
      */
     public boolean match(final OutputWireRecord otherRecord)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!header.logicalEqualsIgnoreVersion(otherRecord.header)) {
+        if(!header.logicalEqualsIgnoreVersion(otherRecord.header)) {
             return false;
         }
 
         final LogEntry entry = instantiateEntry();
         final LogEntry otherEntry =
-            otherRecord.instantiateEntry(envImpl, otherRecord.entryBuffer);
+                otherRecord.instantiateEntry(envImpl, otherRecord.entryBuffer);
         return entry.logicalEquals(otherEntry);
     }
 
@@ -214,10 +221,11 @@ public class OutputWireRecord extends WireRecord {
 
     /**
      * Dump the contents.
+     *
      * @throws DatabaseException
      */
     public String dump()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final StringBuilder sb = new StringBuilder();
         header.dumpRep(sb);
@@ -229,10 +237,10 @@ public class OutputWireRecord extends WireRecord {
     @Override
     public String toString() {
         try {
-           return dump();
-        } catch (DatabaseException e) {
-           e.printStackTrace();
-           return "";
+            return dump();
+        } catch(DatabaseException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -250,14 +258,14 @@ public class OutputWireRecord extends WireRecord {
      */
     private int getEntrySize(final int logVersion) {
         return willReSerialize(logVersion) ?
-            reSerializedSize : header.getItemSize();
+                reSerializedSize : header.getItemSize();
     }
 
     /**
      * Returns whether the log entry will be re-serialized when written, due to
      * a required format change or because an optimized replication format
      * should be used.
-     *
+     * <p>
      * This method caches its result, so that it can be called twice (from
      * getEntrySize and writeToWire) and will not repeat the calculation or
      * return different results. If true is returned, reSerializedSize will
@@ -265,13 +273,13 @@ public class OutputWireRecord extends WireRecord {
      */
     private boolean willReSerialize(final int logVersion) {
 
-        if (reserialize != null) {
+        if(reserialize != null) {
             return reserialize;
         }
 
         int newSize = -1;
 
-        if (header.getVersion() < 8) {
+        if(header.getVersion() < 8) {
             /*
              * Before version 8, duplicates LN format conversion is necessary
              * and we don't have the DatabaseImpl needed to do that, so we
@@ -281,41 +289,45 @@ public class OutputWireRecord extends WireRecord {
              */
             reserialize = false;
 
-        } else if (isOldFormatRequired(logVersion)) {
+        }
+        else if(isOldFormatRequired(logVersion)) {
             /* Re-serialization is mandatory. */
             reserialize = true;
 
-        } else {
+        }
+        else {
             /* Determine whether re-serialization is worthwhile. */
-            if (logEntry != null) {
+            if(logEntry != null) {
                 /*
                  * If we have the entry, then using the optimized replication
                  * format is worthwhile simply if the entry has an optimized
                  * format and its size is smaller, since the cost of
                  * re-serialization is fairly low.
                  */
-                if (logEntry.hasReplicationFormat()) {
+                if(logEntry.hasReplicationFormat()) {
                     newSize = logEntry.getSize(
-                        logVersion, true /*forReplication*/);
+                            logVersion, true /*forReplication*/);
                     reserialize = header.getItemSize() > newSize;
-                } else {
+                }
+                else {
                     reserialize = false;
                 }
-            } else {
+            }
+            else {
                 /*
                  * If we must materialize the entry in order to re-serialize
                  * it, then we must make a best guess about whether this is
                  * worthwhile by examining the entry in serialized format.
                  */
                 reserialize = getSharedEntry().isReplicationFormatWorthwhile(
-                    entryBuffer, header.getVersion(), logVersion);
+                        entryBuffer, header.getVersion(), logVersion);
             }
         }
 
-        if (reserialize) {
-            if (newSize == -1) {
+        if(reserialize) {
+            if(newSize == -1) {
                 newSize = instantiateEntry().getSize(
-                    logVersion, true /*forReplication*/);
+                        logVersion, true /*forReplication*/);
             }
             reSerializedSize = newSize;
         }
@@ -331,17 +343,17 @@ public class OutputWireRecord extends WireRecord {
      */
     private boolean isOldFormatRequired(final int logVersion) {
 
-        if (oldFormatRequired != null) {
+        if(oldFormatRequired != null) {
             return oldFormatRequired;
         }
 
         oldFormatRequired =
             /* The requested version is older than the current version, */
-            logVersion < LogEntryType.LOG_VERSION &&
+                logVersion < LogEntryType.LOG_VERSION &&
             /* it is older than the entry version, */
-            logVersion < header.getVersion() &&
+                        logVersion < header.getVersion() &&
             /* and it is older than the entry class's last format change */
-            logVersion < (getSharedEntry().getLastFormatChange());
+                        logVersion < (getSharedEntry().getLastFormatChange());
 
         return oldFormatRequired;
     }
@@ -351,22 +363,23 @@ public class OutputWireRecord extends WireRecord {
      * specified buffer using the format for the specified log version.
      *
      * @param messageBuffer the destination buffer
-     * @param logVersion the log version of the format
+     * @param logVersion    the log version of the format
      * @return whether the data format was changed to support an old version.
      */
     boolean writeToWire(final ByteBuffer messageBuffer,
                         final int logVersion) {
 
         messageBuffer.put(header.getType());
-        if (willReSerialize(logVersion)) {
+        if(willReSerialize(logVersion)) {
             final ReplicableLogEntry entry = instantiateEntry();
             LogUtils.writeInt(messageBuffer, logVersion);
             LogUtils.writeInt(messageBuffer, reSerializedSize);
             LogUtils.writeLong(messageBuffer, header.getVLSN().getSequence());
             entryBuffer.mark();
             entry.writeEntry(
-                messageBuffer, logVersion, true /*forReplication*/);
-        } else {
+                    messageBuffer, logVersion, true /*forReplication*/);
+        }
+        else {
             LogUtils.writeInt(messageBuffer, header.getVersion());
             LogUtils.writeInt(messageBuffer, header.getItemSize());
             LogUtils.writeLong(messageBuffer, header.getVLSN().getSequence());
@@ -382,9 +395,9 @@ public class OutputWireRecord extends WireRecord {
      * @return the transaction id, if it's a commit record, zero otherwise.
      */
     public long getCommitTxnId()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!LogEntryType.LOG_TXN_COMMIT.equalsType(header.getType())) {
+        if(!LogEntryType.LOG_TXN_COMMIT.equalsType(header.getType())) {
             return 0;
         }
 
@@ -398,14 +411,14 @@ public class OutputWireRecord extends WireRecord {
      * @return the commit timestamp or 0
      */
     public long getCommitTimeStamp()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!LogEntryType.LOG_TXN_COMMIT.equalsType(header.getType())) {
+        if(!LogEntryType.LOG_TXN_COMMIT.equalsType(header.getType())) {
             return 0;
         }
 
         final TxnCommit txnCommit =
-            (TxnCommit) instantiateEntry().getMainItem();
+                (TxnCommit) instantiateEntry().getMainItem();
         return txnCommit.getTime().getTime();
     }
 
@@ -416,19 +429,19 @@ public class OutputWireRecord extends WireRecord {
      * @return the timestamp or zero
      */
     public long getTimeStamp()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Use the shared log entry to determine the class of the loggable to
          * see if it is worth instantiating it to get the timestamp
          */
         final LogEntry sharedLogEntry = getLogEntryType().getSharedLogEntry();
-        if (sharedLogEntry instanceof SingleItemEntry) {
+        if(sharedLogEntry instanceof SingleItemEntry) {
             final Class<? extends Loggable> logClass =
-                ((SingleItemEntry) sharedLogEntry).getLogClass();
-            if (TxnEnd.class.isAssignableFrom(logClass)) {
+                    ((SingleItemEntry) sharedLogEntry).getLogClass();
+            if(TxnEnd.class.isAssignableFrom(logClass)) {
                 final TxnEnd txnEnd =
-                    (TxnEnd) instantiateEntry().getMainItem();
+                        (TxnEnd) instantiateEntry().getMainItem();
                 return txnEnd.getTime().getTime();
             }
         }
@@ -444,12 +457,12 @@ public class OutputWireRecord extends WireRecord {
      * @throws DatabaseException
      */
     public DatabaseId getReplicableDBId()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogEntryType logEntryType = getLogEntryType();
 
         /* Return null for non-replicable entries */
-        if (!logEntryType.isReplicationPossible()) {
+        if(!logEntryType.isReplicationPossible()) {
             return null;
         }
 
@@ -457,7 +470,7 @@ public class OutputWireRecord extends WireRecord {
          * LN entries are the only replicable log entries associated with a
          * database
          */
-        if (!logEntryType.isLNType()) {
+        if(!logEntryType.isLNType()) {
             return null;
         }
 
@@ -486,29 +499,30 @@ public class OutputWireRecord extends WireRecord {
         LogEntry entry = null;
         try {
             entry = instantiateEntry();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
 
-        if (entry.getTransactionId() >= 0) {
+        if(entry.getTransactionId() >= 0) {
             throw EnvironmentFailureException.unexpectedState
-                (debugTag + " txn id should be negative: " + entry);
+                    (debugTag + " txn id should be negative: " + entry);
         }
 
-        if (entry instanceof LNLogEntry) {
-            if (LogEntryType.LOG_NAMELN_TRANSACTIONAL.equalsType
-                (getEntryType())) {
+        if(entry instanceof LNLogEntry) {
+            if(LogEntryType.LOG_NAMELN_TRANSACTIONAL.equalsType
+                    (getEntryType())) {
                 final LNLogEntry<?> lnEntry = (LNLogEntry<?>) entry;
                 lnEntry.postFetchInit(false /*isDupDb*/);
                 final NameLN nameLN = (NameLN) lnEntry.getLN();
-                if (nameLN.getId().getId() >= 0) {
+                if(nameLN.getId().getId() >= 0) {
                     throw EnvironmentFailureException.unexpectedState
-                        (debugTag + " db id should be negative: " + entry);
+                            (debugTag + " db id should be negative: " + entry);
                 }
-            } else {
-                if (entry.getDbId().getId() >= 0) {
+            }
+            else {
+                if(entry.getDbId().getId() >= 0) {
                     throw EnvironmentFailureException.unexpectedState
-                        (debugTag + " db id should be negative: " + entry);
+                            (debugTag + " db id should be negative: " + entry);
                 }
             }
         }

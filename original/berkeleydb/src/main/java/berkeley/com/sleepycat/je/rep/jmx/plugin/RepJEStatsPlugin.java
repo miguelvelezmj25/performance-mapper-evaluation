@@ -13,42 +13,42 @@
 
 package berkeley.com.sleepycat.je.rep.jmx.plugin;
 
-import java.util.LinkedHashMap;
-
-import javax.management.ObjectName;
-import javax.swing.JPanel;
-
 import berkeley.com.sleepycat.je.jmx.plugin.JEStats;
 import berkeley.com.sleepycat.je.jmx.plugin.Stats;
 import berkeley.com.sleepycat.je.jmx.plugin.StatsPlugin;
 
+import javax.management.ObjectName;
+import javax.swing.*;
+import java.util.LinkedHashMap;
+
 public class RepJEStatsPlugin extends StatsPlugin {
-    public static final String mBeanNamePrefix = 
-        "com.sleepycat.je.jmx:name=RepJEMonitor(*";
+    public static final String mBeanNamePrefix =
+            "com.sleepycat.je.jmx:name=RepJEMonitor(*";
 
     @Override
     protected void initTabs() {
-        if (tabs == null) {
+        if(tabs == null) {
             tabs = new LinkedHashMap<String, JPanel>();
             try {
                 ObjectName name = new ObjectName(mBeanNamePrefix);
                 mBeanCount = getContext().getMBeanServerConnection().
-                    queryNames(name, null).size();
+                        queryNames(name, null).size();
 
-                if (mBeanCount > 0) {
+                if(mBeanCount > 0) {
                     Stats status =
-                        new JEStats(getContext().getMBeanServerConnection());
+                            new JEStats(getContext().getMBeanServerConnection());
                     tabs.put("JE Statistics", status);
                     stats.add(status);
                     status =
-                        new RepJEStats(getContext().getMBeanServerConnection());
+                            new RepJEStats(getContext().getMBeanServerConnection());
                     tabs.put("JE Replicated Statistics", status);
                     stats.add(status);
-                } else {
+                }
+                else {
                     tabs.put("JE Statistics", new JPanel());
                     tabs.put("JE Replicated Statistics", new JPanel());
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }

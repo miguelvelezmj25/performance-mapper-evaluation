@@ -13,12 +13,6 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_READ_LOCKS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WRITE_LOCKS;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.CursorImpl;
@@ -26,6 +20,12 @@ import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.IntStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_READ_LOCKS;
+import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WRITE_LOCKS;
 
 /**
  * A non-transactional Locker that simply tracks locks and releases them when
@@ -55,15 +55,9 @@ public class BasicLocker extends Locker {
      */
     protected BasicLocker(EnvironmentImpl env) {
         super(env,
-              false, // readUncommittedDefault
-              false, // noWait
-              0);    // mandatedId
-    }
-
-    public static BasicLocker createBasicLocker(EnvironmentImpl env)
-        throws DatabaseException {
-
-        return new BasicLocker(env);
+                false, // readUncommittedDefault
+                false, // noWait
+                0);    // mandatedId
     }
 
     /**
@@ -71,14 +65,20 @@ public class BasicLocker extends Locker {
      */
     protected BasicLocker(EnvironmentImpl env, boolean noWait) {
         super(env,
-              false, // readUncommittedDefault
-              noWait,
-              0);    // mandatedId
+                false, // readUncommittedDefault
+                noWait,
+                0);    // mandatedId
+    }
+
+    public static BasicLocker createBasicLocker(EnvironmentImpl env)
+            throws DatabaseException {
+
+        return new BasicLocker(env);
     }
 
     public static BasicLocker createBasicLocker(EnvironmentImpl env,
                                                 boolean noWait)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return new BasicLocker(env, noWait);
     }
@@ -104,25 +104,25 @@ public class BasicLocker extends Locker {
                                       boolean noWait,
                                       boolean jumpAheadOfWaiters,
                                       DatabaseImpl database)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Does nothing in BasicLocker. synchronized is for posterity. */
-        synchronized (this) {
+        synchronized(this) {
             checkState(false);
         }
 
         long timeout = 0;
         boolean useNoWait = noWait || defaultNoWait;
-        if (!useNoWait) {
-            synchronized (this) {
+        if(!useNoWait) {
+            synchronized(this) {
                 timeout = getLockTimeout();
             }
         }
 
         /* Ask for the lock. */
         LockGrantType grant = lockManager.lock
-            (lsn, this, lockType, timeout, useNoWait, jumpAheadOfWaiters, 
-             database);
+                (lsn, this, lockType, timeout, useNoWait, jumpAheadOfWaiters,
+                        database);
 
         return new LockResult(grant, null);
     }
@@ -136,7 +136,7 @@ public class BasicLocker extends Locker {
      * owning txn found.
      */
     public Locker getWriteOwnerLocker(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return lockManager.getWriteOwnerLocker(Long.valueOf(lsn));
     }
@@ -175,17 +175,18 @@ public class BasicLocker extends Locker {
 
     /**
      * Throws EnvironmentFailureException unconditionally.
-     *
+     * <p>
      * If we were to create a new BasicLocker here, it would not share locks
      * with this locker, which violates the definition of this method.  This
      * method is not currently called in direct uses of BasicLocker and is
      * overridden by subclasses where it is allowed (e.g., ThreadLocker and
      * ReadCommittedLocker).
+     *
      * @throws DatabaseException from subclasses.
      */
     @Override
     public Locker newNonTxnLocker()
-        throws DatabaseException {
+            throws DatabaseException {
 
         throw EnvironmentFailureException.unexpectedState();
     }
@@ -196,19 +197,19 @@ public class BasicLocker extends Locker {
      */
     @Override
     public synchronized void releaseNonTxnLocks()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Don't remove locks from txn's lock collection until iteration is
          * done, lest we get a ConcurrentModificationException during deadlock
          * graph "display".  [#9544]
          */
-        if (ownedLock != null) {
+        if(ownedLock != null) {
             lockManager.release(ownedLock, this);
             ownedLock = null;
         }
-        if (ownedLockSet != null) {
-            for (final Long nid : ownedLockSet) {
+        if(ownedLockSet != null) {
+            for(final Long nid : ownedLockSet) {
                 lockManager.release(nid, this);
             }
 
@@ -217,8 +218,8 @@ public class BasicLocker extends Locker {
         }
 
         /* Unload delete info, but don't wake up the compressor. */
-        if ((deleteInfo != null) &&
-            (deleteInfo.size() > 0)) {
+        if((deleteInfo != null) &&
+                (deleteInfo.size() > 0)) {
             envImpl.addToCompressorQueue(deleteInfo.values());
             deleteInfo.clear();
         }
@@ -229,7 +230,7 @@ public class BasicLocker extends Locker {
      */
     @Override
     public void nonTxnOperationEnd()
-        throws DatabaseException {
+            throws DatabaseException {
 
         operationEnd(true);
     }
@@ -239,7 +240,7 @@ public class BasicLocker extends Locker {
      */
     @Override
     public void operationEnd(boolean operationOK)
-        throws DatabaseException {
+            throws DatabaseException {
 
         releaseNonTxnLocks();
 
@@ -249,6 +250,7 @@ public class BasicLocker extends Locker {
 
     /**
      * This txn doesn't store cursors.
+     *
      * @throws DatabaseException in subclasses.
      */
     @Override
@@ -282,12 +284,13 @@ public class BasicLocker extends Locker {
 
     @Override
     public void markDeleteAtTxnEnd(DatabaseImpl db, boolean deleteAtCommit)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (deleteAtCommit) {
+        if(deleteAtCommit) {
             /* releaseDb will be called by startAndFinishDelete. */
             db.startAndFinishDelete();
-        } else {
+        }
+        else {
             envImpl.getDbTree().releaseDb(db);
         }
     }
@@ -299,16 +302,17 @@ public class BasicLocker extends Locker {
     protected void addLock(Long lsn,
                            LockType type,
                            LockGrantType grantStatus) {
-        if ((ownedLock != null &&
-            ownedLock.equals(lsn)) ||
-            (ownedLockSet != null &&
-             ownedLockSet.contains(lsn))) {
+        if((ownedLock != null &&
+                ownedLock.equals(lsn)) ||
+                (ownedLockSet != null &&
+                        ownedLockSet.contains(lsn))) {
             return; // Already owned
         }
-        if (ownedLock == null) {
+        if(ownedLock == null) {
             ownedLock = lsn;
-        } else {
-            if (ownedLockSet == null) {
+        }
+        else {
+            if(ownedLockSet == null) {
                 ownedLockSet = new HashSet<>();
             }
             ownedLockSet.add(lsn);
@@ -320,10 +324,11 @@ public class BasicLocker extends Locker {
      */
     @Override
     void removeLock(long lsn) {
-        if (ownedLock != null &&
-            ownedLock == lsn) {
+        if(ownedLock != null &&
+                ownedLock == lsn) {
             ownedLock = null;
-        } else if (ownedLockSet != null) {
+        }
+        else if(ownedLockSet != null) {
             ownedLockSet.remove(lsn);
         }
     }
@@ -342,32 +347,34 @@ public class BasicLocker extends Locker {
      */
     @Override
     public StatGroup collectStats()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        StatGroup stats = 
-            new StatGroup("Locker lock counts" ,
-                          "Read and write locks held by this locker");
+        StatGroup stats =
+                new StatGroup("Locker lock counts",
+                        "Read and write locks held by this locker");
 
         IntStat nReadLocks = new IntStat(stats, LOCK_READ_LOCKS);
         IntStat nWriteLocks = new IntStat(stats, LOCK_WRITE_LOCKS);
 
-        if (ownedLock != null) {
+        if(ownedLock != null) {
             Lock l = lockManager.lookupLock(ownedLock);
-            if (l != null) {
-                if (l.isOwnedWriteLock(this)) {
+            if(l != null) {
+                if(l.isOwnedWriteLock(this)) {
                     nWriteLocks.increment();
-                } else {
+                }
+                else {
                     nReadLocks.increment();
                 }
             }
         }
-        if (ownedLockSet != null) {
-            for (Long nid : ownedLockSet) {
+        if(ownedLockSet != null) {
+            for(Long nid : ownedLockSet) {
                 Lock l = lockManager.lookupLock(nid);
-                if (l != null) {
-                    if (l.isOwnedWriteLock(this)) {
+                if(l != null) {
+                    if(l.isOwnedWriteLock(this)) {
                         nWriteLocks.increment();
-                    } else {
+                    }
+                    else {
                         nReadLocks.increment();
                     }
                 }

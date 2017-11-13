@@ -51,7 +51,7 @@ public class LongStat extends Stat<Long> {
     }
 
     public void max(long count) {
-        if (count > counter) {
+        if(count > counter) {
             count = counter;
         }
     }
@@ -64,15 +64,15 @@ public class LongStat extends Stat<Long> {
     @Override
     public Stat<Long> computeInterval(Stat<Long> base) {
         Stat<Long> ret = copy();
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
             ret.set(counter - base.get());
         }
         return ret;
     }
 
     @Override
-    public void negate () {
-        if (definition.getType() == StatType.INCREMENTAL) {
+    public void negate() {
+        if(definition.getType() == StatType.INCREMENTAL) {
             counter = -counter;
         }
     }
@@ -89,6 +89,6 @@ public class LongStat extends Stat<Long> {
 
     @Override
     public boolean isNotSet() {
-       return (counter == 0);
+        return (counter == 0);
     }
 }

@@ -81,7 +81,7 @@ enum Command {
                 throw new InvalidCommandException
                         ("Extraneous argument: " + tokenizer.nextToken());
             }
-        } catch (NumberFormatException e) {
+        } catch(NumberFormatException e) {
             throw new InvalidCommandException
                     ("Stock price must be a numeric value, not: " + price);
         }

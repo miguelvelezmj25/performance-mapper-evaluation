@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
+import berkeley.com.sleepycat.je.cleaner.OffsetList;
+import berkeley.com.sleepycat.je.utilint.DbLsn;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
-
-import berkeley.com.sleepycat.je.cleaner.OffsetList;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
 
 /*
  * The current set of LSNs of children which are not in-memory but are
@@ -74,7 +74,7 @@ abstract class LSNAccumulator {
     void add(long lsn) {
         long fileNumber = DbLsn.getFileNumber(lsn);
         OffsetList offsetsForFile = offsetsByFile.get(fileNumber);
-        if (offsetsForFile == null) {
+        if(offsetsForFile == null) {
             offsetsForFile = new OffsetList();
             offsetsByFile.put(fileNumber, offsetsForFile);
             incInternalMemoryUsage(MemoryBudget.TFS_LIST_INITIAL_OVERHEAD);
@@ -82,8 +82,8 @@ abstract class LSNAccumulator {
         }
 
         boolean newSegment =
-            offsetsForFile.add(DbLsn.getFileOffset(lsn), false);
-        if (newSegment) {
+                offsetsForFile.add(DbLsn.getFileOffset(lsn), false);
+        if(newSegment) {
             incInternalMemoryUsage(MemoryBudget.TFS_LIST_SEGMENT_OVERHEAD);
         }
 
@@ -94,12 +94,12 @@ abstract class LSNAccumulator {
         long[] currentLSNs = new long[nTotalEntries];
         int curIdx = 0;
 
-        for (Map.Entry<Long, OffsetList> fileEntry :
-                 offsetsByFile.entrySet()) {
+        for(Map.Entry<Long, OffsetList> fileEntry :
+                offsetsByFile.entrySet()) {
 
             long fileNumber = fileEntry.getKey();
 
-            for (long fileOffset : fileEntry.getValue().toArray()) {
+            for(long fileOffset : fileEntry.getValue().toArray()) {
                 currentLSNs[curIdx] = DbLsn.makeLsn(fileNumber, fileOffset);
                 curIdx += 1;
             }
@@ -112,12 +112,12 @@ abstract class LSNAccumulator {
 
     void getLSNs(long[] lsns, int nLsns) {
 
-        for (Map.Entry<Long, OffsetList> fileEntry :
-                 offsetsByFile.entrySet()) {
+        for(Map.Entry<Long, OffsetList> fileEntry :
+                offsetsByFile.entrySet()) {
 
             long fileNumber = fileEntry.getKey();
 
-            for (long fileOffset : fileEntry.getValue().toArray()) {
+            for(long fileOffset : fileEntry.getValue().toArray()) {
                 lsns[nLsns] = DbLsn.makeLsn(fileNumber, fileOffset);
                 ++nLsns;
             }

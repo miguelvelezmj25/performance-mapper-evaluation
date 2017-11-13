@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * The metadata for a persistent entity class.  An entity class may be
  * specified with the {@link Entity} annotation.
- *
+ * <p>
  * <p>{@code EntityMetadata} objects are thread-safe.  Multiple threads may
  * safely call the methods of a shared {@code EntityMetadata} object.</p>
  *
@@ -36,8 +36,8 @@ public class EntityMetadata implements Serializable {
     /**
      * Used by an {@code EntityModel} to construct entity metadata.
      *
-     * @param className the class name.
-     * @param primaryKey the primary key metadata.
+     * @param className     the class name.
+     * @param primaryKey    the primary key metadata.
      * @param secondaryKeys the secondary key metadata.
      */
     public EntityMetadata(String className,
@@ -83,12 +83,13 @@ public class EntityMetadata implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof EntityMetadata) {
+        if(other instanceof EntityMetadata) {
             EntityMetadata o = (EntityMetadata) other;
             return ClassMetadata.nullOrEqual(className, o.className) &&
-                   ClassMetadata.nullOrEqual(primaryKey, o.primaryKey) &&
-                   ClassMetadata.nullOrEqual(secondaryKeys, o.secondaryKeys);
-        } else {
+                    ClassMetadata.nullOrEqual(primaryKey, o.primaryKey) &&
+                    ClassMetadata.nullOrEqual(secondaryKeys, o.secondaryKeys);
+        }
+        else {
             return false;
         }
     }
@@ -96,7 +97,7 @@ public class EntityMetadata implements Serializable {
     @Override
     public int hashCode() {
         return ClassMetadata.hashCode(className) +
-               ClassMetadata.hashCode(primaryKey) +
-               ClassMetadata.hashCode(secondaryKeys);
+                ClassMetadata.hashCode(primaryKey) +
+                ClassMetadata.hashCode(secondaryKeys);
     }
 }

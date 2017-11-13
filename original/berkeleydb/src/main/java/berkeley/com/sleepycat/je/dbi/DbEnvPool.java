@@ -13,39 +13,28 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
-import berkeley.com.sleepycat.je.EnvironmentNotFoundException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.latch.LatchSupport;
 import berkeley.com.sleepycat.je.utilint.TestHook;
 import berkeley.com.sleepycat.je.utilint.TestHookExecute;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
 /**
  * Singleton collection of environments.  Responsible for environment open and
  * close, supporting this from multiple threads by synchronizing on the pool.
- *
+ * <p>
  * To avoid multiple environment openings from being blocked by recovery in
  * getEnvironment(), the EnvironmentImpl constructor is broken into two parts,
  * with the second part (EnvironmentImpl.finishInit) doing the recovery.
- *
+ * <p>
  * When synchronizing on two or more of the following objects the
  * synchronization order must be as follows.  Synchronization is not performed
  * in constructors, of course, because no other thread can access the object.
- *
+ * <p>
  * Synchronization order:  Environment, DbEnvPool, EnvironmentImpl, Evictor
  */
 public class DbEnvPool {
@@ -102,15 +91,15 @@ public class DbEnvPool {
                                           EnvironmentConfig config,
                                           boolean checkImmutableParams,
                                           RepConfigProxy repConfigProxy)
-        throws EnvironmentNotFoundException, EnvironmentLockedException {
+            throws EnvironmentNotFoundException, EnvironmentLockedException {
 
         String environmentKey = null;
         EnvironmentImpl envImpl = null;
-        synchronized (this) {
+        synchronized(this) {
             environmentKey = getEnvironmentMapKey(envHome);
             envImpl = envs.get(environmentKey);
 
-            if (envImpl != null) {
+            if(envImpl != null) {
 
                 /*
                  * If the envImpl intance returned is standalone, but users are
@@ -119,11 +108,11 @@ public class DbEnvPool {
                  * read only property, since a replicated environment can't be
                  * read only.
                  */
-                if (!envImpl.isReplicated() && (repConfigProxy != null)) {
+                if(!envImpl.isReplicated() && (repConfigProxy != null)) {
                     throw new UnsupportedOperationException
-                       ("This environment was previously opened as a " +
-                        "standalone environment. It cannot be re-opened for " +
-                        "replication.");
+                            ("This environment was previously opened as a " +
+                                    "standalone environment. It cannot be re-opened for " +
+                                    "replication.");
                 }
 
                 /*
@@ -131,26 +120,26 @@ public class DbEnvPool {
                  * are actually creating a standalone environment and it is not
                  * read only, then throw out an UnsupportedOperationException.
                  */
-                if (envImpl.isReplicated() && (repConfigProxy == null) &&
-                    !config.getReadOnly()) {
+                if(envImpl.isReplicated() && (repConfigProxy == null) &&
+                        !config.getReadOnly()) {
                     throw new UnsupportedOperationException
-                        ("This environment was previously opened for " +
-                         "replication. It cannot be re-opened in read/write " +
-                         "mode for standalone operation.");
+                            ("This environment was previously opened for " +
+                                    "replication. It cannot be re-opened in read/write " +
+                                    "mode for standalone operation.");
                 }
 
                 /*
                  * If envImpl is used for an Arbiter.
                  */
-                if (envImpl.isArbiter()) {
+                if(envImpl.isArbiter()) {
                     throw new UnsupportedOperationException(
-                        "An Arbiter is currently using " +
-                        "this directory. " + envHome.getAbsolutePath());
+                            "An Arbiter is currently using " +
+                                    "this directory. " + envHome.getAbsolutePath());
                 }
 
                 envImpl.checkIfInvalid();
 
-                if (checkImmutableParams) {
+                if(checkImmutableParams) {
 
                     /*
                      * If a non-null configuration parameter was passed to the
@@ -168,11 +157,12 @@ public class DbEnvPool {
                      * in config.
                      */
                     envImpl.checkImmutablePropsForEquality
-                        (DbInternal.getProps(config));
+                            (DbInternal.getProps(config));
                 }
                 /* Successful, increment reference count */
                 envImpl.incOpenCount();
-            } else {
+            }
+            else {
 
                 /*
                  * If a shared cache is used, get another (any other,
@@ -180,7 +170,7 @@ public class DbEnvPool {
                  * global cache.
                  */
                 EnvironmentImpl sharedCacheEnv = config.getSharedCache() ?
-                    getAnySharedCacheEnv() : null;
+                        getAnySharedCacheEnv() : null;
 
                 /*
                  * Environment must be instantiated. If it can be created,
@@ -190,10 +180,10 @@ public class DbEnvPool {
                  * RecoveryManager.buildTree.
                  */
                 envImpl =
-                    (repConfigProxy == null) ?
-                     new EnvironmentImpl(envHome, config, sharedCacheEnv) :
-                     loadRepImpl(envHome, config, sharedCacheEnv,
-                                 repConfigProxy);
+                        (repConfigProxy == null) ?
+                                new EnvironmentImpl(envHome, config, sharedCacheEnv) :
+                                loadRepImpl(envHome, config, sharedCacheEnv,
+                                        repConfigProxy);
                 assert config.getSharedCache() == envImpl.getSharedCache();
 
                 envImpl.incOpenCount();
@@ -219,7 +209,7 @@ public class DbEnvPool {
         TestHookExecute.doHookIfSet(beforeFinishInitHook, envImpl);
         boolean success = false;
         try {
-            if (envImpl.finishInit(config)) {
+            if(envImpl.finishInit(config)) {
                 /* Initialization (recovery) was performed. */
                 synchronized(this) {
                     finishAdditionOfSharedCacheEnv(envImpl);
@@ -227,7 +217,7 @@ public class DbEnvPool {
             }
             success = true;
         } finally {
-            if (!success) {
+            if(!success) {
                 synchronized(this) {
                     envs.remove(environmentKey);
                     sharedCacheEnvs.remove(envImpl);
@@ -242,11 +232,11 @@ public class DbEnvPool {
      * Use reflection to create a RepImpl, to avoid introducing HA compilation
      * dependencies to non-replication code.
      */
-     private EnvironmentImpl loadRepImpl(File envHome,
-                                         EnvironmentConfig config,
-                                         EnvironmentImpl sharedCacheEnv,
-                                         RepConfigProxy repConfigProxy)
-        throws DatabaseException {
+    private EnvironmentImpl loadRepImpl(File envHome,
+                                        EnvironmentConfig config,
+                                        EnvironmentImpl sharedCacheEnv,
+                                        RepConfigProxy repConfigProxy)
+            throws DatabaseException {
 
         final String repClassName = "com.sleepycat.je.rep.impl.RepImpl";
         final String envImplName = "com.sleepycat.je.dbi.EnvironmentImpl";
@@ -254,18 +244,18 @@ public class DbEnvPool {
         try {
             final Class<?> repClass = Class.forName(repClassName);
             return (EnvironmentImpl)
-                repClass.getConstructor(envHome.getClass(),
-                                        config.getClass(),
-                                        Class.forName(envImplName),
-                                        Class.forName(repProxy)).
-                newInstance(envHome, config, sharedCacheEnv, repConfigProxy);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof RuntimeException) {
+                    repClass.getConstructor(envHome.getClass(),
+                            config.getClass(),
+                            Class.forName(envImplName),
+                            Class.forName(repProxy)).
+                            newInstance(envHome, config, sharedCacheEnv, repConfigProxy);
+        } catch(InvocationTargetException e) {
+            if(e.getCause() instanceof RuntimeException) {
                 /* Propate runtime exceptions thrown by the ctor. */
-                throw (RuntimeException)e.getCause();
+                throw (RuntimeException) e.getCause();
             }
             throw EnvironmentFailureException.unexpectedException(e);
-        } catch (Exception e) {
+        } catch(Exception e) {
 
             /*
              * This intentially violates our guideline for not catching
@@ -279,10 +269,10 @@ public class DbEnvPool {
 
     /* Add this environment into sharedCache environments list. */
     private void addToSharedCacheEnvs(EnvironmentImpl envImpl)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (envImpl.getSharedCache()) {
-            if (sharedCacheEnvs.contains(envImpl)) {
+        if(envImpl.getSharedCache()) {
+            if(sharedCacheEnvs.contains(envImpl)) {
                 throw EnvironmentFailureException.unexpectedState();
             }
             sharedCacheEnvs.add(envImpl);
@@ -291,10 +281,10 @@ public class DbEnvPool {
 
     /* Post-processing of SharedCacheEnv addition, after recovery is done. */
     private void finishAdditionOfSharedCacheEnv(EnvironmentImpl envImpl)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (envImpl.getSharedCache()) {
-            if (!sharedCacheEnvs.contains(envImpl)) {
+        if(envImpl.getSharedCache()) {
+            if(!sharedCacheEnvs.contains(envImpl)) {
                 throw EnvironmentFailureException.unexpectedState();
             }
             assert envImpl.getEvictor().checkEnv(envImpl);
@@ -305,7 +295,7 @@ public class DbEnvPool {
     /**
      * Called by EnvironmentImpl.setMutableConfig to perform the
      * setMutableConfig operation while synchronized on the DbEnvPool.
-     *
+     * <p>
      * In theory we shouldn't need to synchronize here when
      * envImpl.getSharedCache() is false; however, we synchronize
      * unconditionally to standardize the synchronization order and avoid
@@ -313,19 +303,19 @@ public class DbEnvPool {
      */
     synchronized void setMutableConfig(EnvironmentImpl envImpl,
                                        EnvironmentMutableConfig mutableConfig)
-        throws DatabaseException {
+            throws DatabaseException {
 
         envImpl.doSetMutableConfig(mutableConfig);
-        if (envImpl.getSharedCache()) {
+        if(envImpl.getSharedCache()) {
             resetSharedCache(envImpl.getMemoryBudget().getMaxMemory(),
-                             envImpl);
+                    envImpl);
         }
     }
 
     /**
      * Called by EnvironmentImpl.close to perform the close operation while
      * synchronized on the DbEnvPool.
-     *
+     * <p>
      * Synchronization on this DbEnvPool during the close is used to protect
      * its data structures.  Unfortunately, this means that a long checkpoint
      * during a close will block other closes and opens.  We may want to
@@ -335,9 +325,9 @@ public class DbEnvPool {
     synchronized void closeEnvironment(EnvironmentImpl envImpl,
                                        boolean doCheckpoint,
                                        boolean isAbnormalClose) {
-        synchronized (envImpl) {
+        synchronized(envImpl) {
             /* Hold the reference count stable. */
-            if (envImpl.decOpenCount()) {
+            if(envImpl.decOpenCount()) {
                 try {
                     envImpl.doClose(doCheckpoint, isAbnormalClose);
                 } finally {
@@ -352,7 +342,7 @@ public class DbEnvPool {
      * operation while synchronized on the DbEnvPool.
      */
     synchronized void closeEnvironmentAfterInvalid(EnvironmentImpl envImpl)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             envImpl.doCloseAfterInvalid();
@@ -369,23 +359,25 @@ public class DbEnvPool {
     private void removeEnvironment(EnvironmentImpl envImpl) {
 
         final String environmentKey =
-            getEnvironmentMapKey(envImpl.getEnvironmentHome());
+                getEnvironmentMapKey(envImpl.getEnvironmentHome());
 
         final boolean found = envs.remove(environmentKey) != null;
 
-        if (sharedCacheEnvs.remove(envImpl)) {
+        if(sharedCacheEnvs.remove(envImpl)) {
 
             assert found && envImpl.getSharedCache();
             assert !envImpl.getEvictor().checkEnv(envImpl);
 
-            if (sharedCacheEnvs.isEmpty()) {
+            if(sharedCacheEnvs.isEmpty()) {
                 envImpl.getEvictor().shutdown();
                 envImpl.getOffHeapCache().shutdown();
-            } else {
+            }
+            else {
                 envImpl.getMemoryBudget().subtractCacheUsage();
                 resetSharedCache(-1, null);
             }
-        } else {
+        }
+        else {
             assert !found || !envImpl.getSharedCache();
         }
 
@@ -393,7 +385,7 @@ public class DbEnvPool {
          * Latch notes may only be cleared when there is no possibility that
          * any environment is open.
          */
-        if (envs.isEmpty()) {
+        if(envs.isEmpty()) {
             LatchSupport.clear();
         }
     }
@@ -415,11 +407,11 @@ public class DbEnvPool {
 
     /* Use the canonical path name for a normalized environment key. */
     String getEnvironmentMapKey(File file)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             return file.getCanonicalPath();
-        } catch (IOException e) {
+        } catch(IOException e) {
             /* No env is available, can't throw EnvironmentFailedException. */
             throw EnvironmentFailureException.unexpectedException(e);
         }
@@ -429,27 +421,26 @@ public class DbEnvPool {
      * Resets the memory budget for all environments with a shared cache.
      *
      * @param newMaxMemory is the new total cache budget or is less than 0 if
-     * the total should remain unchanged.  A total greater than zero is given
-     * when it has changed via setMutableConfig.
-     *
-     * @param skipEnv is an environment that should not be reset, or null.
-     * Non-null is passed when an environment has already been reset because
-     * it was just created or the target of setMutableConfig.
+     *                     the total should remain unchanged.  A total greater than zero is given
+     *                     when it has changed via setMutableConfig.
+     * @param skipEnv      is an environment that should not be reset, or null.
+     *                     Non-null is passed when an environment has already been reset because
+     *                     it was just created or the target of setMutableConfig.
      */
     private void resetSharedCache(long newMaxMemory, EnvironmentImpl skipEnv)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        for (EnvironmentImpl envImpl : sharedCacheEnvs) {
+        for(EnvironmentImpl envImpl : sharedCacheEnvs) {
 
             /*
              * To avoid spurious exceptions, don't reset invalid envs that have
              * not yet been removed.  They aren't usable, and we expect them
              * to be closed and removed very soon.
              */
-            if (envImpl != skipEnv && envImpl.isValid()) {
+            if(envImpl != skipEnv && envImpl.isValid()) {
                 envImpl.getMemoryBudget().reset(newMaxMemory,
-                                                false /*newEnv*/,
-                                                envImpl.getConfigManager());
+                        false /*newEnv*/,
+                        envImpl.getConfigManager());
             }
         }
     }

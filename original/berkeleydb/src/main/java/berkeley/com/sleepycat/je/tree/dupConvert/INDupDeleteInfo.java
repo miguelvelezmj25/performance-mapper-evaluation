@@ -13,26 +13,26 @@
 
 package berkeley.com.sleepycat.je.tree.dupConvert;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.tree.Key;
 
+import java.nio.ByteBuffer;
+
 /**
  * INDupDeleteInfo encapsulates the information logged about the removal of a
  * child from a duplicate IN during IN compression.
- *
+ * <p>
  * Obsolete in log version 8, only used by DupConvert and some log readers.
  */
 public class INDupDeleteInfo implements Loggable {
 
+    private final DatabaseId dbId;
     private long deletedNodeId;
     private byte[] deletedMainKey;
     private byte[] deletedDupKey;
-    private final DatabaseId dbId;
     private boolean dupRootDeletion;
 
     /**
@@ -94,7 +94,7 @@ public class INDupDeleteInfo implements Loggable {
         boolean unpacked = (entryVersion < 6);
         deletedNodeId = LogUtils.readLong(itemBuffer, unpacked);
         deletedMainKey =
-            LogUtils.readByteArray(itemBuffer, unpacked);
+                LogUtils.readByteArray(itemBuffer, unpacked);
         deletedDupKey = LogUtils.readByteArray(itemBuffer, unpacked);
         dbId.readFromLog(itemBuffer, entryVersion);
 

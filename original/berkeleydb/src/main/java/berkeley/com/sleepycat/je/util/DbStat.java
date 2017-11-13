@@ -13,22 +13,12 @@
 
 package berkeley.com.sleepycat.je.util;
 
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.util.logging.Level;
-
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DatabaseExistsException;
-import berkeley.com.sleepycat.je.DatabaseNotFoundException;
-import berkeley.com.sleepycat.je.DatabaseStats;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.JEVersion;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
 public class DbStat extends DbVerify {
     /*
@@ -39,8 +29,15 @@ public class DbStat extends DbVerify {
 
     private int progressInterval = 0;
 
+    DbStat() {
+    }
+
+    public DbStat(Environment env, String dbName) {
+        super(env, dbName, false);
+    }
+
     public static void main(String argv[])
-        throws DatabaseException {
+            throws DatabaseException {
 
         DbStat stat = new DbStat();
         stat.parseArgs(argv);
@@ -48,17 +45,17 @@ public class DbStat extends DbVerify {
         int ret = 0;
         try {
             stat.openEnv();
-            if (!stat.stats(System.err)) {
+            if(!stat.stats(System.err)) {
                 ret = 1;
             }
-        } catch (Throwable T) {
+        } catch(Throwable T) {
             ret = 1;
             T.printStackTrace(System.err);
         }
 
         try {
             stat.closeEnv();
-        } catch (Throwable ignored) {
+        } catch(Throwable ignored) {
 
             /*
              * Klockwork - ok
@@ -68,62 +65,61 @@ public class DbStat extends DbVerify {
         System.exit(ret);
     }
 
-    DbStat() {
-    }
-
-    public DbStat(Environment env, String dbName) {
-        super(env, dbName, false);
-    }
-
     @Override
     void parseArgs(String argv[]) {
 
         int argc = 0;
         int nArgs = argv.length;
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
-            if (thisArg.equals("-V")) {
+            if(thisArg.equals("-V")) {
                 System.out.println(JEVersion.CURRENT_VERSION);
                 System.exit(0);
-            } else if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(argv[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else if (thisArg.equals("-s")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-s")) {
+                if(argc < nArgs) {
                     dbName = argv[argc++];
-                } else {
+                }
+                else {
                     printUsage("-s requires an argument");
                 }
-            } else if (thisArg.equals("-v")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-v")) {
+                if(argc < nArgs) {
                     progressInterval = Integer.parseInt(argv[argc++]);
-                    if (progressInterval <= 0) {
+                    if(progressInterval <= 0) {
                         printUsage("-v requires a positive argument");
                     }
-                } else {
+                }
+                else {
                     printUsage("-v requires an argument");
                 }
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage("-h is a required argument");
         }
 
-        if (dbName == null) {
+        if(dbName == null) {
             printUsage("-s is a required argument");
         }
     }
 
     public boolean stats(PrintStream out)
-        throws DatabaseNotFoundException {
+            throws DatabaseNotFoundException {
 
         try {
             LoggerUtils.envLogMsg(Level.INFO, DbInternal.getNonNullEnvImpl(env),
-                                  "DbStat.stats of " + dbName + " starting");
+                    "DbStat.stats of " + dbName + " starting");
 
             DatabaseConfig dbConfig = new DatabaseConfig();
             dbConfig.setReadOnly(true);
@@ -132,13 +128,13 @@ public class DbStat extends DbVerify {
             Database db;
             try {
                 db = env.openDatabase(null, dbName, dbConfig);
-            } catch (DatabaseExistsException e) {
+            } catch(DatabaseExistsException e) {
                 /* Should never happen, ExclusiveCreate is false. */
                 throw EnvironmentFailureException.unexpectedException(e);
             }
 
             StatsConfig statsConfig = new StatsConfig();
-            if (progressInterval > 0) {
+            if(progressInterval > 0) {
                 statsConfig.setShowProgressInterval(progressInterval);
                 statsConfig.setShowProgressStream(out);
             }
@@ -148,8 +144,8 @@ public class DbStat extends DbVerify {
 
             db.close();
             LoggerUtils.envLogMsg(Level.INFO, DbInternal.getNonNullEnvImpl(env),
-                               "DbStat.stats of " + dbName + " ending");
-        } catch (DatabaseException DE) {
+                    "DbStat.stats of " + dbName + " ending");
+        } catch(DatabaseException DE) {
             return false;
         }
 

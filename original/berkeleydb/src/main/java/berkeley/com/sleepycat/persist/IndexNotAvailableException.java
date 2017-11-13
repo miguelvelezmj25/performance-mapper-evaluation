@@ -20,7 +20,7 @@ import berkeley.com.sleepycat.je.OperationFailureException;
  * EntityStore#getSecondaryIndex getSecondaryIndex} and {@link
  * EntityStore#getSubclassIndex getSubclassIndex} when an index has not yet
  * been created.
- *
+ * <p>
  * <!-- begin JE only -->
  * This exception can be thrown in two circumstances.
  * <ol>
@@ -50,13 +50,12 @@ public class IndexNotAvailableException extends OperationFailureException {
 
     private static final long serialVersionUID = 1L;
 
-    /** 
+    /**
      * For internal use only.
      * <!-- begin JE only -->
-     * @hidden
-     * <!-- end JE only -->
      *
      * @param message the message.
+     * @hidden <!-- end JE only -->
      */
     public IndexNotAvailableException(String message) {
         super(message);
@@ -64,18 +63,20 @@ public class IndexNotAvailableException extends OperationFailureException {
 
     /* <!-- begin JE only --> */
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private IndexNotAvailableException(String message,
-                                   OperationFailureException cause) {
+                                       OperationFailureException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

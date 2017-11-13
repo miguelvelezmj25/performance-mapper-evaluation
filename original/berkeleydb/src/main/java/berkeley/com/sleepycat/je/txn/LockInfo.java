@@ -13,42 +13,25 @@
 
 package berkeley.com.sleepycat.je.txn;
 
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-
 /**
  * LockInfo is a class that embodies information about a lock instance.  The
  * holding thread and the locktype are all contained in the object.
- *
+ * <p>
  * This class is public for unit tests.
  */
 public class LockInfo implements Cloneable {
-    protected Locker locker;
-    protected LockType lockType;
-
     private static boolean deadlockStackTrace = false;
     private static Map<LockInfo, StackTraceAtLockTime> traceExceptionMap =
-        Collections.synchronizedMap(new WeakHashMap<LockInfo, 
-                                    StackTraceAtLockTime>());
-    @SuppressWarnings("serial")
-    private static class StackTraceAtLockTime extends Exception {}
-
-    /**
-     * Called when the je.txn.deadlockStackTrace property is changed.
-     */
-    static void setDeadlockStackTrace(boolean enable) {
-        deadlockStackTrace = enable;
-    }
-
-    /**
-     * For unit testing only.
-     */
-    public static boolean getDeadlockStackTrace() {
-        return deadlockStackTrace;
-    }
+            Collections.synchronizedMap(new WeakHashMap<LockInfo,
+                    StackTraceAtLockTime>());
+    protected Locker locker;
+    protected LockType lockType;
 
     /**
      * Construct a new LockInfo.  public for Sizeof program.
@@ -57,7 +40,7 @@ public class LockInfo implements Cloneable {
         this.locker = locker;
         this.lockType = lockType;
 
-        if (deadlockStackTrace) {
+        if(deadlockStackTrace) {
             traceExceptionMap.put(this, new StackTraceAtLockTime());
         }
     }
@@ -71,16 +54,23 @@ public class LockInfo implements Cloneable {
         this.locker = other.locker;
         this.lockType = other.lockType;
 
-        if (deadlockStackTrace) {
+        if(deadlockStackTrace) {
             traceExceptionMap.put(this, traceExceptionMap.get(other));
         }
     }
 
     /**
-     * Change this lockInfo over to the prescribed locker.
+     * For unit testing only.
      */
-    void setLocker(Locker locker) {
-        this.locker = locker;
+    public static boolean getDeadlockStackTrace() {
+        return deadlockStackTrace;
+    }
+
+    /**
+     * Called when the je.txn.deadlockStackTrace property is changed.
+     */
+    static void setDeadlockStackTrace(boolean enable) {
+        deadlockStackTrace = enable;
     }
 
     /**
@@ -91,10 +81,10 @@ public class LockInfo implements Cloneable {
     }
 
     /**
-     * @return The LockType associated with this Lock.
+     * Change this lockInfo over to the prescribed locker.
      */
-    void setLockType(LockType lockType) {
-        this.lockType = lockType;
+    void setLocker(Locker locker) {
+        this.locker = locker;
     }
 
     /**
@@ -104,9 +94,16 @@ public class LockInfo implements Cloneable {
         return lockType;
     }
 
+    /**
+     * @return The LockType associated with this Lock.
+     */
+    void setLockType(LockType lockType) {
+        this.lockType = lockType;
+    }
+
     @Override
     public Object clone()
-        throws CloneNotSupportedException {
+            throws CloneNotSupportedException {
 
         return super.clone();
     }
@@ -128,14 +125,18 @@ public class LockInfo implements Cloneable {
         buf.append(lockType);
         buf.append("\"/>");
 
-        if (deadlockStackTrace) {
+        if(deadlockStackTrace) {
             Exception traceException = traceExceptionMap.get(this);
-            if (traceException != null) {
+            if(traceException != null) {
                 buf.append(" lock taken at: ");
                 buf.append(LoggerUtils.getStackTrace(traceException));
             }
         }
 
         return buf.toString();
+    }
+
+    @SuppressWarnings("serial")
+    private static class StackTraceAtLockTime extends Exception {
     }
 }

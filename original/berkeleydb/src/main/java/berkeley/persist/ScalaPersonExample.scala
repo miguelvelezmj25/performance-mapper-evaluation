@@ -67,6 +67,7 @@ object ScalaPersonExample extends Application {
       printAll(cursor) // tail recursion
     }
   }
+
   if (priIndex.get(txn, 1L, null) == null) {
     val person1 = new Person("Zola", "#1 Zola Street")
     val person2 = new Person("Abby", "#1 Abby Street")

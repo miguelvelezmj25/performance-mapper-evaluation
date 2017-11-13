@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.log.LogEntryType;
@@ -26,6 +22,10 @@ import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.log.entry.NameLNLogEntry;
 import berkeley.com.sleepycat.je.txn.Txn;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A NameLN represents a Leaf Node in the name->database id mapping tree.
@@ -121,14 +121,14 @@ public final class NameLN extends LN {
     @Override
     protected LogEntryType getLogType(boolean isInsert,
                                       boolean isTransactional) {
-        return isTransactional ? LogEntryType.LOG_NAMELN_TRANSACTIONAL : 
-                                 LogEntryType.LOG_NAMELN;
+        return isTransactional ? LogEntryType.LOG_NAMELN_TRANSACTIONAL :
+                LogEntryType.LOG_NAMELN;
     }
 
     @Override
     public Collection<VersionedWriteLoggable> getEmbeddedLoggables() {
         final Collection<VersionedWriteLoggable> list =
-            new ArrayList<>(super.getEmbeddedLoggables());
+                new ArrayList<>(super.getEmbeddedLoggables());
         list.add(new DatabaseId());
         return list;
     }
@@ -136,9 +136,9 @@ public final class NameLN extends LN {
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
         return
-            super.getLogSize(logVersion, forReplication) +
-            id.getLogSize(logVersion, forReplication) +
-            1;               // deleted flag
+                super.getLogSize(logVersion, forReplication) +
+                        id.getLogSize(logVersion, forReplication) +
+                        1;               // deleted flag
     }
 
     @Override
@@ -163,21 +163,21 @@ public final class NameLN extends LN {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof NameLN)) {
+        if(!(other instanceof NameLN)) {
             return false;
         }
 
         NameLN otherLN = (NameLN) other;
 
-        if (!super.logicalEquals(otherLN)) {
+        if(!super.logicalEquals(otherLN)) {
             return false;
         }
 
-        if (!(id.equals(otherLN.id))) {
+        if(!(id.equals(otherLN.id))) {
             return false;
         }
 
-        if (deleted != otherLN.deleted) {
+        if(deleted != otherLN.deleted) {
             return false;
         }
 
@@ -199,29 +199,29 @@ public final class NameLN extends LN {
      */
     @Override
     LNLogEntry<?> createLogEntry(
-        LogEntryType entryType,
-        DatabaseImpl dbImpl,
-        Txn txn,
-        long abortLsn,
-        boolean abortKD,
-        byte[] abortKey,
-        byte[] abortData,
-        long abortVLSN,
-        int abortExpiration,
-        boolean abortExpirationInHours,
-        byte[] newKey,
-        boolean newEmbeddedLN,
-        int newExpiration,
-        boolean newExpirationInHours,
-        ReplicationContext repContext) {
+            LogEntryType entryType,
+            DatabaseImpl dbImpl,
+            Txn txn,
+            long abortLsn,
+            boolean abortKD,
+            byte[] abortKey,
+            byte[] abortData,
+            long abortVLSN,
+            int abortExpiration,
+            boolean abortExpirationInHours,
+            byte[] newKey,
+            boolean newEmbeddedLN,
+            int newExpiration,
+            boolean newExpirationInHours,
+            ReplicationContext repContext) {
 
         return new NameLNLogEntry(entryType,
-                                  dbImpl.getId(),
-                                  txn,
-                                  abortLsn,
-                                  abortKD,
-                                  newKey,
-                                  this,
-                                  repContext);
+                dbImpl.getId(),
+                txn,
+                abortLsn,
+                abortKD,
+                newKey,
+                this,
+                repContext);
     }
 }

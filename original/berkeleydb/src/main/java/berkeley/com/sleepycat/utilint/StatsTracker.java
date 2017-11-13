@@ -48,21 +48,22 @@ public class StatsTracker<T> {
         this.intervalLatencies = new HashMap<T, LatencyStat>();
         this.cumulativeLatencies = new HashMap<T, LatencyStat>();
 
-        for (T opType : opTypes) {
+        for(T opType : opTypes) {
             intervalLatencies.put
-                (opType, new LatencyStat(maxTrackedLatencyMillis));
+                    (opType, new LatencyStat(maxTrackedLatencyMillis));
             cumulativeLatencies.put
-                (opType, new LatencyStat(maxTrackedLatencyMillis));
+                    (opType, new LatencyStat(maxTrackedLatencyMillis));
         }
 
         activityCounter = new ActivityCounter(activeThreadThreshold,
-                                              threadDumpIntervalMillis,
-                                              threadDumpMax, 
-                                              stackTraceLogger);
+                threadDumpIntervalMillis,
+                threadDumpMax,
+                stackTraceLogger);
     }
 
-    /** 
+    /**
      * Track the start of a operation.
+     *
      * @return the value of System.nanoTime, for passing to markFinish.
      */
     public long markStart() {
@@ -72,24 +73,27 @@ public class StatsTracker<T> {
 
     /**
      * Track the end of an operation.
+     *
      * @param startTime should be the value returned by the corresponding call
-     * to markStart
+     *                  to markStart
      */
     public void markFinish(T opType, long startTime) {
         markFinish(opType, startTime, 1);
     }
+
     /**
      * Track the end of an operation.
+     *
      * @param startTime should be the value returned by the corresponding call
-     * to markStart
+     *                  to markStart
      */
     public void markFinish(T opType, long startTime, int numOperations) {
         try {
-            if (numOperations == 0) {
+            if(numOperations == 0) {
                 return;
             }
 
-            if (opType != null) {
+            if(opType != null) {
                 long elapsed = System.nanoTime() - startTime;
                 intervalLatencies.get(opType).set(numOperations, elapsed);
                 cumulativeLatencies.get(opType).set(numOperations, elapsed);
@@ -105,7 +109,7 @@ public class StatsTracker<T> {
      * for the next period's collection.
      */
     public void clearLatency() {
-        for (Map.Entry<T, LatencyStat> e : intervalLatencies.entrySet()) {
+        for(Map.Entry<T, LatencyStat> e : intervalLatencies.entrySet()) {
             e.getValue().clear();
         }
     }

@@ -13,70 +13,25 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_BYTES_READ_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_BYTES_WRITTEN_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_FILE_OPENS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_LOG_FSYNCS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_OPEN_FILES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_READ_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_WRITES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_RANDOM_WRITE_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_READS_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_READ_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_WRITES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_SEQUENTIAL_WRITE_BYTES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITEQUEUE_OVERFLOW;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITEQUEUE_OVERFLOW_FAILURES;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FILEMGR_WRITES_FROM_WRITEQUEUE;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_FSYNC_MAX_TIME;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_FSYNC_TIME;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.LogWriteException;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.ThreadInterruptedException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.FileHeaderEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.HexFormatter;
-import berkeley.com.sleepycat.je.utilint.IntStat;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongMaxZeroStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.RelatchRequiredException;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static berkeley.com.sleepycat.je.log.LogStatDefinition.*;
 
 /**
  * The FileManager presents the abstraction of one contiguous file.  It doles
@@ -84,167 +39,29 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  */
 public class FileManager {
 
-    public enum FileMode {
-        READ_MODE("r", false),
-        READWRITE_MODE("rw", true),
-        READWRITE_ODSYNC_MODE("rwd", true),
-        READWRITE_OSYNC_MODE("rws", true);
-
-        private String fileModeValue;
-        private boolean isWritable;
-
-        private FileMode(String fileModeValue, boolean isWritable) {
-            this.fileModeValue = fileModeValue;
-            this.isWritable = isWritable;
-        }
-
-        public String getModeValue() {
-            return fileModeValue;
-        }
-
-        public boolean isWritable() {
-            return isWritable;
-        }
-    }
-
-    private static final boolean DEBUG = false;
-
-    /*
-     * The number of writes that have been performed.
-     *
-     * public so that unit tests can diddle them.
-     */
-    public static long WRITE_COUNT = 0;
-
-    /*
-     * The write count value where we should stop or throw.
-     */
-    public static long STOP_ON_WRITE_COUNT = Long.MAX_VALUE;
-
-    /*
-     * If we're throwing, then throw on write #'s WRITE_COUNT through
-     * WRITE_COUNT + N_BAD_WRITES - 1 (inclusive).
-     */
-    public static long N_BAD_WRITES = Long.MAX_VALUE;
-
-    /*
-     * If true, then throw an IOException on write #'s WRITE_COUNT through
-     * WRITE_COUNT + N_BAD_WRITES - 1 (inclusive).
-     */
-    public static boolean THROW_ON_WRITE = false;
-
     public static final String JE_SUFFIX = ".jdb";  // regular log files
     public static final String DEL_SUFFIX = ".del";  // cleaned files
     public static final String BAD_SUFFIX = ".bad";  // corrupt files
-    private static final String LOCK_FILE = "je.lck";// lock file
-    static final String[] DEL_SUFFIXES = { DEL_SUFFIX };
-    static final String[] JE_SUFFIXES = { JE_SUFFIX };
-    private static final String[] JE_AND_DEL_SUFFIXES =
-    { JE_SUFFIX, DEL_SUFFIX };
-
     /*
      * The suffix used to denote a file that is in the process of being
      * transferred during a network backup. The file may not have been
      * completely transferred, or its digest verified.
      */
     public static final String TMP_SUFFIX = ".tmp";
-
     /*
      * The suffix used to rename files out of the way, if they are being
      * retained during a backup. Note that the suffix is used in conjunction
      * with a backup number as described in <code>NetworkBackup</code>
      */
     public static final String BUP_SUFFIX = ".bup";
-
-    /* May be set to false to speed unit tests. */
-    private boolean syncAtFileEnd = true;
-
-    private final EnvironmentImpl envImpl;
-    private final long maxFileSize;
-    private final File dbEnvHome;
-    private final File[] dbEnvDataDirs;
-
-    /* True if .del files should be included in the list of log files. */
-    private boolean includeDeletedFiles = false;
-
-    /* File cache */
-    private final FileCache fileCache;
-
-    private FileCacheWarmer fileCacheWarmer;
-
-    /* The channel and lock for the je.lck file. */
-    private RandomAccessFile lockFile;
-    private FileChannel channel;
-    private FileLock envLock;
-    private FileLock exclLock;
-
-    /* True if all files should be opened readonly. */
-    private final boolean readOnly;
-
-    /* Handles onto log position */
-    private volatile long currentFileNum;     // number of the current file
-    private volatile long nextAvailableLsn;   // the next LSN available
-    private volatile long lastUsedLsn;    // last LSN used in the current file
-    private long prevOffset;         // Offset to use for the previous pointer
-    private boolean forceNewFile;    // Force new file on next write
-
-    /* endOfLog is used for writes and fsyncs to the end of the log. */
-    private final LogEndFileDescriptor endOfLog;
-
-    /*
-     * When we bump the LSNs over to a new file, we must remember the last LSN
-     * of the previous file so we can set the prevOffset field of the file
-     * header appropriately. We have to save it in a map because there's a time
-     * lag between when we know what the last LSN is and when we actually do
-     * the file write, because LSN bumping is done before we get a write
-     * buffer.  This map is keyed by file num->last LSN.
-     */
-    private final Map<Long, Long> perFileLastUsedLsn;
-
-    /*
-     * True if we should use the Write Queue.  This queue is enabled by default
-     * and contains any write() operations which were attempted but would have
-     * blocked because an fsync() or another write() was in progress at the
-     * time.  The operations on the Write Queue are later executed by the next
-     * operation that is able to grab the fsync latch.  File systems like ext3
-     * need this queue in order to achieve reasonable throughput since it
-     * acquires an exclusive mutex on the inode during any IO operation
-     * (seek/read/write/fsync).  OS's like Windows and Solaris do not since
-     * they are able to handle concurrent IO operations on a single file.
-     */
-    private final boolean useWriteQueue;
-
-    /* The starting size of the Write Queue. */
-    private final int writeQueueSize;
-
-    /*
-     * Use O_DSYNC to open JE log files.
-     */
-    private final boolean useODSYNC;
-
-    /* public for unit tests. */
-    public boolean VERIFY_CHECKSUMS = false;
-
-    /** {@link EnvironmentParams#LOG_FSYNC_TIME_LIMIT}. */
-    private final int fSyncTimeLimit;
-
-    /*
-     * Non-0 means to use envHome/data001 through envHome/data00N for the
-     * environment directories, where N is nDataDirs.  Distribute *.jdb files
-     * through dataNNN directories round-robin.
-     */
-    private final int nDataDirs;
-
-    /*
-     * Last file to which any IO was done.
-     */
-    long lastFileNumberTouched = -1;
-
-    /*
-     * Current file offset of lastFile.
-     */
-    long lastFileTouchedOffset = 0;
-
+    /* Testing switch. public so others can read the value. */
+    public static final boolean LOGWRITE_EXCEPTION_TESTING;
+    static final String[] DEL_SUFFIXES = {DEL_SUFFIX};
+    static final String[] JE_SUFFIXES = {JE_SUFFIX};
+    private static final boolean DEBUG = false;
+    private static final String LOCK_FILE = "je.lck";// lock file
+    private static final String[] JE_AND_DEL_SUFFIXES =
+            {JE_SUFFIX, DEL_SUFFIX};
     /*
      * For IO stats, this is a measure of what is "close enough" to constitute
      * a sequential IO vs a random IO. 1MB for now.  Generally a seek within a
@@ -252,11 +69,76 @@ public class FileManager {
      * single rotational latency.
      */
     private static final long ADJACENT_TRACK_SEEK_DELTA = 1 << 20;
-
+    /* Max write counter value. */
+    private static final int LOGWRITE_EXCEPTION_MAX = 100;
     /*
-     * Used to detect unexpected file deletion.
+     * The number of writes that have been performed.
+     *
+     * public so that unit tests can diddle them.
      */
-    private final FileDeletionDetector fdd;
+    public static long WRITE_COUNT = 0;
+    /*
+     * The write count value where we should stop or throw.
+     */
+    public static long STOP_ON_WRITE_COUNT = Long.MAX_VALUE;
+    /*
+     * If we're throwing, then throw on write #'s WRITE_COUNT through
+     * WRITE_COUNT + N_BAD_WRITES - 1 (inclusive).
+     */
+    public static long N_BAD_WRITES = Long.MAX_VALUE;
+    /*
+     * If true, then throw an IOException on write #'s WRITE_COUNT through
+     * WRITE_COUNT + N_BAD_WRITES - 1 (inclusive).
+     */
+    public static boolean THROW_ON_WRITE = false;
+    /**
+     * The factory instance used to create RandomAccessFiles.  This field is
+     * intentionally public and non-static so it may be set by tests.  See
+     * FileFactory.
+     */
+    public static FileFactory fileFactory = new FileFactory() {
+
+        public RandomAccessFile createFile(File envHome,
+                                           String fullName,
+                                           String mode)
+                throws FileNotFoundException {
+
+            return new DefaultRandomAccessFile(fullName, mode);
+        }
+    };
+    private static Comparator<File> fileComparator =
+            new Comparator<File>() {
+
+                private String getFileNum(File file) {
+                    String fname = file.toString();
+                    return fname.substring(fname.indexOf(File.separator) + 1);
+                }
+
+                public int compare(File o1, File o2) {
+                    String fnum1 = getFileNum(o1);
+                    String fnum2 = getFileNum(o2);
+                    return o1.compareTo(o2);
+                }
+            };
+    private static Comparator<String> stringComparator =
+            new Comparator<String>() {
+
+                private String getFileNum(String fname) {
+                    return fname.substring(fname.indexOf(File.separator) + 1);
+                }
+
+                public int compare(String o1, String o2) {
+                    String fnum1 = getFileNum(o1);
+                    String fnum2 = getFileNum(o2);
+                    return fnum1.compareTo(fnum2);
+                }
+            };
+    private static String RRET_PROPERTY_NAME = "je.logwrite.exception.testing";
+
+    static {
+        LOGWRITE_EXCEPTION_TESTING =
+                (System.getProperty(RRET_PROPERTY_NAME) != null);
+    }
 
     /*
      * Stats
@@ -282,21 +164,106 @@ public class FileManager {
     final LongStat nLogFSyncs;
     final LongStat nFSyncTime;
     final LongMaxZeroStat nFSyncMaxTime;
+    private final EnvironmentImpl envImpl;
+    private final long maxFileSize;
+    private final File dbEnvHome;
+    private final File[] dbEnvDataDirs;
+    /* File cache */
+    private final FileCache fileCache;
+    /* True if all files should be opened readonly. */
+    private final boolean readOnly;
+    /* endOfLog is used for writes and fsyncs to the end of the log. */
+    private final LogEndFileDescriptor endOfLog;
+    /*
+     * When we bump the LSNs over to a new file, we must remember the last LSN
+     * of the previous file so we can set the prevOffset field of the file
+     * header appropriately. We have to save it in a map because there's a time
+     * lag between when we know what the last LSN is and when we actually do
+     * the file write, because LSN bumping is done before we get a write
+     * buffer.  This map is keyed by file num->last LSN.
+     */
+    private final Map<Long, Long> perFileLastUsedLsn;
+    /*
+     * True if we should use the Write Queue.  This queue is enabled by default
+     * and contains any write() operations which were attempted but would have
+     * blocked because an fsync() or another write() was in progress at the
+     * time.  The operations on the Write Queue are later executed by the next
+     * operation that is able to grab the fsync latch.  File systems like ext3
+     * need this queue in order to achieve reasonable throughput since it
+     * acquires an exclusive mutex on the inode during any IO operation
+     * (seek/read/write/fsync).  OS's like Windows and Solaris do not since
+     * they are able to handle concurrent IO operations on a single file.
+     */
+    private final boolean useWriteQueue;
+    /* The starting size of the Write Queue. */
+    private final int writeQueueSize;
+    /*
+     * Use O_DSYNC to open JE log files.
+     */
+    private final boolean useODSYNC;
+    /**
+     * {@link EnvironmentParams#LOG_FSYNC_TIME_LIMIT}.
+     */
+    private final int fSyncTimeLimit;
+    /*
+     * Non-0 means to use envHome/data001 through envHome/data00N for the
+     * environment directories, where N is nDataDirs.  Distribute *.jdb files
+     * through dataNNN directories round-robin.
+     */
+    private final int nDataDirs;
+    /*
+     * Used to detect unexpected file deletion.
+     */
+    private final FileDeletionDetector fdd;
+    /* public for unit tests. */
+    public boolean VERIFY_CHECKSUMS = false;
+    /*
+     * Last file to which any IO was done.
+     */
+    long lastFileNumberTouched = -1;
+    /*
+     * Current file offset of lastFile.
+     */
+    long lastFileTouchedOffset = 0;
+    /* May be set to false to speed unit tests. */
+    private boolean syncAtFileEnd = true;
+    /* True if .del files should be included in the list of log files. */
+    private boolean includeDeletedFiles = false;
+    private FileCacheWarmer fileCacheWarmer;
+    /* The channel and lock for the je.lck file. */
+    private RandomAccessFile lockFile;
+    private FileChannel channel;
+    private FileLock envLock;
+    private FileLock exclLock;
+    /* Handles onto log position */
+    private volatile long currentFileNum;     // number of the current file
+    private volatile long nextAvailableLsn;   // the next LSN available
+
+    /*
+     * File management
+     */
+    private volatile long lastUsedLsn;    // last LSN used in the current file
+    private long prevOffset;         // Offset to use for the previous pointer
+    private boolean forceNewFile;    // Force new file on next write
+    /* Current write counter value. */
+    private int logWriteExceptionCounter = 0;
+    /* Whether an exception has been thrown. */
+    private boolean logWriteExceptionThrown = false;
+    /* Random number generator. */
+    private Random logWriteExceptionRandom = null;
 
     /**
      * Set up the file cache and initialize the file manager to point to the
      * beginning of the log.
      *
      * @param dbEnvHome environment home directory
-     *
-     * @throws IllegalArgumentException via Environment ctor
-     *
+     * @throws IllegalArgumentException   via Environment ctor
      * @throws EnvironmentLockedException via Environment ctor
      */
     public FileManager(EnvironmentImpl envImpl,
                        File dbEnvHome,
                        boolean readOnly)
-        throws EnvironmentLockedException {
+            throws EnvironmentLockedException {
 
         this.envImpl = envImpl;
         this.dbEnvHome = dbEnvHome;
@@ -305,7 +272,7 @@ public class FileManager {
         boolean success = false;
 
         stats = new StatGroup(LogStatDefinition.FILEMGR_GROUP_NAME,
-                              LogStatDefinition.FILEMGR_GROUP_DESC);
+                LogStatDefinition.FILEMGR_GROUP_DESC);
         nRandomReads = new LongStat(stats, FILEMGR_RANDOM_READS);
         nRandomWrites = new LongStat(stats, FILEMGR_RANDOM_WRITES);
         nSequentialReads = new LongStat(stats, FILEMGR_SEQUENTIAL_READS);
@@ -313,22 +280,22 @@ public class FileManager {
         nRandomReadBytes = new LongStat(stats, FILEMGR_RANDOM_READ_BYTES);
         nRandomWriteBytes = new LongStat(stats, FILEMGR_RANDOM_WRITE_BYTES);
         nSequentialReadBytes =
-            new LongStat(stats, FILEMGR_SEQUENTIAL_READ_BYTES);
+                new LongStat(stats, FILEMGR_SEQUENTIAL_READ_BYTES);
         nSequentialWriteBytes =
-            new LongStat(stats, FILEMGR_SEQUENTIAL_WRITE_BYTES);
+                new LongStat(stats, FILEMGR_SEQUENTIAL_WRITE_BYTES);
         nFileOpens = new IntStat(stats, FILEMGR_FILE_OPENS);
         nOpenFiles = new IntStat(stats, FILEMGR_OPEN_FILES);
         nBytesReadFromWriteQueue =
-            new LongStat(stats, FILEMGR_BYTES_READ_FROM_WRITEQUEUE);
+                new LongStat(stats, FILEMGR_BYTES_READ_FROM_WRITEQUEUE);
         nBytesWrittenFromWriteQueue =
-            new LongStat(stats, FILEMGR_BYTES_WRITTEN_FROM_WRITEQUEUE);
+                new LongStat(stats, FILEMGR_BYTES_WRITTEN_FROM_WRITEQUEUE);
         nReadsFromWriteQueue =
-            new LongStat(stats, FILEMGR_READS_FROM_WRITEQUEUE);
+                new LongStat(stats, FILEMGR_READS_FROM_WRITEQUEUE);
         nWritesFromWriteQueue =
-            new LongStat(stats, FILEMGR_WRITES_FROM_WRITEQUEUE);
+                new LongStat(stats, FILEMGR_WRITES_FROM_WRITEQUEUE);
         nWriteQueueOverflow = new LongStat(stats, FILEMGR_WRITEQUEUE_OVERFLOW);
         nWriteQueueOverflowFailures =
-            new LongStat(stats, FILEMGR_WRITEQUEUE_OVERFLOW_FAILURES);
+                new LongStat(stats, FILEMGR_WRITEQUEUE_OVERFLOW_FAILURES);
         nLogFSyncs = new LongStat(stats, FILEMGR_LOG_FSYNCS);
         nFSyncTime = new LongStat(stats, GRPCMGR_FSYNC_TIME);
         nFSyncMaxTime = new LongMaxZeroStat(stats, GRPCMGR_FSYNC_MAX_TIME);
@@ -337,49 +304,50 @@ public class FileManager {
             /* Read configurations. */
             DbConfigManager configManager = envImpl.getConfigManager();
             maxFileSize =
-                configManager.getLong(EnvironmentParams.LOG_FILE_MAX);
+                    configManager.getLong(EnvironmentParams.LOG_FILE_MAX);
 
             useWriteQueue = configManager.getBoolean(
-                EnvironmentParams.LOG_USE_WRITE_QUEUE);
+                    EnvironmentParams.LOG_USE_WRITE_QUEUE);
 
             writeQueueSize = configManager.getInt(
-                EnvironmentParams.LOG_WRITE_QUEUE_SIZE);
+                    EnvironmentParams.LOG_WRITE_QUEUE_SIZE);
 
             useODSYNC = configManager.getBoolean(
-                EnvironmentParams.LOG_USE_ODSYNC);
+                    EnvironmentParams.LOG_USE_ODSYNC);
 
             VERIFY_CHECKSUMS = configManager.getBoolean(
-                EnvironmentParams.LOG_VERIFY_CHECKSUMS);
+                    EnvironmentParams.LOG_VERIFY_CHECKSUMS);
 
             fSyncTimeLimit = configManager.getDuration(
-                EnvironmentParams.LOG_FSYNC_TIME_LIMIT);
+                    EnvironmentParams.LOG_FSYNC_TIME_LIMIT);
 
             nDataDirs = configManager.getInt(
-                EnvironmentParams.LOG_N_DATA_DIRECTORIES);
+                    EnvironmentParams.LOG_N_DATA_DIRECTORIES);
 
-            if (nDataDirs != 0) {
+            if(nDataDirs != 0) {
                 dbEnvDataDirs = gatherDataDirs();
-            } else {
+            }
+            else {
                 checkNoDataDirs();
                 dbEnvDataDirs = null;
             }
 
-            if (!envImpl.isMemOnly()) {
-                if (!dbEnvHome.exists()) {
+            if(!envImpl.isMemOnly()) {
+                if(!dbEnvHome.exists()) {
                     throw new IllegalArgumentException
-                        ("Environment home " + dbEnvHome + " doesn't exist");
+                            ("Environment home " + dbEnvHome + " doesn't exist");
                 }
 
                 /*
                  * If this is an arbiter take an exclusive lock.
                  */
                 boolean isReadOnly = envImpl.isArbiter() ? false : readOnly;
-                if (!lockEnvironment(isReadOnly, false)) {
+                if(!lockEnvironment(isReadOnly, false)) {
                     throw new EnvironmentLockedException
-                        (envImpl,
-                         "The environment cannot be locked for " +
-                         (isReadOnly ? "shared" : "single writer") +
-                         " access.");
+                            (envImpl,
+                                    "The environment cannot be locked for " +
+                                            (isReadOnly ? "shared" : "single writer") +
+                                            " access.");
                 }
             }
 
@@ -389,57 +357,60 @@ public class FileManager {
             /* Start out as if no log existed. */
             currentFileNum = 0L;
             nextAvailableLsn =
-                DbLsn.makeLsn(currentFileNum, firstLogEntryOffset());
+                    DbLsn.makeLsn(currentFileNum, firstLogEntryOffset());
             lastUsedLsn = DbLsn.NULL_LSN;
             perFileLastUsedLsn =
-                Collections.synchronizedMap(new HashMap<Long, Long>());
+                    Collections.synchronizedMap(new HashMap<Long, Long>());
             prevOffset = 0L;
             endOfLog = new LogEndFileDescriptor();
             forceNewFile = false;
 
             final String stopOnWriteCountName = "je.debug.stopOnWriteCount";
             final String stopOnWriteCountProp =
-                System.getProperty(stopOnWriteCountName);
-            if (stopOnWriteCountProp != null) {
+                    System.getProperty(stopOnWriteCountName);
+            if(stopOnWriteCountProp != null) {
                 try {
                     STOP_ON_WRITE_COUNT = Long.parseLong(stopOnWriteCountProp);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     throw new IllegalArgumentException
-                        ("Could not parse: " + stopOnWriteCountName, e);
+                            ("Could not parse: " + stopOnWriteCountName, e);
                 }
             }
 
             final String stopOnWriteActionName = "je.debug.stopOnWriteAction";
             final String stopOnWriteActionProp =
-                System.getProperty(stopOnWriteActionName);
-            if (stopOnWriteActionProp != null) {
-                if (stopOnWriteActionProp.compareToIgnoreCase("throw") == 0) {
+                    System.getProperty(stopOnWriteActionName);
+            if(stopOnWriteActionProp != null) {
+                if(stopOnWriteActionProp.compareToIgnoreCase("throw") == 0) {
                     THROW_ON_WRITE = true;
-                } else if (stopOnWriteActionProp.
-                           compareToIgnoreCase("stop") == 0) {
+                }
+                else if(stopOnWriteActionProp.
+                        compareToIgnoreCase("stop") == 0) {
                     THROW_ON_WRITE = false;
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException
-                        ("Unknown value for: " + stopOnWriteActionName  +
-                         stopOnWriteActionProp);
+                            ("Unknown value for: " + stopOnWriteActionName +
+                                    stopOnWriteActionProp);
                 }
             }
 
             final Boolean logFileDeleteDetect = configManager.getBoolean(
-                EnvironmentParams.LOG_DETECT_FILE_DELETE);
-            if (!envImpl.isMemOnly() && logFileDeleteDetect) {
+                    EnvironmentParams.LOG_DETECT_FILE_DELETE);
+            if(!envImpl.isMemOnly() && logFileDeleteDetect) {
                 fdd = new FileDeletionDetector(
-                    dbEnvHome, dbEnvDataDirs, envImpl);
-            } else {
+                        dbEnvHome, dbEnvDataDirs, envImpl);
+            }
+            else {
                 fdd = null;
             }
 
             success = true;
         } finally {
-            if (!success) {
+            if(!success) {
                 try {
                     close();
-                } catch (IOException e) {
+                } catch(IOException e) {
                     /*
                      * Klockwork - ok
                      * Eat it, we want to throw the original exception.
@@ -450,19 +421,95 @@ public class FileManager {
     }
 
     /**
+     * Find JE files, flavor for unit test support.
+     *
+     * @param suffixes which type of file we're looking for
+     * @return array of file names
+     */
+    public static String[] listFiles(File envDirFile,
+                                     String[] suffixes,
+                                     boolean envMultiSubDir) {
+        String[] names = envDirFile.list(new JEFileFilter(suffixes));
+
+        ArrayList<String> subFileNames = new ArrayList<String>();
+        if(envMultiSubDir) {
+            for(File file : envDirFile.listFiles()) {
+                if(file.isDirectory() && file.getName().startsWith("data")) {
+                    File[] subFiles =
+                            file.listFiles(new JEFileFilter(suffixes));
+                    for(File subFile : subFiles) {
+                        subFileNames.add(file.getName() +
+                                File.separator + subFile.getName());
+                    }
+                }
+            }
+
+            String[] totalFileNames =
+                    new String[names.length + subFileNames.size()];
+            for(int i = 0; i < totalFileNames.length; i++) {
+                if(i < names.length) {
+                    totalFileNames[i] = names[i];
+                }
+                else {
+                    totalFileNames[i] = subFileNames.get(i - names.length);
+                }
+            }
+            names = totalFileNames;
+        }
+
+        if(names != null) {
+            Arrays.sort(names, stringComparator);
+        }
+        else {
+            names = new String[0];
+        }
+
+        return names;
+    }
+
+    /**
+     * @return the file name for the nth file.
+     */
+    public static String getFileName(long fileNum, String suffix) {
+        return (getFileNumberString(fileNum) + suffix);
+    }
+
+    /**
+     * @return the file name for the nth log (*.jdb) file.
+     */
+    public static String getFileName(long fileNum) {
+        return getFileName(fileNum, JE_SUFFIX);
+    }
+
+    /**
+     * HexFormatter generates a 0 padded string starting with 0x.  We want
+     * the right most 8 digits, so start at 10.
+     */
+    private static String getFileNumberString(long fileNum) {
+        return HexFormatter.formatLong(fileNum).substring(10);
+    }
+
+    /**
+     * @return the size in bytes of the file header log entry.
+     */
+    public static int firstLogEntryOffset() {
+        return FileHeader.entrySize() + LogEntryHeader.MIN_HEADER_SIZE;
+    }
+
+    /**
      * Set the file manager's "end of log".
      *
      * @param nextAvailableLsn LSN to be used for the next log entry
-     * @param lastUsedLsn last LSN to have a valid entry, may be null
-     * @param prevOffset value to use for the prevOffset of the next entry.
-     *  If the beginning of the file, this is 0.
+     * @param lastUsedLsn      last LSN to have a valid entry, may be null
+     * @param prevOffset       value to use for the prevOffset of the next entry.
+     *                         If the beginning of the file, this is 0.
      */
     public void setLastPosition(long nextAvailableLsn,
                                 long lastUsedLsn,
                                 long prevOffset) {
         this.lastUsedLsn = lastUsedLsn;
         perFileLastUsedLsn.put(Long.valueOf(DbLsn.getFileNumber(lastUsedLsn)),
-                               Long.valueOf(lastUsedLsn));
+                Long.valueOf(lastUsedLsn));
         this.nextAvailableLsn = nextAvailableLsn;
         currentFileNum = DbLsn.getFileNumber(this.nextAvailableLsn);
         this.prevOffset = prevOffset;
@@ -475,10 +522,6 @@ public class FileManager {
     public void setSyncAtFileEnd(boolean sync) {
         syncAtFileEnd = sync;
     }
-
-    /*
-     * File management
-     */
 
     /**
      * public for cleaner.
@@ -527,7 +570,7 @@ public class FileManager {
          * created.  If the env is memory-only, we will never create or delete
          * log files.
          */
-        if (fileNum == currentFileNum || envImpl.isMemOnly()) {
+        if(fileNum == currentFileNum || envImpl.isMemOnly()) {
             return true;
         }
 
@@ -543,22 +586,23 @@ public class FileManager {
 
     /**
      * Get all JE file numbers.
+     *
      * @return an array of all JE file numbers.
      */
     public Long[] getAllFileNumbers() {
         /* Get all the names in sorted order. */
         String[] names = listFileNames(JE_SUFFIXES);
         Long[] nums = new Long[names.length];
-        for (int i = 0; i < nums.length; i += 1) {
+        for(int i = 0; i < nums.length; i += 1) {
             String name = names[i];
             long num = nums[i] = getNumFromName(name);
-            if (nDataDirs != 0) {
+            if(nDataDirs != 0) {
                 int dbEnvDataDirsIdx = getDataDirIndexFromName(name) - 1;
-                if (dbEnvDataDirsIdx != (num % nDataDirs)) {
+                if(dbEnvDataDirsIdx != (num % nDataDirs)) {
                     throw EnvironmentFailureException.unexpectedState
-                        ("Found file " + name + " but it should have been in " +
-                         "data directory " + (dbEnvDataDirsIdx + 1) +
-                         ". Perhaps it was moved or restored incorrectly?");
+                            ("Found file " + name + " but it should have been in " +
+                                    "data directory " + (dbEnvDataDirsIdx + 1) +
+                                    ". Perhaps it was moved or restored incorrectly?");
                 }
             }
         }
@@ -567,10 +611,11 @@ public class FileManager {
 
     /**
      * Get the next file number before/after currentFileNum.
+     *
      * @param curFile the file we're at right now. Note that
-     * it may not exist, if it's been cleaned and renamed.
+     *                it may not exist, if it's been cleaned and renamed.
      * @param forward if true, we want the next larger file, if false
-     * we want the previous file
+     *                we want the previous file
      * @return null if there is no following file, or if filenum doesn't exist
      */
     public Long getFollowingFileNum(long curFile, boolean forward) {
@@ -582,20 +627,21 @@ public class FileManager {
          * gap due to log cleaning, fall through and get a list of all files.
          */
         final long tryFile;
-        if (forward) {
-            if (curFile == Long.MAX_VALUE) {
+        if(forward) {
+            if(curFile == Long.MAX_VALUE) {
                 return null;
             }
             tryFile = curFile + 1;
-        } else {
-            if (curFile <= 0) {
+        }
+        else {
+            if(curFile <= 0) {
                 return null;
             }
             tryFile = curFile - 1;
         }
 
         String tryName = getFullFileName(tryFile, JE_SUFFIX);
-        if ((new File(tryName)).isFile()) {
+        if((new File(tryName)).isFile()) {
             return tryFile;
         }
 
@@ -607,32 +653,35 @@ public class FileManager {
         int foundIdx = Arrays.binarySearch(names, searchName, stringComparator);
 
         boolean foundTarget = false;
-        if (foundIdx >= 0) {
-            if (forward) {
+        if(foundIdx >= 0) {
+            if(forward) {
                 foundIdx++;
-            } else {
+            }
+            else {
                 foundIdx--;
             }
-        } else {
+        }
+        else {
 
             /*
              * currentFileNum not found (might have been cleaned). FoundIdx
              * will be (-insertionPoint - 1).
              */
             foundIdx = Math.abs(foundIdx + 1);
-            if (!forward) {
+            if(!forward) {
                 foundIdx--;
             }
         }
 
         /* The current fileNum is found, return the next or prev file. */
-        if (forward && (foundIdx < names.length)) {
+        if(forward && (foundIdx < names.length)) {
             foundTarget = true;
-        } else if (!forward && (foundIdx > -1)) {
+        }
+        else if(!forward && (foundIdx > -1)) {
             foundTarget = true;
         }
 
-        if (foundTarget) {
+        if(foundTarget) {
             return getNumFromName(names[foundIdx]);
         }
         return null;
@@ -654,11 +703,11 @@ public class FileManager {
      */
     private Long getFileNum(boolean first) {
         String[] names = listFileNames(JE_SUFFIXES);
-        if (names.length == 0) {
+        if(names.length == 0) {
             return null;
         }
         int index = 0;
-        if (!first) {
+        if(!first) {
             index = names.length - 1;
         }
         return getNumFromName(names[index]);
@@ -671,14 +720,14 @@ public class FileManager {
      * -1 if multiple data directories are not being used.
      */
     private int getDataDirIndexFromName(String fileName) {
-        if (nDataDirs == 0) {
+        if(nDataDirs == 0) {
             return -1;
         }
 
         int dataDirEnd = fileName.lastIndexOf(File.separator);
         String dataDir = fileName.substring(0, dataDirEnd);
         return Integer.valueOf
-            (Integer.parseInt(dataDir.substring("data".length())));
+                (Integer.parseInt(dataDir.substring("data".length())));
     }
 
     /**
@@ -689,7 +738,7 @@ public class FileManager {
      */
     public Long getNumFromName(String fileName) {
         String name = fileName;
-        if (nDataDirs != 0) {
+        if(nDataDirs != 0) {
             name = name.substring(name.lastIndexOf(File.separator) + 1);
         }
         String fileNumber = name.substring(0, name.indexOf("."));
@@ -698,9 +747,10 @@ public class FileManager {
 
     /**
      * Find JE files. Return names sorted in ascending fashion.
+     *
      * @param suffixes which type of file we're looking for
      * @return array of file names
-     *
+     * <p>
      * Used by unit tests so package protection.
      */
     String[] listFileNames(String[] suffixes) {
@@ -717,97 +767,25 @@ public class FileManager {
      */
     public String[] listFileNames(long minFileNumber, long maxFileNumber) {
         JEFileFilter fileFilter =
-            new JEFileFilter(JE_SUFFIXES, minFileNumber, maxFileNumber);
+                new JEFileFilter(JE_SUFFIXES, minFileNumber, maxFileNumber);
         return listFileNamesInternal(fileFilter);
     }
 
-    private static Comparator<File> fileComparator =
-        new Comparator<File>() {
-
-        private String getFileNum(File file) {
-            String fname = file.toString();
-            return fname.substring(fname.indexOf(File.separator) + 1);
-        }
-
-        public int compare(File o1, File o2) {
-            String fnum1 = getFileNum(o1);
-            String fnum2 = getFileNum(o2);
-            return o1.compareTo(o2);
-        }
-    };
-
-    private static Comparator<String> stringComparator =
-        new Comparator<String>() {
-
-        private String getFileNum(String fname) {
-            return fname.substring(fname.indexOf(File.separator) + 1);
-        }
-
-        public int compare(String o1, String o2) {
-            String fnum1 = getFileNum(o1);
-            String fnum2 = getFileNum(o2);
-            return fnum1.compareTo(fnum2);
-        }
-    };
-
-    /**
-     * Find JE files, flavor for unit test support.
-     *
-     * @param suffixes which type of file we're looking for
-     * @return array of file names
-     */
-    public static String[] listFiles(File envDirFile,
-                                     String[] suffixes,
-                                     boolean envMultiSubDir) {
-        String[] names = envDirFile.list(new JEFileFilter(suffixes));
-
-        ArrayList<String> subFileNames = new ArrayList<String>();
-        if (envMultiSubDir) {
-            for (File file : envDirFile.listFiles()) {
-                if (file.isDirectory() && file.getName().startsWith("data")) {
-                    File[] subFiles =
-                        file.listFiles(new JEFileFilter(suffixes));
-                    for (File subFile : subFiles) {
-                        subFileNames.add(file.getName() +
-                                         File.separator + subFile.getName());
-                    }
-                }
-            }
-
-            String[] totalFileNames =
-                new String[names.length + subFileNames.size()];
-            for (int i = 0; i < totalFileNames.length; i++) {
-                if (i < names.length) {
-                    totalFileNames[i] = names[i];
-                } else {
-                    totalFileNames[i] = subFileNames.get(i - names.length);
-                }
-            }
-            names = totalFileNames;
-        }
-
-        if (names != null) {
-            Arrays.sort(names, stringComparator);
-        } else {
-            names = new String[0];
-        }
-
-        return names;
-    }
-
     public File[] listJDBFiles() {
-        if (nDataDirs == 0) {
+        if(nDataDirs == 0) {
             return listJDBFilesInternalSingleDir(new JEFileFilter(JE_SUFFIXES));
-        } else {
+        }
+        else {
             return listJDBFilesInternalMultiDir(new JEFileFilter(JE_SUFFIXES));
         }
     }
 
     public File[] listJDBFilesInternalSingleDir(JEFileFilter fileFilter) {
         File[] files = dbEnvHome.listFiles(fileFilter);
-        if (files != null) {
+        if(files != null) {
             Arrays.sort(files);
-        } else {
+        }
+        else {
             files = new File[0];
         }
 
@@ -818,20 +796,20 @@ public class FileManager {
         File[][] files = new File[nDataDirs][];
         int nTotalFiles = 0;
         int i = 0;
-        for (File envDir : dbEnvDataDirs) {
+        for(File envDir : dbEnvDataDirs) {
             files[i] = envDir.listFiles(fileFilter);
             nTotalFiles += files[i].length;
             i++;
         }
 
-        if (nTotalFiles == 0) {
+        if(nTotalFiles == 0) {
             return new File[0];
         }
 
         File[] ret = new File[nTotalFiles];
         i = 0;
-        for (File[] envFiles : files) {
-            for (File envFile : envFiles) {
+        for(File[] envFiles : files) {
+            for(File envFile : envFiles) {
                 ret[i++] = envFile;
             }
         }
@@ -841,18 +819,20 @@ public class FileManager {
     }
 
     private String[] listFileNamesInternal(JEFileFilter fileFilter) {
-        if (nDataDirs == 0) {
+        if(nDataDirs == 0) {
             return listFileNamesInternalSingleDir(fileFilter);
-        } else {
+        }
+        else {
             return listFileNamesInternalMultiDirs(fileFilter);
         }
     }
 
     private String[] listFileNamesInternalSingleDir(JEFileFilter fileFilter) {
         String[] fileNames = dbEnvHome.list(fileFilter);
-        if (fileNames != null) {
+        if(fileNames != null) {
             Arrays.sort(fileNames);
-        } else {
+        }
+        else {
             fileNames = new String[0];
         }
         return fileNames;
@@ -862,14 +842,14 @@ public class FileManager {
         String[][] files = new String[nDataDirs][];
         int nTotalFiles = 0;
         int i = 0;
-        for (File envDir : dbEnvDataDirs) {
+        for(File envDir : dbEnvDataDirs) {
             files[i] = envDir.list(filter);
 
             String envDirName = envDir.toString();
             String dataDirName = envDirName.
-                substring(envDirName.lastIndexOf(File.separator) + 1);
+                    substring(envDirName.lastIndexOf(File.separator) + 1);
 
-            for (int j = 0; j < files[i].length; j += 1) {
+            for(int j = 0; j < files[i].length; j += 1) {
                 files[i][j] = dataDirName + File.separator + files[i][j];
             }
 
@@ -877,14 +857,14 @@ public class FileManager {
             i++;
         }
 
-        if (nTotalFiles == 0) {
+        if(nTotalFiles == 0) {
             return new String[0];
         }
 
         String[] ret = new String[nTotalFiles];
         i = 0;
-        for (String[] envFiles : files) {
-            for (String envFile : envFiles) {
+        for(String[] envFiles : files) {
+            for(String envFile : envFiles) {
                 ret[i++] = envFile;
             }
         }
@@ -895,76 +875,77 @@ public class FileManager {
 
     private void checkNoDataDirs() {
         String[] dataDirNames =
-            dbEnvHome.list(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
+                dbEnvHome.list(new FilenameFilter() {
+                                   public boolean accept(File dir, String name) {
                         /* We'll validate the subdirNum later. */
-                        return name != null &&
-                            name.length() == "dataNNN".length() &&
-                            name.startsWith("data");
-                    }
-                }
+                                       return name != null &&
+                                               name.length() == "dataNNN".length() &&
+                                               name.startsWith("data");
+                                   }
+                               }
                 );
-        if (dataDirNames != null && dataDirNames.length != 0) {
+        if(dataDirNames != null && dataDirNames.length != 0) {
             throw EnvironmentFailureException.unexpectedState
-                (EnvironmentParams.LOG_N_DATA_DIRECTORIES.getName() +
-                 " was not set and expected to find no" +
-                 " data directories, but found " +
-                 dataDirNames.length + " data directories instead.");
+                    (EnvironmentParams.LOG_N_DATA_DIRECTORIES.getName() +
+                            " was not set and expected to find no" +
+                            " data directories, but found " +
+                            dataDirNames.length + " data directories instead.");
         }
     }
 
     public File[] gatherDataDirs() {
         String[] dataDirNames =
-            dbEnvHome.list(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
+                dbEnvHome.list(new FilenameFilter() {
+                                   public boolean accept(File dir, String name) {
                         /* We'll validate the subdirNum later. */
-                        return name != null &&
-                            name.length() == "dataNNN".length() &&
-                            name.startsWith("data");
-                    }
-                }
+                                       return name != null &&
+                                               name.length() == "dataNNN".length() &&
+                                               name.startsWith("data");
+                                   }
+                               }
                 );
-        if (dataDirNames != null) {
+        if(dataDirNames != null) {
             Arrays.sort(dataDirNames);
-        } else {
+        }
+        else {
             dataDirNames = new String[0];
         }
 
-        if (dataDirNames.length != nDataDirs) {
+        if(dataDirNames.length != nDataDirs) {
             throw EnvironmentFailureException.unexpectedState
-                (EnvironmentParams.LOG_N_DATA_DIRECTORIES.getName() +
-                 " was set and expected to find " + nDataDirs +
-                 " data directories, but found " +
-                 dataDirNames.length + " instead.");
+                    (EnvironmentParams.LOG_N_DATA_DIRECTORIES.getName() +
+                            " was set and expected to find " + nDataDirs +
+                            " data directories, but found " +
+                            dataDirNames.length + " instead.");
         }
 
         int ddNum = 1;
         File[] dataDirs = new File[nDataDirs];
-        for (String fn : dataDirNames) {
+        for(String fn : dataDirNames) {
             String subdirNumStr = fn.substring(4);
             try {
                 int subdirNum = Integer.parseInt(subdirNumStr);
-                if (subdirNum != ddNum) {
+                if(subdirNum != ddNum) {
                     throw EnvironmentFailureException.unexpectedState
-                        ("Expected to find data subdir: data" +
-                         paddedDirNum(ddNum) +
-                         " but found data" +
-                         subdirNumStr + " instead.");
+                            ("Expected to find data subdir: data" +
+                                    paddedDirNum(ddNum) +
+                                    " but found data" +
+                                    subdirNumStr + " instead.");
 
                 }
 
                 File dataDir = new File(dbEnvHome, fn);
-                if (!dataDir.exists()) {
+                if(!dataDir.exists()) {
                     throw EnvironmentFailureException.unexpectedState
-                        ("Data dir: " + dataDir + " doesn't exist.");
+                            ("Data dir: " + dataDir + " doesn't exist.");
                 }
-                if (!dataDir.isDirectory()) {
+                if(!dataDir.isDirectory()) {
                     throw EnvironmentFailureException.unexpectedState
-                        ("Data dir: " + dataDir + " is not a directory.");
+                            ("Data dir: " + dataDir + " is not a directory.");
                 }
                 dataDirs[ddNum - 1] = dataDir;
-            } catch (NumberFormatException E) {
-                    throw EnvironmentFailureException.unexpectedState
+            } catch(NumberFormatException E) {
+                throw EnvironmentFailureException.unexpectedState
                         ("Illegal data subdir: data" + subdirNumStr);
             }
             ddNum++;
@@ -982,21 +963,21 @@ public class FileManager {
      * @return the full file name and path for the nth JE file.
      */
     String[] getFullFileNames(long fileNum) {
-        if (includeDeletedFiles) {
+        if(includeDeletedFiles) {
             int nSuffixes = JE_AND_DEL_SUFFIXES.length;
             String[] ret = new String[nSuffixes];
-            for (int i = 0; i < nSuffixes; i++) {
+            for(int i = 0; i < nSuffixes; i++) {
                 ret[i] = getFullFileName(fileNum, JE_AND_DEL_SUFFIXES[i]);
             }
             return ret;
         }
-        return new String[] { getFullFileName(fileNum, JE_SUFFIX) };
+        return new String[]{getFullFileName(fileNum, JE_SUFFIX)};
     }
 
     private File getDataDir(long fileNum) {
         return (nDataDirs == 0) ?
-            dbEnvHome :
-            dbEnvDataDirs[((int) (fileNum % nDataDirs))];
+                dbEnvHome :
+                dbEnvDataDirs[((int) (fileNum % nDataDirs))];
     }
 
     public String getFullFileName(long fileNum) {
@@ -1022,27 +1003,7 @@ public class FileManager {
         String fileNum = fileName.substring(0, suffixStartPos);
 
         return getFullFileName
-            (Long.valueOf(Long.parseLong(fileNum, 16)), suffix);
-    }
-
-    /**
-     * @return the file name for the nth file.
-     */
-    public static String getFileName(long fileNum, String suffix) {
-        return (getFileNumberString(fileNum) + suffix);
-    }
-
-    /** @return the file name for the nth log (*.jdb) file. */
-    public static String getFileName(long fileNum) {
-        return getFileName(fileNum, JE_SUFFIX);
-    }
-
-    /**
-     * HexFormatter generates a 0 padded string starting with 0x.  We want
-     * the right most 8 digits, so start at 10.
-     */
-    private static String getFileNumberString(long fileNum) {
-        return HexFormatter.formatLong(fileNum).substring(10);
+                (Long.valueOf(Long.parseLong(fileNum, 16)), suffix);
     }
 
     /**
@@ -1050,7 +1011,7 @@ public class FileManager {
      * can occur on Windows if the file was recently closed.
      */
     public boolean renameFile(final long fileNum, final String newSuffix)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         return renameFile(fileNum, newSuffix, null) != null;
     }
@@ -1060,38 +1021,35 @@ public class FileManager {
      * NNNNNNNN.suffix.1, etc. Used for deleting files or moving corrupt files
      * aside.
      *
-     * @param fileNum the file we want to move
-     *
+     * @param fileNum   the file we want to move
      * @param newSuffix the new file suffix
-     *
-     * @param subDir the data directory sub-directory to rename the file into.
-     * The subDir must already exist. May be null to leave the file in its
-     * current data directory.
-     *
+     * @param subDir    the data directory sub-directory to rename the file into.
+     *                  The subDir must already exist. May be null to leave the file in its
+     *                  current data directory.
      * @return renamed File if successful, or null if File.renameTo returns
      * false, which can occur on Windows if the file was recently closed.
      */
     public File renameFile(final long fileNum,
                            final String newSuffix,
                            final String subDir)
-        throws IOException {
+            throws IOException {
 
         final File oldDir = getDataDir(fileNum);
         final String oldName = getFileName(fileNum);
         final File oldFile = new File(oldDir, oldName);
 
         final File newDir =
-            (subDir != null) ? (new File(oldDir, subDir)) : oldDir;
+                (subDir != null) ? (new File(oldDir, subDir)) : oldDir;
 
         final String newName = getFileName(fileNum, newSuffix);
 
         String generation = "";
         int repeatNum = 0;
 
-        while (true) {
+        while(true) {
             final File newFile = new File(newDir, newName + generation);
 
-            if (newFile.exists()) {
+            if(newFile.exists()) {
                 repeatNum++;
                 generation = "." + repeatNum;
                 continue;
@@ -1103,8 +1061,8 @@ public class FileManager {
              * old file and then create the new file. So we should also
              * record the file rename action here.
              */
-            if (fdd != null) {
-                if (oldName.endsWith(FileManager.JE_SUFFIX)) {
+            if(fdd != null) {
+                if(oldName.endsWith(FileManager.JE_SUFFIX)) {
                     fdd.addDeletedFile(oldName);
                 }
             }
@@ -1120,12 +1078,11 @@ public class FileManager {
      * Delete log file NNNNNNNN.
      *
      * @param fileNum the file we want to move
-     *
      * @return true if successful, false if File.delete returns false, which
      * can occur on Windows if the file was recently closed.
      */
     public boolean deleteFile(final long fileNum)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         final String fileName = getFullFileNames(fileNum)[0];
 
@@ -1136,8 +1093,8 @@ public class FileManager {
          * The file name gotten from WatchKey is the relative file name,
          * so we should also get the relative file name here.
          */
-        if (fdd != null) {
-            if (fileName.endsWith(FileManager.JE_SUFFIX)) {
+        if(fdd != null) {
+            if(fileName.endsWith(FileManager.JE_SUFFIX)) {
                 final int index = fileName.lastIndexOf(File.separator) + 1;
                 final String relativeFileName = fileName.substring(index);
                 fdd.addDeletedFile(relativeFileName);
@@ -1153,19 +1110,19 @@ public class FileManager {
      * Returns the log version for the given file.
      */
     public int getFileLogVersion(long fileNum)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             FileHandle handle = getFileHandle(fileNum);
             int logVersion = handle.getLogVersion();
             handle.release();
             return logVersion;
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
-        } catch (ChecksumException e) {
+                    (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
+                    (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
         }
     }
 
@@ -1180,7 +1137,7 @@ public class FileManager {
      * @return the file handle for the existing or newly created file
      */
     public FileHandle getFileHandle(long fileNum)
-        throws FileNotFoundException, ChecksumException, DatabaseException {
+            throws FileNotFoundException, ChecksumException, DatabaseException {
 
         /* Check the file cache for this file. */
         Long fileId = Long.valueOf(fileNum);
@@ -1190,7 +1147,7 @@ public class FileManager {
          * Loop until we get an open FileHandle.
          */
         try {
-            while (true) {
+            while(true) {
 
                 /*
                  * The file cache is intentionally not latched here so that
@@ -1211,17 +1168,17 @@ public class FileManager {
                  * to open the same file, which is necessary.
                  */
                 boolean newHandle = false;
-                if (fileHandle == null) {
-                    synchronized (fileCache) {
+                if(fileHandle == null) {
+                    synchronized(fileCache) {
                         fileHandle = fileCache.get(fileId);
-                        if (fileHandle == null) {
+                        if(fileHandle == null) {
                             newHandle = true;
                             fileHandle = addFileHandle(fileId);
                         }
                     }
                 }
 
-                if (newHandle) {
+                if(newHandle) {
 
                     /*
                      * Open the file with the fileHandle latched.  It was
@@ -1230,22 +1187,23 @@ public class FileManager {
                     boolean success = false;
                     try {
                         openFileHandle(fileHandle, FileMode.READ_MODE,
-                                       null /*existingHandle*/);
+                                null /*existingHandle*/);
                         success = true;
                     } finally {
-                        if (!success) {
+                        if(!success) {
                             /* An exception is in flight -- clean up. */
                             fileHandle.release();
                             clearFileCache(fileNum);
                         }
                     }
-                } else {
+                }
+                else {
 
                     /*
                      * The handle was found in the cache.  Latch the fileHandle
                      * before checking getFile below and returning.
                      */
-                    if (!fileHandle.latchNoWait()) {
+                    if(!fileHandle.latchNoWait()) {
 
                         /*
                          * But the handle was latched.  Rather than wait, let's
@@ -1254,21 +1212,21 @@ public class FileManager {
                          */
                         final FileHandle existingHandle = fileHandle;
                         fileHandle = new FileHandle(
-                            envImpl, fileId, getFileNumberString(fileId)) {
-                                @Override
-                                public void release()
+                                envImpl, fileId, getFileNumberString(fileId)) {
+                            @Override
+                            public void release()
                                     throws DatabaseException {
 
-                                    try {
-                                        close();
-                                    } catch (IOException E) {
-                                        // Ignore
-                                    }
+                                try {
+                                    close();
+                                } catch(IOException E) {
+                                    // Ignore
                                 }
-                            };
+                            }
+                        };
 
                         openFileHandle(fileHandle, FileMode.READ_MODE,
-                                       existingHandle);
+                                existingHandle);
                     }
                 }
 
@@ -1277,40 +1235,46 @@ public class FileManager {
                  * latch, so we have to test that the handle is still valid.
                  * If it's not, then loop back and try again.
                  */
-                if (fileHandle.getFile() == null) {
+                if(fileHandle.getFile() == null) {
                     fileHandle.release();
-                } else {
+                }
+                else {
                     break;
                 }
             }
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             /* Handle at higher levels. */
             throw e;
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_READ, e);
+                    (envImpl, EnvironmentFailureReason.LOG_READ, e);
         }
 
         return fileHandle;
     }
 
+    /*
+     * Support for writing new log entries
+     */
+
     /**
      * Creates a new FileHandle and adds it to the cache, but does not open
      * the file.
+     *
      * @return the latched FileHandle.
      */
     private FileHandle addFileHandle(Long fileNum)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         FileHandle fileHandle =
-            new FileHandle(envImpl, fileNum, getFileNumberString(fileNum));
+                new FileHandle(envImpl, fileNum, getFileNumberString(fileNum));
         fileCache.add(fileNum, fileHandle);
         fileHandle.latch();
         return fileHandle;
     }
 
     private FileMode getAppropriateReadWriteMode() {
-        if (useODSYNC) {
+        if(useODSYNC) {
             return FileMode.READWRITE_ODSYNC_MODE;
         }
         return FileMode.READWRITE_MODE;
@@ -1321,10 +1285,10 @@ public class FileManager {
      * cache.
      */
     private FileHandle makeFileHandle(long fileNum, FileMode mode)
-        throws FileNotFoundException, ChecksumException {
+            throws FileNotFoundException, ChecksumException {
 
         FileHandle fileHandle =
-            new FileHandle(envImpl, fileNum, getFileNumberString(fileNum));
+                new FileHandle(envImpl, fileNum, getFileNumberString(fileNum));
         openFileHandle(fileHandle, mode, null /*existingHandle*/);
         return fileHandle;
     }
@@ -1333,13 +1297,13 @@ public class FileManager {
      * Opens the file for the given handle and initializes it.
      *
      * @param existingHandle is an already open handle for the same file or
-     * null.  If non-null it is used to avoid the cost of reading the file
-     * header.
+     *                       null.  If non-null it is used to avoid the cost of reading the file
+     *                       header.
      */
     private void openFileHandle(FileHandle fileHandle,
                                 FileMode mode,
                                 FileHandle existingHandle)
-        throws FileNotFoundException, ChecksumException {
+            throws FileNotFoundException, ChecksumException {
 
         nFileOpens.increment();
         long fileNum = fileHandle.getFileNum();
@@ -1355,15 +1319,15 @@ public class FileManager {
              * we're configured to look for all types, we'll look for N.del.
              */
             FileNotFoundException FNFE = null;
-            for (String fileName2 : fileNames) {
+            for(String fileName2 : fileNames) {
                 fileName = fileName2;
                 try {
                     newFile = fileFactory.createFile(dbEnvHome, fileName,
-                                                     mode.getModeValue());
+                            mode.getModeValue());
                     break;
-                } catch (FileNotFoundException e) {
+                } catch(FileNotFoundException e) {
                     /* Save the first exception thrown. */
-                    if (FNFE == null) {
+                    if(FNFE == null) {
                         FNFE = e;
                     }
                 }
@@ -1373,8 +1337,8 @@ public class FileManager {
              * If we didn't find the file or couldn't create it, rethrow the
              * exception.
              */
-            if (newFile == null) {
-        	assert FNFE != null;
+            if(newFile == null) {
+                assert FNFE != null;
                 throw FNFE;
             }
 
@@ -1383,9 +1347,9 @@ public class FileManager {
              * validate the header.  Note that the log version is zero if the
              * existing handle is not fully initialized.
              */
-            if (existingHandle != null) {
+            if(existingHandle != null) {
                 final int logVersion = existingHandle.getLogVersion();
-                if (logVersion > 0) {
+                if(logVersion > 0) {
                     fileHandle.init(newFile, logVersion);
                     success = true;
                     return;
@@ -1394,52 +1358,53 @@ public class FileManager {
 
             int logVersion = LogEntryType.LOG_VERSION;
 
-            if (newFile.length() == 0) {
+            if(newFile.length() == 0) {
 
                 /*
                  * If the file is empty, reinitialize it if we can. If not,
                  * send the file handle back up; the calling code will deal
                  * with the fact that there's nothing there.
                  */
-                if (mode.isWritable()) {
+                if(mode.isWritable()) {
                     /* An empty file, write a header. */
                     long lastLsn = DbLsn.longToLsn(perFileLastUsedLsn.remove
-                       (Long.valueOf(fileNum - 1)));
+                            (Long.valueOf(fileNum - 1)));
                     long headerPrevOffset = 0;
-                    if (lastLsn != DbLsn.NULL_LSN) {
+                    if(lastLsn != DbLsn.NULL_LSN) {
                         headerPrevOffset = DbLsn.getFileOffset(lastLsn);
                     }
-                    if ((headerPrevOffset == 0) &&
-                        (fileNum > 1) &&
-                        syncAtFileEnd) {
+                    if((headerPrevOffset == 0) &&
+                            (fileNum > 1) &&
+                            syncAtFileEnd) {
                         /* Get more info if this happens again. [#20732] */
                         throw EnvironmentFailureException.unexpectedState
-                            (envImpl,
-                             "Zero prevOffset fileNum=0x" +
-                             Long.toHexString(fileNum) +
-                             " lastLsn=" + DbLsn.getNoFormatString(lastLsn) +
-                             " perFileLastUsedLsn=" + perFileLastUsedLsn +
-                             " fileLen=" + newFile.length());
+                                (envImpl,
+                                        "Zero prevOffset fileNum=0x" +
+                                                Long.toHexString(fileNum) +
+                                                " lastLsn=" + DbLsn.getNoFormatString(lastLsn) +
+                                                " perFileLastUsedLsn=" + perFileLastUsedLsn +
+                                                " fileLen=" + newFile.length());
                     }
                     FileHeader fileHeader =
-                        new FileHeader(fileNum, headerPrevOffset);
+                            new FileHeader(fileNum, headerPrevOffset);
                     writeFileHeader(newFile, fileName, fileHeader, fileNum);
                 }
-            } else {
+            }
+            else {
                 /* A non-empty file, check the header */
                 logVersion =
-                    readAndValidateFileHeader(newFile, fileName, fileNum);
+                        readAndValidateFileHeader(newFile, fileName, fileNum);
             }
             fileHandle.init(newFile, logVersion);
             success = true;
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             /* Handle at higher levels. */
             throw e;
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_READ,
-                 "Couldn't open file " + fileName, e);
-        } catch (DatabaseException e) {
+                    (envImpl, EnvironmentFailureReason.LOG_READ,
+                            "Couldn't open file " + fileName, e);
+        } catch(DatabaseException e) {
 
             /*
              * Let this exception go as a checksum exception, so it sets the
@@ -1449,7 +1414,7 @@ public class FileManager {
             e.addErrorMessage("Couldn't open file " + fileName);
             throw e;
         } finally {
-            if (!success) {
+            if(!success) {
                 closeFileInErrorCase(newFile);
             }
         }
@@ -1460,24 +1425,23 @@ public class FileManager {
      */
     private void closeFileInErrorCase(RandomAccessFile file) {
         try {
-            if (file != null) {
+            if(file != null) {
                 file.close();
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
         }
     }
 
     /**
      * Read the given JE log file and validate the header.
      *
-     * @throws DatabaseException if the file header isn't valid
-     *
      * @return file header log version.
+     * @throws DatabaseException if the file header isn't valid
      */
     private int readAndValidateFileHeader(RandomAccessFile file,
                                           String fileName,
                                           long fileNum)
-        throws ChecksumException, DatabaseException {
+            throws ChecksumException, DatabaseException {
 
         /*
          * Read the file header from this file. It's always the first log
@@ -1489,8 +1453,8 @@ public class FileManager {
          */
         LogManager logManager = envImpl.getLogManager();
         LogEntry headerEntry = logManager.getLogEntryAllowChecksumException
-            (DbLsn.makeLsn(fileNum, 0), file,
-             LogEntryType.UNKNOWN_FILE_HEADER_VERSION);
+                (DbLsn.makeLsn(fileNum, 0), file,
+                        LogEntryType.UNKNOWN_FILE_HEADER_VERSION);
         FileHeader header = (FileHeader) headerEntry.getMainItem();
         return header.validate(envImpl, fileName, fileNum);
     }
@@ -1502,7 +1466,7 @@ public class FileManager {
                                  String fileName,
                                  FileHeader header,
                                  long fileNum)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Fail loudly if the environment is invalid. */
         envImpl.checkIfInvalid();
@@ -1510,21 +1474,21 @@ public class FileManager {
         /*
          * Fail silent if the environment is not open.
          */
-        if (envImpl.mayNotWrite()) {
+        if(envImpl.mayNotWrite()) {
             return;
         }
 
         /* Write file header into this buffer in the usual log entry format. */
         LogEntry headerLogEntry =
-            new FileHeaderEntry(LogEntryType.LOG_FILE_HEADER, header);
+                new FileHeaderEntry(LogEntryType.LOG_FILE_HEADER, header);
         ByteBuffer headerBuf = envImpl.getLogManager().
-            putIntoBuffer(headerLogEntry,
-                          0); // prevLogEntryOffset
+                putIntoBuffer(headerLogEntry,
+                        0); // prevLogEntryOffset
 
         /* Write the buffer into the channel. */
         int bytesWritten;
         try {
-            if (LOGWRITE_EXCEPTION_TESTING) {
+            if(LOGWRITE_EXCEPTION_TESTING) {
                 generateLogWriteException(file, headerBuf, 0, fileNum);
             }
 
@@ -1534,28 +1498,28 @@ public class FileManager {
              * header. [#20732]
              */
             bytesWritten = writeToFile(file, headerBuf, 0, fileNum,
-                                       true /*flushRequired*/);
+                    true /*flushRequired*/);
 
-        } catch (ClosedChannelException e) {
+        } catch(ClosedChannelException e) {
 
             /*
              * The channel should never be closed. It may be closed because
              * of an interrupt received by another thread. See SR [#10463]
              */
             throw new ThreadInterruptedException
-                (envImpl, "Channel closed, may be due to thread interrupt", e);
-        } catch (IOException e) {
+                    (envImpl, "Channel closed, may be due to thread interrupt", e);
+        } catch(IOException e) {
             /* Possibly an out of disk exception. */
             throw new LogWriteException(envImpl, e);
         }
 
-        if (bytesWritten != headerLogEntry.getSize() +
-            LogEntryHeader.MIN_HEADER_SIZE) {
+        if(bytesWritten != headerLogEntry.getSize() +
+                LogEntryHeader.MIN_HEADER_SIZE) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                 "File " + fileName +
-                 " was created with an incomplete header. Only " +
-                 bytesWritten + " bytes were written.");
+                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                            "File " + fileName +
+                                    " was created with an incomplete header. Only " +
+                                    bytesWritten + " bytes were written.");
         }
     }
 
@@ -1563,23 +1527,19 @@ public class FileManager {
      * @return the prevOffset field stored in the file header.
      */
     long getFileHeaderPrevOffset(long fileNum)
-        throws ChecksumException, DatabaseException {
+            throws ChecksumException, DatabaseException {
 
         try {
             LogEntry headerEntry =
-                envImpl.getLogManager().getLogEntryAllowChecksumException
-                    (DbLsn.makeLsn(fileNum, 0));
+                    envImpl.getLogManager().getLogEntryAllowChecksumException
+                            (DbLsn.makeLsn(fileNum, 0));
             FileHeader header = (FileHeader) headerEntry.getMainItem();
             return header.getLastEntryInPrevFileOffset();
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+                    (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
         }
     }
-
-    /*
-     * Support for writing new log entries
-     */
 
     /**
      * @return the file offset of the last LSN that was used. For constructing
@@ -1602,8 +1562,8 @@ public class FileManager {
 
         boolean flippedFiles = false;
 
-        if (forceNewFile ||
-            (DbLsn.getFileOffset(nextAvailableLsn) + size) > maxFileSize) {
+        if(forceNewFile ||
+                (DbLsn.getFileOffset(nextAvailableLsn) + size) > maxFileSize) {
 
             forceNewFile = false;
 
@@ -1611,38 +1571,41 @@ public class FileManager {
             currentFileNum++;
 
             /* Remember the last used LSN of the previous file. */
-            if (lastUsedLsn != DbLsn.NULL_LSN) {
+            if(lastUsedLsn != DbLsn.NULL_LSN) {
                 perFileLastUsedLsn.put
-                    (Long.valueOf(DbLsn.getFileNumber(lastUsedLsn)),
-                     Long.valueOf(lastUsedLsn));
+                        (Long.valueOf(DbLsn.getFileNumber(lastUsedLsn)),
+                                Long.valueOf(lastUsedLsn));
             }
             prevOffset = 0;
             lastUsedLsn =
-                DbLsn.makeLsn(currentFileNum, firstLogEntryOffset());
+                    DbLsn.makeLsn(currentFileNum, firstLogEntryOffset());
             flippedFiles = true;
-        } else {
-            if (lastUsedLsn == DbLsn.NULL_LSN) {
+        }
+        else {
+            if(lastUsedLsn == DbLsn.NULL_LSN) {
                 prevOffset = 0;
-            } else {
+            }
+            else {
                 prevOffset = DbLsn.getFileOffset(lastUsedLsn);
             }
             lastUsedLsn = nextAvailableLsn;
         }
         nextAvailableLsn =
-            DbLsn.makeLsn(DbLsn.getFileNumber(lastUsedLsn),
-                          (DbLsn.getFileOffset(lastUsedLsn) + size));
+                DbLsn.makeLsn(DbLsn.getFileNumber(lastUsedLsn),
+                        (DbLsn.getFileOffset(lastUsedLsn) + size));
 
         return flippedFiles;
     }
 
     /**
      * Write out a log buffer to the file.
-     * @param fullBuffer buffer to write
+     *
+     * @param fullBuffer      buffer to write
      * @param flushWriteQueue true if this write can not be queued on the
-     * Write Queue.
+     *                        Write Queue.
      */
     void writeLogBuffer(LogBuffer fullBuffer, boolean flushWriteQueue)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Fail loudly if the environment is invalid. */
         envImpl.checkIfInvalid();
@@ -1650,7 +1613,7 @@ public class FileManager {
         /*
          * Fail silent if the environment is not open.
          */
-        if (envImpl.mayNotWrite()) {
+        if(envImpl.mayNotWrite()) {
             return;
         }
 
@@ -1661,10 +1624,10 @@ public class FileManager {
          * Is there anything in this write buffer? We could have been called by
          * the environment shutdown, and nothing is actually in the buffer.
          */
-        if (firstLsn != DbLsn.NULL_LSN) {
+        if(firstLsn != DbLsn.NULL_LSN) {
 
             RandomAccessFile file =
-                endOfLog.getWritableFile(DbLsn.getFileNumber(firstLsn), true);
+                    endOfLog.getWritableFile(DbLsn.getFileNumber(firstLsn), true);
             ByteBuffer data = fullBuffer.getDataBuffer();
 
             try {
@@ -1674,33 +1637,33 @@ public class FileManager {
                  * a header [#11915] [#12616].
                  */
                 assert fullBuffer.getRewriteAllowed() ||
-                    (DbLsn.getFileOffset(firstLsn) >= file.length() ||
-                     file.length() == firstLogEntryOffset()) :
+                        (DbLsn.getFileOffset(firstLsn) >= file.length() ||
+                                file.length() == firstLogEntryOffset()) :
                         "FileManager would overwrite non-empty file 0x" +
-                        Long.toHexString(DbLsn.getFileNumber(firstLsn)) +
-                        " lsnOffset=0x" +
-                        Long.toHexString(DbLsn.getFileOffset(firstLsn)) +
-                        " fileLength=0x" +
-                        Long.toHexString(file.length());
+                                Long.toHexString(DbLsn.getFileNumber(firstLsn)) +
+                                " lsnOffset=0x" +
+                                Long.toHexString(DbLsn.getFileOffset(firstLsn)) +
+                                " fileLength=0x" +
+                                Long.toHexString(file.length());
 
-                if (LOGWRITE_EXCEPTION_TESTING) {
+                if(LOGWRITE_EXCEPTION_TESTING) {
                     generateLogWriteException
-                        (file, data, DbLsn.getFileOffset(firstLsn),
-                         DbLsn.getFileNumber(firstLsn));
+                            (file, data, DbLsn.getFileOffset(firstLsn),
+                                    DbLsn.getFileNumber(firstLsn));
                 }
                 writeToFile(file, data, DbLsn.getFileOffset(firstLsn),
-                            DbLsn.getFileNumber(firstLsn),
-                            flushWriteQueue);
-            } catch (ClosedChannelException e) {
+                        DbLsn.getFileNumber(firstLsn),
+                        flushWriteQueue);
+            } catch(ClosedChannelException e) {
 
                 /*
                  * The file should never be closed. It may be closed because
                  * of an interrupt received by another thread. See SR [#10463].
                  */
                 throw new ThreadInterruptedException
-                    (envImpl, "File closed, may be due to thread interrupt",
-                     e);
-            } catch (IOException e) {
+                        (envImpl, "File closed, may be due to thread interrupt",
+                                e);
+            } catch(IOException e) {
                 throw new LogWriteException(envImpl, e);
             }
 
@@ -1716,7 +1679,7 @@ public class FileManager {
                             long destOffset,
                             long fileNum,
                             boolean flushWriteQueue)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         int totalBytesWritten = 0;
 
@@ -1725,17 +1688,18 @@ public class FileManager {
         int pos = data.position();
         int size = data.limit() - pos;
 
-        if (lastFileNumberTouched == fileNum &&
-            (Math.abs(destOffset - lastFileTouchedOffset) <
-             ADJACENT_TRACK_SEEK_DELTA)) {
+        if(lastFileNumberTouched == fileNum &&
+                (Math.abs(destOffset - lastFileTouchedOffset) <
+                        ADJACENT_TRACK_SEEK_DELTA)) {
             nSequentialWrites.increment();
             nSequentialWriteBytes.add(size);
-        } else {
+        }
+        else {
             nRandomWrites.increment();
             nRandomWriteBytes.add(size);
         }
 
-        if (VERIFY_CHECKSUMS) {
+        if(VERIFY_CHECKSUMS) {
             verifyChecksums(data, destOffset, "pre-write");
         }
 
@@ -1752,34 +1716,34 @@ public class FileManager {
          * block anyway.  In that case, queue the write operation.
          */
         boolean fsyncLatchAcquired =
-            endOfLog.fsyncFileSynchronizer.tryLock();
+                endOfLog.fsyncFileSynchronizer.tryLock();
         boolean enqueueSuccess = false;
-        if (!fsyncLatchAcquired &&
-            useWriteQueue &&
-            !flushWriteQueue) {
+        if(!fsyncLatchAcquired &&
+                useWriteQueue &&
+                !flushWriteQueue) {
             enqueueSuccess =
-                endOfLog.enqueueWrite(fileNum, data.array(), destOffset,
-                                      pos + data.arrayOffset(), size);
+                    endOfLog.enqueueWrite(fileNum, data.array(), destOffset,
+                            pos + data.arrayOffset(), size);
         }
 
-        if (!enqueueSuccess) {
-            if (!fsyncLatchAcquired) {
+        if(!enqueueSuccess) {
+            if(!fsyncLatchAcquired) {
                 endOfLog.fsyncFileSynchronizer.lock();
             }
             try {
-                if (useWriteQueue) {
+                if(useWriteQueue) {
                     endOfLog.dequeuePendingWrites1();
                 }
 
-                synchronized (file) {
+                synchronized(file) {
 
                     file.seek(destOffset);
                     file.write(data.array(), pos + data.arrayOffset(), size);
 
-                    if (VERIFY_CHECKSUMS) {
+                    if(VERIFY_CHECKSUMS) {
                         file.seek(destOffset);
                         file.read(
-                            data.array(), pos + data.arrayOffset(), size);
+                                data.array(), pos + data.arrayOffset(), size);
                         verifyChecksums(data, destOffset, "post-write");
                     }
                 }
@@ -1796,18 +1760,18 @@ public class FileManager {
     }
 
     private void bumpWriteCount(final String debugMsg)
-        throws IOException {
+            throws IOException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("Write: " + WRITE_COUNT + " " + debugMsg);
         }
 
-        if (++WRITE_COUNT >= STOP_ON_WRITE_COUNT &&
-            WRITE_COUNT < (STOP_ON_WRITE_COUNT + N_BAD_WRITES)) {
-            if (THROW_ON_WRITE) {
+        if(++WRITE_COUNT >= STOP_ON_WRITE_COUNT &&
+                WRITE_COUNT < (STOP_ON_WRITE_COUNT + N_BAD_WRITES)) {
+            if(THROW_ON_WRITE) {
                 throw new IOException
-                    ("IOException generated for testing: " + WRITE_COUNT +
-                     " " + debugMsg);
+                        ("IOException generated for testing: " + WRITE_COUNT +
+                                " " + debugMsg);
             }
             Runtime.getRuntime().halt(0xff);
         }
@@ -1823,9 +1787,9 @@ public class FileManager {
                       ByteBuffer readBuffer,
                       long offset,
                       long fileNo)
-        throws DatabaseException {
+            throws DatabaseException {
         readFromFile(file, readBuffer, offset, fileNo,
-                     true /* dataKnownToBeInFile */);
+                true /* dataKnownToBeInFile */);
     }
 
     /**
@@ -1839,7 +1803,7 @@ public class FileManager {
                          long offset,
                          long fileNo,
                          boolean dataKnownToBeInFile)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * All IOExceptions on read turn into EnvironmentFailureExceptions
@@ -1851,8 +1815,8 @@ public class FileManager {
              * Check if there's a pending write(s) in the write queue for this
              * fileNo/offset and if so, use it to fulfill this read request.
              */
-            if (useWriteQueue &&
-                endOfLog.checkWriteCache(readBuffer, offset, fileNo)) {
+            if(useWriteQueue &&
+                    endOfLog.checkWriteCache(readBuffer, offset, fileNo)) {
                 return true;
             }
 
@@ -1876,7 +1840,7 @@ public class FileManager {
              * entries fall under (3).
              */
             boolean readThisFile = true;
-            if (!dataKnownToBeInFile) {
+            if(!dataKnownToBeInFile) {
 
                 /*
                  * Callers who are not sure whether the desired data is in this
@@ -1886,23 +1850,23 @@ public class FileManager {
                 readThisFile = (offset < file.length());
             }
 
-            if (readThisFile) {
+            if(readThisFile) {
                 readFromFileInternal(file, readBuffer, offset, fileNo);
                 return true;
             }
 
             return false;
-        } catch (ClosedChannelException e) {
+        } catch(ClosedChannelException e) {
 
             /*
              * The channel should never be closed. It may be closed because
              * of an interrupt received by another thread. See SR [#10463]
              */
             throw new ThreadInterruptedException
-                (envImpl, "Channel closed, may be due to thread interrupt", e);
-        } catch (IOException e) {
+                    (envImpl, "Channel closed, may be due to thread interrupt", e);
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_READ, e);
+                    (envImpl, EnvironmentFailureReason.LOG_READ, e);
         }
     }
 
@@ -1910,7 +1874,7 @@ public class FileManager {
                                       ByteBuffer readBuffer,
                                       long offset,
                                       long fileNum)
-        throws IOException {
+            throws IOException {
 
         /*
          * Perform a RandomAccessFile read and update the buffer position.
@@ -1918,16 +1882,17 @@ public class FileManager {
          * have a backing array.  Synchronization on the file object is needed
          * because two threads may call seek() on the same file object.
          */
-        synchronized (file) {
+        synchronized(file) {
             int pos = readBuffer.position();
             int size = readBuffer.limit() - pos;
 
-            if (lastFileNumberTouched == fileNum &&
-                (Math.abs(offset - lastFileTouchedOffset) <
-                 ADJACENT_TRACK_SEEK_DELTA)) {
+            if(lastFileNumberTouched == fileNum &&
+                    (Math.abs(offset - lastFileTouchedOffset) <
+                            ADJACENT_TRACK_SEEK_DELTA)) {
                 nSequentialReads.increment();
                 nSequentialReadBytes.add(size);
-            } else {
+            }
+            else {
                 nRandomReads.increment();
                 nRandomReadBytes.add(size);
             }
@@ -1935,9 +1900,9 @@ public class FileManager {
             file.seek(offset);
 
             int bytesRead = file.read(readBuffer.array(),
-                                      pos + readBuffer.arrayOffset(),
-                                      size);
-            if (bytesRead > 0) {
+                    pos + readBuffer.arrayOffset(),
+                    size);
+            if(bytesRead > 0) {
                 readBuffer.position(pos + bytesRead);
             }
 
@@ -1950,7 +1915,7 @@ public class FileManager {
 
         int curPos = entryBuffer.position();
 
-        while (entryBuffer.remaining() > 0) {
+        while(entryBuffer.remaining() > 0) {
 
             int recStartPos = entryBuffer.position();
 
@@ -1958,8 +1923,8 @@ public class FileManager {
 
             try {
                 header = new LogEntryHeader(
-                    entryBuffer, LogEntryType.LOG_VERSION, lsn);
-            } catch (ChecksumException e) {
+                        entryBuffer, LogEntryType.LOG_VERSION, lsn);
+            } catch(ChecksumException e) {
                 System.err.println("ChecksumException in printLogBuffer " + e);
                 break;
             }
@@ -1968,9 +1933,9 @@ public class FileManager {
             int recSize = header.getSize() + header.getItemSize();
 
             System.out.println(
-                "LOGREC " + recType.toStringNoVersion() +
-                " at LSN " + DbLsn.toString(lsn) +
-                " , log buffer offset " + recStartPos);
+                    "LOGREC " + recType.toStringNoVersion() +
+                            " at LSN " + DbLsn.toString(lsn) +
+                            " , log buffer offset " + recStartPos);
 
             lsn += recSize;
 
@@ -1985,16 +1950,16 @@ public class FileManager {
                                  String comment) {
         int curPos = entryBuffer.position();
         try {
-            while (entryBuffer.remaining() > 0) {
+            while(entryBuffer.remaining() > 0) {
                 int recStartPos = entryBuffer.position();
                 /* Write buffer contains current log version entries. */
                 LogEntryHeader header = new LogEntryHeader(
-                    entryBuffer, LogEntryType.LOG_VERSION, lsn);
+                        entryBuffer, LogEntryType.LOG_VERSION, lsn);
                 verifyChecksum(entryBuffer, header, lsn, comment);
                 entryBuffer.position(recStartPos + header.getSize() +
-                                     header.getItemSize());
+                        header.getItemSize());
             }
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             System.err.println("ChecksumException: (" + comment + ") " + e);
             System.err.println("start stack trace");
             e.printStackTrace(System.err);
@@ -2007,7 +1972,7 @@ public class FileManager {
                                 LogEntryHeader header,
                                 long lsn,
                                 String comment)
-        throws ChecksumException {
+            throws ChecksumException {
 
         ChecksumValidator validator = null;
         /* Add header to checksum bytes */
@@ -2023,7 +1988,7 @@ public class FileManager {
          * read didn't get enough.
          */
         int itemSize = header.getItemSize();
-        if (entryBuffer.remaining() < itemSize) {
+        if(entryBuffer.remaining() < itemSize) {
             System.err.println("Couldn't verify checksum (" + comment + ")");
             return;
         }
@@ -2040,13 +2005,13 @@ public class FileManager {
      * FSync the end of the log.
      */
     void syncLogEnd()
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             endOfLog.force();
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new LogWriteException
-                (envImpl, "IOException during fsync", e);
+                    (envImpl, "IOException during fsync", e);
         }
     }
 
@@ -2055,9 +2020,9 @@ public class FileManager {
      * under the log write latch.
      */
     void syncLogEndAndFinishFile()
-        throws DatabaseException, IOException {
+            throws DatabaseException, IOException {
 
-        if (syncAtFileEnd) {
+        if(syncAtFileEnd) {
             syncLogEnd();
         }
         endOfLog.close();
@@ -2084,28 +2049,28 @@ public class FileManager {
         endOfLog.fsyncFileSynchronizer.unlock();
     }
 
-    public void startFileCacheWarmer(final long recoveryStartLsn){
+    public void startFileCacheWarmer(final long recoveryStartLsn) {
         assert fileCacheWarmer == null;
 
         final DbConfigManager cm = envImpl.getConfigManager();
 
         final int warmUpSize = cm.getInt(
-            EnvironmentParams.LOG_FILE_WARM_UP_SIZE);
+                EnvironmentParams.LOG_FILE_WARM_UP_SIZE);
 
-        if (warmUpSize == 0) {
+        if(warmUpSize == 0) {
             return;
         }
 
         final int bufSize = cm.getInt(
-            EnvironmentParams.LOG_FILE_WARM_UP_BUF_SIZE);
+                EnvironmentParams.LOG_FILE_WARM_UP_BUF_SIZE);
 
         fileCacheWarmer = new FileCacheWarmer(
-            envImpl, recoveryStartLsn, lastUsedLsn, warmUpSize, bufSize);
+                envImpl, recoveryStartLsn, lastUsedLsn, warmUpSize, bufSize);
 
         fileCacheWarmer.start();
     }
 
-    private void stopFileCacheWarmer(){
+    private void stopFileCacheWarmer() {
 
         /*
          * Use fcw local var because fileCacheWarmer can be set to null by
@@ -2114,7 +2079,7 @@ public class FileManager {
          */
         final FileCacheWarmer fcw = fileCacheWarmer;
 
-        if (fcw == null) {
+        if(fcw == null) {
             return;
         }
 
@@ -2132,9 +2097,9 @@ public class FileManager {
      * Close all file handles and empty the cache.
      */
     public void clear()
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
-        synchronized (fileCache) {
+        synchronized(fileCache) {
             fileCache.clear();
         }
 
@@ -2145,31 +2110,31 @@ public class FileManager {
      * Clear the file lock.
      */
     public void close()
-        throws IOException {
+            throws IOException {
 
         stopFileCacheWarmer();
 
-        if (envLock != null) {
+        if(envLock != null) {
             envLock.release();
             envLock = null;
         }
 
-        if (exclLock != null) {
+        if(exclLock != null) {
             exclLock.release();
             exclLock = null;
         }
 
-        if (channel != null) {
+        if(channel != null) {
             channel.close();
             channel = null;
         }
 
-        if (lockFile != null) {
+        if(lockFile != null) {
             lockFile.close();
             lockFile = null;
         }
-        
-        if (fdd != null) {
+
+        if(fdd != null) {
             fdd.close();
         }
     }
@@ -2178,7 +2143,7 @@ public class FileManager {
      * Lock the environment.  Return true if the lock was acquired.  If
      * exclusive is false, then this implements a single writer, multiple
      * reader lock.  If exclusive is true, then implement an exclusive lock.
-     *
+     * <p>
      * There is a lock file and there are two regions of the lock file: byte 0,
      * and byte 1.  Byte 0 is the exclusive writer process area of the lock
      * file.  If an environment is opened for write, then it attempts to take
@@ -2186,7 +2151,7 @@ public class FileManager {
      * area of the lock file.  If an environment is opened for read-only, then
      * it attempts to take a shared lock on byte 1.  This is how we implement
      * single writer, multi reader semantics.
-     *
+     * <p>
      * The cleaner, each time it is invoked, attempts to take an exclusive lock
      * on byte 1.  The owning process already either has an exclusive lock on
      * byte 0, or a shared lock on byte 1.  This will necessarily conflict with
@@ -2203,62 +2168,67 @@ public class FileManager {
      */
     public boolean lockEnvironment(boolean rdOnly, boolean exclusive) {
         try {
-            if (checkEnvHomePermissions(rdOnly)) {
+            if(checkEnvHomePermissions(rdOnly)) {
                 return true;
             }
 
-            if (lockFile == null) {
+            if(lockFile == null) {
                 lockFile =
-                    new RandomAccessFile
-                    (new File(dbEnvHome, LOCK_FILE),
-                     FileMode.READWRITE_MODE.getModeValue());
+                        new RandomAccessFile
+                                (new File(dbEnvHome, LOCK_FILE),
+                                        FileMode.READWRITE_MODE.getModeValue());
             }
 
             channel = lockFile.getChannel();
 
             try {
-                if (exclusive) {
+                if(exclusive) {
 
                     /*
                      * To lock exclusive, must have exclusive on
                      * shared reader area (byte 1).
                      */
                     exclLock = channel.tryLock(1, 1, false);
-                    if (exclLock == null) {
+                    if(exclLock == null) {
                         return false;
                     }
                     return true;
                 }
-                if (rdOnly) {
+                if(rdOnly) {
                     envLock = channel.tryLock(1, 1, true);
-                } else {
+                }
+                else {
                     envLock = channel.tryLock(0, 1, false);
                 }
-                if (envLock == null) {
+                if(envLock == null) {
                     return false;
                 }
                 return true;
-            } catch (OverlappingFileLockException e) {
+            } catch(OverlappingFileLockException e) {
                 return false;
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
+                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
         }
     }
 
     public void releaseExclusiveLock()
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
-            if (exclLock != null) {
+            if(exclLock != null) {
                 exclLock.release();
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
+                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
         }
     }
+
+    /**
+     * Return the offset of the first log entry after the file header.
+     */
 
     /**
      * Ensure that if the environment home dir is on readonly media or in a
@@ -2266,45 +2236,45 @@ public class FileManager {
      * access.
      *
      * @return true if the environment home dir is readonly.
-     *
      * @throws IllegalArgumentException via Environment ctor
      */
     public boolean checkEnvHomePermissions(boolean rdOnly)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (nDataDirs == 0) {
+        if(nDataDirs == 0) {
             return checkEnvHomePermissionsSingleEnvDir(dbEnvHome, rdOnly);
-        } else {
+        }
+        else {
             return checkEnvHomePermissionsMultiEnvDir(rdOnly);
         }
     }
 
     private boolean checkEnvHomePermissionsSingleEnvDir(File dbEnvHome,
                                                         boolean rdOnly)
-        throws DatabaseException {
+            throws DatabaseException {
 
         boolean envDirIsReadOnly = !dbEnvHome.canWrite();
-        if (envDirIsReadOnly && !rdOnly) {
+        if(envDirIsReadOnly && !rdOnly) {
 
             /*
              * Use the absolute path in the exception message, to
              * make a mis-specified relative path problem more obvious.
              */
             throw new IllegalArgumentException
-                ("The Environment directory " +
-                 dbEnvHome.getAbsolutePath() +
-                 " is not writable, but the " +
-                 "Environment was opened for read-write access.");
+                    ("The Environment directory " +
+                            dbEnvHome.getAbsolutePath() +
+                            " is not writable, but the " +
+                            "Environment was opened for read-write access.");
         }
 
         return envDirIsReadOnly;
     }
 
     private boolean checkEnvHomePermissionsMultiEnvDir(boolean rdOnly)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        for (File dbEnvDir : dbEnvDataDirs) {
-            if (!checkEnvHomePermissionsSingleEnvDir(dbEnvDir, rdOnly)) {
+        for(File dbEnvDir : dbEnvDataDirs) {
+            if(!checkEnvHomePermissionsSingleEnvDir(dbEnvDir, rdOnly)) {
                 return false;
             }
         }
@@ -2316,18 +2286,18 @@ public class FileManager {
      * Truncate a log at this position. Used by recovery to a timestamp
      * utilities and by recovery to set the end-of-log position, see
      * LastFileReader.setEndOfFile().
-     *
+     * <p>
      * <p>This method forces a new log file to be written next, if the last
      * file (the file truncated to) has an old version in its header. This
      * ensures that when the log is opened by an old version of JE, a version
      * incompatibility will be detected.  [#11243]</p>
      */
     public void truncateSingleFile(long fileNum, long offset)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         try {
             FileHandle handle =
-                makeFileHandle(fileNum, getAppropriateReadWriteMode());
+                    makeFileHandle(fileNum, getAppropriateReadWriteMode());
             RandomAccessFile file = handle.getFile();
 
             try {
@@ -2336,14 +2306,18 @@ public class FileManager {
                 file.close();
             }
 
-            if (handle.isOldHeaderVersion()) {
+            if(handle.isOldHeaderVersion()) {
                 forceNewFile = true;
             }
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
+                    (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
         }
     }
+
+    /*
+     * Unit test support
+     */
 
     /*
      * Truncate all log entries after a specified log entry, the position of
@@ -2352,15 +2326,15 @@ public class FileManager {
      * DbTruncateLog utility, see SR [#19463].
      */
     public void truncateLog(long fileNum, long offset)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         /*
          * Truncate the log files following by this log file in descending
          * order to avoid the log entry gap, see SR [#19463].
          */
-        for (long i = getLastFileNum(); i >= fileNum; i--) {
+        for(long i = getLastFileNum(); i >= fileNum; i--) {
             /* Do nothing if this file doesn't exist. */
-            if (!isFileValid(i)) {
+            if(!isFileValid(i)) {
                 continue;
             }
 
@@ -2370,16 +2344,16 @@ public class FileManager {
              * FileHeader is also deleted, delete the whole file to avoid a log
              * file gap.
              */
-            if (i == fileNum) {
+            if(i == fileNum) {
                 truncateSingleFile(fileNum, offset);
-                if (offset != 0) {
+                if(offset != 0) {
                     continue;
                 }
             }
 
             boolean deleted = deleteFile(i);
             assert deleted : "File " + getFullFileName(i, JE_SUFFIX) +
-                             " not deleted during truncateLog";
+                    " not deleted during truncateLog";
         }
     }
 
@@ -2388,12 +2362,12 @@ public class FileManager {
      * are written here, but are fsync'ed later. If there is any problem or
      * exception during the setting, the method will throw an
      * EnvironmentFailureException.
-     *
+     * <p>
      * These changes are made directly to the file, but recently logged log
      * entries may also be resident in the log buffers. The caller must take
      * care to call LogManager.flush() before this method, to ensure that all
      * entries are on disk.
-     *
+     * <p>
      * In addition, we must ensure that after this step, the affected log
      * entries will only be read via a FileReader, and will not be faulted in
      * by the LogManager. Entries may be present in the log and in the log
@@ -2405,11 +2379,11 @@ public class FileManager {
      * they are made invisible.
      *
      * @param fileNum target file.
-     * @param lsns The list of LSNs to make invisible, must be sorted in
-     * ascending order.
+     * @param lsns    The list of LSNs to make invisible, must be sorted in
+     *                ascending order.
      */
     public void makeInvisible(long fileNum, List<Long> lsns) {
-        if (lsns.size() == 0) {
+        if(lsns.size() == 0) {
             return;
         }
 
@@ -2422,21 +2396,21 @@ public class FileManager {
              * specific use by this method.
              */
             handle = makeFileHandle(fileNum, getAppropriateReadWriteMode());
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_CHECKSUM,
-                 "Opening file " + fileNum +  " for invisible marking ", e);
-        } catch (FileNotFoundException e) {
+                    (envImpl, EnvironmentFailureReason.LOG_CHECKSUM,
+                            "Opening file " + fileNum + " for invisible marking ", e);
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                 "Opening file " + fileNum +  " for invisible marking ", e);
+                    (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                            "Opening file " + fileNum + " for invisible marking ", e);
         }
         RandomAccessFile file = handle.getFile();
 
         /* Set the invisible bit for each entry. */
         try {
-            for (Long lsn : lsns) {
-                if (DbLsn.getFileNumber(lsn) != fileNum) {
+            for(Long lsn : lsns) {
+                if(DbLsn.getFileNumber(lsn) != fileNum) {
 
                     /*
                      * This failure will not invalidate the environment right
@@ -2445,23 +2419,23 @@ public class FileManager {
                      * want.
                      */
                     throw new EnvironmentFailureException
-                        (envImpl, EnvironmentFailureReason.UNEXPECTED_STATE,
-                         "LSN of " + DbLsn.getNoFormatString(lsn) +
-                         " did not match file number" + fileNum);
+                            (envImpl, EnvironmentFailureReason.UNEXPECTED_STATE,
+                                    "LSN of " + DbLsn.getNoFormatString(lsn) +
+                                            " did not match file number" + fileNum);
                 }
 
                 int entryFlagsOffset = (int)
-                    (DbLsn.getFileOffset(lsn) + LogEntryHeader.FLAGS_OFFSET);
+                        (DbLsn.getFileOffset(lsn) + LogEntryHeader.FLAGS_OFFSET);
                 file.seek(entryFlagsOffset);
                 byte flags = file.readByte();
                 byte newFlags = LogEntryHeader.makeInvisible(flags);
                 file.seek(entryFlagsOffset);
                 file.writeByte(newFlags);
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_WRITE,
-                 "Flipping invisibility in file " + fileNum, e);
+                    (envImpl, EnvironmentFailureReason.LOG_WRITE,
+                            "Flipping invisibility in file " + fileNum, e);
         } finally {
 
             /*
@@ -2470,10 +2444,10 @@ public class FileManager {
              */
             try {
                 file.close();
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_WRITE,
-                     "Closing after invisibility cloaking: file " + fileNum, e);
+                        (envImpl, EnvironmentFailureReason.LOG_WRITE,
+                                "Closing after invisibility cloaking: file " + fileNum, e);
             }
         }
     }
@@ -2482,34 +2456,34 @@ public class FileManager {
      * Fsync this set of log files. Used for replication syncup rollback.
      */
     public void force(Set<Long> fileNums) {
-        for (long fileNum : fileNums) {
+        for(long fileNum : fileNums) {
             RandomAccessFile file = null;
             try {
                 FileHandle handle =
-                    makeFileHandle(fileNum, getAppropriateReadWriteMode());
+                        makeFileHandle(fileNum, getAppropriateReadWriteMode());
                 file = handle.getFile();
                 file.getChannel().force(false);
                 nLogFSyncs.increment();
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                     "Invisible fsyncing file " + fileNum, e);
-            } catch (ChecksumException e) {
+                        (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                                "Invisible fsyncing file " + fileNum, e);
+            } catch(ChecksumException e) {
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_CHECKSUM,
-                     "Invisible fsyncing file " + fileNum, e);
-            } catch (IOException e) {
+                        (envImpl, EnvironmentFailureReason.LOG_CHECKSUM,
+                                "Invisible fsyncing file " + fileNum, e);
+            } catch(IOException e) {
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_WRITE,
-                     "Invisible fsyncing file " + fileNum, e);
+                        (envImpl, EnvironmentFailureReason.LOG_WRITE,
+                                "Invisible fsyncing file " + fileNum, e);
             } finally {
-                if (file != null) {
+                if(file != null) {
                     try {
                         file.close();
-                    } catch (IOException e) {
+                    } catch(IOException e) {
                         throw new EnvironmentFailureException
-                            (envImpl, EnvironmentFailureReason.LOG_WRITE,
-                             "Invisible fsyncing file " + fileNum, e);
+                                (envImpl, EnvironmentFailureReason.LOG_WRITE,
+                                        "Invisible fsyncing file " + fileNum, e);
                     }
                 }
             }
@@ -2523,16 +2497,9 @@ public class FileManager {
         forceNewFile = true;
     }
 
-    /**
-     * Return the offset of the first log entry after the file header.
+    /*
+     * Generate IOExceptions for testing.
      */
-
-    /**
-     * @return the size in bytes of the file header log entry.
-     */
-    public static int firstLogEntryOffset() {
-        return FileHeader.entrySize() + LogEntryHeader.MIN_HEADER_SIZE;
-    }
 
     /**
      * Return the next available LSN in the log. Note that this is
@@ -2560,10 +2527,6 @@ public class FileManager {
     }
 
     /*
-     * Unit test support
-     */
-
-    /*
      * @return ids of files in cache
      */
     Set<Long> getCacheKeys() {
@@ -2574,11 +2537,86 @@ public class FileManager {
      * Clear a file out of the file cache regardless of mode type.
      */
     private void clearFileCache(long fileNum)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
-        synchronized (fileCache) {
+        synchronized(fileCache) {
             fileCache.remove(fileNum);
         }
+    }
+
+    private void generateLogWriteException(RandomAccessFile file,
+                                           ByteBuffer data,
+                                           long destOffset,
+                                           long fileNum)
+            throws DatabaseException, IOException {
+
+        if(logWriteExceptionThrown) {
+            (new Exception("Write after LogWriteException")).
+                    printStackTrace();
+        }
+        logWriteExceptionCounter += 1;
+        if(logWriteExceptionCounter >= LOGWRITE_EXCEPTION_MAX) {
+            logWriteExceptionCounter = 0;
+        }
+        if(logWriteExceptionRandom == null) {
+            logWriteExceptionRandom = new Random(System.currentTimeMillis());
+        }
+        if(logWriteExceptionCounter ==
+                logWriteExceptionRandom.nextInt(LOGWRITE_EXCEPTION_MAX)) {
+            int len = logWriteExceptionRandom.nextInt(data.remaining());
+            if(len > 0) {
+                byte[] a = new byte[len];
+                data.get(a, 0, len);
+                ByteBuffer buf = ByteBuffer.wrap(a);
+                writeToFile(file, buf, destOffset, fileNum,
+                        false /*flushRequired*/);
+            }
+            logWriteExceptionThrown = true;
+            throw new IOException("Randomly generated for testing");
+        }
+    }
+    public enum FileMode {
+        READ_MODE("r", false),
+        READWRITE_MODE("rw", true),
+        READWRITE_ODSYNC_MODE("rwd", true),
+        READWRITE_OSYNC_MODE("rws", true);
+
+        private String fileModeValue;
+        private boolean isWritable;
+
+        private FileMode(String fileModeValue, boolean isWritable) {
+            this.fileModeValue = fileModeValue;
+            this.isWritable = isWritable;
+        }
+
+        public String getModeValue() {
+            return fileModeValue;
+        }
+
+        public boolean isWritable() {
+            return isWritable;
+        }
+    }
+
+    /**
+     * The factory interface for creating RandomAccessFiles.  For production
+     * use, the default factory is always used and a DefaultRandomAccessFile is
+     * always created.  For testing, the factory can be overridden to return a
+     * subclass of DefaultRandomAccessFile that overrides methods and injects
+     * faults, for example.
+     */
+    public interface FileFactory {
+
+        /**
+         * @param envHome  can be used to distinguish environments in a test
+         *                 program that opens multiple environments.  Not for production use.
+         * @param fullName the full file name to be passed to the
+         *                 RandomAccessFile constructor.
+         * @param mode     the file mode to be passed to the RandomAccessFile
+         *                 constructor.
+         */
+        RandomAccessFile createFile(File envHome, String fullName, String mode)
+                throws FileNotFoundException;
     }
 
     /*
@@ -2604,7 +2642,7 @@ public class FileManager {
             fileMap = new Hashtable<Long, FileHandle>();
             fileList = new LinkedList<Long>();
             fileCacheSize =
-                configManager.getInt(EnvironmentParams.LOG_FILE_CACHE_SIZE);
+                    configManager.getInt(EnvironmentParams.LOG_FILE_CACHE_SIZE);
         }
 
         private FileHandle get(Long fileId) {
@@ -2612,7 +2650,7 @@ public class FileManager {
         }
 
         private void add(Long fileId, FileHandle fileHandle)
-            throws IOException, DatabaseException {
+                throws IOException, DatabaseException {
 
             /*
              * Does the cache have any room or do we have to evict?  Hunt down
@@ -2621,9 +2659,9 @@ public class FileManager {
              * evictable. Should we try to shrink the file cache? Presently if
              * it grows, it doesn't shrink.
              */
-            if (fileList.size() >= fileCacheSize) {
+            if(fileList.size() >= fileCacheSize) {
                 Iterator<Long> iter = fileList.iterator();
-                while (iter.hasNext()) {
+                while(iter.hasNext()) {
                     Long evictId = iter.next();
                     FileHandle evictTarget = fileMap.get(evictId);
 
@@ -2635,7 +2673,7 @@ public class FileManager {
                      * meant to be short lived and only held over the i/o out
                      * of the file.
                      */
-                    if (evictTarget.latchNoWait()) {
+                    if(evictTarget.latchNoWait()) {
                         try {
                             fileMap.remove(evictId);
                             iter.remove();
@@ -2662,12 +2700,12 @@ public class FileManager {
          * mode.
          */
         private void remove(long fileNum)
-            throws IOException, DatabaseException {
+                throws IOException, DatabaseException {
 
             Iterator<Long> iter = fileList.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 Long evictId = iter.next();
-                if (evictId.longValue() == fileNum) {
+                if(evictId.longValue() == fileNum) {
                     FileHandle evictTarget = fileMap.get(evictId);
                     try {
                         evictTarget.latch();
@@ -2682,10 +2720,10 @@ public class FileManager {
         }
 
         private void clear()
-            throws IOException, DatabaseException {
+                throws IOException, DatabaseException {
 
             Iterator<FileHandle> iter = fileMap.values().iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 FileHandle fileHandle = iter.next();
                 try {
                     fileHandle.latch();
@@ -2709,20 +2747,46 @@ public class FileManager {
     }
 
     /**
+     * The RandomAccessFile for production use.  Tests that override the
+     * default FileFactory should return a RandomAccessFile that subclasses
+     * this class to inherit workarounds such as the overridden length method.
+     */
+    public static class DefaultRandomAccessFile extends RandomAccessFile {
+
+        public DefaultRandomAccessFile(String fullName, String mode)
+                throws FileNotFoundException {
+
+            super(fullName, mode);
+        }
+
+        /**
+         * RandomAccessFile.length() is not thread safe and side-effects the
+         * file pointer if interrupted in the middle.  It is synchronized here
+         * to work around that problem.
+         */
+        @Override
+        public synchronized long length()
+                throws IOException {
+
+            return super.length();
+        }
+    }
+
+    /**
      * The LogEndFileDescriptor is used to write and fsync the end of the log.
      * Because the JE log is append only, there is only one logical R/W file
      * descriptor for the whole environment. This class actually implements two
      * RandomAccessFile instances, one for writing and one for fsyncing, so the
      * two types of operations don't block each other.
-     *
+     * <p>
      * The write file descriptor is considered the master.  Manipulation of
      * this class is done under the log write latch. Here's an explanation of
      * why the log write latch is sufficient to safeguard all operations.
-     *
+     * <p>
      * There are two types of callers who may use this file descriptor: the
      * thread that is currently writing to the end of the log and any threads
      * that are fsyncing on behalf of the FSyncManager.
-     *
+     * <p>
      * The writing thread appends data to the file and fsyncs the file when we
      * flip over to a new log file.  The file is only instantiated at the point
      * that it must do so -- which is either when the first fsync is required
@@ -2732,24 +2796,24 @@ public class FileManager {
      * to the file, and we close the file descriptor when the log file is full.
      * Therefore is a period when there is no log descriptor -- when we have
      * not yet written a log buffer into a given log file.
-     *
+     * <p>
      * The fsyncing threads ask for the log end file descriptor asynchronously,
      * but will never modify it.  These threads may arrive at the point when
      * the file descriptor is null, and therefore skip their fysnc, but that is
      * fine because it means a writing thread already flipped that target file
      * and has moved on to the next file.
-     *
+     * <p>
      * Time     Activity
      * 10       thread 1 writes log entry A into file 0x0, issues fsync
-     *          outside of log write latch, yields the processor
+     * outside of log write latch, yields the processor
      * 20       thread 2 writes log entry B, piggybacks off thread 1
      * 30       thread 3 writes log entry C, but no room left in that file,
-     *          so it flips the log, and fsyncs file 0x0, all under the log
-     *          write latch. It nulls out endOfLogRWFile, moves onto file
-     *          0x1, but doesn't create the file yet.
+     * so it flips the log, and fsyncs file 0x0, all under the log
+     * write latch. It nulls out endOfLogRWFile, moves onto file
+     * 0x1, but doesn't create the file yet.
      * 40       thread 1 finally comes along, but endOfLogRWFile is null--
-     *          no need to fsync in that case, 0x0 got fsynced.
-     *
+     * no need to fsync in that case, 0x0 got fsynced.
+     * <p>
      * If a write is attempted and an fsync is already in progress, then the
      * information pertaining to the data to be written (data, offset, length)
      * is saved away in the "queuedWrites" array.  When the fsync completes,
@@ -2758,10 +2822,7 @@ public class FileManager {
      * call (e.g. ext3).
      */
     class LogEndFileDescriptor {
-        private RandomAccessFile endOfLogRWFile = null;
-        private RandomAccessFile endOfLogSyncFile = null;
         private final ReentrantLock fsyncFileSynchronizer = new ReentrantLock();
-
         /*
          * Holds all data for writes which have been queued due to their
          * being blocked by an fsync when the original write was attempted.
@@ -2773,8 +2834,9 @@ public class FileManager {
          * Default protection for unit tests.
          */
         private final byte[] queuedWrites =
-            useWriteQueue ? new byte[writeQueueSize] : null;
-
+                useWriteQueue ? new byte[writeQueueSize] : null;
+        private RandomAccessFile endOfLogRWFile = null;
+        private RandomAccessFile endOfLogSyncFile = null;
         /* Current position in the queuedWrites array. */
         private int queuedWritesPosition = 0;
 
@@ -2810,29 +2872,29 @@ public class FileManager {
 
             int pos = readBuffer.position();
             int targetBufSize = readBuffer.limit() - pos;
-            synchronized (queuedWrites) {
-                if (qwFileNum != fileNum) {
+            synchronized(queuedWrites) {
+                if(qwFileNum != fileNum) {
                     return false;
                 }
 
-                if (queuedWritesPosition == 0) {
+                if(queuedWritesPosition == 0) {
                     return false;
                 }
 
-                if (requestedOffset < qwStartingOffset ||
-                    (qwStartingOffset + queuedWritesPosition) <=
-                    requestedOffset) {
+                if(requestedOffset < qwStartingOffset ||
+                        (qwStartingOffset + queuedWritesPosition) <=
+                                requestedOffset) {
                     return false;
                 }
 
                 /* We have the bytes available. */
                 int nBytesToCopy = (int)
-                    (queuedWritesPosition -
-                     (requestedOffset - qwStartingOffset));
+                        (queuedWritesPosition -
+                                (requestedOffset - qwStartingOffset));
                 nBytesToCopy = Math.min(nBytesToCopy, targetBufSize);
                 readBuffer.put(queuedWrites,
-                               (int) (requestedOffset - qwStartingOffset),
-                               nBytesToCopy);
+                        (int) (requestedOffset - qwStartingOffset),
+                        nBytesToCopy);
                 nBytesReadFromWriteQueue.add(nBytesToCopy);
                 nReadsFromWriteQueue.increment();
                 return true;
@@ -2852,16 +2914,16 @@ public class FileManager {
                              final long destOffset,
                              final int arrayOffset,
                              final int size)
-            throws DatabaseException {
+                throws DatabaseException {
 
             assert !fsyncFileSynchronizer.isHeldByCurrentThread();
 
-            for (int i = 0; i < 2; i++) {
+            for(int i = 0; i < 2; i++) {
                 try {
                     enqueueWrite1(fileNum, data, destOffset,
-                                  arrayOffset, size);
+                            arrayOffset, size);
                     return true;
-                } catch (RelatchRequiredException RE) {
+                } catch(RelatchRequiredException RE) {
                     dequeuePendingWrites();
                 }
             }
@@ -2876,7 +2938,7 @@ public class FileManager {
                                    final long destOffset,
                                    final int arrayOffset,
                                    final int size)
-            throws RelatchRequiredException, DatabaseException {
+                throws RelatchRequiredException, DatabaseException {
 
             /*
              * The queuedWrites queue only ever holds writes for a single file.
@@ -2897,15 +2959,15 @@ public class FileManager {
              * only result in eliminating an unnecessary dequeuePendingWrites
              * call.
              */
-            if (qwFileNum < fileNum /* && queuedWritesPosition > 0 */) {
+            if(qwFileNum < fileNum /* && queuedWritesPosition > 0 */) {
                 dequeuePendingWrites();
                 qwFileNum = fileNum;
             }
 
-            synchronized (queuedWrites) {
+            synchronized(queuedWrites) {
                 boolean overflow =
-                    (writeQueueSize - queuedWritesPosition) < size;
-                if (overflow) {
+                        (writeQueueSize - queuedWritesPosition) < size;
+                if(overflow) {
                     nWriteQueueOverflow.increment();
 
                     /*
@@ -2921,7 +2983,7 @@ public class FileManager {
 
                 assert qwFileNum == fileNum;
                 int curPos = queuedWritesPosition;
-                if (curPos == 0) {
+                if(curPos == 0) {
 
                     /*
                      * This is the first entry in queue.  Set qwStartingOffset.
@@ -2929,17 +2991,17 @@ public class FileManager {
                     qwStartingOffset = destOffset;
                 }
 
-                if (curPos + qwStartingOffset != destOffset) {
+                if(curPos + qwStartingOffset != destOffset) {
                     throw new EnvironmentFailureException
-                        (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                         "non-consecutive writes queued. " +
-                         "qwPos=" + queuedWritesPosition +
-                         " write destOffset=" + destOffset);
+                            (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                                    "non-consecutive writes queued. " +
+                                            "qwPos=" + queuedWritesPosition +
+                                            " write destOffset=" + destOffset);
                 }
 
                 System.arraycopy(data, arrayOffset,
-                                 queuedWrites, queuedWritesPosition,
-                                 size);
+                        queuedWrites, queuedWritesPosition,
+                        size);
                 queuedWritesPosition += size;
             }
         }
@@ -2955,7 +3017,7 @@ public class FileManager {
          * Execute pending writes.  Assumes fsyncFileSynchronizer is not held.
          */
         private void dequeuePendingWrites()
-            throws DatabaseException {
+                throws DatabaseException {
 
             assert !fsyncFileSynchronizer.isHeldByCurrentThread();
 
@@ -2971,47 +3033,47 @@ public class FileManager {
          * Execute pending writes.  Assumes fsyncFileSynchronizer is held.
          */
         private void dequeuePendingWrites1()
-            throws DatabaseException {
+                throws DatabaseException {
 
             assert fsyncFileSynchronizer.isHeldByCurrentThread();
 
             try {
-                synchronized (queuedWrites) {
+                synchronized(queuedWrites) {
                     /* Nothing to see here.  Move along. */
-                    if (queuedWritesPosition == 0) {
+                    if(queuedWritesPosition == 0) {
                         return;
                     }
 
                     RandomAccessFile file = getWritableFile(qwFileNum, false);
-                    synchronized (file) {
+                    synchronized(file) {
                         file.seek(qwStartingOffset);
                         file.write(queuedWrites, 0, queuedWritesPosition);
                         nBytesWrittenFromWriteQueue.add(queuedWritesPosition);
                         nWritesFromWriteQueue.increment();
-                        if (VERIFY_CHECKSUMS) {
+                        if(VERIFY_CHECKSUMS) {
                             file.seek(qwStartingOffset);
                             file.read(queuedWrites, 0, queuedWritesPosition);
                             ByteBuffer bb =
-                                ByteBuffer.allocate(queuedWritesPosition);
+                                    ByteBuffer.allocate(queuedWritesPosition);
                             bb.put(queuedWrites, 0, queuedWritesPosition);
                             bb.position(0);
                             verifyChecksums
-                                (bb, qwStartingOffset, "post-write");
+                                    (bb, qwStartingOffset, "post-write");
                         }
                     }
 
                     /* We flushed the queue.  Reset the buffer. */
                     queuedWritesPosition = 0;
                 }
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw new LogWriteException
-                    (envImpl, "IOException during fsync", e);
+                        (envImpl, "IOException during fsync", e);
             }
         }
 
         /**
          * getWritableFile must be called under the log write latch.
-         *
+         * <p>
          * Typically, endOfLogRWFile is not null.  Hence the
          * fsyncFileSynchronizer does not need to be locked (which would
          * block the write queue from operating.
@@ -3019,7 +3081,7 @@ public class FileManager {
         private RandomAccessFile getWritableFile(final long fileNumber,
                                                  final boolean doLock) {
             try {
-                if (endOfLogRWFile == null) {
+                if(endOfLogRWFile == null) {
 
                     /*
                      * We need to make a file descriptor for the end of the
@@ -3030,34 +3092,34 @@ public class FileManager {
                      * to avoid a race for creating the file and writing the
                      * header.  [#20732]
                      */
-                    if (doLock) {
+                    if(doLock) {
                         fsyncFileSynchronizer.lock();
                     }
                     try {
                         endOfLogRWFile =
-                            makeFileHandle(fileNumber,
-                                           getAppropriateReadWriteMode()).
-                            getFile();
+                                makeFileHandle(fileNumber,
+                                        getAppropriateReadWriteMode()).
+                                        getFile();
                         endOfLogSyncFile =
-                            makeFileHandle(fileNumber,
-                                           getAppropriateReadWriteMode()).
-                            getFile();
+                                makeFileHandle(fileNumber,
+                                        getAppropriateReadWriteMode()).
+                                        getFile();
                     } finally {
-                        if (doLock) {
+                        if(doLock) {
                             fsyncFileSynchronizer.unlock();
                         }
                     }
                 }
 
                 return endOfLogRWFile;
-            } catch (Exception e) {
+            } catch(Exception e) {
 
                 /*
                  * If we can't get a write channel, we need to invalidate the
                  * environment.
                  */
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
+                        (envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
             }
         }
 
@@ -3065,7 +3127,7 @@ public class FileManager {
          * FSync the log file that makes up the end of the log.
          */
         private void force()
-            throws DatabaseException, IOException {
+                throws DatabaseException, IOException {
 
             /*
              * Get a local copy of the end of the log file descriptor, it could
@@ -3080,19 +3142,19 @@ public class FileManager {
             try {
 
                 /* Flush any queued writes. */
-                if (useWriteQueue) {
+                if(useWriteQueue) {
                     dequeuePendingWrites1();
                 }
 
                 RandomAccessFile file = endOfLogSyncFile;
-                if (file != null) {
+                if(file != null) {
                     bumpWriteCount("fsync");
                     FileChannel ch = file.getChannel();
 
                     long start = System.currentTimeMillis();
                     try {
                         ch.force(false);
-                    } catch (ClosedChannelException e) {
+                    } catch(ClosedChannelException e) {
 
                         /*
                          * The channel should never be closed. It may be closed
@@ -3100,31 +3162,31 @@ public class FileManager {
                          * See SR [#10463].
                          */
                         throw new ThreadInterruptedException
-                            (envImpl,
-                             "Channel closed, may be due to thread interrupt",
-                             e);
+                                (envImpl,
+                                        "Channel closed, may be due to thread interrupt",
+                                        e);
                     }
                     final long fSyncMs = System.currentTimeMillis() - start;
 
                     nLogFSyncs.increment();
                     nFSyncTime.add(fSyncMs);
 
-                    if (nFSyncMaxTime.setMax(fSyncMs) &&
-                        fSyncTimeLimit != 0 &&
-                        fSyncMs > fSyncTimeLimit) {
+                    if(nFSyncMaxTime.setMax(fSyncMs) &&
+                            fSyncTimeLimit != 0 &&
+                            fSyncMs > fSyncTimeLimit) {
 
                         LoggerUtils.warning(
-                            envImpl.getLogger(), envImpl,
-                            String.format(
-                                "FSync time of %d ms exceeds limit (%d ms)",
-                                fSyncMs, fSyncTimeLimit));
+                                envImpl.getLogger(), envImpl,
+                                String.format(
+                                        "FSync time of %d ms exceeds limit (%d ms)",
+                                        fSyncMs, fSyncTimeLimit));
                     }
 
                     assert EnvironmentImpl.maybeForceYield();
                 }
 
                 /* Flush any writes which were queued while fsync'ing. */
-                if (useWriteQueue) {
+                if(useWriteQueue) {
                     dequeuePendingWrites1();
                 }
             } finally {
@@ -3137,7 +3199,7 @@ public class FileManager {
          * ensure that we won't force and close on the same descriptor.
          */
         void close()
-            throws IOException {
+                throws IOException {
 
             /*
              * Protect both the RWFile and SyncFile under this lock out of
@@ -3147,7 +3209,7 @@ public class FileManager {
             fsyncFileSynchronizer.lock();
             try {
                 IOException firstException = null;
-                if (endOfLogRWFile != null) {
+                if(endOfLogRWFile != null) {
                     RandomAccessFile file = endOfLogRWFile;
 
                     /*
@@ -3157,12 +3219,12 @@ public class FileManager {
                     endOfLogRWFile = null;
                     try {
                         file.close();
-                    } catch (IOException e) {
+                    } catch(IOException e) {
                         /* Save this exception, so we can try second close. */
                         firstException = e;
                     }
                 }
-                if (endOfLogSyncFile != null) {
+                if(endOfLogSyncFile != null) {
                     RandomAccessFile file = endOfLogSyncFile;
 
                     /*
@@ -3173,7 +3235,7 @@ public class FileManager {
                     file.close();
                 }
 
-                if (firstException != null) {
+                if(firstException != null) {
                     throw firstException;
                 }
             } finally {
@@ -3181,123 +3243,4 @@ public class FileManager {
             }
         }
     }
-
-    /*
-     * Generate IOExceptions for testing.
-     */
-
-    /* Testing switch. public so others can read the value. */
-    public static final boolean LOGWRITE_EXCEPTION_TESTING;
-    private static String RRET_PROPERTY_NAME = "je.logwrite.exception.testing";
-
-    static {
-        LOGWRITE_EXCEPTION_TESTING =
-            (System.getProperty(RRET_PROPERTY_NAME) != null);
-    }
-
-    /* Max write counter value. */
-    private static final int LOGWRITE_EXCEPTION_MAX = 100;
-    /* Current write counter value. */
-    private int logWriteExceptionCounter = 0;
-    /* Whether an exception has been thrown. */
-    private boolean logWriteExceptionThrown = false;
-    /* Random number generator. */
-    private Random logWriteExceptionRandom = null;
-
-    private void generateLogWriteException(RandomAccessFile file,
-                                           ByteBuffer data,
-                                           long destOffset,
-                                           long fileNum)
-        throws DatabaseException, IOException {
-
-        if (logWriteExceptionThrown) {
-            (new Exception("Write after LogWriteException")).
-                printStackTrace();
-        }
-        logWriteExceptionCounter += 1;
-        if (logWriteExceptionCounter >= LOGWRITE_EXCEPTION_MAX) {
-            logWriteExceptionCounter = 0;
-        }
-        if (logWriteExceptionRandom == null) {
-            logWriteExceptionRandom = new Random(System.currentTimeMillis());
-        }
-        if (logWriteExceptionCounter ==
-            logWriteExceptionRandom.nextInt(LOGWRITE_EXCEPTION_MAX)) {
-            int len = logWriteExceptionRandom.nextInt(data.remaining());
-            if (len > 0) {
-                byte[] a = new byte[len];
-                data.get(a, 0, len);
-                ByteBuffer buf = ByteBuffer.wrap(a);
-                writeToFile(file, buf, destOffset, fileNum,
-                            false /*flushRequired*/);
-            }
-            logWriteExceptionThrown = true;
-            throw new IOException("Randomly generated for testing");
-        }
-    }
-
-    /**
-     * The factory interface for creating RandomAccessFiles.  For production
-     * use, the default factory is always used and a DefaultRandomAccessFile is
-     * always created.  For testing, the factory can be overridden to return a
-     * subclass of DefaultRandomAccessFile that overrides methods and injects
-     * faults, for example.
-     */
-    public interface FileFactory {
-
-        /**
-         * @param envHome can be used to distinguish environments in a test
-         * program that opens multiple environments.  Not for production use.
-         *
-         * @param fullName the full file name to be passed to the
-         * RandomAccessFile constructor.
-         *
-         * @param mode the file mode to be passed to the RandomAccessFile
-         * constructor.
-         */
-        RandomAccessFile createFile(File envHome, String fullName, String mode)
-            throws FileNotFoundException;
-    }
-
-    /**
-     * The RandomAccessFile for production use.  Tests that override the
-     * default FileFactory should return a RandomAccessFile that subclasses
-     * this class to inherit workarounds such as the overridden length method.
-     */
-    public static class DefaultRandomAccessFile extends RandomAccessFile {
-
-        public DefaultRandomAccessFile(String fullName, String mode)
-            throws FileNotFoundException {
-
-            super(fullName, mode);
-        }
-
-        /**
-         * RandomAccessFile.length() is not thread safe and side-effects the
-         * file pointer if interrupted in the middle.  It is synchronized here
-         * to work around that problem.
-         */
-        @Override
-        public synchronized long length()
-            throws IOException {
-
-            return super.length();
-        }
-    }
-
-    /**
-     * The factory instance used to create RandomAccessFiles.  This field is
-     * intentionally public and non-static so it may be set by tests.  See
-     * FileFactory.
-     */
-    public static FileFactory fileFactory = new FileFactory() {
-
-        public RandomAccessFile createFile(File envHome,
-                                           String fullName,
-                                           String mode)
-            throws FileNotFoundException {
-
-            return new DefaultRandomAccessFile(fullName, mode);
-        }
-    };
 }

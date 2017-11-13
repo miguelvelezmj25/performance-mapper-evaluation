@@ -27,22 +27,22 @@ public class LockUpgrade {
      * [#16496]
      */
     public static final LockUpgrade ILLEGAL =
-        new LockUpgrade(null, false, true);
+            new LockUpgrade(null, false, true);
 
     public static final LockUpgrade EXISTING =
-        new LockUpgrade(null, false, false);
+            new LockUpgrade(null, false, false);
 
     public static final LockUpgrade WRITE_PROMOTE =
-        new LockUpgrade(null /*LockType.WRITE*/, true, false);
+            new LockUpgrade(null /*LockType.WRITE*/, true, false);
 
     public static final LockUpgrade RANGE_READ_IMMED =
-        new LockUpgrade(null /*LockType.RANGE_READ*/, false, false);
+            new LockUpgrade(null /*LockType.RANGE_READ*/, false, false);
 
     public static final LockUpgrade RANGE_WRITE_IMMED =
-        new LockUpgrade(null /*LockType.RANGE_WRITE*/, false, false);
+            new LockUpgrade(null /*LockType.RANGE_WRITE*/, false, false);
 
     public static final LockUpgrade RANGE_WRITE_PROMOTE =
-        new LockUpgrade(null /*LockType.RANGE_WRITE*/, true, false);
+            new LockUpgrade(null /*LockType.RANGE_WRITE*/, true, false);
 
     private LockType upgrade;
     private boolean promotion;

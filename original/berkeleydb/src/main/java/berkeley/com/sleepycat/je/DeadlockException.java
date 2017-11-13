@@ -22,7 +22,7 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * Note that this is different than a {@link LockTimeoutException lock
  * timeout} or {@link TransactionTimeoutException}, which occur for other
  * reasons.
- *
+ * <p>
  * <p>For more information on deadlock detection, see
  * {@link EnvironmentConfig#LOCK_DEADLOCK_DETECT}. As described there, a
  * {@code DeadlockException} is normally thrown when a random victim is
@@ -32,15 +32,15 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * unresponsive thread, the message will contain the string:
  * {@code Unable to break deadlock using random victim selection within the
  * timeout interval}.</p>
- *
+ * <p>
  * <p>TODO: describe how to debug using info included with the exception.</p>
- *
+ * <p>
  * <p>Normally, applications should catch the base class {@link
  * LockConflictException} rather than catching one of its subclasses.  All lock
  * conflicts are typically handled in the same way, which is normally to abort
  * and retry the transaction.  See {@link LockConflictException} for more
  * information.</p>
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  */
@@ -48,34 +48,38 @@ public class DeadlockException extends LockConflictException {
 
     private static final long serialVersionUID = 729943514L;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     DeadlockException(String message) {
         super(message);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public DeadlockException(Locker locker, String message) {
         super(locker, message);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     DeadlockException(String message,
                       DeadlockException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

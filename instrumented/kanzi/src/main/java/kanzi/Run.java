@@ -1,9 +1,13 @@
 package kanzi;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import kanzi.app.BlockCompressor;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +21,16 @@ public class Run {
     public static boolean TRANSFORM;
     public static boolean CHECKSUM;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        System.out.println("Instrument");
         Sink.init();
+
+        String dir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.knz";
+        File output = new File(dir);
+
+        if(output.exists()) {
+            FileUtils.forceDelete(output);
+        }
 
         VERBOSE = Source.getOptionVERBOSE(Boolean.valueOf(args[0]));
         FORCE = Source.getOptionFORCE(Boolean.valueOf(args[1]));
@@ -29,12 +41,12 @@ public class Run {
         CHECKSUM = Source.getOptionCHECKSUM(Boolean.valueOf(args[6]));
 
 //        VERBOSE = Source.getOptionVERBOSE(true);
-//        FORCE = Source.getOptionFORCE(true);
-//        BLOCKSIZE = Source.getOptionBLOCKSIZE(true);
+//        FORCE = Source.getOptionFORCE(false);
+//        BLOCKSIZE = Source.getOptionBLOCKSIZE(false);
 //        LEVEL = Source.getOptionLEVEL(true);
-//        ENTROPY = Source.getOptionENTROPY(true);
-//        TRANSFORM = Source.getOptionTRANSFORM(true);
-//        CHECKSUM = Source.getOptionCHECKSUM(true);
+//        ENTROPY = Source.getOptionENTROPY(false);
+//        TRANSFORM = Source.getOptionTRANSFORM(false);
+//        CHECKSUM = Source.getOptionCHECKSUM(false);
 
         int verbose = 0;
         boolean force = false;
@@ -73,8 +85,8 @@ public class Run {
         }
 
         Map<String, Object> map = new HashMap<>();
-        map.put("inputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.jar");
-        map.put("outputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.knz");
+        map.put("inputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.jar");
+        map.put("outputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.knz");
 
         BlockCompressor bc = null;
 
@@ -91,8 +103,7 @@ public class Run {
             bc.dispose();
         }
 
-        System.exit(code);
-
+//        System.exit(code);
     }
 
 

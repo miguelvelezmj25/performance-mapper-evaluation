@@ -22,8 +22,6 @@ import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 import java.io.File;
 
-import static com.sun.jmx.snmp.SnmpStatusException.readOnly;
-
 public class MyDbEnv {
 
 
@@ -42,12 +40,13 @@ public class MyDbEnv {
     // for us.
     public void setup(File envHome, String[] args) throws DatabaseException {
 
-//        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
-//        READONLY = Source.getOptionREADONLY(Boolean.valueOf(args[1]));
+        ALLOWCREATE = Source.getOptionALLOWCREATE(Boolean.valueOf(args[0]));
+        READONLY = Source.getOptionREADONLY(Boolean.valueOf(args[1]));
+        TRANSACTIONAL = Source.getOptionTRANSACTIONAL(Boolean.valueOf(args[2]));
 
-        ALLOWCREATE = Source.getOptionALLOWCREATE(true);
-        READONLY = Source.getOptionREADONLY(true);
-        TRANSACTIONAL = Source.getOptionTRANSACTIONAL(true);
+//        ALLOWCREATE = Source.getOptionALLOWCREATE(true);
+//        READONLY = Source.getOptionREADONLY(true);
+//        TRANSACTIONAL = Source.getOptionTRANSACTIONAL(true);
 
         boolean allowCreate = false;
         boolean readOnly = false;
@@ -117,7 +116,6 @@ public class MyDbEnv {
         StoreConfig storeConfig = new StoreConfig();
 
 
-
         myEnvConfig.setReadOnly(readOnly);
         storeConfig.setReadOnly(readOnly);
 
@@ -148,7 +146,7 @@ public class MyDbEnv {
         if(store != null) {
             try {
                 store.close();
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 System.err.println("Error closing store: " +
                         dbe.toString());
                 System.exit(-1);
@@ -159,7 +157,7 @@ public class MyDbEnv {
             try {
                 // Finally, close the store and environment.
                 myEnv.close();
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 System.err.println("Error closing MyDbEnv: " +
                         dbe.toString());
                 System.exit(-1);

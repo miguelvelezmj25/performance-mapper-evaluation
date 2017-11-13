@@ -13,6 +13,8 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.TransactionStats.Active;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,17 +22,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import berkeley.com.sleepycat.je.TransactionStats.Active;
-
 /**
  * The Stats infrastructure provides context for JE statistics. Each statistic
  * has these attributes:
  * - metadata - specifically, a name and description
  * - each statistic is associated with a parent stat group, which itself has
- *   a name and description.
+ * a name and description.
  * - support for the StatsConfig.clear semantics
  * - a way to print statistics in a user friendly way.
- *
+ * <p>
  * To create a statistic variable, instantiate one of the concrete subclasses
  * of Stat. Each concrete subclass should hold the methods that are needed to
  * best set and display the value. For example, instead of using LongStat to
@@ -38,7 +38,7 @@ import berkeley.com.sleepycat.je.TransactionStats.Active;
  * needs to specify a StatDefinition. There may be multiple Stat variables in
  * different components that share a StatDefinition. They are differentiated
  * when displayed by their parent StatGroup.
- *
+ * <p>
  * Each Stat instance is associated with a StatGroup, which holds the
  * collection of stats that belong to a given component. Each member of the
  * StatGroup has a unique StatDefinition. StatGroups can be combined, in order
@@ -46,14 +46,14 @@ import berkeley.com.sleepycat.je.TransactionStats.Active;
  * tables. Each lock table keeps its own latch statistics. When LockStats are
  * generated, the StatsGroup for each latch is collected and rolled up into a
  * single StatGroup, using the addAll(StatGroup) method.
- *
+ * <p>
  * The Stats infrastructure is for internal use only. Public API classes like
  * EnvironmentStats, LockStats, etc, contain StatGroups. A call to retrieve
  * stats is implemented by getting a clone of the StatGroups held by the
  * components like the cleaner, the incompressor, the LockManager, etc.  The
  * public API classes provide getter methods that reach into the StatGroups to
  * return the specific stat value.
- *
+ * <p>
  * To add a statistic, create the Stat variable in the component where it is
  * being used and associate it with a StatGroup. The Stat infrastructure does
  * the rest of the work for plumbing that statistic up to the public API
@@ -73,7 +73,7 @@ public class StatGroup implements Serializable {
 
     public StatGroup(String groupName, String groupDescription) {
         this(groupName, groupDescription,
-             new HashMap<StatDefinition, Stat<?>>());
+                new HashMap<StatDefinition, Stat<?>>());
     }
 
     private StatGroup(String groupName,
@@ -99,7 +99,7 @@ public class StatGroup implements Serializable {
     void register(Stat<?> oneStat) {
         Stat<?> prev = stats.put(oneStat.getDefinition(), oneStat);
         assert (prev == null) : "prev = " + prev + " oneStat=" +
-            oneStat.getDefinition();
+                oneStat.getDefinition();
     }
 
     /**
@@ -108,19 +108,19 @@ public class StatGroup implements Serializable {
      * stats are added to or removed from the argument during this call.
      *
      * @throws ConcurrentModificationException if the addition or removal of
-     * stats in the argument is detected
+     *                                         stats in the argument is detected
      */
     @SuppressWarnings("unchecked")
     public void addAll(StatGroup other) {
 
-        for (Entry<StatDefinition, Stat<?>> entry :
-             other.stats.entrySet()) {
+        for(Entry<StatDefinition, Stat<?>> entry :
+                other.stats.entrySet()) {
 
             StatDefinition definition = entry.getKey();
             Stat<?> localStat;
-            synchronized (stats) {
+            synchronized(stats) {
                 localStat = stats.get(definition);
-                if (localStat == null) {
+                if(localStat == null) {
                     stats.put(definition, entry.getValue());
                     continue;
                 }
@@ -142,24 +142,25 @@ public class StatGroup implements Serializable {
      * this stat group while this method is being called.
      *
      * @throws ConcurrentModificationException if the addition or removal of
-     * stats in this group is detected
+     *                                         stats in this group is detected
      */
     @SuppressWarnings("unchecked")
     public StatGroup computeInterval(StatGroup baseGroup) {
         Map<StatDefinition, Stat<?>> intervalValues =
                 new HashMap<StatDefinition, Stat<?>>();
 
-        for (Entry<StatDefinition, Stat<?>> entry :
-             stats.entrySet()) {
+        for(Entry<StatDefinition, Stat<?>> entry :
+                stats.entrySet()) {
             StatDefinition definition = entry.getKey();
             Stat<?> statValue = entry.getValue();
             @SuppressWarnings("rawtypes")
             Stat baseStat = baseGroup.stats.get(definition);
-            if (baseStat == null) {
+            if(baseStat == null) {
                 intervalValues.put(definition, statValue.copy());
-            } else {
+            }
+            else {
                 intervalValues.put(definition,
-                                   statValue.computeInterval(baseStat));
+                        statValue.computeInterval(baseStat));
             }
         }
         return new StatGroup(groupName, groupDescription, intervalValues);
@@ -169,8 +170,8 @@ public class StatGroup implements Serializable {
      * Clear all stats in a StatGroup.
      */
     public void clear() {
-        synchronized (stats) {
-            for (Stat<?> s : stats.values()) {
+        synchronized(stats) {
+            for(Stat<?> s : stats.values()) {
                 s.clear();
             }
         }
@@ -180,8 +181,8 @@ public class StatGroup implements Serializable {
      * Negates all stats in a StatGroup.
      */
     public void negate() {
-        synchronized (stats) {
-            for (Stat<?> s : stats.values()) {
+        synchronized(stats) {
+            for(Stat<?> s : stats.values()) {
                 s.negate();
             }
         }
@@ -201,13 +202,14 @@ public class StatGroup implements Serializable {
     public StatGroup cloneGroup(boolean clear) {
 
         Map<StatDefinition, Stat<?>> copyValues =
-            new HashMap<StatDefinition, Stat<?>>();
+                new HashMap<StatDefinition, Stat<?>>();
 
-        synchronized (stats) {
-            for (Stat<?> s : stats.values()) {
-                if (clear) {
+        synchronized(stats) {
+            for(Stat<?> s : stats.values()) {
+                if(clear) {
                     copyValues.put(s.getDefinition(), s.copyAndClear());
-                } else {
+                }
+                else {
                     copyValues.put(s.getDefinition(), s.copy());
                 }
             }
@@ -228,15 +230,18 @@ public class StatGroup implements Serializable {
     public int getInt(StatDefinition definition) {
         int retval;
         Stat<?> s = stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             retval = 0;
-        } else if (s instanceof IntStat) {
+        }
+        else if(s instanceof IntStat) {
             retval = ((IntStat) s).get();
-        } else if (s instanceof AtomicIntStat) {
+        }
+        else if(s instanceof AtomicIntStat) {
             retval = ((AtomicIntStat) s).get();
-        } else {
+        }
+        else {
             assert false : "Internal error calling getInt with" +
-                " unexpected stat type: " + s.getClass().getName();
+                    " unexpected stat type: " + s.getClass().getName();
             retval = 0;
         }
         return retval;
@@ -249,23 +254,27 @@ public class StatGroup implements Serializable {
     public long getLong(StatDefinition definition) {
         long retval = 0;
         Stat<?> s = stats.get(definition);
-        if (s == null) {
-            retval= 0;
-        } else if (s instanceof LongStat) {
-            retval = ((LongStat)s).get();
-        } else if (s instanceof AtomicLongStat) {
-            retval = ((AtomicLongStat)s).get();
-        } else if (s instanceof IntegralLongAvgStat) {
-            retval = ((IntegralLongAvgStat)s).get().compute();
-        } else {
-            assert false: "Internal error calling getLong() with "+
-                 "unknown stat type.";
+        if(s == null) {
+            retval = 0;
+        }
+        else if(s instanceof LongStat) {
+            retval = ((LongStat) s).get();
+        }
+        else if(s instanceof AtomicLongStat) {
+            retval = ((AtomicLongStat) s).get();
+        }
+        else if(s instanceof IntegralLongAvgStat) {
+            retval = ((IntegralLongAvgStat) s).get().compute();
+        }
+        else {
+            assert false : "Internal error calling getLong() with " +
+                    "unknown stat type.";
         }
         return retval;
     }
 
     public IntegralLongAvgStat getIntegralLongAvgStat(
-        StatDefinition definition) {
+            StatDefinition definition) {
         return (IntegralLongAvgStat) stats.get(definition);
     }
 
@@ -283,54 +292,60 @@ public class StatGroup implements Serializable {
 
     public Long getAtomicLong(StatDefinition definition) {
         AtomicLongStat s = (AtomicLongStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return 0L;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
 
     public Active[] getActiveTxnArray(StatDefinition definition) {
         ActiveTxnArrayStat s = (ActiveTxnArrayStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return null;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
 
     public long[] getLongArray(StatDefinition definition) {
         LongArrayStat s = (LongArrayStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return null;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
 
     public float getFloat(StatDefinition definition) {
         FloatStat s = (FloatStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return 0;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
 
     public boolean getBoolean(StatDefinition definition) {
         BooleanStat s = (BooleanStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return false;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
 
     public String getString(StatDefinition definition) {
         StringStat s = (StringStat) stats.get(definition);
-        if (s == null) {
+        if(s == null) {
             return null;
-        } else {
+        }
+        else {
             return s.get();
         }
     }
@@ -340,7 +355,7 @@ public class StatGroup implements Serializable {
      */
     public void addToTipMap(Map<String, String> tips) {
         tips.put(getName(), getDescription());
-        for (StatDefinition d: stats.keySet()) {
+        for(StatDefinition d : stats.keySet()) {
             tips.put(d.getName(), d.getDescription());
         }
     }
@@ -353,10 +368,10 @@ public class StatGroup implements Serializable {
 
         /* Order the stats for consistent display. */
         Map<StatDefinition, Stat<?>> sortedStats;
-        synchronized (stats) {
+        synchronized(stats) {
             sortedStats = new TreeMap<StatDefinition, Stat<?>>(stats);
         }
-        for (Stat<?> s : sortedStats.values()) {
+        for(Stat<?> s : sortedStats.values()) {
             sb.append("\t").append(s).append("\n");
         }
 
@@ -373,10 +388,10 @@ public class StatGroup implements Serializable {
 
         /* Order the stats for consistent display.*/
         Map<StatDefinition, Stat<?>> sortedStats;
-        synchronized (stats) {
+        synchronized(stats) {
             sortedStats = new TreeMap<StatDefinition, Stat<?>>(stats);
         }
-        for (Stat<?> s : sortedStats.values()) {
+        for(Stat<?> s : sortedStats.values()) {
             sb.append("\t").append(s.toStringVerbose()).append("\n");
         }
         return sb.toString();
@@ -392,13 +407,13 @@ public class StatGroup implements Serializable {
 
         /* Order the stats for consistent display.*/
         Map<StatDefinition, Stat<?>> sortedStats;
-        synchronized (stats) {
+        synchronized(stats) {
             sortedStats = new TreeMap<StatDefinition, Stat<?>>(stats);
         }
 
-        for (Stat<?> s : sortedStats.values()) {
+        for(Stat<?> s : sortedStats.values()) {
 
-            if (s.isNotSet()) {
+            if(s.isNotSet()) {
                 continue;
             }
 
@@ -406,7 +421,7 @@ public class StatGroup implements Serializable {
              * Print the group name lazily, in case no fields in this group are
              * set at all. In that case, this method will not print anything.
              */
-            if (!headerPrinted) {
+            if(!headerPrinted) {
                 sb.append(groupName + "\n");
                 headerPrinted = true;
             }
@@ -420,8 +435,8 @@ public class StatGroup implements Serializable {
      */
     public String getCSVHeader() {
         StringBuilder sb = new StringBuilder();
-        synchronized (stats) {
-            for (StatDefinition def : stats.keySet()) {
+        synchronized(stats) {
+            for(StatDefinition def : stats.keySet()) {
                 sb.append(groupName + "_" + def.getName() + ",");
             }
         }
@@ -433,8 +448,8 @@ public class StatGroup implements Serializable {
      */
     public String getCSVData() {
         StringBuilder sb = new StringBuilder();
-        synchronized (stats) {
-            for (Stat<?> s : stats.values()) {
+        synchronized(stats) {
+            for(Stat<?> s : stats.values()) {
                 sb.append(s.getFormattedValue() + ",");
             }
         }

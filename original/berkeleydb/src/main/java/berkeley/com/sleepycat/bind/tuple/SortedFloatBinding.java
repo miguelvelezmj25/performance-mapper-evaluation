@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a sorted <code>Float</code>
  * primitive wrapper or sorted a <code>float</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -31,6 +31,28 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
  * @see <a href="package-summary.html#floatFormats">Floating Point Formats</a>
  */
 public class SortedFloatBinding extends TupleBinding<Float> {
+
+    /**
+     * Converts an entry buffer into a simple <code>float</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static float entryToFloat(DatabaseEntry entry) {
+
+        return entryToInput(entry).readSortedFloat();
+    }
+
+    /**
+     * Converts a simple <code>float</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void floatToEntry(float val, DatabaseEntry entry) {
+
+        outputToEntry(FloatBinding.sizedOutput().writeSortedFloat(val), entry);
+    }
 
     /* javadoc is inherited */
     public Float entryToObject(TupleInput input) {
@@ -48,29 +70,5 @@ public class SortedFloatBinding extends TupleBinding<Float> {
     protected TupleOutput getTupleOutput(Float object) {
 
         return FloatBinding.sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>float</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static float entryToFloat(DatabaseEntry entry) {
-
-        return entryToInput(entry).readSortedFloat();
-    }
-
-    /**
-     * Converts a simple <code>float</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void floatToEntry(float val, DatabaseEntry entry) {
-
-        outputToEntry(FloatBinding.sizedOutput().writeSortedFloat(val), entry);
     }
 }

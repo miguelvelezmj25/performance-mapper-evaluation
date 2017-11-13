@@ -13,23 +13,24 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
+import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.DatabaseException;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * The Iterator returned by all stored collections.
- *
+ * <p>
  * <p>While in general this class conforms to the {@link Iterator} interface,
  * it is important to note that all iterators for stored collections must be
  * explicitly closed with {@link #close()}.  The static method {@link
@@ -37,7 +38,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * harm to iterators that are not from stored collections, and also avoids
  * casting.  If a stored iterator is not closed, unpredictable behavior
  * including process death may result.</p>
- *
+ * <p>
  * <p>This class implements the {@link Iterator} interface for all stored
  * iterators.  It also implements {@link ListIterator} because some list
  * iterator methods apply to all stored iterators, for example, {@link
@@ -45,7 +46,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * supported for lists, but for other types of collections are only supported
  * under certain conditions.  See {@link #nextIndex}, {@link #previousIndex},
  * {@link #add} and {@link #set} for details.</p>
- *
+ * <p>
  * <p>In addition, this class provides the following methods for stored
  * collection iterators only.  Note that the use of these methods is not
  * compatible with the standard Java collections interface.</p>
@@ -61,33 +62,14 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class StoredIterator<E> extends BaseIterator<E>
-    implements ListIterator<E>, Cloneable
+        implements ListIterator<E>, Cloneable
     /* <!-- begin JE only --> */
-    , Closeable
-    /* <!-- end JE only --> */
-    {
-
-    /**
-     * Closes the given iterator using {@link #close()} if it is a {@link
-     * StoredIterator}.  If the given iterator is not a {@link StoredIterator},
-     * this method does nothing.
-     *
-     * @param i is the iterator to close.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
-     */
-    public static void close(Iterator<?> i) {
-
-        if (i instanceof StoredIterator) {
-            ((StoredIterator) i).close();
-        }
-    }
+        , Closeable
+    /* <!-- end JE only --> */ {
 
     private static final int MOVE_NEXT = 1;
     private static final int MOVE_PREV = 2;
     private static final int MOVE_FIRST = 3;
-
     private boolean lockForWrite;
     private StoredCollection<E> coll;
     private DataCursor cursor;
@@ -97,26 +79,43 @@ public class StoredIterator<E> extends BaseIterator<E>
     private boolean writeAllowed;
     private boolean setAndRemoveAllowed;
     private E currentData;
-
     StoredIterator(StoredCollection<E> coll,
                    boolean writeAllowed,
                    DataCursor joinCursor) {
         try {
             this.coll = coll;
             this.writeAllowed = writeAllowed;
-            if (joinCursor == null)
+            if(joinCursor == null) {
                 this.cursor = new DataCursor(coll.view, writeAllowed);
-            else
+            }
+            else {
                 this.cursor = joinCursor;
+            }
             reset();
-        } catch (Exception e) {
+        } catch(Exception e) {
             try {
                 /* Ensure that the cursor is closed.  [#10516] */
                 close();
-            } catch (Exception ignored) {
+            } catch(Exception ignored) {
                 /* Klockwork - ok */
             }
             throw StoredContainer.convertException(e);
+        }
+    }
+
+    /**
+     * Closes the given iterator using {@link #close()} if it is a {@link
+     * StoredIterator}.  If the given iterator is not a {@link StoredIterator},
+     * this method does nothing.
+     *
+     * @param i is the iterator to close.
+     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
+     *                                 including a {@code DatabaseException} on BDB (C edition).
+     */
+    public static void close(Iterator<?> i) {
+
+        if(i instanceof StoredIterator) {
+            ((StoredIterator) i).close();
         }
     }
 
@@ -154,35 +153,33 @@ public class StoredIterator<E> extends BaseIterator<E>
      * This method conforms to the {@link Iterator#hasNext} interface.
      *
      * @return whether {@link #next()} will succeed.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean hasNext() {
 
-        if (cursor == null) {
+        if(cursor == null) {
             return false;
         }
         try {
-            if (toNext != 0) {
+            if(toNext != 0) {
                 OperationStatus status = move(toNext);
-                if (status == OperationStatus.SUCCESS) {
+                if(status == OperationStatus.SUCCESS) {
                     toNext = 0;
                     toPrevious = MOVE_PREV;
                     toCurrent = MOVE_PREV;
                 }
             }
             return (toNext == 0);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -193,35 +190,33 @@ public class StoredIterator<E> extends BaseIterator<E>
      * This method conforms to the {@link ListIterator#hasPrevious} interface.
      *
      * @return whether {@link #previous()} will succeed.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public boolean hasPrevious() {
 
-        if (cursor == null) {
+        if(cursor == null) {
             return false;
         }
         try {
-            if (toPrevious != 0) {
+            if(toPrevious != 0) {
                 OperationStatus status = move(toPrevious);
-                if (status == OperationStatus.SUCCESS) {
+                if(status == OperationStatus.SUCCESS) {
                     toPrevious = 0;
                     toNext = MOVE_NEXT;
                     toCurrent = MOVE_NEXT;
                 }
             }
             return (toPrevious == 0);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -231,29 +226,27 @@ public class StoredIterator<E> extends BaseIterator<E>
      * This method conforms to the {@link Iterator#next} interface.
      *
      * @return the next element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C Edition).
      */
     public E next() {
 
         try {
-            if (toNext != 0) {
+            if(toNext != 0) {
                 OperationStatus status = move(toNext);
-                if (status == OperationStatus.SUCCESS) {
+                if(status == OperationStatus.SUCCESS) {
                     toNext = 0;
                 }
             }
-            if (toNext == 0) {
+            if(toNext == 0) {
                 currentData = coll.makeIteratorData(this, cursor);
                 toNext = MOVE_NEXT;
                 toPrevious = 0;
@@ -262,7 +255,7 @@ public class StoredIterator<E> extends BaseIterator<E>
                 return currentData;
             }
             // else throw NoSuchElementException below
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
         throw new NoSuchElementException();
@@ -273,29 +266,27 @@ public class StoredIterator<E> extends BaseIterator<E>
      * This method conforms to the {@link ListIterator#previous} interface.
      *
      * @return the previous element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C Edition).
      */
     public E previous() {
 
         try {
-            if (toPrevious != 0) {
+            if(toPrevious != 0) {
                 OperationStatus status = move(toPrevious);
-                if (status == OperationStatus.SUCCESS) {
+                if(status == OperationStatus.SUCCESS) {
                     toPrevious = 0;
                 }
             }
-            if (toPrevious == 0) {
+            if(toPrevious == 0) {
                 currentData = coll.makeIteratorData(this, cursor);
                 toPrevious = MOVE_PREV;
                 toNext = 0;
@@ -304,7 +295,7 @@ public class StoredIterator<E> extends BaseIterator<E>
                 return currentData;
             }
             // else throw NoSuchElementException below
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
         throw new NoSuchElementException();
@@ -320,33 +311,30 @@ public class StoredIterator<E> extends BaseIterator<E>
      * size is not available.
      *
      * @return the next index.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                       Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if this iterator's collection does
-     * not use record number keys.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       not use record number keys.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public int nextIndex() {
 
-        if (!coll.view.recNumAccess) {
+        if(!coll.view.recNumAccess) {
             throw new UnsupportedOperationException
-                ("Record number access not supported");
+                    ("Record number access not supported");
         }
         try {
             return hasNext() ? (cursor.getCurrentRecordNumber() -
-                                coll.getIndexOffset())
-                             : Integer.MAX_VALUE;
-        } catch (Exception e) {
+                    coll.getIndexOffset())
+                    : Integer.MAX_VALUE;
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -358,33 +346,30 @@ public class StoredIterator<E> extends BaseIterator<E>
      * interface.
      *
      * @return the previous index.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                       Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if this iterator's collection does
-     * not use record number keys.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       not use record number keys.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public int previousIndex() {
 
-        if (!coll.view.recNumAccess) {
+        if(!coll.view.recNumAccess) {
             throw new UnsupportedOperationException
-                ("Record number access not supported");
+                    ("Record number access not supported");
         }
         try {
             return hasPrevious() ? (cursor.getCurrentRecordNumber() -
-                                    coll.getIndexOffset())
-                                 : (-1);
-        } catch (Exception e) {
+                    coll.getIndexOffset())
+                    : (-1);
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -393,46 +378,42 @@ public class StoredIterator<E> extends BaseIterator<E>
      * Replaces the last element returned by next or previous with the
      * specified element (optional operation).
      * This method conforms to the {@link ListIterator#set} interface.
-     *
+     * <p>
      * <p>In order to call this method, if the underlying Database is
      * transactional then a transaction must be active when creating the
      * iterator.</p>
      *
      * @param value the new value.
-     *
-     * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     *              <p>
+     *              <!-- begin JE only -->
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is a {@link
-     * StoredKeySet} (the set returned by {@link java.util.Map#keySet}), or if
-     * duplicates are sorted since this would change the iterator position, or
-     * if the collection is indexed, or if the collection is read-only.
-     *
-     * @throws IllegalArgumentException if an entity value binding is used and
-     * the primary key of the value given is different than the existing stored
-     * primary key.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       StoredKeySet} (the set returned by {@link java.util.Map#keySet}), or if
+     *                                       duplicates are sorted since this would change the iterator position, or
+     *                                       if the collection is indexed, or if the collection is read-only.
+     * @throws IllegalArgumentException      if an entity value binding is used and
+     *                                       the primary key of the value given is different than the existing stored
+     *                                       primary key.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public void set(E value) {
 
-        if (!coll.hasValues()) {
+        if(!coll.hasValues()) {
             throw new UnsupportedOperationException();
         }
-        if (!setAndRemoveAllowed) {
+        if(!setAndRemoveAllowed) {
             throw new IllegalStateException();
         }
         try {
             moveToCurrent();
             cursor.putCurrent(value);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -443,33 +424,31 @@ public class StoredIterator<E> extends BaseIterator<E>
      * This method conforms to the {@link ListIterator#remove} interface except
      * that when the collection is a list and the RECNO-RENUMBER access method
      * is not used, list indices will not be renumbered.
-     *
+     * <p>
      * <p>In order to call this method, if the underlying Database is
      * transactional then a transaction must be active when creating the
      * iterator.</p>
-     *
+     * <p>
      * <p>Note that for the JE product, RECNO-RENUMBER databases are not
      * supported, and therefore list indices are never renumbered by this
      * method.</p>
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is a sublist, or
-     * if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       if the collection is read-only.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public void remove() {
 
-        if (!setAndRemoveAllowed) {
+        if(!setAndRemoveAllowed) {
             throw new IllegalStateException();
         }
         try {
@@ -478,7 +457,7 @@ public class StoredIterator<E> extends BaseIterator<E>
             setAndRemoveAllowed = false;
             toNext = MOVE_NEXT;
             toPrevious = MOVE_PREV;
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -492,43 +471,38 @@ public class StoredIterator<E> extends BaseIterator<E>
      * If duplicates are unsorted, the new value will be inserted in the same
      * manner as list elements.
      * If duplicates are sorted, the new value will be inserted in sort order.
-     *
+     * <p>
      * <p>Note that for the JE product, RECNO-RENUMBER databases are not
      * supported, and therefore this method may only be used to add
      * duplicates.</p>
      *
      * @param value the new value.
-     *
-     * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     *              <p>
+     *              <!-- begin JE only -->
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is a sublist, or
-     * if the collection is indexed, or if the collection is read-only, or if
-     * the collection is a list and the RECNO-RENUMBER access method was not
-     * used, or if the collection is not a list and duplicates are not allowed.
-     *
-     * @throws IllegalStateException if the collection is empty and is not a
-     * list with RECNO-RENUMBER access.
-     *
-     * @throws IllegalArgumentException if a duplicate value is being added
-     * that already exists and duplicates are sorted.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       if the collection is indexed, or if the collection is read-only, or if
+     *                                       the collection is a list and the RECNO-RENUMBER access method was not
+     *                                       used, or if the collection is not a list and duplicates are not allowed.
+     * @throws IllegalStateException         if the collection is empty and is not a
+     *                                       list with RECNO-RENUMBER access.
+     * @throws IllegalArgumentException      if a duplicate value is being added
+     *                                       that already exists and duplicates are sorted.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public void add(E value) {
 
         coll.checkIterAddAllowed();
         try {
             OperationStatus status = OperationStatus.SUCCESS;
-            if (toNext != 0 && toPrevious != 0) { // database is empty
-                if (coll.view.keysRenumbered) { // recno-renumber database
+            if(toNext != 0 && toPrevious != 0) { // database is empty
+                if(coll.view.keysRenumbered) { // recno-renumber database
                     /*
                      * Close cursor during append and then reopen to support
                      * CDB restriction that append may not be called with a
@@ -540,42 +514,49 @@ public class StoredIterator<E> extends BaseIterator<E>
                     cursor = new DataCursor(coll.view, writeAllowed);
                     reset();
                     next(); // move past new record
-                } else { // hash/btree with duplicates
+                }
+                else { // hash/btree with duplicates
                     throw new IllegalStateException
-                        ("Collection is empty, cannot add() duplicate");
+                            ("Collection is empty, cannot add() duplicate");
                 }
-            } else { // database is not empty
+            }
+            else { // database is not empty
                 boolean putBefore = false;
-                if (coll.view.keysRenumbered) { // recno-renumber database
+                if(coll.view.keysRenumbered) { // recno-renumber database
                     moveToCurrent();
-                    if (hasNext()) {
+                    if(hasNext()) {
                         status = cursor.putBefore(value);
                         putBefore = true;
-                    } else {
-                        status = cursor.putAfter(value);
                     }
-                } else { // hash/btree with duplicates
-                    if (coll.areDuplicatesOrdered()) {
-                        status = cursor.putNoDupData(null, value, null, true);
-                    } else if (toNext == 0) {
-                        status = cursor.putBefore(value);
-                        putBefore = true;
-                    } else {
+                    else {
                         status = cursor.putAfter(value);
                     }
                 }
-                if (putBefore) {
+                else { // hash/btree with duplicates
+                    if(coll.areDuplicatesOrdered()) {
+                        status = cursor.putNoDupData(null, value, null, true);
+                    }
+                    else if(toNext == 0) {
+                        status = cursor.putBefore(value);
+                        putBefore = true;
+                    }
+                    else {
+                        status = cursor.putAfter(value);
+                    }
+                }
+                if(putBefore) {
                     toPrevious = 0;
                     toNext = MOVE_NEXT;
                 }
             }
-            if (status == OperationStatus.KEYEXIST) {
+            if(status == OperationStatus.KEYEXIST) {
                 throw new IllegalArgumentException("Duplicate value");
-            } else if (status != OperationStatus.SUCCESS) {
+            }
+            else if(status != OperationStatus.SUCCESS) {
                 throw DbCompat.unexpectedState("Could not insert: " + status);
             }
             setAndRemoveAllowed = false;
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -606,31 +587,29 @@ public class StoredIterator<E> extends BaseIterator<E>
      * duplicates are allowed, 1 is always returned.
      * This method does not exist in the standard {@link Iterator} or {@link
      * ListIterator} interfaces.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
      *
      * @return the number of duplicates.
-     *
-     * @throws IllegalStateException if next() or previous() has not been
-     * called for this iterator, or if remove() or add() were called after
-     * the last call to next() or previous().
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
+     * @throws EnvironmentFailureException if an unexpected, internal or
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws IllegalStateException       if next() or previous() has not been
+     *                                     called for this iterator, or if remove() or add() were called after
+     *                                     the last call to next() or previous().
      */
     public int count() {
 
-        if (!setAndRemoveAllowed) {
+        if(!setAndRemoveAllowed) {
             throw new IllegalStateException();
         }
         try {
             moveToCurrent();
             return cursor.count();
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -639,7 +618,7 @@ public class StoredIterator<E> extends BaseIterator<E>
      * Closes this iterator.
      * This method does not exist in the standard {@link Iterator} or {@link
      * ListIterator} interfaces.
-     *
+     * <p>
      * <p>After being closed, only the {@link #hasNext} and {@link
      * #hasPrevious} methods may be called and these will return false.  {@link
      * #close()} may also be called again and will do nothing.  If other
@@ -647,11 +626,11 @@ public class StoredIterator<E> extends BaseIterator<E>
      * thrown.</p>
      *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                 including a {@code DatabaseException} on BDB (C Edition).
      */
     public void close() {
 
-        if (cursor != null) {
+        if(cursor != null) {
             coll.closeCursor(cursor);
             cursor = null;
         }
@@ -677,7 +656,7 @@ public class StoredIterator<E> extends BaseIterator<E>
             StoredIterator o = (StoredIterator) super.clone();
             o.cursor = cursor.cloneCursor();
             return o;
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -691,11 +670,11 @@ public class StoredIterator<E> extends BaseIterator<E>
 
         try {
             OperationStatus status =
-                cursor.getSearchKey(Integer.valueOf(index),
-                                    null, lockForWrite);
+                    cursor.getSearchKey(Integer.valueOf(index),
+                            null, lockForWrite);
             setAndRemoveAllowed = (status == OperationStatus.SUCCESS);
             return setAndRemoveAllowed;
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }
@@ -703,28 +682,30 @@ public class StoredIterator<E> extends BaseIterator<E>
     // --- end BaseIterator methods ---
 
     private void moveToCurrent()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (toCurrent != 0) {
+        if(toCurrent != 0) {
             move(toCurrent);
             toCurrent = 0;
         }
     }
 
     private OperationStatus move(int direction)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        switch (direction) {
+        switch(direction) {
             case MOVE_NEXT:
-                if (coll.iterateDuplicates()) {
+                if(coll.iterateDuplicates()) {
                     return cursor.getNext(lockForWrite);
-                } else {
+                }
+                else {
                     return cursor.getNextNoDup(lockForWrite);
                 }
             case MOVE_PREV:
-                if (coll.iterateDuplicates()) {
+                if(coll.iterateDuplicates()) {
                     return cursor.getPrev(lockForWrite);
-                } else {
+                }
+                else {
                     return cursor.getPrevNoDup(lockForWrite);
                 }
             case MOVE_FIRST:

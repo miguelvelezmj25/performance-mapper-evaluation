@@ -13,11 +13,18 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GROUP_DESC;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GROUP_NAME;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_END_OF_LOG;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_REPEAT_FAULT_READS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.LOGMGR_TEMP_BUFFER_WRITES;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.StatsConfig;
+import berkeley.com.sleepycat.je.cleaner.*;
+import berkeley.com.sleepycat.je.config.EnvironmentParams;
+import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
+import berkeley.com.sleepycat.je.dbi.DbConfigManager;
+import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.log.entry.LogEntry;
+import berkeley.com.sleepycat.je.txn.WriteLockInfo;
+import berkeley.com.sleepycat.je.utilint.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,28 +36,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.cleaner.DbFileSummary;
-import berkeley.com.sleepycat.je.cleaner.ExpirationTracker;
-import berkeley.com.sleepycat.je.cleaner.LocalUtilizationTracker;
-import berkeley.com.sleepycat.je.cleaner.TrackedFileSummary;
-import berkeley.com.sleepycat.je.cleaner.UtilizationTracker;
-import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.entry.LogEntry;
-import berkeley.com.sleepycat.je.txn.WriteLockInfo;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LSNStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import static berkeley.com.sleepycat.je.log.LogStatDefinition.*;
 
 /**
  * The LogManager supports reading and writing to the JE log.
@@ -74,46 +60,36 @@ public class LogManager {
 
     /* How many bytes to read when faulting in. */
     private final int readBufferSize;
-
-    /* The last LSN in the log during recovery. */
-    private long lastLsnAtRecovery = DbLsn.NULL_LSN;
-
     /* Stats */
     private final StatGroup stats;
-
     /*
      * Number of times we have to repeat a read when we fault in an object
      * because the initial read was too small.
      */
     private final LongStat nRepeatFaultReads;
-
     /*
      * Number of times we have to use the temporary marshalling buffer to
      * write to the log.
      */
     private final LongStat nTempBufferWrites;
-
     /* The location of the next entry to be written to the log. */
     private final LSNStat endOfLog;
-
+    /* A queue to hold log entries which are to be logged lazily. */
+    private final Queue<LazyQueueEntry> lazyLogQueue =
+            new ConcurrentLinkedQueue<LazyQueueEntry>();
+    /* The last LSN in the log during recovery. */
+    private long lastLsnAtRecovery = DbLsn.NULL_LSN;
     /*
      * Used to determine if we switched log buffers. For
      * NOSYNC durability, if we switched log buffers,
      * the thread will write the previous dirty buffers.
      */
     private LogBuffer prevLogBuffer = null;
-
     /* For unit tests */
     private TestHook readHook; // used for generating exceptions on log reads
-
     /* For unit tests. */
     private TestHook<Object> delayVLSNRegisterHook;
     private TestHook<CountDownLatch> flushHook;
-
-    /* A queue to hold log entries which are to be logged lazily. */
-    private final Queue<LazyQueueEntry> lazyLogQueue =
-        new ConcurrentLinkedQueue<LazyQueueEntry>();
-
     /*
      * Used for tracking the current file. Is null if no tracking should occur.
      * Read/write of this field is protected by the LWL, but the tracking
@@ -121,25 +97,12 @@ public class LogManager {
      */
     private ExpirationTracker expirationTracker = null;
 
-    /*
-     * An entry in the lazyLogQueue. A struct to hold the entry and repContext.
-     */
-    private static class LazyQueueEntry {
-        private final LogEntry entry;
-        private final ReplicationContext repContext;
-
-        private LazyQueueEntry(LogEntry entry, ReplicationContext repContext) {
-            this.entry = entry;
-            this.repContext = repContext;
-        }
-    }
-
     /**
      * There is a single log manager per database environment.
      */
     public LogManager(EnvironmentImpl envImpl,
                       boolean readOnly)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Set up log buffers. */
         this.envImpl = envImpl;
@@ -151,11 +114,11 @@ public class LogManager {
 
         /* See if we're configured to do a checksum when reading in objects. */
         doChecksumOnRead =
-            configManager.getBoolean(EnvironmentParams.LOG_CHECKSUM_READ);
+                configManager.getBoolean(EnvironmentParams.LOG_CHECKSUM_READ);
 
         logWriteMutex = new Object();
         readBufferSize =
-            configManager.getInt(EnvironmentParams.LOG_FAULT_READ_SIZE);
+                configManager.getInt(EnvironmentParams.LOG_FAULT_READ_SIZE);
 
         /* Do the stats definitions. */
         stats = new StatGroup(GROUP_NAME, GROUP_DESC);
@@ -191,9 +154,29 @@ public class LogManager {
      */
     public void resetPool(DbConfigManager configManager)
             throws DatabaseException {
-        synchronized (logWriteMutex) {
-           logBufferPool.reset(configManager);
+        synchronized(logWriteMutex) {
+            logBufferPool.reset(configManager);
         }
+    }
+
+    /**
+     * Log this single object and force a write of the log files.
+     *
+     * @param entry         object to be logged
+     * @param fsyncRequired if true, log files should also be fsynced.
+     * @return LSN of the new log entry
+     */
+    public long logForceFlush(LogEntry entry,
+                              boolean fsyncRequired,
+                              ReplicationContext repContext)
+            throws DatabaseException {
+
+        return log(entry,
+                Provisional.NO,
+                true,           // flush required
+                fsyncRequired,
+                false,          // forceNewLogFile
+                repContext);    // repContext
     }
 
     /*
@@ -201,58 +184,42 @@ public class LogManager {
      */
 
     /**
-     * Log this single object and force a write of the log files.
-     * @param entry object to be logged
-     * @param fsyncRequired if true, log files should also be fsynced.
-     * @return LSN of the new log entry
-     */
-    public long logForceFlush(LogEntry entry,
-                              boolean fsyncRequired,
-                              ReplicationContext repContext)
-        throws DatabaseException {
-
-        return log(entry,
-                   Provisional.NO,
-                   true,           // flush required
-                   fsyncRequired,
-                   false,          // forceNewLogFile
-                   repContext);    // repContext
-    }
-
-    /**
      * Log this single object and force a flip of the log files.
+     *
      * @param entry object to be logged
      * @return LSN of the new log entry
      */
     public long logForceFlip(LogEntry entry)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return log(entry,
-                   Provisional.NO,
-                   true,           // flush required
-                   false,          // fsync required
-                   true,           // forceNewLogFile
-                   ReplicationContext.NO_REPLICATE);
+                Provisional.NO,
+                true,           // flush required
+                false,          // fsync required
+                true,           // forceNewLogFile
+                ReplicationContext.NO_REPLICATE);
     }
 
     /**
      * Write a log entry.
+     *
      * @param entry object to be logged
      * @return LSN of the new log entry
      */
     public long log(LogEntry entry, ReplicationContext repContext)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return log(entry,
-                   Provisional.NO,
-                   false,           // flush required
-                   false,           // fsync required
-                   false,           // forceNewLogFile
-                   repContext);
+                Provisional.NO,
+                false,           // flush required
+                false,           // fsync required
+                false,           // forceNewLogFile
+                repContext);
     }
 
     /**
      * Write a log entry lazily.
+     *
      * @param entry object to be logged
      */
     public void logLazily(LogEntry entry, ReplicationContext repContext) {
@@ -269,7 +236,7 @@ public class LogManager {
                      final boolean fsyncRequired,
                      final boolean forceNewLogFile,
                      final ReplicationContext repContext)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogParams params = new LogParams();
 
@@ -290,7 +257,7 @@ public class LogManager {
      * flushing and sync'ing (if requested).
      */
     public LogItem log(LogParams params)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogItem item = new LogItem();
 
@@ -301,15 +268,15 @@ public class LogManager {
          * occur during recovery, for one reason.  Logging LNs in a read-only
          * env is not allowed, and this is checked in the LN class.
          */
-        if (readOnly) {
+        if(readOnly) {
             return item;
         }
 
         try {
             /* Flush any pending lazy entries. */
-            for (LazyQueueEntry lqe = lazyLogQueue.poll();
-                 lqe != null;
-                 lqe = lazyLogQueue.poll()) {
+            for(LazyQueueEntry lqe = lazyLogQueue.poll();
+                lqe != null;
+                lqe = lazyLogQueue.poll()) {
 
                 LogParams lqeParams = new LogParams();
                 lqeParams.entry = lqe.entry;
@@ -327,22 +294,23 @@ public class LogManager {
              * section.  Note that the header may only be created during
              * marshalling because it calls entry.getSize().
              */
-            if (logEntry.getLogType().marshallOutsideLatch()) {
+            if(logEntry.getLogType().marshallOutsideLatch()) {
 
                 item.header = new LogEntryHeader(
-                    logEntry, params.provisional, params.repContext);
+                        logEntry, params.provisional, params.repContext);
 
                 item.buffer = marshallIntoBuffer(item.header, logEntry);
             }
 
             logItem(item, params);
 
-            if (params.fsyncRequired || params.flushRequired) {
+            if(params.fsyncRequired || params.flushRequired) {
 
                 /* Flush log buffers and write queue, and optionally fsync. */
                 grpManager.flushAndSync(params.fsyncRequired);
 
-            } else if (params.switchedLogBuffer) {
+            }
+            else if(params.switchedLogBuffer) {
                 /*
                  * The operation does not require writing to the log file, but
                  * since we switched log buffers, this thread will write the
@@ -362,11 +330,11 @@ public class LogManager {
              * this before the ckpt so we have a better chance of writing this
              * mapping to disk.
              */
-            if (params.repContext.inReplicationStream()) {
+            if(params.repContext.inReplicationStream()) {
 
                 assert (item.header.getVLSN() != null) :
-                    "Unexpected null vlsn: " + item.header + " " +
-                    params.repContext;
+                        "Unexpected null vlsn: " + item.header + " " +
+                                params.repContext;
 
                 /* Block the VLSN registration, used by unit tests. */
                 TestHookExecute.doHookIfSet(delayVLSNRegisterHook);
@@ -374,7 +342,7 @@ public class LogManager {
                 envImpl.registerVLSN(item);
             }
 
-        } catch (EnvironmentFailureException e) {
+        } catch(EnvironmentFailureException e) {
 
             /*
              * Final checks are below for unexpected exceptions during the
@@ -386,15 +354,15 @@ public class LogManager {
              * If we've already invalidated the environment, rethrow so as not
              * to excessively wrap the exception.
              */
-            if (!envImpl.isValid()) {
+            if(!envImpl.isValid()) {
                 throw e;
             }
             throw EnvironmentFailureException.unexpectedException(envImpl, e);
 
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw EnvironmentFailureException.unexpectedException(envImpl, e);
 
-        } catch (Error e) {
+        } catch(Error e) {
             envImpl.invalidate(e);
             throw e;
         }
@@ -407,29 +375,29 @@ public class LogManager {
         envImpl.getCleaner().wakeupAfterWrite(item.size);
 
         /* Update background writes. */
-        if (params.backgroundIO) {
+        if(params.backgroundIO) {
             envImpl.updateBackgroundWrites(
-                item.size, logBufferPool.getLogBufferSize());
+                    item.size, logBufferPool.getLogBufferSize());
         }
 
         return item;
     }
 
     private void logItem(final LogItem item, final LogParams params)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         final UtilizationTracker tracker = envImpl.getUtilizationTracker();
 
         final LogWriteInfo lwi = serialLog(item, params, tracker);
 
-        if (lwi != null) {
+        if(lwi != null) {
 
             /*
              * Add checksum, prev offset, and VLSN to the entry.
              * Copy data into the log buffer.
              */
             item.buffer = item.header.addPostMarshallingInfo(
-                item.buffer, lwi.fileOffset, lwi.vlsn);
+                    item.buffer, lwi.fileOffset, lwi.vlsn);
 
             lwi.lbs.put(item.buffer);
         }
@@ -438,14 +406,14 @@ public class LogManager {
         updateObsolete(params, tracker);
 
         /* Expiration tracking is protected by the Btree latch, not the LWL. */
-        if (params.expirationTrackerToUse != null) {
+        if(params.expirationTrackerToUse != null) {
             params.expirationTrackerToUse.track(params.entry, item.size);
         }
 
         /* Queue flushing of expiration tracker after a file flip. */
-        if (params.expirationTrackerCompleted != null) {
+        if(params.expirationTrackerCompleted != null) {
             envImpl.getExpirationProfile().addCompletedTracker(
-                params.expirationTrackerCompleted);
+                    params.expirationTrackerCompleted);
         }
     }
 
@@ -454,7 +422,7 @@ public class LogManager {
      * invalidated when any exception occurs in the critical write path, and it
      * checks for an invalid environment to be sure that no subsequent write is
      * allowed.  [#21929]
-     *
+     * <p>
      * Invalidation is necessary because a logging operation does not ensure
      * that the internal state -- correspondence of LSN pointer, log buffer
      * position and file position, and the integrity of the VLSN index [#20919]
@@ -462,12 +430,12 @@ public class LogManager {
      * subsequent write can cause log corruption.
      */
     private LogWriteInfo serialLog(
-        final LogItem item,
-        final LogParams params,
-        final UtilizationTracker tracker)
-        throws IOException {
+            final LogItem item,
+            final LogParams params,
+            final UtilizationTracker tracker)
+            throws IOException {
 
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
 
             /* Do not attempt to write with an invalid environment. */
             envImpl.checkIfInvalid();
@@ -475,24 +443,24 @@ public class LogManager {
             try {
                 return serialLogWork(item, params, tracker);
 
-            } catch (EnvironmentFailureException e) {
+            } catch(EnvironmentFailureException e) {
                 /*
                  * If we've already invalidated the environment, rethrow so
                  * as not to excessively wrap the exception.
                  */
-                if (!envImpl.isValid()) {
+                if(!envImpl.isValid()) {
                     throw e;
                 }
 
                 /* Otherwise, invalidate the environment. */
                 throw EnvironmentFailureException.unexpectedException(
-                    envImpl, e);
+                        envImpl, e);
 
-            } catch (Exception e) {
+            } catch(Exception e) {
                 throw EnvironmentFailureException.unexpectedException(
-                    envImpl, e);
+                        envImpl, e);
 
-            } catch (Error e) {
+            } catch(Error e) {
                 /* Errors must be caught here as well as Exceptions.[#21929] */
                 envImpl.invalidate(e);
                 throw e;
@@ -510,17 +478,17 @@ public class LogManager {
      * indicates that the item was written to the log. This occurs when the
      * data item is too big to fit into an empty LogBuffer.
      *
-     * @param params log params.
+     * @param params  log params.
      * @param tracker utilization.
      * @return a LogWriteInfo object used to access allocated LogBuffer space.
-     *           If null, the data was written to the log.
+     * If null, the data was written to the log.
      * @throws IOException
      */
     private LogWriteInfo serialLogWork(
-        final LogItem item,
-        final LogParams params,
-        final UtilizationTracker tracker)
-        throws IOException {
+            final LogItem item,
+            final LogParams params,
+            final UtilizationTracker tracker)
+            throws IOException {
 
         /*
          * Do obsolete tracking before marshalling a FileSummaryLN into the
@@ -531,24 +499,26 @@ public class LogManager {
          */
         final LogEntryType entryType = params.entry.getLogType();
 
-        if (!DbLsn.isTransientOrNull(params.oldLsn)) {
-            if (params.obsoleteDupsAllowed) {
+        if(!DbLsn.isTransientOrNull(params.oldLsn)) {
+            if(params.obsoleteDupsAllowed) {
                 tracker.countObsoleteNodeDupsAllowed(
-                    params.oldLsn, entryType, params.oldSize, params.nodeDb);
-            } else {
+                        params.oldLsn, entryType, params.oldSize, params.nodeDb);
+            }
+            else {
                 tracker.countObsoleteNode(
-                    params.oldLsn, entryType, params.oldSize, params.nodeDb);
+                        params.oldLsn, entryType, params.oldSize, params.nodeDb);
             }
         }
 
         /* Count auxOldLsn for same database; no specified size. */
-        if (!DbLsn.isTransientOrNull(params.auxOldLsn)) {
-            if (params.obsoleteDupsAllowed) {
+        if(!DbLsn.isTransientOrNull(params.auxOldLsn)) {
+            if(params.obsoleteDupsAllowed) {
                 tracker.countObsoleteNodeDupsAllowed(
-                    params.auxOldLsn, entryType, 0, params.nodeDb);
-            } else {
+                        params.auxOldLsn, entryType, 0, params.nodeDb);
+            }
+            else {
                 tracker.countObsoleteNode(
-                    params.auxOldLsn, entryType, 0, params.nodeDb);
+                        params.auxOldLsn, entryType, 0, params.nodeDb);
             }
         }
 
@@ -560,15 +530,17 @@ public class LogManager {
          */
         final VLSN vlsn;
 
-        if (params.repContext.getClientVLSN() != null ||
-            params.repContext.mustGenerateVLSN()) {
+        if(params.repContext.getClientVLSN() != null ||
+                params.repContext.mustGenerateVLSN()) {
 
-            if (params.repContext.mustGenerateVLSN()) {
+            if(params.repContext.mustGenerateVLSN()) {
                 vlsn = envImpl.assignVLSNs(params.entry);
-            } else {
+            }
+            else {
                 vlsn = params.repContext.getClientVLSN();
             }
-        } else {
+        }
+        else {
             vlsn = null;
         }
 
@@ -582,13 +554,14 @@ public class LogManager {
         final boolean marshallOutsideLatch = (item.buffer != null);
         final int entrySize;
 
-        if (marshallOutsideLatch) {
+        if(marshallOutsideLatch) {
             entrySize = item.buffer.limit();
             assert item.header != null;
-        } else {
+        }
+        else {
             assert item.header == null;
             item.header = new LogEntryHeader(
-                params.entry, params.provisional, params.repContext);
+                    params.entry, params.provisional, params.repContext);
             entrySize = item.header.getEntrySize();
         }
 
@@ -599,7 +572,7 @@ public class LogManager {
          * We need to bump the LSN first, and bumping the LSN must
          * be done within the log write latch.
          */
-        if (params.forceNewLogFile) {
+        if(params.forceNewLogFile) {
             fileManager.forceNewLogFile();
         }
 
@@ -612,33 +585,33 @@ public class LogManager {
          * getSizeForWrite.
          */
         tracker.countNewLogEntry(
-            currentLsn, entryType, entrySize, params.nodeDb);
+                currentLsn, entryType, entrySize, params.nodeDb);
 
         /*
          * LN deletions and dup DB LNs are obsolete immediately.  Inexact
          * counting is used to save resources because the cleaner knows
          * that all such LNs are obsolete.
          */
-        if (params.entry.isImmediatelyObsolete(params.nodeDb)) {
+        if(params.entry.isImmediatelyObsolete(params.nodeDb)) {
             tracker.countObsoleteNodeInexact(
-                currentLsn, entryType, entrySize, params.nodeDb);
+                    currentLsn, entryType, entrySize, params.nodeDb);
         }
 
         /*
          * This entry must be marshalled within the log write latch.
          */
-        if (!marshallOutsideLatch) {
+        if(!marshallOutsideLatch) {
             assert item.buffer == null;
             item.buffer = marshallIntoBuffer(item.header, params.entry);
         }
 
         /* Sanity check */
-        if (entrySize != item.buffer.limit()) {
+        if(entrySize != item.buffer.limit()) {
             throw EnvironmentFailureException.unexpectedState(
-                "Logged entry entrySize= " + entrySize +
-                " but marshalledSize=" + item.buffer.limit() +
-                " type=" + entryType + " currentLsn=" +
-                DbLsn.getNoFormatString(currentLsn));
+                    "Logged entry entrySize= " + entrySize +
+                            " but marshalledSize=" + item.buffer.limit() +
+                            " type=" + entryType + " currentLsn=" +
+                            DbLsn.getNoFormatString(currentLsn));
         }
 
         /*
@@ -648,9 +621,9 @@ public class LogManager {
          * The returned buffer is not latched.
          */
         final LogBuffer lastLogBuffer =
-            logBufferPool.getWriteBuffer(entrySize, flippedFile);
+                logBufferPool.getWriteBuffer(entrySize, flippedFile);
 
-        if (lastLogBuffer != prevLogBuffer) {
+        if(lastLogBuffer != prevLogBuffer) {
             params.switchedLogBuffer = true;
         }
         prevLogBuffer = lastLogBuffer;
@@ -662,10 +635,11 @@ public class LogManager {
         try {
             useBuffer = lastLogBuffer.allocate(entrySize);
 
-            if (useBuffer != null) {
+            if(useBuffer != null) {
                 /* Register the lsn while holding the buffer latch. */
                 lastLogBuffer.registerLsn(currentLsn);
-            } else {
+            }
+            else {
                 /*
                  * The item buffer is larger than the LogBuffer capacity, so
                  * write the item buffer to the file directly. Note that
@@ -674,14 +648,14 @@ public class LogManager {
                  * First add checksum, prev offset, and VLSN to the entry.
                  */
                 item.buffer = item.header.addPostMarshallingInfo(
-                    item.buffer, fileOffset, vlsn);
+                        item.buffer, fileOffset, vlsn);
 
                 final boolean flushWriteQueue =
-                    params.flushRequired && !params.fsyncRequired;
+                        params.flushRequired && !params.fsyncRequired;
 
                 fileManager.writeLogBuffer(
-                    new LogBuffer(item.buffer, currentLsn),
-                    flushWriteQueue);
+                        new LogBuffer(item.buffer, currentLsn),
+                        flushWriteQueue);
 
                 assert lastLogBuffer.getDataBuffer().position() == 0;
 
@@ -703,14 +677,14 @@ public class LogManager {
         item.size = entrySize;
 
         /* If the expirationTracker field is null, no tracking should occur. */
-        if (expirationTracker != null) {
+        if(expirationTracker != null) {
             /*
              * When logging to a new file, also flip the expirationTracker
              * under the LWL and return expirationTrackerCompleted so it will
              * be queued for flushing.
              */
             final long newFile = DbLsn.getFileNumber(item.lsn);
-            if (flippedFile && newFile != expirationTracker.getFileNum()) {
+            if(flippedFile && newFile != expirationTracker.getFileNum()) {
                 params.expirationTrackerCompleted = expirationTracker;
                 expirationTracker = new ExpirationTracker(newFile);
             }
@@ -752,7 +726,7 @@ public class LogManager {
     ByteBuffer putIntoBuffer(LogEntry entry,
                              long prevLogEntryOffset) {
         LogEntryHeader header = new LogEntryHeader
-            (entry, Provisional.NO, ReplicationContext.NO_REPLICATE);
+                (entry, Provisional.NO, ReplicationContext.NO_REPLICATE);
 
         /*
          * Currently this method is only used for serializing the FileHeader.
@@ -764,26 +738,26 @@ public class LogManager {
         ByteBuffer destBuffer = marshallIntoBuffer(header, entry);
 
         return header.addPostMarshallingInfo(destBuffer,
-            prevLogEntryOffset,
-            null);
+                prevLogEntryOffset,
+                null);
+    }
+
+    /**
+     * Instantiate all the objects in the log entry at this LSN.
+     */
+    public LogEntry getLogEntry(long lsn)
+            throws FileNotFoundException {
+
+        return getLogEntry(lsn, 0, false /*invisibleReadAllowed*/).
+                getEntry();
     }
 
     /*
      * Reading from the log.
      */
 
-    /**
-     * Instantiate all the objects in the log entry at this LSN.
-     */
-    public LogEntry getLogEntry(long lsn)
-        throws FileNotFoundException {
-
-        return getLogEntry(lsn, 0, false /*invisibleReadAllowed*/).
-            getEntry();
-    }
-
     public WholeEntry getWholeLogEntry(long lsn)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
 
         return getLogEntry(lsn, 0, false /*invisibleReadAllowed*/);
     }
@@ -793,10 +767,10 @@ public class LogManager {
      * fetch of invisible log entries if we are in recovery.
      */
     public WholeEntry getLogEntryAllowInvisibleAtRecovery(long lsn, int size)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
 
         return getLogEntry(
-            lsn, size, envImpl.isInInit() /*invisibleReadAllowed*/);
+                lsn, size, envImpl.isInInit() /*invisibleReadAllowed*/);
     }
 
     /**
@@ -804,24 +778,25 @@ public class LogManager {
      * may be marked invisible.
      */
     public WholeEntry getLogEntryAllowInvisible(long lsn)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
 
         return getLogEntry(lsn, 0, true);
     }
 
     /**
      * Instantiate all the objects in the log entry at this LSN.
-     * @param lsn location of entry in log.
+     *
+     * @param lsn                  location of entry in log.
      * @param invisibleReadAllowed true if it's expected that the target log
-     * entry might be invisible. Correct the known-to-be-bad checksum before
-     * proceeding.
+     *                             entry might be invisible. Correct the known-to-be-bad checksum before
+     *                             proceeding.
      * @return log entry that embodies all the objects in the log entry.
      */
     private WholeEntry getLogEntry(
-        long lsn,
-        int lastLoggedSize,
-        boolean invisibleReadAllowed)
-        throws FileNotFoundException {
+            long lsn,
+            int lastLoggedSize,
+            boolean invisibleReadAllowed)
+            throws FileNotFoundException {
 
         /* Fail loudly if the environment is invalid. */
         envImpl.checkIfInvalid();
@@ -839,16 +814,16 @@ public class LogManager {
 
             try {
                 return getLogEntryFromLogSource(
-                    lsn, lastLoggedSize, logSource, invisibleReadAllowed);
+                        lsn, lastLoggedSize, logSource, invisibleReadAllowed);
 
-            } catch (ChecksumException ce) {
+            } catch(ChecksumException ce) {
 
                 /*
                  * When using a FileSource, a checksum error indicates a
                  * persistent corruption. An EFE with LOG_CHECKSUM is created
                  * in the catch below and EFE.isCorrupted will return true.
                  */
-                if (!(logSource instanceof LogBuffer)) {
+                if(!(logSource instanceof LogBuffer)) {
                     assert logSource instanceof FileSource;
                     throw ce;
                 }
@@ -862,9 +837,9 @@ public class LogManager {
                 long fileLength = -1;
                 try {
                     fileHandle =
-                        fileManager.getFileHandle(DbLsn.getFileNumber(lsn));
+                            fileManager.getFileHandle(DbLsn.getFileNumber(lsn));
                     fileLength = fileHandle.getFile().length();
-                } catch (IOException ioe) {
+                } catch(IOException ioe) {
                     /* FileNotFound or another IOException was thrown. */
                 }
 
@@ -875,15 +850,15 @@ public class LogManager {
                  * not persistent and we throw a EFE for which isCorrupted
                  * will return false.
                  */
-                if (fileHandle == null ||
-                    fileLength <=
-                        DbLsn.getFileOffset(logBuffer.getFirstLsn())) {
+                if(fileHandle == null ||
+                        fileLength <=
+                                DbLsn.getFileOffset(logBuffer.getFirstLsn())) {
 
                     throw EnvironmentFailureException.unexpectedException(
-                        envImpl,
-                        "Corruption detected in log buffer, " +
-                            "but was not written to disk.",
-                        ce);
+                            envImpl,
+                            "Corruption detected in log buffer, " +
+                                    "but was not written to disk.",
+                            ce);
                 }
 
                 /*
@@ -893,17 +868,17 @@ public class LogManager {
                  * and an EFE with LOG_CHECKSUM is thrown below.
                  */
                 final FileSource fileSource = new FileHandleSource(
-                    fileHandle, readBufferSize, fileManager);
+                        fileHandle, readBufferSize, fileManager);
                 try {
                     return getLogEntryFromLogSource(
-                        lsn, lastLoggedSize, fileSource,
-                        invisibleReadAllowed);
+                            lsn, lastLoggedSize, fileSource,
+                            invisibleReadAllowed);
                 } finally {
                     fileSource.release();
                 }
             }
 
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             /*
              * WARNING: EFE with LOG_CHECKSUM indicates a persistent corruption
              * and therefore LogSource.release must not be called until after
@@ -912,40 +887,40 @@ public class LogManager {
              * thread.
              */
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
+                    envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
 
-        } catch (Error e) {
+        } catch(Error e) {
             envImpl.invalidate(e);
             throw e;
 
         } finally {
-            if (logSource != null) {
+            if(logSource != null) {
                 logSource.release();
             }
         }
     }
 
     public LogEntry getLogEntryHandleFileNotFound(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             return getLogEntry(lsn);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl,
-                 EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+                    (envImpl,
+                            EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
         }
     }
 
     public WholeEntry getWholeLogEntryHandleFileNotFound(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             return getWholeLogEntry(lsn);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl,
-                    EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+                    (envImpl,
+                            EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
         }
     }
 
@@ -955,14 +930,14 @@ public class LogManager {
      * instead of getLogEntry when a ChecksumException is handled specially.
      */
     LogEntry getLogEntryAllowChecksumException(long lsn)
-        throws ChecksumException, FileNotFoundException, DatabaseException {
+            throws ChecksumException, FileNotFoundException, DatabaseException {
 
         final LogSource logSource = getLogSource(lsn);
 
         try {
             return getLogEntryFromLogSource(
-                lsn, 0, logSource, false /*invisibleReadAllowed*/).
-                getEntry();
+                    lsn, 0, logSource, false /*invisibleReadAllowed*/).
+                    getEntry();
         } finally {
             logSource.release();
         }
@@ -971,17 +946,17 @@ public class LogManager {
     LogEntry getLogEntryAllowChecksumException(long lsn,
                                                RandomAccessFile file,
                                                int logVersion)
-        throws ChecksumException, DatabaseException {
+            throws ChecksumException, DatabaseException {
 
         final LogSource logSource = new FileSource(
-            file, readBufferSize, fileManager, DbLsn.getFileNumber(lsn),
-            logVersion);
+                file, readBufferSize, fileManager, DbLsn.getFileNumber(lsn),
+                logVersion);
 
         try {
             return getLogEntryFromLogSource(
-                lsn, 0, logSource,
-                false /*invisibleReadAllowed*/).
-                getEntry();
+                    lsn, 0, logSource,
+                    false /*invisibleReadAllowed*/).
+                    getEntry();
         } finally {
             logSource.release();
         }
@@ -990,21 +965,21 @@ public class LogManager {
     /**
      * Gets log entry from the given source; the caller is responsible for
      * calling logSource.release and handling ChecksumException.
-     *
+     * <p>
      * Is non-private for unit testing.
      *
-     * @param lsn location of entry in log
-     * @param lastLoggedSize is the entry size if known, or zero if unknown.
+     * @param lsn                  location of entry in log
+     * @param lastLoggedSize       is the entry size if known, or zero if unknown.
      * @param invisibleReadAllowed if true, we will permit the read of invisible
-     * log entries, and we will adjust the invisible bit so that the checksum
-     * will validate
+     *                             log entries, and we will adjust the invisible bit so that the checksum
+     *                             will validate
      * @return log entry that embodies all the objects in the log entry
      */
     WholeEntry getLogEntryFromLogSource(long lsn,
                                         int lastLoggedSize,
                                         LogSource logSource,
                                         boolean invisibleReadAllowed)
-        throws ChecksumException, DatabaseException {
+            throws ChecksumException, DatabaseException {
 
         /*
          * Read the log entry header into a byte buffer. If the
@@ -1024,36 +999,36 @@ public class LogManager {
         long fileOffset = DbLsn.getFileOffset(lsn);
 
         ByteBuffer entryBuffer = (lastLoggedSize > 0) ?
-            logSource.getBytes(fileOffset, lastLoggedSize) :
-            logSource.getBytes(fileOffset);
+                logSource.getBytes(fileOffset, lastLoggedSize) :
+                logSource.getBytes(fileOffset);
 
-        if (entryBuffer.remaining() < LogEntryHeader.MIN_HEADER_SIZE) {
+        if(entryBuffer.remaining() < LogEntryHeader.MIN_HEADER_SIZE) {
             throw new ChecksumException(
-                "Incomplete log entry header in " + logSource +
-                " needed=" + LogEntryHeader.MIN_HEADER_SIZE +
-                " remaining=" + entryBuffer.remaining() +
-                " lsn=" + DbLsn.getNoFormatString(lsn));
+                    "Incomplete log entry header in " + logSource +
+                            " needed=" + LogEntryHeader.MIN_HEADER_SIZE +
+                            " remaining=" + entryBuffer.remaining() +
+                            " lsn=" + DbLsn.getNoFormatString(lsn));
         }
 
         /* Read the fixed length portion of the header. */
         LogEntryHeader header = new LogEntryHeader(
-            entryBuffer, logSource.getLogVersion(), lsn);
+                entryBuffer, logSource.getLogVersion(), lsn);
 
         /* Read the variable length portion of the header. */
-        if (header.isVariableLength()) {
-            if (entryBuffer.remaining() <
-                header.getVariablePortionSize()) {
+        if(header.isVariableLength()) {
+            if(entryBuffer.remaining() <
+                    header.getVariablePortionSize()) {
                 throw new ChecksumException(
-                    "Incomplete log entry header in " + logSource +
-                    " needed=" + header.getVariablePortionSize() +
-                    " remaining=" + entryBuffer.remaining() +
-                    " lsn=" + DbLsn.getNoFormatString(lsn));
+                        "Incomplete log entry header in " + logSource +
+                                " needed=" + header.getVariablePortionSize() +
+                                " remaining=" + entryBuffer.remaining() +
+                                " lsn=" + DbLsn.getNoFormatString(lsn));
             }
             header.readVariablePortion(entryBuffer);
         }
 
         ChecksumValidator validator = null;
-        if (doChecksumOnRead) {
+        if(doChecksumOnRead) {
             int itemStart = entryBuffer.position();
 
             /*
@@ -1063,16 +1038,16 @@ public class LogManager {
              * LogEntryHeader object itself still has the invisible bit set,
              * which is useful for debugging.
              */
-            if (header.isInvisible()) {
+            if(header.isInvisible()) {
                 LogEntryHeader.turnOffInvisible
-                    (entryBuffer, itemStart - header.getSize());
+                        (entryBuffer, itemStart - header.getSize());
             }
 
             /* Add header to checksum bytes */
             validator = new ChecksumValidator();
             int headerSizeMinusChecksum = header.getSizeMinusChecksum();
             entryBuffer.position(itemStart -
-                                 headerSizeMinusChecksum);
+                    headerSizeMinusChecksum);
             validator.update(entryBuffer, headerSizeMinusChecksum);
             entryBuffer.position(itemStart);
         }
@@ -1082,15 +1057,15 @@ public class LogManager {
          * read didn't get enough.
          */
         int itemSize = header.getItemSize();
-        if (entryBuffer.remaining() < itemSize) {
+        if(entryBuffer.remaining() < itemSize) {
             entryBuffer = logSource.getBytes(
-                fileOffset + header.getSize(), itemSize);
-            if (entryBuffer.remaining() < itemSize) {
+                    fileOffset + header.getSize(), itemSize);
+            if(entryBuffer.remaining() < itemSize) {
                 throw new ChecksumException(
-                    "Incomplete log entry item in " + logSource +
-                    " needed=" + itemSize +
-                    " remaining=" + entryBuffer.remaining() +
-                    " lsn=" + DbLsn.getNoFormatString(lsn));
+                        "Incomplete log entry item in " + logSource +
+                                " needed=" + itemSize +
+                                " remaining=" + entryBuffer.remaining() +
+                                " lsn=" + DbLsn.getNoFormatString(lsn));
             }
             nRepeatFaultReads.increment();
         }
@@ -1099,7 +1074,7 @@ public class LogManager {
          * Do entry validation. Run checksum before checking the entry type, it
          * will be the more encompassing error.
          */
-        if (doChecksumOnRead) {
+        if(doChecksumOnRead) {
             /* Check the checksum first. */
             validator.update(entryBuffer, itemSize);
             validator.validate(header.getChecksum(), lsn);
@@ -1109,29 +1084,29 @@ public class LogManager {
          * If invisibleReadAllowed == false, we should not be fetching an
          * invisible log entry.
          */
-        if (header.isInvisible() && !invisibleReadAllowed) {
+        if(header.isInvisible() && !invisibleReadAllowed) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                 "Read invisible log entry at " +
-                 DbLsn.getNoFormatString(lsn) + " " + header);
+                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                            "Read invisible log entry at " +
+                                    DbLsn.getNoFormatString(lsn) + " " + header);
         }
 
-        assert LogEntryType.isValidType(header.getType()):
-            "Read non-valid log entry type: " + header.getType();
+        assert LogEntryType.isValidType(header.getType()) :
+                "Read non-valid log entry type: " + header.getType();
 
         /* Read the entry. */
         LogEntry logEntry =
-            LogEntryType.findType(header.getType()).getNewLogEntry();
+                LogEntryType.findType(header.getType()).getNewLogEntry();
         logEntry.readEntry(envImpl, header, entryBuffer);
 
         /* For testing only; generate a read io exception. */
-        if (readHook != null) {
+        if(readHook != null) {
             try {
                 readHook.doIOHook();
-            } catch (IOException e) {
+            } catch(IOException e) {
                 /* Simulate what the FileManager would do. */
                 throw new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.LOG_READ, e);
+                        (envImpl, EnvironmentFailureReason.LOG_READ, e);
             }
         }
 
@@ -1140,11 +1115,12 @@ public class LogManager {
 
     /**
      * Fault in the first object in the log entry log entry at this LSN.
+     *
      * @param lsn location of object in log
      * @return the object in the log
      */
     public Object getEntry(long lsn)
-        throws FileNotFoundException, DatabaseException {
+            throws FileNotFoundException, DatabaseException {
 
         LogEntry entry = getLogEntry(lsn);
         return entry.getMainItem();
@@ -1160,21 +1136,21 @@ public class LogManager {
      * Is public for unit testing.
      */
     public LogSource getLogSource(long lsn)
-        throws FileNotFoundException, ChecksumException, DatabaseException {
+            throws FileNotFoundException, ChecksumException, DatabaseException {
 
         /*
          * First look in log to see if this LSN is still in memory.
          */
         LogBuffer logBuffer = logBufferPool.getReadBufferByLsn(lsn);
 
-        if (logBuffer == null) {
+        if(logBuffer == null) {
             try {
                 /* Not in the in-memory log -- read it off disk. */
                 long fileNum = DbLsn.getFileNumber(lsn);
                 return new FileHandleSource
-                    (fileManager.getFileHandle(fileNum),
-                     readBufferSize, fileManager);
-            } catch (DatabaseException e) {
+                        (fileManager.getFileHandle(fileNum),
+                                readBufferSize, fileManager);
+            } catch(DatabaseException e) {
                 /* Add LSN to exception message. */
                 e.addErrorMessage("lsn= " + DbLsn.getNoFormatString(lsn));
                 throw e;
@@ -1190,8 +1166,8 @@ public class LogManager {
     public LogBuffer getReadBufferByLsn(long lsn) {
 
         assert DbLsn.getFileOffset(lsn) != 0 :
-             "Read of lsn " + DbLsn.getNoFormatString(lsn)  +
-            " is illegal because file header entry is not in the log buffer";
+                "Read of lsn " + DbLsn.getNoFormatString(lsn) +
+                        " is illegal because file header entry is not in the log buffer";
 
         return logBufferPool.getReadBufferByLsn(lsn);
     }
@@ -1200,9 +1176,9 @@ public class LogManager {
      * Flush all log entries, fsync the log file.
      */
     public void flushSync()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (readOnly) {
+        if(readOnly) {
             return;
         }
 
@@ -1215,9 +1191,9 @@ public class LogManager {
      * Flush all log entries and write to the log but do not fsync.
      */
     public void flushNoSync()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (readOnly) {
+        if(readOnly) {
             return;
         }
 
@@ -1230,9 +1206,9 @@ public class LogManager {
      * fsync, the write queue will be flushed by FileManager.fsyncLogEnd.
      */
     void flushBeforeSync()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (readOnly) {
+        if(readOnly) {
             return;
         }
 
@@ -1241,13 +1217,13 @@ public class LogManager {
 
     /**
      * Flush the dirty log buffers, and optionally the write queue as well.
-     *
+     * <p>
      * Flushing logically means flushing all write buffers to the file system,
      * so flushWriteQueue should be false only when this method is called just
      * before an fsync (FileManager.syncLogEnd will flush the write queue).
      */
     private void flushInternal(boolean flushWriteQueue)
-        throws DatabaseException {
+            throws DatabaseException {
 
         assert !readOnly;
 
@@ -1256,8 +1232,8 @@ public class LogManager {
          * free buffers, the only recourse is to write all buffers
          * under the LWL.
          */
-        synchronized (logWriteMutex) {
-            if (!logBufferPool.bumpCurrent(0)) {
+        synchronized(logWriteMutex) {
+            if(!logBufferPool.bumpCurrent(0)) {
                 logBufferPool.bumpAndWriteDirty(0, flushWriteQueue);
                 return;
             }
@@ -1271,9 +1247,9 @@ public class LogManager {
     }
 
     public StatGroup loadStats(StatsConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!config.getFast()) {
+        if(!config.getFast()) {
             loadEndOfLogStat();
         }
 
@@ -1308,7 +1284,7 @@ public class LogManager {
      * Returns a tracked summary for the given file which will not be flushed.
      */
     public TrackedFileSummary getUnflushableTrackedSummary(long file) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             return envImpl.getUtilizationTracker().
                     getUnflushableTrackedSummary(file);
         }
@@ -1318,34 +1294,34 @@ public class LogManager {
      * Removes the tracked summary for the given file.
      */
     public void removeTrackedFile(TrackedFileSummary tfs) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             tfs.reset();
         }
     }
 
     private void updateObsolete(
-        LogParams params,
-        UtilizationTracker tracker) {
+            LogParams params,
+            UtilizationTracker tracker) {
 
-        if (params.packedObsoleteInfo == null &&
-            params.obsoleteWriteLockInfo == null) {
+        if(params.packedObsoleteInfo == null &&
+                params.obsoleteWriteLockInfo == null) {
             return;
         }
 
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
 
             /* Count other obsolete info under the log write latch. */
-            if (params.packedObsoleteInfo != null) {
+            if(params.packedObsoleteInfo != null) {
                 params.packedObsoleteInfo.countObsoleteInfo(
-                    tracker, params.nodeDb);
+                        tracker, params.nodeDb);
             }
 
-            if (params.obsoleteWriteLockInfo != null) {
-                for (WriteLockInfo info : params.obsoleteWriteLockInfo) {
+            if(params.obsoleteWriteLockInfo != null) {
+                for(WriteLockInfo info : params.obsoleteWriteLockInfo) {
                     tracker.countObsoleteNode(info.getAbortLsn(),
-                                              null /*type*/,
-                                              info.getAbortLogSize(),
-                                              info.getDb());
+                            null /*type*/,
+                            info.getAbortLogSize(),
+                            info.getDb());
                 }
             }
         }
@@ -1361,11 +1337,12 @@ public class LogManager {
                                   int size,
                                   DatabaseImpl nodeDb,
                                   boolean countExact) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             UtilizationTracker tracker = envImpl.getUtilizationTracker();
-            if (countExact) {
+            if(countExact) {
                 tracker.countObsoleteNode(lsn, type, size, nodeDb);
-            } else {
+            }
+            else {
                 tracker.countObsoleteNodeInexact(lsn, type, size, nodeDb);
             }
         }
@@ -1378,10 +1355,10 @@ public class LogManager {
      * log write latch.
      */
     public void countObsoleteNodeDupsAllowed(long lsn,
-                                              LogEntryType type,
-                                              int size,
-                                              DatabaseImpl nodeDb) {
-        synchronized (logWriteMutex) {
+                                             LogEntryType type,
+                                             int size,
+                                             DatabaseImpl nodeDb) {
+        synchronized(logWriteMutex) {
             UtilizationTracker tracker = envImpl.getUtilizationTracker();
             tracker.countObsoleteNodeDupsAllowed(lsn, type, size, nodeDb);
         }
@@ -1391,9 +1368,9 @@ public class LogManager {
      * @see LocalUtilizationTracker#transferToUtilizationTracker
      */
     public void transferToUtilizationTracker(LocalUtilizationTracker
-                                             localTracker)
-        throws DatabaseException {
-        synchronized (logWriteMutex) {
+                                                     localTracker)
+            throws DatabaseException {
+        synchronized(logWriteMutex) {
             UtilizationTracker tracker = envImpl.getUtilizationTracker();
             localTracker.transferToUtilizationTracker(tracker);
         }
@@ -1403,15 +1380,15 @@ public class LogManager {
      * @see DatabaseImpl#countObsoleteDb
      */
     public void countObsoleteDb(DatabaseImpl db) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             db.countObsoleteDb(envImpl.getUtilizationTracker(),
-                               DbLsn.NULL_LSN /*mapLnLsn*/);
+                    DbLsn.NULL_LSN /*mapLnLsn*/);
         }
     }
 
     public boolean removeDbFileSummaries(DatabaseImpl db,
                                          Collection<Long> fileNums) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             return db.removeDbFileSummaries(fileNums);
         }
     }
@@ -1420,13 +1397,13 @@ public class LogManager {
      * @see DatabaseImpl#cloneDbFileSummaries
      */
     public Map<Long, DbFileSummary> cloneDbFileSummaries(DatabaseImpl db) {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             return db.cloneDbFileSummariesInternal();
         }
     }
 
     public void loadEndOfLogStat() {
-        synchronized (logWriteMutex) {
+        synchronized(logWriteMutex) {
             endOfLog.set(fileManager.getLastUsedLsn());
         }
     }
@@ -1445,6 +1422,19 @@ public class LogManager {
     public void setFlushLogHook(TestHook<CountDownLatch> hook) {
         flushHook = hook;
         grpManager.setFlushLogHook(hook);
+    }
+
+    /*
+     * An entry in the lazyLogQueue. A struct to hold the entry and repContext.
+     */
+    private static class LazyQueueEntry {
+        private final LogEntry entry;
+        private final ReplicationContext repContext;
+
+        private LazyQueueEntry(LogEntry entry, ReplicationContext repContext) {
+            this.entry = entry;
+            this.repContext = repContext;
+        }
     }
 
     private class LogWriteInfo {

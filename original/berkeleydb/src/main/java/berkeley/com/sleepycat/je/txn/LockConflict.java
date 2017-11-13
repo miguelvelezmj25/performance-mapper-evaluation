@@ -20,8 +20,8 @@ package berkeley.com.sleepycat.je.txn;
  */
 class LockConflict {
 
-    static final LockConflict ALLOW   = new LockConflict(true, false);
-    static final LockConflict BLOCK   = new LockConflict(false, false);
+    static final LockConflict ALLOW = new LockConflict(true, false);
+    static final LockConflict BLOCK = new LockConflict(false, false);
     static final LockConflict RESTART = new LockConflict(false, true);
 
     private boolean allowed;
@@ -32,7 +32,7 @@ class LockConflict {
      */
     private LockConflict(boolean allowed, boolean restart) {
         this.allowed = allowed;
-        this.restart= restart;
+        this.restart = restart;
     }
 
     /**

@@ -13,16 +13,16 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.LockSupport;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.ThreadInterruptedException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.latch.Latch;
 import berkeley.com.sleepycat.je.latch.LatchFactory;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * LogBuffers hold outgoing, newly written log entries.
@@ -33,20 +33,20 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
  * pin count is decremented via the free() method.
  * Readers of a log buffer wait until the pin count
  * is zero.
- *
+ * <p>
  * The pin count is incremented under the readLatch. The
  * pin count is decremented without holding the latch.
  * Holding the readLatch will prevent the pin count from
  * being incremented.
- *
+ * <p>
  * Apart from the pin count, access to the buffer is protected by the
  * readLatch and the LWL:
  * - Write access requires holding both the LWL and the readLatch.
  * - Read access requires holding either the LWL or the readLatch.
- *
+ * <p>
  * Of course, for buffers outside the buffer pool, or in the process of being
  * constructed, these rules do not apply and no latching is necessary.
- *
+ * <p>
  * TODO:
  * Although the above statement about latching reflects the current
  * implementation, it would be better if we can remove the reliance on the LWL
@@ -83,12 +83,12 @@ public class LogBuffer implements LogSource {
     private EnvironmentImpl env;
 
     LogBuffer(int capacity, EnvironmentImpl env)
-        throws DatabaseException {
+            throws DatabaseException {
 
         data = new byte[capacity];
         buffer = ByteBuffer.wrap(data);
         readLatch = LatchFactory.createExclusiveLatch(
-            env, DEBUG_NAME, false /*collectStats*/);
+                env, DEBUG_NAME, false /*collectStats*/);
         this.env = env;
         reinit();
     }
@@ -110,7 +110,7 @@ public class LogBuffer implements LogSource {
      * The LWL and buffer pool latch must be held.
      */
     void reinit()
-        throws DatabaseException {
+            throws DatabaseException {
 
         readLatch.acquireExclusive();
         buffer.clear();
@@ -127,7 +127,7 @@ public class LogBuffer implements LogSource {
 
     /**
      * Return first LSN held in this buffer.
-     *
+     * <p>
      * The LWL or readLatch must be held.
      */
     public long getFirstLsn() {
@@ -137,27 +137,27 @@ public class LogBuffer implements LogSource {
     /**
      * Register the LSN for a buffer segment that has been allocated in this
      * buffer.
-     *
+     * <p>
      * The LWL and readLatch must be held.
      */
     void registerLsn(long lsn) {
         assert readLatch.isExclusiveOwner();
 
-        if (lastLsn != DbLsn.NULL_LSN) {
-            assert (DbLsn.compareTo(lsn, lastLsn) > 0):
-                "lsn=" + lsn + " lastlsn=" + lastLsn;
+        if(lastLsn != DbLsn.NULL_LSN) {
+            assert (DbLsn.compareTo(lsn, lastLsn) > 0) :
+                    "lsn=" + lsn + " lastlsn=" + lastLsn;
         }
 
         lastLsn = lsn;
 
-        if (firstLsn == DbLsn.NULL_LSN) {
+        if(firstLsn == DbLsn.NULL_LSN) {
             firstLsn = lsn;
         }
     }
 
     /**
      * Check capacity of buffer.
-     *
+     * <p>
      * The LWL or readLatch must be held.
      *
      * @return true if this buffer can hold this many more bytes.
@@ -169,7 +169,7 @@ public class LogBuffer implements LogSource {
     /**
      * Returns the buffer for read access (although some tests may write to the
      * buffer).
-     *
+     * <p>
      * The LWL or readLatch must be held.
      *
      * @return the actual data buffer.
@@ -195,10 +195,10 @@ public class LogBuffer implements LogSource {
      * Support for reading out of a still-in-memory log.  Can be used to
      * determine if a log entry with a given LSN is contained in this buffer,
      * or whether an arbitrary LSN location is present in the buffer.
-     *
+     * <p>
      * No latches need be held. The buffer is latched for read if true is
      * returned.
-     *
+     * <p>
      * This method must wait until the buffer's pin count goes to zero. When
      * writing is active and this is the currentWriteBuffer, it may have to
      * wait until the buffer is full.
@@ -218,30 +218,32 @@ public class LogBuffer implements LogSource {
         waitForZeroAndLatch();
         boolean found = false;
 
-        if ((firstLsn != DbLsn.NULL_LSN) &&
-            (DbLsn.getFileNumber(firstLsn) == DbLsn.getFileNumber(lsn))) {
+        if((firstLsn != DbLsn.NULL_LSN) &&
+                (DbLsn.getFileNumber(firstLsn) == DbLsn.getFileNumber(lsn))) {
 
             final long fileOffset = DbLsn.getFileOffset(lsn);
             final int contentSize;
-            if (buffer.position() == 0) {
+            if(buffer.position() == 0) {
                 /* Buffer was flipped for reading. */
                 contentSize = buffer.limit();
-            } else {
+            }
+            else {
                 /* Buffer is still being written into. */
                 contentSize = buffer.position();
             }
             final long firstLsnOffset = DbLsn.getFileOffset(firstLsn);
             final long lastContentOffset = firstLsnOffset + contentSize;
 
-            if ((firstLsnOffset <= fileOffset) &&
-                (lastContentOffset > fileOffset)) {
+            if((firstLsnOffset <= fileOffset) &&
+                    (lastContentOffset > fileOffset)) {
                 found = true;
             }
         }
 
-        if (found) {
+        if(found) {
             return true;
-        } else {
+        }
+        else {
             readLatch.release();
             return false;
         }
@@ -250,11 +252,11 @@ public class LogBuffer implements LogSource {
     /**
      * Acquires the readLatch, providing exclusive access to the buffer.
      * When modifying the buffer, both the LWL and buffer latch must be held.
-     *
+     * <p>
      * Note that containsLsn() acquires the latch for reading.
-     *
+     * <p>
      * Call release() to release the latch.
-     *
+     * <p>
      * TODO:
      * It would be possible to use a shared buffer latch to allow concurrent
      * access by multiple readers. The access rules for would then be:
@@ -264,7 +266,7 @@ public class LogBuffer implements LogSource {
      * actually only need read access.
      */
     public void latchForWrite()
-        throws DatabaseException {
+            throws DatabaseException {
 
         readLatch.acquireExclusive();
     }
@@ -292,20 +294,19 @@ public class LogBuffer implements LogSource {
 
     /**
      * Allocate a segment out of the buffer.
-     *
+     * <p>
      * The LWL and readLatch must be held.
      *
      * @param size of buffer to allocate
-     *
      * @return null if not enough room, otherwise a
-     *         LogBufferSegment for the data.
+     * LogBufferSegment for the data.
      */
     public LogBufferSegment allocate(int size) {
         assert readLatch.isExclusiveOwner();
 
-        if (hasRoom(size)) {
+        if(hasRoom(size)) {
             ByteBuffer buf =
-                ByteBuffer.wrap(data, buffer.position(), size);
+                    ByteBuffer.wrap(data, buffer.position(), size);
             buffer.position(buffer.position() + size);
             writePinCount.incrementAndGet();
             return new LogBufferSegment(this, buf);
@@ -325,23 +326,25 @@ public class LogBuffer implements LogSource {
      */
     public void waitForZeroAndLatch() {
         boolean done = false;
-        while (!done) {
-            if (writePinCount.get() > 0) {
+        while(!done) {
+            if(writePinCount.get() > 0) {
                 LockSupport.parkNanos(this, 100);
                 /*
                  * This may be overkill to check if a thread was
                  * interrupted. There should be no interrupt of the
                  * thread pinning and unpinning the buffer.
                  */
-                if (Thread.interrupted()) {
+                if(Thread.interrupted()) {
                     throw new ThreadInterruptedException(
-                        env, "Interrupt during read operation");
+                            env, "Interrupt during read operation");
                 }
-            } else {
+            }
+            else {
                 readLatch.acquireExclusive();
-                if (writePinCount.get() == 0) {
-                   done = true;
-                } else {
+                if(writePinCount.get() == 0) {
+                    done = true;
+                }
+                else {
                     readLatch.release();
                 }
             }
@@ -351,7 +354,7 @@ public class LogBuffer implements LogSource {
     /**
      * Make a copy of this buffer (doesn't copy data, only buffer state)
      * and position it to read the requested data.
-     *
+     * <p>
      * The LWL or readLatch must be held.
      *
      * @see LogSource#getBytes
@@ -365,7 +368,7 @@ public class LogBuffer implements LogSource {
     /**
      * Same as getBytes(long fileOffset) since buffer should always hold a
      * whole entry.
-     *
+     * <p>
      * The LWL or readLatch must be held.
      *
      * @see LogSource#getBytes
@@ -384,6 +387,6 @@ public class LogBuffer implements LogSource {
     @Override
     public String toString() {
         return
-            "[LogBuffer firstLsn=" + DbLsn.getNoFormatString(firstLsn) + "]";
+                "[LogBuffer firstLsn=" + DbLsn.getNoFormatString(firstLsn) + "]";
     }
 }

@@ -13,35 +13,26 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.cleaner.LocalUtilizationTracker;
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbTree;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.evictor.OffHeapCache;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.LogItem;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
 import berkeley.com.sleepycat.je.txn.LockManager;
-import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.SizeofMarker;
-import berkeley.com.sleepycat.je.utilint.TinyHashSet;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * A BIN represents a Bottom Internal Node in the JE tree.
- *
+ * <p>
  * BIN-deltas
  * ==========
  * A BIN-delta is a BIN with the non-dirty slots omitted. A "full BIN", OTOH
@@ -50,16 +41,16 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * the BIN-delta flag is set (IN.isBINDelta).  On disk, the NewBINDelta log
  * entry type (class BINDeltaLogEntry) is the only thing that distinguishes it
  * from a full BIN, which has the BIN log entry type.
- *
+ * <p>
  * BIN-deltas provides two benefits: Reduced writing and reduced memory usage.
- *
+ * <p>
  * Reduced Writing
  * ---------------
  * Logging a BIN-delta rather a full BIN reduces writing significantly.  The
  * cost, however, is that two reads are necessary to reconstruct a full BIN
  * from scratch.  The reduced writing is worth this cost, particularly because
  * less writing means less log cleaning.
- *
+ * <p>
  * A BIN-delta is logged when 25% or less (configured with EnvironmentConfig
  * TREE_BIN_DELTA) of the slots in a BIN are dirty. When a BIN-delta is logged,
  * the dirty flag is cleared on the the BIN in cache.  If more slots are
@@ -68,95 +59,95 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * cumulative and not chained, to avoid reading many (more than two) log
  * entries to reconstruct a full BIN.  The dirty flag on each slot is cleared
  * only when a full BIN is logged.
- *
+ * <p>
  * In addition to the cost of fetching two entries on a BIN cache miss, another
  * drawback of the current approach is that dirtiness propagates upward in the
  * Btree due to BIN-delta logging, causing repeated logging of upper INs.  The
  * slot of the parent IN contains the LSN of the most recent BIN-delta or full
  * BIN that was logged.  A BINDeltaLogEntry in turn contains the LSN of the
  * last full BIN logged.
- *
- *   Historical note:  The pre-JE 5 implementation of OldBINDeltas worked
- *   differently and had a different cost/benefit trade-off.  When an
- *   OldBINDelta was logged, its dirty flag was not cleared, causing it to be
- *   logged repeatedly at every checkpoint.  A full BIN was logged after 10
- *   deltas, to prevent endless logging of the same BIN.  One benefit of this
- *   approach is that the BIN's parent IN was not dirtied when logging the
- *   OldBINDelta, preventing dirtiness from propagating upward.  Another
- *   benefit is that the OldBINDelta was only processed by recovery, and did
- *   not have to be fetched to reconstruct a full BIN from scratch on a cache
- *   miss.  But the cost (the logging of an OldBINDelta every checkpoint, even
- *   when it hadn't changed since the last time logged) outweighed the
- *   benefits.  When the current approach was implemented in JE 5, performance
- *   improved due to less logging.
- *
- *   In JE 6, deltas were also maintained in the Btree cache.  This was done to
- *   provide the reduced memory benefits described in the next section.  The
- *   log format for a delta was also changed.  The OldBINDelta log format is
- *   different (not the same as the BIN format) and is supported for backward
- *   compatibility as the OldBINDeltaLogEntry.  Its log entry type name is
- *   still BINDelta, which is why the new type is named NewBINDelta (for
- *   backward compatibility, log entry type names cannot be changed.)  This is
- *   also why the spelling "BIN-delta" is used to refer to deltas in the new
- *   approach.  The old BINDelta class was renamed to OldBINDelta and there is
- *   no longer a class named BINDelta.
- *
+ * <p>
+ * Historical note:  The pre-JE 5 implementation of OldBINDeltas worked
+ * differently and had a different cost/benefit trade-off.  When an
+ * OldBINDelta was logged, its dirty flag was not cleared, causing it to be
+ * logged repeatedly at every checkpoint.  A full BIN was logged after 10
+ * deltas, to prevent endless logging of the same BIN.  One benefit of this
+ * approach is that the BIN's parent IN was not dirtied when logging the
+ * OldBINDelta, preventing dirtiness from propagating upward.  Another
+ * benefit is that the OldBINDelta was only processed by recovery, and did
+ * not have to be fetched to reconstruct a full BIN from scratch on a cache
+ * miss.  But the cost (the logging of an OldBINDelta every checkpoint, even
+ * when it hadn't changed since the last time logged) outweighed the
+ * benefits.  When the current approach was implemented in JE 5, performance
+ * improved due to less logging.
+ * <p>
+ * In JE 6, deltas were also maintained in the Btree cache.  This was done to
+ * provide the reduced memory benefits described in the next section.  The
+ * log format for a delta was also changed.  The OldBINDelta log format is
+ * different (not the same as the BIN format) and is supported for backward
+ * compatibility as the OldBINDeltaLogEntry.  Its log entry type name is
+ * still BINDelta, which is why the new type is named NewBINDelta (for
+ * backward compatibility, log entry type names cannot be changed.)  This is
+ * also why the spelling "BIN-delta" is used to refer to deltas in the new
+ * approach.  The old BINDelta class was renamed to OldBINDelta and there is
+ * no longer a class named BINDelta.
+ * <p>
  * Reduced Memory Usage
  * --------------------
  * In the Btree cache, a BIN may be represented as a full BIN or a BIN-delta.
  * Eviction will mutate a full BIN to a BIN-delta in preference to discarding
  * the entire BIN. A BIN-delta in cache occupies less memory than a full BIN,
  * and can be exploited as follows:
- *
- *  - When a full BIN is needed, it can be constructed with only one fetch
- *    rather than two, reducing IO overall.  IN.fetchIN implements this
- *    optimization.
- *
- *  - Certain operations can sometimes be performed using the BIN-delta alone,
- *    allowing such operations on a given data set to take place using less
- *    less IO (for a given cache size).
- *
+ * <p>
+ * - When a full BIN is needed, it can be constructed with only one fetch
+ * rather than two, reducing IO overall.  IN.fetchIN implements this
+ * optimization.
+ * <p>
+ * - Certain operations can sometimes be performed using the BIN-delta alone,
+ * allowing such operations on a given data set to take place using less
+ * less IO (for a given cache size).
+ * <p>
  * The latter benefit is not yet implemented.   No user CRUD operations are
  * currently implemented using BIN-deltas. In the future we plan to implement
  * the following operations using the BIN-delta alone.
- *
- *  - Consider recording deletions in a BIN-delta.  Currently, slot deletion
- *    prohibits a BIN-delta from being logged.  To record deletion in
- *    BIN-deltas, slot deletion will have to be deferred until a full BIN is
- *    logged.
- *
- *  - User reads by key, updates and deletions can be implemented if the key
- *    happens to appear in the BIN-delta.
- *
- *  - The Cleaner can migrate an LN if its key happens to appear in the
- *    BIN-delta.  This is similar to a user update operation, but in a
- *    different code path.
- *
- *  - Insertions, deletions and updates can always be performed in a BIN-delta
- *    during replica replay, since the Master operation has already determined
- *    whether the key exists.
- *
- *  - Recovery LN redo could also apply insertions, updates and inserts in the
- *    manner described.
- *
- *  - Add idempotent put/delete operations, which can always be applied in a
- *    BIN-delta.
- *
- *  - Store a hash of the keys in the full BIN in the BIN-delta and use it to
- *    perform the following in the delta:
- *    - putIfAbsent (true insertion)
- *    - get/delete/putIfPresent operations that return NOTFOUND
- *    - to avoid accumulating unnecessary deletions
- *
+ * <p>
+ * - Consider recording deletions in a BIN-delta.  Currently, slot deletion
+ * prohibits a BIN-delta from being logged.  To record deletion in
+ * BIN-deltas, slot deletion will have to be deferred until a full BIN is
+ * logged.
+ * <p>
+ * - User reads by key, updates and deletions can be implemented if the key
+ * happens to appear in the BIN-delta.
+ * <p>
+ * - The Cleaner can migrate an LN if its key happens to appear in the
+ * BIN-delta.  This is similar to a user update operation, but in a
+ * different code path.
+ * <p>
+ * - Insertions, deletions and updates can always be performed in a BIN-delta
+ * during replica replay, since the Master operation has already determined
+ * whether the key exists.
+ * <p>
+ * - Recovery LN redo could also apply insertions, updates and inserts in the
+ * manner described.
+ * <p>
+ * - Add idempotent put/delete operations, which can always be applied in a
+ * BIN-delta.
+ * <p>
+ * - Store a hash of the keys in the full BIN in the BIN-delta and use it to
+ * perform the following in the delta:
+ * - putIfAbsent (true insertion)
+ * - get/delete/putIfPresent operations that return NOTFOUND
+ * - to avoid accumulating unnecessary deletions
+ * <p>
  * However, some internal operations do currently exploit BIN-deltas to avoid
  * unnecessary IO.  The following are currently implemented.
- *
- *  - The Evictor and Checkpointer log a BIN-delta that is present in the
- *    cache, without having to fetch the full BIN.
- *
- *  - The Cleaner can use the BIN-delta to avoid fetching when processing a BIN
- *    log entry (delta or full) and the BIN is not present in cache,
- *
+ * <p>
+ * - The Evictor and Checkpointer log a BIN-delta that is present in the
+ * cache, without having to fetch the full BIN.
+ * <p>
+ * - The Cleaner can use the BIN-delta to avoid fetching when processing a BIN
+ * log entry (delta or full) and the BIN is not present in cache,
+ * <p>
  * To support BIB-delta-aware operations, the IN.fetchIN() and IN.getTarget()
  * methods may return a BIN delta. IN.getTarget() will return whatever object
  * is cached under the parent IN, and IN.fetchIN() will do a single I/O to
@@ -173,77 +164,61 @@ public class BIN extends IN {
 
     /**
      * Used as the "empty rep" for the INLongRep lastLoggedSizes field.
-     *
+     * <p>
      * minLength is 1 because log sizes are unpredictable.
-     *
+     * <p>
      * allowSparseRep is false because all slots have log sizes and less
      * mutation is better.
      */
     private static final INLongRep.EmptyRep EMPTY_LAST_LOGGED_SIZES =
-        new INLongRep.EmptyRep(1, false);
+            new INLongRep.EmptyRep(1, false);
 
     /**
      * Used as the "empty rep" for the INLongRep vlsnCache field.
-     *
+     * <p>
      * minLength is 5 because VLSNS grow that large fairly quickly, and less
      * mutation is better. The value 5 accomodates data set sizes up to 100
      * billion. If we want to improve memory utilization for smaller data sets
      * or reduce mutation for larger data sets, we could dynamically determine
      * a value based on the last assigned VLSN.
-     *
+     * <p>
      * allowSparseRep is false because either all slots typically have VLSNs,
      * or none do, and less mutation is better.
      */
     private static final INLongRep.EmptyRep EMPTY_VLSNS =
-        new INLongRep.EmptyRep(5, false);
+            new INLongRep.EmptyRep(5, false);
 
     /**
      * Used as the "empty rep" for the INLongRep offHeapLNIds field.
-     *
+     * <p>
      * minLength is 8 because memory IDs are 64-bit pointers.
-     *
+     * <p>
      * allowSparseRep is true because some workloads will only load LN IDs for
      * a subset of the LNs in the BIN.
      */
     private static final INLongRep.EmptyRep EMPTY_OFFHEAP_LN_IDS =
-        new INLongRep.EmptyRep(8, true);
+            new INLongRep.EmptyRep(8, true);
 
     /**
      * Used as the "empty rep" for the INLongRep expirationValues field.
-     *
+     * <p>
      * minLength is 1 because we expect most expiration values, which are an
      * offset from a base day/hour, to fit in one byte.
-     *
+     * <p>
      * allowSparseRep is true because some workloads only set TTLs on some of
      * the LNs in a BIN.
      */
     private static final INLongRep.EmptyRep EMPTY_EXPIRATION =
-        new INLongRep.EmptyRep(1, true);
-
-    /*
-     * The set of cursors that are currently referring to this BIN.
-     * This field is set to null when there are no cursors on this BIN.
+            new INLongRep.EmptyRep(1, true);
+    /**
+     * Can be set to true by tests to prevent last logged sizes from being
+     * stored.
      */
-    private TinyHashSet<CursorImpl> cursorSet;
+    public static boolean TEST_NO_LAST_LOGGED_SIZES = false;
 
     /*
      * Support for logging BIN deltas. (Partial BIN logging)
      */
-
-    /*
-     * If this is a delta, fullBinNEntries stores the number of entries
-     * in the full version of the BIN. This is a persistent field for
-     * BIN-delta logrecs only, and for log versions >= 10.
-     */
-    private int fullBinNEntries = -1;
-
-    /*
-     * If this is a delta, fullBinMaxEntries stores the max number of
-     * entries (capacity) in the full version of the BIN. This is a
-     * persistent field for BIN-delta logrecs only, and for log versions >= 10.
-     */
-    private int fullBinMaxEntries = -1;
-
     /*
      * If "this" is a BIN-delta, bloomFilter is a bloom-filter representation
      * of the set of keys in the clean slots of the full version of the same
@@ -254,12 +229,27 @@ public class BIN extends IN {
      * versions >= 10.
      */
     byte[] bloomFilter;
-
+    /*
+     * The set of cursors that are currently referring to this BIN.
+     * This field is set to null when there are no cursors on this BIN.
+     */
+    private TinyHashSet<CursorImpl> cursorSet;
+    /*
+     * If this is a delta, fullBinNEntries stores the number of entries
+     * in the full version of the BIN. This is a persistent field for
+     * BIN-delta logrecs only, and for log versions >= 10.
+     */
+    private int fullBinNEntries = -1;
+    /*
+     * If this is a delta, fullBinMaxEntries stores the max number of
+     * entries (capacity) in the full version of the BIN. This is a
+     * persistent field for BIN-delta logrecs only, and for log versions >= 10.
+     */
+    private int fullBinMaxEntries = -1;
     /*
      * See comment in IN.java, right after the lastFullVersion data field.
      */
     private long lastDeltaVersion = DbLsn.NULL_LSN;
-
     /*
      * Caches the VLSN sequence for the LN entries in a BIN, when VLSN
      * preservation and caching are configured.
@@ -278,7 +268,6 @@ public class BIN extends IN {
      * caching is not configured, which is always the case for standalone JE.
      */
     private INLongRep vlsnCache = EMPTY_VLSNS;
-
     /*
      * Stores the size of the most recently written logrec of each LN, or zero
      * if the size is unknown.
@@ -288,14 +277,12 @@ public class BIN extends IN {
      * used initially until the need arises to add a non-zero value.
      */
     private INLongRep lastLoggedSizes = EMPTY_LAST_LOGGED_SIZES;
-
     /**
      * When some LNs are in the off-heap cache, the offHeapLruId is this BIN's
      * index in the off-heap LRU list.
      */
     private INLongRep offHeapLNIds = EMPTY_OFFHEAP_LN_IDS;
     private int offHeapLruId = -1;
-
     /**
      * An expirationValues slot value is one more than the number of days/hours
      * to add to the expirationBase to get the true expiration days/hours. A
@@ -306,20 +293,14 @@ public class BIN extends IN {
     private INLongRep expirationValues = EMPTY_EXPIRATION;
     private int expirationBase = -1;
 
-    /**
-     * Can be set to true by tests to prevent last logged sizes from being
-     * stored.
-     */
-    public static boolean TEST_NO_LAST_LOGGED_SIZES = false;
-
     public BIN() {
     }
 
     public BIN(
-        DatabaseImpl db,
-        byte[] identifierKey,
-        int capacity,
-        int level) {
+            DatabaseImpl db,
+            byte[] identifierKey,
+            int capacity,
+            int level) {
 
         super(db, identifierKey, capacity, level);
     }
@@ -337,16 +318,16 @@ public class BIN extends IN {
      */
     @Override
     protected IN createNewInstance(
-        byte[] identifierKey,
-        int maxEntries,
-        int level) {
+            byte[] identifierKey,
+            int maxEntries,
+            int level) {
 
         return new BIN(getDatabase(), identifierKey, maxEntries, level);
     }
 
     public BINReference createReference() {
-      return new BINReference(
-          getNodeId(), getDatabase().getId(), getIdentifierKey());
+        return new BINReference(
+                getNodeId(), getDatabase().getId(), getIdentifierKey());
     }
 
     @Override
@@ -392,7 +373,7 @@ public class BIN extends IN {
          * dup DBs, the VLSNs are not reliably available since the LNs are
          * immediately obsolete.
          */
-        if (!isVLSNCachingEnabled()) {
+        if(!isVLSNCachingEnabled()) {
             return;
         }
         setCachedVLSNUnconditional(idx, vlsn);
@@ -400,9 +381,9 @@ public class BIN extends IN {
 
     void setCachedVLSNUnconditional(int idx, long vlsn) {
         vlsnCache = vlsnCache.set(
-            idx,
-            (vlsn == VLSN.NULL_VLSN_SEQUENCE ? 0 : vlsn),
-            this);
+                idx,
+                (vlsn == VLSN.NULL_VLSN_SEQUENCE ? 0 : vlsn),
+                this);
     }
 
     long getCachedVLSN(int idx) {
@@ -415,8 +396,8 @@ public class BIN extends IN {
      * cases:
      * 1) This is a standalone environment.
      * 2) The VLSN is not cached (perhaps VLSN caching is not configured), and
-     *    the allowFetch param is false.
-     *
+     * the allowFetch param is false.
+     * <p>
      * WARNING: Because the vlsnCache is only updated when an LN is evicted, it
      * is critical that getVLSN returns the VLSN for a resident LN before
      * getting the VLSN from the cache.
@@ -425,41 +406,43 @@ public class BIN extends IN {
 
         /* Must return the VLSN from the LN, if it is resident. */
         LN ln = (LN) getTarget(idx);
-        if (ln != null) {
+        if(ln != null) {
             return ln.getVLSNSequence();
         }
 
         /* Next try the vlsnCache. */
         long vlsn = getCachedVLSN(idx);
-        if (!VLSN.isNull(vlsn)) {
+        if(!VLSN.isNull(vlsn)) {
             return vlsn;
         }
 
         /* Next try the off-heap cache. */
         final OffHeapCache ohCache = getOffHeapCache();
-        if (ohCache.isEnabled()) {
+        if(ohCache.isEnabled()) {
 
             vlsn = ohCache.loadVLSN(this, idx);
 
-            if (!VLSN.isNull(vlsn)) {
+            if(!VLSN.isNull(vlsn)) {
                 return vlsn;
             }
         }
 
         /* As the last resort, fetch the LN if fetching is allowed. */
-        if (!allowFetch || isEmbeddedLN(idx)) {
+        if(!allowFetch || isEmbeddedLN(idx)) {
             return vlsn;
         }
 
         ln = fetchLN(idx, cacheMode);
-        if (ln != null) {
+        if(ln != null) {
             return ln.getVLSNSequence();
         }
 
         return VLSN.NULL_VLSN_SEQUENCE;
     }
 
-    /** For unit testing. */
+    /**
+     * For unit testing.
+     */
     public INLongRep getVLSNCache() {
         return vlsnCache;
     }
@@ -468,7 +451,7 @@ public class BIN extends IN {
      * The last logged size is never needed when the LN is counted obsolete
      * immediately, since it is only needed for counting an LN obsolete
      * during an update or deletion.
-     *
+     * <p>
      * This method may not be called until after the database is initialized,
      * i,e., it may not be called during readFromLog.
      */
@@ -482,10 +465,10 @@ public class BIN extends IN {
     boolean mayHaveLastLoggedSizeStored() {
 
         /* Check final static first so all test code is optimized away. */
-        if (DatabaseUtil.TEST) {
+        if(DatabaseUtil.TEST) {
             /* Don't skew test measurements with internal DBs. */
-            if (TEST_NO_LAST_LOGGED_SIZES &&
-                !databaseImpl.getDbType().isInternal()) {
+            if(TEST_NO_LAST_LOGGED_SIZES &&
+                    !databaseImpl.getDbType().isInternal()) {
                 return false;
             }
         }
@@ -495,23 +478,23 @@ public class BIN extends IN {
 
     /**
      * Sets last logged size if necessary.
-     *
+     * <p>
      * This method does not dirty the IN because the caller methods dirty it,
      * for example, when setting the LSN, key, or node.
-     *
+     * <p>
      * This method is sometimes called to add the logged size for a pre log
      * version 9 BIN, for example, during fetchTarget and preload.  This makes
      * the logged size available for obsolete counting but does not dirty the
      * IN, since that could cause an unexpected write of the IN being read.
      *
      * @param lastLoggedSize is positive if the size is known, zero if the size
-     * is unknown, or -1 if the size should not be changed because logging of
-     * the LN was deferred.
+     *                       is unknown, or -1 if the size should not be changed because logging of
+     *                       the LN was deferred.
      */
     @Override
     public void setLastLoggedSize(int idx, int lastLoggedSize) {
 
-        if ((lastLoggedSize < 0) || !isLastLoggedSizeStored(idx)) {
+        if((lastLoggedSize < 0) || !isLastLoggedSizeStored(idx)) {
             return;
         }
 
@@ -526,7 +509,7 @@ public class BIN extends IN {
 
     /**
      * Sets the size without checking whether it is necessary.
-     *
+     * <p>
      * This method is used when reading from the log because the databaseImpl
      * is not yet initialized and isLastLoggedSizeStored cannot be called.
      * It is also called for efficiency reasons when it is known that storing
@@ -545,7 +528,7 @@ public class BIN extends IN {
     @Override
     public int getLastLoggedSize(int idx) {
 
-        if (isLastLoggedSizeStored(idx)) {
+        if(isLastLoggedSizeStored(idx)) {
             return (int) lastLoggedSizes.get(idx);
         }
 
@@ -558,7 +541,7 @@ public class BIN extends IN {
     public void setExpiration(final int idx, int value, final boolean hours) {
 
         /* This slot has no expiration. */
-        if (value == 0) {
+        if(value == 0) {
             expirationValues = expirationValues.set(idx, 0, this);
             return;
         }
@@ -567,38 +550,39 @@ public class BIN extends IN {
          * If this is the first slot with an expiration, initialize the base to
          * the value and set the offset (slot value) to one.
          */
-        if (expirationBase == -1 || nEntries == 1) {
+        if(expirationBase == -1 || nEntries == 1) {
             expirationBase = value;
             setExpirationOffset(idx, 1);
             setExpirationInHours(hours);
             return;
         }
 
-        if (hours) {
+        if(hours) {
             /* Convert existing values to hours if necessary. */
-            if (!isExpirationInHours()) {
+            if(!isExpirationInHours()) {
 
                 expirationBase *= 24;
                 setExpirationInHours(true);
 
-                for (int i = 0; i < nEntries; i += 1) {
+                for(int i = 0; i < nEntries; i += 1) {
 
-                    if (i == idx) {
+                    if(i == idx) {
                         continue;
                     }
 
                     final int offset = (int) expirationValues.get(i);
 
-                    if (offset == 0) {
+                    if(offset == 0) {
                         continue;
                     }
 
                     setExpirationOffset(i, ((offset - 1) * 24) + 1);
                 }
             }
-        } else {
+        }
+        else {
             /* If values are stored in hours, convert days to hours. */
-            if (isExpirationInHours()) {
+            if(isExpirationInHours()) {
                 value *= 24;
             }
         }
@@ -607,20 +591,20 @@ public class BIN extends IN {
          * Slot's expiration must not be less than the base. If it is, decrease
          * the base and increase the offset in other slots accordingly.
          */
-        if (value < expirationBase) {
+        if(value < expirationBase) {
 
             final int adjustment = expirationBase - value;
             expirationBase = value;
 
-            for (int i = 0; i < nEntries; i += 1) {
+            for(int i = 0; i < nEntries; i += 1) {
 
-                if (i == idx) {
+                if(i == idx) {
                     continue;
                 }
 
                 final int offset = (int) expirationValues.get(i);
 
-                if (offset == 0) {
+                if(offset == 0) {
                     continue;
                 }
 
@@ -644,7 +628,7 @@ public class BIN extends IN {
 
         final int offset = (int) expirationValues.get(idx);
 
-        if (offset == 0) {
+        if(offset == 0) {
             return 0;
         }
 
@@ -655,12 +639,12 @@ public class BIN extends IN {
         return expirationBase;
     }
 
-    int getExpirationOffset(int idx) {
-        return (int) expirationValues.get(idx);
-    }
-
     void setExpirationBase(int base) {
         expirationBase = base;
+    }
+
+    int getExpirationOffset(int idx) {
+        return (int) expirationValues.get(idx);
     }
 
     void setExpirationOffset(int idx, int offset) {
@@ -691,8 +675,8 @@ public class BIN extends IN {
     public boolean isProbablyExpired(int idx) {
 
         return getEnv().expiresWithin(
-            getExpiration(idx), isExpirationInHours(),
-            getEnv().getTtlClockTolerance());
+                getExpiration(idx), isExpirationInHours(),
+                getEnv().getTtlClockTolerance());
     }
 
     public int getLastLoggedSizeUnconditional(int idx) {
@@ -701,7 +685,7 @@ public class BIN extends IN {
 
     public void setOffHeapLNId(int idx, long memId) {
 
-        if (offHeapLNIds.get(idx) == memId) {
+        if(offHeapLNIds.get(idx) == memId) {
             return;
         }
 
@@ -726,15 +710,15 @@ public class BIN extends IN {
         return !offHeapLNIds.isEmpty();
     }
 
+    public int getOffHeapLruId() {
+        return offHeapLruId;
+    }
+
     public void setOffHeapLruId(int id) {
 
         assert id >= 0 || !hasOffHeapLNs();
 
         offHeapLruId = id;
-    }
-
-    public int getOffHeapLruId() {
-        return offHeapLruId;
     }
 
     void freeOffHeapLN(int idx) {
@@ -747,9 +731,9 @@ public class BIN extends IN {
     @Override
     void setTarget(int idx, Node target) {
 
-        if (target == null) {
+        if(target == null) {
             final Node oldTarget = getTarget(idx);
-            if (oldTarget instanceof LN) {
+            if(oldTarget instanceof LN) {
                 setCachedVLSN(idx, ((LN) oldTarget).getVLSNSequence());
             }
         }
@@ -771,15 +755,15 @@ public class BIN extends IN {
         setLastLoggedSizeUnconditional(idx, from.getLastLoggedSize(fromIdx));
 
         setExpiration(
-            idx, fromBin.getExpiration(fromIdx),
-            fromBin.isExpirationInHours());
+                idx, fromBin.getExpiration(fromIdx),
+                fromBin.isExpirationInHours());
 
         final OffHeapCache ohCache = getOffHeapCache();
 
-        if (ohCache.isEnabled()) {
+        if(ohCache.isEnabled()) {
 
             offHeapLNIds = offHeapLNIds.set(
-                idx, fromBin.offHeapLNIds.get(fromIdx), this);
+                    idx, fromBin.offHeapLNIds.get(fromIdx), this);
 
             ohCache.ensureOffHeapLNsInLRU(this);
         }
@@ -815,19 +799,20 @@ public class BIN extends IN {
 
     /* public for the test suite. */
     public Set<CursorImpl> getCursorSet() {
-       if (cursorSet == null) {
-           return Collections.emptySet();
-       }
-       return cursorSet.copy();
+        if(cursorSet == null) {
+            return Collections.emptySet();
+        }
+        return cursorSet.copy();
     }
 
     /**
      * Register a cursor with this BIN.  Caller has this BIN already latched.
+     *
      * @param cursor Cursor to register.
      */
     public void addCursor(CursorImpl cursor) {
         assert isLatchExclusiveOwner();
-        if (cursorSet == null) {
+        if(cursorSet == null) {
             cursorSet = new TinyHashSet<CursorImpl>();
         }
         cursorSet.add(cursor);
@@ -841,11 +826,11 @@ public class BIN extends IN {
      */
     public void removeCursor(CursorImpl cursor) {
         assert isLatchExclusiveOwner();
-        if (cursorSet == null) {
+        if(cursorSet == null) {
             return;
         }
         cursorSet.remove(cursor);
-        if (cursorSet.size() == 0) {
+        if(cursorSet.size() == 0) {
             cursorSet = null;
         }
     }
@@ -862,7 +847,7 @@ public class BIN extends IN {
          * EX-latched. So, cleanup after the old evictor is scrapped.
          */
         final TinyHashSet<CursorImpl> cursors = cursorSet;
-        if (cursors == null) {
+        if(cursors == null) {
             return 0;
         }
         return cursors.size();
@@ -874,26 +859,25 @@ public class BIN extends IN {
      * newSibling is the new BIN into which the entries from "this" between
      * newSiblingLow and newSiblingHigh have been copied.
      *
-     * @param newSibling - the newSibling into which "this" has been split.
+     * @param newSibling     - the newSibling into which "this" has been split.
      * @param newSiblingLow
      * @param newSiblingHigh - the low and high entry of
-     * "this" that were moved into newSibling.
+     *                       "this" that were moved into newSibling.
      */
     @Override
     void adjustCursors(
-        IN newSibling,
-        int newSiblingLow,
-        int newSiblingHigh)
-    {
+            IN newSibling,
+            int newSiblingLow,
+            int newSiblingHigh) {
         assert newSibling.isLatchExclusiveOwner();
         assert this.isLatchExclusiveOwner();
-        if (cursorSet == null) {
+        if(cursorSet == null) {
             return;
         }
         int adjustmentDelta = (newSiblingHigh - newSiblingLow);
         Iterator<CursorImpl> iter = cursorSet.iterator();
 
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             CursorImpl cursor = iter.next();
             int cIdx = cursor.getIndex();
             cursor.assertBIN(this);
@@ -953,18 +937,20 @@ public class BIN extends IN {
              *                                 cursor ^
              */
             BIN ns = (BIN) newSibling;
-            if (newSiblingLow == 0) {
-                if (cIdx < newSiblingHigh) {
+            if(newSiblingLow == 0) {
+                if(cIdx < newSiblingHigh) {
                     /* case 1 */
                     iter.remove();
                     cursor.setBIN(ns);
                     ns.addCursor(cursor);
-                } else {
+                }
+                else {
                     /* case 2 */
                     cursor.setIndex(cIdx - adjustmentDelta);
                 }
-            } else {
-                if (cIdx >= newSiblingLow) {
+            }
+            else {
+                if(cIdx >= newSiblingLow) {
                     /* case 4 */
                     cursor.setIndex(cIdx - newSiblingLow);
                     iter.remove();
@@ -980,10 +966,10 @@ public class BIN extends IN {
      * actually referring to this BIN.
      */
     public void verifyCursors() {
-        if (cursorSet == null) {
+        if(cursorSet == null) {
             return;
         }
-        for (CursorImpl cursor : cursorSet) {
+        for(CursorImpl cursor : cursorSet) {
             cursor.assertBIN(this);
         }
     }
@@ -997,13 +983,13 @@ public class BIN extends IN {
     void adjustCursorsForInsert(int insertIndex) {
 
         assert this.isLatchExclusiveOwner();
-        if (cursorSet == null) {
+        if(cursorSet == null) {
             return;
         }
 
-        for (CursorImpl cursor : cursorSet) {
+        for(CursorImpl cursor : cursorSet) {
             int cIdx = cursor.getIndex();
-            if (insertIndex <= cIdx) {
+            if(insertIndex <= cIdx) {
                 cursor.setIndex(cIdx + 1);
             }
         }
@@ -1017,13 +1003,13 @@ public class BIN extends IN {
      */
     @Override
     IN splitSpecial(
-        IN parent,
-        int parentIndex,
-        IN grandParent,
-        int maxEntriesPerNode,
-        byte[] key,
-        boolean leftSide)
-        throws DatabaseException {
+            IN parent,
+            int parentIndex,
+            IN grandParent,
+            int maxEntriesPerNode,
+            byte[] key,
+            boolean leftSide)
+            throws DatabaseException {
 
         int nEntries = getNEntries();
 
@@ -1032,65 +1018,66 @@ public class BIN extends IN {
         boolean exact = (index & IN.EXACT_MATCH) != 0;
         index &= ~IN.EXACT_MATCH;
 
-        if (leftSide && index < 0) {
+        if(leftSide && index < 0) {
             return splitInternal(
-                parent, parentIndex, grandParent, maxEntriesPerNode, 1);
+                    parent, parentIndex, grandParent, maxEntriesPerNode, 1);
 
-        } else if (!leftSide && !exact && index == (nEntries - 1)) {
+        }
+        else if(!leftSide && !exact && index == (nEntries - 1)) {
             return splitInternal(
-                parent, parentIndex, grandParent, maxEntriesPerNode,
-                nEntries - 1);
+                    parent, parentIndex, grandParent, maxEntriesPerNode,
+                    nEntries - 1);
 
-        } else {
+        }
+        else {
             return split(
-                parent, parentIndex, grandParent, maxEntriesPerNode);
+                    parent, parentIndex, grandParent, maxEntriesPerNode);
         }
     }
 
     /**
      * Compress a full BIN by removing any slots that are deleted or expired.
-     *
+     * <p>
      * This must not be a BIN-delta. No cursors can be present on the BIN.
      * Caller is responsible for latching and unlatching this node.
-     *
+     * <p>
      * If the slot containing the identifier is removed, the identifier key
      * will be changed to the key in the first remaining slot.
-     *
+     * <p>
      * Normally when a slot is removed, the IN is dirtied. However, during
      * compression the BIN is not dirtied when a slot is removed. This is safe
      * for the reasons described below. Note that the BIN being compressed is
      * always a full BIN, not a delta.
-     *
-     *  + If the BIN is not dirty and it does not become dirty before shutdown,
-     *  i.e., it is not logged, then it is possible that this compression will
-     *  be "lost". However, the state of the slot on disk is expired/deleted,
-     *  and when the BIN is later fetched from disk, this state will be
-     *  restored and the compression will be performed again.
-     *
-     *  + If the slot is dirty, the BIN may also be dirty or may become dirty
-     *  later, and be logged. Logging a delta would cause the information in
-     *  the dirty slot to be lost. Therefore, when a dirty slot is removed, we
-     *  set a flag that prohibits the next BIN logged from being a delta.
-     *
+     * <p>
+     * + If the BIN is not dirty and it does not become dirty before shutdown,
+     * i.e., it is not logged, then it is possible that this compression will
+     * be "lost". However, the state of the slot on disk is expired/deleted,
+     * and when the BIN is later fetched from disk, this state will be
+     * restored and the compression will be performed again.
+     * <p>
+     * + If the slot is dirty, the BIN may also be dirty or may become dirty
+     * later, and be logged. Logging a delta would cause the information in
+     * the dirty slot to be lost. Therefore, when a dirty slot is removed, we
+     * set a flag that prohibits the next BIN logged from being a delta.
+     * <p>
      * This optimization (that we don't dirty the BIN and we allow logging a
      * delta after removing a non-dirty slot) has one minor and one major
      * impact:
-     *
+     * <p>
      * 1. When a slot is removed for a deleted record, normally the slot and
      * the BIN will be dirty. Although it is unusual, we may encounter a
      * non-dirty slot for a deleted record. This happens if the slot could not
      * be removed by this method when a full BIN is logged, due to a lock or a
      * cursor, and we compress the full BIN later.
-     *
+     * <p>
      * 2. When a slot is removed for an expired record, it is common that the
      * slot will not be be dirty. In this case, without the optimization, the
      * removal of expired slots would cause more logging and less deltas would
      * be logged.
      *
      * @param localTracker is used only for temporary DBs, and may be specified
-     * to consolidate multiple tracking operations.  If null, the tracking is
-     * performed immediately in this method.
-     *
+     *                     to consolidate multiple tracking operations.  If null, the tracking is
+     *                     performed immediately in this method.
      * @return true if all deleted and expired slots were compressed, or false
      * if one or more slots could not be compressed because we were unable to
      * obtain a lock. A false return value means "try again later".
@@ -1103,15 +1090,15 @@ public class BIN extends IN {
          * being set up to safeguard active data and so we can't compress
          * safely.
          */
-        if (!databaseImpl.getEnv().isValid()) {
+        if(!databaseImpl.getEnv().isValid()) {
             return true;
         }
 
-        if (nCursors() > 0) {
+        if(nCursors() > 0) {
             throw EnvironmentFailureException.unexpectedState();
         }
 
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             throw EnvironmentFailureException.unexpectedState();
         }
 
@@ -1119,23 +1106,23 @@ public class BIN extends IN {
         final EnvironmentImpl envImpl = db.getEnv();
 
         final LockManager lockManager =
-            envImpl.getTxnManager().getLockManager();
+                envImpl.getTxnManager().getLockManager();
 
         boolean setNewIdKey = false;
         boolean anyLocked = false;
 
-        for (int i = 0; i < getNEntries(); i++) {
+        for(int i = 0; i < getNEntries(); i++) {
 
-            if (!compressDirtySlots && isDirty(i)) {
+            if(!compressDirtySlots && isDirty(i)) {
                 continue;
             }
 
             final boolean expired =
-                envImpl.isExpired(getExpiration(i), isExpirationInHours());
+                    envImpl.isExpired(getExpiration(i), isExpirationInHours());
 
             final boolean deleted = isDeleted(i);
 
-            if (!deleted && !expired) {
+            if(!deleted && !expired) {
                 continue;
             }
 
@@ -1166,17 +1153,17 @@ public class BIN extends IN {
             final long lsn = getLsn(i);
 
             /* Can discard a NULL_LSN entry without locking. */
-            if (lsn != DbLsn.NULL_LSN &&
-                !lockManager.isLockUncontended(lsn)) {
+            if(lsn != DbLsn.NULL_LSN &&
+                    !lockManager.isLockUncontended(lsn)) {
 
                 anyLocked = true;
                 continue;
             }
 
             /* At this point, we know we can remove the slot. */
-            if (entryKeys.compareKeys(
-                getIdentifierKey(), keyPrefix, i, haveEmbeddedData(i),
-                getKeyComparator()) == 0) {
+            if(entryKeys.compareKeys(
+                    getIdentifierKey(), keyPrefix, i, haveEmbeddedData(i),
+                    getKeyComparator()) == 0) {
 
                 /*
                  * We're about to remove the entry with the idKey so the
@@ -1190,15 +1177,15 @@ public class BIN extends IN {
              * must either log a dirty LN or count it obsolete. However, if
              * we compress an expired slot, neither is necessary; see TTL.
              */
-            if (!expired && db.isDeferredWriteMode()) {
+            if(!expired && db.isDeferredWriteMode()) {
 
                 final LN ln = (LN) getTarget(i);
 
-                if (ln != null &&
-                    ln.isDirty() &&
-                    !DbLsn.isTransient(lsn)) {
+                if(ln != null &&
+                        ln.isDirty() &&
+                        !DbLsn.isTransient(lsn)) {
 
-                    if (db.isTemporary()) {
+                    if(db.isTemporary()) {
 
                         /*
                          * When a previously logged LN in a temporary DB is
@@ -1209,17 +1196,19 @@ public class BIN extends IN {
                          * being accessed again (after log cleaning, for
                          * example), since temp DBs do not survive recovery.
                          */
-                        if (localTracker != null) {
+                        if(localTracker != null) {
                             localTracker.countObsoleteNode(
-                                lsn, ln.getGenericLogType(),
-                                getLastLoggedSize(i), db);
-                        } else {
-                            envImpl.getLogManager().countObsoleteNode(
-                                lsn, ln.getGenericLogType(),
-                                getLastLoggedSize(i), db,
-                                true /*countExact*/);
+                                    lsn, ln.getGenericLogType(),
+                                    getLastLoggedSize(i), db);
                         }
-                    } else {
+                        else {
+                            envImpl.getLogManager().countObsoleteNode(
+                                    lsn, ln.getGenericLogType(),
+                                    getLastLoggedSize(i), db,
+                                    true /*countExact*/);
+                        }
+                    }
+                    else {
 
                         /*
                          * When a previously logged deferred-write LN is dirty,
@@ -1238,11 +1227,11 @@ public class BIN extends IN {
             i--;
         }
 
-        if (getNEntries() != 0 && setNewIdKey) {
+        if(getNEntries() != 0 && setNewIdKey) {
             setIdentifierKey(getKey(0), false /*makeDirty*/);
         }
 
-        if (getNEntries() == 0) {
+        if(getNEntries() == 0) {
             /* This BIN is empty and expendable. */
             updateLRU(CacheMode.MAKE_COLD); // TODO actually make cold
         }
@@ -1254,8 +1243,8 @@ public class BIN extends IN {
          * because the configured capacity was changed.
          */
         final int configuredCapacity = databaseImpl.getNodeMaxTreeEntries();
-        if (getMaxEntries() > configuredCapacity &&
-            getNEntries() < configuredCapacity) {
+        if(getMaxEntries() > configuredCapacity &&
+                getNEntries() < configuredCapacity) {
             resize(configuredCapacity);
         }
 
@@ -1277,7 +1266,7 @@ public class BIN extends IN {
          * the BIN if the deleted slot is dirty, because removing dirty BIN
          * slots prevents logging a delta.
          */
-        if (isDirty(idx) && shouldLogDelta()) {
+        if(isDirty(idx) && shouldLogDelta()) {
             return;
         }
 
@@ -1288,7 +1277,7 @@ public class BIN extends IN {
     @Override
     boolean validateSubtreeBeforeDelete(int index) {
 
-        assert(!isBINDelta());
+        assert (!isBINDelta());
 
         return true;
     }
@@ -1296,31 +1285,31 @@ public class BIN extends IN {
     /**
      * Check if this node fits the qualifications for being part of a deletable
      * subtree. It may not have any LN children.
-     *
+     * <p>
      * We assume that this is only called under an assert.
      */
     @Override
     boolean isValidForDelete()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        assert(isLatchExclusiveOwner());
+        assert (isLatchExclusiveOwner());
 
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             return false;
         }
 
         int numValidEntries = 0;
 
-        for (int i = 0; i < getNEntries(); i++) {
-            if (!isEntryKnownDeleted(i)) {
+        for(int i = 0; i < getNEntries(); i++) {
+            if(!isEntryKnownDeleted(i)) {
                 numValidEntries++;
             }
         }
 
-        if (numValidEntries > 0) { // any valid entries, not eligible
+        if(numValidEntries > 0) { // any valid entries, not eligible
             return false;
         }
-        if (nCursors() > 0) {      // cursors on BIN, not eligible
+        if(nCursors() > 0) {      // cursors on BIN, not eligible
             return false;
         }
         return true;               // 0 entries, no cursors
@@ -1349,23 +1338,23 @@ public class BIN extends IN {
          * constructor has run. Luckily the initial representations have a
          * memory size of zero, so we can ignore them in this case.
          */
-        if (vlsnCache != null) {
+        if(vlsnCache != null) {
             size += vlsnCache.getMemorySize();
         }
 
-        if (lastLoggedSizes != null) {
+        if(lastLoggedSizes != null) {
             size += lastLoggedSizes.getMemorySize();
         }
 
-        if (expirationValues != null) {
+        if(expirationValues != null) {
             size += expirationValues.getMemorySize();
         }
 
-        if (offHeapLNIds != null) {
+        if(offHeapLNIds != null) {
             size += offHeapLNIds.getMemorySize();
         }
 
-        if (bloomFilter != null) {
+        if(bloomFilter != null) {
             size += BINDeltaBloomFilter.getMemorySize(bloomFilter);
         }
 
@@ -1382,12 +1371,12 @@ public class BIN extends IN {
         final long offHeapLNIdOverhead = offHeapLNIds.getMemorySize();
 
         final long binTotal = inTotal +
-            vlsnCacheOverhead + logSizesOverhead + offHeapLNIdOverhead;
+                vlsnCacheOverhead + logSizesOverhead + offHeapLNIdOverhead;
 
         System.out.format(
-            "BIN: %d vlsns: %d logSizes: %d expiration: %d offHeapLNIds: %d %n",
-            binTotal, vlsnCacheOverhead, logSizesOverhead, expirationOverhead,
-            offHeapLNIdOverhead);
+                "BIN: %d vlsns: %d logSizes: %d expiration: %d offHeapLNIds: %d %n",
+                binTotal, vlsnCacheOverhead, logSizesOverhead, expirationOverhead,
+                offHeapLNIdOverhead);
 
         return binTotal;
     }
@@ -1405,17 +1394,18 @@ public class BIN extends IN {
     @Override
     public long getTreeAdminMemorySize() {
 
-        if (getDatabase().getId().equals(DbTree.ID_DB_ID)) {
+        if(getDatabase().getId().equals(DbTree.ID_DB_ID)) {
             long treeAdminMem = 0;
-            for (int i = 0; i < getMaxEntries(); i++) {
+            for(int i = 0; i < getMaxEntries(); i++) {
                 Node n = getTarget(i);
-                if (n != null) {
+                if(n != null) {
                     MapLN mapLN = (MapLN) n;
                     treeAdminMem += mapLN.getDatabase().getTreeAdminMemory();
                 }
             }
             return treeAdminMem;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -1424,7 +1414,7 @@ public class BIN extends IN {
      * Reduce memory consumption. Note that evicting deferred-write LNs may
      * require logging them, which will mark this BIN dirty. Compression of
      * deleted slots will also mark the BIN dirty.
-     *
+     * <p>
      * The BIN should be latched by the caller.
      *
      * @return a long number encoding (a) the number of evicted bytes, and
@@ -1437,13 +1427,13 @@ public class BIN extends IN {
         /* Try compressing non-dirty slots. */
         final long oldMemSize = inMemorySize;
         getEnv().lazyCompress(this);
-        if (oldMemSize > inMemorySize) {
+        if(oldMemSize > inMemorySize) {
             return oldMemSize - inMemorySize;
         }
 
         /* Try LN eviction. Return if any were evicted. */
         final long lnBytesAndStatus = evictLNs();
-        if ((lnBytesAndStatus & ~IN.NON_EVICTABLE_IN) != 0) {
+        if((lnBytesAndStatus & ~IN.NON_EVICTABLE_IN) != 0) {
             return lnBytesAndStatus;
         }
 
@@ -1455,11 +1445,11 @@ public class BIN extends IN {
 
         final long vlsnBytes = vlsnCache.getMemorySize();
 
-        if (vlsnBytes > 0) {
+        if(vlsnBytes > 0) {
 
             int numEntries = getNEntries();
-            for (int i = 0; i < numEntries; ++i) {
-                if (isEmbeddedLN(i)) {
+            for(int i = 0; i < numEntries; ++i) {
+                if(isEmbeddedLN(i)) {
                     return 0;
                 }
             }
@@ -1474,7 +1464,7 @@ public class BIN extends IN {
     /**
      * Reduce memory consumption by evicting all LN targets. Note that this may
      * cause LNs to be logged, which will mark this BIN dirty.
-     *
+     * <p>
      * The BIN should be latched by the caller.
      *
      * @return a long number encoding (a) the number of evicted bytes, and
@@ -1482,10 +1472,10 @@ public class BIN extends IN {
      * any cursors on it, or has any non-evictable children.
      */
     public long evictLNs()
-        throws DatabaseException {
+            throws DatabaseException {
 
         assert isLatchExclusiveOwner() :
-            "BIN must be latched before evicting LNs";
+                "BIN must be latched before evicting LNs";
 
         /*
          * We can't evict an LN which is pointed to by a cursor, in case that
@@ -1494,7 +1484,7 @@ public class BIN extends IN {
          * could do a more expensive, precise check to see entries have which
          * cursors. This is something we might move to later.
          */
-        if (nCursors() > 0) {
+        if(nCursors() > 0) {
             return IN.NON_EVICTABLE_IN;
         }
 
@@ -1503,17 +1493,18 @@ public class BIN extends IN {
         long numLNsEvicted = 0;
         boolean haveNonEvictableLN = false;
 
-        for (int i = 0; i < getNEntries(); i++) {
+        for(int i = 0; i < getNEntries(); i++) {
 
-            if (getTarget(i) == null) {
+            if(getTarget(i) == null) {
                 continue;
             }
 
             long lnRemoved = evictLNInternal(i, false /*ifFetchedCold*/);
 
-            if (lnRemoved < 0) {
+            if(lnRemoved < 0) {
                 haveNonEvictableLN = true;
-            } else {
+            }
+            else {
                 totalRemoved += lnRemoved;
                 ++numLNsEvicted;
             }
@@ -1523,16 +1514,17 @@ public class BIN extends IN {
          * compactMemory() may decrease the memory footprint by mutating the
          * representations of the target and key sets.
          */
-        if (totalRemoved > 0) {
+        if(totalRemoved > 0) {
             updateMemorySize(totalRemoved, 0);
             totalRemoved += compactMemory();
         }
 
         getEvictor().incNumLNsEvicted(numLNsEvicted);
 
-        if (haveNonEvictableLN) {
+        if(haveNonEvictableLN) {
             return (totalRemoved | IN.NON_EVICTABLE_IN);
-        } else {
+        }
+        else {
             return totalRemoved;
         }
     }
@@ -1542,12 +1534,12 @@ public class BIN extends IN {
     }
 
     public void evictLN(int index, boolean ifFetchedCold)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final long removed = evictLNInternal(index, ifFetchedCold);
 
         /* May decrease the memory footprint by changing the INTargetRep. */
-        if (removed > 0) {
+        if(removed > 0) {
             updateMemorySize(removed, 0);
             compactMemory();
         }
@@ -1558,31 +1550,30 @@ public class BIN extends IN {
      * and must be subtracted from the memory budget by the caller.
      *
      * @param ifFetchedCold If true, evict the LN only if it has the
-     * FetchedCold flag set.
-     *
+     *                      FetchedCold flag set.
      * @return number of evicted bytes or -1 if the LN is not evictable.
      */
     private long evictLNInternal(int index, boolean ifFetchedCold)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final Node n = getTarget(index);
 
-        assert(n == null || n instanceof LN);
+        assert (n == null || n instanceof LN);
 
-        if (n == null) {
+        if(n == null) {
             return 0;
         }
 
         final LN ln = (LN) n;
 
-        if (ifFetchedCold && !ln.getFetchedCold()) {
+        if(ifFetchedCold && !ln.getFetchedCold()) {
             return 0;
         }
 
         /*
          * Don't evict MapLNs for open databases (LN.isEvictable) [#13415].
          */
-        if (!ln.isEvictable(getLsn(index))) {
+        if(!ln.isEvictable(getLsn(index))) {
             return -1;
         }
 
@@ -1597,7 +1588,7 @@ public class BIN extends IN {
         ln.releaseMemoryBudget();
 
         final OffHeapCache ohCache = getOffHeapCache();
-        if (ohCache.isEnabled()) {
+        if(ohCache.isEnabled()) {
             ohCache.storeEvictedLN(this, index, ln);
         }
 
@@ -1609,12 +1600,12 @@ public class BIN extends IN {
      */
     @Override
     public void logDirtyChildren()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Look for LNs that are dirty or have never been logged before. */
-        for (int i = 0; i < getNEntries(); i++) {
+        for(int i = 0; i < getNEntries(); i++) {
             Node node = getTarget(i);
-            if (node != null) {
+            if(node != null) {
                 logDirtyLN(i, (LN) node, true /*allowEviction*/);
             }
         }
@@ -1624,22 +1615,22 @@ public class BIN extends IN {
      * Logs the LN at the given index if it is dirty.
      */
     private void logDirtyLN(
-        int idx,
-        LN ln,
-        boolean allowEviction)
-        throws DatabaseException {
+            int idx,
+            LN ln,
+            boolean allowEviction)
+            throws DatabaseException {
 
         final long currLsn = getLsn(idx);
 
         final boolean force = getDatabase().isDeferredWriteMode() &&
-                              DbLsn.isTransientOrNull(currLsn);
+                DbLsn.isTransientOrNull(currLsn);
 
-        if (force || ln.isDirty()) {
+        if(force || ln.isDirty()) {
             final DatabaseImpl dbImpl = getDatabase();
             final EnvironmentImpl envImpl = dbImpl.getEnv();
 
             /* Only deferred write databases should have dirty LNs. */
-            assert(dbImpl.isDeferredWriteMode() || ln instanceof MapLN);
+            assert (dbImpl.isDeferredWriteMode() || ln instanceof MapLN);
 
             /*
              * Do not lock while logging.  Locking of new LSN is performed by
@@ -1651,28 +1642,28 @@ public class BIN extends IN {
              * non-transactional)
              */
             final LogItem logItem = ln.log(
-                envImpl, dbImpl, null /*locker*/, null /*writeLockInfo*/,
-                isEmbeddedLN(idx), getKey(idx),
-                getExpiration(idx), isExpirationInHours(),
-                isEmbeddedLN(idx), currLsn, getLastLoggedSize(idx),
-                false/*isInsertion*/, true /*backgroundIO*/,
-                ReplicationContext.NO_REPLICATE);
+                    envImpl, dbImpl, null /*locker*/, null /*writeLockInfo*/,
+                    isEmbeddedLN(idx), getKey(idx),
+                    getExpiration(idx), isExpirationInHours(),
+                    isEmbeddedLN(idx), currLsn, getLastLoggedSize(idx),
+                    false/*isInsertion*/, true /*backgroundIO*/,
+                    ReplicationContext.NO_REPLICATE);
 
             updateEntry(
-                idx, logItem.lsn, ln.getVLSNSequence(),
-                logItem.size);
+                    idx, logItem.lsn, ln.getVLSNSequence(),
+                    logItem.size);
 
             /* Lock new LSN on behalf of existing lockers. */
             CursorImpl.lockAfterLsnChange(
-                dbImpl, currLsn, logItem.lsn, null /*excludeLocker*/);
+                    dbImpl, currLsn, logItem.lsn, null /*excludeLocker*/);
 
             /*
              * It is desirable to evict a non-dirty LN that is immediately
              * obsolete, because it will never be fetched again.
              */
-            if (allowEviction &&
-                (databaseImpl.isLNImmediatelyObsolete() ||
-                 isEmbeddedLN(idx))) {
+            if(allowEviction &&
+                    (databaseImpl.isLNImmediatelyObsolete() ||
+                            isEmbeddedLN(idx))) {
                 evictLN(idx);
             }
         }
@@ -1708,46 +1699,48 @@ public class BIN extends IN {
      */
 
     public int getFullBinNEntries() {
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             return fullBinNEntries;
-        } else {
+        }
+        else {
             return nEntries;
         }
     }
 
     public void setFullBinNEntries(int n) {
-        assert(isBINDelta(false));
+        assert (isBINDelta(false));
         fullBinNEntries = n;
     }
 
     void incFullBinNEntries() {
-        assert(isBINDelta());
+        assert (isBINDelta());
         ++fullBinNEntries;
     }
 
     public int getFullBinMaxEntries() {
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             return fullBinMaxEntries;
-        } else {
+        }
+        else {
             return getMaxEntries();
         }
     }
 
     public void setFullBinMaxEntries(int n) {
-        assert(isBINDelta(false));
+        assert (isBINDelta(false));
         fullBinMaxEntries = n;
     }
 
     int getDeltaCapacity(int numDirtyEntries) {
 
         boolean blindOps =
-            (getEnv().allowBlindOps() || getEnv().allowBlindPuts());
+                (getEnv().allowBlindOps() || getEnv().allowBlindPuts());
 
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             return getMaxEntries();
         }
 
-        if (blindOps) {
+        if(blindOps) {
             return (getNEntries() * databaseImpl.getBinDeltaPercent()) / 100;
         }
 
@@ -1757,7 +1750,7 @@ public class BIN extends IN {
     boolean allowBlindPuts() {
         boolean res = getEnv().allowBlindPuts();
 
-        if (res) {
+        if(res) {
             res = res && databaseImpl.hasBtreeBinaryEqualityComparator();
             res = res && databaseImpl.hasDuplicateBinaryEqualityComparator();
         }
@@ -1780,16 +1773,16 @@ public class BIN extends IN {
      */
     byte[] createBloomFilter() {
 
-        assert(bloomFilter == null || isBINDelta());
+        assert (bloomFilter == null || isBINDelta());
 
         boolean blindPuts = allowBlindPuts();
 
-        if (!blindPuts) {
-            assert(bloomFilter == null);
+        if(!blindPuts) {
+            assert (bloomFilter == null);
             return null;
         }
 
-        if (bloomFilter != null) {
+        if(bloomFilter != null) {
             /*
              * We are here because we are logging a delta that has a filter
              * already. We just need to log the existing filter.
@@ -1797,7 +1790,7 @@ public class BIN extends IN {
             return bloomFilter;
         }
 
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             return null;
         }
 
@@ -1807,20 +1800,20 @@ public class BIN extends IN {
         byte[] bf = new byte[nbytes];
 
         BINDeltaBloomFilter.HashContext hc =
-            new BINDeltaBloomFilter.HashContext();
+                new BINDeltaBloomFilter.HashContext();
 
-        if (keyPrefix != null) {
+        if(keyPrefix != null) {
             hc.hashKeyPrefix(keyPrefix);
         }
 
-        for (int i = 0; i < getNEntries(); ++i) {
+        for(int i = 0; i < getNEntries(); ++i) {
 
-            if (isDirty(i)) {
+            if(isDirty(i)) {
                 continue;
             }
 
             byte[] suffix = entryKeys.getKey(i, haveEmbeddedData(i));
-            if (suffix == null) {
+            if(suffix == null) {
                 suffix = Key.EMPTY_KEY;
             }
 
@@ -1832,9 +1825,9 @@ public class BIN extends IN {
 
     public boolean mayHaveKeyInFullBin(byte[] key) {
 
-        assert(isBINDelta());
+        assert (isBINDelta());
 
-        if (bloomFilter == null) {
+        if(bloomFilter == null) {
             return true;
         }
 
@@ -1846,19 +1839,20 @@ public class BIN extends IN {
      */
     int getBloomFilterLogSize() {
 
-        if (!allowBlindPuts()) {
+        if(!allowBlindPuts()) {
             return 0;
         }
 
-        if (isBINDelta()) {
-            if (bloomFilter != null) {
+        if(isBINDelta()) {
+            if(bloomFilter != null) {
                 return BINDeltaBloomFilter.getLogSize(bloomFilter);
             }
 
             return 0;
 
-        } else {
-            assert(bloomFilter == null);
+        }
+        else {
+            assert (bloomFilter == null);
             int numKeys = getNEntries() - getNDeltas();
             return BINDeltaBloomFilter.getLogSize(numKeys);
         }
@@ -1866,21 +1860,21 @@ public class BIN extends IN {
 
     boolean isDeltaProhibited() {
         return (getProhibitNextDelta() ||
-            getDatabase().isDeferredWriteMode() ||
-            getLastFullLsn() == DbLsn.NULL_LSN);
+                getDatabase().isDeferredWriteMode() ||
+                getLastFullLsn() == DbLsn.NULL_LSN);
     }
 
     /**
      * Decide whether to log a full or partial BIN, depending on the ratio of
      * the delta size to full BIN size.
-     *
+     * <p>
      * Other factors are taken into account:
      * + a delta cannot be logged if the BIN has never been logged before
      * + deltas are not currently supported for DeferredWrite databases
      * + this particular delta may have been prohibited because the cleaner is
-     *   migrating the BIN or a dirty slot has been removed
+     * migrating the BIN or a dirty slot has been removed
      * + if there are no dirty slots, we might as well log a full BIN
-     *
+     * <p>
      * The restriction on using BIN-deltas for deferred-write DBs is for
      * reasons that are probably no longer relevant. However, we have not
      * tested deltas with DW, so we still prohibit them. Because BIN-deltas
@@ -1891,7 +1885,7 @@ public class BIN extends IN {
      */
     public boolean shouldLogDelta() {
 
-        if (isBINDelta()) {
+        if(isBINDelta()) {
             /*
              * Cannot assert that db is not in DeferredWrite mode.
              * See Database.mutateDeferredWriteBINDeltas.
@@ -1902,7 +1896,7 @@ public class BIN extends IN {
         }
 
         /* Cheapest checks first. */
-        if (isDeltaProhibited()) {
+        if(isDeltaProhibited()) {
             return false;
         }
 
@@ -1910,13 +1904,13 @@ public class BIN extends IN {
         final int numDeltas = getNDeltas();
 
         /* A delta with zero items is not valid. */
-        if (numDeltas <= 0) {
+        if(numDeltas <= 0) {
             return false;
         }
 
         /* Check the configured BinDeltaPercent. */
         final int deltaLimit =
-            (getNEntries() * databaseImpl.getBinDeltaPercent()) / 100;
+                (getNEntries() * databaseImpl.getBinDeltaPercent()) / 100;
 
         return numDeltas <= deltaLimit;
     }
@@ -1932,7 +1926,7 @@ public class BIN extends IN {
 
     /**
      * Mutate to a delta (discard non-dirty entries and resize arrays).
-     *
+     * <p>
      * This method must be called with this node latched exclusively, and
      * canMutateToBINDelta must return true.
      *
@@ -1943,7 +1937,7 @@ public class BIN extends IN {
         assert isLatchExclusiveOwner();
         assert canMutateToBINDelta();
 
-        if (getInListResident()) {
+        if(getInListResident()) {
             getEnv().getInMemoryINs().updateBINDeltaStat(1);
         }
 
@@ -1965,10 +1959,10 @@ public class BIN extends IN {
      */
     public BIN cloneBINDelta() {
 
-        assert(isBINDelta());
+        assert (isBINDelta());
 
         final BIN bin = new BIN(
-            databaseImpl, getIdentifierKey(), 0/*capacity*/, getLevel());
+                databaseImpl, getIdentifierKey(), 0/*capacity*/, getLevel());
 
         bin.nodeId = nodeId;
         bin.flags = flags;
@@ -1983,17 +1977,18 @@ public class BIN extends IN {
      * Replaces the contents of destBIN with the deltas in this BIN.
      */
     private void initBINDelta(
-        final BIN destBIN,
-        final int nDeltas,
-        final int capacity,
-        final boolean copyTargets) {
+            final BIN destBIN,
+            final int nDeltas,
+            final int capacity,
+            final boolean copyTargets) {
 
         long[] longLSNs = null;
         byte[] compactLSNs = null;
 
-        if (entryLsnLongArray == null) {
+        if(entryLsnLongArray == null) {
             compactLSNs = new byte[nDeltas * 4];
-        } else {
+        }
+        else {
             longLSNs = new long[nDeltas];
         }
 
@@ -2005,49 +2000,50 @@ public class BIN extends IN {
         Node[] targets = null;
         int[] expiration = null;
 
-        if (copyTargets) {
+        if(copyTargets) {
             targets = new Node[nDeltas];
             memIds = new long[nDeltas];
         }
 
-        if (expirationBase != -1) {
+        if(expirationBase != -1) {
             expiration = new int[nDeltas];
         }
 
         int j = 0;
-        for (int i = 0; i < getNEntries(); i += 1) {
+        for(int i = 0; i < getNEntries(); i += 1) {
 
-            if (!isDirty(i)) {
+            if(!isDirty(i)) {
                 freeOffHeapLN(i);
                 continue;
             }
 
-            if (entryLsnLongArray == null) {
+            if(entryLsnLongArray == null) {
                 int doff = j << 2;
                 int soff = i << 2;
                 compactLSNs[doff] = entryLsnByteArray[soff];
-                compactLSNs[doff+1] = entryLsnByteArray[soff+1];
-                compactLSNs[doff+2] = entryLsnByteArray[soff+2];
-                compactLSNs[doff+3] = entryLsnByteArray[soff+3];
-            } else {
+                compactLSNs[doff + 1] = entryLsnByteArray[soff + 1];
+                compactLSNs[doff + 2] = entryLsnByteArray[soff + 2];
+                compactLSNs[doff + 3] = entryLsnByteArray[soff + 3];
+            }
+            else {
                 longLSNs[j] = getLsn(i);
             }
 
             keys[j] = entryKeys.get(i);
             states[j] = getState(i);
 
-            if (targets != null) {
+            if(targets != null) {
                 targets[j] = getTarget(i);
             }
 
-            if (memIds != null) {
+            if(memIds != null) {
                 memIds[j] = getOffHeapLNId(i);
             }
 
             vlsns[j] = getCachedVLSN(i);
             sizes[j] = getLastLoggedSize(i);
 
-            if (expiration != null) {
+            if(expiration != null) {
                 expiration[j] = getExpiration(i);
             }
 
@@ -2062,11 +2058,11 @@ public class BIN extends IN {
         destBIN.fullBinMaxEntries = getFullBinMaxEntries();
 
         destBIN.resetContent(
-            capacity, nDeltas,
-            baseFileNumber, compactLSNs, longLSNs,
-            states, keyPrefix, keys, targets,
-            sizes, memIds, vlsns,
-            expiration, isExpirationInHours());
+                capacity, nDeltas,
+                baseFileNumber, compactLSNs, longLSNs,
+                states, keyPrefix, keys, targets,
+                sizes, memIds, vlsns,
+                expiration, isExpirationInHours());
 
         destBIN.setBINDelta(true);
 
@@ -2079,30 +2075,31 @@ public class BIN extends IN {
      * a new BIN delta with the given content.
      */
     private void resetContent(
-        final int capacity,
-        final int newNEntries,
-        final long baseFileNumber,
-        final byte[] compactLSNs,
-        final long[] longLSNs,
-        final byte[] states,
-        final byte[] keyPrefix,
-        final byte[][] keys,
-        final Node[] targets,
-        final int[] loggedSizes,
-        final long[] memIds,
-        final long[] vlsns,
-        final int[] expiration,
-        final boolean expirationInHours) {
+            final int capacity,
+            final int newNEntries,
+            final long baseFileNumber,
+            final byte[] compactLSNs,
+            final long[] longLSNs,
+            final byte[] states,
+            final byte[] keyPrefix,
+            final byte[][] keys,
+            final Node[] targets,
+            final int[] loggedSizes,
+            final long[] memIds,
+            final long[] vlsns,
+            final int[] expiration,
+            final boolean expirationInHours) {
 
         updateRepCacheStats(false);
 
         nEntries = newNEntries;
 
         this.baseFileNumber = baseFileNumber;
-        if (longLSNs == null) {
+        if(longLSNs == null) {
             entryLsnByteArray = new byte[capacity << 2];
             entryLsnLongArray = null;
-        } else {
+        }
+        else {
             entryLsnByteArray = null;
             entryLsnLongArray = new long[capacity];
         }
@@ -2121,30 +2118,31 @@ public class BIN extends IN {
 
         entryStates = new byte[capacity];
 
-        for (int i = 0; i < newNEntries; i += 1) {
+        for(int i = 0; i < newNEntries; i += 1) {
 
-            if (longLSNs == null) {
+            if(longLSNs == null) {
                 int off = i << 2;
                 entryLsnByteArray[off] = compactLSNs[off];
-                entryLsnByteArray[off+1] = compactLSNs[off+1];
-                entryLsnByteArray[off+2] = compactLSNs[off+2];
-                entryLsnByteArray[off+3] = compactLSNs[off+3];
-            } else {
+                entryLsnByteArray[off + 1] = compactLSNs[off + 1];
+                entryLsnByteArray[off + 2] = compactLSNs[off + 2];
+                entryLsnByteArray[off + 3] = compactLSNs[off + 3];
+            }
+            else {
                 entryLsnLongArray[i] = longLSNs[i];
             }
 
             entryKeys = entryKeys.set(i, keys[i], this);
             entryStates[i] = states[i];
 
-            if (targets != null) {
+            if(targets != null) {
                 entryTargets = entryTargets.set(i, targets[i], this);
             }
 
-            if (memIds != null) {
+            if(memIds != null) {
                 setOffHeapLNId(i, memIds[i]);
             }
 
-            if (expiration != null) {
+            if(expiration != null) {
                 setExpiration(i, expiration[i], expirationInHours);
             }
 
@@ -2158,14 +2156,14 @@ public class BIN extends IN {
     /**
      * Fetch the full BIN and apply the deltas in this BIN to it, then use the
      * merged result to replace the contents of this BIN.
-     *
+     * <p>
      * This method must be called with this node latched exclusively. If 'this'
      * is not a delta, this method does nothing.
      */
     @Override
     public void mutateToFullBIN(boolean leaveFreeSlot) {
 
-        if (!isBINDelta()) {
+        if(!isBINDelta()) {
             return;
         }
 
@@ -2179,14 +2177,14 @@ public class BIN extends IN {
     /**
      * Mutates this delta to a full BIN by applying this delta to the fullBIN
      * param and then replacing this BIN's contents with it.
-     *
+     * <p>
      * This method must be called with this node latched exclusively. 'this'
      * must be a delta.
-     *
+     * <p>
      * After mutation, the full BIN is compressed and compacted. The
      * compression is particularly important, since BIN-deltas in cache cannot
      * be compressed.
-     *
+     * <p>
      * The method is public because it is called directly from FileProcessor
      * when it finds a BIN that must be migrated. In that case, fullBIN is a
      * full BIN that has just been read from the log, and it is not part of
@@ -2200,12 +2198,12 @@ public class BIN extends IN {
         byte[][] keys = null;
         int i = 0;
 
-        if (cursorSet != null) {
+        if(cursorSet != null) {
             keys = new byte[cursorSet.size()][];
 
-            for (CursorImpl cursor : cursorSet) {
+            for(CursorImpl cursor : cursorSet) {
                 final int index = cursor.getIndex();
-                if (index >= 0 && index < getNEntries()) {
+                if(index >= 0 && index < getNEntries()) {
                     keys[i] = cursor.getCurrentKey(true/*isLatched*/);
                 }
                 ++i;
@@ -2218,27 +2216,27 @@ public class BIN extends IN {
 
         setBINDelta(false);
 
-        if (cursorSet != null) {
+        if(cursorSet != null) {
 
             i = 0;
-            for (CursorImpl cursor : cursorSet) {
+            for(CursorImpl cursor : cursorSet) {
 
-                if (keys[i] != null) {
+                if(keys[i] != null) {
                     /*
                      * Do not ask for an exact match from findEntry because if
                      * the cursor was on a KD slot, findEntry would return -1.
                      */
                     int index = findEntry(keys[i], true, false);
 
-                    if ((index & IN.EXACT_MATCH) == 0) {
+                    if((index & IN.EXACT_MATCH) == 0) {
                         throw EnvironmentFailureException.unexpectedState(
-                            getEnv(), "Failed to reposition cursor during " +
-                            "mutation of a BIN delta to a full BIN");
+                                getEnv(), "Failed to reposition cursor during " +
+                                        "mutation of a BIN delta to a full BIN");
                     }
 
                     index &= ~IN.EXACT_MATCH;
 
-                    assert(index >= 0 && index < getNEntries());
+                    assert (index >= 0 && index < getNEntries());
                     cursor.setIndex(index);
                 }
                 ++i;
@@ -2248,7 +2246,7 @@ public class BIN extends IN {
         getEnv().lazyCompress(this);
         compactMemory();
 
-        if (getInListResident()) {
+        if(getInListResident()) {
             getEnv().getInMemoryINs().updateBINDeltaStat(-1);
         }
     }
@@ -2260,16 +2258,16 @@ public class BIN extends IN {
 
         try {
             return (BIN)
-                envImpl.getLogManager().getEntryHandleFileNotFound(lsn);
+                    envImpl.getLogManager().getEntryHandleFileNotFound(lsn);
 
-        } catch (EnvironmentFailureException e) {
+        } catch(EnvironmentFailureException e) {
             e.addErrorMessage(makeFetchErrorMsg(null, lsn, -1));
             throw e;
 
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                makeFetchErrorMsg(e.toString(), lsn, -1), e);
+                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                    makeFetchErrorMsg(e.toString(), lsn, -1), e);
         }
     }
 
@@ -2318,17 +2316,17 @@ public class BIN extends IN {
 
         updateRepCacheStats(false);
 
-        if (entryLsnByteArray != null) {
+        if(entryLsnByteArray != null) {
             entryLsnByteArray = Arrays.copyOfRange(
-                entryLsnByteArray, 0, newCapacity * 4);
+                    entryLsnByteArray, 0, newCapacity * 4);
         }
-        if (entryLsnLongArray != null) {
+        if(entryLsnLongArray != null) {
             entryLsnLongArray = Arrays.copyOfRange(
-                entryLsnLongArray, 0, newCapacity);
+                    entryLsnLongArray, 0, newCapacity);
         }
-        if (entryStates != null) {
+        if(entryStates != null) {
             entryStates = Arrays.copyOfRange(
-                entryStates, 0, newCapacity);
+                    entryStates, 0, newCapacity);
         }
 
         entryKeys = entryKeys.resize(newCapacity);
@@ -2347,7 +2345,7 @@ public class BIN extends IN {
      * Create a BIN by fetching its most recent full version from the log and
      * applying to it the deltas in this BIN delta. The new BIN is not added
      * to the INList or the BTree.
-     *
+     * <p>
      * Called from DiskOrderedScanner.fetchAndProcessBINs() and
      * DiskOrderedScanner.accumulateLNs()
      *
@@ -2362,27 +2360,27 @@ public class BIN extends IN {
     /**
      * Given a full version BIN, apply to it the deltas in this BIN delta. The
      * fullBIN will then be complete, but its memory will not be compacted.
-     *
+     * <p>
      * Called from mutateToFullBIN() above and from SortedLSNTreewalker.
      *
      * @param leaveFreeSlot should be true if a slot will be inserted into the
-     * resulting full BIN, without first checking whether the full BIN must be
-     * split, and performing the split if necessary. If this param is true, the
-     * returned BIN will contain at least one free slot. If this param is
-     * false, a BIN with no free slots may be returned. For example, it is
-     * important that false is passed when a split will be performed, since if
-     * true were passed, the BIN would grow beyond its bounds unnecessarily.
+     *                      resulting full BIN, without first checking whether the full BIN must be
+     *                      split, and performing the split if necessary. If this param is true, the
+     *                      returned BIN will contain at least one free slot. If this param is
+     *                      false, a BIN with no free slots may be returned. For example, it is
+     *                      important that false is passed when a split will be performed, since if
+     *                      true were passed, the BIN would grow beyond its bounds unnecessarily.
      */
     public void reconstituteBIN(
-        DatabaseImpl dbImpl,
-        BIN fullBIN,
-        boolean leaveFreeSlot) {
+            DatabaseImpl dbImpl,
+            BIN fullBIN,
+            boolean leaveFreeSlot) {
 
         fullBIN.setDatabase(dbImpl);
         fullBIN.latch(CacheMode.UNCHANGED);
 
         try {
-            if (databaseImpl == null) {
+            if(databaseImpl == null) {
                 setDatabase(dbImpl);
             }
 
@@ -2435,34 +2433,34 @@ public class BIN extends IN {
              * will be shrunk back down to the Database's configured maxEntries
              * during normal compression.
              */
-            if (!dbImpl.getEnv().isInInit()) {
+            if(!dbImpl.getEnv().isInInit()) {
                 fullBIN.compress(
-                    false /*compressDirtySlots*/, null /*localTracker*/);
+                        false /*compressDirtySlots*/, null /*localTracker*/);
             }
             int nInsertions = leaveFreeSlot ? 1 : 0;
-            for (int i = 0; i < getNEntries(); i += 1) {
+            for(int i = 0; i < getNEntries(); i += 1) {
                 final int foundIndex = fullBIN.findEntry(
-                    getKey(i), true, false);
-                if (foundIndex < 0 || (foundIndex & IN.EXACT_MATCH) == 0) {
+                        getKey(i), true, false);
+                if(foundIndex < 0 || (foundIndex & IN.EXACT_MATCH) == 0) {
                     nInsertions += 1;
                 }
             }
             final int maxEntries = nInsertions + fullBIN.getNEntries();
-            if (maxEntries > fullBIN.getMaxEntries()) {
+            if(maxEntries > fullBIN.getMaxEntries()) {
                 fullBIN.resize(maxEntries);
                 dbImpl.getEnv().addToCompressorQueue(fullBIN);
             }
 
             /* Process each delta. */
-            for (int i = 0; i < getNEntries(); i++) {
+            for(int i = 0; i < getNEntries(); i++) {
 
                 assert isDirty(i) : this;
 
                 fullBIN.applyDelta(
-                    getKey(i), getData(i), getLsn(i), getState(i),
-                    getLastLoggedSize(i), getOffHeapLNId(i),
-                    getCachedVLSN(i), getTarget(i),
-                    getExpiration(i), isExpirationInHours());
+                        getKey(i), getData(i), getLsn(i), getState(i),
+                        getLastLoggedSize(i), getOffHeapLNId(i),
+                        getCachedVLSN(i), getTarget(i),
+                        getExpiration(i), isExpirationInHours());
             }
 
             /*
@@ -2482,16 +2480,16 @@ public class BIN extends IN {
      * Note: also called from OldBINDelta class.
      */
     void applyDelta(
-        final byte[] key,
-        final byte[] data,
-        final long lsn,
-        final byte state,
-        final int lastLoggedSize,
-        final long ohLnId,
-        final long vlsn,
-        final Node child,
-        final int expiration,
-        final boolean expirationInHours) {
+            final byte[] key,
+            final byte[] data,
+            final long lsn,
+            final byte state,
+            final int lastLoggedSize,
+            final long ohLnId,
+            final long vlsn,
+            final Node child,
+            final int expiration,
+            final boolean expirationInHours) {
 
         /*
          * The delta is the authoritative version of the entry. In all cases,
@@ -2506,7 +2504,7 @@ public class BIN extends IN {
          */
         int foundIndex = findEntry(key, true, false);
 
-        if (foundIndex >= 0 && (foundIndex & IN.EXACT_MATCH) != 0) {
+        if(foundIndex >= 0 && (foundIndex & IN.EXACT_MATCH) != 0) {
 
             foundIndex &= ~IN.EXACT_MATCH;
 
@@ -2515,9 +2513,10 @@ public class BIN extends IN {
              * info.  Note that all state flags should be restored [#22848].
              */
             applyDeltaSlot(
-                foundIndex, child, lsn, lastLoggedSize, state, key, data);
+                    foundIndex, child, lsn, lastLoggedSize, state, key, data);
 
-        } else {
+        }
+        else {
 
             /*
              * The entry doesn't exist, insert the delta entry. We insert the
@@ -2526,7 +2525,7 @@ public class BIN extends IN {
              * [#20737]
              */
             final int result = insertEntry1(
-                child, key, data, lsn, state, false/*blindInsertion*/);
+                    child, key, data, lsn, state, false/*blindInsertion*/);
 
             assert (result & INSERT_SUCCESS) != 0;
             foundIndex = result & ~IN.INSERT_SUCCESS;

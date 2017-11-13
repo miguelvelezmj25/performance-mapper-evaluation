@@ -13,89 +13,24 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_FEEDERS_CREATED;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_FEEDERS_SHUTDOWN;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_MAX_REPLICA_LAG;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_MAX_REPLICA_LAG_NAME;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_DELAY_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_LAST_COMMIT_TIMESTAMP_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_LAST_COMMIT_VLSN_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_VLSN_LAG_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_VLSN_RATE_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.LATEST_COMMIT_LAG_MS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.MAX_COMMIT_PROCESSING_NANOS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.MIN_COMMIT_PROCESSING_NANOS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_ABORTS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_ACKS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_NO_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_WRITE_NO_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_ELAPSED_TXN_TIME;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_MAX_EXCEEDED;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_TIMEOUTS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_TXNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_LNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_NAME_LNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.TOTAL_COMMIT_LAG_MS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.TOTAL_COMMIT_PROCESSING_NANOS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition.N_LAG_CONSISTENCY_WAITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition.N_LAG_CONSISTENCY_WAIT_MS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition.N_VLSN_CONSISTENCY_WAITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition.N_VLSN_CONSISTENCY_WAIT_MS;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.ACK_WAIT_MS;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.LAST_COMMIT_TIMESTAMP;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.LAST_COMMIT_VLSN;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.TOTAL_TXN_MS;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.TXNS_ACKED;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.TXNS_NOT_ACKED;
-import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.VLSN_RATE;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.BYTES_READ_RATE;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.BYTES_WRITE_RATE;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.MESSAGE_READ_RATE;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.MESSAGE_WRITE_RATE;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_BYTES_READ;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_BYTES_WRITTEN;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_ENTRIES_WRITTEN_OLD_VERSION;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGES_BATCHED;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGES_READ;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGES_WRITTEN;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGE_BATCHES;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_READ_NANOS;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_WRITE_NANOS;
-import static berkeley.com.sleepycat.je.utilint.CollectionUtils.emptySortedMap;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
-import berkeley.com.sleepycat.je.rep.impl.node.FeederManager;
-import berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition;
-import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
-import berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition;
-import berkeley.com.sleepycat.je.rep.impl.node.Replica;
-import berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition;
+import berkeley.com.sleepycat.je.rep.impl.node.*;
 import berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndexStatDefinition;
-import berkeley.com.sleepycat.je.utilint.AtomicLongMapStat;
-import berkeley.com.sleepycat.je.utilint.IntegralLongAvgStat;
-import berkeley.com.sleepycat.je.utilint.LongAvgRateMapStat;
-import berkeley.com.sleepycat.je.utilint.LongAvgRateStat;
-import berkeley.com.sleepycat.je.utilint.LongDiffMapStat;
-import berkeley.com.sleepycat.je.utilint.StatDefinition;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.io.Serializable;
+import java.util.*;
+
+import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.*;
+import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.*;
+import static berkeley.com.sleepycat.je.rep.impl.node.ReplicaStatDefinition.*;
+import static berkeley.com.sleepycat.je.rep.stream.FeederTxnStatDefinition.*;
+import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.*;
+import static berkeley.com.sleepycat.je.utilint.CollectionUtils.emptySortedMap;
 
 /**
  * Statistics for a replicated environment.
@@ -110,25 +45,25 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  * <p>
  * The current categories are:
  * <ul>
- *  <li><b>FeederManager</b>: A feed is the {@link <a
+ * <li><b>FeederManager</b>: A feed is the {@link <a
  * href="{@docRoot}/../ReplicationGuide/introduction.html#replicationstreams">replication
  * stream</a>} between a master and replica. The current number of feeders
  * gives a sense of the connectivity of the replication group.
- *  </li>
- *  <li><b>BinaryProtocol</b>: These statistics center on the network traffic
- *   engendered by the replication stream, and provide a sense of the network
- *   bandwidth seen by the replication group.
- *  </li>
- *  <li><b>Replay</b>: The act of receiving and applying the replication stream
- *  at the Replica node is called Replay. These stats give a sense of how much
- *  load the replica node is experiencing when processing the traffic from the
- *  replication group.
- *  </li>
- *  <li><b>ConsistencyTracker</b>: The tracker is invoked when consistency
- *  policies are used at a replica node. This provides a measure of delays
- *  experienced by read requests at a replica, in order to conform with the
- *  consistency specified by the application.
- *  </li>
+ * </li>
+ * <li><b>BinaryProtocol</b>: These statistics center on the network traffic
+ * engendered by the replication stream, and provide a sense of the network
+ * bandwidth seen by the replication group.
+ * </li>
+ * <li><b>Replay</b>: The act of receiving and applying the replication stream
+ * at the Replica node is called Replay. These stats give a sense of how much
+ * load the replica node is experiencing when processing the traffic from the
+ * replication group.
+ * </li>
+ * <li><b>ConsistencyTracker</b>: The tracker is invoked when consistency
+ * policies are used at a replica node. This provides a measure of delays
+ * experienced by read requests at a replica, in order to conform with the
+ * consistency specified by the application.
+ * </li>
  * </ul>
  *
  * @see <a href="{@docRoot}/../jconsole/JConsole-plugin.html">Viewing
@@ -144,15 +79,13 @@ public class ReplicatedEnvironmentStats implements Serializable {
      * de-serialized instance in which this statistic was unavailable.
      */
     private static final int VALUE_UNAVAILABLE = -1;
-
+    private final Map<String, String> tipsMap = new HashMap<String, String>();
     private StatGroup feederManagerStats;
     private StatGroup feederTxnStats;
     private StatGroup replayStats;
     private StatGroup trackerStats;
     private StatGroup protocolStats;
     private StatGroup vlsnIndexStats;
-
-    private final Map<String, String> tipsMap = new HashMap<String, String>();
 
     ReplicatedEnvironmentStats(RepImpl repImpl, StatsConfig config) {
         final RepNode repNode = repImpl.getRepNode();
@@ -173,34 +106,46 @@ public class ReplicatedEnvironmentStats implements Serializable {
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public ReplicatedEnvironmentStats() {
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only
+     * <p>
+     * For JConsole plugin support.
      */
-    public Collection<StatGroup> getStatGroups() {
-        return (feederTxnStats != null) ?
-            Arrays.asList(feederManagerStats,
-                          feederTxnStats,
-                          replayStats,
-                          trackerStats,
-                          protocolStats,
-                          vlsnIndexStats) :
-            Arrays.asList(feederManagerStats,
-                          replayStats,
-                          trackerStats,
-                          protocolStats,
-                          vlsnIndexStats);
+    public static String[] getStatGroupTitles() {
+        return new String[]{
+                FeederManagerStatDefinition.GROUP_NAME,
+                FeederTxnStatDefinition.GROUP_NAME,
+                BinaryProtocolStatDefinition.GROUP_NAME,
+                ReplayStatDefinition.GROUP_NAME,
+                ReplicaStatDefinition.GROUP_NAME,
+                VLSNIndexStatDefinition.GROUP_NAME};
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
+     */
+    public Collection<StatGroup> getStatGroups() {
+        return (feederTxnStats != null) ?
+                Arrays.asList(feederManagerStats,
+                        feederTxnStats,
+                        replayStats,
+                        trackerStats,
+                        protocolStats,
+                        vlsnIndexStats) :
+                Arrays.asList(feederManagerStats,
+                        replayStats,
+                        trackerStats,
+                        protocolStats,
+                        vlsnIndexStats);
+    }
+
+    /**
+     * @hidden Internal use only.
      */
     public Map<String, StatGroup> getStatGroupsMap() {
         HashMap<String, StatGroup> statmap = new HashMap<String, StatGroup>();
@@ -209,51 +154,40 @@ public class ReplicatedEnvironmentStats implements Serializable {
         statmap.put(trackerStats.getName(), trackerStats);
         statmap.put(protocolStats.getName(), protocolStats);
         statmap.put(vlsnIndexStats.getName(), vlsnIndexStats);
-        if (feederTxnStats != null) {
+        if(feederTxnStats != null) {
             statmap.put(feederTxnStats.getName(), feederTxnStats);
         }
         return statmap;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setStatGroup(StatGroup sg) {
 
-        if (sg.getName().equals(FeederManagerStatDefinition.GROUP_NAME)) {
+        if(sg.getName().equals(FeederManagerStatDefinition.GROUP_NAME)) {
             feederManagerStats = sg;
-        } else if (sg.getName().equals(ReplayStatDefinition.GROUP_NAME)) {
-            replayStats = sg;
-        } else if (sg.getName().equals(ReplicaStatDefinition.GROUP_NAME)) {
-            trackerStats = sg;
-        } else if (sg.getName().equals
-                       (BinaryProtocolStatDefinition.GROUP_NAME)) {
-            protocolStats = sg;
-        } else if (sg.getName().equals(VLSNIndexStatDefinition.GROUP_NAME)) {
-           vlsnIndexStats = sg;
-        } else if (sg.getName().equals(FeederTxnStatDefinition.GROUP_NAME)) {
-            feederTxnStats = sg;
-        } else {
-            throw EnvironmentFailureException.unexpectedState
-                ("Internal error stat context is not registered");
         }
-    }
-
-    /**
-     * @hidden
-     * Internal use only
-     *
-     * For JConsole plugin support.
-     */
-    public static String[] getStatGroupTitles() {
-        return new String[] {
-            FeederManagerStatDefinition.GROUP_NAME,
-            FeederTxnStatDefinition.GROUP_NAME,
-            BinaryProtocolStatDefinition.GROUP_NAME,
-            ReplayStatDefinition.GROUP_NAME,
-            ReplicaStatDefinition.GROUP_NAME,
-            VLSNIndexStatDefinition.GROUP_NAME};
+        else if(sg.getName().equals(ReplayStatDefinition.GROUP_NAME)) {
+            replayStats = sg;
+        }
+        else if(sg.getName().equals(ReplicaStatDefinition.GROUP_NAME)) {
+            trackerStats = sg;
+        }
+        else if(sg.getName().equals
+                (BinaryProtocolStatDefinition.GROUP_NAME)) {
+            protocolStats = sg;
+        }
+        else if(sg.getName().equals(VLSNIndexStatDefinition.GROUP_NAME)) {
+            vlsnIndexStats = sg;
+        }
+        else if(sg.getName().equals(FeederTxnStatDefinition.GROUP_NAME)) {
+            feederTxnStats = sg;
+        }
+        else {
+            throw EnvironmentFailureException.unexpectedState
+                    ("Internal error stat context is not registered");
+        }
     }
 
     private void addMessageRateStats() {
@@ -261,30 +195,30 @@ public class ReplicatedEnvironmentStats implements Serializable {
         long denominator;
 
         numerator = (protocolStats.getLongStat(N_MESSAGES_READ) == null) ?
-                     0 : protocolStats.getLongStat(N_MESSAGES_READ).get();
+                0 : protocolStats.getLongStat(N_MESSAGES_READ).get();
         denominator = (protocolStats.getLongStat(N_READ_NANOS) == null) ?
                 0 : protocolStats.getLongStat(N_READ_NANOS).get();
         @SuppressWarnings("unused")
         IntegralLongAvgStat msgReadRate =
-            new IntegralLongAvgStat
-                (protocolStats,
-                 MESSAGE_READ_RATE,
-                 numerator,
-                 denominator,
-                 1000000000);
+                new IntegralLongAvgStat
+                        (protocolStats,
+                                MESSAGE_READ_RATE,
+                                numerator,
+                                denominator,
+                                1000000000);
 
         numerator = (protocolStats.getLongStat(N_MESSAGES_WRITTEN) == null) ?
                 0 : protocolStats.getLongStat(N_MESSAGES_WRITTEN).get();
         denominator = (protocolStats.getLongStat(N_WRITE_NANOS) == null) ?
-           0 : protocolStats.getLongStat(N_WRITE_NANOS).get();
+                0 : protocolStats.getLongStat(N_WRITE_NANOS).get();
         @SuppressWarnings("unused")
         IntegralLongAvgStat msgWriteRate =
-            new IntegralLongAvgStat
-                (protocolStats,
-                 MESSAGE_WRITE_RATE,
-                 numerator,
-                 denominator,
-                 1000000000);
+                new IntegralLongAvgStat
+                        (protocolStats,
+                                MESSAGE_WRITE_RATE,
+                                numerator,
+                                denominator,
+                                1000000000);
     }
 
     private void addBytesRateStats() {
@@ -292,30 +226,30 @@ public class ReplicatedEnvironmentStats implements Serializable {
         long denominator;
 
         numerator = (protocolStats.getLongStat(N_BYTES_READ) == null) ?
-                     0 : protocolStats.getLongStat(N_BYTES_READ).get();
+                0 : protocolStats.getLongStat(N_BYTES_READ).get();
         denominator = (protocolStats.getLongStat(N_READ_NANOS) == null) ?
                 0 : protocolStats.getLongStat(N_READ_NANOS).get();
         @SuppressWarnings("unused")
         IntegralLongAvgStat bytesReadRate =
-            new IntegralLongAvgStat
-                (protocolStats,
-                 BYTES_READ_RATE,
-                 numerator,
-                 denominator,
-                 1000000000);
+                new IntegralLongAvgStat
+                        (protocolStats,
+                                BYTES_READ_RATE,
+                                numerator,
+                                denominator,
+                                1000000000);
 
         numerator = (protocolStats.getLongStat(N_BYTES_WRITTEN) == null) ?
                 0 : protocolStats.getLongStat(N_BYTES_WRITTEN).get();
         denominator = (protocolStats.getLongStat(N_WRITE_NANOS) == null) ?
-           0 : protocolStats.getLongStat(N_WRITE_NANOS).get();
+                0 : protocolStats.getLongStat(N_WRITE_NANOS).get();
         @SuppressWarnings("unused")
         IntegralLongAvgStat bytesWriteRate =
-            new IntegralLongAvgStat
-                (protocolStats,
-                 BYTES_WRITE_RATE,
-                 numerator,
-                 denominator,
-                 1000000000);
+                new IntegralLongAvgStat
+                        (protocolStats,
+                                BYTES_WRITE_RATE,
+                                numerator,
+                                denominator,
+                                1000000000);
     }
 
     /* Feeder Stats. */
@@ -370,8 +304,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public SortedMap<String, Long> getReplicaDelayMap() {
         final LongDiffMapStat stat =
-            (LongDiffMapStat) feederManagerStats.getStat(REPLICA_DELAY_MAP);
-        if (stat == null) {
+                (LongDiffMapStat) feederManagerStats.getStat(REPLICA_DELAY_MAP);
+        if(stat == null) {
             return emptySortedMap();
         }
         return stat.getMap();
@@ -386,8 +320,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public SortedMap<String, Long> getReplicaLastCommitTimestampMap() {
         final AtomicLongMapStat stat = (AtomicLongMapStat)
-            feederManagerStats.getStat(REPLICA_LAST_COMMIT_TIMESTAMP_MAP);
-        if (stat == null) {
+                feederManagerStats.getStat(REPLICA_LAST_COMMIT_TIMESTAMP_MAP);
+        if(stat == null) {
             return emptySortedMap();
         }
         return stat.getMap();
@@ -402,8 +336,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public SortedMap<String, Long> getReplicaLastCommitVLSNMap() {
         final AtomicLongMapStat stat = (AtomicLongMapStat)
-            feederManagerStats.getStat(REPLICA_LAST_COMMIT_VLSN_MAP);
-        if (stat == null) {
+                feederManagerStats.getStat(REPLICA_LAST_COMMIT_VLSN_MAP);
+        if(stat == null) {
             return emptySortedMap();
         }
         return stat.getMap();
@@ -418,8 +352,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public SortedMap<String, Long> getReplicaVLSNLagMap() {
         final LongDiffMapStat stat =
-            (LongDiffMapStat) feederManagerStats.getStat(REPLICA_VLSN_LAG_MAP);
-        if (stat == null) {
+                (LongDiffMapStat) feederManagerStats.getStat(REPLICA_VLSN_LAG_MAP);
+        if(stat == null) {
             return emptySortedMap();
         }
         return stat.getMap();
@@ -434,8 +368,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public SortedMap<String, Long> getReplicaVLSNRateMap() {
         final LongAvgRateMapStat stat = (LongAvgRateMapStat)
-            feederManagerStats.getStat(REPLICA_VLSN_RATE_MAP);
-        if (stat == null) {
+                feederManagerStats.getStat(REPLICA_VLSN_RATE_MAP);
+        if(stat == null) {
             return emptySortedMap();
         }
         return stat.getMap();
@@ -450,8 +384,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getNTxnsAcked() {
         return (feederTxnStats == null) ?
-               VALUE_UNAVAILABLE :
-               feederTxnStats.getAtomicLong(TXNS_ACKED);
+                VALUE_UNAVAILABLE :
+                feederTxnStats.getAtomicLong(TXNS_ACKED);
     }
 
     /**
@@ -462,8 +396,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getNTxnsNotAcked() {
         return (feederTxnStats == null) ?
-               VALUE_UNAVAILABLE :
-               feederTxnStats.getAtomicLong(TXNS_NOT_ACKED);
+                VALUE_UNAVAILABLE :
+                feederTxnStats.getAtomicLong(TXNS_NOT_ACKED);
     }
 
     /**
@@ -500,8 +434,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getLastCommitVLSN() {
         return (feederTxnStats == null) ?
-            VALUE_UNAVAILABLE :
-            feederTxnStats.getAtomicLong(LAST_COMMIT_VLSN);
+                VALUE_UNAVAILABLE :
+                feederTxnStats.getAtomicLong(LAST_COMMIT_VLSN);
     }
 
     /**
@@ -512,8 +446,8 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getLastCommitTimestamp() {
         return (feederTxnStats == null) ?
-            VALUE_UNAVAILABLE :
-            feederTxnStats.getAtomicLong(LAST_COMMIT_TIMESTAMP);
+                VALUE_UNAVAILABLE :
+                feederTxnStats.getAtomicLong(LAST_COMMIT_TIMESTAMP);
     }
 
     /**
@@ -524,11 +458,11 @@ public class ReplicatedEnvironmentStats implements Serializable {
      * @since 6.3.0
      */
     public long getVLSNRate() {
-        if (feederTxnStats == null) {
+        if(feederTxnStats == null) {
             return VALUE_UNAVAILABLE;
         }
         final LongAvgRateStat stat =
-            (LongAvgRateStat) feederTxnStats.getStat(VLSN_RATE);
+                (LongAvgRateStat) feederTxnStats.getStat(VLSN_RATE);
         return (stat != null) ? stat.get() : 0;
     }
 
@@ -629,9 +563,9 @@ public class ReplicatedEnvironmentStats implements Serializable {
      *
      * @since 5.0.76
      */
-     public long getNReplayGroupCommitMaxExceeded() {
-         return replayStats.getLong(N_GROUP_COMMIT_MAX_EXCEEDED);
-     }
+    public long getNReplayGroupCommitMaxExceeded() {
+        return replayStats.getLong(N_GROUP_COMMIT_MAX_EXCEEDED);
+    }
 
     /**
      * The number of replay transaction commits that were part of a group
@@ -639,18 +573,18 @@ public class ReplicatedEnvironmentStats implements Serializable {
      *
      * @since 5.0.76
      */
-     public long getNReplayGroupCommitTxns() {
-         return replayStats.getLong(N_GROUP_COMMIT_TXNS);
-     }
+    public long getNReplayGroupCommitTxns() {
+        return replayStats.getLong(N_GROUP_COMMIT_TXNS);
+    }
 
-     /**
-      * The number of group commit operations.
-      *
-      * @since 5.0.76
-      */
-     public long getNReplayGroupCommits() {
-         return replayStats.getLong(N_GROUP_COMMITS);
-     }
+    /**
+     * The number of group commit operations.
+     *
+     * @since 5.0.76
+     */
+    public long getNReplayGroupCommits() {
+        return replayStats.getLong(N_GROUP_COMMITS);
+    }
 
     /**
      * The minimum time taken to replay a transaction commit operation.
@@ -674,15 +608,14 @@ public class ReplicatedEnvironmentStats implements Serializable {
     }
 
     /**
-     * @hidden
-     * TODO: Make visible after experimenting with this new stat
-     *
+     * @hidden TODO: Make visible after experimenting with this new stat
+     * <p>
      * The sum of time periods, measured in milliseconds, between when update
      * operations commit on the master and then subsequently commit on the
      * replica.  Divide this value by the total number of commit operations,
      * available by calling {@link #getNReplayCommits}, to find the average
      * commit lag for a single operation.
-     *
+     * <p>
      * <p>Note that each lag is computed on the replica by comparing the time
      * of the master commit, as measured by the master, and time on the replica
      * when it commits locally.  As a result, the return value will be affected
@@ -693,12 +626,11 @@ public class ReplicatedEnvironmentStats implements Serializable {
     }
 
     /**
-     * @hidden
-     * TODO: Make visible after experimenting with this new stat
-     *
+     * @hidden TODO: Make visible after experimenting with this new stat
+     * <p>
      * The time in milliseconds between when the latest update operation
      * committed on the master and then subsequently committed on the replica.
-     *
+     * <p>
      * <p>Note that the lag is computed on the replica by comparing the time of
      * the master commit, as measured by the master, and time on the replica
      * when it commits locally.  As a result, the return value will be affected
@@ -747,12 +679,11 @@ public class ReplicatedEnvironmentStats implements Serializable {
     /**
      * The number of Replication Stream messages that were written as part
      * of a message batch instead of being written  individually.
-     *
+     * <p>
      * It represents a subset of the messages returned by
      * {@link #getNProtocolMessagesWritten()}
      *
      * @see #getNProtocolMessageBatches
-     *
      * @since 6.2.7
      */
     public long getNProtocolMessagesBatched() {
@@ -763,7 +694,6 @@ public class ReplicatedEnvironmentStats implements Serializable {
      * The number of Replication Stream message batches written to the network.
      *
      * @see #getNProtocolMessagesBatched
-     *
      * @since 6.2.7
      */
     public long getNProtocolMessageBatches() {
@@ -814,7 +744,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getProtocolMessageReadRate() {
         IntegralLongAvgStat rstat =
-            protocolStats.getIntegralLongAvgStat(MESSAGE_READ_RATE);
+                protocolStats.getIntegralLongAvgStat(MESSAGE_READ_RATE);
         return (rstat != null) ? rstat.get().longValue() : 0;
     }
 
@@ -828,7 +758,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getProtocolMessageWriteRate() {
         IntegralLongAvgStat rstat =
-            protocolStats.getIntegralLongAvgStat(MESSAGE_WRITE_RATE);
+                protocolStats.getIntegralLongAvgStat(MESSAGE_WRITE_RATE);
         return (rstat != null) ? rstat.get().longValue() : 0;
     }
 
@@ -842,7 +772,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getProtocolBytesReadRate() {
         IntegralLongAvgStat rstat =
-            protocolStats.getIntegralLongAvgStat(BYTES_READ_RATE);
+                protocolStats.getIntegralLongAvgStat(BYTES_READ_RATE);
         return (rstat != null) ? rstat.get().longValue() : 0;
     }
 
@@ -856,7 +786,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
      */
     public long getProtocolBytesWriteRate() {
         IntegralLongAvgStat rstat =
-            protocolStats.getIntegralLongAvgStat(BYTES_WRITE_RATE);
+                protocolStats.getIntegralLongAvgStat(BYTES_WRITE_RATE);
         return (rstat != null) ? rstat.get().longValue() : 0;
     }
 
@@ -873,7 +803,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
 
     /**
      * The number of times a Replica held back a
-     * {@link Environment#beginTransaction(Transaction,TransactionConfig)}
+     * {@link Environment#beginTransaction(Transaction, TransactionConfig)}
      * operation to satisfy the {@link TimeConsistencyPolicy}.
      */
     public long getTrackerLagConsistencyWaits() {
@@ -882,7 +812,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
 
     /**
      * The total time (in msec) for which a Replica held back a
-     * {@link Environment#beginTransaction(Transaction,TransactionConfig)}
+     * {@link Environment#beginTransaction(Transaction, TransactionConfig)}
      * operation to satisfy the {@link TimeConsistencyPolicy}.
      */
     public long getTrackerLagConsistencyWaitMs() {
@@ -891,7 +821,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
 
     /**
      * The number of times a Replica held back a
-     * {@link Environment#beginTransaction(Transaction,TransactionConfig)}
+     * {@link Environment#beginTransaction(Transaction, TransactionConfig)}
      * operation to satisfy the {@link CommitPointConsistencyPolicy}.
      */
     public long getTrackerVLSNConsistencyWaits() {
@@ -900,7 +830,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
 
     /**
      * The total time (in msec) for which a Replica held back a
-     * {@link Environment#beginTransaction(Transaction,TransactionConfig)}
+     * {@link Environment#beginTransaction(Transaction, TransactionConfig)}
      * operation to satisfy the {@link CommitPointConsistencyPolicy}.
      */
     public long getTrackerVLSNConsistencyWaitMs() {
@@ -914,7 +844,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             sb.append(group.toString());
         }
 
@@ -924,7 +854,7 @@ public class ReplicatedEnvironmentStats implements Serializable {
     public String toStringVerbose() {
         StringBuilder sb = new StringBuilder();
 
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             sb.append(group.toStringVerbose());
         }
 
@@ -934,9 +864,9 @@ public class ReplicatedEnvironmentStats implements Serializable {
     public Map<String, String> getTips() {
         /* Add FeederManager stats definition. */
 
-        for (StatGroup group : getStatGroups()) {
+        for(StatGroup group : getStatGroups()) {
             tipsMap.put(group.getName(), group.getDescription());
-            for (StatDefinition def : group.getStats().keySet()) {
+            for(StatDefinition def : group.getStats().keySet()) {
                 tipsMap.put(def.getName(), def.getDescription());
             }
         }

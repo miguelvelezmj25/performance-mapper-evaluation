@@ -21,7 +21,7 @@ package berkeley.com.sleepycat.je.utilint;
 @SuppressWarnings("serial")
 public class RelatchRequiredException extends Exception {
     public static RelatchRequiredException relatchRequiredException =
-        new RelatchRequiredException();
+            new RelatchRequiredException();
 
     private RelatchRequiredException() {
     }

@@ -26,11 +26,11 @@ import java.lang.reflect.Method;
  */
 class CompressedOopsDetector {
     private static final String HOTSPOT_BEAN_CLASS =
-        "com.sun.management.HotSpotDiagnosticMXBean";
+            "com.sun.management.HotSpotDiagnosticMXBean";
     private static final String HOTSPOT_BEAN_NAME =
-        "com.sun.management:type=HotSpotDiagnostic";
+            "com.sun.management:type=HotSpotDiagnostic";
     private static final String VMOPTION_CLASS =
-        "com.sun.management.VMOption";
+            "com.sun.management.VMOption";
 
     /**
      * For IBM J9, it appears that the best way to tell if compressed OOPs are
@@ -38,7 +38,7 @@ class CompressedOopsDetector {
      * contains this value.
      */
     private static final String IBM_VM_INFO_COMPRESSED_OOPS_SUBSTRING =
-        "Compressed References";
+            "Compressed References";
 
     /**
      * @return TRUE or FALSE if the status of compressed oops is known, or null
@@ -47,13 +47,13 @@ class CompressedOopsDetector {
     static Boolean isEnabled() {
         try {
             return isEnabledInternal();
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             final String vendor = System.getProperty("java.vendor");
-            if ((vendor != null) && vendor.startsWith("IBM")) {
+            if((vendor != null) && vendor.startsWith("IBM")) {
                 final String info = System.getProperty("java.vm.info");
-                if (info != null) {
+                if(info != null) {
                     return info.indexOf(
-                        IBM_VM_INFO_COMPRESSED_OOPS_SUBSTRING) != -1;
+                            IBM_VM_INFO_COMPRESSED_OOPS_SUBSTRING) != -1;
                 }
             }
             return null;
@@ -62,13 +62,13 @@ class CompressedOopsDetector {
 
     /* Throws exceptions rather than returning null. */
     private static Boolean isEnabledInternal()
-        throws Throwable {
+            throws Throwable {
 
         final Class<?> hotspotMBeanClass = Class.forName(HOTSPOT_BEAN_CLASS);
         final Object hotspotMBean =
-            ManagementFactory.newPlatformMXBeanProxy(
-                ManagementFactory.getPlatformMBeanServer(),
-                HOTSPOT_BEAN_NAME, hotspotMBeanClass);
+                ManagementFactory.newPlatformMXBeanProxy(
+                        ManagementFactory.getPlatformMBeanServer(),
+                        HOTSPOT_BEAN_NAME, hotspotMBeanClass);
 
         /*
          * vmOption is an instance of com.sun.management.VMOption.
@@ -76,9 +76,9 @@ class CompressedOopsDetector {
          * VMOption, which has a "String getValue()" method.
          */
         final Method getVMOption =
-            hotspotMBeanClass.getMethod("getVMOption", String.class);
+                hotspotMBeanClass.getMethod("getVMOption", String.class);
         final Object vmOption =
-            getVMOption.invoke(hotspotMBean, "UseCompressedOops");
+                getVMOption.invoke(hotspotMBean, "UseCompressedOops");
         final Class<?> vmOptionClass = Class.forName(VMOPTION_CLASS);
         final Method getValue = vmOptionClass.getMethod("getValue");
         final String value = (String) getValue.invoke(vmOption);
@@ -89,7 +89,7 @@ class CompressedOopsDetector {
     public static void main(final String[] args) {
         try {
             System.out.println("isEnabled(): " + isEnabled());
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             e.printStackTrace();
         }
     }

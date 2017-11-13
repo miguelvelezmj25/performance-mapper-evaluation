@@ -23,16 +23,6 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  */
 public class SubscriptionStat {
 
-    /*
-     * VLSN from which feeder agrees to stream log entries, it is returned from
-     * the feeder and can be equal to or earlier than the VLSN requested by the
-     * client, which is specified in subscription configuration.
-     */
-    private VLSN startVLSN;
-
-    /* the last VLSN that has been processed */
-    private VLSN highVLSN;
-
     /* used by main thread: # of retries to insert msgs into input queue */
     private final LongStat nReplayQueueOverflow;
     /* used by main thread: # of msgs received from feeder */
@@ -46,6 +36,14 @@ public class SubscriptionStat {
     /* used by input thread: # of txn aborted and committed */
     private final LongStat nTxnAborted;
     private final LongStat nTxnCommitted;
+    /*
+     * VLSN from which feeder agrees to stream log entries, it is returned from
+     * the feeder and can be equal to or earlier than the VLSN requested by the
+     * client, which is specified in subscription configuration.
+     */
+    private VLSN startVLSN;
+    /* the last VLSN that has been processed */
+    private VLSN highVLSN;
 
     SubscriptionStat() {
 
@@ -53,7 +51,7 @@ public class SubscriptionStat {
 
         /* initialize statistics */
         StatGroup stats = new StatGroup("subscription",
-                                        "subscription " + "statistics");
+                "subscription " + "statistics");
         nReplayQueueOverflow = new LongStat(stats,
                 SubscriptionStatDefinition.SUB_N_REPLAY_QUEUE_OVERFLOW, 0L);
         nMsgReceived = new LongStat(stats,
@@ -69,7 +67,7 @@ public class SubscriptionStat {
                 SubscriptionStatDefinition.SUB_TXN_ABORTED, 0L);
         nTxnCommitted = new LongStat(stats,
                 SubscriptionStatDefinition.SUB_TXN_COMMITTED, 0L);
-        
+
     }
 
     /*--------------*/
@@ -78,11 +76,11 @@ public class SubscriptionStat {
     public synchronized LongStat getNumReplayQueueOverflow() {
         return nReplayQueueOverflow;
     }
-    
+
     public synchronized LongStat getMaxPendingInput() {
         return maxPendingInput;
     }
-    
+
     public synchronized LongStat getNumMsgResponded() {
         return nMsgResponded;
     }
@@ -107,15 +105,15 @@ public class SubscriptionStat {
         return startVLSN;
     }
 
-    public synchronized VLSN getHighVLSN() {
-        return highVLSN;
-    }
-
     /*--------------*/
     /*-  Setters   -*/
     /*--------------*/
     public synchronized void setStartVLSN(VLSN vlsn) {
         startVLSN = vlsn;
+    }
+
+    public synchronized VLSN getHighVLSN() {
+        return highVLSN;
     }
 
     public synchronized void setHighVLSN(VLSN vlsn) {

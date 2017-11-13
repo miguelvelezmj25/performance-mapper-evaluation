@@ -12,9 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -25,11 +22,14 @@ import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
+
 /**
  * The VLSNReader returns picks out replicated log entries from the log. It
  * works in tandem with the VLSNIndex, using vlsn->lsn mappings if those are
  * available, and otherwise scanning the log for replicated entries.
- *
+ * <p>
  * A VLSNReader is not thread safe, and can only be used serially.
  */
 abstract class VLSNReader extends FileReader {
@@ -59,7 +59,7 @@ abstract class VLSNReader extends FileReader {
     /* stats */
     long nScanned;    // Num log entries seen by the reader
     long nReposition; // Number of times the reader has used a vlsn->lsn
-                      // mapping and have reset the read window
+    // mapping and have reset the read window
 
     VLSNReader(EnvironmentImpl envImpl,
                VLSNIndex vlsnIndex,
@@ -68,64 +68,67 @@ abstract class VLSNReader extends FileReader {
                int readBufferSize,
                NameIdPair nameIdPair,
                long finishLsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * If we go backwards, endOfFileLsn and startLsn must not be null.
          * Make them the same, so we always start at the same very end.
          */
         super(envImpl,
-              readBufferSize,
-              forward,
-              startLsn,
-              null,            // singleFileNumber
-              startLsn,        // endOfFileLsn
-              finishLsn); 
+                readBufferSize,
+                forward,
+                startLsn,
+                null,            // singleFileNumber
+                startLsn,        // endOfFileLsn
+                finishLsn);
 
         this.vlsnIndex = vlsnIndex;
         currentVLSN = VLSN.NULL_VLSN;
     }
 
     void setPosition(long startLsn)
-        throws ChecksumException, FileNotFoundException, DatabaseException {
+            throws ChecksumException, FileNotFoundException, DatabaseException {
 
-        if (startLsn == DbLsn.NULL_LSN) {
+        if(startLsn == DbLsn.NULL_LSN) {
             return;
         }
 
         /*
          * An assertion: a reposition should never make the reader lose ground.
          */
-        if (forward) {
-            if (DbLsn.compareTo(getLastLsn(), startLsn) > 0) {
+        if(forward) {
+            if(DbLsn.compareTo(getLastLsn(), startLsn) > 0) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Feeder forward scanning should not be repositioned to " +
-                     " a position earlier than the current position. Current" +
-                     " lsn = " + DbLsn.getNoFormatString(getLastLsn()) + 
-                     " reposition = " + DbLsn.getNoFormatString(startLsn));
+                        ("Feeder forward scanning should not be repositioned to " +
+                                " a position earlier than the current position. Current" +
+                                " lsn = " + DbLsn.getNoFormatString(getLastLsn()) +
+                                " reposition = " + DbLsn.getNoFormatString(startLsn));
             }
-        } else {
-            if (DbLsn.compareTo(getLastLsn(), startLsn) < 0) {
+        }
+        else {
+            if(DbLsn.compareTo(getLastLsn(), startLsn) < 0) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Feeder backward scanning should not be repositioned to " +
-                     " a position later than the current position. Current" +
-                     " lsn = " + DbLsn.getNoFormatString(getLastLsn()) + 
-                     " reposition = " + DbLsn.getNoFormatString(startLsn));
+                        ("Feeder backward scanning should not be repositioned to " +
+                                " a position later than the current position. Current" +
+                                " lsn = " + DbLsn.getNoFormatString(getLastLsn()) +
+                                " reposition = " + DbLsn.getNoFormatString(startLsn));
             }
         }
 
         long fileNum = DbLsn.getFileNumber(startLsn);
         long offset = DbLsn.getFileOffset(startLsn);
 
-        if (window.containsLsn(fileNum, offset)) {
+        if(window.containsLsn(fileNum, offset)) {
             window.positionBuffer(offset);
-        } else {
+        }
+        else {
             window.slideAndFill(fileNum, offset, offset, forward);
         }
 
-        if (forward) {
+        if(forward) {
             nextEntryOffset = offset;
-        } else {
+        }
+        else {
             currentEntryPrevOffset = offset;
         }
         nReposition++;
@@ -139,10 +142,10 @@ abstract class VLSNReader extends FileReader {
         ByteBuffer buffer = entryBuffer.slice();
         buffer.limit(currentEntryHeader.getItemSize());
         currentFeedRecord =
-            new OutputWireRecord(envImpl, currentEntryHeader, buffer);
+                new OutputWireRecord(envImpl, currentEntryHeader, buffer);
 
         entryBuffer.position(entryBuffer.position() +
-                             currentEntryHeader.getItemSize());
+                currentEntryHeader.getItemSize());
         return true;
     }
 

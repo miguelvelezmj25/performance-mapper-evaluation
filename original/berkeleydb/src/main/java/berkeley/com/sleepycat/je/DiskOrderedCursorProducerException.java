@@ -21,12 +21,13 @@ package berkeley.com.sleepycat.je;
  * @since 5.0
  */
 public class DiskOrderedCursorProducerException
-    extends OperationFailureException {
+        extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public DiskOrderedCursorProducerException(String message, Throwable cause) {
@@ -35,6 +36,7 @@ public class DiskOrderedCursorProducerException
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

@@ -13,21 +13,6 @@
 
 package berkeley.com.sleepycat.je.incomp;
 
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.GROUP_DESC;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.GROUP_NAME;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_CURSORS_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_DBCLOSED_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_NON_EMPTY_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_PROCESSED_BINS;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_QUEUE_SIZE;
-import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.INCOMP_SPLIT_BINS;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.StatsConfig;
@@ -38,24 +23,18 @@ import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.DbTree;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.latch.LatchSupport;
-import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.BINReference;
-import berkeley.com.sleepycat.je.tree.CursorsExistException;
-import berkeley.com.sleepycat.je.tree.IN;
-import berkeley.com.sleepycat.je.tree.NodeNotEmptyException;
-import berkeley.com.sleepycat.je.tree.Tree;
-import berkeley.com.sleepycat.je.utilint.DaemonThread;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
+import berkeley.com.sleepycat.je.tree.*;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.*;
+
+import static berkeley.com.sleepycat.je.incomp.INCompStatDefinition.*;
 
 /**
  * JE compression consists of removing BIN slots for deleted and expired
  * records, and pruning empty IN/BINs from the tree which is also called a
  * reverse split.
- *
+ * <p>
  * One of the reasons compression is treated specially is that slot compression
  * cannot be performed inline as part of a delete operation.  When we delete an
  * LN, a cursor is always present on the LN.  The API dictates that the cursor
@@ -68,15 +47,15 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * operation latency.  For all these reasons, slot compression is performed
  * after the delete operation is complete and committed, and not in the thread
  * performing the operation or transaction commit.
- *
+ * <p>
  * Compression is of two types:
- *
+ * <p>
  * + "Queued compression" is carried out by the INCompressor daemon thread.
- *    Both slot compression and pruning are performed.
- *
+ * Both slot compression and pruning are performed.
+ * <p>
  * + "Lazy compression" is carried out opportunistically at various times when
- *    compression is beneficial.
- *
+ * compression is beneficial.
+ * <p>
  * The use of BIN-deltas has a big impact on slot compression because dirty
  * slots cannot be compressed until we know that a full BIN will be logged
  * next. If a dirty slot were compressed prior to logging a BIN-delta, the
@@ -85,47 +64,47 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * delta would next be logged. However, there are times when we do compress
  * dirty slots, and in that case the "prohibit next logged delta" flag is set
  * on the BIN.
- *
+ * <p>
  * Queued compression prior to logging a BIN-delta is also wasteful because the
  * dequeued entry cannot be processed.  Therefore, lazy compression is relied
  * on when a BIN-delta will next be logged.  Because, BIN-deltas are logged
  * more often than BINs, lazy compression is used for slot compression more
  * often than queued compression.
- *
+ * <p>
  * Lazy compression is used for compressing expired slots, in addition to
  * deleted slots. This is done opportunistically as described above. Expired
  * slots are normally not dirty, so they can often be compressed even when a
  * BIN will be logged next as a BIN-delta. The same is true of deleted slots
  * that are not dirty, although these occur infrequently.
- *
+ * <p>
  * Since we don't lazy-compress BIN-deltas, how can we prevent their expired
  * slots from using space for long time periods? Currently the expired space
  * will be reclaimed only when the delta is mutated to a full BIN and then
  * compressed, including when the full BIN is cleaned. This is the same as
  * reclaiming space for deleted slots, so this is acceptable for now at least.
- *
+ * <p>
  * You may wonder, since lazy compression is necessary, why use queued
  * compression for slot compression at all? Queued compression is useful for
  * the following reasons:
- *
+ * <p>
  * + If a BIN-delta will not be logged next, queued compression will cause the
- *   compression to occur sooner than with lazy compression.
- *
+ * compression to occur sooner than with lazy compression.
+ * <p>
  * + When a cursor is on a BIN or a deleted entry is locked during lazy
- *   compression, we cannot compress the slot. Queuing allows it to be
- *   compressed sooner than if we waited for the next lazy compression.
- *
+ * compression, we cannot compress the slot. Queuing allows it to be
+ * compressed sooner than if we waited for the next lazy compression.
+ * <p>
  * + The code to process a queue entry must do slot compression anyway, even if
- *   we only want to prune the BIN.  We have to account for the case where all
- *   slots are deleted but not yet compressed.  So the code to process the
- *   queue entry could not be simplified even if we were to decide not to queue
- *   entries for slot compression. 
+ * we only want to prune the BIN.  We have to account for the case where all
+ * slots are deleted but not yet compressed.  So the code to process the
+ * queue entry could not be simplified even if we were to decide not to queue
+ * entries for slot compression.
  */
 public class INCompressor extends DaemonThread {
     private static final boolean DEBUG = false;
 
     private final long lockTimeout;
-
+    private final Object binRefQueueSync;
     /* stats */
     private StatGroup stats;
     private LongStat splitBins;
@@ -134,14 +113,12 @@ public class INCompressor extends DaemonThread {
     private LongStat nonEmptyBins;
     private LongStat processedBins;
     private LongStat compQueueSize;
-
     /* per-run stats */
     private int splitBinsThisRun = 0;
     private int dbClosedBinsThisRun = 0;
     private int cursorsBinsThisRun = 0;
     private int nonEmptyBinsThisRun = 0;
     private int processedBinsThisRun = 0;
-
     /*
      * The following stats are not kept per run, because they're set by
      * multiple threads doing lazy compression. They are debugging aids; it
@@ -149,21 +126,18 @@ public class INCompressor extends DaemonThread {
      */
     private int lazyProcessed = 0;
     private int wokenUp = 0;
-
     /*
      * Store logical references to BINs that have deleted entries and are
      * candidates for compaction.
      */
     private Map<Long, BINReference> binRefQueue;
-    private final Object binRefQueueSync;
-
     /* For unit tests */
     private TestHook beforeFlushTrackerHook; // [#15528]
 
     public INCompressor(EnvironmentImpl env, long waitTime, String name) {
         super(waitTime, name, env);
         lockTimeout = env.getConfigManager().getDuration
-            (EnvironmentParams.COMPRESSOR_LOCK_TIMEOUT);
+                (EnvironmentParams.COMPRESSOR_LOCK_TIMEOUT);
         binRefQueue = new HashMap<>();
         binRefQueueSync = new Object();
  
@@ -183,12 +157,12 @@ public class INCompressor extends DaemonThread {
     }
 
     public synchronized void verifyCursors()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Environment may have been closed.  If so, then our job here is done.
          */
-        if (envImpl.isClosed()) {
+        if(envImpl.isClosed()) {
             return;
         }
 
@@ -197,7 +171,7 @@ public class INCompressor extends DaemonThread {
          * hold a latch while verify takes locks.
          */
         final List<BINReference> queueSnapshot;
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             queueSnapshot = new ArrayList<>(binRefQueue.values());
         }
 
@@ -210,12 +184,12 @@ public class INCompressor extends DaemonThread {
         final Map<DatabaseId, DatabaseImpl> dbCache = new HashMap<>();
 
         try {
-            for (final BINReference binRef : queueSnapshot) {
+            for(final BINReference binRef : queueSnapshot) {
                 final DatabaseImpl db = dbTree.getDb(
-                    binRef.getDatabaseId(), lockTimeout, dbCache);
+                        binRef.getDatabaseId(), lockTimeout, dbCache);
 
                 final BIN bin = searchForBIN(db, binRef);
-                if (bin != null) {
+                if(bin != null) {
                     bin.verifyCursors();
                     bin.releaseLatch();
                 }
@@ -226,7 +200,7 @@ public class INCompressor extends DaemonThread {
     }
 
     public int getBinRefQueueSize() {
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             return binRefQueue.size();
         }
     }
@@ -242,7 +216,7 @@ public class INCompressor extends DaemonThread {
      * Adds the BIN to the queue if the BIN is not already in the queue.
      */
     public void addBinToQueue(BIN bin) {
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             addBinToQueueAlreadyLatched(bin);
         }
     }
@@ -252,7 +226,7 @@ public class INCompressor extends DaemonThread {
      * queue.
      */
     private void addBinRefToQueue(BINReference binRef) {
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             addBinRefToQueueAlreadyLatched(binRef);
         }
     }
@@ -262,8 +236,8 @@ public class INCompressor extends DaemonThread {
      * this to avoid latching for each add.
      */
     public void addMultipleBinRefsToQueue(Collection<BINReference> binRefs) {
-        synchronized (binRefQueueSync) {
-            for (final BINReference binRef : binRefs) {
+        synchronized(binRefQueueSync) {
+            for(final BINReference binRef : binRefs) {
                 addBinRefToQueueAlreadyLatched(binRef);
             }
         }
@@ -276,7 +250,7 @@ public class INCompressor extends DaemonThread {
 
         final Long node = binRef.getNodeId();
 
-        if (binRefQueue.containsKey(node)) {
+        if(binRefQueue.containsKey(node)) {
             return;
         }
 
@@ -290,7 +264,7 @@ public class INCompressor extends DaemonThread {
 
         final Long node = bin.getNodeId();
 
-        if (binRefQueue.containsKey(node)) {
+        if(binRefQueue.containsKey(node)) {
             return;
         }
 
@@ -298,7 +272,7 @@ public class INCompressor extends DaemonThread {
     }
 
     public boolean exists(long nodeId) {
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             return binRefQueue.containsKey(nodeId);
         }
     }
@@ -309,12 +283,12 @@ public class INCompressor extends DaemonThread {
     public StatGroup loadStats(StatsConfig config) {
         compQueueSize.set((long) getBinRefQueueSize());
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("lazyProcessed = " + lazyProcessed);
             System.out.println("wokenUp=" + wokenUp);
         }
 
-        if (config.getClear()) {
+        if(config.getClear()) {
             lazyProcessed = 0;
             wokenUp = 0;
         }
@@ -328,14 +302,14 @@ public class INCompressor extends DaemonThread {
     @Override
     protected long nDeadlockRetries() {
         return envImpl.getConfigManager().getInt
-            (EnvironmentParams.COMPRESSOR_RETRY);
+                (EnvironmentParams.COMPRESSOR_RETRY);
     }
 
     @Override
     public synchronized void onWakeup()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (envImpl.isClosing()) {
+        if(envImpl.isClosing()) {
             return;
         }
         wokenUp++;
@@ -347,7 +321,7 @@ public class INCompressor extends DaemonThread {
      * thread or programatically.
      */
     public synchronized void doCompress()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Make a snapshot of the current work queue so the compressor thread
@@ -357,9 +331,9 @@ public class INCompressor extends DaemonThread {
          */
         final Map<Long, BINReference> queueSnapshot;
         final int binQueueSize;
-        synchronized (binRefQueueSync) {
+        synchronized(binRefQueueSync) {
             binQueueSize = binRefQueue.size();
-            if (binQueueSize <= 0) {
+            if(binQueueSize <= 0) {
                 return;
             }
             queueSnapshot = binRefQueue;
@@ -369,9 +343,9 @@ public class INCompressor extends DaemonThread {
         /* There is work to be done. */
         resetPerRunCounters();
         LoggerUtils.fine(logger, envImpl,
-                         "InCompress.doCompress called, queue size: " +
-                         binQueueSize);
-        if (LatchSupport.TRACK_LATCHES) {
+                "InCompress.doCompress called, queue size: " +
+                        binQueueSize);
+        if(LatchSupport.TRACK_LATCHES) {
             LatchSupport.expectBtreeLatchesHeld(0);
         }
 
@@ -384,7 +358,7 @@ public class INCompressor extends DaemonThread {
          * lost info.
          */
         final LocalUtilizationTracker localTracker =
-            new LocalUtilizationTracker(envImpl);
+                new LocalUtilizationTracker(envImpl);
 
         /* Use local caching to reduce DbTree.getDb overhead. */
         final Map<DatabaseId, DatabaseImpl> dbCache = new HashMap<>();
@@ -393,13 +367,13 @@ public class INCompressor extends DaemonThread {
         final BINSearch binSearch = new BINSearch();
 
         try {
-            for (final BINReference binRef : queueSnapshot.values()) {
+            for(final BINReference binRef : queueSnapshot.values()) {
 
-                if (envImpl.isClosed()) {
+                if(envImpl.isClosed()) {
                     return;
                 }
 
-                if (!findDBAndBIN(binSearch, binRef, dbTree, dbCache)) {
+                if(!findDBAndBIN(binSearch, binRef, dbTree, dbCache)) {
 
                     /*
                      * Either the db is closed, or the BIN doesn't exist.
@@ -423,7 +397,7 @@ public class INCompressor extends DaemonThread {
 
         } finally {
             dbTree.releaseDbs(dbCache);
-            if (LatchSupport.TRACK_LATCHES) {
+            if(LatchSupport.TRACK_LATCHES) {
                 LatchSupport.expectBtreeLatchesHeld(0);
             }
             accumulatePerRunCounters();
@@ -434,20 +408,20 @@ public class INCompressor extends DaemonThread {
      * Compresses a single BIN and then deletes the BIN if it is empty.
      *
      * @param bin is latched when this method is called, and unlatched when it
-     * returns.
+     *            returns.
      */
     private void compressBin(
-        DatabaseImpl db,
-        BIN bin,
-        BINReference binRef,
-        LocalUtilizationTracker localTracker) {
+            DatabaseImpl db,
+            BIN bin,
+            BINReference binRef,
+            LocalUtilizationTracker localTracker) {
 
         /* Safe to get identifier keys; bin is latched. */
         final byte[] idKey = bin.getIdentifierKey();
         boolean empty = (bin.getNEntries() == 0);
 
         try {
-            if (!empty) {
+            if(!empty) {
 
                 /*
                  * Deltas in cache cannot be compressed.
@@ -458,12 +432,12 @@ public class INCompressor extends DaemonThread {
                  * logging a full BIN.  Clean-up for such queue entries is
                  * here.
                 */
-                if (bin.isBINDelta()) {
+                if(bin.isBINDelta()) {
                     return;
                 }
 
                 /* If there are cursors on the BIN, requeue and try later. */
-                if (bin.nCursors() > 0) {
+                if(bin.nCursors() > 0) {
                     addBinRefToQueue(binRef);
                     cursorsBinsThisRun++;
                     return;
@@ -473,9 +447,9 @@ public class INCompressor extends DaemonThread {
                  * If a delta should be logged, do not compress dirty slots,
                  * since this would prevent logging a delta.
                  */
-                if (!bin.compress(
-                    !bin.shouldLogDelta() /*compressDirtySlots*/,
-                    localTracker)) {
+                if(!bin.compress(
+                        !bin.shouldLogDelta() /*compressDirtySlots*/,
+                        localTracker)) {
 
                     /* If compression is incomplete, requeue and try later. */
                     addBinRefToQueue(binRef);
@@ -490,7 +464,7 @@ public class INCompressor extends DaemonThread {
         }
 
         /* After releasing the latch, prune the BIN if it is empty. */
-        if (empty) {
+        if(empty) {
             pruneBIN(db, binRef, idKey);
         }
     }
@@ -507,15 +481,15 @@ public class INCompressor extends DaemonThread {
             final Tree tree = dbImpl.getTree();
             tree.delete(idKey);
             processedBinsThisRun++;
-        } catch (NodeNotEmptyException NNEE) {
+        } catch(NodeNotEmptyException NNEE) {
 
             /*
              * Something was added to the node since the point when the
              * deletion occurred; we can't prune, and we can throw away this
              * BINReference.
              */
-             nonEmptyBinsThisRun++;
-        } catch (CursorsExistException e) {
+            nonEmptyBinsThisRun++;
+        } catch(CursorsExistException e) {
             /* If there are cursors in the way of the delete, retry later. */
             addBinRefToQueue(binRef);
             cursorsBinsThisRun++;
@@ -526,7 +500,6 @@ public class INCompressor extends DaemonThread {
      * Search the tree for the BIN that corresponds to this BINReference.
      *
      * @param binRef the BINReference that indicates the bin we want.
-     *
      * @return the BIN that corresponds to this BINReference. The
      * node is latched upon return. Returns null if the BIN can't be found.
      */
@@ -555,14 +528,14 @@ public class INCompressor extends DaemonThread {
 
     /**
      * Lazily/opportunistically compress a full BIN.
-     *
+     * <p>
      * The target IN should be latched when we enter, and it will be remain
      * latched.
-     *
+     * <p>
      * If compression succeeds, does not prune empty BINs, but does queue them
      * for pruning later. If compression fails because a record lock cannot be
      * obtained, queues the BIN to retry later.
-     *
+     * <p>
      * Note that we do not bother to delete queue entries for the BIN if
      * compression succeeds.  Queue entries are normally removed quickly by the
      * compressor.  In the case where queue entries happen to exist when we do
@@ -574,7 +547,7 @@ public class INCompressor extends DaemonThread {
         assert in.isLatchOwner();
 
         /* Only full BINs can be compressed. */
-        if (!in.isBIN() || in.isBINDelta()) {
+        if(!in.isBIN() || in.isBINDelta()) {
             return;
         }
 
@@ -584,9 +557,9 @@ public class INCompressor extends DaemonThread {
          * Cursors prohibit compression. We queue for later when there is
          * anything that can be compressed.
          */
-        if (bin.nCursors() > 0) {
-            for (int i = 0; i < bin.getNEntries(); i += 1) {
-                if (bin.isDefunct(i)) {
+        if(bin.nCursors() > 0) {
+            for(int i = 0; i < bin.getNEntries(); i += 1) {
+                if(bin.isDefunct(i)) {
                     addBinToQueue(bin);
                     break;
                 }
@@ -594,12 +567,13 @@ public class INCompressor extends DaemonThread {
             return;
         }
 
-        if (bin.compress(compressDirtySlots, null /*localTracker*/)) {
-            if (bin.getNEntries() == 0) {
+        if(bin.compress(compressDirtySlots, null /*localTracker*/)) {
+            if(bin.getNEntries() == 0) {
                 /* The BIN is empty. Prune it later. */
                 addBinToQueue(bin);
             }
-        } else {
+        }
+        else {
             /* A record lock prevented slot removal. Try again later. */
             addBinToQueue(bin);
         }
@@ -612,20 +586,20 @@ public class INCompressor extends DaemonThread {
      * @return true if the db is open and the target bin is found.
      */
     private boolean findDBAndBIN(
-        BINSearch binSearch,
-        BINReference binRef,
-        DbTree dbTree,
-        Map<DatabaseId, DatabaseImpl> dbCache)
-        throws DatabaseException {
+            BINSearch binSearch,
+            BINReference binRef,
+            DbTree dbTree,
+            Map<DatabaseId, DatabaseImpl> dbCache)
+            throws DatabaseException {
 
         /*
          * Find the database.  Do not call releaseDb after this getDb, since
          * the entire dbCache will be released later.
          */
         binSearch.db = dbTree.getDb(
-            binRef.getDatabaseId(), lockTimeout, dbCache);
+                binRef.getDatabaseId(), lockTimeout, dbCache);
 
-        if (binSearch.db == null || binSearch.db.isDeleted()) {
+        if(binSearch.db == null || binSearch.db.isDeleted()) {
             /* The db was deleted. Ignore this BIN Ref. */
             dbClosedBinsThisRun++;
             return false;
@@ -637,10 +611,10 @@ public class INCompressor extends DaemonThread {
         /* Find the BIN. */
         binSearch.bin = searchForBIN(binSearch.db, binRef);
 
-        if (binSearch.bin == null ||
-            binSearch.bin.getNodeId() != binRef.getNodeId()) {
+        if(binSearch.bin == null ||
+                binSearch.bin.getNodeId() != binRef.getNodeId()) {
             /* The BIN may have been split. */
-            if (binSearch.bin != null) {
+            if(binSearch.bin != null) {
                 binSearch.bin.releaseLatch();
             }
             splitBinsThisRun++;

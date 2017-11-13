@@ -13,37 +13,36 @@
 
 package berkeley.com.sleepycat.bind.tuple;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.je.DatabaseEntry;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An abstract <code>EntryBinding</code> that treats a key or data entry as a
  * tuple; it includes predefined bindings for Java primitive types.
- *
+ * <p>
  * <p>This class takes care of converting the entries to/from {@link
  * TupleInput} and {@link TupleOutput} objects.  Its two abstract methods must
  * be implemented by a concrete subclass to convert between tuples and key or
  * data objects.</p>
  * <ul>
  * <li> {@link #entryToObject(TupleInput)} </li>
- * <li> {@link #objectToEntry(Object,TupleOutput)} </li>
+ * <li> {@link #objectToEntry(Object, TupleOutput)} </li>
  * </ul>
  *
  * @param <E> is the class representing the key or data.
- *
- * @see <a href="package-summary.html#formats">Tuple Formats</a>
- *
  * @author Mark Hayes
+ * @see <a href="package-summary.html#formats">Tuple Formats</a>
  */
 public abstract class TupleBinding<E>
-    extends TupleBase<E>
-    implements EntryBinding<E> {
+        extends TupleBase<E>
+        implements EntryBinding<E> {
 
-    private static final Map<Class,TupleBinding> primitives =
-        new HashMap<Class,TupleBinding>();
+    private static final Map<Class, TupleBinding> primitives =
+            new HashMap<Class, TupleBinding>();
+
     static {
         addPrimitive(String.class, String.class, new StringBinding());
         addPrimitive(Character.class, Character.TYPE, new CharacterBinding());
@@ -56,6 +55,12 @@ public abstract class TupleBinding<E>
         addPrimitive(Double.class, Double.TYPE, new DoubleBinding());
     }
 
+    /**
+     * Creates a tuple binding.
+     */
+    public TupleBinding() {
+    }
+
     private static void addPrimitive(Class cls1, Class cls2,
                                      TupleBinding binding) {
         primitives.put(cls1, binding);
@@ -63,9 +68,33 @@ public abstract class TupleBinding<E>
     }
 
     /**
-     * Creates a tuple binding.
+     * Creates a tuple binding for a primitive Java class.  The following
+     * Java classes are supported.
+     * <ul>
+     * <li><code>String</code></li>
+     * <li><code>Character</code></li>
+     * <li><code>Boolean</code></li>
+     * <li><code>Byte</code></li>
+     * <li><code>Short</code></li>
+     * <li><code>Integer</code></li>
+     * <li><code>Long</code></li>
+     * <li><code>Float</code></li>
+     * <li><code>Double</code></li>
+     * </ul>
+     * <p>
+     * <p><em>Note:</em> {@link #getPrimitiveBinding} returns bindings that do
+     * not sort negative floating point numbers correctly by default.  See
+     * {@link SortedFloatBinding} and {@link SortedDoubleBinding} for
+     * details.</p>
+     *
+     * @param <T> the primitive Java class.
+     * @param cls the primitive Java class.
+     * @return a new binding for the primitive class or null if the cls
+     * parameter is not one of the supported classes.
      */
-    public TupleBinding() {
+    public static <T> TupleBinding<T> getPrimitiveBinding(Class<T> cls) {
+
+        return primitives.get(cls);
     }
 
     // javadoc is inherited
@@ -86,7 +115,6 @@ public abstract class TupleBinding<E>
      * Constructs a key or data object from a {@link TupleInput} entry.
      *
      * @param input is the tuple key or data entry.
-     *
      * @return the key or data object constructed from the entry.
      */
     public abstract E entryToObject(TupleInput input);
@@ -95,41 +123,8 @@ public abstract class TupleBinding<E>
      * Converts a key or data object to a tuple entry.
      *
      * @param object is the key or data object.
-     *
      * @param output is the tuple entry to which the key or data should be
-     * written.
+     *               written.
      */
     public abstract void objectToEntry(E object, TupleOutput output);
-
-    /**
-     * Creates a tuple binding for a primitive Java class.  The following
-     * Java classes are supported.
-     * <ul>
-     * <li><code>String</code></li>
-     * <li><code>Character</code></li>
-     * <li><code>Boolean</code></li>
-     * <li><code>Byte</code></li>
-     * <li><code>Short</code></li>
-     * <li><code>Integer</code></li>
-     * <li><code>Long</code></li>
-     * <li><code>Float</code></li>
-     * <li><code>Double</code></li>
-     * </ul>
-     *
-     * <p><em>Note:</em> {@link #getPrimitiveBinding} returns bindings that do
-     * not sort negative floating point numbers correctly by default.  See
-     * {@link SortedFloatBinding} and {@link SortedDoubleBinding} for
-     * details.</p>
-     *
-     * @param <T> the primitive Java class.
-     *
-     * @param cls the primitive Java class.
-     *
-     * @return a new binding for the primitive class or null if the cls
-     * parameter is not one of the supported classes.
-     */
-    public static <T> TupleBinding<T> getPrimitiveBinding(Class<T> cls) {
-
-        return primitives.get(cls);
-    }
 }

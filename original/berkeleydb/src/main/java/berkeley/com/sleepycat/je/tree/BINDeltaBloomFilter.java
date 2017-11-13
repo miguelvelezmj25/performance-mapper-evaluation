@@ -13,58 +13,32 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.nio.ByteBuffer;
-import java.util.Random;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogUtils;
+
+import java.nio.ByteBuffer;
+import java.util.Random;
 
 /**
  * A Bloom filter implementation, highly specialized for use in BIN deltas.
  * Both space and computation times are minimized, with a potential small
  * loss in accuracy.
- *
+ * <p>
  * A nice introduction to bloom filters can be found here:
- * http://en.wikipedia.org/wiki/Bloom_filter 
+ * http://en.wikipedia.org/wiki/Bloom_filter
  */
 public class BINDeltaBloomFilter {
-
-    /*
-     * Used to optimize creation of the bloom filter: Lets us avoid repeated
-     * (per key) hashing of the key prefix and repeated allocations of the
-     * RNG and the hashes array.
-     */
-    public static class HashContext {
-
-        public int[] hashes;
-
-        public Random rng;
-
-        public long initFNVvalue;
-
-        public HashContext() {
-            hashes = new int[BINDeltaBloomFilter.K];
-            rng = new Random();
-            initFNVvalue = BINDeltaBloomFilter.FNVOffsetBasis;
-        }
-
-        void hashKeyPrefix(byte[] prefix) {
-            initFNVvalue = BINDeltaBloomFilter.hashFNV(prefix, initFNVvalue);
-        }
-    }
 
     /*
      * Params for the Fowler-Noll-Vo (FNV) hash function
      */
     private static final long FNVOffsetBasis = 2166136261L;
     private static final long FNVPrime = 16777619L;
-
     /*
      * The m/n ratio, where m is the number of bits used by the bloom filter
      * and n is the number of keys in the set represented by the bloom filter.
      */
     private static final int M_N_RATIO = 8;
-
     /*
      * The number of hash values to generate per key, when a key is added to
      * the filter or when the key's membership is tested.
@@ -78,7 +52,7 @@ public class BINDeltaBloomFilter {
 
         hash(bf, key, hc);
 
-        for (int idx : hc.hashes) {
+        for(int idx : hc.hashes) {
             setBit(bf, idx);
         }
     }
@@ -92,8 +66,8 @@ public class BINDeltaBloomFilter {
 
         hash(bf, key, hc);
 
-        for (int idx : hc.hashes) {
-            if (!getBit(bf, idx)) {
+        for(int idx : hc.hashes) {
+            if(!getBit(bf, idx)) {
                 return false;
             }
         }
@@ -106,24 +80,25 @@ public class BINDeltaBloomFilter {
      */
     private static void hash(byte[] bf, byte[] key, HashContext hc) {
 
-        assert(K == 3);
-        assert(hc.hashes.length == K);
+        assert (K == 3);
+        assert (hc.hashes.length == K);
 
         hc.rng.setSeed(hashFNV(key, hc.initFNVvalue));
 
         int numBits = bf.length * 8;
 
-        if (numBits <= 1024) {
+        if(numBits <= 1024) {
             int hash = hc.rng.nextInt();
             hc.hashes[0] = (hash & 0x000003FF) % numBits;
             hash = hash >> 10;
             hc.hashes[1] = (hash & 0x000003FF) % numBits;
             hash = hash >> 10;
             hc.hashes[2] = (hash & 0x000003FF) % numBits;
-        } else {
-            hc.hashes[0] = (int)((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
-            hc.hashes[1] = (int)((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
-            hc.hashes[2] = (int)((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
+        }
+        else {
+            hc.hashes[0] = (int) ((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
+            hc.hashes[1] = (int) ((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
+            hc.hashes[2] = (int) ((hc.rng.nextInt() & 0xFFFFFFFFL) % numBits);
         }
     }
 
@@ -134,14 +109,13 @@ public class BINDeltaBloomFilter {
 
         long hash = initValue;
 
-        for (byte b : key) {
+        for(byte b : key) {
             hash = (hash * FNVPrime) & 0xFFFFFFFF;
             hash ^= b;
         }
 
         return hash;
     }
-
 
     /*
      * Get the total memory consumed by the given bloom filter.
@@ -155,7 +129,7 @@ public class BINDeltaBloomFilter {
      * for the given number of keys.
      */
     public static int getByteSize(int numKeys) {
-        assert(numKeys > 0);
+        assert (numKeys > 0);
         int nbits = numKeys * M_N_RATIO;
         return (nbits + 7) / 8;
     }
@@ -198,7 +172,7 @@ public class BINDeltaBloomFilter {
         int nbits = bf.length * 8;
 
         sb.append("<BloomFilter>");
-        for (int i = 0; i < nbits; ++i) {
+        for(int i = 0; i < nbits; ++i) {
             sb.append(getBit(bf, i) ? 1 : 0);
         }
         sb.append("</BloomFilter>");
@@ -213,7 +187,7 @@ public class BINDeltaBloomFilter {
 
         int nbits = bf.length * 8;
 
-        for (int i = 0; i < nbits; ++i) {
+        for(int i = 0; i < nbits; ++i) {
             sb.append(getBit(bf, i) ? 1 : 0);
         }
         return sb.toString();
@@ -230,6 +204,30 @@ public class BINDeltaBloomFilter {
      *
      */
     private static boolean getBit(byte[] bf, int idx) {
-        return ( (bf[idx / 8] & (1 << (idx % 8))) != 0 );
+        return ((bf[idx / 8] & (1 << (idx % 8))) != 0);
+    }
+
+    /*
+     * Used to optimize creation of the bloom filter: Lets us avoid repeated
+     * (per key) hashing of the key prefix and repeated allocations of the
+     * RNG and the hashes array.
+     */
+    public static class HashContext {
+
+        public int[] hashes;
+
+        public Random rng;
+
+        public long initFNVvalue;
+
+        public HashContext() {
+            hashes = new int[BINDeltaBloomFilter.K];
+            rng = new Random();
+            initFNVvalue = BINDeltaBloomFilter.FNVOffsetBasis;
+        }
+
+        void hashKeyPrefix(byte[] prefix) {
+            initFNVvalue = BINDeltaBloomFilter.hashFNV(prefix, initFNVvalue);
+        }
     }
 }

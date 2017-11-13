@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.zip.Checksum;
-
 import berkeley.com.sleepycat.je.utilint.Adler32;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.nio.ByteBuffer;
+import java.util.zip.Checksum;
 
 /**
  * Checksum validator is used to check checksums on log entries.
@@ -38,23 +38,24 @@ public class ChecksumValidator {
     /**
      * Add this byte buffer to the checksum. Assume the byte buffer is already
      * positioned at the data.
-     * @param buf target buffer
+     *
+     * @param buf    target buffer
      * @param length of data
      */
     public void update(ByteBuffer buf, int length)
-        throws ChecksumException {
+            throws ChecksumException {
 
-        if (buf == null) {
+        if(buf == null) {
             throw new ChecksumException(
-                "null buffer given to checksum validation, probably " +
-                 " result of 0's in log file, len=" + length);
+                    "null buffer given to checksum validation, probably " +
+                            " result of 0's in log file, len=" + length);
         }
 
         int bufStart = buf.position();
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("bufStart = " + bufStart +
-                               " length = " + length);
+                    " length = " + length);
         }
 
         update(buf.array(), bufStart + buf.arrayOffset(), length);
@@ -65,25 +66,25 @@ public class ChecksumValidator {
     }
 
     void validate(long expectedChecksum, long lsn)
-        throws ChecksumException {
+            throws ChecksumException {
 
-        if (expectedChecksum != cksum.getValue()) {
+        if(expectedChecksum != cksum.getValue()) {
             throw new ChecksumException
-                ("Location " + DbLsn.getNoFormatString(lsn) +
-                 " expected " + expectedChecksum + " got " + cksum.getValue());
+                    ("Location " + DbLsn.getNoFormatString(lsn) +
+                            " expected " + expectedChecksum + " got " + cksum.getValue());
         }
     }
 
     public void validate(long expectedChecksum, long fileNum, long fileOffset)
-        throws ChecksumException {
+            throws ChecksumException {
 
-        if (expectedChecksum != cksum.getValue()) {
+        if(expectedChecksum != cksum.getValue()) {
             long problemLsn = DbLsn.makeLsn(fileNum, fileOffset);
 
             throw new ChecksumException
-                ("Location " + DbLsn.getNoFormatString(problemLsn) +
-                 " expected " + expectedChecksum + " got " +
-                 cksum.getValue());
+                    ("Location " + DbLsn.getNoFormatString(problemLsn) +
+                            " expected " + expectedChecksum + " got " +
+                            cksum.getValue());
         }
     }
 }

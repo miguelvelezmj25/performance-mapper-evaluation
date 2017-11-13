@@ -19,10 +19,10 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * Thrown when a non-blocking operation fails to get a lock, and {@link
  * EnvironmentConfig#LOCK_OLD_LOCK_EXCEPTIONS} is set to true.  Non-blocking
  * transactions are configured using {@link TransactionConfig#setNoWait}.
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
- *
+ * <p>
  * <p>For compatibility with JE 3.3 and earlier, {@link
  * LockNotGrantedException} is thrown instead of {@link
  * LockNotAvailableException} when {@link
@@ -31,7 +31,7 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * EnvironmentConfig#LOCK_OLD_LOCK_EXCEPTIONS} for information on the changes
  * that should be made to all applications that upgrade from JE 3.3 or
  * earlier.</p>
- *
+ * <p>
  * <p>Normally, applications should catch the base class {@link
  * LockConflictException} rather than catching one of its subclasses.  All lock
  * conflicts are typically handled in the same way, which is normally to abort
@@ -56,27 +56,30 @@ public class LockNotGrantedException extends DeadlockException {
      * as deadlocks.  See SR [#10672]
      */
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public LockNotGrantedException(Locker locker, String message) {
         /* Do not set abort-only for a no-wait lock failure. */
         super(message);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private LockNotGrantedException(String message,
                                     LockNotGrantedException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

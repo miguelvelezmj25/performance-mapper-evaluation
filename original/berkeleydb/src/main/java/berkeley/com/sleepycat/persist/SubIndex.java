@@ -13,43 +13,29 @@
 
 package berkeley.com.sleepycat.persist;
 
-import java.util.Map;
-import java.util.SortedMap;
-
 import berkeley.com.sleepycat.bind.EntityBinding;
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.collections.StoredSortedMap;
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.compat.DbCompat.OpResult;
 import berkeley.com.sleepycat.compat.DbCompat.OpWriteOptions;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.DbInternal;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.Environment;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.Get;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.LockMode;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.OperationResult;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.ReadOptions;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.SecondaryCursor;
-import berkeley.com.sleepycat.je.SecondaryDatabase;
-import berkeley.com.sleepycat.je.Transaction;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.WriteOptions;
-/* <!-- end JE only --> */
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.util.keyrange.KeyRange;
 import berkeley.com.sleepycat.util.keyrange.RangeCursor;
+
+import java.util.Map;
+import java.util.SortedMap;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
 
 /**
  * The EntityIndex returned by SecondaryIndex.subIndex.  A SubIndex, in JE
@@ -63,7 +49,7 @@ import berkeley.com.sleepycat.util.keyrange.RangeCursor;
  */
 class SubIndex<PK, E> implements EntityIndex<PK, E> {
 
-    private SecondaryIndex<?,PK,E> secIndex;
+    private SecondaryIndex<?, PK, E> secIndex;
     private SecondaryDatabase db;
     private boolean transactional;
     private boolean sortedDups;
@@ -82,14 +68,14 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     <SK> SubIndex(SecondaryIndex<SK, PK, E> secIndex,
                   EntityBinding entityBinding,
                   SK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         this.secIndex = secIndex;
         db = secIndex.getDatabase();
         transactional = secIndex.transactional;
         sortedDups = secIndex.sortedDups;
         locking =
-            DbCompat.getInitializeLocking(db.getEnvironment().getConfig());
+                DbCompat.getInitializeLocking(db.getEnvironment().getConfig());
         Environment env = db.getEnvironment();
         concurrentDB = DbCompat.getInitializeCDB(env.getConfig());
         keyObject = key;
@@ -103,7 +89,7 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
         this.entityBinding = entityBinding;
 
         keyAdapter = new PrimaryKeyValueAdapter<PK>
-            (priIndex.keyClass, priIndex.keyBinding);
+                (priIndex.keyClass, priIndex.keyBinding);
         entityAdapter = secIndex.entityAdapter;
     }
 
@@ -112,36 +98,36 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     }
 
     public boolean contains(PK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return contains(null, key, null);
     }
 
     public boolean contains(Transaction txn, PK key, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseEntry pkeyEntry = new DatabaseEntry();
         DatabaseEntry dataEntry = BasicIndex.NO_RETURN_ENTRY;
         pkeyBinding.objectToEntry(key, pkeyEntry);
 
         OperationStatus status =
-            db.getSearchBoth(txn, keyEntry, pkeyEntry, dataEntry, lockMode);
+                db.getSearchBoth(txn, keyEntry, pkeyEntry, dataEntry, lockMode);
         return (status == OperationStatus.SUCCESS);
     }
 
     public E get(PK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return get(null, key, null);
     }
 
     public E get(Transaction txn, PK key, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* <!-- begin JE only --> */
-        if (DbCompat.IS_JE) {
+        if(DbCompat.IS_JE) {
             EntityResult<E> result = get(
-                txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
+                    txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
             return result != null ? result.value() : null;
         }
         /* <!-- end JE only --> */
@@ -151,11 +137,12 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
         pkeyBinding.objectToEntry(key, pkeyEntry);
 
         OperationStatus status =
-            db.getSearchBoth(txn, keyEntry, pkeyEntry, dataEntry, lockMode);
+                db.getSearchBoth(txn, keyEntry, pkeyEntry, dataEntry, lockMode);
 
-        if (status == OperationStatus.SUCCESS) {
+        if(status == OperationStatus.SUCCESS) {
             return (E) entityBinding.entryToObject(pkeyEntry, dataEntry);
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -165,7 +152,7 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                PK key,
                                Get getType,
                                ReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         BasicIndex.checkGetType(getType);
 
@@ -174,28 +161,30 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
         pkeyBinding.objectToEntry(key, pkeyEntry);
 
         OperationResult result = db.get(
-            txn, keyEntry, pkeyEntry, dataEntry, Get.SEARCH_BOTH, options);
+                txn, keyEntry, pkeyEntry, dataEntry, Get.SEARCH_BOTH, options);
 
-        if (result != null) {
+        if(result != null) {
             return new EntityResult<>(
-                (E) entityBinding.entryToObject(pkeyEntry, dataEntry),
-                result);
-        } else {
+                    (E) entityBinding.entryToObject(pkeyEntry, dataEntry),
+                    result);
+        }
+        else {
             return null;
         }
     }
     /* <!-- end JE only --> */
 
     public long count()
-        throws DatabaseException {
+            throws DatabaseException {
 
         CursorConfig cursorConfig = locking ?
-            CursorConfig.READ_UNCOMMITTED : null;
+                CursorConfig.READ_UNCOMMITTED : null;
         EntityCursor<PK> cursor = keys(null, cursorConfig);
         try {
-            if (cursor.next() != null) {
+            if(cursor.next() != null) {
                 return cursor.count();
-            } else {
+            }
+            else {
                 return 0;
             }
         } finally {
@@ -206,7 +195,7 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     /* <!-- begin JE only --> */
 
     public long count(long memoryLimit)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return count();
     }
@@ -214,13 +203,13 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     /* <!-- end JE only --> */
 
     public boolean delete(PK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return delete(null, key);
     }
 
     public boolean delete(Transaction txn, PK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return deleteInternal(txn, key, OpWriteOptions.EMPTY).isSuccess();
     }
@@ -229,7 +218,7 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     public OperationResult delete(Transaction txn,
                                   PK key,
                                   WriteOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return deleteInternal(txn, key, OpWriteOptions.make(options)).jeResult;
     }
@@ -238,7 +227,7 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     private OpResult deleteInternal(Transaction txn,
                                     PK key,
                                     OpWriteOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseEntry pkeyEntry = new DatabaseEntry();
         DatabaseEntry dataEntry = BasicIndex.NO_RETURN_ENTRY;
@@ -246,37 +235,38 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
 
         boolean autoCommit = false;
         Environment env = db.getEnvironment();
-        if (transactional &&
-            txn == null &&
-            DbCompat.getThreadTransaction(env) == null) {
+        if(transactional &&
+                txn == null &&
+                DbCompat.getThreadTransaction(env) == null) {
             txn = env.beginTransaction
-                (null, secIndex.getAutoCommitTransactionConfig());
+                    (null, secIndex.getAutoCommitTransactionConfig());
             autoCommit = true;
         }
 
         boolean failed = true;
         CursorConfig cursorConfig = null;
-        if (concurrentDB) {
+        if(concurrentDB) {
             cursorConfig = new CursorConfig();
             DbCompat.setWriteCursor(cursorConfig, true);
-        } 
+        }
         SecondaryCursor cursor = db.openSecondaryCursor(txn, cursorConfig);
         try {
             /* <!-- begin JE only --> */
-            if (DbCompat.IS_JE) {
+            if(DbCompat.IS_JE) {
                 ReadOptions readOptions;
-                if (options.jeOptions != null &&
-                    options.jeOptions.getCacheMode() != null) {
+                if(options.jeOptions != null &&
+                        options.jeOptions.getCacheMode() != null) {
                     readOptions = new ReadOptions();
                     readOptions.setLockMode(LockMode.RMW);
                     readOptions.setCacheMode(options.jeOptions.getCacheMode());
-                } else {
+                }
+                else {
                     readOptions = LockMode.RMW.toReadOptions();
                 }
                 OperationResult result = cursor.get(
-                    keyEntry, pkeyEntry, dataEntry, Get.SEARCH_BOTH,
-                    readOptions);
-                if (result != null) {
+                        keyEntry, pkeyEntry, dataEntry, Get.SEARCH_BOTH,
+                        readOptions);
+                if(result != null) {
                     result = cursor.delete(options.jeOptions);
                 }
                 failed = false;
@@ -284,19 +274,20 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
             }
             /* <!-- end JE only --> */
             OperationStatus status = cursor.getSearchBoth
-                (keyEntry, pkeyEntry, dataEntry,
-                 locking ? LockMode.RMW : null);
-            if (status == OperationStatus.SUCCESS) {
+                    (keyEntry, pkeyEntry, dataEntry,
+                            locking ? LockMode.RMW : null);
+            if(status == OperationStatus.SUCCESS) {
                 status = cursor.delete();
             }
             failed = false;
             return OpResult.make(status);
         } finally {
             cursor.close();
-            if (autoCommit) {
-                if (failed) {
+            if(autoCommit) {
+                if(failed) {
                     txn.abort();
-                } else {
+                }
+                else {
                     txn.commit();
                 }
             }
@@ -304,26 +295,26 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     }
 
     public EntityCursor<PK> keys()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return keys(null, null);
     }
 
     public EntityCursor<PK> keys(Transaction txn, CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(txn, null, keyAdapter, config);
     }
 
     public EntityCursor<E> entities()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(null, null, entityAdapter, null);
     }
 
     public EntityCursor<E> entities(Transaction txn,
                                     CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(txn, null, entityAdapter, config);
     }
@@ -332,10 +323,10 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                  boolean fromInclusive,
                                  PK toKey,
                                  boolean toInclusive)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(null, fromKey, fromInclusive, toKey, toInclusive,
-                      keyAdapter, null);
+                keyAdapter, null);
     }
 
     public EntityCursor<PK> keys(Transaction txn,
@@ -344,20 +335,20 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                  PK toKey,
                                  boolean toInclusive,
                                  CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(txn, fromKey, fromInclusive, toKey, toInclusive,
-                      keyAdapter, config);
+                keyAdapter, config);
     }
 
     public EntityCursor<E> entities(PK fromKey,
                                     boolean fromInclusive,
                                     PK toKey,
                                     boolean toInclusive)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(null, fromKey, fromInclusive, toKey, toInclusive,
-                      entityAdapter, null);
+                entityAdapter, null);
     }
 
     public EntityCursor<E> entities(Transaction txn,
@@ -366,10 +357,10 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                     PK toKey,
                                     boolean toInclusive,
                                     CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return cursor(txn, fromKey, fromInclusive, toKey, toInclusive,
-                      entityAdapter, config);
+                entityAdapter, config);
     }
 
     private <V> EntityCursor<V> cursor(Transaction txn,
@@ -379,20 +370,20 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                        boolean toInclusive,
                                        ValueAdapter<V> adapter,
                                        CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseEntry fromEntry = null;
-        if (fromKey != null) {
+        if(fromKey != null) {
             fromEntry = new DatabaseEntry();
             pkeyBinding.objectToEntry(fromKey, fromEntry);
         }
         DatabaseEntry toEntry = null;
-        if (toKey != null) {
+        if(toKey != null) {
             toEntry = new DatabaseEntry();
             pkeyBinding.objectToEntry(toKey, toEntry);
         }
         KeyRange pkeyRange = emptyPKeyRange.subRange
-            (fromEntry, fromInclusive, toEntry, toInclusive);
+                (fromEntry, fromInclusive, toEntry, toInclusive);
         return cursor(txn, pkeyRange, adapter, config);
     }
 
@@ -400,11 +391,11 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
                                        KeyRange pkeyRange,
                                        ValueAdapter<V> adapter,
                                        CursorConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         Cursor cursor = db.openCursor(txn, config);
         RangeCursor rangeCursor =
-            new RangeCursor(singleKeyRange, pkeyRange, sortedDups, cursor);
+                new RangeCursor(singleKeyRange, pkeyRange, sortedDups, cursor);
         return new SubIndexCursor<V>(rangeCursor, adapter);
     }
 
@@ -413,9 +404,9 @@ class SubIndex<PK, E> implements EntityIndex<PK, E> {
     }
 
     public synchronized SortedMap<PK, E> sortedMap() {
-        if (map == null) {
+        if(map == null) {
             map = (SortedMap) ((StoredSortedMap) secIndex.sortedMap()).
-                duplicatesMap(keyObject, pkeyBinding);
+                    duplicatesMap(keyObject, pkeyBinding);
         }
         return map;
     }

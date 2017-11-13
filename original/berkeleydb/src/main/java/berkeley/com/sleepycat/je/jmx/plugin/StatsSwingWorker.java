@@ -13,17 +13,17 @@
 
 package berkeley.com.sleepycat.je.jmx.plugin;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.swing.SwingWorker;
 
 /* 
  * The class takes the responsibility for updating the tabs in JConsole plugin.
  */
-public class StatsSwingWorker extends 
-    SwingWorker<List<List<Map.Entry<String, String>>>, Object> {
+public class StatsSwingWorker extends
+        SwingWorker<List<List<Map.Entry<String, String>>>, Object> {
 
     private final ArrayList<Stats> list;
 
@@ -33,9 +33,9 @@ public class StatsSwingWorker extends
 
     @Override
     public List<List<Map.Entry<String, String>>> doInBackground() {
-        ArrayList<List<Map.Entry<String, String>>> statsList= 
-            new ArrayList<List<Map.Entry<String, String>>>();
-        for (Stats status: list) {
+        ArrayList<List<Map.Entry<String, String>>> statsList =
+                new ArrayList<List<Map.Entry<String, String>>>();
+        for(Stats status : list) {
             statsList.add(status.getResultsList());
         }
 
@@ -45,14 +45,14 @@ public class StatsSwingWorker extends
     @Override
     protected void done() {
         try {
-            if (get() != null) {
-                for (int i = 0; i < list.size(); i++) {
+            if(get() != null) {
+                for(int i = 0; i < list.size(); i++) {
                     list.get(i).getTModel().setList(get().get(i));
                     list.get(i).getTModel().fireTableDataChanged();
                 }
             }
-        } catch (InterruptedException e) {
-        } catch (ExecutionException e) {
+        } catch(InterruptedException e) {
+        } catch(ExecutionException e) {
         }
     }
 }

@@ -13,27 +13,27 @@
 
 package berkeley.com.sleepycat.bind.serial;
 
-import java.io.IOException;
-
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.je.DatabaseEntry;
 import berkeley.com.sleepycat.util.FastInputStream;
 import berkeley.com.sleepycat.util.FastOutputStream;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
+import java.io.IOException;
+
 /**
  * A concrete <code>EntryBinding</code> that treats a key or data entry as
  * a serialized object.
- *
+ * <p>
  * <p>This binding stores objects in serialized object format.  The
  * deserialized objects are returned by the binding, and their
  * <code>Class</code> must implement the <code>Serializable</code>
  * interface.</p>
- *
+ * <p>
  * <p>For key bindings, a tuple binding is usually a better choice than a
  * serial binding.  A tuple binding gives a reasonable sort order, and works
  * with comparators in all cases -- see below.</p>
- *
+ * <p>
  * <p><em>WARNING:</em> SerialBinding should not be used with Berkeley DB Java
  * Edition for key bindings, when a custom comparator is used.  In JE,
  * comparators are instantiated and called internally at times when databases
@@ -41,9 +41,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * database, a serial binding cannot be used during these times.  An attempt
  * to use a serial binding with a custom comparator will result in a
  * NullPointerException during environment open or close.</p>
- *
+ * <p>
  * <p><a name="evolution"><strong>Class Evolution</strong></a></p>
- *
+ * <p>
  * <p>{@code SerialBinding} and other classes in this package use standard Java
  * serialization and all rules of Java serialization apply.  This includes the
  * rules for class evolution.  Once an instance of a class is stored, the class
@@ -51,7 +51,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * the Java specification.  To use a new incompatible version of a class, a
  * different {@link ClassCatalog} must be used or the class catalog database
  * must be truncated.</p>
- *
+ * <p>
  * <p>If more advanced class evolution features are required, consider using
  * the {@link com.sleepycat.persist.evolve Direct Persistence Layer}.</p>
  *
@@ -66,16 +66,15 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
      * Creates a serial binding.
      *
      * @param classCatalog is the catalog to hold shared class information and
-     * for a database should be a {@link StoredClassCatalog}.
-     *
-     * @param baseClass is the base class for serialized objects stored using
-     * this binding -- all objects using this binding must be an instance of
-     * this class.  Note that if this parameter is non-null, then this binding
-     * will not support serialization of null values.
+     *                     for a database should be a {@link StoredClassCatalog}.
+     * @param baseClass    is the base class for serialized objects stored using
+     *                     this binding -- all objects using this binding must be an instance of
+     *                     this class.  Note that if this parameter is non-null, then this binding
+     *                     will not support serialization of null values.
      */
     public SerialBinding(ClassCatalog classCatalog, Class<E> baseClass) {
 
-        if (classCatalog == null) {
+        if(classCatalog == null) {
             throw new NullPointerException("classCatalog must be non-null");
         }
         this.classCatalog = classCatalog;
@@ -99,12 +98,12 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
      * non-null value.  If {@link ClassCatalog#getClassLoader()} returns null,
      * then <code>Thread.currentThread().getContextClassLoader()</code> is
      * returned.
-     *
+     * <p>
      * <p>This method may be overridden to return a dynamically determined
      * class loader.  For example, <code>getBaseClass().getClassLoader()</code>
      * could be called to use the class loader for the base class, assuming
      * that a base class has been specified.</p>
-     *
+     * <p>
      * <p>If this method returns null, a default class loader will be used as
      * determined by the <code>java.io.ObjectInputStream.resolveClass</code>
      * method.</p>
@@ -114,7 +113,7 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
     public ClassLoader getClassLoader() {
 
         final ClassLoader loader = classCatalog.getClassLoader();
-        if (loader != null) {
+        if(loader != null) {
             return loader;
         }
         return Thread.currentThread().getContextClassLoader();
@@ -127,7 +126,6 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
      * {@link SerialInput} is used to deserialize the object.
      *
      * @param entry is the input serialized entry.
-     *
      * @return the output deserialized object.
      */
     public E entryToObject(DatabaseEntry entry) {
@@ -138,17 +136,17 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
 
         System.arraycopy(hdr, 0, bufWithHeader, 0, hdr.length);
         System.arraycopy(entry.getData(), entry.getOffset(),
-                         bufWithHeader, hdr.length, length);
+                bufWithHeader, hdr.length, length);
 
         try {
             SerialInput jin = new SerialInput(
-                new FastInputStream(bufWithHeader, 0, bufWithHeader.length),
-                classCatalog,
-                getClassLoader());
+                    new FastInputStream(bufWithHeader, 0, bufWithHeader.length),
+                    classCatalog,
+                    getClassLoader());
             return (E) jin.readObject();
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
-        } catch (ClassNotFoundException e) {
+        } catch(ClassNotFoundException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
     }
@@ -158,39 +156,37 @@ public class SerialBinding<E> extends SerialBase implements EntryBinding<E> {
      * header is not included in the output data to save space, and therefore
      * to deserialize the data the complementary {@link #entryToObject} method
      * must be used.  {@link SerialOutput} is used to serialize the object.
-     *
+     * <p>
      * <p>Note that this method sets the DatabaseEntry offset property to a
      * non-zero value and the size property to a value less than the length of
      * the byte array.</p>
      *
      * @param object is the input deserialized object.
-     *
-     * @param entry is the output serialized entry.
-     *
+     * @param entry  is the output serialized entry.
      * @throws IllegalArgumentException if the object is not an instance of the
-     * base class for this binding, including if the object is null and a
-     * non-null base class was specified.
+     *                                  base class for this binding, including if the object is null and a
+     *                                  non-null base class was specified.
      */
     public void objectToEntry(E object, DatabaseEntry entry) {
 
-        if (baseClass != null && !baseClass.isInstance(object)) {
+        if(baseClass != null && !baseClass.isInstance(object)) {
             throw new IllegalArgumentException
-                (((object != null) ?
-                  ("Data object class (" + object.getClass() + ')') :
-                  "Null value") +
-                 " is not an instance of binding's base class (" +
-                 baseClass + ')');
+                    (((object != null) ?
+                            ("Data object class (" + object.getClass() + ')') :
+                            "Null value") +
+                            " is not an instance of binding's base class (" +
+                            baseClass + ')');
         }
         FastOutputStream fo = getSerialOutput(object);
         try {
             SerialOutput jos = new SerialOutput(fo, classCatalog);
             jos.writeObject(object);
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
 
         byte[] hdr = SerialOutput.getStreamHeader();
         entry.setData(fo.getBufferBytes(), hdr.length,
-                     fo.getBufferLength() - hdr.length);
+                fo.getBufferLength() - hdr.length);
     }
 }

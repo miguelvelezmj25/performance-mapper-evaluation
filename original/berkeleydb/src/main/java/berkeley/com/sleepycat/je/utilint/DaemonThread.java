@@ -13,16 +13,12 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.ExceptionListener;
-import berkeley.com.sleepycat.je.LockConflictException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A daemon thread. Also see StoppableThread for an alternative daemon
@@ -31,25 +27,22 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 public abstract class DaemonThread implements DaemonRunner, Runnable {
 
     private static final int JOIN_MILLIS = 10;
-    private volatile long waitTime;
+    private static final String ERROR_LISTENER = "setErrorListener";
+    public static boolean stifleExceptionChatter = false;
+    /* Fields for DaemonErrorListener, enabled only during testing. */
+    protected final EnvironmentImpl envImpl;
+    /* Logger used in DaemonThread's subclasses. */
+    protected final Logger logger;
     private final Object synchronizer = new Object();
-    private Thread thread;
     protected String name;
     protected int nWakeupRequests;
-    public static boolean stifleExceptionChatter = false;
-
+    private volatile long waitTime;
+    private Thread thread;
     /* Fields shared between threads must be 'volatile'. */
     private volatile boolean shutdownRequest = false;
     private volatile boolean paused = false;
-
     /* This is not volatile because it is only an approximation. */
     private boolean running = false;
-
-    /* Fields for DaemonErrorListener, enabled only during testing. */
-    protected final EnvironmentImpl envImpl;
-    private static final String ERROR_LISTENER = "setErrorListener";
-    /* Logger used in DaemonThread's subclasses. */
-    protected final Logger logger;
 
     public DaemonThread(final long waitTime,
                         final String name,
@@ -75,23 +68,25 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
      * If run is true, starts the thread if not started or unpauses it
      * if already started; if run is false, pauses the thread if
      * started or does nothing if not started.
-     *
+     * <p>
      * Note that no thread is created unless run is true at some time. That
      * way, threads are conserved in cases where the app wants to run their
      * own threads. This can be important when many JE envs are in the same
      * process, in which case a shared cache is often used.
      */
     public void runOrPause(boolean run) {
-        if (run) {
+        if(run) {
             paused = false;
-            if (thread != null) {
+            if(thread != null) {
                 wakeup();
-            } else {
+            }
+            else {
                 thread = new Thread(this, name);
                 thread.setDaemon(true);
                 thread.start();
             }
-        } else {
+        }
+        else {
             paused = true;
         }
     }
@@ -104,15 +99,15 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
      * Requests shutdown and calls join() to wait for the thread to stop.
      */
     public void shutdown() {
-        if (thread != null) {
+        if(thread != null) {
             shutdownRequest = true;
-            while (thread.isAlive()) {
-                synchronized (synchronizer) {
+            while(thread.isAlive()) {
+                synchronized(synchronizer) {
                     synchronizer.notifyAll();
                 }
                 try {
                     thread.join(JOIN_MILLIS);
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
 
                     /*
                      * Klockwork - ok
@@ -132,55 +127,56 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
     }
 
     public void wakeup() {
-        if (!paused) {
-            synchronized (synchronizer) {
+        if(!paused) {
+            synchronized(synchronizer) {
                 synchronizer.notifyAll();
             }
         }
     }
 
     public void run() {
-        while (!shutdownRequest) {
+        while(!shutdownRequest) {
             try {
                 /* Do a unit of work. */
                 int numTries = 0;
                 long maxRetries = nDeadlockRetries();
-                while (numTries <= maxRetries &&
-                       !shutdownRequest &&
-                       !paused) {
+                while(numTries <= maxRetries &&
+                        !shutdownRequest &&
+                        !paused) {
                     try {
                         nWakeupRequests++;
                         running = true;
                         onWakeup();
                         break;
-                    } catch (LockConflictException e) {
+                    } catch(LockConflictException e) {
                     } finally {
                         running = false;
                     }
                     numTries++;
                 }
                 /* Wait for notify, timeout or interrupt. */
-                if (!shutdownRequest) {
-                    synchronized (synchronizer) {
-                        if (waitTime == 0 || paused) {
+                if(!shutdownRequest) {
+                    synchronized(synchronizer) {
+                        if(waitTime == 0 || paused) {
                             synchronizer.wait();
-                        } else {
+                        }
+                        else {
                             synchronizer.wait(waitTime);
                         }
                     }
                 }
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 notifyExceptionListener(e);
-                if (!stifleExceptionChatter) {
+                if(!stifleExceptionChatter) {
                     logger.info
-                        ("Shutting down " + this + " due to exception: " + e);
+                            ("Shutting down " + this + " due to exception: " + e);
                 }
                 shutdownRequest = true;
 
                 assert checkErrorListener(e);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 notifyExceptionListener(e);
-                if (!stifleExceptionChatter) {
+                if(!stifleExceptionChatter) {
 
                     /*
                      * If the exception caused the environment to become
@@ -189,13 +185,13 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
                      * EnvironmentFailureException ctor.
                      */
                     logger.log(Level.SEVERE,
-                               this.toString() + " caught exception, " + e +
-                               (shutdownRequest ? " Exiting" : " Continuing"),
-                               e);
+                            this.toString() + " caught exception, " + e +
+                                    (shutdownRequest ? " Exiting" : " Continuing"),
+                            e);
                 }
 
                 assert checkErrorListener(e);
-            } catch (Error e) {
+            } catch(Error e) {
                 assert checkErrorListener(e);
                 envImpl.invalidate(e); /* [#21929] */
                 notifyExceptionListener(envImpl.getInvalidatingException());
@@ -211,11 +207,11 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
     }
 
     private void notifyExceptionListener(Exception e) {
-        if (envImpl == null) {
+        if(envImpl == null) {
             return;
         }
         final ExceptionListener listener = envImpl.getExceptionListener();
-        if (listener == null) {
+        if(listener == null) {
             return;
         }
         listener.exceptionThrown(DbInternal.makeExceptionEvent(e, name));
@@ -224,17 +220,17 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
     /**
      * If Daemon Thread throws errors and exceptions, this function will catch
      * it and throw a EnvironmentFailureException, and fail the test.
-     *
+     * <p>
      * Only used during testing.
      */
     public boolean checkErrorListener(Throwable e) {
-        if (Boolean.getBoolean(ERROR_LISTENER)) {
-            if (!stifleExceptionChatter) {
+        if(Boolean.getBoolean(ERROR_LISTENER)) {
+            if(!stifleExceptionChatter) {
                 logger.severe(name + " " + LoggerUtils.getStackTrace(e));
             }
             new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.TEST_INVALIDATE,
-                 "Daemon thread failed during testing", e);
+                    (envImpl, EnvironmentFailureReason.TEST_INVALIDATE,
+                            "Daemon thread failed during testing", e);
         }
 
         return true;
@@ -253,7 +249,7 @@ public abstract class DaemonThread implements DaemonRunner, Runnable {
      * DaemonThread aren't made.
      */
     abstract protected void onWakeup()
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * Returns whether shutdown has been requested.  This method should be

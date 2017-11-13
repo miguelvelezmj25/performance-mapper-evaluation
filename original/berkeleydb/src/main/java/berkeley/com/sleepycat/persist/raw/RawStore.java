@@ -13,20 +13,16 @@
 
 package berkeley.com.sleepycat.persist.raw;
 
-import java.io.Closeable;
-
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.persist.PrimaryIndex;
-import berkeley.com.sleepycat.persist.SecondaryIndex;
-import berkeley.com.sleepycat.persist.StoreConfig;
-import berkeley.com.sleepycat.persist.StoreExistsException;
-import berkeley.com.sleepycat.persist.StoreNotFoundException;
+import berkeley.com.sleepycat.persist.*;
 import berkeley.com.sleepycat.persist.evolve.IncompatibleClassException;
 import berkeley.com.sleepycat.persist.evolve.Mutations;
 import berkeley.com.sleepycat.persist.impl.Store;
 import berkeley.com.sleepycat.persist.model.EntityModel;
+
+import java.io.Closeable;
 
 /**
  * Provides access to the raw data in a store for use by general purpose tools.
@@ -34,10 +30,10 @@ import berkeley.com.sleepycat.persist.model.EntityModel;
  * entity classes or key classes.  Keys are represented as simple type objects
  * or, for composite keys, as {@link RawObject} instances, and entities are
  * represented as {@link RawObject} instances.
- *
+ * <p>
  * <p>{@code RawStore} objects are thread-safe.  Multiple threads may safely
  * call the methods of a shared {@code RawStore} object.</p>
- *
+ * <p>
  * <p>When using a {@code RawStore}, the current persistent class definitions
  * are not used.  Instead, the previously stored metadata and class definitions
  * are used.  This has several implications:</p>
@@ -54,41 +50,35 @@ import berkeley.com.sleepycat.persist.model.EntityModel;
  */
 public class RawStore
     /* <!-- begin JE only --> */
-    implements Closeable
-    /* <!-- end JE only --> */
-    {
+        implements Closeable
+    /* <!-- end JE only --> */ {
 
     private Store store;
 
     /**
      * Opens an entity store for raw data access.
      *
-     * @param env an open Berkeley DB environment.
-     *
+     * @param env       an open Berkeley DB environment.
      * @param storeName the name of the entity store within the given
-     * environment.
-     *
-     * @param config the store configuration, or null to use default
-     * configuration properties.
-     *
-     * @throws StoreNotFoundException when the {@link
-     * StoreConfig#setAllowCreate AllowCreate} configuration parameter is false
-     * and the store's internal catalog database does not exist.
-     *
+     *                  environment.
+     * @param config    the store configuration, or null to use default
+     *                  configuration properties.
+     * @throws StoreNotFoundException   when the {@link
+     *                                  StoreConfig#setAllowCreate AllowCreate} configuration parameter is false
+     *                                  and the store's internal catalog database does not exist.
      * @throws IllegalArgumentException if the <code>Environment</code> is
-     * read-only and the <code>config ReadOnly</code> property is false.
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                  read-only and the <code>config ReadOnly</code> property is false.
+     * @throws DatabaseException        the base class for all BDB exceptions.
      */
     public RawStore(Environment env, String storeName, StoreConfig config)
-        throws StoreNotFoundException, DatabaseException {
+            throws StoreNotFoundException, DatabaseException {
 
         try {
             store = new Store(env, storeName, config, true /*rawAccess*/);
-        } catch (StoreExistsException e) {
+        } catch(StoreExistsException e) {
             /* Should never happen, ExclusiveCreate not used. */
             throw DbCompat.unexpectedException(e);
-        } catch (IncompatibleClassException e) {
+        } catch(IncompatibleClassException e) {
             /* Should never happen, evolution is not performed. */
             throw DbCompat.unexpectedException(e);
         }
@@ -98,16 +88,14 @@ public class RawStore
      * Opens the primary index for a given entity class.
      *
      * @param entityClass the name of the entity class.
-     *
      * @return the PrimaryIndex.
-     *
      * @throws DatabaseException the base class for all BDB exceptions.
      */
     public PrimaryIndex<Object, RawObject> getPrimaryIndex(String entityClass)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return store.getPrimaryIndex
-            (Object.class, null, RawObject.class, entityClass);
+                (Object.class, null, RawObject.class, entityClass);
     }
 
     /**
@@ -115,20 +103,17 @@ public class RawStore
      * name.
      *
      * @param entityClass the name of the entity class.
-     *
-     * @param keyName the secondary key name.
-     *
+     * @param keyName     the secondary key name.
      * @return the SecondaryIndex.
-     *
      * @throws DatabaseException the base class for all BDB exceptions.
      */
     public SecondaryIndex<Object, Object, RawObject>
-        getSecondaryIndex(String entityClass, String keyName)
-        throws DatabaseException {
+    getSecondaryIndex(String entityClass, String keyName)
+            throws DatabaseException {
 
         return store.getSecondaryIndex
-            (getPrimaryIndex(entityClass), RawObject.class, entityClass,
-             Object.class, null, keyName);
+                (getPrimaryIndex(entityClass), RawObject.class, entityClass,
+                        Object.class, null, keyName);
     }
 
     /**
@@ -179,7 +164,7 @@ public class RawStore
     /**
      * Closes all databases and sequences that were opened by this model.  No
      * databases opened via this store may be in use.
-     *
+     * <p>
      * <p>WARNING: To guard against memory leaks, the application should
      * discard all references to the closed handle.  While BDB makes an effort
      * to discard references from closed objects to the allocated memory for an
@@ -190,7 +175,7 @@ public class RawStore
      * @throws DatabaseException the base class for all BDB exceptions.
      */
     public void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
         store.close();
     }

@@ -33,10 +33,10 @@ public final class LongDiffMapStat extends MapStat<Long, LongDiffStat> {
      * Creates an instance of this class.  The definition type must be
      * CUMULATIVE.
      *
-     * @param group the owning group
-     * @param definition the associated definition
+     * @param group          the owning group
+     * @param definition     the associated definition
      * @param validityMillis the amount of time, in milliseconds, which a
-     * computed difference remains valid
+     *                       computed difference remains valid
      */
     public LongDiffMapStat(StatGroup group,
                            StatDefinition definition,
@@ -56,7 +56,7 @@ public final class LongDiffMapStat extends MapStat<Long, LongDiffStat> {
      * Creates, stores, and returns a new stat for the specified key and base
      * stat.
      *
-     * @param key the new key
+     * @param key  the new key
      * @param base the base stat
      * @return the new stat
      */
@@ -71,13 +71,18 @@ public final class LongDiffMapStat extends MapStat<Long, LongDiffStat> {
         return new LongDiffMapStat(this);
     }
 
-    /** Ignores base for a non-additive stat. */
+    /**
+     * Ignores base for a non-additive stat.
+     */
     @Override
     public LongDiffMapStat computeInterval(Stat<String> base) {
         return copy();
     }
 
-    /** Does nothing for a non-additive stat. */
+    /**
+     * Does nothing for a non-additive stat.
+     */
     @Override
-    public synchronized void negate() { }
+    public synchronized void negate() {
+    }
 }

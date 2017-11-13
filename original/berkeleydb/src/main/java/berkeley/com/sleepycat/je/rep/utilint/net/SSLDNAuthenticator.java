@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
-import javax.net.ssl.SSLSession;
-
-import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
 import berkeley.com.sleepycat.je.rep.net.InstanceParams;
+import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
+
+import javax.net.ssl.SSLSession;
 
 /**
  * This is an implementation of SSLAuthenticator which authenticates based
@@ -27,18 +27,29 @@ import berkeley.com.sleepycat.je.rep.net.InstanceParams;
  */
 
 public class SSLDNAuthenticator
-    extends SSLDNMatcher
-    implements SSLAuthenticator {
+        extends SSLDNMatcher
+        implements SSLAuthenticator {
 
     /**
      * Construct an SSLDNAuthenticator
      *
      * @param params The parameter for authentication creation.  This class
-     *        requires a Java regular expression to be applied to the subject
-     *        common name.
+     *               requires a Java regular expression to be applied to the subject
+     *               common name.
      */
     public SSLDNAuthenticator(InstanceParams params) {
         super(params);
+    }
+
+    /**
+     * Verify that the string is a valid pattern.
+     *
+     * @throws IllegalArgumentException if not a valid pattern.
+     */
+    public static void validate(String regex)
+            throws IllegalArgumentException {
+
+        validateRegex(regex);
     }
 
     /*
@@ -49,15 +60,5 @@ public class SSLDNAuthenticator
     @Override
     public boolean isTrusted(SSLSession sslSession) {
         return peerMatches(sslSession);
-    }
-
-    /**
-     * Verify that the string is a valid pattern.
-     * @throws IllegalArgumentException if not a valid pattern.
-     */
-    public static void validate(String regex)
-        throws IllegalArgumentException {
-
-        validateRegex(regex);
     }
 }

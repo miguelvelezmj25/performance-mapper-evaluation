@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.entry.ReplicableLogEntry;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.nio.ByteBuffer;
+
 /**
  * Values returned when a item is logged.
- *
+ * <p>
  * This class is used as a simple struct for returning multiple values, and
  * does not need getters and setters.
  */

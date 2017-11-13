@@ -50,7 +50,7 @@ public class SimpleDataChannel extends AbstractDataChannel {
 
     @Override
     public long read(ByteBuffer[] dsts, int offset, int length)
-        throws IOException {
+            throws IOException {
 
         return socketChannel.read(dsts, offset, length);
     }
@@ -77,7 +77,7 @@ public class SimpleDataChannel extends AbstractDataChannel {
 
     @Override
     public long write(ByteBuffer[] srcs, int offset, int length)
-        throws IOException {
+            throws IOException {
 
         return socketChannel.write(srcs, offset, length);
     }

@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.elections;
 
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.ELECTIONS_OPEN_TIMEOUT;
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.ELECTIONS_READ_TIMEOUT;
-
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.rep.elections.Acceptor.SuggestionGenerator.Ranking;
 import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
@@ -25,62 +22,60 @@ import berkeley.com.sleepycat.je.rep.impl.TextProtocol;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
 
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.ELECTIONS_OPEN_TIMEOUT;
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.ELECTIONS_READ_TIMEOUT;
+
 /**
  * Defines the request/response messages used in the implementation of
  * elections.
- *
+ * <p>
  * From Proposer to Acceptor:
- *     Propose -> Promise | Reject
- *     Accept -> Accepted | Reject
- *
+ * Propose -> Promise | Reject
+ * Accept -> Accepted | Reject
+ * <p>
  * From Proposer initiator to Learners:
- *    Result -> none
- *
+ * Result -> none
+ * <p>
  * The following exchange is not part of the elections process, but is used by
  * the Monitor to query a Learner for the latest election result it's aware of,
  * when the Monitor first starts up.  It is also used by nodes and utilities
  * that are attempting to find the master.
- *
+ * <p>
  * From Monitor to Learner
- *    MasterQuery -> MasterQueryResponse | None
- *
+ * MasterQuery -> MasterQueryResponse | None
  */
 public class Protocol extends TextProtocol {
 
     /* Protocol version string. Format: <major version>.<minor version> */
     /* It's used to ensure compatibility across versions. */
     private static final String VERSION = "2.0";
-
-    /* An instance of ProposalParser used to de-serialize proposals */
-    private final ProposalParser proposalParser;
-
-    /* An instance of ValueParser used to de-serialize values */
-    private final ValueParser valueParser;
-
     /* Request Operations */
     public final MessageOp PROPOSE;
     public final MessageOp ACCEPT;
     public final MessageOp RESULT;
     public final MessageOp MASTER_QUERY;
     public final MessageOp SHUTDOWN;
-
     /* Response operations */
     public final MessageOp REJECT;
     public final MessageOp PROMISE;
     public final MessageOp ACCEPTED;
     public final MessageOp MASTER_QUERY_RESPONSE;
+    /* An instance of ProposalParser used to de-serialize proposals */
+    private final ProposalParser proposalParser;
+    /* An instance of ValueParser used to de-serialize values */
+    private final ValueParser valueParser;
 
     /**
      * Creates an instance of the Protocol.
      *
      * @param proposalParser parses a string into a Proposal object.
-     * @param valueParser parses a string into a Value object.
+     * @param valueParser    parses a string into a Value object.
+     * @param nameIdPair     a unique identifier for this election participant.
      * @parameter groupName the name of the group running the election process.
-     * @param nameIdPair a unique identifier for this election participant.
      */
     public Protocol(ProposalParser proposalParser,
                     ValueParser valueParser,
-                    String  groupName,
+                    String groupName,
                     NameIdPair nameIdPair,
                     RepImpl repImpl,
                     DataChannelFactory channelFactory) {
@@ -92,15 +87,15 @@ public class Protocol extends TextProtocol {
         ACCEPT = new MessageOp("A", Accept.class);
         RESULT = new MessageOp("RE", Result.class);
         MASTER_QUERY = new MessageOp("MQ", MasterQuery.class);
-        SHUTDOWN = new MessageOp("X", Shutdown.class );
+        SHUTDOWN = new MessageOp("X", Shutdown.class);
 
         REJECT = new MessageOp("R", Reject.class);
         PROMISE = new MessageOp("PR", Promise.class);
         ACCEPTED = new MessageOp("AD", Accepted.class);
         MASTER_QUERY_RESPONSE =
-            new MessageOp("MQR", MasterQueryResponse.class);
+                new MessageOp("MQR", MasterQueryResponse.class);
 
-        initializeMessageOps(new MessageOp[] {
+        initializeMessageOps(new MessageOp[]{
                 PROPOSE,
                 ACCEPT,
                 RESULT,
@@ -118,15 +113,52 @@ public class Protocol extends TextProtocol {
         setTimeouts(repImpl, ELECTIONS_OPEN_TIMEOUT, ELECTIONS_READ_TIMEOUT);
     }
 
+    /* Represents a Value in Paxos. */
+    public interface Value extends WireFormatable {
+    }
+
+    public interface ValueParser {
+        /**
+         * Converts the wire format back into a Value
+         *
+         * @param wireFormat String representation of a Value
+         * @return the de-serialized Value
+         */
+        abstract Value parse(String wireFormat);
+    }
+
+    /**
+     * A String based value implementation used as the "default" Value
+     */
+    public static class StringValue extends StringFormatable implements Value {
+
+        StringValue() {
+            super(null);
+        }
+
+        public StringValue(String s) {
+            super(s);
+        }
+
+        @Override
+        public String toString() {
+            return "Value:" + s;
+        }
+
+        public String getString() {
+            return s;
+        }
+    }
+
     /**
      * Promise response message. It's sent in response to a Propose message.
-     *
+     * <p>
      * Note that the "minor" part of the suggestion ranking is always tagged on
      * to the end of the promise request payload. Older pre 7.1.3 nodes will
      * ignore extra tokens at the end, since they do not know about the minor
      * component of the ranking. This node will use it if it's present and
      * otherwise use a value of zero for the minor (VLSN) component.
-     *
+     * <p>
      * So when comparing rankings across old and new nodes, we are effectively
      * comparing a Ranking(VLSN, Long.MIN_VALUE) with a Ranking(DTVLSN, VLSN),
      * resulting in suboptimal election results (from a dtvlsn perspective)
@@ -135,16 +167,15 @@ public class Protocol extends TextProtocol {
      * upgraded.
      */
     public class Promise extends ResponseMessage {
-        private Proposal highestProposal = null;
-        private Value acceptedValue = null;
-        private Value suggestion = null;
-
         /**
          * The major and minor components of the Ranking represent the DTVLSN
          * and the latest VLSN respectively.
          */
         private final Ranking suggestionRanking;
         private final int priority;
+        private Proposal highestProposal = null;
+        private Value acceptedValue = null;
+        private Value suggestion = null;
         private int logVersion;
         private JEVersion jeVersion;
 
@@ -158,14 +189,14 @@ public class Protocol extends TextProtocol {
             this.highestProposal = highestProposal;
             this.acceptedValue = value;
             this.suggestion = suggestion;
-            this.suggestionRanking = suggestionRanking ;
+            this.suggestionRanking = suggestionRanking;
             this.priority = priority;
             this.logVersion = logVersion;
             this.jeVersion = jeVersion;
         }
 
         public Promise(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
             highestProposal = proposalParser.parse(nextPayloadToken());
@@ -173,15 +204,15 @@ public class Protocol extends TextProtocol {
             suggestion = valueParser.parse(nextPayloadToken());
             String weight = nextPayloadToken();
             long majorRanking =
-                "".equals(weight) ?
-                Ranking.UNINITIALIZED.major :
-                Long.parseLong(weight);
+                    "".equals(weight) ?
+                            Ranking.UNINITIALIZED.major :
+                            Long.parseLong(weight);
             long minorRanking = Ranking.UNINITIALIZED.major;
             priority = Integer.parseInt(nextPayloadToken());
-            if (getMajorVersionNumber(sendVersion) > 1) {
+            if(getMajorVersionNumber(sendVersion) > 1) {
                 logVersion = Integer.parseInt(nextPayloadToken());
                 jeVersion = new JEVersion(nextPayloadToken());
-                if (hasMoreTokens()) {
+                if(hasMoreTokens()) {
                     /*
                      * The tie breaker is appended to the end by newer versions
                      * of JE nodes >= version 7.1.3
@@ -207,14 +238,14 @@ public class Protocol extends TextProtocol {
             result = prime
                     * result
                     + ((highestProposal == null) ? 0
-                            : highestProposal.hashCode());
+                    : highestProposal.hashCode());
             result = prime * result + priority;
             result = prime * result
                     + ((suggestion == null) ? 0 : suggestion.hashCode());
             result = prime * result + suggestionRanking.hashCode();
 
-            if (getMajorVersionNumber(sendVersion) > 1) {
-                result += prime* result + logVersion + jeVersion.hashCode();
+            if(getMajorVersionNumber(sendVersion) > 1) {
+                result += prime * result + logVersion + jeVersion.hashCode();
             }
 
             return result;
@@ -222,62 +253,65 @@ public class Protocol extends TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
 
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
 
-            if (getClass() != obj.getClass()) {
+            if(getClass() != obj.getClass()) {
                 return false;
             }
 
             Promise other = (Promise) obj;
-            if (!getOuterType().equals(other.getOuterType())) {
+            if(!getOuterType().equals(other.getOuterType())) {
                 return false;
             }
 
-            if (acceptedValue == null) {
-                if (other.acceptedValue != null) {
+            if(acceptedValue == null) {
+                if(other.acceptedValue != null) {
                     return false;
                 }
-            } else if (!acceptedValue.equals(other.acceptedValue)) {
+            }
+            else if(!acceptedValue.equals(other.acceptedValue)) {
                 return false;
             }
 
-            if (highestProposal == null) {
-                if (other.highestProposal != null) {
+            if(highestProposal == null) {
+                if(other.highestProposal != null) {
                     return false;
                 }
-            } else if (!highestProposal.equals(other.highestProposal)) {
+            }
+            else if(!highestProposal.equals(other.highestProposal)) {
                 return false;
             }
 
-            if (priority != other.priority) {
+            if(priority != other.priority) {
                 return false;
             }
 
-            if (getMajorVersionNumber(sendVersion) > 1) {
-                if (logVersion != other.logVersion) {
+            if(getMajorVersionNumber(sendVersion) > 1) {
+                if(logVersion != other.logVersion) {
                     return false;
                 }
 
-                if (jeVersion.compareTo(other.jeVersion) != 0) {
+                if(jeVersion.compareTo(other.jeVersion) != 0) {
                     return false;
                 }
             }
 
-            if (suggestion == null) {
-                if (other.suggestion != null) {
+            if(suggestion == null) {
+                if(other.suggestion != null) {
                     return false;
                 }
-            } else if (!suggestion.equals(other.suggestion)) {
+            }
+            else if(!suggestion.equals(other.suggestion)) {
                 return false;
             }
 
-            if (!suggestionRanking.equals(other.suggestionRanking)) {
+            if(!suggestionRanking.equals(other.suggestionRanking)) {
                 return false;
             }
 
@@ -287,29 +321,29 @@ public class Protocol extends TextProtocol {
         @Override
         public String wireFormat() {
             String line =
-                wireFormatPrefix() +
-                SEPARATOR +
-                ((highestProposal != null) ?
-                 highestProposal.wireFormat() :
-                 "") +
-                SEPARATOR +
-                ((acceptedValue != null) ? acceptedValue.wireFormat() : "") +
-                SEPARATOR +
-                ((suggestion != null) ?  suggestion.wireFormat() : "") +
-                SEPARATOR +
-                ((suggestionRanking.major == Long.MIN_VALUE) ?
-                 "" :
-                 Long.toString(suggestionRanking.major)) +
-                 SEPARATOR +
-                 priority;
+                    wireFormatPrefix() +
+                            SEPARATOR +
+                            ((highestProposal != null) ?
+                                    highestProposal.wireFormat() :
+                                    "") +
+                            SEPARATOR +
+                            ((acceptedValue != null) ? acceptedValue.wireFormat() : "") +
+                            SEPARATOR +
+                            ((suggestion != null) ? suggestion.wireFormat() : "") +
+                            SEPARATOR +
+                            ((suggestionRanking.major == Long.MIN_VALUE) ?
+                                    "" :
+                                    Long.toString(suggestionRanking.major)) +
+                            SEPARATOR +
+                            priority;
 
-           if (getMajorVersionNumber(sendVersion) > 1) {
-              line += SEPARATOR + logVersion +
-                      SEPARATOR + jeVersion.toString() +
-                      SEPARATOR + Long.toString(suggestionRanking.minor);
-           }
+            if(getMajorVersionNumber(sendVersion) > 1) {
+                line += SEPARATOR + logVersion +
+                        SEPARATOR + jeVersion.toString() +
+                        SEPARATOR + Long.toString(suggestionRanking.minor);
+            }
 
-           return line;
+            return line;
         }
 
         Proposal getHighestProposal() {
@@ -353,18 +387,18 @@ public class Protocol extends TextProtocol {
         private final Value value;
 
         Accepted(Proposal proposal, Value value) {
-            assert(proposal!= null);
-            assert(value != null);
+            assert (proposal != null);
+            assert (value != null);
             this.proposal = proposal;
             this.value = value;
         }
 
         public Accepted(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
             proposal = proposalParser.parse(nextPayloadToken());
-            value  = valueParser.parse(nextPayloadToken());
+            value = valueParser.parse(nextPayloadToken());
         }
 
         @Override
@@ -379,28 +413,30 @@ public class Protocol extends TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof Accepted)) {
+            if(!(obj instanceof Accepted)) {
                 return false;
             }
             final Accepted other = (Accepted) obj;
-            if (proposal == null) {
-                if (other.proposal != null) {
+            if(proposal == null) {
+                if(other.proposal != null) {
                     return false;
                 }
-            } else if (!proposal.equals(other.proposal)) {
+            }
+            else if(!proposal.equals(other.proposal)) {
                 return false;
             }
-            if (value == null) {
-                if (other.value != null) {
+            if(value == null) {
+                if(other.value != null) {
                     return false;
                 }
-            } else if (!value.equals(other.value)) {
+            }
+            else if(!value.equals(other.value)) {
                 return false;
             }
             return true;
@@ -414,7 +450,7 @@ public class Protocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR + proposal.wireFormat() +
-                SEPARATOR + value.wireFormat();
+                    SEPARATOR + value.wireFormat();
         }
 
         public Value getValue() {
@@ -437,10 +473,11 @@ public class Protocol extends TextProtocol {
         }
 
         public MasterQueryResponse(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
         }
+
         @Override
         public MessageOp getOp() {
             return MASTER_QUERY_RESPONSE;
@@ -463,7 +500,7 @@ public class Protocol extends TextProtocol {
         }
 
         public Reject(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
             higherProposal = proposalParser.parse(nextPayloadToken());
@@ -474,28 +511,29 @@ public class Protocol extends TextProtocol {
             final int prime = 31;
             int result = super.hashCode();
             result = prime * result +
-                ((higherProposal == null) ? 0 : higherProposal.hashCode());
+                    ((higherProposal == null) ? 0 : higherProposal.hashCode());
 
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof Reject)) {
+            if(!(obj instanceof Reject)) {
                 return false;
             }
             final Reject other = (Reject) obj;
-            if (higherProposal == null) {
-                if (other.higherProposal != null) {
+            if(higherProposal == null) {
+                if(other.higherProposal != null) {
                     return false;
                 }
-            } else if (!higherProposal.equals(other.higherProposal)) {
+            }
+            else if(!higherProposal.equals(other.higherProposal)) {
                 return false;
             }
             return true;
@@ -527,7 +565,7 @@ public class Protocol extends TextProtocol {
         }
 
         public Propose(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
             proposal = proposalParser.parse(nextPayloadToken());
@@ -544,21 +582,22 @@ public class Protocol extends TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof Propose)) {
+            if(!(obj instanceof Propose)) {
                 return false;
             }
             final Propose other = (Propose) obj;
-            if (proposal == null) {
-                if (other.proposal != null) {
+            if(proposal == null) {
+                if(other.proposal != null) {
                     return false;
                 }
-            } else if (!proposal.equals(other.proposal)) {
+            }
+            else if(!proposal.equals(other.proposal)) {
                 return false;
             }
             return true;
@@ -571,7 +610,7 @@ public class Protocol extends TextProtocol {
 
         @Override
         public String wireFormat() {
-            return wireFormatPrefix() + SEPARATOR +  proposal.wireFormat();
+            return wireFormatPrefix() + SEPARATOR + proposal.wireFormat();
         }
 
         Proposal getProposal() {
@@ -581,10 +620,11 @@ public class Protocol extends TextProtocol {
 
     public class Shutdown extends RequestMessage {
 
-        public Shutdown() {}
+        public Shutdown() {
+        }
 
         public Shutdown(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
         }
@@ -613,7 +653,7 @@ public class Protocol extends TextProtocol {
         }
 
         public Accept(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
             value = valueParser.parse(nextPayloadToken());
@@ -629,21 +669,22 @@ public class Protocol extends TextProtocol {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (!super.equals(obj)) {
+            if(!super.equals(obj)) {
                 return false;
             }
-            if (!(obj instanceof Accept)) {
+            if(!(obj instanceof Accept)) {
                 return false;
             }
             final Accept other = (Accept) obj;
-            if (value == null) {
-                if (other.value != null) {
+            if(value == null) {
+                if(other.value != null) {
                     return false;
                 }
-            } else if (!value.equals(other.value)) {
+            }
+            else if(!value.equals(other.value)) {
                 return false;
             }
             return true;
@@ -674,7 +715,7 @@ public class Protocol extends TextProtocol {
         }
 
         public Result(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(requestLine, tokens);
         }
 
@@ -689,10 +730,11 @@ public class Protocol extends TextProtocol {
      */
     public class MasterQuery extends RequestMessage {
 
-        public MasterQuery() {}
+        public MasterQuery() {
+        }
 
         public MasterQuery(String responseLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(responseLine, tokens);
         }
@@ -715,46 +757,6 @@ public class Protocol extends TextProtocol {
         @Override
         public String toString() {
             return getOp() + " " + getMessagePrefix() + " " + wireFormat();
-        }
-    }
-
-    /* Represents a Value in Paxos. */
-    public interface Value extends WireFormatable  {
-    }
-
-    public interface ValueParser {
-        /**
-         * Converts the wire format back into a Value
-         *
-         * @param wireFormat String representation of a Value
-         *
-         *
-         * @return the de-serialized Value
-         *
-         */
-        abstract Value parse(String wireFormat);
-    }
-
-    /**
-     * A String based value implementation used as the "default" Value
-     */
-    public static class StringValue extends StringFormatable implements Value {
-
-        StringValue() {
-            super(null);
-        }
-
-        public StringValue(String s) {
-            super(s);
-        }
-
-        @Override
-        public String toString() {
-            return "Value:" + s;
-        }
-
-        public String getString() {
-            return s;
         }
     }
 }

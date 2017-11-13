@@ -18,7 +18,6 @@ import java.nio.ByteBuffer;
 /**
  * LogBufferSegment is used by a writer to access
  * a portion of a LogBuffer.
- *
  */
 class LogBufferSegment {
     private final LogBuffer logBuffer;
@@ -32,8 +31,9 @@ class LogBufferSegment {
     /**
      * Copies the data into the underlying LogBuffer
      * and decrements the LogBuffer pin count.
+     *
      * @param dataToCopy data to copy into the underlying
-     *        LogBuffer.
+     *                   LogBuffer.
      */
     public void put(ByteBuffer dataToCopy) {
 

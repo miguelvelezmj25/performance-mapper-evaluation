@@ -4,7 +4,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 /**
- * Removing regions. 4 regions are left
+ * Removing regions. 1 region are left
  */
 public class Regions14 {
 
@@ -51,29 +51,10 @@ public class Regions14 {
     }
 
     private static void moo(boolean a, boolean b) throws InterruptedException {
-        if(a && b) { // A & AB
+        if(a && b) { // AB
             Thread.sleep(2000);
             System.out.println();
         }
     }
 
 }
-
-
-/*
-void foo() {
-
-for(int i =0 ; i < 10; i++) {
-    if(A) {
-        ...
-    }
-
-    ...
-
-}
-
-if(C) {
-...
-}
-}
- */

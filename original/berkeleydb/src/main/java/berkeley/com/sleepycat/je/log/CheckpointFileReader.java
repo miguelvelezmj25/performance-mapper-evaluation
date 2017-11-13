@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.nio.ByteBuffer;
 
 /**
  * CheckpointFileReader searches for root and checkpoint entries.
@@ -36,10 +36,10 @@ public class CheckpointFileReader extends FileReader {
                                 long startLsn,
                                 long finishLsn,
                                 long endOfFileLsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env, readBufferSize, forward, startLsn,
-              null, endOfFileLsn, finishLsn);
+                null, endOfFileLsn, finishLsn);
     }
 
     /**
@@ -52,14 +52,16 @@ public class CheckpointFileReader extends FileReader {
         isDbTree = false;
         isCheckpointEnd = false;
         isCheckpointStart = false;
-        if (LogEntryType.LOG_CKPT_END.equalsType(logEntryTypeNumber)) {
+        if(LogEntryType.LOG_CKPT_END.equalsType(logEntryTypeNumber)) {
             isTarget = true;
             isCheckpointEnd = true;
-        } else if (LogEntryType.LOG_CKPT_START.equalsType
-            (logEntryTypeNumber)) {
+        }
+        else if(LogEntryType.LOG_CKPT_START.equalsType
+                (logEntryTypeNumber)) {
             isTarget = true;
             isCheckpointStart = true;
-        } else if (LogEntryType.LOG_DBTREE.equalsType
+        }
+        else if(LogEntryType.LOG_DBTREE.equalsType
                 (logEntryTypeNumber)) {
             isTarget = true;
             isDbTree = true;

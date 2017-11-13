@@ -21,10 +21,10 @@ import java.util.Map;
 /**
  * The metadata for a persistent class.  A persistent class may be specified
  * with the {@link Entity} or {@link Persistent} annotation.
- *
+ * <p>
  * <p>{@code ClassMetadata} objects are thread-safe.  Multiple threads may
  * safely call the methods of a shared {@code ClassMetadata} object.</p>
- *
+ * <p>
  * <p>This and other metadata classes are classes rather than interfaces to
  * allow adding properties to the model at a future date without causing
  * incompatibilities.  Any such property will be given a default value and
@@ -49,12 +49,12 @@ public class ClassMetadata implements Serializable {
      * Used by an {@code EntityModel} to construct persistent class metadata.
      * The optional {@link #getPersistentFields} property will be set to null.
      *
-     * @param className the class name.
-     * @param version the version.
-     * @param proxiedClassName the proxied class name.
-     * @param entityClass whether the class is an entity class.
-     * @param primaryKey the primary key metadata.
-     * @param secondaryKeys the secondary key metadata.
+     * @param className          the class name.
+     * @param version            the version.
+     * @param proxiedClassName   the proxied class name.
+     * @param entityClass        whether the class is an entity class.
+     * @param primaryKey         the primary key metadata.
+     * @param secondaryKeys      the secondary key metadata.
      * @param compositeKeyFields the composite key field metadata.
      */
     public ClassMetadata(String className,
@@ -66,20 +66,20 @@ public class ClassMetadata implements Serializable {
                          List<FieldMetadata> compositeKeyFields) {
 
         this(className, version, proxiedClassName, entityClass, primaryKey,
-             secondaryKeys, compositeKeyFields, null /*persistentFields*/);
+                secondaryKeys, compositeKeyFields, null /*persistentFields*/);
     }
 
     /**
      * Used by an {@code EntityModel} to construct persistent class metadata.
      *
-     * @param className the class name.
-     * @param version the version.
-     * @param proxiedClassName the proxied class name.
-     * @param entityClass whether the class is an entity class.
-     * @param primaryKey the primary key metadata.
-     * @param secondaryKeys the secondary key metadata.
+     * @param className          the class name.
+     * @param version            the version.
+     * @param proxiedClassName   the proxied class name.
+     * @param entityClass        whether the class is an entity class.
+     * @param primaryKey         the primary key metadata.
+     * @param secondaryKeys      the secondary key metadata.
      * @param compositeKeyFields the composite key field metadata.
-     * @param persistentFields the persistent field metadata.
+     * @param persistentFields   the persistent field metadata.
      */
     public ClassMetadata(String className,
                          int version,
@@ -97,6 +97,24 @@ public class ClassMetadata implements Serializable {
         this.secondaryKeys = secondaryKeys;
         this.compositeKeyFields = compositeKeyFields;
         this.persistentFields = persistentFields;
+    }
+
+    static boolean nullOrEqual(Object o1, Object o2) {
+        if(o1 == null) {
+            return o2 == null;
+        }
+        else {
+            return o1.equals(o2);
+        }
+    }
+
+    static int hashCode(Object o) {
+        if(o != null) {
+            return o.hashCode();
+        }
+        else {
+            return 0;
+        }
     }
 
     /**
@@ -180,7 +198,7 @@ public class ClassMetadata implements Serializable {
      * this class, or null if the default rules for persistent fields should be
      * used.  All fields returned must be declared in this class and must be
      * non-static.
-     *
+     * <p>
      * <p>By default (if null is returned) the persistent fields of a class
      * will be all declared instance fields that are non-transient (are not
      * declared with the <code>transient</code> keyword).  The default rules
@@ -196,16 +214,17 @@ public class ClassMetadata implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof ClassMetadata) {
+        if(other instanceof ClassMetadata) {
             ClassMetadata o = (ClassMetadata) other;
             return version == o.version &&
-                   entityClass == o.entityClass &&
-                   nullOrEqual(className, o.className) &&
-                   nullOrEqual(proxiedClassName, o.proxiedClassName) &&
-                   nullOrEqual(primaryKey, o.primaryKey) &&
-                   nullOrEqual(secondaryKeys, o.secondaryKeys) &&
-                   nullOrEqual(compositeKeyFields, o.compositeKeyFields);
-        } else {
+                    entityClass == o.entityClass &&
+                    nullOrEqual(className, o.className) &&
+                    nullOrEqual(proxiedClassName, o.proxiedClassName) &&
+                    nullOrEqual(primaryKey, o.primaryKey) &&
+                    nullOrEqual(secondaryKeys, o.secondaryKeys) &&
+                    nullOrEqual(compositeKeyFields, o.compositeKeyFields);
+        }
+        else {
             return false;
         }
     }
@@ -213,27 +232,11 @@ public class ClassMetadata implements Serializable {
     @Override
     public int hashCode() {
         return version +
-               (entityClass ? 1 : 0) +
-               hashCode(className) +
-               hashCode(proxiedClassName) +
-               hashCode(primaryKey) +
-               hashCode(secondaryKeys) +
-               hashCode(compositeKeyFields);
-    }
-
-    static boolean nullOrEqual(Object o1, Object o2) {
-        if (o1 == null) {
-            return o2 == null;
-        } else {
-            return o1.equals(o2);
-        }
-    }
-
-    static int hashCode(Object o) {
-        if (o != null) {
-            return o.hashCode();
-        } else {
-            return 0;
-        }
+                (entityClass ? 1 : 0) +
+                hashCode(className) +
+                hashCode(proxiedClassName) +
+                hashCode(primaryKey) +
+                hashCode(secondaryKeys) +
+                hashCode(compositeKeyFields);
     }
 }

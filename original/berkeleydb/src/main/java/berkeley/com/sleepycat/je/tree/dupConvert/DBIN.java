@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree.dupConvert;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogEntryType;
@@ -26,9 +24,11 @@ import berkeley.com.sleepycat.je.tree.Key;
 import berkeley.com.sleepycat.je.tree.TreeUtils;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
 
+import java.nio.ByteBuffer;
+
 /**
  * A DBIN represents an Duplicate Bottom Internal Node in the JE tree.
- *
+ * <p>
  * Obsolete in log version 8, only used by DupConvert and some log readers.
  */
 public final class DBIN extends BIN implements Loggable {
@@ -84,6 +84,7 @@ public final class DBIN extends BIN implements Loggable {
 
     /**
      * For unit test support:
+     *
      * @return a string that dumps information about this IN, without
      */
     @Override
@@ -93,7 +94,7 @@ public final class DBIN extends BIN implements Loggable {
         sb.append(beginTag());
         sb.append('\n');
 
-        sb.append(TreeUtils.indent(nSpaces+2));
+        sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append("<dupkey>");
         sb.append(dupKey == null ? "" : Key.dumpString(dupKey, 0));
         sb.append("</dupkey>");

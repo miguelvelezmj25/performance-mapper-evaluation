@@ -27,9 +27,9 @@ public class InstanceContext {
      * Creates an InstanceContext instance.
      *
      * @param repNetConfig the configuration from which an instantiation
-     * is being generated.
-     * @param logger a logger that can be used for logging errors or other
-     * information
+     *                     is being generated.
+     * @param logger       a logger that can be used for logging errors or other
+     *                     information
      */
     public InstanceContext(ReplicationNetworkConfig repNetConfig,
                            LoggerFactory loggerFactory) {
@@ -49,6 +49,7 @@ public class InstanceContext {
     /**
      * Gets the LoggerFactory that is usable by an instantiation for creation
      * of a JE HA-friendly logging object.
+     *
      * @return a LoggerFactory object.
      */
     final public LoggerFactory getLoggerFactory() {

@@ -20,10 +20,10 @@ public class IntegralRateStat extends LongStat {
     private static final long serialVersionUID = 1L;
 
     private final long factor;
-    
-    public IntegralRateStat(StatGroup group, 
-                            StatDefinition definition, 
-                            Stat<? extends Number> divisor, 
+
+    public IntegralRateStat(StatGroup group,
+                            StatDefinition definition,
+                            Stat<? extends Number> divisor,
                             Stat<? extends Number> dividend,
                             long factor) {
         super(group, definition);
@@ -33,15 +33,16 @@ public class IntegralRateStat extends LongStat {
     }
 
     /* Calculate the rate based on the two stats. */
-    private void calculateRate(Stat<? extends Number> divisor, 
+    private void calculateRate(Stat<? extends Number> divisor,
                                Stat<? extends Number> dividend) {
-        if (divisor == null || dividend == null) {
+        if(divisor == null || dividend == null) {
             counter = 0;
-        } else {
+        }
+        else {
             counter = (dividend.get().longValue() != 0) ?
-                (divisor.get().longValue() * factor) / 
-                 dividend.get().longValue() :
-                 0;
+                    (divisor.get().longValue() * factor) /
+                            dividend.get().longValue() :
+                    0;
         }
     }
 }

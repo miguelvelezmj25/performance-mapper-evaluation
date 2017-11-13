@@ -12,11 +12,11 @@
  */
 package berkeley.com.sleepycat.je.tree;
 
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.evictor.Evictor;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
+
+import java.util.Arrays;
 
 /**
  * The abstract class that defines the various representations used to
@@ -24,7 +24,7 @@ import berkeley.com.sleepycat.je.utilint.SizeofMarker;
  * arrays can be sparse, so the non-default representations are designed to
  * make efficient representations for the sparse cases. Each specialized
  * representation is a subclass of INTargetReps.
- *
+ * <p>
  * A new IN node starts out with the None representation and grows through a
  * sparse into the full default representation. Subsequently, the default
  * representation can be <i>compacted</i> into a Sparse or None representation
@@ -34,15 +34,17 @@ import berkeley.com.sleepycat.je.utilint.SizeofMarker;
  * a cpu cost and a gc cost associated with it.
  */
 public abstract class INTargetRep
-    extends INArrayRep<INTargetRep, INTargetRep.Type, Node> {
+        extends INArrayRep<INTargetRep, INTargetRep.Type, Node> {
 
     /* Single instance used for None rep. */
     public static final None NONE = new None();
 
-    /* Enumeration for the different types of supported representations. */
-    public enum Type { DEFAULT, SPARSE, NONE }
-
     public INTargetRep() {
+    }
+
+    /* Enumeration for the different types of supported representations. */
+    public enum Type {
+        DEFAULT, SPARSE, NONE
     }
 
     /* The default non-sparse representation. It simply wraps an array. */
@@ -94,24 +96,25 @@ public abstract class INTargetRep
         @Override
         public INTargetRep compact(IN parent) {
             int count = 0;
-            for (Node target : targets) {
-                if (target != null) {
+            for(Node target : targets) {
+                if(target != null) {
                     count++;
                 }
             }
 
-            if ((count > Sparse.MAX_ENTRIES) ||
-                (targets.length > Sparse.MAX_INDEX)) {
+            if((count > Sparse.MAX_ENTRIES) ||
+                    (targets.length > Sparse.MAX_INDEX)) {
                 return this;
             }
 
             INTargetRep newRep = null;
-            if (count == 0) {
+            if(count == 0) {
                 newRep = NONE;
-            } else {
+            }
+            else {
                 newRep = new Sparse(targets.length);
-                for (int i=0; i < targets.length; i++) {
-                    if (targets[i] != null) {
+                for(int i = 0; i < targets.length; i++) {
+                    if(targets[i] != null) {
                         newRep.set(i, targets[i], parent);
                     }
                 }
@@ -124,14 +127,14 @@ public abstract class INTargetRep
         @Override
         public long calculateMemorySize() {
             return MemoryBudget.DEFAULT_TARGET_ENTRY_OVERHEAD +
-                   MemoryBudget.objectArraySize(targets.length);
+                    MemoryBudget.objectArraySize(targets.length);
         }
 
         @Override
         public void updateCacheStats(@SuppressWarnings("unused")
-                                     boolean increment,
+                                             boolean increment,
                                      @SuppressWarnings("unused")
-                                     Evictor evictor) {
+                                             Evictor evictor) {
             /* No stats for this default rep. */
         }
     }
@@ -182,16 +185,16 @@ public abstract class INTargetRep
             assert (j >= 0) && (j <= MAX_INDEX);
 
             /* Unrolled for loop */
-            if (idxs[0] == j) {
+            if(idxs[0] == j) {
                 return targets[0];
             }
-            if (idxs[1] == j) {
+            if(idxs[1] == j) {
                 return targets[1];
             }
-            if (idxs[2] == j) {
+            if(idxs[2] == j) {
                 return targets[2];
             }
-            if (idxs[3] == j) {
+            if(idxs[3] == j) {
                 return targets[3];
             }
             return null;
@@ -203,26 +206,26 @@ public abstract class INTargetRep
             assert (j >= 0) && (j <= MAX_INDEX);
 
             int slot = -1;
-            for (int i=0; i < targets.length; i++) {
+            for(int i = 0; i < targets.length; i++) {
 
-                if (idxs[i] == j) {
+                if(idxs[i] == j) {
                     targets[i] = node;
                     return this;
                 }
 
-                if ((slot < 0) && (targets[i] == null)) {
-                   slot = i;
+                if((slot < 0) && (targets[i] == null)) {
+                    slot = i;
                 }
             }
 
-            if (node == null) {
+            if(node == null) {
                 return this;
             }
 
             /* Have a free slot, use it. */
-            if (slot >= 0) {
+            if(slot >= 0) {
                 targets[slot] = node;
-                idxs[slot] = (short)j;
+                idxs[slot] = (short) j;
                 return this;
             }
 
@@ -230,8 +233,8 @@ public abstract class INTargetRep
             Default fe = new Default(parent.getMaxEntries());
             noteRepChange(fe, parent);
 
-            for (int i=0; i < targets.length; i++) {
-                if (targets[i] != null) {
+            for(int i = 0; i < targets.length; i++) {
+                if(targets[i] != null) {
                     fe.set(idxs[i], targets[i], parent);
                 }
             }
@@ -244,18 +247,20 @@ public abstract class INTargetRep
 
             INTargetRep target = this;
 
-            if ((to == from) || (n == 0)) {
+            if((to == from) || (n == 0)) {
                 /* Nothing to do */
-            } else if (to < from) {
+            }
+            else if(to < from) {
                 /* Copy ascending */
-                for (int i = 0; i < n; i++) {
+                for(int i = 0; i < n; i++) {
                     target = target.set(to++, get(from++), parent);
                 }
-            } else {
+            }
+            else {
                 /* to > from. Copy descending */
                 from += n;
                 to += n;
-                for (int i = 0; i < n; i++) {
+                for(int i = 0; i < n; i++) {
                     target = target.set(--to, get(--from), parent);
                 }
             }
@@ -265,12 +270,12 @@ public abstract class INTargetRep
         @Override
         public INTargetRep compact(IN parent) {
             int count = 0;
-            for (Node target : targets) {
-                if (target != null) {
+            for(Node target : targets) {
+                if(target != null) {
                     count++;
                 }
             }
-            if (count == 0) {
+            if(count == 0) {
                 None newRep = NONE;
                 noteRepChange(newRep, parent);
                 return newRep;
@@ -289,9 +294,10 @@ public abstract class INTargetRep
 
         @Override
         public void updateCacheStats(boolean increment, Evictor evictor) {
-            if (increment) {
+            if(increment) {
                 evictor.getNINSparseTarget().incrementAndGet();
-            } else {
+            }
+            else {
                 evictor.getNINSparseTarget().decrementAndGet();
             }
         }
@@ -327,7 +333,7 @@ public abstract class INTargetRep
         @Override
         public INTargetRep set(int idx, Node node, IN parent) {
 
-            if (node == null) {
+            if(node == null) {
                 return this;
             }
 
@@ -358,9 +364,10 @@ public abstract class INTargetRep
 
         @Override
         public void updateCacheStats(boolean increment, Evictor evictor) {
-            if (increment) {
+            if(increment) {
                 evictor.getNINNoTarget().incrementAndGet();
-            } else {
+            }
+            else {
                 evictor.getNINNoTarget().decrementAndGet();
             }
         }

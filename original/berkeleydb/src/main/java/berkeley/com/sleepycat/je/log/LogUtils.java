@@ -13,14 +13,13 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-
-import javax.transaction.xa.Xid;
-
 import berkeley.com.sleepycat.je.utilint.Timestamp;
 import berkeley.com.sleepycat.util.PackedInteger;
 import berkeley.com.sleepycat.utilint.StringUtils;
+
+import javax.transaction.xa.Xid;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * This class holds convenience methods for marshalling internal JE data to and
@@ -32,14 +31,11 @@ public class LogUtils {
     public static final int INT_BYTES = 4;
     public static final int LONG_BYTES = 8;
     public static final int UNSIGNED_INT_BYTES = 4;
-
-    private static final boolean DEBUG = false;
-
     /*
      * We can return the same byte[] for 0 length arrays.
      */
     public static final byte[] ZERO_LENGTH_BYTE_ARRAY = new byte[0];
-
+    private static final boolean DEBUG = false;
     /*
      * The je.logCharset system property can be specified when running
      * DbPrintLog to work around the charset issue in JE 5.0 and earlier (see
@@ -55,12 +51,13 @@ public class LogUtils {
      * DbPrintLog) that was written with a non-ANSI-based default charset.
      */
     private static Charset logCharset = null;
+
     static {
         final String charsetName = System.getProperty("je.logCharset");
-        if (charsetName != null && charsetName.length() > 0) {
+        if(charsetName != null && charsetName.length() > 0) {
             try {
                 logCharset = Charset.forName(charsetName);
-            } catch (RuntimeException e) {
+            } catch(RuntimeException e) {
                 e.printStackTrace();
             }
         }
@@ -107,16 +104,17 @@ public class LogUtils {
      */
     public static short readShort(ByteBuffer logBuf) {
         return (short) (((logBuf.get() & 0xFF) << 0) +
-                        ((logBuf.get() & 0xFF) << 8));
+                ((logBuf.get() & 0xFF) << 8));
     }
 
     /**
      * Read an int from the log in either packed or unpacked format.
      */
     public static int readInt(ByteBuffer logBuf, boolean unpacked) {
-        if (unpacked) {
+        if(unpacked) {
             return readInt(logBuf);
-        } else {
+        }
+        else {
             return readPackedInt(logBuf);
         }
     }
@@ -159,8 +157,8 @@ public class LogUtils {
     public static void writePackedInt(ByteBuffer logBuf, int i) {
         int off = logBuf.arrayOffset();
         int newPos =
-            PackedInteger.writeInt(logBuf.array(),
-                                   logBuf.position() + off, i);
+                PackedInteger.writeInt(logBuf.array(),
+                        logBuf.position() + off, i);
         logBuf.position(newPos - off);
     }
 
@@ -213,21 +211,21 @@ public class LogUtils {
      * Write a long into the log.
      */
     public static void writeLong(ByteBuffer logBuf, long l) {
-        byte b =(byte) (l >>> 0);
+        byte b = (byte) (l >>> 0);
         logBuf.put(b);
-        b =(byte) (l >>> 8);
+        b = (byte) (l >>> 8);
         logBuf.put(b);
-        b =(byte) (l >>> 16);
+        b = (byte) (l >>> 16);
         logBuf.put(b);
-        b =(byte) (l >>> 24);
+        b = (byte) (l >>> 24);
         logBuf.put(b);
-        b =(byte) (l >>> 32);
+        b = (byte) (l >>> 32);
         logBuf.put(b);
-        b =(byte) (l >>> 40);
+        b = (byte) (l >>> 40);
         logBuf.put(b);
-        b =(byte) (l >>> 48);
+        b = (byte) (l >>> 48);
         logBuf.put(b);
-        b =(byte) (l >>> 56);
+        b = (byte) (l >>> 56);
         logBuf.put(b);
     }
 
@@ -235,9 +233,10 @@ public class LogUtils {
      * Read an int from the log in either packed or unpacked format.
      */
     public static long readLong(ByteBuffer logBuf, boolean unpacked) {
-        if (unpacked) {
+        if(unpacked) {
             return readLong(logBuf);
-        } else {
+        }
+        else {
             return readPackedLong(logBuf);
         }
     }
@@ -270,8 +269,8 @@ public class LogUtils {
     public static void writePackedLong(ByteBuffer logBuf, long l) {
         int off = logBuf.arrayOffset();
         int newPos =
-            PackedInteger.writeLong(logBuf.array(),
-                                    logBuf.position() + off, l);
+                PackedInteger.writeLong(logBuf.array(),
+                        logBuf.position() + off, l);
         logBuf.position(newPos - off);
     }
 
@@ -300,7 +299,7 @@ public class LogUtils {
      */
     public static void writeByteArray(ByteBuffer logBuf, byte[] b) {
 
-        if (b == null) {
+        if(b == null) {
             writePackedInt(logBuf, -1);
             return;
         }
@@ -317,16 +316,16 @@ public class LogUtils {
      */
     public static byte[] readByteArray(ByteBuffer logBuf, boolean unpacked) {
         int size = readInt(logBuf, unpacked);
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("pos = " + logBuf.position() +
-                               " byteArray is " + size + " on read");
+                    " byteArray is " + size + " on read");
         }
 
-        if (size < 0) {
+        if(size < 0) {
             return null;
         }
 
-        if (size == 0) {
+        if(size == 0) {
             return ZERO_LENGTH_BYTE_ARRAY;
         }
 
@@ -339,9 +338,10 @@ public class LogUtils {
      * @return log storage size for a byteArray
      */
     public static int getByteArrayLogSize(byte[] b) {
-        if (b == null) {
+        if(b == null) {
             return LogUtils.getPackedIntLogSize(-1);
-        } else {
+        }
+        else {
             int len = b.length;
             return LogUtils.getPackedIntLogSize(len) + len;
         }
@@ -360,12 +360,12 @@ public class LogUtils {
      * Read a byte array from the log.  The size is not stored.
      */
     public static byte[] readBytesNoLength(ByteBuffer logBuf, int size) {
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("pos = " + logBuf.position() +
-                               " byteArray is " + size + " on read");
+                    " byteArray is " + size + " on read");
         }
 
-        if (size == 0) {
+        if(size == 0) {
             return ZERO_LENGTH_BYTE_ARRAY;
         }
 
@@ -394,10 +394,10 @@ public class LogUtils {
          * Use logCharset only prior to version 9, since in version 9
          * UTF8 is always used.  See logCharset for details.
          */
-        if (entryVersion >= 9) {
+        if(entryVersion >= 9) {
             return StringUtils.fromUTF8(bytes);
         }
-        if (logCharset != null) {
+        if(logCharset != null) {
             return new String(bytes, logCharset);
         }
         return new String(bytes);
@@ -467,9 +467,10 @@ public class LogUtils {
         sb.append(" exists = \"");
         boolean exists = readBoolean(itemBuffer);
         sb.append(exists);
-        if (exists) {
+        if(exists) {
             sb.append("\">");
-        } else {
+        }
+        else {
             /* Close off the tag, we're done. */
             sb.append("\"/>");
         }
@@ -485,11 +486,11 @@ public class LogUtils {
         byte[] gid = xid.getGlobalTransactionId();
         byte[] bqual = xid.getBranchQualifier();
         return
-            INT_BYTES +                         // FormatId
-            1 +                                 // gxid length byte
-            1 +                                 // bqual length byte
-            (gid == null ? 0 : gid.length) +    // gid bytes
-            (bqual == null ? 0 : bqual.length); // bqual bytes
+                INT_BYTES +                         // FormatId
+                        1 +                                 // gxid length byte
+                        1 +                                 // bqual length byte
+                        (gid == null ? 0 : gid.length) +    // gid bytes
+                        (bqual == null ? 0 : bqual.length); // bqual bytes
     }
 
     /*
@@ -502,16 +503,18 @@ public class LogUtils {
 
         writeInt(logBuf, xid.getFormatId());
 
-        if (gid == null) {
+        if(gid == null) {
             logBuf.put((byte) -1);
-        } else {
+        }
+        else {
             logBuf.put((byte) (gid.length));
             logBuf.put(gid);
         }
 
-        if (bqual == null) {
+        if(bqual == null) {
             logBuf.put((byte) -1);
-        } else {
+        }
+        else {
             logBuf.put((byte) (bqual.length));
             logBuf.put(bqual);
         }
@@ -526,14 +529,14 @@ public class LogUtils {
 
         int gidLen = logBuf.get();
         byte[] gid = null;
-        if (gidLen >= 0) {
+        if(gidLen >= 0) {
             gid = new byte[gidLen];
             logBuf.get(gid);
         }
 
         int bqualLen = logBuf.get();
         byte[] bqual = null;
-        if (bqualLen >= 0) {
+        if(bqualLen >= 0) {
             bqual = new byte[bqualLen];
             logBuf.get(bqual);
         }
@@ -567,16 +570,16 @@ public class LogUtils {
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof XidImpl)) {
+            if(!(o instanceof XidImpl)) {
                 return false;
             }
 
             XidImpl xid = (XidImpl) o;
-            if (xid.getFormatId() != formatId) {
+            if(xid.getFormatId() != formatId) {
                 return false;
             }
-            if (compareByteArrays(xid.getGlobalTransactionId(), gid) &&
-                compareByteArrays(xid.getBranchQualifier(), bqual)) {
+            if(compareByteArrays(xid.getGlobalTransactionId(), gid) &&
+                    compareByteArrays(xid.getBranchQualifier(), bqual)) {
                 return true;
             }
 
@@ -586,13 +589,13 @@ public class LogUtils {
         @Override
         public int hashCode() {
             int code = formatId;
-            if (gid != null) {
-                for (int i = 0; i < gid.length; i++) {
+            if(gid != null) {
+                for(int i = 0; i < gid.length; i++) {
                     code += gid[i];
                 }
             }
-            if (bqual != null) {
-                for (int i = 0; i < bqual.length; i++) {
+            if(bqual != null) {
+                for(int i = 0; i < bqual.length; i++) {
                     code += bqual[i];
                 }
             }
@@ -600,17 +603,17 @@ public class LogUtils {
         }
 
         private boolean compareByteArrays(byte[] b1, byte[] b2) {
-            if (b1 == null ||
-                b2 == null) {
+            if(b1 == null ||
+                    b2 == null) {
                 return b1 == b2;
             }
 
-            if (b1.length != b2.length) {
+            if(b1.length != b2.length) {
                 return false;
             }
 
-            for (int i = 0; i < b1.length; i++) {
-                if (b1[i] != b2[i]) {
+            for(int i = 0; i < b1.length; i++) {
+                if(b1[i] != b2[i]) {
                     return false;
                 }
             }
@@ -623,15 +626,17 @@ public class LogUtils {
             StringBuilder sb = new StringBuilder();
             sb.append("<Xid formatId=\"").append(formatId);
             sb.append("\" gTxnId=\"");
-            if (gid == null) {
+            if(gid == null) {
                 sb.append("null");
-            } else {
+            }
+            else {
                 sb.append(new String(gid));
             }
             sb.append("\" bqual=\"");
-            if (bqual == null) {
+            if(bqual == null) {
                 sb.append("null");
-            } else {
+            }
+            else {
                 sb.append(new String(bqual));
             }
             sb.append("\"/>");

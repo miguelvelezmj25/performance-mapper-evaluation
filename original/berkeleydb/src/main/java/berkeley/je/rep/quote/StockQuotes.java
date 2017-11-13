@@ -300,7 +300,7 @@ public class StockQuotes {
         }
         try {
             Command command = Command.getCommand(commandLine);
-            switch (command) {
+            switch(command) {
                 case NONE:
                     break;
                 case PRINT:
@@ -313,7 +313,7 @@ public class StockQuotes {
                     updateStock(commandLine, out);
                     break;
             }
-        } catch (InvalidCommandException e) {
+        } catch(InvalidCommandException e) {
             out.println(e.getMessage());
         }
         return false;
@@ -370,7 +370,7 @@ public class StockQuotes {
     final void runExample()
             throws Exception {
 
-        while (true) {
+        while(true) {
 
             try {
                 initialize();
@@ -378,13 +378,13 @@ public class StockQuotes {
                 shutdown();
                 return;
                 /* Exit the application. */
-            } catch (InsufficientLogException insufficientLog) {
+            } catch(InsufficientLogException insufficientLog) {
                 /* Restore the log files from another node in the group. */
                 NetworkRestore networkRestore = new NetworkRestore();
                 networkRestore.execute(insufficientLog,
                         new NetworkRestoreConfig());
                 continue;
-            } catch (RollbackException rollback) {
+            } catch(RollbackException rollback) {
 
                 /*
                  * Any transient state that is dependent on the environment
@@ -411,7 +411,7 @@ public class StockQuotes {
 
         boolean done = false;
 
-        while (!done) {
+        while(!done) {
             String line = getCommandLine(System.out, System.in);
             done = doCommand(line, System.out);
         }
@@ -541,7 +541,7 @@ public class StockQuotes {
                         repConfig,
                         envConfig);
 
-            } catch (UnknownMasterException unknownMaster) {
+            } catch(UnknownMasterException unknownMaster) {
                 exception = unknownMaster;
 
                 /*
@@ -581,7 +581,7 @@ public class StockQuotes {
         }
         String nodeName = null;
         String nodeHost = null;
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
 
             if(thisArg.equals("-env")) {

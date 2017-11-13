@@ -13,11 +13,7 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
@@ -38,71 +34,71 @@ public class LockerFactory {
                                            final boolean autoTxnIsReplicated) {
 
         return getWritableLocker(
-            env, userTxn, isInternalDb, dbIsTransactional,
-            autoTxnIsReplicated, null /*autoCommitConfig*/);
+                env, userTxn, isInternalDb, dbIsTransactional,
+                autoTxnIsReplicated, null /*autoCommitConfig*/);
     }
 
     /**
      * Get a locker for a write operation.
      *
      * @param autoTxnIsReplicated is true if this transaction is
-     * executed on a rep group master, and needs to be broadcast.
-     * Currently, all application-created transactions are of the type
-     * com.sleepycat.je.txn.Txn, and are replicated if the parent
-     * environment is replicated. Auto Txns are trickier because they may
-     * be created for a local write operation, such as log cleaning.
+     *                            executed on a rep group master, and needs to be broadcast.
+     *                            Currently, all application-created transactions are of the type
+     *                            com.sleepycat.je.txn.Txn, and are replicated if the parent
+     *                            environment is replicated. Auto Txns are trickier because they may
+     *                            be created for a local write operation, such as log cleaning.
      */
     public static Locker getWritableLocker(
-        final Environment env,
-        final Transaction userTxn,
-        final boolean isInternalDb,
-        final boolean dbIsTransactional,
-        final boolean autoTxnIsReplicated,
-        TransactionConfig autoCommitConfig) {
+            final Environment env,
+            final Transaction userTxn,
+            final boolean isInternalDb,
+            final boolean dbIsTransactional,
+            final boolean autoTxnIsReplicated,
+            TransactionConfig autoCommitConfig) {
 
         final EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
         final boolean envIsTransactional = envImpl.isTransactional();
 
-        if (userTxn == null) {
+        if(userTxn == null) {
             final Transaction xaLocker = env.getThreadTransaction();
-            if (xaLocker != null) {
+            if(xaLocker != null) {
                 return DbInternal.getLocker(xaLocker);
             }
         }
 
-        if (dbIsTransactional && userTxn == null) {
+        if(dbIsTransactional && userTxn == null) {
 
-            if (autoCommitConfig == null) {
+            if(autoCommitConfig == null) {
                 autoCommitConfig = DbInternal.getDefaultTxnConfig(env);
             }
 
             return Txn.createAutoTxn(
-                envImpl, autoCommitConfig,
-                (autoTxnIsReplicated ?
-                 ReplicationContext.MASTER :
-                 ReplicationContext.NO_REPLICATE));
+                    envImpl, autoCommitConfig,
+                    (autoTxnIsReplicated ?
+                            ReplicationContext.MASTER :
+                            ReplicationContext.NO_REPLICATE));
 
         }
 
-        if (userTxn == null) {
+        if(userTxn == null) {
             /* Non-transactional user operations use ThreadLocker. */
             return
-                ThreadLocker.createThreadLocker(envImpl, autoTxnIsReplicated);
+                    ThreadLocker.createThreadLocker(envImpl, autoTxnIsReplicated);
         }
 
         /*
          * The user provided a transaction, so the environment and the
          * database had better be opened transactionally.
          */
-        if (!isInternalDb && !envIsTransactional) {
+        if(!isInternalDb && !envIsTransactional) {
             throw new IllegalArgumentException(
-                "A Transaction cannot be used because the"+
-                " environment was opened non-transactionally");
+                    "A Transaction cannot be used because the" +
+                            " environment was opened non-transactionally");
         }
-        if (!dbIsTransactional) {
+        if(!dbIsTransactional) {
             throw new IllegalArgumentException(
-                "A Transaction cannot be used because the" +
-                " database was opened non-transactionally");
+                    "A Transaction cannot be used because the" +
+                            " database was opened non-transactionally");
         }
 
         /*
@@ -111,9 +107,9 @@ public class LockerFactory {
          * isolation level.
          */
         final Locker locker = DbInternal.getLocker(userTxn);
-        if (locker.isReadCommittedIsolation()) {
+        if(locker.isReadCommittedIsolation()) {
             return ReadCommittedLocker.createReadCommittedLocker(
-                envImpl, locker);
+                    envImpl, locker);
         }
 
         return locker;
@@ -123,36 +119,36 @@ public class LockerFactory {
      * Get a locker for a read or cursor operation.
      */
     public static Locker getReadableLocker(
-        final Database dbHandle,
-        final Transaction userTxn,
-        final boolean readCommittedIsolation) {
+            final Database dbHandle,
+            final Transaction userTxn,
+            final boolean readCommittedIsolation) {
 
         return getReadableLocker(
-            dbHandle,
-            (userTxn != null) ? DbInternal.getLocker(userTxn) : null,
-            readCommittedIsolation);
+                dbHandle,
+                (userTxn != null) ? DbInternal.getLocker(userTxn) : null,
+                readCommittedIsolation);
     }
 
     /**
      * Get a locker for this database handle for a read or cursor operation.
      */
     public static Locker getReadableLocker(
-        final Database dbHandle,
-        Locker locker,
-        boolean readCommittedIsolation) {
+            final Database dbHandle,
+            Locker locker,
+            boolean readCommittedIsolation) {
 
         final DatabaseImpl dbImpl = DbInternal.getDbImpl(dbHandle);
 
-        if (!dbImpl.isTransactional() &&
-            locker != null &&
-            locker.isTransactional()) {
+        if(!dbImpl.isTransactional() &&
+                locker != null &&
+                locker.isTransactional()) {
             throw new IllegalArgumentException(
-                "A Transaction cannot be used because the" +
-                " database was opened non-transactionally");
+                    "A Transaction cannot be used because the" +
+                            " database was opened non-transactionally");
         }
 
         /* Don't reuse a non-transactional locker. */
-        if (locker != null && !locker.isTransactional()) { 
+        if(locker != null && !locker.isTransactional()) {
             locker = null;
         }
 
@@ -161,47 +157,47 @@ public class LockerFactory {
          * locker being reused, or if true is passed for the parameter (this is
          * the case when read-committed is configured for the cursor).
          */
-        if (locker != null && locker.isReadCommittedIsolation()) {
+        if(locker != null && locker.isReadCommittedIsolation()) {
             readCommittedIsolation = true;
         }
 
         final boolean autoTxnIsReplicated =
-            dbImpl.isReplicated() &&
-            dbImpl.getEnv().isReplicated();
+                dbImpl.isReplicated() &&
+                        dbImpl.getEnv().isReplicated();
 
         return getReadableLocker(
-            dbHandle.getEnvironment(), locker, autoTxnIsReplicated,
-            readCommittedIsolation);
+                dbHandle.getEnvironment(), locker, autoTxnIsReplicated,
+                readCommittedIsolation);
     }
 
     /**
      * Get a locker for a read or cursor operation.
      */
     private static Locker getReadableLocker(
-        final Environment env,
-        final Locker locker,
-        final boolean autoTxnIsReplicated,
-        final boolean readCommittedIsolation) {
+            final Environment env,
+            final Locker locker,
+            final boolean autoTxnIsReplicated,
+            final boolean readCommittedIsolation) {
 
         final EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
 
-        if (locker == null) {
+        if(locker == null) {
             final Transaction xaTxn = env.getThreadTransaction();
-            if (xaTxn != null) {
+            if(xaTxn != null) {
                 return DbInternal.getLocker(xaTxn);
             }
             /* Non-transactional user operations use ThreadLocker. */
             return
-                ThreadLocker.createThreadLocker(envImpl, autoTxnIsReplicated);
+                    ThreadLocker.createThreadLocker(envImpl, autoTxnIsReplicated);
         }
 
         /*
          * Use the given locker.  For read-committed, wrap the given
          * transactional locker in a special locker for that isolation level.
          */
-        if (readCommittedIsolation) {
+        if(readCommittedIsolation) {
             return ReadCommittedLocker.createReadCommittedLocker(
-                envImpl, locker);
+                    envImpl, locker);
         }
 
         return locker;
@@ -210,12 +206,12 @@ public class LockerFactory {
     /**
      * Get a non-transactional locker for internal database operations.  Always
      * non replicated.
-     *
+     * <p>
      * This method is not called for user txns and should not throw a Java
      * runtime exception (IllegalArgument, etc).
      */
     public static Locker getInternalReadOperationLocker(
-        final EnvironmentImpl envImpl) {
+            final EnvironmentImpl envImpl) {
 
         return BasicLocker.createBasicLocker(envImpl);
     }

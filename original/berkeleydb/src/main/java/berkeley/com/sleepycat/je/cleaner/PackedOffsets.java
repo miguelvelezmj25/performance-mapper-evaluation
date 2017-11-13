@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Stores a sorted list of LSN offsets in a packed short representation.  Each
@@ -64,7 +64,7 @@ public class PackedOffsets implements Loggable {
         Arrays.sort(offsets);
         int dataIndex = 0;
         long priorVal = 0;
-        for (int i = 0; i < offsets.length; i += 1) {
+        for(int i = 0; i < offsets.length; i += 1) {
             long val = offsets[i];
             dataIndex = append(newData, dataIndex, val - priorVal);
             priorVal = val;
@@ -83,7 +83,7 @@ public class PackedOffsets implements Loggable {
         long[] offsets = new long[size];
         int index = 0;
         Iterator iter = iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             offsets[index++] = iter.next();
         }
         assert index == size;
@@ -98,12 +98,13 @@ public class PackedOffsets implements Loggable {
 
         assert val >= 0;
 
-        while (true) {
+        while(true) {
             short s = (short) (val & 0x7fff);
             val >>>= 15;
-            if (val > 0) {
+            if(val > 0) {
                 to[index++] = (short) (-1 - s);
-            } else {
+            }
+            else {
                 to[index++] = s;
                 break;
             }
@@ -112,44 +113,14 @@ public class PackedOffsets implements Loggable {
     }
 
     /**
-     * An iterator over all offsets.
-     */
-    class Iterator {
-
-        private int index;
-        private long priorVal;
-
-        private Iterator() {
-        }
-
-        boolean hasNext() {
-            return data != null && index < data.length;
-        }
-
-        long next() {
-            long val = priorVal;
-            for (int shift = 0;; shift += 15) {
-                long s = data[index++];
-                if (s < 0) {
-                    val += (-1 - s) << shift;
-                } else {
-                    val += s << shift;
-                    break;
-                }
-            }
-            priorVal = val;
-            return val;
-        }
-    }
-
-    /**
      * Return the extra memory used by this object when the pack() method has
      * been called to allocate the data array.
      */
     public int getExtraMemorySize() {
-        if (data != null) {
+        if(data != null) {
             return MemoryBudget.shortArraySize(data.length);
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -160,9 +131,9 @@ public class PackedOffsets implements Loggable {
     public int getLogSize() {
 
         int len = (data != null) ? data.length : 0;
-        return  (LogUtils.getPackedIntLogSize(size) +
-                 LogUtils.getPackedIntLogSize(len) +
-                 (len * LogUtils.SHORT_BYTES));
+        return (LogUtils.getPackedIntLogSize(size) +
+                LogUtils.getPackedIntLogSize(len) +
+                (len * LogUtils.SHORT_BYTES));
     }
 
     /**
@@ -171,12 +142,13 @@ public class PackedOffsets implements Loggable {
     public void writeToLog(ByteBuffer buf) {
 
         LogUtils.writePackedInt(buf, size);
-        if (data != null) {
+        if(data != null) {
             LogUtils.writePackedInt(buf, data.length);
-            for (int i = 0; i < data.length; i += 1) {
+            for(int i = 0; i < data.length; i += 1) {
                 LogUtils.writeShort(buf, data[i]);
             }
-        } else {
+        }
+        else {
             LogUtils.writePackedInt(buf, 0);
         }
     }
@@ -189,9 +161,9 @@ public class PackedOffsets implements Loggable {
         boolean unpacked = (entryVersion < 6);
         size = LogUtils.readInt(buf, unpacked);
         int len = LogUtils.readInt(buf, unpacked);
-        if (len > 0) {
+        if(len > 0) {
             data = new short[len];
-            for (int i = 0; i < len; i += 1) {
+            for(int i = 0; i < len; i += 1) {
                 data[i] = LogUtils.readShort(buf);
             }
         }
@@ -202,24 +174,26 @@ public class PackedOffsets implements Loggable {
      */
     public void dumpLog(StringBuilder buf, boolean verbose) {
 
-        if (size > 0) {
+        if(size > 0) {
             Iterator i = iterator();
             buf.append("<offsets size=\"");
             buf.append(size);
             buf.append("\">");
-            while (i.hasNext()) {
+            while(i.hasNext()) {
                 buf.append("0x");
                 buf.append(Long.toHexString(i.next()));
                 buf.append(' ');
             }
             buf.append("</offsets>");
-        } else {
+        }
+        else {
             buf.append("<offsets size=\"0\"/>");
         }
     }
 
     /**
      * Never called.
+     *
      * @see Loggable#getTransactionId
      */
     public long getTransactionId() {
@@ -239,5 +213,37 @@ public class PackedOffsets implements Loggable {
         StringBuilder buf = new StringBuilder();
         dumpLog(buf, true);
         return buf.toString();
+    }
+
+    /**
+     * An iterator over all offsets.
+     */
+    class Iterator {
+
+        private int index;
+        private long priorVal;
+
+        private Iterator() {
+        }
+
+        boolean hasNext() {
+            return data != null && index < data.length;
+        }
+
+        long next() {
+            long val = priorVal;
+            for(int shift = 0; ; shift += 15) {
+                long s = data[index++];
+                if(s < 0) {
+                    val += (-1 - s) << shift;
+                }
+                else {
+                    val += s << shift;
+                    break;
+                }
+            }
+            priorVal = val;
+            return val;
+        }
     }
 }

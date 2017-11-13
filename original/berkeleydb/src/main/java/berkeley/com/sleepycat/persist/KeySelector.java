@@ -15,16 +15,16 @@ package berkeley.com.sleepycat.persist;
 
 /**
  * This is package-private to hide it until we implemented unsorted access.
- *
+ * <p>
  * Implemented to select keys to be returned by an unsorted {@code
  * ForwardCursor}.
- *
+ * <p>
  * <p>The reason for implementing a selector, rather than filtering the objects
  * returned by the {@link ForwardCursor}, is to improve performance when not
  * all keys are to be processed.  Keys are passed to this interface without
  * retrieving record data or locking, so it is less expensive to return false
  * from this method than to retrieve the object from the cursor.</p>
- *
+ * <p>
  * see EntityIndex#unsortedKeys
  * see EntityIndex#unsortedEntities
  *
@@ -34,7 +34,7 @@ interface KeySelector<K> {
 
     /**
      * Returns whether a given key should be returned via the cursor.
-     *
+     * <p>
      * <p>This method should not assume that the given key is for a committed
      * record or not, nor should it assume that the key will be returned via
      * the cursor if this method returns true.  The record for this key will

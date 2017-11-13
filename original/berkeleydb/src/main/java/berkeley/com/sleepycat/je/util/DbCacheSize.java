@@ -13,42 +13,7 @@
 
 package berkeley.com.sleepycat.je.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import berkeley.com.sleepycat.je.CacheMode;
-import berkeley.com.sleepycat.je.CheckpointConfig;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Durability;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentStats;
-import berkeley.com.sleepycat.je.Get;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationResult;
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.je.PreloadConfig;
-import berkeley.com.sleepycat.je.PreloadStats;
-import berkeley.com.sleepycat.je.PreloadStatus;
-import berkeley.com.sleepycat.je.Put;
-import berkeley.com.sleepycat.je.ReadOptions;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.WriteOptions;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.evictor.Evictor;
 import berkeley.com.sleepycat.je.evictor.OffHeapCache;
@@ -58,9 +23,17 @@ import berkeley.com.sleepycat.je.utilint.CmdUtil;
 import berkeley.com.sleepycat.je.utilint.DbCacheSizeRepEnv;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Estimates the in-memory cache size needed to hold a specified data set.
- *
+ * <p>
  * To get an estimate of the in-memory footprint for a given database,
  * specify the number of records and database characteristics and DbCacheSize
  * will return an estimate of the cache size required for holding the
@@ -70,9 +43,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * may also be optionally configured using {@link
  * EnvironmentConfig#setOffHeapCacheSize} or using the {@link
  * EnvironmentConfig#MAX_OFF_HEAP_MEMORY} property.
- *
+ * <p>
  * <h4>Importance of the JE Cache</h4>
- *
+ * <p>
  * The JE cache is not an optional cache. It is used to hold the metadata for
  * accessing JE data.  In fact the JE cache size is probably the most critical
  * factor to JE performance, since Btree nodes will have to be fetched during a
@@ -147,9 +120,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * especially if the off-heap cache is not full. This utility displays the
  * main cache size needed to hold all upper INs, and displays a warning if
  * this is smaller than the main cache size specified.
- *
+ * <p>
  * <h4>Estimating the JE Cache Size</h4>
- *
+ * <p>
  * Estimating JE in-memory sizes is not straightforward for several reasons.
  * There is some fixed overhead for each Btree internal node, so fanout
  * (maximum number of child entries per parent node) and degree of node
@@ -175,14 +148,14 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * The {@link DatabaseConfig} settings are specified using command line options
  * defined by this utility.
  * <ul>
- *   <li>{@code -nodemax ENTRIES} corresponds to {@link
- *   DatabaseConfig#setNodeMaxEntries}.</li>
- *   <li>{@code -duplicates} corresponds to passing true to {@link
- *   DatabaseConfig#setSortedDuplicates}.  Note that duplicates are configured
- *   for DPL MANY_TO_ONE and MANY_TO_MANY secondary indices.</li>
- *   <li>{@code -keyprefix LENGTH} corresponds to passing true {@link
- *   DatabaseConfig#setKeyPrefixing}.  Note that key prefixing is always used
- *   when duplicates are configured.</li>
+ * <li>{@code -nodemax ENTRIES} corresponds to {@link
+ * DatabaseConfig#setNodeMaxEntries}.</li>
+ * <li>{@code -duplicates} corresponds to passing true to {@link
+ * DatabaseConfig#setSortedDuplicates}.  Note that duplicates are configured
+ * for DPL MANY_TO_ONE and MANY_TO_MANY secondary indices.</li>
+ * <li>{@code -keyprefix LENGTH} corresponds to passing true {@link
+ * DatabaseConfig#setKeyPrefixing}.  Note that key prefixing is always used
+ * when duplicates are configured.</li>
  * </ul>
  * <p>
  * This utility estimates the JE cache size by creating an in-memory
@@ -211,9 +184,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * database/tables.  With this approach, it is important that the {@code
  * DatabaseConfig} parameters are the same, or at least similar, for all
  * databases/tables.
- *
+ * <p>
  * <h4>Key Prefixing and Compaction</h4>
- *
+ * <p>
  * Key prefixing deserves special consideration.  It can significantly reduce
  * the size of the cache and is generally recommended; however, the benefit can
  * be difficult to predict.  Key prefixing, in turn, impacts the benefits of
@@ -245,9 +218,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * way keys are assigned, the number of expected prefix bytes must be estimated
  * by the user and specified to DbCacheSize using the {@code -keyprefix}
  * argument.
- *
+ * <p>
  * <h4>Key Prefixing and Duplicates</h4>
- * 
+ * <p>
  * When {@link DatabaseConfig#setSortedDuplicates duplicates} are configured
  * for a Database (including DPL MANY_TO_ONE and MANY_TO_MANY secondary
  * indices), key prefixing is always used.  This is because the internal key in
@@ -277,9 +250,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * keys (email addresses) that all have some number of prefix bytes in common.
  * Therefore, when duplicates are specified it is possible to specify a prefix
  * size that is larger than the key size.
- *
+ * <p>
  * <h4>Small Data Sizes and Embedded LNs</h4>
- *
+ * <p>
  * Another special data representation involves small data sizes. When the
  * data size of a record is less than or equal to {@link
  * EnvironmentConfig#TREE_MAX_EMBEDDED_LN} (16 bytes, by default), the data
@@ -292,9 +265,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * <p>
  * See {@link EnvironmentConfig#TREE_MAX_EMBEDDED_LN} for information about
  * the trade-offs in using the embedded LNs feature.
- *
+ * <p>
  * <h4>Record Versions and Oracle NoSQL Database</h4>
- *
+ * <p>
  * This note applies only to when JE is used with Oracle NoSQL DB.  In Oracle
  * NoSQL DB, an internal JE environment configuration parameter is always
  * used: {@code -je.rep.preserveRecordVersion true}.  This allows using record
@@ -308,9 +281,9 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * showing how much memory is required to hold the internal nodes and record
  * versions (but not the leaf nodes).  This is the minimum recommended size
  * when the "... if version" operations are used.
- *
+ * <p>
  * <h4>Running the DbCacheSize utility</h4>
- *
+ * <p>
  * Usage:
  * <pre>
  * java { com.sleepycat.je.util.DbCacheSize |
@@ -425,66 +398,66 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * </pre>
  * There are several things of interest in the output.
  * <ul>
- *     <li>The environment overhead is larger because of memory used for the
- *     off-heap LRU.</li>
- *     <li>To cache only internal nodes, an off-heap cache is not needed since
- *     the internal nodes take around 24MB, which when added to the 5MB
- *     overhead is less than the 30MB main cache specified. This is why the
- *     number of bytes on the second line is zero.</li>
- *     <li>To cache all nodes, the main cache size specified should be used
- *     (25MB added to the 5MB overhead is 30MB), and an off-heap cache of
- *     around 71MB should be configured.</li>
+ * <li>The environment overhead is larger because of memory used for the
+ * off-heap LRU.</li>
+ * <li>To cache only internal nodes, an off-heap cache is not needed since
+ * the internal nodes take around 24MB, which when added to the 5MB
+ * overhead is less than the 30MB main cache specified. This is why the
+ * number of bytes on the second line is zero.</li>
+ * <li>To cache all nodes, the main cache size specified should be used
+ * (25MB added to the 5MB overhead is 30MB), and an off-heap cache of
+ * around 71MB should be configured.</li>
  * </ul>
- *
+ * <p>
  * <h4>Output Properties</h4>
- *
+ * <p>
  * <p>
  * When {@code -outputproperties} is specified, a list of properties in Java
  * properties file format will be written to System.out, instead of the output
  * shown above. The properties and their meanings are listed below.
  * <ul>
- *     <li>The following properties are always output (except allNodes, see
- *     below). They describe the estimated size of the main cache.
- *     <ul>
- *         <li><strong>overhead</strong>: The environment overhead, as shown
- *         under Environment Cache Overhead above.</li>
- *         <li><strong>internalNodes</strong>: The Btree size in the main
- *         cache for holding the internal nodes. This is the "Internal nodes
- *         only" line above (followed by "MAIN cache" when {@code -offheap} is
- *         specified).</li>
- *         <li><strong>internalNodesAndVersions</strong>: The Btree size needed
- *         to hold the internal nodes and record versions in the main cache.
- *         This value is zero when {@code -offheap} is specified; currently JE
- *         does not cache record versions off-heap unless their associated LNs
- *         are also cached off-heap, so there is no way to calculate this
- *         property.</li>
- *         <li><strong>allNodes</strong>: The Btree size in the main cache
- *         needed to hold all nodes. This is the "Internal nodes and leaf
- *         nodes" line above (followed by "MAIN cache" when {@code -offheap} is
- *         specified). This property is not output unless {@code -data} is
- *         specified.</li>
- *     </ul>
- *     <li>The following properties are output only when {@code -offheap} is
- *     specified. They describe the estimated size of the off-heap cache.
- *     <ul>
- *         <li><strong>minMainCache</strong>: The minimum size of the main
- *         cache needed to hold all upper INs. When the {@code -maincache}
- *         value specified is less than this minimum, not all internal nodes
- *         can be cached. See the discussion further above.</li>
- *         <li><strong>offHeapInternalNodes</strong>: The size of the off-heap
- *         cache needed to hold the internal nodes. This is the "Internal nodes
- *         only: OFF_HEAP cache" line above.</li>
- *         <li><strong>offHeapAllNodes</strong>: The size of the off-heap cache
- *         needed to hold all nodes. This is the "Internal nodes and leaf
- *         nodes: OFF_HEAP cache" line above. This property is not output
- *         unless {@code -data} is specified.</li>
- *     </ul>
- *     <li>The following properties are deprecated but are output for
- *     compatibility with earlier releases.
- *     <ul>
- *         <li> minInternalNodes, maxInternalNodes, minAllNodes, and (when
- *         {@code -data} is specified) maxAllNodes</li>
- *     </ul>
+ * <li>The following properties are always output (except allNodes, see
+ * below). They describe the estimated size of the main cache.
+ * <ul>
+ * <li><strong>overhead</strong>: The environment overhead, as shown
+ * under Environment Cache Overhead above.</li>
+ * <li><strong>internalNodes</strong>: The Btree size in the main
+ * cache for holding the internal nodes. This is the "Internal nodes
+ * only" line above (followed by "MAIN cache" when {@code -offheap} is
+ * specified).</li>
+ * <li><strong>internalNodesAndVersions</strong>: The Btree size needed
+ * to hold the internal nodes and record versions in the main cache.
+ * This value is zero when {@code -offheap} is specified; currently JE
+ * does not cache record versions off-heap unless their associated LNs
+ * are also cached off-heap, so there is no way to calculate this
+ * property.</li>
+ * <li><strong>allNodes</strong>: The Btree size in the main cache
+ * needed to hold all nodes. This is the "Internal nodes and leaf
+ * nodes" line above (followed by "MAIN cache" when {@code -offheap} is
+ * specified). This property is not output unless {@code -data} is
+ * specified.</li>
+ * </ul>
+ * <li>The following properties are output only when {@code -offheap} is
+ * specified. They describe the estimated size of the off-heap cache.
+ * <ul>
+ * <li><strong>minMainCache</strong>: The minimum size of the main
+ * cache needed to hold all upper INs. When the {@code -maincache}
+ * value specified is less than this minimum, not all internal nodes
+ * can be cached. See the discussion further above.</li>
+ * <li><strong>offHeapInternalNodes</strong>: The size of the off-heap
+ * cache needed to hold the internal nodes. This is the "Internal nodes
+ * only: OFF_HEAP cache" line above.</li>
+ * <li><strong>offHeapAllNodes</strong>: The size of the off-heap cache
+ * needed to hold all nodes. This is the "Internal nodes and leaf
+ * nodes: OFF_HEAP cache" line above. This property is not output
+ * unless {@code -data} is specified.</li>
+ * </ul>
+ * <li>The following properties are deprecated but are output for
+ * compatibility with earlier releases.
+ * <ul>
+ * <li> minInternalNodes, maxInternalNodes, minAllNodes, and (when
+ * {@code -data} is specified) maxAllNodes</li>
+ * </ul>
  * </ul>
  *
  * @see EnvironmentConfig#setCacheSize
@@ -511,11 +484,11 @@ public class DbCacheSize {
      */
 
     private static final NumberFormat INT_FORMAT =
-        NumberFormat.getIntegerInstance();
+            NumberFormat.getIntegerInstance();
 
     private static final String MAIN_HEADER =
-        "   Number of Bytes  Description\n" +
-        "   ---------------  -----------";
+            "   Number of Bytes  Description\n" +
+                    "   ---------------  -----------";
     //   123456789012345678
     //                     12
     private static final int MIN_COLUMN_WIDTH = 18;
@@ -588,167 +561,269 @@ public class DbCacheSize {
     DbCacheSize() {
     }
 
+    /**
+     * Runs DbCacheSize as a command line utility.
+     * For command usage, see {@link DbCacheSize class description}.
+     */
+    public static void main(final String[] args)
+            throws Throwable {
+
+        final DbCacheSize dbCacheSize = new DbCacheSize();
+        try {
+            dbCacheSize.parseArgs(args);
+            dbCacheSize.calculateCacheSizes();
+            if(dbCacheSize.outputProperties) {
+                dbCacheSize.printProperties(System.out);
+            }
+            else {
+                dbCacheSize.printCacheSizes(System.out);
+            }
+            if(dbCacheSize.doMeasure) {
+                dbCacheSize.measure(System.out);
+            }
+        } finally {
+            dbCacheSize.cleanup();
+        }
+    }
+
+    /**
+     * Prints usage and calls System.exit.
+     */
+    private static void usage(final String msg) {
+
+        if(msg != null) {
+            System.out.println(msg);
+        }
+
+        System.out.println
+                ("usage:" +
+                        "\njava " + CmdUtil.getJavaCommand(DbCacheSize.class) +
+                        "\n   -records <count>" +
+                        "\n      # Total records (key/data pairs); required" +
+                        "\n   -key <bytes> " +
+                        "\n      # Average key bytes per record; required" +
+                        "\n  [-data <bytes>]" +
+                        "\n      # Average data bytes per record; if omitted no leaf" +
+                        "\n      # node sizes are included in the output; required with" +
+                        "\n      # -duplicates, and specifies the primary key length" +
+                        "\n  [-offheap]" +
+                        "\n      # Indicates that an off-heap cache will be used." +
+                        "\n  [-maincache <bytes>]" +
+                        "\n      # The size of the main cache (in the JVM heap)." +
+                        "\n      # The size of the off-heap cache displayed is the" +
+                        "\n      # additional amount needed to hold the data set." +
+                        "\n      # If omitted, the main cache size is implied to" +
+                        "\n      # be the amount needed to hold all internal nodes." +
+                        "\n      # Ignored if -offheap is not also specified." +
+                        "\n  [-keyprefix <bytes>]" +
+                        "\n      # Expected size of the prefix for the keys in each" +
+                        "\n      # BIN; default: zero, key prefixing is not configured;" +
+                        "\n      # required with -duplicates" +
+                        "\n  [-nodemax <entries>]" +
+                        "\n      # Number of entries per Btree node; default: 128" +
+                        "\n  [-orderedinsertion]" +
+                        "\n      # Assume ordered insertions and no deletions, so BINs" +
+                        "\n      # are 100% full; default: unordered insertions and/or" +
+                        "\n      # deletions, BINs are 70% full" +
+                        "\n  [-duplicates]" +
+                        "\n      # Indicates that sorted duplicates are used, including" +
+                        "\n      # MANY_TO_ONE and MANY_TO_MANY secondary indices;" +
+                        "\n      # default: false" +
+                        "\n  [-ttl]" +
+                        "\n      # Indicates that TTL is used; default: false" +
+                        "\n  [-replicated]" +
+                        "\n      # Use a ReplicatedEnvironment; default: false" +
+                        "\n  [-ENV_PARAM_NAME VALUE]..." +
+                        "\n      # Any number of EnvironmentConfig parameters and" +
+                        "\n      # ReplicationConfig parameters (if -replicated)" +
+                        "\n  [-btreeinfo]" +
+                        "\n      # Outputs additional Btree information" +
+                        "\n  [-outputproperties]" +
+                        "\n      # Writes Java properties to System.out");
+
+        System.exit(2);
+    }
+
     void parseArgs(String[] args) {
-        for (int i = 0; i < args.length; i += 1) {
+        for(int i = 0; i < args.length; i += 1) {
             String name = args[i];
             String val = null;
-            if (i < args.length - 1 && !args[i + 1].startsWith("-")) {
+            if(i < args.length - 1 && !args[i + 1].startsWith("-")) {
                 i += 1;
                 val = args[i];
             }
-            if (name.equals("-records")) {
-                if (val == null) {
+            if(name.equals("-records")) {
+                if(val == null) {
                     usage("No value after -records");
                 }
                 try {
                     records = Long.parseLong(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (records <= 0) {
+                if(records <= 0) {
                     usage(val + " is not a positive integer");
                 }
-            } else if (name.equals("-key")) {
-                if (val == null) {
+            }
+            else if(name.equals("-key")) {
+                if(val == null) {
                     usage("No value after -key");
                 }
                 try {
                     keySize = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (keySize <= 0) {
+                if(keySize <= 0) {
                     usage(val + " is not a positive integer");
                 }
-            } else if (name.equals("-data")) {
-                if (val == null) {
+            }
+            else if(name.equals("-data")) {
+                if(val == null) {
                     usage("No value after -data");
                 }
                 try {
                     dataSize = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (dataSize < 0) {
+                if(dataSize < 0) {
                     usage(val + " is not a non-negative integer");
                 }
-            } else if (name.equals("-offheap")) {
-                if (val != null) {
+            }
+            else if(name.equals("-offheap")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 offHeapCache = true;
-            } else if (name.equals("-maincache")) {
-                if (val == null) {
+            }
+            else if(name.equals("-maincache")) {
+                if(val == null) {
                     usage("No value after -maincache");
                 }
                 try {
                     mainCacheSize = Long.parseLong(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (mainCacheSize <= 0) {
+                if(mainCacheSize <= 0) {
                     usage(val + " is not a positive integer");
                 }
-            } else if (name.equals("-keyprefix")) {
-                if (val == null) {
+            }
+            else if(name.equals("-keyprefix")) {
+                if(val == null) {
                     usage("No value after -keyprefix");
                 }
                 try {
                     keyPrefix = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (keyPrefix < 0) {
+                if(keyPrefix < 0) {
                     usage(val + " is not a non-negative integer");
                 }
-            } else if (name.equals("-orderedinsertion")) {
-                if (val != null) {
+            }
+            else if(name.equals("-orderedinsertion")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 orderedInsertion = true;
-            } else if (name.equals("-duplicates")) {
-                if (val != null) {
+            }
+            else if(name.equals("-duplicates")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 duplicates = true;
-            } else if (name.equals("-ttl")) {
-                if (val != null) {
+            }
+            else if(name.equals("-ttl")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 useTTL = true;
-            } else if (name.equals("-replicated")) {
-                if (val != null) {
+            }
+            else if(name.equals("-replicated")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 replicated = true;
-            } else if (name.equals("-nodemax")) {
-                if (val == null) {
+            }
+            else if(name.equals("-nodemax")) {
+                if(val == null) {
                     usage("No value after -nodemax");
                 }
                 try {
                     nodeMaxEntries = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (nodeMaxEntries <= 0) {
+                if(nodeMaxEntries <= 0) {
                     usage(val + " is not a positive integer");
                 }
-            } else if (name.equals("-binmax")) {
-                if (val == null) {
+            }
+            else if(name.equals("-binmax")) {
+                if(val == null) {
                     usage("No value after -binmax");
                 }
                 try {
                     binMaxEntries = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
-                if (binMaxEntries <= 0) {
+                if(binMaxEntries <= 0) {
                     usage(val + " is not a positive integer");
                 }
-            } else if (name.equals("-density")) {
+            }
+            else if(name.equals("-density")) {
                 usage
-                    ("-density is no longer supported, see -orderedinsertion");
-            } else if (name.equals("-overhead")) {
+                        ("-density is no longer supported, see -orderedinsertion");
+            }
+            else if(name.equals("-overhead")) {
                 usage("-overhead is no longer supported");
-            } else if (name.startsWith("-je.")) {
-                if (val == null) {
+            }
+            else if(name.startsWith("-je.")) {
+                if(val == null) {
                     usage("No value after " + name);
                 }
-                if (name.startsWith("-je.rep.")) {
+                if(name.startsWith("-je.rep.")) {
                     repParams.put(name.substring(1), val);
-                } else {
+                }
+                else {
                     envConfig.setConfigParam(name.substring(1), val);
                 }
-            } else if (name.equals("-measure")) {
-                if (val != null) {
+            }
+            else if(name.equals("-measure")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 doMeasure = true;
-            } else if (name.equals("-outputproperties")) {
-                if (val != null) {
+            }
+            else if(name.equals("-outputproperties")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 outputProperties = true;
-            } else if (name.equals("-btreeinfo")) {
-                if (val != null) {
+            }
+            else if(name.equals("-btreeinfo")) {
+                if(val != null) {
                     usage("No value allowed after " + name);
                 }
                 btreeInfo = true;
-            } else {
+            }
+            else {
                 usage("Unknown arg: " + name);
             }
         }
 
-        if (records == 0) {
+        if(records == 0) {
             usage("-records not specified");
         }
-        if (keySize == 0) {
+        if(keySize == 0) {
             usage("-key not specified");
         }
     }
 
     void cleanup() {
-        if (tempDir != null) {
+        if(tempDir != null) {
             emptyTempDir();
             tempDir.delete();
         }
@@ -807,93 +882,11 @@ public class DbCacheSize {
     }
 
     /**
-     * Runs DbCacheSize as a command line utility.
-     * For command usage, see {@link DbCacheSize class description}.
-     */
-    public static void main(final String[] args)
-        throws Throwable {
-
-        final DbCacheSize dbCacheSize = new DbCacheSize();
-        try {
-            dbCacheSize.parseArgs(args);
-            dbCacheSize.calculateCacheSizes();
-            if (dbCacheSize.outputProperties) {
-                dbCacheSize.printProperties(System.out);
-            } else {
-                dbCacheSize.printCacheSizes(System.out);
-            }
-            if (dbCacheSize.doMeasure) {
-                dbCacheSize.measure(System.out);
-            }
-        } finally {
-            dbCacheSize.cleanup();
-        }
-    }
-
-    /**
-     * Prints usage and calls System.exit.
-     */
-    private static void usage(final String msg) {
-
-        if (msg != null) {
-            System.out.println(msg);
-        }
-
-        System.out.println
-            ("usage:" +
-             "\njava "  + CmdUtil.getJavaCommand(DbCacheSize.class) +
-             "\n   -records <count>" +
-             "\n      # Total records (key/data pairs); required" +
-             "\n   -key <bytes> " +
-             "\n      # Average key bytes per record; required" +
-             "\n  [-data <bytes>]" +
-             "\n      # Average data bytes per record; if omitted no leaf" +
-             "\n      # node sizes are included in the output; required with" +
-             "\n      # -duplicates, and specifies the primary key length" +
-             "\n  [-offheap]" +
-             "\n      # Indicates that an off-heap cache will be used." +
-             "\n  [-maincache <bytes>]" +
-             "\n      # The size of the main cache (in the JVM heap)." +
-             "\n      # The size of the off-heap cache displayed is the" +
-             "\n      # additional amount needed to hold the data set." +
-             "\n      # If omitted, the main cache size is implied to" +
-             "\n      # be the amount needed to hold all internal nodes." +
-             "\n      # Ignored if -offheap is not also specified." +
-             "\n  [-keyprefix <bytes>]" +
-             "\n      # Expected size of the prefix for the keys in each" +
-             "\n      # BIN; default: zero, key prefixing is not configured;" +
-             "\n      # required with -duplicates" +
-             "\n  [-nodemax <entries>]" +
-             "\n      # Number of entries per Btree node; default: 128" +
-             "\n  [-orderedinsertion]" +
-             "\n      # Assume ordered insertions and no deletions, so BINs" +
-             "\n      # are 100% full; default: unordered insertions and/or" +
-             "\n      # deletions, BINs are 70% full" +
-             "\n  [-duplicates]" +
-             "\n      # Indicates that sorted duplicates are used, including" +
-             "\n      # MANY_TO_ONE and MANY_TO_MANY secondary indices;" +
-             "\n      # default: false" +
-             "\n  [-ttl]" +
-             "\n      # Indicates that TTL is used; default: false" +
-             "\n  [-replicated]" +
-             "\n      # Use a ReplicatedEnvironment; default: false" +
-             "\n  [-ENV_PARAM_NAME VALUE]..." +
-             "\n      # Any number of EnvironmentConfig parameters and" +
-             "\n      # ReplicationConfig parameters (if -replicated)" +
-             "\n  [-btreeinfo]" +
-             "\n      # Outputs additional Btree information" +
-             "\n  [-outputproperties]" +
-             "\n      # Writes Java properties to System.out");
-
-        System.exit(2);
-    }
-
-    /**
      * Calculates estimated cache sizes.
      */
     void calculateCacheSizes() {
 
-        if (binMaxEntries <= 0) {
+        if(binMaxEntries <= 0) {
             binMaxEntries = nodeMaxEntries;
         }
 
@@ -904,22 +897,22 @@ public class DbCacheSize {
 
             envOverhead = env.getStats(null).getCacheTotalBytes();
 
-            if (offHeapCache) {
+            if(offHeapCache) {
 
                 assumeEvictLN = (mainCacheSize == 0);
 
-                if (mainCacheSize > 0 &&
-                    mainCacheSize - envOverhead <= 1024 * 1024) {
+                if(mainCacheSize > 0 &&
+                        mainCacheSize - envOverhead <= 1024 * 1024) {
 
                     throw new IllegalArgumentException(
-                        "The -maincache value must be at least 1 MiB larger" +
-                        " than the environment overhead (" +
-                        INT_FORMAT.format(envOverhead) + ')');
+                            "The -maincache value must be at least 1 MiB larger" +
+                                    " than the environment overhead (" +
+                                    INT_FORMAT.format(envOverhead) + ')');
                 }
             }
 
             final int density =
-                orderedInsertion ? ORDERED_DENSITY : DEFAULT_DENSITY;
+                    orderedInsertion ? ORDERED_DENSITY : DEFAULT_DENSITY;
 
             nodeAvg = (nodeMaxEntries * density) / 100;
             binAvg = (binMaxEntries * density) / 100;
@@ -935,16 +928,16 @@ public class DbCacheSize {
              * fit in main (there is no point in configuring a cache that can
              * never be filled) and then recalculate the number of nodes.
              */
-            if (offHeapCache) {
+            if(offHeapCache) {
 
-                if (mainCacheSize == 0) {
+                if(mainCacheSize == 0) {
                     mainCacheSize = mainNoLNsOrVLSNs + envOverhead;
                 }
 
                 mainDataSize = mainCacheSize - envOverhead;
                 mainMinDataSize = calcLevel2AndAboveSize();
 
-                if (mainMinDataSize > mainDataSize) {
+                if(mainMinDataSize > mainDataSize) {
                     records *= ((double) mainDataSize) / mainMinDataSize;
                     calcNNodes();
                     calcMainCacheSizes();
@@ -965,8 +958,8 @@ public class DbCacheSize {
              */
             try {
                 env.close();
-            } catch (RuntimeException e) {
-                if (success) {
+            } catch(RuntimeException e) {
+                if(success) {
                     throw e;
                 }
             }
@@ -977,7 +970,7 @@ public class DbCacheSize {
         assert offHeapCache;
 
         return ((nUinNodes - nLevel2Nodes) * uinWithTargets) +
-               (nLevel2Nodes * (uinNoTargets + uinOffHeapBINIds));
+                (nLevel2Nodes * (uinNoTargets + uinOffHeapBINIds));
     }
 
     private void calcNNodes() {
@@ -987,13 +980,13 @@ public class DbCacheSize {
         nUinNodes = 0;
         nLevel2Nodes = 0;
 
-        for (long nodes = nBinNodes / nodeAvg;; nodes /= nodeAvg) {
+        for(long nodes = nBinNodes / nodeAvg; ; nodes /= nodeAvg) {
 
-            if (nodes == 0) {
+            if(nodes == 0) {
                 nodes = 1; // root
             }
 
-            if (btreeLevels == 2) {
+            if(btreeLevels == 2) {
                 assert nLevel2Nodes == 0;
                 nLevel2Nodes = nodes;
             }
@@ -1001,7 +994,7 @@ public class DbCacheSize {
             nUinNodes += nodes;
             btreeLevels += 1;
 
-            if (nodes == 1) {
+            if(nodes == 1) {
                 break;
             }
         }
@@ -1016,13 +1009,13 @@ public class DbCacheSize {
         final long mainUINs = nUinNodes * uinWithTargets;
 
         mainNoLNsOrVLSNs =
-            (nBinNodes * binNoLNsOrVLSNs) + mainUINs;
+                (nBinNodes * binNoLNsOrVLSNs) + mainUINs;
 
         mainNoLNsWithVLSNs =
-            (nBinNodes * binNoLNsWithVLSNs) + mainUINs;
+                (nBinNodes * binNoLNsWithVLSNs) + mainUINs;
 
         mainWithLNsAndVLSNs =
-            (nBinNodes * binWithLNsAndVLSNs) + mainUINs;
+                (nBinNodes * binWithLNsAndVLSNs) + mainUINs;
     }
 
     private void calcOffHeapNoLNsOrVLSNs() {
@@ -1033,7 +1026,7 @@ public class DbCacheSize {
         /*
          * If all INs fit in main, then no off-heap cache is needed.
          */
-        if (mainNoLNsOrVLSNs <= mainDataSize) {
+        if(mainNoLNsOrVLSNs <= mainDataSize) {
             offHeapNoLNsOrVLSNs = 0;
             nMainBINsNoLNsOrVLSNs = nBinNodes;
             return;
@@ -1046,7 +1039,7 @@ public class DbCacheSize {
          * possible, and the rest off-heap.
          */
         final long mainSpare = (mainDataSize > calcLevel2AndAboveSize()) ?
-            (mainDataSize - calcLevel2AndAboveSize()) : 0;
+                (mainDataSize - calcLevel2AndAboveSize()) : 0;
 
         final long nMainBINs = mainSpare / binNoLNsOrVLSNs;
         final long nOffHeapBins = nBinNodes - nMainBINs;
@@ -1061,7 +1054,7 @@ public class DbCacheSize {
         /*
          * If everything fits in main, then no off-heap cache is needed.
          */
-        if (mainWithLNsAndVLSNs <= mainDataSize) {
+        if(mainWithLNsAndVLSNs <= mainDataSize) {
             offHeapWithLNsAndVLSNs = 0;
             nMainBINsWithLNsAndVLSNs = nBinNodes;
             nMainLNsWithLNsAndVLSNs = (binOffHeapLNs == 0) ? 0 : records;
@@ -1074,7 +1067,7 @@ public class DbCacheSize {
          * If LNs are not stored separately (they are embedded or duplicates
          * are configured), then only internal nodes are relevant.
          */
-        if (binOffHeapLNs == 0) {
+        if(binOffHeapLNs == 0) {
             offHeapWithLNsAndVLSNs = offHeapNoLNsOrVLSNs;
             nMainBINsWithLNsAndVLSNs = nMainBINsNoLNsOrVLSNs;
             nMainLNsWithLNsAndVLSNs = 0;
@@ -1088,15 +1081,15 @@ public class DbCacheSize {
          * divided by the added size required to hold the LNs in one BIN.
          */
         final long mainWithOffHeapLNIds =
-            mainNoLNsOrVLSNs + (nBinNodes * binOffHeapLNIds);
+                mainNoLNsOrVLSNs + (nBinNodes * binOffHeapLNIds);
 
-        if (mainWithOffHeapLNIds <= mainDataSize) {
+        if(mainWithOffHeapLNIds <= mainDataSize) {
 
             final long mainSpare = (mainDataSize > mainNoLNsOrVLSNs) ?
-                (mainDataSize - mainNoLNsOrVLSNs) : 0;
+                    (mainDataSize - mainNoLNsOrVLSNs) : 0;
 
             final long nBINsWithMainLNs = mainSpare /
-                (binWithLNsAndVLSNs - binNoLNsOrVLSNs);
+                    (binWithLNsAndVLSNs - binNoLNsOrVLSNs);
 
             final long nBINsWithOffHeapLNs = nBinNodes - nBINsWithMainLNs;
 
@@ -1111,14 +1104,14 @@ public class DbCacheSize {
          * possible, and the rest off-heap. Put all LNs off-heap.
          */
         final long mainSpare = (mainDataSize > calcLevel2AndAboveSize()) ?
-            (mainDataSize - calcLevel2AndAboveSize()) : 0;
+                (mainDataSize - calcLevel2AndAboveSize()) : 0;
 
         final long nMainBINs = mainSpare / (binNoLNsOrVLSNs + binOffHeapLNIds);
         final long nOffHeapBins = nBinNodes - nMainBINs;
 
         offHeapWithLNsAndVLSNs =
-            (nOffHeapBins * binOffHeapWithLNIds) +
-            (nBinNodes * binOffHeapLNs);
+                (nOffHeapBins * binOffHeapWithLNIds) +
+                        (nBinNodes * binOffHeapLNs);
 
         nMainBINsWithLNsAndVLSNs = nMainBINs;
         nMainLNsWithLNsAndVLSNs = 0;
@@ -1126,17 +1119,17 @@ public class DbCacheSize {
 
     private void calcTreeSizes(final Environment env) {
 
-        if (nodeMaxEntries != binMaxEntries) {
+        if(nodeMaxEntries != binMaxEntries) {
             throw new IllegalArgumentException(
-                "-binmax not currently supported because a per-BIN max is" +
-                " not implemented in the Btree, so we can't measure" +
-                " an actual BIN node with the given -binmax value");
+                    "-binmax not currently supported because a per-BIN max is" +
+                            " not implemented in the Btree, so we can't measure" +
+                            " an actual BIN node with the given -binmax value");
         }
         assert nodeAvg == binAvg;
 
-        if (nodeAvg > 0xFFFF) {
+        if(nodeAvg > 0xFFFF) {
             throw new IllegalArgumentException(
-                "Entries per node (" + nodeAvg + ") is greater than 0xFFFF");
+                    "Entries per node (" + nodeAvg + ") is greater than 0xFFFF");
         }
 
         final EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
@@ -1150,17 +1143,18 @@ public class DbCacheSize {
         final DatabaseEntry dataEntry = new DatabaseEntry();
 
         final WriteOptions options = new WriteOptions();
-        if (useTTL) {
+        if(useTTL) {
             options.setTTL(30, TimeUnit.DAYS);
         }
 
         /* Insert nodeAvg records into a single BIN. */
         final Database db = openDatabase(env, true);
-        for (int i = 0; i < nodeAvg; i += 1) {
+        for(int i = 0; i < nodeAvg; i += 1) {
 
-            if (keyBytes.length == 1) {
+            if(keyBytes.length == 1) {
                 keyBytes[0] = (byte) i;
-            } else {
+            }
+            else {
                 assert keyBytes.length == 2;
                 keyBytes[0] = (byte) (i >> 8);
                 keyBytes[1] = (byte) i;
@@ -1169,11 +1163,11 @@ public class DbCacheSize {
             setKeyData(keyBytes, keyPrefix, keyEntry, dataEntry);
 
             final OperationResult result = db.put(
-                null, keyEntry, dataEntry,
-                duplicates ? Put.NO_DUP_DATA : Put.NO_OVERWRITE,
-                options);
+                    null, keyEntry, dataEntry,
+                    duplicates ? Put.NO_DUP_DATA : Put.NO_OVERWRITE,
+                    options);
 
-            if (result == null) {
+            if(result == null) {
                 throw new IllegalStateException();
             }
         }
@@ -1200,13 +1194,13 @@ public class DbCacheSize {
          * Evict all LNs so we can calculate BIN size without LNs.  This is
          * simulated by calling partialEviction directly.
          */
-        if (offHeapCache) {
+        if(offHeapCache) {
             final long prevSize = getOffHeapCacheSize(envImpl);
 
             bin.partialEviction();
 
             binOffHeapLNs = 0;
-            for (int i = 0; i < nodeAvg; i += 1) {
+            for(int i = 0; i < nodeAvg; i += 1) {
                 binOffHeapLNs += getOffHeapLNSize(bin, 0);
             }
 
@@ -1214,7 +1208,8 @@ public class DbCacheSize {
 
             binOffHeapLNIds = bin.getOffHeapLNIdsMemorySize();
 
-        } else {
+        }
+        else {
             bin.partialEviction();
 
             binOffHeapLNs = 0;
@@ -1230,17 +1225,19 @@ public class DbCacheSize {
          * after the LNs in a separate step.  This is simulated by calling
          * partialEviction a second time.
          */
-        if (duplicates || !envImpl.getCacheVLSN()) {
+        if(duplicates || !envImpl.getCacheVLSN()) {
             assert bin.getVLSNCache().getMemorySize() == 0;
 
-        } else {
+        }
+        else {
             assert bin.getVLSNCache().getMemorySize() > 0;
 
             bin.partialEviction();
 
-            if (dataSize <= bin.getEnv().getMaxEmbeddedLN()) {
+            if(dataSize <= bin.getEnv().getMaxEmbeddedLN()) {
                 assert bin.getVLSNCache().getMemorySize() > 0;
-            } else {
+            }
+            else {
                 assert bin.getVLSNCache().getMemorySize() == 0;
             }
         }
@@ -1253,15 +1250,15 @@ public class DbCacheSize {
          * slots with nodeAvg entries.
          */
         final IN in = DbInternal.getDbImpl(db).
-                                 getTree().
-                                 getRootINLatchedExclusive(CacheMode.DEFAULT);
+                getTree().
+                getRootINLatchedExclusive(CacheMode.DEFAULT);
         assert bin == in.getTarget(0);
 
-        for (int i = 1; i < nodeAvg; i += 1) {
+        for(int i = 1; i < nodeAvg; i += 1) {
 
             final int result = in.insertEntry1(
-                bin, bin.getKey(i), null, bin.getLsn(i),
-                false/*blindInsertion*/);
+                    bin, bin.getKey(i), null, bin.getLsn(i),
+                    false/*blindInsertion*/);
 
             assert (result & IN.INSERT_SUCCESS) != 0;
             assert i == (result & ~IN.INSERT_SUCCESS);
@@ -1272,12 +1269,12 @@ public class DbCacheSize {
         uinWithTargets = in.getInMemorySize();
         uinNoTargets = uinWithTargets - in.getTargets().calculateMemorySize();
 
-        if (offHeapCache) {
+        if(offHeapCache) {
 
             in.releaseLatch();
 
             long bytesFreed = envImpl.getEvictor().doTestEvict(
-                bin, Evictor.EvictionSource.CACHEMODE);
+                    bin, Evictor.EvictionSource.CACHEMODE);
 
             assert bytesFreed > 0;
 
@@ -1293,22 +1290,23 @@ public class DbCacheSize {
             binOffHeapNoLNIds = getOffHeapBINSize(in, 0);
 
             assert bytesFreed ==
-                binOffHeapLNs + (binOffHeapWithLNIds - binOffHeapNoLNIds);
+                    binOffHeapLNs + (binOffHeapWithLNIds - binOffHeapNoLNIds);
 
-            for (int i = 1; i < nodeAvg; i += 1) {
+            for(int i = 1; i < nodeAvg; i += 1) {
                 in.setOffHeapBINId(i, binId, false, false);
             }
 
             uinOffHeapBINIds = in.getOffHeapBINIdsMemorySize();
 
             /* Cleanup to avoid assertions during env close. */
-            for (int i = 1; i < nodeAvg; i += 1) {
+            for(int i = 1; i < nodeAvg; i += 1) {
                 in.clearOffHeapBINId(i);
             }
 
             in.releaseLatch();
 
-        } else {
+        }
+        else {
             binOffHeapWithLNIds = 0;
             uinOffHeapBINIds = 0;
 
@@ -1321,7 +1319,7 @@ public class DbCacheSize {
 
     private long getMainDataSize(final Environment env) {
         return DbInternal.getNonNullEnvImpl(env).
-            getMemoryBudget().getTreeMemoryUsage();
+                getMemoryBudget().getTreeMemoryUsage();
     }
 
     private long getOffHeapCacheSize(final EnvironmentImpl envImpl) {
@@ -1335,7 +1333,7 @@ public class DbCacheSize {
         final OffHeapCache ohCache = bin.getEnv().getOffHeapCache();
 
         final long memId = bin.getOffHeapLNId(i);
-        if (memId == 0) {
+        if(memId == 0) {
             return 0;
         }
 
@@ -1361,28 +1359,30 @@ public class DbCacheSize {
                             final DatabaseEntry keyEntry,
                             final DatabaseEntry dataEntry) {
         final byte[] fullKey;
-        if (duplicates) {
+        if(duplicates) {
             fullKey = new byte[keySize + dataSize];
-        } else {
+        }
+        else {
             fullKey = new byte[keySize];
         }
 
-        if (keyPrefix + keyBytes.length > fullKey.length) {
+        if(keyPrefix + keyBytes.length > fullKey.length) {
             throw new IllegalArgumentException(
-                "Key doesn't fit, allowedLen=" + fullKey.length +
-                " keyLen=" + keyBytes.length + " prefixLen=" + keyPrefix);
+                    "Key doesn't fit, allowedLen=" + fullKey.length +
+                            " keyLen=" + keyBytes.length + " prefixLen=" + keyPrefix);
         }
 
         System.arraycopy(keyBytes, 0, fullKey, keyOffset, keyBytes.length);
 
         final byte[] finalKey;
         final byte[] finalData;
-        if (duplicates) {
+        if(duplicates) {
             finalKey = new byte[keySize];
             finalData = new byte[dataSize];
             System.arraycopy(fullKey, 0, finalKey, 0, keySize);
             System.arraycopy(fullKey, keySize, finalData, 0, dataSize);
-        } else {
+        }
+        else {
             finalKey = fullKey;
             finalData = new byte[Math.max(0, dataSize)];
         }
@@ -1400,20 +1400,20 @@ public class DbCacheSize {
         out.println("overhead=" + envOverhead);
         out.println("internalNodes=" + mainNoLNsOrVLSNs);
         out.println("internalNodesAndVersions=" + mainNoLNsWithVLSNs);
-        if (dataSize >= 0) {
+        if(dataSize >= 0) {
             out.println("allNodes=" + mainWithLNsAndVLSNs);
         }
-        if (offHeapCache) {
+        if(offHeapCache) {
             out.println("minMainCache=" + (mainMinDataSize + envOverhead));
             out.println("offHeapInternalNodes=" + offHeapNoLNsOrVLSNs);
-            if (dataSize >= 0) {
+            if(dataSize >= 0) {
                 out.println("offHeapAllNodes=" + offHeapWithLNsAndVLSNs);
             }
         }
         out.println("# Following are deprecated");
         out.println("minInternalNodes=" + mainNoLNsOrVLSNs);
         out.println("maxInternalNodes=" + mainNoLNsOrVLSNs);
-        if (dataSize >= 0) {
+        if(dataSize >= 0) {
             out.println("minAllNodes=" + mainWithLNsAndVLSNs);
             out.println("maxAllNodes=" + mainWithLNsAndVLSNs);
         }
@@ -1434,8 +1434,8 @@ public class DbCacheSize {
         out.println(" minimum bytes");
         out.println();
         out.println(
-            "To account for JE daemon operation, record locks, HA network " +
-            "connections, etc,");
+                "To account for JE daemon operation, record locks, HA network " +
+                        "connections, etc,");
         out.println("a larger amount is needed in practice.");
         out.println();
         out.println("=== Database Cache Size ===");
@@ -1443,72 +1443,74 @@ public class DbCacheSize {
         out.println(MAIN_HEADER);
 
         out.println(line(
-            mainNoLNsOrVLSNs, "Internal nodes only" + mainSuffix));
+                mainNoLNsOrVLSNs, "Internal nodes only" + mainSuffix));
 
-        if (offHeapCache) {
+        if(offHeapCache) {
             out.println(line(
-                offHeapNoLNsOrVLSNs, "Internal nodes only" + offHeapSuffix));
+                    offHeapNoLNsOrVLSNs, "Internal nodes only" + offHeapSuffix));
         }
 
-        if (dataSize >= 0) {
-            if (!offHeapCache && mainNoLNsWithVLSNs != mainNoLNsOrVLSNs) {
+        if(dataSize >= 0) {
+            if(!offHeapCache && mainNoLNsWithVLSNs != mainNoLNsOrVLSNs) {
                 out.println(line(
-                    mainNoLNsWithVLSNs,
-                    "Internal nodes and record versions" + mainSuffix));
+                        mainNoLNsWithVLSNs,
+                        "Internal nodes and record versions" + mainSuffix));
             }
 
             out.println(line(
-                mainWithLNsAndVLSNs,
-                "Internal nodes and leaf nodes" + mainSuffix));
+                    mainWithLNsAndVLSNs,
+                    "Internal nodes and leaf nodes" + mainSuffix));
 
-            if (offHeapCache) {
+            if(offHeapCache) {
                 out.println(line(
-                    offHeapWithLNsAndVLSNs,
-                    "Internal nodes and leaf nodes" + offHeapSuffix));
+                        offHeapWithLNsAndVLSNs,
+                        "Internal nodes and leaf nodes" + offHeapSuffix));
             }
 
-            if (mainNoLNsOrVLSNs == mainWithLNsAndVLSNs &&
-                offHeapNoLNsOrVLSNs == offHeapWithLNsAndVLSNs){
+            if(mainNoLNsOrVLSNs == mainWithLNsAndVLSNs &&
+                    offHeapNoLNsOrVLSNs == offHeapWithLNsAndVLSNs) {
 
-                if (duplicates) {
+                if(duplicates) {
                     out.println(
-                        "\nNote that leaf nodes do not use additional memory" +
-                        " because the database is" +
-                        "\nconfigured for duplicates. In addition, record" +
-                        " versions are not applicable.");
-                } else {
+                            "\nNote that leaf nodes do not use additional memory" +
+                                    " because the database is" +
+                                    "\nconfigured for duplicates. In addition, record" +
+                                    " versions are not applicable.");
+                }
+                else {
                     out.println(
-                        "\nNote that leaf nodes do not use additional memory" +
-                        " because with a small" +
-                        "\ndata size, the LNs are embedded in the BINs." +
-                        " In addition, record versions" +
-                        "\n(if configured) are always cached in this mode.");
+                            "\nNote that leaf nodes do not use additional memory" +
+                                    " because with a small" +
+                                    "\ndata size, the LNs are embedded in the BINs." +
+                                    " In addition, record versions" +
+                                    "\n(if configured) are always cached in this mode.");
                 }
 
             }
-        } else {
-            if (!duplicates) {
+        }
+        else {
+            if(!duplicates) {
                 out.println("\nTo get leaf node sizing specify -data");
             }
         }
 
-        if (offHeapCache && mainMinDataSize > mainDataSize) {
+        if(offHeapCache && mainMinDataSize > mainDataSize) {
             out.println(
-                "\nWARNING: The information above applies to a data set of " +
-                INT_FORMAT.format(records) + " records," +
-                "\nnot the number of records specified, because the main" +
-                " cache size specified is " +
-                "\ntoo small to hold all upper INs. This prevents all" +
-                " internal nodes (or leaf" +
-                "\nnodes) from fitting into cache, and the data set was" +
-                " reduced accordingly. To" +
-                "\nfit all internal nodes in cache with the specified " +
-                " number of records, specify" +
-                "\na main cache size of at least " +
-                INT_FORMAT.format(mainMinDataSize + envOverhead) + " bytes.");
+                    "\nWARNING: The information above applies to a data set of " +
+                            INT_FORMAT.format(records) + " records," +
+                            "\nnot the number of records specified, because the main" +
+                            " cache size specified is " +
+                            "\ntoo small to hold all upper INs. This prevents all" +
+                            " internal nodes (or leaf" +
+                            "\nnodes) from fitting into cache, and the data set was" +
+                            " reduced accordingly. To" +
+                            "\nfit all internal nodes in cache with the specified " +
+                            " number of records, specify" +
+                            "\na main cache size of at least " +
+                            INT_FORMAT.format(mainMinDataSize + envOverhead) + " bytes.");
         }
 
-        if (btreeInfo) {
+        if(btreeInfo) {
             out.println();
             out.println("=== Calculated Btree Information ===");
             out.println();
@@ -1516,28 +1518,28 @@ public class DbCacheSize {
             out.println(line(nUinNodes, "Upper internal nodes"));
             out.println(line(nBinNodes, "Bottom internal nodes"));
 
-            if (offHeapCache) {
+            if(offHeapCache) {
                 out.println();
                 out.println("--- BINs and LNs in Main Cache vs Off-heap ---");
                 out.println();
                 out.println(line(
-                    nMainBINsNoLNsOrVLSNs,
-                    "Internal nodes only, BINs" + mainSuffix));
+                        nMainBINsNoLNsOrVLSNs,
+                        "Internal nodes only, BINs" + mainSuffix));
                 out.println(line(
-                    nBinNodes - nMainBINsNoLNsOrVLSNs,
-                    "Internal nodes only, BINs" + offHeapSuffix));
+                        nBinNodes - nMainBINsNoLNsOrVLSNs,
+                        "Internal nodes only, BINs" + offHeapSuffix));
                 out.println(line(
-                    nMainBINsWithLNsAndVLSNs,
-                    "Internal nodes and leaf nodes, BINs" + mainSuffix));
+                        nMainBINsWithLNsAndVLSNs,
+                        "Internal nodes and leaf nodes, BINs" + mainSuffix));
                 out.println(line(
-                    nBinNodes - nMainBINsWithLNsAndVLSNs,
-                    "Internal nodes and leaf nodes, BINs" + offHeapSuffix));
+                        nBinNodes - nMainBINsWithLNsAndVLSNs,
+                        "Internal nodes and leaf nodes, BINs" + offHeapSuffix));
                 out.println(line(
-                    nMainLNsWithLNsAndVLSNs,
-                    "Internal nodes and leaf nodes, LNs" + mainSuffix));
+                        nMainLNsWithLNsAndVLSNs,
+                        "Internal nodes and leaf nodes, LNs" + mainSuffix));
                 out.println(line(
-                    records - nMainLNsWithLNsAndVLSNs,
-                    "Internal nodes and leaf nodes, LNs" + offHeapSuffix));
+                        records - nMainLNsWithLNsAndVLSNs,
+                        "Internal nodes and leaf nodes, LNs" + offHeapSuffix));
             }
         }
 
@@ -1560,7 +1562,7 @@ public class DbCacheSize {
 
         int start = buf.length();
 
-        while (buf.length() - start + str.length() < MIN_COLUMN_WIDTH) {
+        while(buf.length() - start + str.length() < MIN_COLUMN_WIDTH) {
             buf.append(' ');
         }
 
@@ -1574,61 +1576,62 @@ public class DbCacheSize {
     void measure(final PrintStream out) {
 
         Environment env = openMeasureEnvironment(
-            true /*createNew*/, false /*setMainSize*/);
+                true /*createNew*/, false /*setMainSize*/);
         try {
             IN.ACCUMULATED_LIMIT = 0;
 
             Database db = openDatabase(env, true);
 
-            if (out != null) {
+            if(out != null) {
                 out.println(
-                    "Measuring with maximum cache size: " +
-                    INT_FORMAT.format(env.getConfig().getCacheSize()) +
-                    " and (for off-heap) main data size: " +
-                    INT_FORMAT.format(mainDataSize));
+                        "Measuring with maximum cache size: " +
+                                INT_FORMAT.format(env.getConfig().getCacheSize()) +
+                                " and (for off-heap) main data size: " +
+                                INT_FORMAT.format(mainDataSize));
             }
 
             insertRecords(out, env, db);
 
-            if (offHeapCache) {
+            if(offHeapCache) {
                 db.close();
                 env.close();
                 env = null;
                 env = openMeasureEnvironment(
-                    false /*createNew*/, false /*setMainSize*/);
+                        false /*createNew*/, false /*setMainSize*/);
                 db = openDatabase(env, false);
 
                 readRecords(out, env, db, false /*readData*/);
                 evictMainToDataSize(db, mainDataSize);
 
                 measuredMainNoLNsOrVLSNs = getStats(
-                    out, env, "After read keys only, evict main to size");
+                        out, env, "After read keys only, evict main to size");
 
                 measuredOffHeapNoLNsOrVLSNs =
-                    getOffHeapCacheSize(DbInternal.getNonNullEnvImpl(env));
+                        getOffHeapCacheSize(DbInternal.getNonNullEnvImpl(env));
 
                 readRecords(out, env, db, true /*readData*/);
                 evictMainToDataSize(db, mainDataSize);
 
                 measuredMainWithLNsAndVLSNs = getStats(
-                    out, env, "After read all, evict main to size");
+                        out, env, "After read all, evict main to size");
 
                 measuredOffHeapWithLNsAndVLSNs =
-                    getOffHeapCacheSize(DbInternal.getNonNullEnvImpl(env));
+                        getOffHeapCacheSize(DbInternal.getNonNullEnvImpl(env));
 
-            } else {
+            }
+            else {
                 measuredMainWithLNsAndVLSNs = getStats(
-                    out, env, "After insert");
+                        out, env, "After insert");
 
                 trimLNs(db);
 
                 measuredMainNoLNsWithVLSNs = getStats(
-                    out, env, "After trimLNs");
+                        out, env, "After trimLNs");
 
                 trimVLSNs(db);
 
                 measuredMainNoLNsOrVLSNs = getStats(
-                    out, env, "After trimVLSNs");
+                        out, env, "After trimVLSNs");
             }
 
             db.close();
@@ -1636,34 +1639,35 @@ public class DbCacheSize {
             env = null;
 
             env = openMeasureEnvironment(
-                false /*createNew*/, offHeapCache /*setMainSize*/);
+                    false /*createNew*/, offHeapCache /*setMainSize*/);
             db = openDatabase(env, false);
 
             PreloadStatus status = preloadRecords(out, db, false /*loadLNs*/);
 
             preloadMainNoLNsOrVLSNs = getStats(
-                out, env,
-                "Internal nodes only after preload (" +
-                status + ")");
+                    out, env,
+                    "Internal nodes only after preload (" +
+                            status + ")");
 
-            if (assumeEvictLN) {
+            if(assumeEvictLN) {
                 preloadMainWithLNsAndVLSNs = preloadMainNoLNsOrVLSNs;
-            } else {
+            }
+            else {
                 status = preloadRecords(out, db, true /*loadLNs*/);
 
                 preloadMainWithLNsAndVLSNs = getStats(
-                    out, env,
-                    "All nodes after preload (" +
-                        status + ")");
+                        out, env,
+                        "All nodes after preload (" +
+                                status + ")");
             }
 
-            if (!offHeapCache) {
+            if(!offHeapCache) {
                 trimLNs(db);
 
                 preloadMainNoLNsWithVLSNs = getStats(
-                    out, env,
-                    "Internal nodes plus VLSNs after preload (" +
-                    status + ")");
+                        out, env,
+                        "Internal nodes plus VLSNs after preload (" +
+                                status + ")");
             }
 
             db.close();
@@ -1678,10 +1682,10 @@ public class DbCacheSize {
              * Do not propagate exception thrown by Environment.close if
              * another exception is currently in flight.
              */
-            if (env != null) {
+            if(env != null) {
                 try {
                     env.close();
-                } catch (RuntimeException ignore) {
+                } catch(RuntimeException ignore) {
                 }
             }
         }
@@ -1692,7 +1696,7 @@ public class DbCacheSize {
 
         final EnvironmentConfig config = envConfig.clone();
 
-        if (setMainSize) {
+        if(setMainSize) {
             config.setCacheSize(mainCacheSize);
 
             /*
@@ -1704,15 +1708,17 @@ public class DbCacheSize {
              * we don't set the cache size.
              */
             config.setConfigParam(
-                EnvironmentConfig.LOG_TOTAL_BUFFER_BYTES,
-                String.valueOf(3 << 20));
-        } else {
+                    EnvironmentConfig.LOG_TOTAL_BUFFER_BYTES,
+                    String.valueOf(3 << 20));
+        }
+        else {
             config.setCachePercent(90);
         }
 
-        if (offHeapCache) {
+        if(offHeapCache) {
             config.setOffHeapCacheSize(1024 * 1024 * 1024);
-        } else {
+        }
+        else {
             config.setOffHeapCacheSize(0);
         }
 
@@ -1723,9 +1729,10 @@ public class DbCacheSize {
 
         final EnvironmentConfig config = envConfig.clone();
 
-        if (offHeapCache) {
+        if(offHeapCache) {
             config.setOffHeapCacheSize(1024 * 1024 * 1024);
-        } else {
+        }
+        else {
             config.setOffHeapCacheSize(0);
         }
 
@@ -1736,7 +1743,7 @@ public class DbCacheSize {
                                         final boolean createNew) {
         mkTempDir();
 
-        if (createNew) {
+        if(createNew) {
             emptyTempDir();
         }
 
@@ -1746,39 +1753,40 @@ public class DbCacheSize {
 
         /* Daemons interfere with cache size measurements. */
         config.setConfigParam(
-            EnvironmentConfig.ENV_RUN_CLEANER, "false");
+                EnvironmentConfig.ENV_RUN_CLEANER, "false");
         config.setConfigParam(
-            EnvironmentConfig.ENV_RUN_CHECKPOINTER, "false");
+                EnvironmentConfig.ENV_RUN_CHECKPOINTER, "false");
         config.setConfigParam(
-            EnvironmentConfig.ENV_RUN_IN_COMPRESSOR, "false");
+                EnvironmentConfig.ENV_RUN_IN_COMPRESSOR, "false");
         config.setConfigParam(
-            EnvironmentConfig.ENV_RUN_EVICTOR, "false");
+                EnvironmentConfig.ENV_RUN_EVICTOR, "false");
         config.setConfigParam(
-            EnvironmentConfig.ENV_RUN_OFFHEAP_EVICTOR, "false");
+                EnvironmentConfig.ENV_RUN_OFFHEAP_EVICTOR, "false");
 
         /* Evict in small chunks. */
         config.setConfigParam(
-            EnvironmentConfig.EVICTOR_EVICT_BYTES, "1024");
+                EnvironmentConfig.EVICTOR_EVICT_BYTES, "1024");
 
         final Environment newEnv;
 
-        if (replicated) {
+        if(replicated) {
             try {
                 final Class repEnvClass = Class.forName
-                    ("com.sleepycat.je.rep.utilint.DbCacheSizeRepEnv");
+                        ("com.sleepycat.je.rep.utilint.DbCacheSizeRepEnv");
                 final DbCacheSizeRepEnv repEnv =
-                    (DbCacheSizeRepEnv) repEnvClass.newInstance();
+                        (DbCacheSizeRepEnv) repEnvClass.newInstance();
                 newEnv = repEnv.open(tempDir, config, repParams);
-            } catch (ClassNotFoundException |
-                     InstantiationException |
-                     IllegalAccessException e) {
+            } catch(ClassNotFoundException |
+                    InstantiationException |
+                    IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
-        } else {
-            if (!repParams.isEmpty()) {
+        }
+        else {
+            if(!repParams.isEmpty()) {
                 throw new IllegalArgumentException(
-                    "Cannot set replication params in a standalone " +
-                    "environment.  May add -replicated.");
+                        "Cannot set replication params in a standalone " +
+                                "environment.  May add -replicated.");
             }
             newEnv = new Environment(tempDir, config);
         }
@@ -1791,9 +1799,9 @@ public class DbCacheSize {
          * unlikely to be effective.
          */
         final long fileSize = Integer.parseInt(
-            newEnv.getConfig().getConfigParam(EnvironmentConfig.LOG_FILE_MAX));
+                newEnv.getConfig().getConfigParam(EnvironmentConfig.LOG_FILE_MAX));
 
-        if ((fileSize > IN.MAX_FILE_OFFSET) || !orderedInsertion) {
+        if((fileSize > IN.MAX_FILE_OFFSET) || !orderedInsertion) {
             IN.disableCompactLsns = true;
         }
 
@@ -1801,19 +1809,19 @@ public class DbCacheSize {
          * Preallocate 1st chunk of LRU entries, so it is counted in env
          * overhead.
          */
-        if (offHeapCache) {
+        if(offHeapCache) {
             DbInternal.getNonNullEnvImpl(newEnv).
-                getOffHeapCache().preallocateLRUEntries();
+                    getOffHeapCache().preallocateLRUEntries();
         }
 
         return newEnv;
     }
 
     private void mkTempDir() {
-        if (tempDir == null) {
+        if(tempDir == null) {
             try {
                 tempDir = File.createTempFile("DbCacheSize", null);
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw new IllegalStateException(e);
             }
             /* createTempFile creates a file, but we want a directory. */
@@ -1823,12 +1831,12 @@ public class DbCacheSize {
     }
 
     private void emptyTempDir() {
-        if (tempDir == null) {
+        if(tempDir == null) {
             return;
         }
         final File[] children = tempDir.listFiles();
-        if (children != null) {
-            for (File child : children) {
+        if(children != null) {
+            for(File child : children) {
                 child.delete();
             }
         }
@@ -1861,25 +1869,26 @@ public class DbCacheSize {
         final int maxKeyBytes = lastKeyBytes.length;
 
         final int keyOffset;
-        if (keyPrefix == 0) {
+        if(keyPrefix == 0) {
             keyOffset = 0;
-        } else {
+        }
+        else {
 
             /*
              * Calculate prefix length for generated keys and adjust key offset
              * to produce the desired prefix length.
              */
             final int nodeAvg = orderedInsertion ?
-                nodeMaxEntries :
-                ((nodeMaxEntries * DEFAULT_DENSITY) / 100);
+                    nodeMaxEntries :
+                    ((nodeMaxEntries * DEFAULT_DENSITY) / 100);
             final int prevKey = lastKey - (nodeAvg * 2);
             final byte[] prevKeyBytes =
-                padLeft(BigInteger.valueOf(prevKey).toByteArray(),
-                        maxKeyBytes);
+                    padLeft(BigInteger.valueOf(prevKey).toByteArray(),
+                            maxKeyBytes);
             int calcPrefix = 0;
-            while (calcPrefix < lastKeyBytes.length &&
-                   calcPrefix < prevKeyBytes.length &&
-                   lastKeyBytes[calcPrefix] == prevKeyBytes[calcPrefix]) {
+            while(calcPrefix < lastKeyBytes.length &&
+                    calcPrefix < prevKeyBytes.length &&
+                    lastKeyBytes[calcPrefix] == prevKeyBytes[calcPrefix]) {
                 calcPrefix += 1;
             }
             keyOffset = keyPrefix - calcPrefix;
@@ -1887,16 +1896,16 @@ public class DbCacheSize {
 
         /* Generate random keys. */
         List<Integer> rndKeys = null;
-        if (!orderedInsertion) {
+        if(!orderedInsertion) {
             rndKeys = new ArrayList<Integer>(lastKey + 1);
-            for (int i = 0; i <= lastKey; i += 1) {
+            for(int i = 0; i <= lastKey; i += 1) {
                 rndKeys.add(i);
             }
             Collections.shuffle(rndKeys, new Random(123));
         }
 
         final WriteOptions options = new WriteOptions();
-        if (useTTL) {
+        if(useTTL) {
             options.setTTL(30, TimeUnit.DAYS);
         }
 
@@ -1904,28 +1913,28 @@ public class DbCacheSize {
         final Cursor cursor = db.openCursor(txn, null);
         boolean success = false;
         try {
-            for (int i = 0; i <= lastKey; i += 1) {
+            for(int i = 0; i <= lastKey; i += 1) {
                 final int keyVal = orderedInsertion ? i : rndKeys.get(i);
                 final byte[] keyBytes = padLeft(
-                    BigInteger.valueOf(keyVal).toByteArray(), maxKeyBytes);
+                        BigInteger.valueOf(keyVal).toByteArray(), maxKeyBytes);
                 setKeyData(keyBytes, keyOffset, keyEntry, dataEntry);
 
                 final OperationResult result = cursor.put(
-                    keyEntry, dataEntry,
-                    duplicates ? Put.NO_DUP_DATA : Put.NO_OVERWRITE,
-                    options);
+                        keyEntry, dataEntry,
+                        duplicates ? Put.NO_DUP_DATA : Put.NO_OVERWRITE,
+                        options);
 
-                if (result == null && !orderedInsertion) {
+                if(result == null && !orderedInsertion) {
                     i -= 1;
                     continue;
                 }
-                if (result == null) {
+                if(result == null) {
                     throw new IllegalStateException("Could not insert");
                 }
 
-                if (i % 10000 == 0) {
+                if(i % 10000 == 0) {
                     checkForEviction(env, i);
-                    if (out != null) {
+                    if(out != null) {
                         out.print(".");
                         out.flush();
                     }
@@ -1934,9 +1943,10 @@ public class DbCacheSize {
             success = true;
         } finally {
             cursor.close();
-            if (success) {
+            if(success) {
                 txn.commit();
-            } else {
+            }
+            else {
                 txn.abort();
             }
         }
@@ -1967,18 +1977,18 @@ public class DbCacheSize {
         final DatabaseEntry keyEntry = new DatabaseEntry();
         final DatabaseEntry dataEntry = new DatabaseEntry();
 
-        if (!readData) {
+        if(!readData) {
             dataEntry.setPartial(0, 0, true);
         }
 
         final ReadOptions options = new ReadOptions();
 
-        if (assumeEvictLN) {
+        if(assumeEvictLN) {
             options.setCacheMode(CacheMode.EVICT_LN);
         }
 
-        try (final Cursor cursor = db.openCursor(null, null)) {
-            while (cursor.get(keyEntry, dataEntry, Get.NEXT, options) !=
+        try(final Cursor cursor = db.openCursor(null, null)) {
+            while(cursor.get(keyEntry, dataEntry, Get.NEXT, options) !=
                     null) {
             }
         }
@@ -1987,17 +1997,17 @@ public class DbCacheSize {
 
     private void checkForEviction(Environment env, int recNum) {
         final EnvironmentStats stats = env.getStats(null);
-        if (stats.getOffHeapNodesTargeted() > 0) {
+        if(stats.getOffHeapNodesTargeted() > 0) {
             getStats(System.out, env, "Out of off-heap cache");
             throw new IllegalStateException(
-                "*** Ran out of off-heap cache at record " + recNum +
-                " -- try increasing off-heap cache size ***");
+                    "*** Ran out of off-heap cache at record " + recNum +
+                            " -- try increasing off-heap cache size ***");
         }
-        if (stats.getNNodesTargeted() > 0) {
+        if(stats.getNNodesTargeted() > 0) {
             getStats(System.out, env, "Out of main cache");
             throw new IllegalStateException(
-                "*** Ran out of main cache at record " + recNum +
-                " -- try increasing Java heap size ***");
+                    "*** Ran out of main cache at record " + recNum +
+                            " -- try increasing Java heap size ***");
         }
     }
 
@@ -2026,7 +2036,7 @@ public class DbCacheSize {
     private void evictMainToDataSize(final Database db,
                                      final long dataSize) {
 
-        if (getMainDataSize(db.getEnvironment()) <= dataSize) {
+        if(getMainDataSize(db.getEnvironment()) <= dataSize) {
             return;
         }
 
@@ -2040,12 +2050,12 @@ public class DbCacheSize {
             }
         });
 
-        if (!keepGoing) {
+        if(!keepGoing) {
             return;
         }
 
         final Evictor evictor =
-            DbInternal.getNonNullEnvImpl(db.getEnvironment()).getEvictor();
+                DbInternal.getNonNullEnvImpl(db.getEnvironment()).getEvictor();
 
         keepGoing = iterateBINs(db, new BINVisitor() {
             @Override
@@ -2058,10 +2068,6 @@ public class DbCacheSize {
         assert !keepGoing;
     }
 
-    private interface BINVisitor {
-        boolean visitBIN(BIN bin);
-    }
-
     private boolean iterateBINs(final Database db, final BINVisitor visitor) {
 
         final DatabaseEntry key = new DatabaseEntry();
@@ -2072,17 +2078,17 @@ public class DbCacheSize {
         BIN prevBin = null;
         boolean keepGoing = true;
 
-        while (keepGoing &&
-               c.getNext(key, data, LockMode.READ_UNCOMMITTED) ==
-               OperationStatus.SUCCESS) {
+        while(keepGoing &&
+                c.getNext(key, data, LockMode.READ_UNCOMMITTED) ==
+                        OperationStatus.SUCCESS) {
 
             final BIN bin = DbInternal.getCursorImpl(c).getBIN();
 
-            if (bin == prevBin) {
+            if(bin == prevBin) {
                 continue;
             }
 
-            if (prevBin != null) {
+            if(prevBin != null) {
                 prevBin.latch();
                 keepGoing = visitor.visitBIN(prevBin);
                 prevBin.releaseLatchIfOwner();
@@ -2093,7 +2099,7 @@ public class DbCacheSize {
 
         c.close();
 
-        if (keepGoing && prevBin != null) {
+        if(keepGoing && prevBin != null) {
             prevBin.latch();
             visitor.visitBIN(prevBin);
             prevBin.releaseLatch();
@@ -2108,7 +2114,7 @@ public class DbCacheSize {
      */
     private byte[] padLeft(byte[] data, int size) {
         assert data.length <= size;
-        if (data.length == size) {
+        if(data.length == size) {
             return data;
         }
         final byte[] b = new byte[size];
@@ -2123,16 +2129,16 @@ public class DbCacheSize {
                                          final Database db,
                                          final boolean loadLNs) {
         Thread thread = null;
-        if (out != null) {
+        if(out != null) {
             thread = new Thread() {
                 @Override
                 public void run() {
-                    while (true) {
+                    while(true) {
                         try {
                             out.print(".");
                             out.flush();
                             Thread.sleep(5 * 1000);
-                        } catch (InterruptedException e) {
+                        } catch(InterruptedException e) {
                             break;
                         }
                     }
@@ -2144,14 +2150,14 @@ public class DbCacheSize {
         try {
             stats = db.preload(new PreloadConfig().setLoadLNs(loadLNs));
         } finally {
-            if (thread != null) {
+            if(thread != null) {
                 thread.interrupt();
             }
         }
-        if (thread != null) {
+        if(thread != null) {
             try {
                 thread.join();
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 throw new RuntimeExceptionWrapper(e);
             }
         }
@@ -2163,7 +2169,7 @@ public class DbCacheSize {
          * class doesn't complain about the eviction later on.
          */
         final Environment env = db.getEnvironment();
-        if (offHeapCache) {
+        if(offHeapCache) {
             env.evictMemory();
             env.getStats(StatsConfig.CLEAR);
         }
@@ -2177,7 +2183,7 @@ public class DbCacheSize {
     private long getStats(final PrintStream out,
                           final Environment env,
                           final String msg) {
-        if (out != null) {
+        if(out != null) {
             out.println();
             out.println(msg + ':');
         }
@@ -2186,29 +2192,33 @@ public class DbCacheSize {
 
         final long dataSize = getMainDataSize(env);
 
-        if (out != null) {
+        if(out != null) {
             out.println(
-                "MainCache= " + INT_FORMAT.format(stats.getCacheTotalBytes()) +
-                " Data= " + INT_FORMAT.format(dataSize)  +
-                " BINs= " + INT_FORMAT.format(stats.getNCachedBINs()) +
-                " UINs= " + INT_FORMAT.format(stats.getNCachedUpperINs()) +
-                " CacheMiss= " + INT_FORMAT.format(stats.getNCacheMiss()) +
-                " OffHeapCache= " +
-                INT_FORMAT.format(stats.getOffHeapTotalBytes()) +
-                " OhLNs= " + INT_FORMAT.format(stats.getOffHeapCachedLNs()) +
-                " OhBIN= " + INT_FORMAT.format(stats.getOffHeapCachedBINs()) +
-                " OhBINDeltas= " +
-                INT_FORMAT.format(stats.getOffHeapCachedBINDeltas()));
+                    "MainCache= " + INT_FORMAT.format(stats.getCacheTotalBytes()) +
+                            " Data= " + INT_FORMAT.format(dataSize) +
+                            " BINs= " + INT_FORMAT.format(stats.getNCachedBINs()) +
+                            " UINs= " + INT_FORMAT.format(stats.getNCachedUpperINs()) +
+                            " CacheMiss= " + INT_FORMAT.format(stats.getNCacheMiss()) +
+                            " OffHeapCache= " +
+                            INT_FORMAT.format(stats.getOffHeapTotalBytes()) +
+                            " OhLNs= " + INT_FORMAT.format(stats.getOffHeapCachedLNs()) +
+                            " OhBIN= " + INT_FORMAT.format(stats.getOffHeapCachedBINs()) +
+                            " OhBINDeltas= " +
+                            INT_FORMAT.format(stats.getOffHeapCachedBINDeltas()));
         }
 
-        if (stats.getNNodesTargeted() > 0) {
+        if(stats.getNNodesTargeted() > 0) {
             throw new IllegalStateException(
-                "*** All records did not fit in the cache ***");
+                    "*** All records did not fit in the cache ***");
         }
-        if (stats.getOffHeapNodesTargeted() > 0) {
+        if(stats.getOffHeapNodesTargeted() > 0) {
             throw new IllegalStateException(
-                "*** All records did not fit in the off-heap cache ***");
+                    "*** All records did not fit in the off-heap cache ***");
         }
         return dataSize;
+    }
+
+    private interface BINVisitor {
+        boolean visitBIN(BIN bin);
     }
 }

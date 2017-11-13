@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
 /**
  * Redirects logging messages to the owning environment's application
@@ -25,7 +25,7 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * configured through EnvironmentConfig, to support handlers which:
  * - require a constructor with arguments
  * - is specific to this environment, and multiple environments exist in the
- *   same process.
+ * same process.
  */
 public class ConfiguredRedirectHandler extends Handler {
 
@@ -36,21 +36,21 @@ public class ConfiguredRedirectHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         Handler h = getEnvSpecificConfiguredHandler();
-        if ((h != null) && (h.isLoggable(record))) {
+        if((h != null) && (h.isLoggable(record))) {
             h.publish(record);
         }
     }
 
     private Handler getEnvSpecificConfiguredHandler() {
         EnvironmentImpl envImpl =
-            LoggerUtils.envMap.get(Thread.currentThread());
+                LoggerUtils.envMap.get(Thread.currentThread());
 
         /*
          * Prefer to lose logging output, rather than risk a
          * NullPointerException if the caller forgets to set and release the
          * environmentImpl.
          */
-        if (envImpl == null) {
+        if(envImpl == null) {
             return null;
         }
 
@@ -59,9 +59,9 @@ public class ConfiguredRedirectHandler extends Handler {
 
     @Override
     public void close()
-        throws SecurityException {
+            throws SecurityException {
         Handler h = getEnvSpecificConfiguredHandler();
-        if (h != null) {
+        if(h != null) {
             h.close();
         }
     }
@@ -69,7 +69,7 @@ public class ConfiguredRedirectHandler extends Handler {
     @Override
     public void flush() {
         Handler h = getEnvSpecificConfiguredHandler();
-        if (h != null) {
+        if(h != null) {
             h.flush();
         }
     }

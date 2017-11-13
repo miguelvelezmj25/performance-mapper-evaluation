@@ -12,14 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.subscription;
 
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.config.DurationConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
@@ -39,6 +31,14 @@ import berkeley.com.sleepycat.je.rep.utilint.HostPortPair;
 import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
 import berkeley.com.sleepycat.je.utilint.PropUtil;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Object to represent parameters to configure a subscription.
@@ -128,8 +128,8 @@ public class SubscriptionConfig implements Cloneable {
                               String subHostPortPair,
                               String feederHostPortPair,
                               String groupName) throws UnknownHostException {
-       this(subNodeName, subHome, subHostPortPair, feederHostPortPair,
-            groupName, null);
+        this(subNodeName, subHome, subHostPortPair, feederHostPortPair,
+                groupName, null);
     }
 
     /**
@@ -147,7 +147,7 @@ public class SubscriptionConfig implements Cloneable {
                               String subHostPortPair,
                               String feederHostPortPair,
                               String groupName,
-                              UUID   groupUUID) throws UnknownHostException {
+                              UUID groupUUID) throws UnknownHostException {
         /* subscriber */
         this.subNodeName = subNodeName;
         this.subHome = subHome;
@@ -188,11 +188,11 @@ public class SubscriptionConfig implements Cloneable {
                               String subHostPortPair,
                               String feederHostPortPair,
                               String groupName,
-                              UUID   groupUUID,
+                              UUID groupUUID,
                               NodeType nodeType) throws UnknownHostException {
 
         this(subNodeName, subHome, subHostPortPair, feederHostPortPair,
-             groupName, groupUUID);
+                groupName, groupUUID);
         this.nodeType = nodeType;
         verifyParameters();
     }
@@ -208,9 +208,9 @@ public class SubscriptionConfig implements Cloneable {
         envConfig.setReadOnly(true);
         envConfig.setTransactional(true);
         envConfig.setConfigParam(
-            EnvironmentParams.ENV_RECOVERY.getName(), "false");
+                EnvironmentParams.ENV_RECOVERY.getName(), "false");
         envConfig.setConfigParam(
-            EnvironmentParams.ENV_SETUP_LOGGER.getName(), "true");
+                EnvironmentParams.ENV_SETUP_LOGGER.getName(), "true");
 
         return envConfig;
     }
@@ -223,40 +223,40 @@ public class SubscriptionConfig implements Cloneable {
     public ReplicationConfig createReplicationConfig() {
         /* Populate rep. configuration parameters */
         ReplicationConfig repConfig =
-            new ReplicationConfig(getGroupName(),
-                                  getSubNodeName(),
-                                  getSubNodeHostPort());
+                new ReplicationConfig(getGroupName(),
+                        getSubNodeName(),
+                        getSubNodeHostPort());
 
         repConfig.setConfigParam(RepParams.SUBSCRIBER_USE.getName(), "true");
 
         ReplicationNetworkConfig defaultNetConfig =
-            ReplicationNetworkConfig.createDefault();
+                ReplicationNetworkConfig.createDefault();
         repConfig.setRepNetConfig(defaultNetConfig);
 
         repConfig.setConfigParam(RepParams.REPLICA_MESSAGE_QUEUE_SIZE.getName(),
-                                 Integer.toString(getDefaultMsgQueueSize()));
+                Integer.toString(getDefaultMsgQueueSize()));
 
         repConfig.setConfigParam(
-            RepParams.REPLICA_TIMEOUT.getName(),
-            String.valueOf(getChannelTimeout(TimeUnit.MILLISECONDS)) +
-            " ms");
+                RepParams.REPLICA_TIMEOUT.getName(),
+                String.valueOf(getChannelTimeout(TimeUnit.MILLISECONDS)) +
+                        " ms");
 
         repConfig.setConfigParam(
-            RepParams.PRE_HEARTBEAT_TIMEOUT.getName(),
-            String.valueOf(getPreHeartbeatTimeout(TimeUnit.MILLISECONDS)) +
-            " ms");
+                RepParams.PRE_HEARTBEAT_TIMEOUT.getName(),
+                String.valueOf(getPreHeartbeatTimeout(TimeUnit.MILLISECONDS)) +
+                        " ms");
 
         repConfig.setConfigParam(
-            RepParams.REPSTREAM_OPEN_TIMEOUT.getName(),
-            String.valueOf(getStreamOpenTimeout(TimeUnit.MILLISECONDS)) +
-            " ms");
+                RepParams.REPSTREAM_OPEN_TIMEOUT.getName(),
+                String.valueOf(getStreamOpenTimeout(TimeUnit.MILLISECONDS)) +
+                        " ms");
 
         repConfig.setConfigParam(RepParams.HEARTBEAT_INTERVAL.getName(),
-                                 Integer.toString(getHeartbeatIntervalMs()));
+                Integer.toString(getHeartbeatIntervalMs()));
 
         repConfig.setConfigParam(
-            RepParams.REPLICA_RECEIVE_BUFFER_SIZE.getName(),
-            Integer.toString(getReceiveBufferSize()));
+                RepParams.REPLICA_RECEIVE_BUFFER_SIZE.getName(),
+                Integer.toString(getReceiveBufferSize()));
 
         /* set subscription client node type */
         repConfig.setNodeType(nodeType);
@@ -270,6 +270,19 @@ public class SubscriptionConfig implements Cloneable {
 
     public FeederFilter getFeederFilter() {
         return feederFilter;
+    }
+
+    /**
+     * Set the feeder filter which will be transmitted to Feeder.
+     *
+     * @param filter the non-null feeder filter
+     */
+    public void setFeederFilter(FeederFilter filter) {
+
+        if(filter == null) {
+            throw new IllegalArgumentException("Feeder filter cannot be null.");
+        }
+        feederFilter = filter;
     }
 
     public SubscriptionCallback getCallBack() {
@@ -290,7 +303,7 @@ public class SubscriptionConfig implements Cloneable {
 
     public InetAddress getFeederHostAddr() throws UnknownHostException {
         return InetAddress.getByName(HostPortPair
-                                         .getHostname(feederHostPortPair));
+                .getHostname(feederHostPortPair));
     }
 
     public String getSubNodeName() {
@@ -309,27 +322,32 @@ public class SubscriptionConfig implements Cloneable {
         return groupUUID;
     }
 
+    public void setGroupUUID(UUID gID) {
+        groupUUID = gID;
+    }
+
     public int getMaxConnectRetries() {
         return DbConfigManager.getIntVal(props,
-                                         RepParams
-                                             .SUBSCRIPTION_MAX_CONNECT_RETRIES);
+                RepParams
+                        .SUBSCRIPTION_MAX_CONNECT_RETRIES);
     }
 
     public long getSleepBeforeRetryMs() {
         return
-            DbConfigManager.getDurationVal(props,
-                                           RepParams
-                                               .SUBSCRIPTION_SLEEP_BEFORE_RETRY,
-                                           TimeUnit.MILLISECONDS);
+                DbConfigManager.getDurationVal(props,
+                        RepParams
+                                .SUBSCRIPTION_SLEEP_BEFORE_RETRY,
+                        TimeUnit.MILLISECONDS);
     }
 
     public long getChannelTimeout(TimeUnit unit) {
         DurationConfigParam param = RepParams.REPLICA_TIMEOUT;
-        if (props.containsKey(param.getName())) {
+        if(props.containsKey(param.getName())) {
             return DbConfigManager.getDurationVal(props,
-                                                  RepParams.REPLICA_TIMEOUT,
-                                                  unit);
-        } else {
+                    RepParams.REPLICA_TIMEOUT,
+                    unit);
+        }
+        else {
             long ms = PropUtil.parseDuration(param.getDefault());
             return unit.convert(ms, TimeUnit.MILLISECONDS);
         }
@@ -337,23 +355,24 @@ public class SubscriptionConfig implements Cloneable {
 
     public long getPollIntervalMs() {
         return DbConfigManager.getDurationVal(props,
-                                              RepParams
-                                                  .SUBSCRIPTION_POLL_INTERVAL,
-                                              TimeUnit.MILLISECONDS);
+                RepParams
+                        .SUBSCRIPTION_POLL_INTERVAL,
+                TimeUnit.MILLISECONDS);
     }
 
     public long getPollTimeoutMs() {
         return DbConfigManager.getDurationVal(props,
-                                              RepParams
-                                                  .SUBSCRIPTION_POLL_TIMEOUT,
-                                              TimeUnit.MILLISECONDS);
+                RepParams
+                        .SUBSCRIPTION_POLL_TIMEOUT,
+                TimeUnit.MILLISECONDS);
     }
 
     public long getPreHeartbeatTimeout(TimeUnit unit) {
         DurationConfigParam param = RepParams.PRE_HEARTBEAT_TIMEOUT;
-        if (props.containsKey(param.getName())) {
+        if(props.containsKey(param.getName())) {
             return DbConfigManager.getDurationVal(props, param, unit);
-        } else {
+        }
+        else {
             long ms = PropUtil.parseDuration(param.getDefault());
             return unit.convert(ms, TimeUnit.MILLISECONDS);
         }
@@ -361,9 +380,10 @@ public class SubscriptionConfig implements Cloneable {
 
     public long getStreamOpenTimeout(TimeUnit unit) {
         DurationConfigParam param = RepParams.REPSTREAM_OPEN_TIMEOUT;
-        if (props.containsKey(param.getName())) {
+        if(props.containsKey(param.getName())) {
             return DbConfigManager.getDurationVal(props, param, unit);
-        } else {
+        }
+        else {
             long ms = PropUtil.parseDuration(param.getDefault());
             return unit.convert(ms, TimeUnit.MILLISECONDS);
         }
@@ -371,33 +391,27 @@ public class SubscriptionConfig implements Cloneable {
 
     public int getHeartbeatIntervalMs() {
         IntConfigParam param = RepParams.HEARTBEAT_INTERVAL;
-        if (props.containsKey(param.getName())) {
+        if(props.containsKey(param.getName())) {
             return DbConfigManager.getIntVal(props, param);
-        } else {
+        }
+        else {
             return Integer.parseInt(param.getDefault());
         }
     }
 
     public int getReceiveBufferSize() {
         IntConfigParam param = RepParams.REPLICA_RECEIVE_BUFFER_SIZE;
-        if (props.containsKey(param.getName())) {
+        if(props.containsKey(param.getName())) {
             return DbConfigManager.getIntVal(props, param);
-        } else {
+        }
+        else {
             return Integer.parseInt(param.getDefault());
         }
     }
 
-    public int getInputMessageQueueSize() {
-        return inputMessageQueueSize;
-    }
-
-    public int getOutputMessageQueueSize() {
-        return outputMessageQueueSize;
-    }
-
-    public InetSocketAddress getInetSocketAddress()
-        throws UnknownHostException {
-        return new InetSocketAddress(getFeederHostAddr(), getFeederPort());
+    public void setReceiveBufferSize(int val) {
+        DbConfigManager.setIntVal(props, RepParams.REPLICA_RECEIVE_BUFFER_SIZE,
+                val, validateParams);
     }
 
 
@@ -405,14 +419,31 @@ public class SubscriptionConfig implements Cloneable {
     /*-  Setters   -*/
     /*--------------*/
 
-    public void setGroupUUID(UUID gID) {
-        groupUUID = gID;
+    public int getInputMessageQueueSize() {
+        return inputMessageQueueSize;
+    }
+
+    public void setInputMessageQueueSize(int size) {
+        inputMessageQueueSize = size;
+    }
+
+    public int getOutputMessageQueueSize() {
+        return outputMessageQueueSize;
+    }
+
+    public void setOutputMessageQueueSize(int size) {
+        outputMessageQueueSize = size;
+    }
+
+    public InetSocketAddress getInetSocketAddress()
+            throws UnknownHostException {
+        return new InetSocketAddress(getFeederHostAddr(), getFeederPort());
     }
 
     public void setCallback(SubscriptionCallback cbk) {
-        if (cbk == null) {
+        if(cbk == null) {
             throw new IllegalArgumentException("Subscription callback cannot " +
-                                               "be null.");
+                    "be null.");
         }
         callBack = cbk;
     }
@@ -420,38 +451,25 @@ public class SubscriptionConfig implements Cloneable {
     public void setChannelTimeout(long timeout, TimeUnit unit)
             throws IllegalArgumentException {
         DbConfigManager.setDurationVal(props, RepParams.REPLICA_TIMEOUT,
-                                       timeout, unit, validateParams);
+                timeout, unit, validateParams);
     }
 
     public void setPreHeartbeatTimeout(long timeout, TimeUnit unit)
             throws IllegalArgumentException {
         DbConfigManager.setDurationVal(props, RepParams.PRE_HEARTBEAT_TIMEOUT,
-                                       timeout, unit, validateParams);
+                timeout, unit, validateParams);
     }
 
     public void setHeartbeatInterval(int ms)
             throws IllegalArgumentException {
         DbConfigManager.setIntVal(props, RepParams.HEARTBEAT_INTERVAL, ms,
-                                  validateParams);
+                validateParams);
     }
 
     public void setStreamOpenTimeout(long timeout, TimeUnit unit)
             throws IllegalArgumentException {
         DbConfigManager.setDurationVal(props, RepParams.REPSTREAM_OPEN_TIMEOUT,
-                                       timeout, unit, validateParams);
-    }
-
-    public void setReceiveBufferSize(int val) {
-        DbConfigManager.setIntVal(props, RepParams.REPLICA_RECEIVE_BUFFER_SIZE,
-                                  val, validateParams);
-    }
-
-    public void setInputMessageQueueSize(int size) {
-        inputMessageQueueSize = size;
-    }
-
-    public void setOutputMessageQueueSize(int size) {
-        outputMessageQueueSize = size;
+                timeout, unit, validateParams);
     }
 
     public NodeType getNodeType() {
@@ -463,22 +481,9 @@ public class SubscriptionConfig implements Cloneable {
             SubscriptionConfig ret = (SubscriptionConfig) super.clone();
             ret.setProps(this.props);
             return ret;
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
-    }
-
-    /**
-     * Set the feeder filter which will be transmitted to Feeder.
-     *
-     * @param filter  the non-null feeder filter
-     */
-    public void setFeederFilter(FeederFilter filter) {
-
-        if (filter == null) {
-            throw new IllegalArgumentException("Feeder filter cannot be null.");
-        }
-        feederFilter = filter;
     }
 
     private void setProps(Properties p) {
@@ -495,14 +500,14 @@ public class SubscriptionConfig implements Cloneable {
         sb.append("home host and port: ").append(subHostPortPair).append("\n");
 
         sb.append("feeder host and port: ").append(feederHostPortPair)
-          .append("\n");
+                .append("\n");
 
         try {
             sb.append("feeder address: ")
-              .append(getFeederHostAddr()).append("\n");
-        } catch (UnknownHostException e) {
+                    .append(getFeederHostAddr()).append("\n");
+        } catch(UnknownHostException e) {
             sb.append("feeder address: unknown host ")
-              .append(feederHostPortPair).append("\n");
+                    .append(feederHostPortPair).append("\n");
         }
         sb.append("feeder filter: ").append(feederFilter).append("\n");
 
@@ -533,28 +538,87 @@ public class SubscriptionConfig implements Cloneable {
                 "subscription home directory");
 
         DatabaseUtil.checkForNullParam(feederHostPortPair,
-                                       "feeder host port pair");
+                "feeder host port pair");
 
         DatabaseUtil.checkForNullParam(getFeederHost(), "feeder host name");
 
         DatabaseUtil.checkForNullParam(getFeederPort(), "feeder host port");
 
         DatabaseUtil.checkForNullParam(subHostPortPair,
-                                       "subscriber host port pair");
+                "subscriber host port pair");
 
         DatabaseUtil.checkForNullParam(getSubNodeName(),
-                                       "subscriber node name");
+                "subscriber node name");
 
         DatabaseUtil.checkForNullParam(getSubNodeHostPort(),
-                                       "subscriber node host port");
+                "subscriber node host port");
 
         DatabaseUtil.checkForNullParam(getGroupName(), "replication group");
 
         /* we only support SECONDARY and EXTERNAL node type for subscription */
-        if (!nodeType.isExternal() && !nodeType.isSecondary()) {
+        if(!nodeType.isExternal() && !nodeType.isSecondary()) {
             throw new IllegalArgumentException(
-                "'node type' param must be either SECONDARY or " +
-                "EXTERNAL, found node type: " + nodeType);
+                    "'node type' param must be either SECONDARY or " +
+                            "EXTERNAL, found node type: " + nodeType);
+        }
+    }
+
+    private int getDefaultMsgQueueSize() {
+        IntConfigParam param = RepParams.REPLICA_MESSAGE_QUEUE_SIZE;
+        if(props.containsKey(param.getName())) {
+            return DbConfigManager.getIntVal(props, param);
+        }
+        else {
+            return Integer.parseInt(param.getDefault());
+        }
+    }
+
+    /*
+     * a default filter that filters out entries from internal db and db
+     * supporting duplicates.
+     */
+    private static class DefaultFeederFilter
+            implements FeederFilter, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        DefaultFeederFilter() {
+            super();
+        }
+
+        @Override
+        public OutputWireRecord execute(final OutputWireRecord record,
+                                        final RepImpl repImpl) {
+
+            /* keep record if db id is null */
+            final DatabaseId dbId = record.getReplicableDBId();
+            if(dbId == null) {
+                return record;
+            }
+
+            final DbTree dbTree = repImpl.getDbTree();
+            final DatabaseImpl impl = dbTree.getDb(dbId);
+            try {
+                /* keep record if db impl is not available */
+                if(impl == null) {
+                    return record;
+                }
+
+                /* filter out if from an db supporting duplicates */
+                if(impl.getSortedDuplicates()) {
+                    return null;
+                }
+
+                /* filter out if from an internal db */
+                if(impl.isInternalDb()) {
+                    return null;
+                }
+
+                return record;
+            } finally {
+                if(impl != null) {
+                    dbTree.releaseDb(impl);
+                }
+            }
         }
     }
 
@@ -588,64 +652,6 @@ public class SubscriptionConfig implements Cloneable {
         @Override
         public void processException(final Exception exception) {
 
-        }
-    }
-
-    private int getDefaultMsgQueueSize() {
-        IntConfigParam param = RepParams.REPLICA_MESSAGE_QUEUE_SIZE;
-        if (props.containsKey(param.getName())) {
-            return DbConfigManager.getIntVal(props, param);
-        } else {
-            return Integer.parseInt(param.getDefault());
-        }
-    }
-
-    /*
-     * a default filter that filters out entries from internal db and db
-     * supporting duplicates.
-     */
-    private static class DefaultFeederFilter
-            implements FeederFilter, Serializable {
-        private static final long serialVersionUID = 1L;
-
-        DefaultFeederFilter() {
-            super();
-        }
-
-        @Override
-        public OutputWireRecord execute(final OutputWireRecord record,
-                                        final RepImpl repImpl) {
-
-            /* keep record if db id is null */
-            final DatabaseId dbId = record.getReplicableDBId();
-            if (dbId == null) {
-                return record;
-            }
-
-            final DbTree dbTree = repImpl.getDbTree();
-            final DatabaseImpl impl = dbTree.getDb(dbId);
-            try {
-                /* keep record if db impl is not available */
-                if (impl == null) {
-                    return record;
-                }
-
-                /* filter out if from an db supporting duplicates */
-                if (impl.getSortedDuplicates()) {
-                    return null;
-                }
-
-                /* filter out if from an internal db */
-                if (impl.isInternalDb()) {
-                    return null;
-                }
-
-                return record;
-            } finally {
-                if (impl != null) {
-                    dbTree.releaseDb(impl);
-                }
-            }
         }
     }
 }

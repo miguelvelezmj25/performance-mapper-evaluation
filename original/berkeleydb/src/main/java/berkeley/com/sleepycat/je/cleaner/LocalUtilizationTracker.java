@@ -13,24 +13,24 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.IdentityHashMap;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 /**
  * Accumulates changes to the utilization profile locally in a single thread.
- *
+ * <p>
  * <p>Per-database information is keyed by DatabaseImpl so that no tree lookup
  * of a database is required (as when a DatabaseId is used).</p>
- *
+ * <p>
  * <p>The countNewLogEntry, countObsoleteNode and countObsoleteNodeInexact
  * methods may be called without taking the log write latch.  Totals and offset
  * are accumulated locally in this object only, not in DatabaseImpl
  * objects.</p>
- *
+ * <p>
  * <p>When finished with this object, its information should be added to the
  * Environment's UtilizationTracker and DatabaseImpl objects by calling
  * transferToUtilizationTracker under the log write latch.  This is done in the
@@ -58,12 +58,12 @@ public class LocalUtilizationTracker extends BaseLocalUtilizationTracker {
     /**
      * Counts a node that has become obsolete and tracks the LSN offset, if
      * non-zero, to avoid a lookup during cleaning.
-     *
+     * <p>
      * <p>A zero LSN offset is used as a special value when obsolete offset
      * tracking is not desired. [#15365]  The file header entry (at offset
      * zero) is never counted as obsolete, it is assumed to be obsolete by the
      * cleaner.</p>
-     *
+     * <p>
      * <p>This method should only be called for LNs and INs (i.e, only for
      * nodes).  If type is null we assume it is an LN.</p>
      */
@@ -72,17 +72,17 @@ public class LocalUtilizationTracker extends BaseLocalUtilizationTracker {
                                   int size,
                                   DatabaseImpl db) {
         countObsolete
-            (lsn, db, type, size,
-             true,   // countPerFile
-             true,   // countPerDb
-             true,   // trackOffset
-             true);  // checkDupOffsets
+                (lsn, db, type, size,
+                        true,   // countPerFile
+                        true,   // countPerDb
+                        true,   // trackOffset
+                        true);  // checkDupOffsets
     }
 
     /**
      * Counts as countObsoleteNode does, but since the LSN may be inexact, does
      * not track the obsolete LSN offset.
-     *
+     * <p>
      * <p>This method should only be called for LNs and INs (i.e, only for
      * nodes).  If type is null we assume it is an LN.</p>
      */
@@ -91,11 +91,11 @@ public class LocalUtilizationTracker extends BaseLocalUtilizationTracker {
                                          int size,
                                          DatabaseImpl db) {
         countObsolete
-            (lsn, db, type, size,
-             true,   // countPerFile
-             true,   // countPerDb
-             false,  // trackOffset
-             false); // checkDupOffsets
+                (lsn, db, type, size,
+                        true,   // countPerFile
+                        true,   // countPerDb
+                        false,  // trackOffset
+                        false); // checkDupOffsets
     }
 
     public Set<Object> getTrackedDbs() {

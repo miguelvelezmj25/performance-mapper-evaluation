@@ -102,10 +102,10 @@ public class ToManyExample {
                     personDb, secConfig);
 
             txn.commit();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             txn.abort();
             throw e;
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             txn.abort();
             throw e;
         }
@@ -128,7 +128,7 @@ public class ToManyExample {
             ToManyExample example = new ToManyExample(homeDir);
             example.exec();
             example.close();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
         }
     }
@@ -307,7 +307,7 @@ public class ToManyExample {
 
         SecondaryCursor cursor = secDb.openSecondaryCursor(null, null);
         try {
-            while (cursor.getNext(secKey, priKey, priData, null) ==
+            while(cursor.getNext(secKey, priKey, priData, null) ==
                     OperationStatus.SUCCESS) {
                 Person person = personBinding.entryToObject(priData);
                 person.name = keyBinding.entryToObject(priKey);

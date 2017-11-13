@@ -28,21 +28,21 @@ import berkeley.com.sleepycat.je.Transaction;
  * maintaining a cache of database information on a replica, where the cache is
  * initialized after opening the database (and configuring the trigger), and
  * where only the TransactionTrigger.commit method is used.  More specifically:
- *  <ul>
- *  <li>Although the {@link PersistentTrigger} interface exists, it may not
- *  currently be used reliably.</li>
- *  <li>Triggers must be configured on each node in a rep group separately,
- *  when needed.  Specifically, a trigger configured on a master will not be
- *  automatically configured and invoked on the replicas in the group.</li>
- *  <li>Because only transient triggers are currently supported, trigger
- *  methods are only called after opening a database (when configuring the
- *  trigger in the DatabaseConfig), and are not called after closing the
- *  database.</li>
- *  <li>As a result of the above point, triggers are not called during
- *  recovery, and therefore cannot be reliably used to perform write operations
- *  using the tranaction passed to the trigger method.</li>
- *  <li>Also see the warning at the top of ReplicatedDatabaseTrigger.java.</li>
- *  </ul>
+ * <ul>
+ * <li>Although the {@link PersistentTrigger} interface exists, it may not
+ * currently be used reliably.</li>
+ * <li>Triggers must be configured on each node in a rep group separately,
+ * when needed.  Specifically, a trigger configured on a master will not be
+ * automatically configured and invoked on the replicas in the group.</li>
+ * <li>Because only transient triggers are currently supported, trigger
+ * methods are only called after opening a database (when configuring the
+ * trigger in the DatabaseConfig), and are not called after closing the
+ * database.</li>
+ * <li>As a result of the above point, triggers are not called during
+ * recovery, and therefore cannot be reliably used to perform write operations
+ * using the tranaction passed to the trigger method.</li>
+ * <li>Also see the warning at the top of ReplicatedDatabaseTrigger.java.</li>
+ * </ul>
  * <p>
  * The trigger methods {@link #put put} and {@link #delete delete} are used to
  * track all record operations on the database.
@@ -78,6 +78,13 @@ public interface Trigger {
     public String getName();
 
     /**
+     * Returns the result of the {@link #setDatabaseName(String)} operation.
+     *
+     * @return the name of the database associated with this trigger
+     */
+    public String getDatabaseName();
+
+    /**
      * Sets the database name associated with this trigger. The JE trigger
      * mechanism invokes this method to ensure that the trigger knows the name
      * it's associated with across a rename of the database.
@@ -87,18 +94,10 @@ public interface Trigger {
      * serialized representation.
      *
      * @param databaseName the name of the database associated with this
-     * trigger
-     *
+     *                     trigger
      * @return this
      */
     public Trigger setDatabaseName(String databaseName);
-
-    /**
-     * Returns the result of the {@link #setDatabaseName(String)} operation.
-     *
-     * @return the name of the database associated with this trigger
-     */
-    public String getDatabaseName();
 
     /* Trigger lifecycle operations. */
 
@@ -108,8 +107,9 @@ public interface Trigger {
      * exactly once. If the database is replicated, it's invoked once per node
      * on each node.
      * </p>
+     *
      * @param txn the active transaction associated with the operation. The
-     * argument is null if the database is not transactional.
+     *            argument is null if the database is not transactional.
      */
     public void addTrigger(Transaction txn);
 
@@ -123,7 +123,7 @@ public interface Trigger {
      * invocations for this trigger.
      *
      * @param txn the active transaction associated with the operation. The
-     * argument is null if the database is not transactional.
+     *            argument is null if the database is not transactional.
      */
     public void removeTrigger(Transaction txn);
 
@@ -138,14 +138,11 @@ public interface Trigger {
      * be non-null.
      * </p>
      *
-     * @param txn the active transaction associated with the operation. The
-     * argument is null if the database is non-transactional.
-     *
-     * @param key the non-null primary key
-     *
+     * @param txn     the active transaction associated with the operation. The
+     *                argument is null if the database is non-transactional.
+     * @param key     the non-null primary key
      * @param oldData the data before the change, or null if the record
-     * did not exist.
-     *
+     *                did not exist.
      * @param newData the non-null data after the change
      */
     public void put(Transaction txn,
@@ -163,13 +160,11 @@ public interface Trigger {
      * {@link PersistentTrigger#truncate} is invoked upon truncation.
      * </p>
      *
-     * @param txn the active transaction associated with the operation. The
-     * argument is null if the database is non-transactional.
-     *
-     * @param key the non-null primary key
-     *
+     * @param txn     the active transaction associated with the operation. The
+     *                argument is null if the database is non-transactional.
+     * @param key     the non-null primary key
      * @param oldData the non-null data that was associated with the deleted
-     * key
+     *                key
      */
     public void delete(Transaction txn,
                        DatabaseEntry key,

@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.util.FastOutputStream;
 /**
  * A base class for serial bindings creators that provides control over the
  * allocation of the output buffer.
- *
+ * <p>
  * <p>Serial bindings append data to a {@link FastOutputStream} instance.  This
  * object has a byte array buffer that is resized when it is full.  The
  * reallocation of this buffer can be a performance factor for some
@@ -27,9 +27,8 @@ import berkeley.com.sleepycat.util.FastOutputStream;
  * buffer, and the {@link #getSerialOutput} method may be overridden by
  * subclasses to take over creation of the FastOutputStream object.</p>
  *
- * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
- *
  * @author Mark Hayes
+ * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
  */
 public class SerialBase {
 
@@ -37,7 +36,7 @@ public class SerialBase {
 
     /**
      * Initializes the initial output buffer size to zero.
-     *
+     * <p>
      * <p>Unless {@link #setSerialBufferSize} is called, the default {@link
      * FastOutputStream#DEFAULT_INIT_SIZE} size will be used.</p>
      */
@@ -46,24 +45,9 @@ public class SerialBase {
     }
 
     /**
-     * Sets the initial byte size of the output buffer that is allocated by the
-     * default implementation of {@link #getSerialOutput}.
-     *
-     * <p>If this property is zero (the default), the default {@link
-     * FastOutputStream#DEFAULT_INIT_SIZE} size is used.</p>
-     *
-     * @param byteSize the initial byte size of the output buffer, or zero to
-     * use the default size.
-     */
-    public void setSerialBufferSize(int byteSize) {
-        outputBufferSize = byteSize;
-    }
-
-    /**
      * Returns the initial byte size of the output buffer.
      *
      * @return the initial byte size of the output buffer.
-     *
      * @see #setSerialBufferSize
      */
     public int getSerialBufferSize() {
@@ -71,30 +55,43 @@ public class SerialBase {
     }
 
     /**
+     * Sets the initial byte size of the output buffer that is allocated by the
+     * default implementation of {@link #getSerialOutput}.
+     * <p>
+     * <p>If this property is zero (the default), the default {@link
+     * FastOutputStream#DEFAULT_INIT_SIZE} size is used.</p>
+     *
+     * @param byteSize the initial byte size of the output buffer, or zero to
+     *                 use the default size.
+     */
+    public void setSerialBufferSize(int byteSize) {
+        outputBufferSize = byteSize;
+    }
+
+    /**
      * Returns an empty SerialOutput instance that will be used by the serial
      * binding or key creator.
-     *
+     * <p>
      * <p>The default implementation of this method creates a new SerialOutput
      * with an initial buffer size that can be changed using the {@link
      * #setSerialBufferSize} method.</p>
-     *
+     * <p>
      * <p>This method may be overridden to return a FastOutputStream instance.
      * For example, an instance per thread could be created and returned by
      * this method.  If a FastOutputStream instance is reused, be sure to call
      * its {@link FastOutputStream#reset} method before each use.</p>
      *
      * @param object is the object to be written to the serial output, and may
-     * be used by subclasses to determine the size of the output buffer.
-     *
+     *               be used by subclasses to determine the size of the output buffer.
      * @return an empty FastOutputStream instance.
-     *
      * @see #setSerialBufferSize
      */
     protected FastOutputStream getSerialOutput(Object object) {
         int byteSize = getSerialBufferSize();
-        if (byteSize != 0) {
+        if(byteSize != 0) {
             return new FastOutputStream(byteSize);
-        } else {
+        }
+        else {
             return new FastOutputStream();
         }
     }

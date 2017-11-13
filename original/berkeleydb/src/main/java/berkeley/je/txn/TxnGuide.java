@@ -62,7 +62,7 @@ public class TxnGuide {
             for(int i = 0; i < NUMTHREADS; i++) {
                 threadArray[i].join();
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("TxnGuide: " + e.toString());
             e.printStackTrace();
         } finally {
@@ -115,7 +115,7 @@ public class TxnGuide {
         if(myDb != null) {
             try {
                 myDb.close();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 System.err.println("closeEnv: myDb: " +
                         e.toString());
                 e.printStackTrace();
@@ -125,7 +125,7 @@ public class TxnGuide {
         if(myClassDb != null) {
             try {
                 myClassDb.close();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 System.err.println("closeEnv: myClassDb: " +
                         e.toString());
                 e.printStackTrace();
@@ -135,7 +135,7 @@ public class TxnGuide {
         if(myEnv != null) {
             try {
                 myEnv.close();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 System.err.println("closeEnv: " + e.toString());
                 e.printStackTrace();
             }
@@ -145,7 +145,7 @@ public class TxnGuide {
     private static void parseArgs(String args[]) {
         for(int i = 0; i < args.length; ++i) {
             if(args[i].startsWith("-")) {
-                switch (args[i].charAt(1)) {
+                switch(args[i].charAt(1)) {
                     case 'h':
                         myEnvPath = new String(args[++i]);
                         break;

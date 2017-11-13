@@ -13,16 +13,10 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import java.io.Closeable;
-import javax.resource.ResourceException;
+import berkeley.com.sleepycat.je.*;
 
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.SecondaryConfig;
-import berkeley.com.sleepycat.je.SecondaryDatabase;
-import berkeley.com.sleepycat.je.Transaction;
+import javax.resource.ResourceException;
+import java.io.Closeable;
 
 /**
  * A JEConnection provides access to JE services. See
@@ -42,7 +36,7 @@ public class JEConnection implements Closeable {
     protected void setManagedConnection(JEManagedConnection mc,
                                         JELocalTransaction lt) {
         this.mc = mc;
-        if (txn == null) {
+        if(txn == null) {
             txn = lt;
         }
     }
@@ -60,7 +54,7 @@ public class JEConnection implements Closeable {
     }
 
     public Database openDatabase(String name, DatabaseConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return mc.openDatabase(name, config);
     }
@@ -68,33 +62,33 @@ public class JEConnection implements Closeable {
     public SecondaryDatabase openSecondaryDatabase(String name,
                                                    Database primaryDatabase,
                                                    SecondaryConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return mc.openSecondaryDatabase(name, primaryDatabase, config);
     }
 
     public void removeDatabase(String databaseName)
-        throws DatabaseException {
+            throws DatabaseException {
 
         mc.removeDatabase(databaseName);
     }
 
     public long truncateDatabase(String databaseName, boolean returnCount)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return mc.truncateDatabase(databaseName, returnCount);
     }
 
     public Transaction getTransaction()
-        throws ResourceException {
+            throws ResourceException {
 
-        if (txn == null) {
+        if(txn == null) {
             return null;
         }
 
         try {
             return txn.getTransaction();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             ResourceException ret = new ResourceException(DE.toString());
             ret.initCause(DE);
             throw ret;

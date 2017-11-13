@@ -19,10 +19,11 @@ package berkeley.com.sleepycat.je.config;
 public class BooleanConfigParam extends ConfigParam {
 
     private static final String DEBUG_NAME =
-        BooleanConfigParam.class.getName();
+            BooleanConfigParam.class.getName();
 
     /**
      * Set a boolean parameter w/default.
+     *
      * @param configName
      * @param defaultValue
      * @param forReplication true if param is for replication
@@ -33,9 +34,9 @@ public class BooleanConfigParam extends ConfigParam {
                               boolean forReplication) {
         /* defaultValue must not be null. */
         super(configName,
-              Boolean.valueOf(defaultValue).toString(),
-              mutable,
-              forReplication);
+                Boolean.valueOf(defaultValue).toString(),
+                mutable,
+                forReplication);
     }
 
     /**
@@ -43,12 +44,12 @@ public class BooleanConfigParam extends ConfigParam {
      */
     @Override
     public void validateValue(String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (!value.trim().equalsIgnoreCase(Boolean.FALSE.toString()) &&
-            !value.trim().equalsIgnoreCase(Boolean.TRUE.toString())) {
+        if(!value.trim().equalsIgnoreCase(Boolean.FALSE.toString()) &&
+                !value.trim().equalsIgnoreCase(Boolean.TRUE.toString())) {
             throw new IllegalArgumentException
-                (DEBUG_NAME + ": " +  value + " not valid boolean " + name);
+                    (DEBUG_NAME + ": " + value + " not valid boolean " + name);
         }
     }
 }

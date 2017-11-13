@@ -13,12 +13,6 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.evictor.Evictor;
@@ -28,20 +22,19 @@ import berkeley.com.sleepycat.je.tree.IN;
 import berkeley.com.sleepycat.je.utilint.LongStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * The INList is a list of in-memory INs for a given environment.
- *
+ * <p>
  * For an explanation of the 'enabled' mode, see RecoveryManager class
  * comments.
  */
 public class INList implements Iterable<IN> {
-
-    private EnvironmentImpl envImpl;
-    private boolean enabled;
-    private volatile boolean recalcInProgress;
-    private volatile boolean recalcToggle;
-    private boolean recalcConsistent;
-    private AtomicLong recalcTotal;
 
     /**
      * We use a Map of INs because there is no ConcurrentHashSet, only a
@@ -49,7 +42,12 @@ public class INList implements Iterable<IN> {
      * same object as the key and the value.
      */
     private final ConcurrentMap<IN, IN> ins;
-
+    private EnvironmentImpl envImpl;
+    private boolean enabled;
+    private volatile boolean recalcInProgress;
+    private volatile boolean recalcToggle;
+    private boolean recalcConsistent;
+    private AtomicLong recalcTotal;
     /**
      * Stats about the composition of the INList must be kept in this class
      * rather than the evictor because a sharedEnvCache encompasses many
@@ -85,17 +83,17 @@ public class INList implements Iterable<IN> {
      */
     public StatGroup loadStats() {
         StatGroup stats = new StatGroup(EvictorStatDefinition.GROUP_NAME,
-                              EvictorStatDefinition.GROUP_DESC);
+                EvictorStatDefinition.GROUP_DESC);
 
         long istat = nCachedUpperINs.get();
         long bstat = nCachedBINs.get();
         long bdstat = nCachedBINDeltas.get();
         new LongStat(stats, EvictorStatDefinition.CACHED_UPPER_INS,
-                     istat);
+                istat);
         new LongStat(stats, EvictorStatDefinition.CACHED_BINS,
-                     bstat);
+                bstat);
         new LongStat(stats, EvictorStatDefinition.CACHED_BIN_DELTAS,
-                     bdstat);
+                bdstat);
 
         // verifyPrint(istat, bstat);
 
@@ -106,16 +104,17 @@ public class INList implements Iterable<IN> {
         int numINs = 0;
         int numBINs = 0;
 
-        for (IN theIN : ins.keySet()) {
-            if (theIN instanceof BIN) {
+        for(IN theIN : ins.keySet()) {
+            if(theIN instanceof BIN) {
                 numBINs++;
-            } else {
+            }
+            else {
                 numINs++;
             }
         }
         System.out.println("size=" + getSize() + " INcount=" + numINs +
-                           " BINCount=" + numBINs + " INstat=" + istat +
-                           " bstat=" + bstat);
+                " BINCount=" + numBINs + " INstat=" + istat +
+                " bstat=" + bstat);
     }
 
     /*
@@ -147,17 +146,18 @@ public class INList implements Iterable<IN> {
      */
     public void add(IN in) {
         /* Ignore additions until the INList is enabled. */
-        if (!enabled) {
+        if(!enabled) {
             return;
         }
 
         /* Be sure to check for BIN first, since it's a subclass of IN! */
-        if (in.isBIN()) {
+        if(in.isBIN()) {
             nCachedBINs.incrementAndGet();
-            if (in.isBINDelta(false)) {
+            if(in.isBINDelta(false)) {
                 nCachedBINDeltas.incrementAndGet();
             }
-        } else {
+        }
+        else {
             nCachedUpperINs.incrementAndGet();
         }
 
@@ -167,16 +167,16 @@ public class INList implements Iterable<IN> {
          * present to detect potential corruption bugs early. [#21686]
          */
         IN oldValue = ins.putIfAbsent(in, in);
-        if (oldValue != null) {
+        if(oldValue != null) {
             throw EnvironmentFailureException.unexpectedState
-                (envImpl,
-                 "Failed adding new IN node=" + in.getNodeId() +
-                 " dbIdentity=" + System.identityHashCode(in.getDatabase()) +
-                 " db=" + in.getDatabase().dumpString(0) +
-                 "\nExisting IN node=" + oldValue.getNodeId() +
-                 " dbIdentity=" +
-                 System.identityHashCode(oldValue.getDatabase()) +
-                 " db=" + oldValue.getDatabase().dumpString(0));
+                    (envImpl,
+                            "Failed adding new IN node=" + in.getNodeId() +
+                                    " dbIdentity=" + System.identityHashCode(in.getDatabase()) +
+                                    " db=" + in.getDatabase().dumpString(0) +
+                                    "\nExisting IN node=" + oldValue.getNodeId() +
+                                    " dbIdentity=" +
+                                    System.identityHashCode(oldValue.getDatabase()) +
+                                    " db=" + oldValue.getDatabase().dumpString(0));
         }
 
         long size = in.getBudgetedMemorySize();
@@ -189,10 +189,10 @@ public class INList implements Iterable<IN> {
      * An IN is being evicted.
      */
     public void remove(IN in) {
-        if (!enabled) {
+        if(!enabled) {
             return;
         }
- 
+
         boolean removed = removeInternal(in);
         assert removed;
 
@@ -209,19 +209,20 @@ public class INList implements Iterable<IN> {
     private boolean removeInternal(IN in) {
 
         /* Be sure to check for BIN first, since it's a subclass of IN! */
-        if (in.isBIN()) {
+        if(in.isBIN()) {
             nCachedBINs.decrementAndGet();
-            if (in.isBINDelta(false/*checkLatched*/)) {
+            if(in.isBINDelta(false/*checkLatched*/)) {
                 nCachedBINDeltas.decrementAndGet();
             }
-        } else {
+        }
+        else {
             nCachedUpperINs.decrementAndGet();
         }
 
         final Evictor evictor = envImpl.getEvictor();
 
         boolean latchAcquired = false;
-        if (!in.isLatchOwner()) {
+        if(!in.isLatchOwner()) {
             in.latch(CacheMode.UNCHANGED);
             latchAcquired = true;
         }
@@ -231,7 +232,7 @@ public class INList implements Iterable<IN> {
             in.setInListResident(false);
             envImpl.getOffHeapCache().removeINFromMain(in);
         } finally {
-            if (latchAcquired) {
+            if(latchAcquired) {
                 in.releaseLatch();
             }
         }
@@ -255,75 +256,10 @@ public class INList implements Iterable<IN> {
     }
 
     /**
-     * A direct Iterator on the INList may return INs that have been removed,
-     * since the underlying ConcurrentHashMap doesn't block changes to the list
-     * during the iteration.  This Iterator implementation wraps a direct
-     * Iterator and returns only those INs that are on the INList.
-     *
-     * Note that this doesn't guarantee that an IN will not be removed from the
-     * INList after being returned by this iterator.  But filtering out the INs
-     * already removed will avoid wasting effort in the evictor, checkpointer,
-     * and other places where INs are iterated and processed.
-     */
-    private class Iter implements Iterator<IN> {
-
-        private final Iterator<IN> baseIter;
-        private IN next;
-        private IN lastReturned;
-
-        private Iter() {
-            baseIter = ins.keySet().iterator();
-        }
-
-        public boolean hasNext() {
-            if (next != null) {
-                return true;
-            } else {
-                return advance();
-            }
-        }
-
-        public IN next() {
-            if (next == null) {
-                if (!advance()) {
-                    throw new NoSuchElementException();
-                }
-            }
-            lastReturned = next;
-            next = null;
-            return lastReturned;
-        }
-
-        private boolean advance() {
-            while (baseIter.hasNext()) {
-                IN in = baseIter.next();
-                if (in.getInListResident()) {
-                    next = in;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * Caller must update memory usage.
-         */
-        @Override
-        public void remove() {
-            if (lastReturned != null) {
-                removeInternal(lastReturned);
-                lastReturned = null;
-            } else {
-                throw EnvironmentFailureException.unexpectedState();
-            }
-        }
-    }
-
-    /**
      * Clear the entire list at shutdown and release its portion of the memory
      * budget.
      */
-    public void clear()  {
+    public void clear() {
 
         ins.clear();
         nCachedUpperINs.set(0);
@@ -337,11 +273,24 @@ public class INList implements Iterable<IN> {
 
     public void dump() {
         System.out.println("size=" + getSize());
-        for (IN theIN : ins.keySet()) {
+        for(IN theIN : ins.keySet()) {
             System.out.println("db=" + theIN.getDatabase().getId() +
-                               " nid=: " + theIN.getNodeId() + "/" +
-                               theIN.getLevel());
+                    " nid=: " + theIN.getNodeId() + "/" +
+                    theIN.getLevel());
         }
+    }
+
+    /**
+     * We are starting the iteration of the INList.  Flip the INList toggle
+     * and set the total amount to zero.
+     * <p>
+     * After calling this method, memRecalcEnd must be called in a finally
+     * block.  If it is not called, internal state will be invalid.
+     */
+    public void memRecalcBegin() {
+        recalcTotal.set(0);
+        recalcInProgress = true;
+        recalcToggle = !recalcToggle;
     }
 
     /*
@@ -414,19 +363,6 @@ public class INList implements Iterable<IN> {
      */
 
     /**
-     * We are starting the iteration of the INList.  Flip the INList toggle
-     * and set the total amount to zero.
-     *
-     * After calling this method, memRecalcEnd must be called in a finally
-     * block.  If it is not called, internal state will be invalid.
-     */
-    public void memRecalcBegin() {
-        recalcTotal.set(0);
-        recalcInProgress = true;
-        recalcToggle = !recalcToggle;
-    }
-
-    /**
      * An IN was encountered during the iteration through the entire INList.
      * Add its size to the recalc total if we have not already processed it,
      * and mark it as processed.  If it was already processed, memRecalcAdd
@@ -435,8 +371,8 @@ public class INList implements Iterable<IN> {
      */
     public void memRecalcIterate(IN in) {
         assert recalcInProgress;
-        if (recalcConsistent &&
-            recalcToggle != in.getRecalcToggle()) {
+        if(recalcConsistent &&
+                recalcToggle != in.getRecalcToggle()) {
             long delta = in.resetAndGetMemorySize();
             recalcTotal.addAndGet(delta);
         }
@@ -449,8 +385,8 @@ public class INList implements Iterable<IN> {
      * it is a new IN.
      */
     private void memRecalcAdd(IN in, long size) {
-        if (recalcInProgress &&
-            recalcConsistent) {
+        if(recalcInProgress &&
+                recalcConsistent) {
             recalcTotal.addAndGet(size);
         }
         in.setRecalcToggle(recalcToggle);
@@ -471,9 +407,9 @@ public class INList implements Iterable<IN> {
      * total size will be added by memRecalcIterate.
      */
     public void memRecalcUpdate(IN in, long delta) {
-        if (recalcInProgress &&
-            recalcConsistent &&
-            recalcToggle == in.getRecalcToggle()) {
+        if(recalcInProgress &&
+                recalcConsistent &&
+                recalcToggle == in.getRecalcToggle()) {
             recalcTotal.addAndGet(delta);
         }
     }
@@ -485,12 +421,79 @@ public class INList implements Iterable<IN> {
      */
     public void memRecalcEnd(boolean completed) {
         assert recalcInProgress;
-        if (completed &&
-            recalcConsistent) {
+        if(completed &&
+                recalcConsistent) {
             envImpl.getMemoryBudget().refreshTreeMemoryUsage
-                (recalcTotal.get());
+                    (recalcTotal.get());
         }
         recalcInProgress = false;
         recalcConsistent = completed;
+    }
+
+    /**
+     * A direct Iterator on the INList may return INs that have been removed,
+     * since the underlying ConcurrentHashMap doesn't block changes to the list
+     * during the iteration.  This Iterator implementation wraps a direct
+     * Iterator and returns only those INs that are on the INList.
+     * <p>
+     * Note that this doesn't guarantee that an IN will not be removed from the
+     * INList after being returned by this iterator.  But filtering out the INs
+     * already removed will avoid wasting effort in the evictor, checkpointer,
+     * and other places where INs are iterated and processed.
+     */
+    private class Iter implements Iterator<IN> {
+
+        private final Iterator<IN> baseIter;
+        private IN next;
+        private IN lastReturned;
+
+        private Iter() {
+            baseIter = ins.keySet().iterator();
+        }
+
+        public boolean hasNext() {
+            if(next != null) {
+                return true;
+            }
+            else {
+                return advance();
+            }
+        }
+
+        public IN next() {
+            if(next == null) {
+                if(!advance()) {
+                    throw new NoSuchElementException();
+                }
+            }
+            lastReturned = next;
+            next = null;
+            return lastReturned;
+        }
+
+        private boolean advance() {
+            while(baseIter.hasNext()) {
+                IN in = baseIter.next();
+                if(in.getInListResident()) {
+                    next = in;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Caller must update memory usage.
+         */
+        @Override
+        public void remove() {
+            if(lastReturned != null) {
+                removeInternal(lastReturned);
+                lastReturned = null;
+            }
+            else {
+                throw EnvironmentFailureException.unexpectedState();
+            }
+        }
     }
 }

@@ -29,6 +29,7 @@ package berkeley.com.sleepycat.je.rep;
  * href="{@docRoot}/../examples/je/rep/quote/package-summary.html">
  * examples</a>} for information on different approaches toward routing
  * database operations and an example of using the StateChangeListener.
+ *
  * @see <a href="{@docRoot}/../ReplicationGuide/replicawrites.html">Managing
  * Write Requests at a Replica</a>
  */
@@ -46,10 +47,11 @@ public interface StateChangeListener {
      * to the caller, so that it does not unduly delay the other housekeeping
      * operations performed by the internal thread which invokes this method.
      * <p>
+     *
      * @param stateChangeEvent the new state change event
      * @throws RuntimeException Any uncaught exceptions will result in the
-     * shutdown of the ReplicatedEnvironment.
+     *                          shutdown of the ReplicatedEnvironment.
      */
-   public void stateChange(StateChangeEvent stateChangeEvent)
-       throws RuntimeException;
+    public void stateChange(StateChangeEvent stateChangeEvent)
+            throws RuntimeException;
 }

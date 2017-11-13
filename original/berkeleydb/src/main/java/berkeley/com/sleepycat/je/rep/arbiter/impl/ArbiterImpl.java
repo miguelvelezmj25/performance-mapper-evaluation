@@ -13,46 +13,16 @@
 
 package berkeley.com.sleepycat.je.rep.arbiter.impl;
 
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_STATE;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.EnvironmentNotFoundException;
-import berkeley.com.sleepycat.je.StatsConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.rep.GroupShutdownException;
 import berkeley.com.sleepycat.je.rep.InsufficientLogException;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
-import berkeley.com.sleepycat.je.rep.elections.Acceptor;
-import berkeley.com.sleepycat.je.rep.elections.Elections;
-import berkeley.com.sleepycat.je.rep.elections.ElectionsConfig;
-import berkeley.com.sleepycat.je.rep.elections.Learner;
-import berkeley.com.sleepycat.je.rep.elections.MasterValue;
+import berkeley.com.sleepycat.je.rep.elections.*;
 import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
 import berkeley.com.sleepycat.je.rep.elections.Protocol.Value;
-import berkeley.com.sleepycat.je.rep.impl.BinaryNodeStateProtocol;
+import berkeley.com.sleepycat.je.rep.impl.*;
 import berkeley.com.sleepycat.je.rep.impl.BinaryNodeStateProtocol.BinaryNodeStateResponse;
-import berkeley.com.sleepycat.je.rep.impl.BinaryNodeStateService;
-import berkeley.com.sleepycat.je.rep.impl.NodeStateService;
-import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
-import berkeley.com.sleepycat.je.rep.impl.RepImpl;
-import berkeley.com.sleepycat.je.rep.impl.RepNodeImpl;
-import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.rep.impl.node.ChannelTimeoutTask;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
@@ -70,6 +40,22 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
 import berkeley.com.sleepycat.je.utilint.StringStat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_STATE;
 
 /**
  * The implementation of the Arbiter. The Arbiter is a participant in
@@ -111,7 +97,15 @@ public class ArbiterImpl extends StoppableThread {
      * a master.
      */
     private static final int MASTER_QUERY_INTERVAL = 1000;
-
+    private final RepImpl repImpl;
+    private final File arbiterHome;
+    /*
+     * Determines whether the Arbiter has been shutdown. Usually this is held
+     * within the StoppableThread, but the Feeder's two child threads have
+     * their shutdown coordinated by the parent Feeder.
+     */
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
+    NameIdPair nameIdPair;
     private ServiceDispatcher serviceDispatcher;
     private DataChannelFactory channelFactory;
     private MasterStatus masterStatus;
@@ -124,25 +118,13 @@ public class ArbiterImpl extends StoppableThread {
     private ArbiterVLSNTracker arbiterVLSNTracker;
     private ArbiterNodeStateService nodeStateService;
     private ArbBinaryStateService binaryStateService;
-
     /* The Arbiter's logger. */
     private Logger logger;
     private Formatter formatter;
-    private final RepImpl repImpl;
-    NameIdPair nameIdPair;
     private Elections elections;
-    private final File arbiterHome;
     private String groupName;
     private ArbiterAcker arbiterAcker;
     private MonitorEventManager monitorEventManager;
-
-    /*
-     * Determines whether the Arbiter has been shutdown. Usually this is held
-     * within the StoppableThread, but the Feeder's two child threads have
-     * their shutdown coordinated by the parent Feeder.
-     */
-    private final AtomicBoolean shutdown = new AtomicBoolean(false);
-
     /*
      * The latch used to wait for the ArbiterAcker to establish
      * a connection with the Master.
@@ -157,48 +139,48 @@ public class ArbiterImpl extends StoppableThread {
      * Uses the following replication parameters:
      * RepParams.GROUP_NAME The replication group name.
      * RepParams.ENV_UNKNOWN_STATE_TIMEOUT Timeout used for being in
-     *                                     the unknown state.
+     * the unknown state.
      * RepParams.NODE_HOST_PORT The host name and port associated with this
-     *                          node.
+     * node.
      *
      * @param arbiterHome - Arbiter home directory.
-     * @param repImpl - RepImpl
-     *
+     * @param repImpl     - RepImpl
      * @throws EnvironmentNotFoundException
      * @throws EnvironmentLockedException
      * @throws DatabaseException
      */
     public ArbiterImpl(File arbiterHome, RepImpl repImpl)
-        throws EnvironmentNotFoundException,
-               EnvironmentLockedException,
-               DatabaseException {
+            throws EnvironmentNotFoundException,
+            EnvironmentLockedException,
+            DatabaseException {
         super(repImpl, "ArbiterNode " + repImpl.getNameIdPair());
         this.repImpl = repImpl;
         this.arbiterHome = arbiterHome;
         try {
             initialize();
-        } catch (IOException ioe) {
+        } catch(IOException ioe) {
             throw EnvironmentFailureException.unexpectedException(
-                repImpl, "Problem attempting to join on " + getSocket(), ioe);
+                    repImpl, "Problem attempting to join on " + getSocket(), ioe);
         }
     }
 
     public StatGroup loadStats(StatsConfig config) {
         StatGroup arbStat;
-        if (arbiterAcker == null) {
-            arbStat =  new StatGroup(ArbiterStatDefinition.GROUP_NAME,
-                                     ArbiterStatDefinition.GROUP_DESC);
-        } else {
+        if(arbiterAcker == null) {
+            arbStat = new StatGroup(ArbiterStatDefinition.GROUP_NAME,
+                    ArbiterStatDefinition.GROUP_DESC);
+        }
+        else {
             arbStat = arbiterAcker.loadStats(config);
         }
         StringStat state = new StringStat(arbStat, ARB_STATE);
         state.set(currentState.toString());
 
         StatGroup trackerStats =
-            arbiterVLSNTracker == null ? ArbiterVLSNTracker.loadEmptyStats() :
-                arbiterVLSNTracker.loadStats(config);
+                arbiterVLSNTracker == null ? ArbiterVLSNTracker.loadEmptyStats() :
+                        arbiterVLSNTracker.loadStats(config);
         /* Add the tracker stats */
-            arbStat.addAll(trackerStats);
+        arbStat.addAll(trackerStats);
 
         return arbStat;
     }
@@ -206,7 +188,7 @@ public class ArbiterImpl extends StoppableThread {
     private void initialize() throws IOException {
         nameIdPair = repImpl.getNameIdPair();
         currentState = new AtomicReference<ReplicatedEnvironment.State>
-        (ReplicatedEnvironment.State.UNKNOWN);
+                (ReplicatedEnvironment.State.UNKNOWN);
 
         logger = LoggerUtils.getLogger(getClass());
         formatter = new ReplicationFormatter(nameIdPair);
@@ -215,22 +197,22 @@ public class ArbiterImpl extends StoppableThread {
         channelFactory = repImpl.getChannelFactory();
 
         serviceDispatcher =
-            new ServiceDispatcher(getSocket(), repImpl,
-                                  channelFactory);
+                new ServiceDispatcher(getSocket(), repImpl,
+                        channelFactory);
         serviceDispatcher.start();
 
         masterStatus = new MasterStatus(nameIdPair);
         changeListener = new MasterChangeListener();
         File dataFile =
-            new File(arbiterHome.getAbsolutePath() +
-                     File.separator + DATA_FILE_NAME);
+                new File(arbiterHome.getAbsolutePath() +
+                        File.separator + DATA_FILE_NAME);
         arbiterVLSNTracker = new ArbiterVLSNTracker(dataFile);
         suggestionGenerator = new MasterSuggestionGenerator();
 
-        if (arbiterVLSNTracker.getCachedNodeId() != NameIdPair.NULL_NODE_ID) {
+        if(arbiterVLSNTracker.getCachedNodeId() != NameIdPair.NULL_NODE_ID) {
             nameIdPair.update(
-                new NameIdPair(nameIdPair.getName(),
-                               arbiterVLSNTracker.getCachedNodeId()));
+                    new NameIdPair(nameIdPair.getName(),
+                            arbiterVLSNTracker.getCachedNodeId()));
         }
         groupName = repImpl.getConfigManager().get(RepParams.GROUP_NAME);
         helperSockets = repImpl.getHelperSockets();
@@ -240,17 +222,17 @@ public class ArbiterImpl extends StoppableThread {
     public void runArbiter() {
 
         elections = new Elections(new ArbElectionsConfig(),
-                                  changeListener,
-                                  suggestionGenerator);
+                changeListener,
+                suggestionGenerator);
 
         elections.startLearner();
         elections.startAcceptor();
 
         repGroupAdmin =
                 new ReplicationGroupAdmin(
-                    groupName,
-                    helperSockets,
-                    channelFactory);
+                        groupName,
+                        helperSockets,
+                        channelFactory);
         timer = new Timer(true);
         channelTimeoutTask = new ChannelTimeoutTask(timer);
 
@@ -259,9 +241,9 @@ public class ArbiterImpl extends StoppableThread {
         start();
 
         int timeout =
-            repImpl.getConfigManager().getDuration(
-                RepParams.ENV_UNKNOWN_STATE_TIMEOUT);
-        if (timeout == 0) {
+                repImpl.getConfigManager().getDuration(
+                        RepParams.ENV_UNKNOWN_STATE_TIMEOUT);
+        if(timeout == 0) {
             timeout = Integer.MAX_VALUE;
         }
 
@@ -272,10 +254,10 @@ public class ArbiterImpl extends StoppableThread {
              * ENV_UNKNOWN_STATE_TIMEOUT period.
              */
             getReadyLatch().awaitOrException(timeout,
-                                             TimeUnit.MILLISECONDS);
+                    TimeUnit.MILLISECONDS);
             LoggerUtils.fine(logger, repImpl,
-                             "Arbiter started in " + currentState + " state.");
-        } catch (InterruptedException e) {
+                    "Arbiter started in " + currentState + " state.");
+        } catch(InterruptedException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
     }
@@ -285,64 +267,65 @@ public class ArbiterImpl extends StoppableThread {
         /* Set to indicate an error-initiated shutdown. */
         Error repNodeError = null;
         try {
-            while (!isShutdownOrInvalid()) {
+            while(!isShutdownOrInvalid()) {
                 queryGroupForMembership();
                 masterStatus.sync();
                 arbiterAcker = new ArbiterAcker(this, repImpl);
                 arbiterAcker.runArbiterAckLoop();
             }
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             LoggerUtils.fine(logger, repImpl,
-                             "Arbiter main thread interrupted - " +
-                             " forced shutdown.");
-        } catch (GroupShutdownException e) {
+                    "Arbiter main thread interrupted - " +
+                            " forced shutdown.");
+        } catch(GroupShutdownException e) {
             saveShutdownException(e);
             LoggerUtils.fine(logger, repImpl,
-                             "Arbiter main thread sees group shutdown - " + e);
-        } catch (InsufficientLogException e) {
+                    "Arbiter main thread sees group shutdown - " + e);
+        } catch(InsufficientLogException e) {
             saveShutdownException(e);
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             LoggerUtils.fine(logger, repImpl,
-                             "Arbiter main thread sees runtime ex - " + e);
+                    "Arbiter main thread sees runtime ex - " + e);
             saveShutdownException(e);
             throw e;
-        } catch (Error e) {
+        } catch(Error e) {
             LoggerUtils.fine(logger, repImpl, e +
-                             " incurred during arbiter loop");
+                    " incurred during arbiter loop");
             repNodeError = e;
             repImpl.invalidate(e);
         } finally {
+            LoggerUtils.info(logger, repImpl,
+                    "Arbiter main thread shutting down.");
+
+            if(repNodeError != null) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Arbiter main thread shutting down.");
+                        "Node state at shutdown:\n" +
+                                repImpl.dumpState());
+                throw repNodeError;
+            }
+            Throwable exception = getSavedShutdownException();
 
-                if (repNodeError != null) {
-                    LoggerUtils.info(logger, repImpl,
-                                     "Node state at shutdown:\n"+
-                                     repImpl.dumpState());
-                    throw repNodeError;
-                }
-                Throwable exception = getSavedShutdownException();
+            if(exception == null) {
+                LoggerUtils.fine(logger, repImpl,
+                        "Node state at shutdown:\n" +
+                                repImpl.dumpState());
+            }
+            else {
+                LoggerUtils.info(logger, repImpl,
+                        "Arbiter shutdown exception:\n" +
+                                exception.getMessage() +
+                                repImpl.dumpState());
+            }
 
-                if (exception == null) {
-                    LoggerUtils.fine(logger, repImpl,
-                                     "Node state at shutdown:\n"+
-                                     repImpl.dumpState());
-                } else {
-                    LoggerUtils.info(logger, repImpl,
-                                     "Arbiter shutdown exception:\n" +
-                                     exception.getMessage() +
-                                     repImpl.dumpState());
-                }
-
-                try {
-                    shutdown();
-                } catch (DatabaseException e) {
-                    RepUtils.chainExceptionCause(e, exception);
-                    LoggerUtils.severe(logger, repImpl,
-                                       "Unexpected exception during shutdown" +
-                                       e);
-                    throw e;
-                }
+            try {
+                shutdown();
+            } catch(DatabaseException e) {
+                RepUtils.chainExceptionCause(e, exception);
+                LoggerUtils.severe(logger, repImpl,
+                        "Unexpected exception during shutdown" +
+                                e);
+                throw e;
+            }
             setState(ReplicatedEnvironment.State.DETACHED);
             cleanup();
         }
@@ -357,11 +340,13 @@ public class ArbiterImpl extends StoppableThread {
         LeaveReason reason = null;
 
         Exception exception = getSavedShutdownException();
-        if (exception == null) {
+        if(exception == null) {
             reason = LeaveReason.NORMAL_SHUTDOWN;
-        } else if (exception instanceof GroupShutdownException) {
+        }
+        else if(exception instanceof GroupShutdownException) {
             reason = LeaveReason.MASTER_SHUTDOWN_GROUP;
-        } else {
+        }
+        else {
             reason = LeaveReason.ABNORMAL_TERMINATION;
         }
 
@@ -370,8 +355,8 @@ public class ArbiterImpl extends StoppableThread {
 
     /* Get the current master name if it exists. */
     String getMasterName() {
-        if (masterStatus.getGroupMasterNameId().getId() ==
-            NameIdPair.NULL_NODE_ID) {
+        if(masterStatus.getGroupMasterNameId().getId() ==
+                NameIdPair.NULL_NODE_ID) {
             return null;
         }
 
@@ -401,72 +386,72 @@ public class ArbiterImpl extends StoppableThread {
         serviceDispatcher.register(nodeStateService);
 
         binaryStateService =
-            new ArbBinaryStateService(serviceDispatcher, this);
+                new ArbBinaryStateService(serviceDispatcher, this);
     }
 
     private void utilityServicesShutdown() {
 
-        if (binaryStateService != null) {
+        if(binaryStateService != null) {
             try {
                 binaryStateService.shutdown();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Error shutting down binaryStateService " +
-                                 e.getMessage());
+                        "Error shutting down binaryStateService " +
+                                e.getMessage());
             }
         }
 
-        if (nodeStateService != null) {
+        if(nodeStateService != null) {
             try {
                 serviceDispatcher.cancel(NodeStateService.SERVICE_NAME);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Error canceling serviceDispatch " +
-                                 e.getMessage());
+                        "Error canceling serviceDispatch " +
+                                e.getMessage());
             }
         }
     }
 
     public void shutdown() {
         boolean changed = shutdown.compareAndSet(false, true);
-        if (!changed) {
+        if(!changed) {
             return;
         }
 
         try {
             monitorEventManager.notifyLeaveGroup(getLeaveReason());
-        } catch (Exception e) {
+        } catch(Exception e) {
             LoggerUtils.info(logger, repImpl,
-                             "Error shutting down monitor event manager " +
-                             e.getMessage());
+                    "Error shutting down monitor event manager " +
+                            e.getMessage());
         }
 
         utilityServicesShutdown();
 
-        if (arbiterAcker != null) {
+        if(arbiterAcker != null) {
             try {
                 arbiterAcker.shutdown();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Error shutting down ArbiterAcker " +
-                                 e.getMessage());
+                        "Error shutting down ArbiterAcker " +
+                                e.getMessage());
             }
         }
 
-        if (elections != null) {
+        if(elections != null) {
             try {
                 elections.shutdown();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Error shutting down elections " +
-                                 e.getMessage());
+                        "Error shutting down elections " +
+                                e.getMessage());
             }
         }
-        if (serviceDispatcher != null) {
+        if(serviceDispatcher != null) {
             serviceDispatcher.shutdown();
         }
         LoggerUtils.info(logger, repImpl,
-                         nameIdPair + " shutdown completed.");
+                nameIdPair + " shutdown completed.");
         masterStatus.setGroupMaster(null, 0, NameIdPair.NULL);
         readyLatch.releaseAwait(getSavedShutdownException());
         arbiterVLSNTracker.close();
@@ -489,30 +474,30 @@ public class ArbiterImpl extends StoppableThread {
 
     public void refreshHelperHosts() {
         final Set<InetSocketAddress> helpers =
-            new HashSet<InetSocketAddress>(repImpl.getHelperSockets());
-        if (cachedRepGroupImpl != null) {
+                new HashSet<InetSocketAddress>(repImpl.getHelperSockets());
+        if(cachedRepGroupImpl != null) {
             helpers.addAll(cachedRepGroupImpl.getAllHelperSockets());
         }
         helperSockets = helpers;
-        if (repGroupAdmin != null) {
+        if(repGroupAdmin != null) {
             repGroupAdmin.setHelperSockets(helperSockets);
         }
     }
 
     RepGroupImpl refreshCachedGroup()
-        throws DatabaseException {
+            throws DatabaseException {
         RepGroupImpl repGroupImpl;
         repGroupImpl = repGroupAdmin.getGroup().getRepGroupImpl();
         elections.updateRepGroupOnly(repGroupImpl);
-        if (nameIdPair.hasNullId()) {
+        if(nameIdPair.hasNullId()) {
             RepNodeImpl n = repGroupImpl.getMember(nameIdPair.getName());
-            if (n != null) {
+            if(n != null) {
                 nameIdPair.update(n.getNameIdPair());
                 arbiterVLSNTracker.writeNodeId(n.getNameIdPair().getId());
             }
         }
         final Set<InetSocketAddress> helpers =
-            new HashSet<InetSocketAddress>(repImpl.getHelperSockets());
+                new HashSet<InetSocketAddress>(repImpl.getHelperSockets());
         helpers.addAll(repGroupImpl.getAllHelperSockets());
         helperSockets = helpers;
         cachedRepGroupImpl = repGroupImpl;
@@ -549,26 +534,26 @@ public class ArbiterImpl extends StoppableThread {
      * Returns normally when the master is found.
      *
      * @throws InterruptedException if the current thread is interrupted,
-     *         typically due to a shutdown
+     *                              typically due to a shutdown
      */
     private void queryGroupForMembership()
-        throws InterruptedException {
+            throws InterruptedException {
 
         checkLoopbackAddresses();
 
-        if (helperSockets.isEmpty()) {
+        if(helperSockets.isEmpty()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Need a helper to add a new node into the group");
+                    ("Need a helper to add a new node into the group");
         }
 
         NameIdPair groupMasterNameId;
-        while (true) {
+        while(true) {
             elections.getLearner().queryForMaster(helperSockets);
             groupMasterNameId = masterStatus.getGroupMasterNameId();
-            if (!groupMasterNameId.hasNullId()) {
+            if(!groupMasterNameId.hasNullId()) {
                 /* A new, or pre-query, group master. */
-                if (nameIdPair.hasNullId() &&
-                    groupMasterNameId.getName().equals(nameIdPair.getName())) {
+                if(nameIdPair.hasNullId() &&
+                        groupMasterNameId.getName().equals(nameIdPair.getName())) {
 
                     /*
                      * Residual obsolete information in replicas, ignore it.
@@ -579,24 +564,24 @@ public class ArbiterImpl extends StoppableThread {
                      */
                     try {
                         Thread.sleep(MASTER_QUERY_INTERVAL);
-                    } catch (InterruptedException e) {
+                    } catch(InterruptedException e) {
                         throw EnvironmentFailureException.
-                            unexpectedException(e);
+                                unexpectedException(e);
                     }
                     continue;
                 }
-                if (checkGroupMasterIsAlive(groupMasterNameId)) {
+                if(checkGroupMasterIsAlive(groupMasterNameId)) {
                     /* Use the current group master if it's alive. */
                     break;
                 }
             }
-            if (isShutdownOrInvalid()) {
+            if(isShutdownOrInvalid()) {
                 throw new InterruptedException("Arbiter node shutting down.");
             }
             Thread.sleep(MASTER_QUERY_INTERVAL);
         }
         LoggerUtils.fine(logger, repImpl, "New node " + nameIdPair.getName() +
-                         " located master: " + groupMasterNameId);
+                " located master: " + groupMasterNameId);
     }
 
     ArbiterVLSNTracker getArbiterVLSNTracker() {
@@ -609,10 +594,10 @@ public class ArbiterImpl extends StoppableThread {
      * the FeederManager or the Replica.
      */
     boolean isShutdownOrInvalid() {
-        if (isShutdown()) {
+        if(isShutdown()) {
             return true;
         }
-        if (repImpl.wasInvalidated()) {
+        if(repImpl.wasInvalidated()) {
             saveShutdownException(repImpl.getInvalidatingException());
             return true;
         }
@@ -624,23 +609,23 @@ public class ArbiterImpl extends StoppableThread {
         final InetAddress myAddress = getSocket().getAddress();
         final boolean isLoopback = myAddress.isLoopbackAddress();
 
-        for (InetSocketAddress socketAddress : helperSockets) {
+        for(InetSocketAddress socketAddress : helperSockets) {
             final InetAddress nodeAddress = socketAddress.getAddress();
 
-            if (nodeAddress.isLoopbackAddress() == isLoopback) {
+            if(nodeAddress.isLoopbackAddress() == isLoopback) {
                 continue;
             }
             String message = getSocket() +
-                " the address associated with this node, " +
-                (isLoopback? "is " : "is not ") +  "a loopback address." +
-                " It conflicts with an existing use, by a different node " +
-                " of the address:" +
-                socketAddress +
-                (!isLoopback ? " which is a loopback address." :
-                 " which is not a loopback address.") +
-                " Such mixing of addresses within a group is not allowed, " +
-                "since the nodes will not be able to communicate with " +
-                "each other.";
+                    " the address associated with this node, " +
+                    (isLoopback ? "is " : "is not ") + "a loopback address." +
+                    " It conflicts with an existing use, by a different node " +
+                    " of the address:" +
+                    socketAddress +
+                    (!isLoopback ? " which is a loopback address." :
+                            " which is not a loopback address.") +
+                    " Such mixing of addresses within a group is not allowed, " +
+                    "since the nodes will not be able to communicate with " +
+                    "each other.";
             throw new IllegalArgumentException(message);
         }
     }
@@ -650,7 +635,7 @@ public class ArbiterImpl extends StoppableThread {
      * alive and that we are not dealing with obsolete cached information.
      *
      * @return true if the master node could be contacted and was truly alive
-     *
+     * <p>
      * TODO: handle protocol version mismatch here and in DbPing, also
      * consolidate code so that a single copy is shared.
      */
@@ -660,42 +645,42 @@ public class ArbiterImpl extends StoppableThread {
 
         try {
             final InetSocketAddress masterSocket =
-                masterStatus.getGroupMaster();
+                    masterStatus.getGroupMaster();
 
             final BinaryNodeStateProtocol protocol =
-                new BinaryNodeStateProtocol(NameIdPair.NOCHECK, null);
+                    new BinaryNodeStateProtocol(NameIdPair.NOCHECK, null);
 
             /* Build the connection. Set the parameter connectTimeout.*/
             channel = repImpl.getChannelFactory().
-                connect(masterSocket,
-                        new ConnectOptions().
-                        setTcpNoDelay(true).
-                        setOpenTimeout(5000).
-                        setReadTimeout(5000));
+                    connect(masterSocket,
+                            new ConnectOptions().
+                                    setTcpNoDelay(true).
+                                    setOpenTimeout(5000).
+                                    setReadTimeout(5000));
             ServiceDispatcher.doServiceHandshake
-                (channel, BinaryNodeStateService.SERVICE_NAME);
+                    (channel, BinaryNodeStateService.SERVICE_NAME);
             /* Send a NodeState request to the node. */
             protocol.write(
-                protocol.new BinaryNodeStateRequest(
-                    groupMasterNameId.getName(),
-                    repImpl.getConfigManager().get(RepParams.GROUP_NAME)),
-                 channel);
+                    protocol.new BinaryNodeStateRequest(
+                            groupMasterNameId.getName(),
+                            repImpl.getConfigManager().get(RepParams.GROUP_NAME)),
+                    channel);
             /* Get the response and return the NodeState. */
             BinaryNodeStateResponse response =
-                protocol.read(channel, BinaryNodeStateResponse.class);
+                    protocol.read(channel, BinaryNodeStateResponse.class);
 
             ReplicatedEnvironment.State state = response.getNodeState();
-           return (state != null) && state.isMaster();
-        } catch (Exception e) {
+            return (state != null) && state.isMaster();
+        } catch(Exception e) {
             LoggerUtils.info(logger, repImpl,
-                             "Queried master:" + groupMasterNameId +
-                             " unavailable. Reason:" + e);
+                    "Queried master:" + groupMasterNameId +
+                            " unavailable. Reason:" + e);
             return false;
         } finally {
-            if (channel != null) {
+            if(channel != null) {
                 try {
                     channel.close();
-                } catch (IOException ioe) {
+                } catch(IOException ioe) {
                     /* Ignore it */
                 }
             }
@@ -722,6 +707,7 @@ public class ArbiterImpl extends StoppableThread {
     public boolean isShutdown() {
         return shutdown.get();
     }
+
     @Override
     public Logger getLogger() {
         return logger;
@@ -734,7 +720,7 @@ public class ArbiterImpl extends StoppableThread {
     public void resetReadyLatch(Exception exception) {
         ExceptionAwareCountDownLatch old = readyLatch;
         readyLatch = new ExceptionAwareCountDownLatch(repImpl, 1);
-        if (old.getCount() != 0) {
+        if(old.getCount() != 0) {
             /* releasing latch in some error situation. */
             old.releaseAwait(exception);
         }
@@ -747,11 +733,11 @@ public class ArbiterImpl extends StoppableThread {
      */
     public String getHostName() {
         String hostAndPort =
-            repImpl.getConfigManager().get(RepParams.NODE_HOST_PORT);
+                repImpl.getConfigManager().get(RepParams.NODE_HOST_PORT);
         int colonToken = hostAndPort.indexOf(":");
         return (colonToken >= 0) ?
-               hostAndPort.substring(0, colonToken) :
-               hostAndPort;
+                hostAndPort.substring(0, colonToken) :
+                hostAndPort;
     }
 
     /**
@@ -762,12 +748,12 @@ public class ArbiterImpl extends StoppableThread {
     public int getPort() {
 
         String hostAndPort =
-            repImpl.getConfigManager().get(RepParams.NODE_HOST_PORT);
+                repImpl.getConfigManager().get(RepParams.NODE_HOST_PORT);
         int colonToken = hostAndPort.indexOf(":");
 
         return (colonToken >= 0) ?
                 Integer.parseInt(hostAndPort.substring(colonToken + 1)) :
-                    Integer.parseInt(RepParams.DEFAULT_PORT.getDefault());
+                Integer.parseInt(RepParams.DEFAULT_PORT.getDefault());
     }
 
     /**
@@ -783,24 +769,24 @@ public class ArbiterImpl extends StoppableThread {
         @Override
         public void notify(Proposal proposal, Value value) {
             /* We have a winning new proposal, is it truly different? */
-            if (value.equals(currentValue)) {
+            if(value.equals(currentValue)) {
                 return;
             }
             currentValue = (MasterValue) value;
             try {
                 String currentMasterName = currentValue.getNodeName();
                 LoggerUtils.logMsg(logger, formatter, Level.FINE,
-                                   "Arbiter notified of new Master: " +
-                                   currentMasterName);
+                        "Arbiter notified of new Master: " +
+                                currentMasterName);
                 masterStatus.setGroupMaster
-                    (currentValue.getHostName(),
-                     currentValue.getPort(),
-                     currentValue.getNameId());
-            } catch (Exception e) {
+                        (currentValue.getHostName(),
+                                currentValue.getPort(),
+                                currentValue.getNameId());
+            } catch(Exception e) {
                 LoggerUtils.logMsg
-                    (logger, formatter, Level.SEVERE,
-                     "Arbiter change event processing exception: " +
-                     e.getMessage());
+                        (logger, formatter, Level.SEVERE,
+                                "Arbiter change event processing exception: " +
+                                        e.getMessage());
             }
         }
     }
@@ -844,18 +830,18 @@ public class ArbiterImpl extends StoppableThread {
     }
 
     private class MasterSuggestionGenerator
-        implements Acceptor.SuggestionGenerator {
+            implements Acceptor.SuggestionGenerator {
         @Override
         public Value get(Proposal proposal) {
             return new MasterValue(null,
-                                   getPort(),
-                                   NameIdPair.NULL);
+                    getPort(),
+                    NameIdPair.NULL);
         }
 
         @Override
         public Ranking getRanking(Proposal proposal) {
             return new Ranking(arbiterVLSNTracker.getDTVLSN().getSequence(),
-                               arbiterVLSNTracker.get().getSequence());
+                    arbiterVLSNTracker.get().getSequence());
 
         }
     }

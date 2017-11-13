@@ -13,42 +13,20 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ABORTS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ACTIVE;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ACTIVE_TXNS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_BEGINS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_COMMITS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XAABORTS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XACOMMITS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XAPREPARES;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.transaction.xa.Xid;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.LockStats;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
-import berkeley.com.sleepycat.je.TransactionStats;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.latch.LatchFactory;
 import berkeley.com.sleepycat.je.latch.SharedLatch;
-import berkeley.com.sleepycat.je.utilint.ActiveTxnArrayStat;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.IntStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import javax.transaction.xa.Xid;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.*;
 
 /**
  * Class to manage transactions.  Basically a Set of all transactions with add
@@ -66,17 +44,13 @@ public class TxnManager {
      */
     static final long NULL_TXN_ID = -1;
     private static final long FIRST_NEGATIVE_ID = -10;
-    private LockManager lockManager;
     private final EnvironmentImpl envImpl;
     private final SharedLatch allTxnsLatch;
     private final Map<Txn, Txn> allTxns;
-
     /* Maps Xids to Txns. */
     private final Map<Xid, Txn> allXATxns;
-
     /* Maps Threads to Txns when there are thread implied transactions. */
     private final Map<Thread, Transaction> thread2Txn;
-
     /*
      * Positive and negative transaction ids are used in a replicated system,
      * to let replicated transactions intermingle with local transactions.
@@ -84,7 +58,6 @@ public class TxnManager {
     private final AtomicLong lastUsedLocalTxnId;
     private final AtomicLong lastUsedReplicatedTxnId;
     private final AtomicInteger nActiveSerializable;
-
     /* Locker Stats */
     private final StatGroup stats;
     private final IntStat nActive;
@@ -95,18 +68,19 @@ public class TxnManager {
     private final LongStat numXACommits;
     private final LongStat numXAAborts;
     private final ActiveTxnArrayStat activeTxns;
+    private LockManager lockManager;
     private volatile long nTotalCommits = 0;
 
     public TxnManager(EnvironmentImpl envImpl) {
         lockManager = new SyncedLockManager(envImpl);
 
-        if (envImpl.isNoLocking()) {
+        if(envImpl.isNoLocking()) {
             lockManager = new DummyLockManager(envImpl, lockManager);
         }
 
         this.envImpl = envImpl;
         allTxnsLatch = LatchFactory.createSharedLatch(
-            envImpl, "TxnManager.allTxns", false /*exclusiveOnly*/);
+                envImpl, "TxnManager.allTxns", false /*exclusiveOnly*/);
         allTxns = new ConcurrentHashMap<Txn, Txn>();
         allXATxns = Collections.synchronizedMap(new HashMap<Xid, Txn>());
         thread2Txn = new ConcurrentHashMap<Thread, Transaction>();
@@ -125,6 +99,11 @@ public class TxnManager {
         numXACommits = new LongStat(stats, TXN_XACOMMITS);
         numXAAborts = new LongStat(stats, TXN_XAABORTS);
         activeTxns = new ActiveTxnArrayStat(stats, TXN_ACTIVE_TXNS);
+    }
+
+    /* @return true if this id is for a replicated txn. */
+    public static boolean isReplicatedTxn(long txnId) {
+        return (txnId <= FIRST_NEGATIVE_ID);
     }
 
     /**
@@ -150,11 +129,6 @@ public class TxnManager {
         return lastUsedReplicatedTxnId.decrementAndGet();
     }
 
-    /* @return true if this id is for a replicated txn. */
-    public static boolean isReplicatedTxn(long txnId) {
-        return (txnId <= FIRST_NEGATIVE_ID);
-    }
-
     /**
      * Get the next transaction id for a non-replicated transaction. Note
      * than in the future, a replicated node could conceivable issue an
@@ -172,9 +146,9 @@ public class TxnManager {
     public void updateFromReplay(long replayTxnId) {
         assert !envImpl.isMaster();
         assert replayTxnId < 0 :
-            "replay txn id is unexpectedly positive " + replayTxnId;
+                "replay txn id is unexpectedly positive " + replayTxnId;
 
-        if (replayTxnId < lastUsedReplicatedTxnId.get()) {
+        if(replayTxnId < lastUsedReplicatedTxnId.get()) {
             lastUsedReplicatedTxnId.set(replayTxnId);
         }
     }
@@ -189,12 +163,13 @@ public class TxnManager {
 
     /**
      * Create a new transaction.
-     * @param parent for nested transactions, not yet supported
+     *
+     * @param parent    for nested transactions, not yet supported
      * @param txnConfig specifies txn attributes
      * @return the new txn
      */
     public Txn txnBegin(Transaction parent, TransactionConfig txnConfig)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return Txn.createUserTxn(envImpl, txnConfig);
     }
@@ -213,7 +188,7 @@ public class TxnManager {
         allTxnsLatch.acquireShared();
         try {
             allTxns.put(txn, txn);
-            if (txn.isSerializableIsolation()) {
+            if(txn.isSerializableIsolation()) {
                 nActiveSerializable.incrementAndGet();
             }
             numBegins.increment();
@@ -232,14 +207,15 @@ public class TxnManager {
 
             /* Remove any accumulated MemoryBudget delta for the Txn. */
             envImpl.getMemoryBudget().
-                updateTxnMemoryUsage(0 - txn.getBudgetedMemorySize());
-            if (isCommit) {
+                    updateTxnMemoryUsage(0 - txn.getBudgetedMemorySize());
+            if(isCommit) {
                 numCommits.increment();
                 nTotalCommits += 1;
-            } else {
+            }
+            else {
                 numAborts.increment();
             }
-            if (txn.isSerializableIsolation()) {
+            if(txn.isSerializableIsolation()) {
                 nActiveSerializable.decrementAndGet();
             }
         } finally {
@@ -251,13 +227,13 @@ public class TxnManager {
      * Called when txn is created.
      */
     public void registerXATxn(Xid xid, Txn txn, boolean isPrepare) {
-        if (!allXATxns.containsKey(xid)) {
+        if(!allXATxns.containsKey(xid)) {
             allXATxns.put(xid, txn);
             envImpl.getMemoryBudget().updateTxnMemoryUsage
-                (MemoryBudget.HASHMAP_ENTRY_OVERHEAD);
+                    (MemoryBudget.HASHMAP_ENTRY_OVERHEAD);
         }
 
-        if (isPrepare) {
+        if(isPrepare) {
             numXAPrepares.increment();
         }
     }
@@ -275,17 +251,18 @@ public class TxnManager {
      * @throws IllegalStateException via XAResource
      */
     void unRegisterXATxn(Xid xid, boolean isCommit)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (allXATxns.remove(xid) == null) {
+        if(allXATxns.remove(xid) == null) {
             throw new IllegalStateException
-                ("XA Transaction " + xid + " is not registered.");
+                    ("XA Transaction " + xid + " is not registered.");
         }
         envImpl.getMemoryBudget().updateTxnMemoryUsage
-            (0 - MemoryBudget.HASHMAP_ENTRY_OVERHEAD);
-        if (isCommit) {
+                (0 - MemoryBudget.HASHMAP_ENTRY_OVERHEAD);
+        if(isCommit) {
             numXACommits.increment();
-        } else {
+        }
+        else {
             numXAAborts.increment();
         }
     }
@@ -295,19 +272,6 @@ public class TxnManager {
      */
     public Txn getTxnFromXid(Xid xid) {
         return allXATxns.get(xid);
-    }
-
-    /**
-     * Called when txn is assoc'd with this thread.
-     */
-    public void setTxnForThread(Transaction txn) {
-
-        Thread curThread = Thread.currentThread();
-        if (txn == null) {
-            unsetTxnForThread();
-        } else {
-            thread2Txn.put(curThread, txn);
-        }
     }
 
     /**
@@ -325,6 +289,20 @@ public class TxnManager {
         return thread2Txn.get(Thread.currentThread());
     }
 
+    /**
+     * Called when txn is assoc'd with this thread.
+     */
+    public void setTxnForThread(Transaction txn) {
+
+        Thread curThread = Thread.currentThread();
+        if(txn == null) {
+            unsetTxnForThread();
+        }
+        else {
+            thread2Txn.put(curThread, txn);
+        }
+    }
+
     public Xid[] XARecover() {
         Set<Xid> xidSet = allXATxns.keySet();
         Xid[] ret = new Xid[xidSet.size()];
@@ -340,11 +318,11 @@ public class TxnManager {
      * reading an integer more atomic than it already is.
      */
     public boolean
-        areOtherSerializableTransactionsActive(Locker excludeLocker) {
+    areOtherSerializableTransactionsActive(Locker excludeLocker) {
         int exclude =
-            (excludeLocker != null &&
-             excludeLocker.isSerializableIsolation()) ?
-            1 : 0;
+                (excludeLocker != null &&
+                        excludeLocker.isSerializableIsolation()) ?
+                        1 : 0;
         return (nActiveSerializable.get() - exclude > 0);
     }
 
@@ -362,12 +340,13 @@ public class TxnManager {
         allTxnsLatch.acquireExclusive();
         try {
             Iterator<Txn> iter = allTxns.keySet().iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 long txnFirstActive = iter.next().getFirstActiveLsn();
-                if (firstActive == DbLsn.NULL_LSN) {
+                if(firstActive == DbLsn.NULL_LSN) {
                     firstActive = txnFirstActive;
-                } else if (txnFirstActive != DbLsn.NULL_LSN) {
-                    if (DbLsn.compareTo(txnFirstActive, firstActive) < 0) {
+                }
+                else if(txnFirstActive != DbLsn.NULL_LSN) {
+                    if(DbLsn.compareTo(txnFirstActive, firstActive) < 0) {
                         firstActive = txnFirstActive;
                     }
                 }
@@ -392,18 +371,18 @@ public class TxnManager {
         try {
             nActive.set(allTxns.size());
             TransactionStats.Active[] activeSet =
-                new TransactionStats.Active[nActive.get()];
+                    new TransactionStats.Active[nActive.get()];
             Iterator<Txn> iter = allTxns.keySet().iterator();
             int i = 0;
-            while (iter.hasNext() && i < activeSet.length) {
+            while(iter.hasNext() && i < activeSet.length) {
                 Locker txn = iter.next();
                 activeSet[i] = new TransactionStats.Active
-                    (txn.toString(), txn.getId(), 0);
+                        (txn.toString(), txn.getId(), 0);
                 i++;
             }
             activeTxns.set(activeSet);
             txnStats = new TransactionStats(stats.cloneGroup(false));
-            if (config.getClear()) {
+            if(config.getClear()) {
                 numCommits.clear();
                 numAborts.clear();
                 numXACommits.clear();
@@ -424,7 +403,7 @@ public class TxnManager {
      * Collect lock related stats.
      */
     public LockStats lockStat(StatsConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return lockManager.lockStat(config);
     }
@@ -440,10 +419,9 @@ public class TxnManager {
         allTxnsLatch.acquireShared();
         try {
             Set<Txn> all = allTxns.keySet();
-            for (Txn t: all) {
-                if (txnClass.isAssignableFrom(t.getClass())) {
-                    @SuppressWarnings("unchecked")
-                    final T t2 = (T)t;
+            for(Txn t : all) {
+                if(txnClass.isAssignableFrom(t.getClass())) {
+                    @SuppressWarnings("unchecked") final T t2 = (T) t;
                     targetSet.add(t2);
                 }
             }

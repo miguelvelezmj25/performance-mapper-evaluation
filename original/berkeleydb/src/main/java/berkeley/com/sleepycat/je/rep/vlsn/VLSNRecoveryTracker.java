@@ -28,28 +28,28 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * It gathers up VLSN->LSN mappings that are in the log, but not persisted to
  * the mapping database. It has somewhat different preconditions from the
  * parent VLSNTracker which affect the semantics of tracking.
- *
+ * <p>
  * Unlike VLSNTracker, the track() method is guaranteed to be executed in a
  * serial fashion. In addition, this tracker needs to "discover" where the
  * range for this tracker should start.  For example, suppose the on-disk
  * VLSNIndex covers VLSNs 25 -> 200. Also, suppose that the recovery portion of
  * the log holds VLSNs 190 -> 210 (an overlap of 190 -> 200)
- *
+ * <p>
  * The VLSNIndex will be initialized with a range of 25 -> 200. We want the
  * recovery tracker to hold VLSN mappings from 190 -> 210. We don't want it to
  * just consult its range to determine where the next bucket starts.  If we did
  * that, the recovery tracker would start at VLSN 1.
- *
+ * <p>
  * The VLSNRecoveryTracker must account for rollbacks and invisible log
  * entries. It has the authoritative view of what is in the recovery part of the
  * log and will override what is in the on-disk tracker.  At merge time, the
  * regular VLSNIndex must consult the VLSNRecoveryTracker's notion of what the
  * highest VLSN value is.
- *
+ * <p>
  * If we see a RollbackStart, the end of range is abruptly reset back to the
  * matchpoint start. If we see non-invisible entries, the end of range may be
  * incrementing. For example, suppose the log has:recovery tracker
- *
+ * <p>
  * VLSN 10                                tracks 10
  * VLSN 11 (invisible)                    skips
  * VLSN 12 (invisible)                    skips
@@ -59,18 +59,18 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * VLSN 11                                tracks 11
  * VLSN 12                                tracks 12
  * rollback start to VLSN 11              truncates to 11
- *
+ * <p>
  * Suppose the on-disk VLSNIndex holds mappings for VLSN 1->13. A merge of the
  * VLSN index and the recovery tracker would
- *   1) truncate any VLSN > than the recovery tracker's high point -- so the
- *      VLSN index will drop mappings 12, 13
- *   2) will replace any VLSN index mappings with those held in the recovery
- *      tracker.
+ * 1) truncate any VLSN > than the recovery tracker's high point -- so the
+ * VLSN index will drop mappings 12, 13
+ * 2) will replace any VLSN index mappings with those held in the recovery
+ * tracker.
  * The VLSNIndex should map 1 -> 11, with the 10 and 11 mapping provided by the
  * recovery tracker.
  */
 public final class VLSNRecoveryTracker
-    extends VLSNTracker implements VLSNRecoveryProxy {
+        extends VLSNTracker implements VLSNRecoveryProxy {
 
     private byte rollbackType;
     private VLSN lastMatchpointVLSN = VLSN.NULL_VLSN;
@@ -91,28 +91,29 @@ public final class VLSNRecoveryTracker
                              LogEntryHeader currentEntryHeader,
                              LogEntry targetLogEntry) {
 
-        if (currentEntryHeader.getReplicated() &&
-            !currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.getReplicated() &&
+                !currentEntryHeader.isInvisible()) {
 
             VLSN vlsn = currentEntryHeader.getVLSN();
-            track(vlsn, lsn,  currentEntryHeader.getType());
-        } else if (currentEntryHeader.getType() == rollbackType) {
+            track(vlsn, lsn, currentEntryHeader.getType());
+        }
+        else if(currentEntryHeader.getType() == rollbackType) {
             RollbackStart rb = (RollbackStart)
-                ((SingleItemEntry<?>) targetLogEntry).getMainItem();
+                    ((SingleItemEntry<?>) targetLogEntry).getMainItem();
 
             lastMatchpointVLSN = rb.getMatchpointVLSN();
             lastMatchpointLsn = rb.getMatchpoint();
-            if (range.getFirst().isNull()) {
+            if(range.getFirst().isNull()) {
                 return;
             }
 
-            if (range.getFirst().compareTo(lastMatchpointVLSN) > 0) {
+            if(range.getFirst().compareTo(lastMatchpointVLSN) > 0) {
                 /* Throw away all mappings. */
                 initEmpty();
                 return;
             }
 
-            if (range.getLast().compareTo(lastMatchpointVLSN) <= 0) {
+            if(range.getLast().compareTo(lastMatchpointVLSN) <= 0) {
                 /* Nothing to truncate. */
                 return;
             }

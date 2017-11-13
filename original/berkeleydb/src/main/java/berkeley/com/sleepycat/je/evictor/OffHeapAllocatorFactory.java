@@ -21,8 +21,8 @@ public class OffHeapAllocatorFactory {
     private OffHeapAllocator defaultAllocator;
 
     OffHeapAllocatorFactory()
-        throws ClassNotFoundException, IllegalAccessException,
-        InstantiationException {
+            throws ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
 
         /*
          * The CHeapAllocator class should not be referenced symbolically here
@@ -31,7 +31,7 @@ public class OffHeapAllocatorFactory {
          * load CHeapAllocator and create an instance using reflection.
          */
         final Class<?> cls =
-            Class.forName("com.sleepycat.je.evictor.CHeapAllocator");
+                Class.forName("com.sleepycat.je.evictor.CHeapAllocator");
 
         defaultAllocator = (OffHeapAllocator) cls.newInstance();
     }

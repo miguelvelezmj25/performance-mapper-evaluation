@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.persist.model.EntityModel;
+import berkeley.com.sleepycat.persist.model.PersistentProxy;
+import berkeley.com.sleepycat.persist.raw.RawObject;
+
 import java.lang.reflect.Array;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import berkeley.com.sleepycat.persist.model.EntityModel;
-import berkeley.com.sleepycat.persist.model.PersistentProxy;
-import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
  * Format for types proxied by a PersistentProxy.
@@ -46,9 +46,10 @@ public class ProxiedFormat extends Format {
      * proxyFormat will be non-null.
      */
     private String getProxyClassName() {
-        if (proxyClassName != null) {
+        if(proxyClassName != null) {
             return proxyClassName;
-        } else {
+        }
+        else {
             assert proxyFormat != null;
             return proxyFormat.getClassName();
         }
@@ -75,7 +76,7 @@ public class ProxiedFormat extends Format {
     @Override
     void initialize(Catalog catalog, EntityModel model, int initVersion) {
         /* Set the proxy format for a new (never initialized) format. */
-        if (proxyFormat == null) {
+        if(proxyFormat == null) {
             assert proxyClassName != null;
             proxyFormat = catalog.getFormat(proxyClassName);
         }
@@ -90,12 +91,13 @@ public class ProxiedFormat extends Format {
 
     @Override
     public Object newInstance(EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
         Reader reader = proxyFormat.getReader();
-        if (rawAccess) {
+        if(rawAccess) {
             return reader.newInstance(null, true);
-        } else {
+        }
+        else {
 
             /* 
              * Note that the read object will not be a PersistentProxy if
@@ -105,9 +107,9 @@ public class ProxiedFormat extends Format {
              * PersistentProxy.convertProxy to convert the proxy. So we do not
              * need another call to the convertProxy method.  [#19312]
              */
-            Object o = reader.readObject(reader.newInstance(null, false), 
-                                         input, false);
-            if (o instanceof PersistentProxy) {
+            Object o = reader.readObject(reader.newInstance(null, false),
+                    input, false);
+            if(o instanceof PersistentProxy) {
                 o = ((PersistentProxy) o).convertProxy();
             }
             return o;
@@ -116,9 +118,9 @@ public class ProxiedFormat extends Format {
 
     @Override
     public Object readObject(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (rawAccess) {
+        if(rawAccess) {
             o = proxyFormat.getReader().readObject(o, input, true);
         }
         /* Else, do nothing here -- newInstance reads the value. */
@@ -127,13 +129,14 @@ public class ProxiedFormat extends Format {
 
     @Override
     void writeObject(Object o, EntityOutput output, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (rawAccess) {
+        if(rawAccess) {
             proxyFormat.writeObject(o, output, true);
-        } else {
+        }
+        else {
             PersistentProxy proxy =
-                (PersistentProxy) proxyFormat.newInstance(null, false);
+                    (PersistentProxy) proxyFormat.newInstance(null, false);
             proxy.initializeProxy(o);
             proxyFormat.writeObject(proxy, output, false);
         }
@@ -144,10 +147,10 @@ public class ProxiedFormat extends Format {
                             boolean rawAccess,
                             RawObject rawObject,
                             IdentityHashMap converted)
-        throws RefreshException {
+            throws RefreshException {
 
         PersistentProxy proxy = (PersistentProxy) proxyFormat.convertRawObject
-            (catalog, rawAccess, rawObject, converted);
+                (catalog, rawAccess, rawObject, converted);
         Object o = proxy.convertProxy();
         converted.put(rawObject, o);
         return o;
@@ -155,21 +158,21 @@ public class ProxiedFormat extends Format {
 
     @Override
     void skipContents(RecordInput input)
-        throws RefreshException {
+            throws RefreshException {
 
         proxyFormat.skipContents(input);
     }
 
     @Override
     void copySecMultiKey(RecordInput input, Format keyFormat, Set results)
-        throws RefreshException {
+            throws RefreshException {
 
         CollectionProxy.copyElements(input, this, keyFormat, results);
     }
 
     @Override
     boolean evolve(Format newFormatParam, Evolver evolver) {
-        if (!(newFormatParam instanceof ProxiedFormat)) {
+        if(!(newFormatParam instanceof ProxiedFormat)) {
             
             /* 
              * A workaround for reading the BigDecimal data stored by 
@@ -182,32 +185,33 @@ public class ProxiedFormat extends Format {
              * allowed, and the old format can be used as the reader of the old 
              * data.
              */
-            if (newFormatParam.allowEvolveFromProxy()) {
+            if(newFormatParam.allowEvolveFromProxy()) {
                 evolver.useEvolvedFormat(this, this, newFormatParam);
                 return true;
             }
             evolver.addEvolveError
-                (this, newFormatParam, null,
-                 "A proxied class may not be changed to a different type");
+                    (this, newFormatParam, null,
+                            "A proxied class may not be changed to a different type");
             return false;
         }
         ProxiedFormat newFormat = (ProxiedFormat) newFormatParam;
-        if (!evolver.evolveFormat(proxyFormat)) {
+        if(!evolver.evolveFormat(proxyFormat)) {
             return false;
         }
         Format newProxyFormat = proxyFormat.getLatestVersion();
-        if (!newProxyFormat.getClassName().equals
+        if(!newProxyFormat.getClassName().equals
                 (newFormat.getProxyClassName())) {
             evolver.addEvolveError
-                (this, newFormat, null,
-                 "The proxy class for this type has been changed from: " +
-                 newProxyFormat.getClassName() + " to: " +
-                 newFormat.getProxyClassName());
+                    (this, newFormat, null,
+                            "The proxy class for this type has been changed from: " +
+                                    newProxyFormat.getClassName() + " to: " +
+                                    newFormat.getProxyClassName());
             return false;
         }
-        if (newProxyFormat != proxyFormat) {
+        if(newProxyFormat != proxyFormat) {
             evolver.useEvolvedFormat(this, this, newFormat);
-        } else {
+        }
+        else {
             evolver.useOldFormat(this, newFormat);
         }
         return true;

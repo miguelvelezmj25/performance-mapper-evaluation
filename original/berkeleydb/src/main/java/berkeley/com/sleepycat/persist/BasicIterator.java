@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.persist;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.LockMode;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Implements Iterator for an arbitrary EntityCursor.
@@ -50,38 +50,40 @@ class BasicIterator<V> implements Iterator<V> {
     }
 
     public boolean hasNext() {
-        if (nextValue == null) {
+        if(nextValue == null) {
             try {
                 nextValue = forwardCursor.next(lockMode);
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 throw RuntimeExceptionWrapper.wrapIfNeeded(e);
             }
             return nextValue != null;
-        } else {
+        }
+        else {
             return true;
         }
     }
 
     public V next() {
-        if (hasNext()) {
+        if(hasNext()) {
             V v = nextValue;
             nextValue = null;
             return v;
-        } else {
+        }
+        else {
             throw new NoSuchElementException();
         }
     }
 
     public void remove() {
-        if (entityCursor == null) {
+        if(entityCursor == null) {
             throw new UnsupportedOperationException();
         }
         try {
-            if (!entityCursor.delete()) {
+            if(!entityCursor.delete()) {
                 throw new IllegalStateException
-                    ("Record at cursor position is already deleted");
+                        ("Record at cursor position is already deleted");
             }
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
     }

@@ -25,8 +25,8 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * application, a JE configurations change, discarding cached state, etc. The
  * error message details the nature of the problem.
  */
-public abstract class RestartRequiredException 
-    extends EnvironmentFailureException {
+public abstract class RestartRequiredException
+        extends EnvironmentFailureException {
 
     /*
      * Classes that extend RestartRequiredException should be aware that their
@@ -61,7 +61,7 @@ public abstract class RestartRequiredException
                                     String msg) {
         super(envImpl, reason, msg);
     }
-    
+
     /**
      * For internal use only.
      */
@@ -72,8 +72,9 @@ public abstract class RestartRequiredException
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override
-    public abstract EnvironmentFailureException wrapSelf(String msg) ;
+    public abstract EnvironmentFailureException wrapSelf(String msg);
 }

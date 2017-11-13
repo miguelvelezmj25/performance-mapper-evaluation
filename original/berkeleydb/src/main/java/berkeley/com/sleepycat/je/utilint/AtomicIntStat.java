@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A int JE stat that uses {@link AtomicInteger} to be thread safe.
@@ -70,7 +70,7 @@ public class AtomicIntStat extends Stat<Integer> {
     @Override
     public Stat<Integer> computeInterval(Stat<Integer> base) {
         AtomicIntStat ret = copy();
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
             ret.set(counter.get() - base.get());
         }
         return ret;
@@ -78,16 +78,16 @@ public class AtomicIntStat extends Stat<Integer> {
 
     @Override
     public void negate() {
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
 
             /*
              * Negate the value atomically, retrying if another change
              * intervenes.  This loop emulates the behavior of
              * AtomicInteger.getAndIncrement.
              */
-            while (true) {
+            while(true) {
                 final int current = counter.get();
-                if (counter.compareAndSet(current, -current)) {
+                if(counter.compareAndSet(current, -current)) {
                     return;
                 }
             }

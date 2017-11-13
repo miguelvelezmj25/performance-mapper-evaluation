@@ -45,7 +45,7 @@ public class SequenceExample {
         try {
             SequenceExample app = new SequenceExample();
             app.run(envHomeDirectory);
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             System.exit(EXIT_FAILURE);
         }

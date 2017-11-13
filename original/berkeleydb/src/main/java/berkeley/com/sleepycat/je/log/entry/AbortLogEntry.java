@@ -30,12 +30,16 @@ public class AbortLogEntry extends SingleItemReplicableEntry<TxnAbort> {
      */
     private static final int LAST_FORMAT_CHANGE = 13;
 
-    /** Construct a log entry for reading a {@link TxnAbort} object. */
+    /**
+     * Construct a log entry for reading a {@link TxnAbort} object.
+     */
     public AbortLogEntry() {
         super(TxnAbort.class);
     }
 
-    /** Construct a log entry for writing a {@link TxnAbort} object. */
+    /**
+     * Construct a log entry for writing a {@link TxnAbort} object.
+     */
     public AbortLogEntry(final TxnAbort abort) {
         super(LogEntryType.LOG_TXN_ABORT, abort);
     }

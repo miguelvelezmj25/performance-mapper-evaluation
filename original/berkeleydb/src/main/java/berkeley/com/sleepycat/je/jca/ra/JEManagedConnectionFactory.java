@@ -13,10 +13,9 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.Set;
+import berkeley.com.sleepycat.je.DbInternal;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
@@ -24,13 +23,13 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
-
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.Set;
 
 public class JEManagedConnectionFactory
-    implements ManagedConnectionFactory, Serializable {
+        implements ManagedConnectionFactory, Serializable {
 
     private static final long serialVersionUID = 658705244L;
 
@@ -43,35 +42,35 @@ public class JEManagedConnectionFactory
 
     public Object createConnectionFactory() {
         throw EnvironmentFailureException.unexpectedState
-            ("must supply a connMgr");
+                ("must supply a connMgr");
     }
 
     public ManagedConnection
-        createManagedConnection(Subject subject,
-                                ConnectionRequestInfo info)
-        throws ResourceException {
+    createManagedConnection(Subject subject,
+                            ConnectionRequestInfo info)
+            throws ResourceException {
 
         JERequestInfo jeInfo = (JERequestInfo) info;
         return new JEManagedConnection(subject, jeInfo);
     }
 
     public ManagedConnection
-        matchManagedConnections(Set connectionSet,
-                                Subject subject,
-                                ConnectionRequestInfo info) {
+    matchManagedConnections(Set connectionSet,
+                            Subject subject,
+                            ConnectionRequestInfo info) {
         JERequestInfo jeInfo = (JERequestInfo) info;
         Iterator iter = connectionSet.iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Object next = iter.next();
-            if (next instanceof JEManagedConnection) {
+            if(next instanceof JEManagedConnection) {
                 JEManagedConnection mc = (JEManagedConnection) next;
                 EnvironmentImpl nextEnvImpl =
-                    DbInternal.getNonNullEnvImpl(mc.getEnvironment());
+                        DbInternal.getNonNullEnvImpl(mc.getEnvironment());
                 /* Do we need to match on more than root dir and r/o? */
-                if (nextEnvImpl.getEnvironmentHome().
-                    equals(jeInfo.getJERootDir()) &&
-                    nextEnvImpl.isReadOnly() ==
-                    jeInfo.getEnvConfig().getReadOnly()) {
+                if(nextEnvImpl.getEnvironmentHome().
+                        equals(jeInfo.getJERootDir()) &&
+                        nextEnvImpl.isReadOnly() ==
+                                jeInfo.getEnvConfig().getReadOnly()) {
                     return mc;
                 }
             }
@@ -79,22 +78,23 @@ public class JEManagedConnectionFactory
         return null;
     }
 
-    public void setLogWriter(PrintWriter out) {
-    }
-
     public PrintWriter getLogWriter() {
         return null;
     }
 
+    public void setLogWriter(PrintWriter out) {
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
 
-        if (obj instanceof JEManagedConnectionFactory) {
+        if(obj instanceof JEManagedConnectionFactory) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }

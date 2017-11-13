@@ -64,7 +64,7 @@ public class IntegralLongAvgStat extends Stat<IntegralLongAvg> {
 
     @Override
     public void negate() {
-        if (value != null) {
+        if(value != null) {
             value.setDenominator(-value.getDenominator());
             value.setNumerator(-value.getNumerator());
         }
@@ -76,7 +76,7 @@ public class IntegralLongAvgStat extends Stat<IntegralLongAvg> {
             IntegralLongAvgStat ret = (IntegralLongAvgStat) super.clone();
             ret.value = new IntegralLongAvg(value);
             return ret;
-        } catch (CloneNotSupportedException unexpected) {
+        } catch(CloneNotSupportedException unexpected) {
             throw EnvironmentFailureException.unexpectedException(unexpected);
         }
     }

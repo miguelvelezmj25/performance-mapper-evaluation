@@ -12,25 +12,23 @@
  */
 package berkeley.com.sleepycat.je.log;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.util.Properties;
-
-import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.log.entry.FileHeaderEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.log.entry.RestoreRequired;
 import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Properties;
+
 /**
  * A RestoreMarker is a file that indicates that a normal recovery is not
  * possible, because the log files are physically or semantically inconsistent
  * in some way.
- *
+ * <p>
  * One example is an interrupted, incomplete network restore.  The network
  * restore copies log files from a source to destination node. If it's halted,
  * while the destination node may contain files that are readable,
@@ -41,7 +39,7 @@ import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
  * to complete the copy of a set of logs from some node to this node. The
  * network restore creates a marker file just before it does any form of change
  * to the log that would make the log inconsistent.
- *
+ * <p>
  * The restore marker file is named <MAXINT>.jdb, and holds a normal log file
  * header and a RestoreRequired log entry. The RestoreRequired entry indicates
  * the type of error of the initial cause, and information needed to repair the
@@ -50,10 +48,10 @@ import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
  * environment. Recovery will start at this file, and will fail when it reads
  * the RestoreRequired log entry, throwing an exception that contains
  * prescriptive information for how the environment can be repaired.
- *
+ * <p>
  * Note that createMarkerFile() is idempotent and can be safely called multiple
  * times. It's done that way to make it simpler for the caller.
- *
+ * <p>
  * The handler that repairs the log must also delete the marker file so future
  * recoveries can succeed.
  */
@@ -77,33 +75,34 @@ public class RestoreMarker {
     /**
      * Remove the marker file. Use FileManager.delete so this file works with
      * the FileDeletionDetector.
+     *
      * @throws IOException if the file won't delete.
      */
     public void removeMarkerFile(FileManager fileManager)
-        throws IOException {
+            throws IOException {
 
-        if (lastFile.exists()) {
+        if(lastFile.exists()) {
             fileManager.deleteFile(Integer.MAX_VALUE);
         }
     }
 
     /**
      * Create the restore marker file.
-     *
+     * <p>
      * The method may be called repeatedly, but will not re-create the marker
      * file if there's already a non-zero length file.
      *
      * @param failureType the failure type that should be recorded in the
-     * RestoreRequired log entry.
-     * @param props will be serialized to store information about how to handle
-     * the failure type.
+     *                    RestoreRequired log entry.
+     * @param props       will be serialized to store information about how to handle
+     *                    the failure type.
      * @throws IOException if the marker file can't be created
      */
     public void createMarkerFile(RestoreRequired.FailureType failureType,
                                  Properties props) throws IOException {
 
         /* Don't overwrite the file if it already exists. */
-        if (lastFile.exists() && lastFile.length() > 0) {
+        if(lastFile.exists() && lastFile.length() > 0) {
             return;
         }
 
@@ -121,19 +120,19 @@ public class RestoreMarker {
         LogEntry headerLogEntry =
                 new FileHeaderEntry(LogEntryType.LOG_FILE_HEADER, header);
         ByteBuffer buf1 = logManager.putIntoBuffer(headerLogEntry,
-                                                   0); // prevLogEntryOffset
+                0); // prevLogEntryOffset
 
         RestoreRequired rr = new RestoreRequired(failureType, props);
 
         LogEntry marker =
-            SingleItemEntry.create(LogEntryType.LOG_RESTORE_REQUIRED, rr);
+                SingleItemEntry.create(LogEntryType.LOG_RESTORE_REQUIRED, rr);
         ByteBuffer buf2 = logManager.putIntoBuffer(marker, 0);
 
-        try (FileOutputStream stream = new FileOutputStream(lastFile);
-             FileChannel channel = stream.getChannel()) {
+        try(FileOutputStream stream = new FileOutputStream(lastFile);
+            FileChannel channel = stream.getChannel()) {
             channel.write(buf1);
             channel.write(buf2);
-        } catch (IOException e) {
+        } catch(IOException e) {
             /* the stream and channel will be closed */
             throw e;
         }

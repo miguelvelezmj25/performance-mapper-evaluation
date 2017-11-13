@@ -46,10 +46,10 @@ public class SimpleChannelFactory implements DataChannelFactory {
     @Override
     public DataChannel connect(InetSocketAddress addr,
                                ConnectOptions connectOptions)
-        throws IOException {
+            throws IOException {
 
         final SocketChannel socketChannel =
-            RepUtils.openSocketChannel(addr, connectOptions);
+                RepUtils.openSocketChannel(addr, connectOptions);
         return new SimpleDataChannel(socketChannel);
     }
 }

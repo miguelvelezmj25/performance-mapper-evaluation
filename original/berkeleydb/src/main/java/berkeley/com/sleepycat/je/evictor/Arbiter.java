@@ -26,19 +26,17 @@ import berkeley.com.sleepycat.je.utilint.TestHook;
 class Arbiter {
 
     private final MemoryBudget.Totals memBudgetTotals;
-
-    /* Debugging and unit test support. */
-    private TestHook<Boolean> runnableHook;
-
     /* je.evictor.evictBytes */
     private final long evictBytesSetting;
+    /* Debugging and unit test support. */
+    private TestHook<Boolean> runnableHook;
 
     Arbiter(EnvironmentImpl envImpl) {
 
         DbConfigManager configManager = envImpl.getConfigManager();
 
         evictBytesSetting = configManager.getLong(
-            EnvironmentParams.EVICTOR_EVICT_BYTES);
+                EnvironmentParams.EVICTOR_EVICT_BYTES);
 
         memBudgetTotals = envImpl.getMemoryBudget().getTotals();
     }
@@ -49,12 +47,12 @@ class Arbiter {
     boolean isOverBudget() {
 
         return memBudgetTotals.getCacheUsage() >
-            memBudgetTotals.getMaxMemory();
+                memBudgetTotals.getMaxMemory();
     }
 
     /**
      * Do a check on whether synchronous eviction is needed.
-     *
+     * <p>
      * Note that this method is intentionally not synchronized in order to
      * minimize overhead when checking for critical eviction.  This method is
      * called from application threads for every cursor operation.
@@ -62,14 +60,14 @@ class Arbiter {
     boolean needCriticalEviction() {
 
         final long over = memBudgetTotals.getCacheUsage() -
-            memBudgetTotals.getMaxMemory();
+                memBudgetTotals.getMaxMemory();
 
         return (over > memBudgetTotals.getCriticalThreshold());
     }
 
     /**
      * Do a check on whether the cache should still be subject to eviction.
-     *
+     * <p>
      * Note that this method is intentionally not synchronized in order to
      * minimize overhead, because it's checked on every iteration of the
      * evict batch loop.
@@ -77,16 +75,16 @@ class Arbiter {
     boolean stillNeedsEviction() {
 
         return (memBudgetTotals.getCacheUsage() + evictBytesSetting) >
-            memBudgetTotals.getMaxMemory();
+                memBudgetTotals.getMaxMemory();
     }
 
     /**
-     * Return non zero number of bytes if eviction should happen. Caps the 
+     * Return non zero number of bytes if eviction should happen. Caps the
      * number of bytes a single thread will try to evict.
      */
     long getEvictionPledge() {
 
-        long currentUsage  = memBudgetTotals.getCacheUsage();
+        long currentUsage = memBudgetTotals.getCacheUsage();
         long maxMem = memBudgetTotals.getMaxMemory();
 
         long overBudget = currentUsage - maxMem;
@@ -95,20 +93,21 @@ class Arbiter {
         long requiredEvictBytes = 0;
 
         /* If running, figure out how much to evict. */
-        if (doRun) {
+        if(doRun) {
             requiredEvictBytes = overBudget + evictBytesSetting;
             /* Don't evict more than 50% of the cache. */
-            if (currentUsage - requiredEvictBytes < maxMem / 2) {
+            if(currentUsage - requiredEvictBytes < maxMem / 2) {
                 requiredEvictBytes = overBudget + (maxMem / 2);
             }
         }
 
         /* Unit testing, force eviction. */
-        if (runnableHook != null) {
+        if(runnableHook != null) {
             doRun = runnableHook.getHookValue();
-            if (doRun) {
+            if(doRun) {
                 requiredEvictBytes = maxMem;
-            } else {
+            }
+            else {
                 requiredEvictBytes = 0;
             }
         }

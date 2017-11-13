@@ -13,20 +13,6 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_ADMIN_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DATA_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DATA_ADMIN_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_DOS_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_GROUP_DESC;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_GROUP_NAME;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_LOCK_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_SHARED_CACHE_TOTAL_BYTES;
-import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.MB_TOTAL_BYTES;
-
-import java.lang.management.ManagementFactory;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
@@ -37,6 +23,12 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.LongStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 
+import java.lang.management.ManagementFactory;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static berkeley.com.sleepycat.je.dbi.DbiStatDefinition.*;
+
 /**
  * MemoryBudget calculates the available memory for JE and how to apportion
  * it between cache and log buffers. It is meant to centralize all memory
@@ -45,23 +37,13 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  */
 public class MemoryBudget implements EnvConfigObserver {
 
-    /*
-     * CLEANUP_DONE can be set to false for unit test debugging
-     * that is still in progress. When we do the final regression,
-     * this should be removed to be assured that it is never false.
-     */
-    public static boolean CLEANUP_DONE = false;
-
-    /*
-     * These DEBUG variables are public so unit tests can easily turn them
-     * on and off for different sections of code.
-     */
-    public static boolean DEBUG_ADMIN = Boolean.getBoolean("memAdmin");
-    public static boolean DEBUG_LOCK = Boolean.getBoolean("memLock");
-    public static boolean DEBUG_TXN = Boolean.getBoolean("memTxn");
-    public static boolean DEBUG_TREEADMIN = Boolean.getBoolean("memTreeAdmin");
-    public static boolean DEBUG_TREE = Boolean.getBoolean("memTree");
-    public static boolean DEBUG_DOS = Boolean.getBoolean("memDOS");
+    public final static int LONG_OVERHEAD;
+    public final static int ARRAY_OVERHEAD;
+    public final static int ARRAY_SIZE_INCLUDED;
+    public final static int OBJECT_OVERHEAD;
+    public final static int OBJECT_ARRAY_ITEM_OVERHEAD;
+    public final static int HASHMAP_OVERHEAD;
+    public final static int HASHMAP_ENTRY_OVERHEAD;
 
     /*
      * Object overheads. These are set statically with advance measurements.
@@ -76,292 +58,6 @@ public class MemoryBudget implements EnvConfigObserver {
      * The integer following the // below is the Sizeof argument used to
      * compute the value.
      */
-
-    // 7
-    private final static int LONG_OVERHEAD_32 = 16;
-    private final static int LONG_OVERHEAD_64 = 24;
-    private final static int LONG_OVERHEAD_OOPS = 24;
-
-    // 8
-    private final static int ARRAY_OVERHEAD_32 = 16;
-    private final static int ARRAY_OVERHEAD_64 = 24;
-    private final static int ARRAY_OVERHEAD_OOPS = 16;
-
-    // see byteArraySize
-    private final static int ARRAY_SIZE_INCLUDED_32 = 4;
-    private final static int ARRAY_SIZE_INCLUDED_64 = 0;
-    private final static int ARRAY_SIZE_INCLUDED_OOPS = 0;
-
-    // 2
-    private final static int OBJECT_OVERHEAD_32 = 8;
-    private final static int OBJECT_OVERHEAD_64 = 16;
-    private final static int OBJECT_OVERHEAD_OOPS = 16;
-
-    // (4 - ARRAY_OVERHEAD) / 256
-    // 32b: 4 is 1040
-    // 64b: 4 is 2078
-    // Oops: 4 is 1040
-    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_32 = 4;
-    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_64 = 8;
-    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_OOPS = 4;
-
-    // 20
-    private final static int HASHMAP_OVERHEAD_32 = 120;
-    private final static int HASHMAP_OVERHEAD_64 = 219;
-    private final static int HASHMAP_OVERHEAD_OOPS = 128;
-
-    // 21 - OBJECT_OVERHEAD - HASHMAP_OVERHEAD
-    // 32b: 21 is 152
-    // 64b: 21 is max(280,...,287) on Linux/Solaris 1.5/1.6
-    // Oops: 21 is 176
-    private final static int HASHMAP_ENTRY_OVERHEAD_32 = 24;
-    private final static int HASHMAP_ENTRY_OVERHEAD_64 = 52;
-    private final static int HASHMAP_ENTRY_OVERHEAD_OOPS = 32;
-
-    // 22
-    private final static int HASHSET_OVERHEAD_32 = 136;
-    private final static int HASHSET_OVERHEAD_64 = 240;
-    private final static int HASHSET_OVERHEAD_OOPS = 144;
-
-    // 23 - OBJECT_OVERHEAD - HASHSET_OVERHEAD
-    // 32b: 23 is 168
-    // 64b: 23 is max(304,...,311) on Linux/Solaris
-    // Oops: 23 is 192
-    private final static int HASHSET_ENTRY_OVERHEAD_32 = 24;
-    private final static int HASHSET_ENTRY_OVERHEAD_64 = 55;
-    private final static int HASHSET_ENTRY_OVERHEAD_OOPS = 32;
-
-    // HASHMAP_OVERHEAD * 2
-    private final static int TWOHASHMAPS_OVERHEAD_32 = 240;
-    private final static int TWOHASHMAPS_OVERHEAD_64 = 438;
-    private final static int TWOHASHMAPS_OVERHEAD_OOPS = 256;
-
-    // 34
-    private final static int TREEMAP_OVERHEAD_32 = 48;
-    private final static int TREEMAP_OVERHEAD_64 = 80;
-    private final static int TREEMAP_OVERHEAD_OOPS = 48;
-
-    // 35 - OBJECT_OVERHEAD - TREEMAP_OVERHEAD
-    // 32b: 35 is 88
-    // 64b: 35 is 160
-    // Oops: 35 is 104
-    private final static int TREEMAP_ENTRY_OVERHEAD_32 = 32;
-    private final static int TREEMAP_ENTRY_OVERHEAD_64 = 64;
-    private final static int TREEMAP_ENTRY_OVERHEAD_OOPS = 40;
-
-    // 36
-    // 32b JDK 1.7 is 928
-    private final static int MAPLN_OVERHEAD_32 = 920;
-    private final static int MAPLN_OVERHEAD_64 = 1624;
-    private final static int MAPLN_OVERHEAD_OOPS = 1016;
-
-    // 9
-    private final static int LN_OVERHEAD_32 = 16;
-    private final static int LN_OVERHEAD_64 = 32;
-    private final static int LN_OVERHEAD_OOPS = 24;
-    
-    // 17 minus 9
-    // 32b: 17 is 24
-    // 64b: 17 is 40
-    // Oops: 17 is 32
-    private final static int VERSIONEDLN_OVERHEAD_32 = 8;
-    private final static int VERSIONEDLN_OVERHEAD_64 = 8;
-    private final static int VERSIONEDLN_OVERHEAD_OOPS = 8;
-
-    // No longer updated, as dups are no longer used except during conversion.
-    private final static int DUPCOUNTLN_OVERHEAD_32 = 32;
-    private final static int DUPCOUNTLN_OVERHEAD_64 = 48;
-    private final static int DUPCOUNTLN_OVERHEAD_OOPS = 40;
-
-    // 12
-    private final static int BIN_FIXED_OVERHEAD_32 = 223;
-    private final static int BIN_FIXED_OVERHEAD_64 = 352;
-    private final static int BIN_FIXED_OVERHEAD_OOPS = 232;
-
-    // 18
-    private final static int BINDELTA_OVERHEAD_32 = 48;
-    private final static int BINDELTA_OVERHEAD_64 = 72;
-    private final static int BINDELTA_OVERHEAD_OOPS = 64;
-
-    // 19
-    private final static int DELTAINFO_OVERHEAD_32 = 24;
-    private final static int DELTAINFO_OVERHEAD_64 = 40;
-    private final static int DELTAINFO_OVERHEAD_OOPS = 32;
-
-    // 47
-    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_32 = 72;
-    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_64 = 120;
-    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_OOPS = 80;
-
-    // 48
-    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_32 = 16;
-    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_64 = 24;
-    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_OOPS = 16;
-
-    // 49
-    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_32 = 16;
-    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_64 = 32;
-    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_OOPS = 24;
-
-    // 50
-    private final static int DEFAULT_KEYVALS_OVERHEAD_32 = 16;
-    private final static int DEFAULT_KEYVALS_OVERHEAD_64 = 24;
-    private final static int DEFAULT_KEYVALS_OVERHEAD_OOPS = 16;
-
-    // 52
-    private final static int DEFAULT_LONG_REP_OVERHEAD_32 = 16;
-    private final static int DEFAULT_LONG_REP_OVERHEAD_64 = 32;
-    private final static int DEFAULT_LONG_REP_OVERHEAD_OOPS = 24;
-
-    // 59
-    private final static int SPARSE_LONG_REP_OVERHEAD_32 = 24;
-    private final static int SPARSE_LONG_REP_OVERHEAD_64 = 40;
-    private final static int SPARSE_LONG_REP_OVERHEAD_OOPS = 24;
-
-    // 54
-    private final static int DIN_FIXED_OVERHEAD_32 = 120;
-    private final static int DIN_FIXED_OVERHEAD_64 = 176;
-    private final static int DIN_FIXED_OVERHEAD_OOPS = 120;
-
-    // 53
-    private final static int DBIN_FIXED_OVERHEAD_32 = 152;
-    private final static int DBIN_FIXED_OVERHEAD_64 = 232;
-    private final static int DBIN_FIXED_OVERHEAD_OOPS = 168;
-
-    // 13
-    private final static int IN_FIXED_OVERHEAD_32 = 248;
-    private final static int IN_FIXED_OVERHEAD_64 = 392;
-    private final static int IN_FIXED_OVERHEAD_OOPS = 256;
-
-    // 6
-    private final static int KEY_OVERHEAD_32 = 16;
-    private final static int KEY_OVERHEAD_64 = 24;
-    private final static int KEY_OVERHEAD_OOPS = 16;
-
-    // 24
-    private final static int LOCKIMPL_OVERHEAD_32 = 24;
-    private final static int LOCKIMPL_OVERHEAD_64 = 48;
-    private final static int LOCKIMPL_OVERHEAD_OOPS = 32;
-
-    // 42
-    private final static int THINLOCKIMPL_OVERHEAD_32 = 16;
-    private final static int THINLOCKIMPL_OVERHEAD_64 = 32;
-    private final static int THINLOCKIMPL_OVERHEAD_OOPS = 24;
-
-    // 25
-    private final static int LOCKINFO_OVERHEAD_32 = 16;
-    private final static int LOCKINFO_OVERHEAD_64 = 32;
-    private final static int LOCKINFO_OVERHEAD_OOPS = 24;
-
-    // 37
-    private final static int WRITE_LOCKINFO_OVERHEAD_32 = 48;
-    private final static int WRITE_LOCKINFO_OVERHEAD_64 = 72;
-    private final static int WRITE_LOCKINFO_OVERHEAD_OOPS = 56;
-
-    /*
-     * Txn memory is the size for the Txn + a hashmap entry
-     * overhead for being part of the transaction table.
-     */
-    // 15
-    private final static int TXN_OVERHEAD_32 = 224;
-    private final static int TXN_OVERHEAD_64 = 361;
-    private final static int TXN_OVERHEAD_OOPS = 240;
-
-    // 26
-    private final static int CHECKPOINT_REFERENCE_SIZE_32 = 40 +
-        HASHSET_ENTRY_OVERHEAD_32;
-    private final static int CHECKPOINT_REFERENCE_SIZE_64 = 56 +
-        HASHSET_ENTRY_OVERHEAD_64;
-    private final static int CHECKPOINT_REFERENCE_SIZE_OOPS = 48 +
-        HASHSET_ENTRY_OVERHEAD_OOPS;
-
-    /* The per-log-file bytes used in UtilizationProfile. */
-    // 29 / 10.0 (That is the number 10, not the Sizeof type 10)
-    // 32b: 29 is 1088
-    // 64b: 29 is 1600
-    // Oops: 29 is 1248
-    private final static int UTILIZATION_PROFILE_ENTRY_32 = 109;
-    private final static int UTILIZATION_PROFILE_ENTRY_64 = 160;
-    private final static int UTILIZATION_PROFILE_ENTRY_OOPS = 125;
-
-    // 38
-    private final static int DBFILESUMMARY_OVERHEAD_32 = 40;
-    private final static int DBFILESUMMARY_OVERHEAD_64 = 48;
-    private final static int DBFILESUMMARY_OVERHEAD_OOPS = 48;
-
-    /* Tracked File Summary overheads. */
-    // 31
-    private final static int TFS_LIST_INITIAL_OVERHEAD_32 = 464;
-    private final static int TFS_LIST_INITIAL_OVERHEAD_64 = 504;
-    private final static int TFS_LIST_INITIAL_OVERHEAD_OOPS = 464;
-
-    // 30
-    // 64b: 30 is max(464,464,464,465) on Linux/Solaris on 1.5/1.6
-    private final static int TFS_LIST_SEGMENT_OVERHEAD_32 = 440;
-    private final static int TFS_LIST_SEGMENT_OVERHEAD_64 = 465;
-    private final static int TFS_LIST_SEGMENT_OVERHEAD_OOPS = 440;
-
-    // 33
-    private final static int LN_INFO_OVERHEAD_32 = 32;
-    private final static int LN_INFO_OVERHEAD_64 = 48;
-    private final static int LN_INFO_OVERHEAD_OOPS = 30;
-
-    // 43
-    private final static int FILESUMMARYLN_OVERHEAD_32 = 112;
-    private final static int FILESUMMARYLN_OVERHEAD_64 = 168;
-    private final static int FILESUMMARYLN_OVERHEAD_OOPS = 128;
-
-    // 51
-    private final static int INENTRY_OVERHEAD_32 = 16;
-    private final static int INENTRY_OVERHEAD_64 = 32;
-    private final static int INENTRY_OVERHEAD_OOPS= 24;
-
-    // 46
-    private final static int DELTAINENTRY_OVERHEAD_32 = 32;
-    private final static int DELTAINENTRY_OVERHEAD_64 = 48;
-    private final static int DELTAINENTRY_OVERHEAD_OOPS= 32;
-
-    // 55
-    private final static int DOS_WEAK_BINREF_OVERHEAD_32 = 48;
-    private final static int DOS_WEAK_BINREF_OVERHEAD_64 = 72;
-    private final static int DOS_WEAK_BINREF_OVERHEAD_OOPS= 48;
-
-    // 56
-    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_32 = 32;
-    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_64 = 40;
-    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_OOPS = 40;
-
-    // 57
-    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_32 = 88;
-    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_64 = 128;
-    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_OOPS = 88;
-
-    // 58
-    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_32 = 16;
-    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_64 = 24;
-    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_OOPS= 16;
-
-    // 27 minus zero length Object array
-    private final static int EMPTY_OBJ_ARRAY = objectArraySize(0);
-    private final static int ARRAYLIST_OVERHEAD_32 = 40 - EMPTY_OBJ_ARRAY;
-    private final static int ARRAYLIST_OVERHEAD_64 = 64 - EMPTY_OBJ_ARRAY;
-    private final static int ARRAYLIST_OVERHEAD_OOPS = 40 - EMPTY_OBJ_ARRAY;
-
-    // 44 minus 45
-    // 32b: 44 and 45 are 40 and 16, resp.
-    // 64b: 44 and 45 are 56 and 24, resp.
-    // Oops: 44 and 45 are 40 and 16, resp.
-    private final static int TUPLE_OUTPUT_OVERHEAD_32 = 24;
-    private final static int TUPLE_OUTPUT_OVERHEAD_64 = 32;
-    private final static int TUPLE_OUTPUT_OVERHEAD_OOPS = 24;
-
-    public final static int LONG_OVERHEAD;
-    public final static int ARRAY_OVERHEAD;
-    public final static int ARRAY_SIZE_INCLUDED;
-    public final static int OBJECT_OVERHEAD;
-    public final static int OBJECT_ARRAY_ITEM_OVERHEAD;
-    public final static int HASHMAP_OVERHEAD;
-    public final static int HASHMAP_ENTRY_OVERHEAD;
     public final static int HASHSET_OVERHEAD;
     public final static int HASHSET_ENTRY_OVERHEAD;
     public final static int TWOHASHMAPS_OVERHEAD;
@@ -398,20 +94,269 @@ public class MemoryBudget implements EnvConfigObserver {
     public final static int FILESUMMARYLN_OVERHEAD;
     public final static int INENTRY_OVERHEAD;
     public final static int DELTAINENTRY_OVERHEAD;
-
     public final static int DOS_WEAK_BINREF_OVERHEAD;
     public final static int DOS_OFFHEAP_BINREF_OVERHEAD;
     public final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD;
     public final static int DOS_DEFERRED_DELTAREF_OVERHEAD;
-
     public final static int ARRAYLIST_OVERHEAD;
     public final static int TUPLE_OUTPUT_OVERHEAD;
-
     /* Primitive long array item size is the same on all platforms. */
     public final static int PRIMITIVE_LONG_ARRAY_ITEM_OVERHEAD = 8;
-
+    /* public for unit tests. */
+    public final static long MIN_MAX_MEMORY_SIZE = 96 * 1024;
+    public final static String MIN_MAX_MEMORY_SIZE_STRING =
+            Long.toString(MIN_MAX_MEMORY_SIZE);
+    // 7
+    private final static int LONG_OVERHEAD_32 = 16;
+    private final static int LONG_OVERHEAD_64 = 24;
+    private final static int LONG_OVERHEAD_OOPS = 24;
+    // 8
+    private final static int ARRAY_OVERHEAD_32 = 16;
+    private final static int ARRAY_OVERHEAD_64 = 24;
+    private final static int ARRAY_OVERHEAD_OOPS = 16;
+    // see byteArraySize
+    private final static int ARRAY_SIZE_INCLUDED_32 = 4;
+    private final static int ARRAY_SIZE_INCLUDED_64 = 0;
+    private final static int ARRAY_SIZE_INCLUDED_OOPS = 0;
+    // 2
+    private final static int OBJECT_OVERHEAD_32 = 8;
+    private final static int OBJECT_OVERHEAD_64 = 16;
+    private final static int OBJECT_OVERHEAD_OOPS = 16;
+    // (4 - ARRAY_OVERHEAD) / 256
+    // 32b: 4 is 1040
+    // 64b: 4 is 2078
+    // Oops: 4 is 1040
+    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_32 = 4;
+    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_64 = 8;
+    private final static int OBJECT_ARRAY_ITEM_OVERHEAD_OOPS = 4;
+    // 20
+    private final static int HASHMAP_OVERHEAD_32 = 120;
+    private final static int HASHMAP_OVERHEAD_64 = 219;
+    private final static int HASHMAP_OVERHEAD_OOPS = 128;
+    // 21 - OBJECT_OVERHEAD - HASHMAP_OVERHEAD
+    // 32b: 21 is 152
+    // 64b: 21 is max(280,...,287) on Linux/Solaris 1.5/1.6
+    // Oops: 21 is 176
+    private final static int HASHMAP_ENTRY_OVERHEAD_32 = 24;
+    private final static int HASHMAP_ENTRY_OVERHEAD_64 = 52;
+    private final static int HASHMAP_ENTRY_OVERHEAD_OOPS = 32;
+    // 22
+    private final static int HASHSET_OVERHEAD_32 = 136;
+    private final static int HASHSET_OVERHEAD_64 = 240;
+    private final static int HASHSET_OVERHEAD_OOPS = 144;
+    // 23 - OBJECT_OVERHEAD - HASHSET_OVERHEAD
+    // 32b: 23 is 168
+    // 64b: 23 is max(304,...,311) on Linux/Solaris
+    // Oops: 23 is 192
+    private final static int HASHSET_ENTRY_OVERHEAD_32 = 24;
+    private final static int HASHSET_ENTRY_OVERHEAD_64 = 55;
+    private final static int HASHSET_ENTRY_OVERHEAD_OOPS = 32;
+    // HASHMAP_OVERHEAD * 2
+    private final static int TWOHASHMAPS_OVERHEAD_32 = 240;
+    private final static int TWOHASHMAPS_OVERHEAD_64 = 438;
+    private final static int TWOHASHMAPS_OVERHEAD_OOPS = 256;
+    // 34
+    private final static int TREEMAP_OVERHEAD_32 = 48;
+    private final static int TREEMAP_OVERHEAD_64 = 80;
+    private final static int TREEMAP_OVERHEAD_OOPS = 48;
+    // 35 - OBJECT_OVERHEAD - TREEMAP_OVERHEAD
+    // 32b: 35 is 88
+    // 64b: 35 is 160
+    // Oops: 35 is 104
+    private final static int TREEMAP_ENTRY_OVERHEAD_32 = 32;
+    private final static int TREEMAP_ENTRY_OVERHEAD_64 = 64;
+    private final static int TREEMAP_ENTRY_OVERHEAD_OOPS = 40;
+    // 36
+    // 32b JDK 1.7 is 928
+    private final static int MAPLN_OVERHEAD_32 = 920;
+    private final static int MAPLN_OVERHEAD_64 = 1624;
+    private final static int MAPLN_OVERHEAD_OOPS = 1016;
+    // 9
+    private final static int LN_OVERHEAD_32 = 16;
+    private final static int LN_OVERHEAD_64 = 32;
+    private final static int LN_OVERHEAD_OOPS = 24;
+    // 17 minus 9
+    // 32b: 17 is 24
+    // 64b: 17 is 40
+    // Oops: 17 is 32
+    private final static int VERSIONEDLN_OVERHEAD_32 = 8;
+    private final static int VERSIONEDLN_OVERHEAD_64 = 8;
+    private final static int VERSIONEDLN_OVERHEAD_OOPS = 8;
+    // No longer updated, as dups are no longer used except during conversion.
+    private final static int DUPCOUNTLN_OVERHEAD_32 = 32;
+    private final static int DUPCOUNTLN_OVERHEAD_64 = 48;
+    private final static int DUPCOUNTLN_OVERHEAD_OOPS = 40;
+    // 12
+    private final static int BIN_FIXED_OVERHEAD_32 = 223;
+    private final static int BIN_FIXED_OVERHEAD_64 = 352;
+    private final static int BIN_FIXED_OVERHEAD_OOPS = 232;
+    // 18
+    private final static int BINDELTA_OVERHEAD_32 = 48;
+    private final static int BINDELTA_OVERHEAD_64 = 72;
+    private final static int BINDELTA_OVERHEAD_OOPS = 64;
+    // 19
+    private final static int DELTAINFO_OVERHEAD_32 = 24;
+    private final static int DELTAINFO_OVERHEAD_64 = 40;
+    private final static int DELTAINFO_OVERHEAD_OOPS = 32;
+    // 47
+    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_32 = 72;
+    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_64 = 120;
+    private final static int SPARSE_TARGET_ENTRY_OVERHEAD_OOPS = 80;
+    // 48
+    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_32 = 16;
+    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_64 = 24;
+    private final static int DEFAULT_TARGET_ENTRY_OVERHEAD_OOPS = 16;
+    // 49
+    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_32 = 16;
+    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_64 = 32;
+    private final static int MAX_KEY_SIZE_KEYVALS_OVERHEAD_OOPS = 24;
+    // 50
+    private final static int DEFAULT_KEYVALS_OVERHEAD_32 = 16;
+    private final static int DEFAULT_KEYVALS_OVERHEAD_64 = 24;
+    private final static int DEFAULT_KEYVALS_OVERHEAD_OOPS = 16;
+    // 52
+    private final static int DEFAULT_LONG_REP_OVERHEAD_32 = 16;
+    private final static int DEFAULT_LONG_REP_OVERHEAD_64 = 32;
+    private final static int DEFAULT_LONG_REP_OVERHEAD_OOPS = 24;
+    // 59
+    private final static int SPARSE_LONG_REP_OVERHEAD_32 = 24;
+    private final static int SPARSE_LONG_REP_OVERHEAD_64 = 40;
+    private final static int SPARSE_LONG_REP_OVERHEAD_OOPS = 24;
+    // 54
+    private final static int DIN_FIXED_OVERHEAD_32 = 120;
+    private final static int DIN_FIXED_OVERHEAD_64 = 176;
+    private final static int DIN_FIXED_OVERHEAD_OOPS = 120;
+    // 53
+    private final static int DBIN_FIXED_OVERHEAD_32 = 152;
+    private final static int DBIN_FIXED_OVERHEAD_64 = 232;
+    private final static int DBIN_FIXED_OVERHEAD_OOPS = 168;
+    // 13
+    private final static int IN_FIXED_OVERHEAD_32 = 248;
+    private final static int IN_FIXED_OVERHEAD_64 = 392;
+    private final static int IN_FIXED_OVERHEAD_OOPS = 256;
+    // 6
+    private final static int KEY_OVERHEAD_32 = 16;
+    private final static int KEY_OVERHEAD_64 = 24;
+    private final static int KEY_OVERHEAD_OOPS = 16;
+    // 24
+    private final static int LOCKIMPL_OVERHEAD_32 = 24;
+    private final static int LOCKIMPL_OVERHEAD_64 = 48;
+    private final static int LOCKIMPL_OVERHEAD_OOPS = 32;
+    // 42
+    private final static int THINLOCKIMPL_OVERHEAD_32 = 16;
+    private final static int THINLOCKIMPL_OVERHEAD_64 = 32;
+    private final static int THINLOCKIMPL_OVERHEAD_OOPS = 24;
+    // 25
+    private final static int LOCKINFO_OVERHEAD_32 = 16;
+    private final static int LOCKINFO_OVERHEAD_64 = 32;
+    private final static int LOCKINFO_OVERHEAD_OOPS = 24;
+    // 37
+    private final static int WRITE_LOCKINFO_OVERHEAD_32 = 48;
+    private final static int WRITE_LOCKINFO_OVERHEAD_64 = 72;
+    private final static int WRITE_LOCKINFO_OVERHEAD_OOPS = 56;
+    /*
+     * Txn memory is the size for the Txn + a hashmap entry
+     * overhead for being part of the transaction table.
+     */
+    // 15
+    private final static int TXN_OVERHEAD_32 = 224;
+    private final static int TXN_OVERHEAD_64 = 361;
+    private final static int TXN_OVERHEAD_OOPS = 240;
+    // 26
+    private final static int CHECKPOINT_REFERENCE_SIZE_32 = 40 +
+            HASHSET_ENTRY_OVERHEAD_32;
+    private final static int CHECKPOINT_REFERENCE_SIZE_64 = 56 +
+            HASHSET_ENTRY_OVERHEAD_64;
+    private final static int CHECKPOINT_REFERENCE_SIZE_OOPS = 48 +
+            HASHSET_ENTRY_OVERHEAD_OOPS;
+    /* The per-log-file bytes used in UtilizationProfile. */
+    // 29 / 10.0 (That is the number 10, not the Sizeof type 10)
+    // 32b: 29 is 1088
+    // 64b: 29 is 1600
+    // Oops: 29 is 1248
+    private final static int UTILIZATION_PROFILE_ENTRY_32 = 109;
+    private final static int UTILIZATION_PROFILE_ENTRY_64 = 160;
+    private final static int UTILIZATION_PROFILE_ENTRY_OOPS = 125;
+    // 38
+    private final static int DBFILESUMMARY_OVERHEAD_32 = 40;
+    private final static int DBFILESUMMARY_OVERHEAD_64 = 48;
+    private final static int DBFILESUMMARY_OVERHEAD_OOPS = 48;
+    /* Tracked File Summary overheads. */
+    // 31
+    private final static int TFS_LIST_INITIAL_OVERHEAD_32 = 464;
+    private final static int TFS_LIST_INITIAL_OVERHEAD_64 = 504;
+    private final static int TFS_LIST_INITIAL_OVERHEAD_OOPS = 464;
+    // 30
+    // 64b: 30 is max(464,464,464,465) on Linux/Solaris on 1.5/1.6
+    private final static int TFS_LIST_SEGMENT_OVERHEAD_32 = 440;
+    private final static int TFS_LIST_SEGMENT_OVERHEAD_64 = 465;
+    private final static int TFS_LIST_SEGMENT_OVERHEAD_OOPS = 440;
+    // 33
+    private final static int LN_INFO_OVERHEAD_32 = 32;
+    private final static int LN_INFO_OVERHEAD_64 = 48;
+    private final static int LN_INFO_OVERHEAD_OOPS = 30;
+    // 43
+    private final static int FILESUMMARYLN_OVERHEAD_32 = 112;
+    private final static int FILESUMMARYLN_OVERHEAD_64 = 168;
+    private final static int FILESUMMARYLN_OVERHEAD_OOPS = 128;
+    // 51
+    private final static int INENTRY_OVERHEAD_32 = 16;
+    private final static int INENTRY_OVERHEAD_64 = 32;
+    private final static int INENTRY_OVERHEAD_OOPS = 24;
+    // 46
+    private final static int DELTAINENTRY_OVERHEAD_32 = 32;
+    private final static int DELTAINENTRY_OVERHEAD_64 = 48;
+    private final static int DELTAINENTRY_OVERHEAD_OOPS = 32;
+    // 55
+    private final static int DOS_WEAK_BINREF_OVERHEAD_32 = 48;
+    private final static int DOS_WEAK_BINREF_OVERHEAD_64 = 72;
+    private final static int DOS_WEAK_BINREF_OVERHEAD_OOPS = 48;
+    // 56
+    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_32 = 32;
+    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_64 = 40;
+    private final static int DOS_OFFHEAP_BINREF_OVERHEAD_OOPS = 40;
+    // 57
+    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_32 = 88;
+    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_64 = 128;
+    private final static int DOS_DEFERRED_LSN_BATCH_OVERHEAD_OOPS = 88;
+    // 58
+    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_32 = 16;
+    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_64 = 24;
+    private final static int DOS_DEFERRED_DELTAREF_OVERHEAD_OOPS = 16;
+    // 27 minus zero length Object array
+    private final static int EMPTY_OBJ_ARRAY = objectArraySize(0);
+    private final static int ARRAYLIST_OVERHEAD_32 = 40 - EMPTY_OBJ_ARRAY;
+    private final static int ARRAYLIST_OVERHEAD_64 = 64 - EMPTY_OBJ_ARRAY;
+    private final static int ARRAYLIST_OVERHEAD_OOPS = 40 - EMPTY_OBJ_ARRAY;
+    // 44 minus 45
+    // 32b: 44 and 45 are 40 and 16, resp.
+    // 64b: 44 and 45 are 56 and 24, resp.
+    // Oops: 44 and 45 are 40 and 16, resp.
+    private final static int TUPLE_OUTPUT_OVERHEAD_32 = 24;
+    private final static int TUPLE_OUTPUT_OVERHEAD_64 = 32;
+    private final static int TUPLE_OUTPUT_OVERHEAD_OOPS = 24;
     private final static String JVM_ARCH_PROPERTY = "sun.arch.data.model";
     private final static String FORCE_JVM_ARCH = "je.forceJVMArch";
+    /* This value prevents cache churn for apps with a high write rate. */
+    @SuppressWarnings("unused")
+    private final static int DEFAULT_MIN_BTREE_CACHE_SIZE = 500 * 1024;
+    private final static long N_64MB = (1 << 26);
+    /*
+     * CLEANUP_DONE can be set to false for unit test debugging
+     * that is still in progress. When we do the final regression,
+     * this should be removed to be assured that it is never false.
+     */
+    public static boolean CLEANUP_DONE = false;
+    /*
+     * These DEBUG variables are public so unit tests can easily turn them
+     * on and off for different sections of code.
+     */
+    public static boolean DEBUG_ADMIN = Boolean.getBoolean("memAdmin");
+    public static boolean DEBUG_LOCK = Boolean.getBoolean("memLock");
+    public static boolean DEBUG_TXN = Boolean.getBoolean("memTxn");
+    public static boolean DEBUG_TREEADMIN = Boolean.getBoolean("memTreeAdmin");
+    public static boolean DEBUG_TREE = Boolean.getBoolean("memTree");
+    public static boolean DEBUG_DOS = Boolean.getBoolean("memDOS");
     private static boolean COMPRESSED_OOPS_REQUESTED = false;
     private static boolean COMPRESSED_OOPS_KNOWN = false;
     private static boolean COMPRESSED_OOPS_KNOWN_ON = false;
@@ -421,39 +366,40 @@ public class MemoryBudget implements EnvConfigObserver {
         String overrideArch = System.getProperty(FORCE_JVM_ARCH);
 
         try {
-            if (overrideArch == null) {
+            if(overrideArch == null) {
                 String arch = System.getProperty(JVM_ARCH_PROPERTY);
-                if (arch != null) {
+                if(arch != null) {
                     is64 = Integer.parseInt(arch) == 64;
                 }
-            } else {
+            }
+            else {
                 is64 = Integer.parseInt(overrideArch) == 64;
             }
-        } catch (NumberFormatException NFE) {
+        } catch(NumberFormatException NFE) {
             NFE.printStackTrace(System.err);
         }
 
         final Boolean checkCompressedOops =
-            CompressedOopsDetector.isEnabled();
-        if (checkCompressedOops != null) {
+                CompressedOopsDetector.isEnabled();
+        if(checkCompressedOops != null) {
             COMPRESSED_OOPS_KNOWN = true;
             COMPRESSED_OOPS_KNOWN_ON = checkCompressedOops;
         }
 
         List<String> args =
-            ManagementFactory.getRuntimeMXBean().getInputArguments();
-        for (String arg : args) {
-            if ("-XX:+UseCompressedOops".equals(arg)) {
+                ManagementFactory.getRuntimeMXBean().getInputArguments();
+        for(String arg : args) {
+            if("-XX:+UseCompressedOops".equals(arg)) {
                 COMPRESSED_OOPS_REQUESTED = true;
                 break;
             }
         }
 
         final boolean useCompressedOops = COMPRESSED_OOPS_KNOWN ?
-            COMPRESSED_OOPS_KNOWN_ON :
-            COMPRESSED_OOPS_REQUESTED;
+                COMPRESSED_OOPS_KNOWN_ON :
+                COMPRESSED_OOPS_REQUESTED;
 
-        if (useCompressedOops) {
+        if(useCompressedOops) {
             LONG_OVERHEAD = LONG_OVERHEAD_OOPS;
             ARRAY_OVERHEAD = ARRAY_OVERHEAD_OOPS;
             ARRAY_SIZE_INCLUDED = ARRAY_SIZE_INCLUDED_OOPS;
@@ -468,12 +414,12 @@ public class MemoryBudget implements EnvConfigObserver {
             BINDELTA_OVERHEAD = BINDELTA_OVERHEAD_OOPS;
             DELTAINFO_OVERHEAD = DELTAINFO_OVERHEAD_OOPS;
             SPARSE_TARGET_ENTRY_OVERHEAD =
-                SPARSE_TARGET_ENTRY_OVERHEAD_OOPS;
+                    SPARSE_TARGET_ENTRY_OVERHEAD_OOPS;
             DEFAULT_TARGET_ENTRY_OVERHEAD =
-                DEFAULT_TARGET_ENTRY_OVERHEAD_OOPS;
+                    DEFAULT_TARGET_ENTRY_OVERHEAD_OOPS;
             DEFAULT_KEYVALS_OVERHEAD = DEFAULT_KEYVALS_OVERHEAD_OOPS;
             MAX_KEY_SIZE_KEYVALS_OVERHEAD =
-                MAX_KEY_SIZE_KEYVALS_OVERHEAD_OOPS;
+                    MAX_KEY_SIZE_KEYVALS_OVERHEAD_OOPS;
             DEFAULT_LONG_REP_OVERHEAD = DEFAULT_LONG_REP_OVERHEAD_OOPS;
             SPARSE_LONG_REP_OVERHEAD = SPARSE_LONG_REP_OVERHEAD_OOPS;
             DIN_FIXED_OVERHEAD = DIN_FIXED_OVERHEAD_OOPS;
@@ -505,10 +451,11 @@ public class MemoryBudget implements EnvConfigObserver {
             DOS_WEAK_BINREF_OVERHEAD = DOS_WEAK_BINREF_OVERHEAD_OOPS;
             DOS_OFFHEAP_BINREF_OVERHEAD = DOS_OFFHEAP_BINREF_OVERHEAD_OOPS;
             DOS_DEFERRED_LSN_BATCH_OVERHEAD =
-                DOS_DEFERRED_LSN_BATCH_OVERHEAD_OOPS;
+                    DOS_DEFERRED_LSN_BATCH_OVERHEAD_OOPS;
             DOS_DEFERRED_DELTAREF_OVERHEAD =
-                DOS_DEFERRED_DELTAREF_OVERHEAD_OOPS;
-        } else if (is64) {
+                    DOS_DEFERRED_DELTAREF_OVERHEAD_OOPS;
+        }
+        else if(is64) {
             LONG_OVERHEAD = LONG_OVERHEAD_64;
             ARRAY_OVERHEAD = ARRAY_OVERHEAD_64;
             ARRAY_SIZE_INCLUDED = ARRAY_SIZE_INCLUDED_64;
@@ -529,10 +476,10 @@ public class MemoryBudget implements EnvConfigObserver {
             DELTAINFO_OVERHEAD = DELTAINFO_OVERHEAD_64;
             SPARSE_TARGET_ENTRY_OVERHEAD = SPARSE_TARGET_ENTRY_OVERHEAD_64;
             DEFAULT_TARGET_ENTRY_OVERHEAD =
-                DEFAULT_TARGET_ENTRY_OVERHEAD_64;
+                    DEFAULT_TARGET_ENTRY_OVERHEAD_64;
             DEFAULT_KEYVALS_OVERHEAD = DEFAULT_KEYVALS_OVERHEAD_64;
             MAX_KEY_SIZE_KEYVALS_OVERHEAD =
-                MAX_KEY_SIZE_KEYVALS_OVERHEAD_64;
+                    MAX_KEY_SIZE_KEYVALS_OVERHEAD_64;
             DEFAULT_LONG_REP_OVERHEAD = DEFAULT_LONG_REP_OVERHEAD_64;
             SPARSE_LONG_REP_OVERHEAD = SPARSE_LONG_REP_OVERHEAD_64;
             TREEMAP_ENTRY_OVERHEAD = TREEMAP_ENTRY_OVERHEAD_64;
@@ -559,9 +506,10 @@ public class MemoryBudget implements EnvConfigObserver {
             DOS_WEAK_BINREF_OVERHEAD = DOS_WEAK_BINREF_OVERHEAD_64;
             DOS_OFFHEAP_BINREF_OVERHEAD = DOS_OFFHEAP_BINREF_OVERHEAD_64;
             DOS_DEFERRED_LSN_BATCH_OVERHEAD =
-                DOS_DEFERRED_LSN_BATCH_OVERHEAD_64;
+                    DOS_DEFERRED_LSN_BATCH_OVERHEAD_64;
             DOS_DEFERRED_DELTAREF_OVERHEAD = DOS_DEFERRED_DELTAREF_OVERHEAD_64;
-        } else {
+        }
+        else {
             LONG_OVERHEAD = LONG_OVERHEAD_32;
             ARRAY_OVERHEAD = ARRAY_OVERHEAD_32;
             ARRAY_SIZE_INCLUDED = ARRAY_SIZE_INCLUDED_32;
@@ -583,10 +531,10 @@ public class MemoryBudget implements EnvConfigObserver {
             DELTAINFO_OVERHEAD = DELTAINFO_OVERHEAD_32;
             SPARSE_TARGET_ENTRY_OVERHEAD = SPARSE_TARGET_ENTRY_OVERHEAD_32;
             DEFAULT_TARGET_ENTRY_OVERHEAD =
-                DEFAULT_TARGET_ENTRY_OVERHEAD_32;
+                    DEFAULT_TARGET_ENTRY_OVERHEAD_32;
             DEFAULT_KEYVALS_OVERHEAD = DEFAULT_KEYVALS_OVERHEAD_32;
             MAX_KEY_SIZE_KEYVALS_OVERHEAD =
-                MAX_KEY_SIZE_KEYVALS_OVERHEAD_32;
+                    MAX_KEY_SIZE_KEYVALS_OVERHEAD_32;
             DEFAULT_LONG_REP_OVERHEAD = DEFAULT_LONG_REP_OVERHEAD_32;
             SPARSE_LONG_REP_OVERHEAD = SPARSE_LONG_REP_OVERHEAD_32;
             DIN_FIXED_OVERHEAD = DIN_FIXED_OVERHEAD_32;
@@ -612,21 +560,10 @@ public class MemoryBudget implements EnvConfigObserver {
             DOS_WEAK_BINREF_OVERHEAD = DOS_WEAK_BINREF_OVERHEAD_32;
             DOS_OFFHEAP_BINREF_OVERHEAD = DOS_OFFHEAP_BINREF_OVERHEAD_32;
             DOS_DEFERRED_LSN_BATCH_OVERHEAD =
-                DOS_DEFERRED_LSN_BATCH_OVERHEAD_32;
+                    DOS_DEFERRED_LSN_BATCH_OVERHEAD_32;
             DOS_DEFERRED_DELTAREF_OVERHEAD = DOS_DEFERRED_DELTAREF_OVERHEAD_32;
         }
     }
-
-    /* public for unit tests. */
-    public final static long MIN_MAX_MEMORY_SIZE = 96 * 1024;
-    public final static String MIN_MAX_MEMORY_SIZE_STRING =
-        Long.toString(MIN_MAX_MEMORY_SIZE);
-
-    /* This value prevents cache churn for apps with a high write rate. */
-    @SuppressWarnings("unused")
-    private final static int DEFAULT_MIN_BTREE_CACHE_SIZE = 500 * 1024;
-
-    private final static long N_64MB = (1 << 26);
 
     /*
      * Note that this class contains long fields that are accessed by multiple
@@ -678,22 +615,18 @@ public class MemoryBudget implements EnvConfigObserver {
      * to this process.
      */
     private final Totals totals;
-
+    private final EnvironmentImpl envImpl;
     /* Memory available to log buffers. */
     private long logBufferBudget;
-
     /* Maximum allowed use of the admin budget by the UtilizationTracker. */
     private long trackerBudget;
-
     /* Mininum to prevent cache churn. */
     private long minTreeMemoryUsage;
-
-    private final EnvironmentImpl envImpl;
 
     MemoryBudget(EnvironmentImpl envImpl,
                  EnvironmentImpl sharedCacheEnv,
                  DbConfigManager configManager)
-        throws DatabaseException {
+            throws DatabaseException {
 
         this.envImpl = envImpl;
 
@@ -702,16 +635,18 @@ public class MemoryBudget implements EnvConfigObserver {
 
         /* Perform first time budget initialization. */
         long newMaxMemory;
-        if (envImpl.getSharedCache()) {
-            if (sharedCacheEnv != null) {
+        if(envImpl.getSharedCache()) {
+            if(sharedCacheEnv != null) {
                 totals = sharedCacheEnv.getMemoryBudget().totals;
                 /* For a new environment, do not override existing budget. */
                 newMaxMemory = -1;
-            } else {
+            }
+            else {
                 totals = new SharedTotals();
                 newMaxMemory = calcMaxMemory(configManager);
             }
-        } else {
+        }
+        else {
             totals = new PrivateTotals(this);
             newMaxMemory = calcMaxMemory(configManager);
         }
@@ -720,20 +655,64 @@ public class MemoryBudget implements EnvConfigObserver {
         checkCompressedOops();
     }
 
+    public static int tupleOutputSize(TupleOutput o) {
+        return TUPLE_OUTPUT_OVERHEAD +
+                byteArraySize(o.getBufferBytes().length);
+    }
+
+    /**
+     * Returns the memory size occupied by a byte array of a given length.  All
+     * arrays (regardless of element type) have the same overhead for a zero
+     * length array.  On 32b Java, there are 4 bytes included in that fixed
+     * overhead that can be used for the first N elements -- however many fit
+     * in 4 bytes.  On 64b Java, there is no extra space included.  In all
+     * cases, space is allocated in 8 byte chunks.
+     */
+    public static int byteArraySize(int arrayLen) {
+
+        /*
+         * ARRAY_OVERHEAD accounts for N bytes of data, which is 4 bytes on 32b
+         * Java and 0 bytes on 64b Java.  Data larger than N bytes is allocated
+         * in 8 byte increments.
+         */
+        int size = ARRAY_OVERHEAD;
+        if(arrayLen > ARRAY_SIZE_INCLUDED) {
+            size += ((arrayLen - ARRAY_SIZE_INCLUDED + 7) / 8) * 8;
+        }
+
+        return size;
+    }
+
+    public static int shortArraySize(int arrayLen) {
+        return byteArraySize(arrayLen * 2);
+    }
+
+    public static int intArraySize(int arrayLen) {
+        return byteArraySize(arrayLen * 4);
+    }
+
+    public static int longArraySize(int arrayLen) {
+        return byteArraySize(arrayLen * 8);
+    }
+
+    public static int objectArraySize(int arrayLen) {
+        return byteArraySize(arrayLen * OBJECT_ARRAY_ITEM_OVERHEAD);
+    }
+
     /**
      * Logs a SEVERE message if compressed oops was specified but did not take
      * effect.  Must be called after the environment is initialized so the
      * message makes it to the output file.
      */
     private void checkCompressedOops() {
-        if (COMPRESSED_OOPS_REQUESTED &&
-            COMPRESSED_OOPS_KNOWN &&
-            !COMPRESSED_OOPS_KNOWN_ON) {
+        if(COMPRESSED_OOPS_REQUESTED &&
+                COMPRESSED_OOPS_KNOWN &&
+                !COMPRESSED_OOPS_KNOWN_ON) {
             LoggerUtils.severe(envImpl.getLogger(), envImpl,
-                "-XX:+UseCompressedOops was specified but is not in effect," +
-                " probably because the heap size is too large for this JVM" +
-                " option on this platform.  This is likely to cause an" +
-                " OutOfMemoryError!");
+                    "-XX:+UseCompressedOops was specified but is not in effect," +
+                            " probably because the heap size is too large for this JVM" +
+                            " option on this platform.  This is likely to cause an" +
+                            " OutOfMemoryError!");
         }
     }
 
@@ -742,7 +721,7 @@ public class MemoryBudget implements EnvConfigObserver {
      */
     public void envConfigUpdate(DbConfigManager configManager,
                                 EnvironmentMutableConfig ignore)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Reinitialize the cache budget and the log buffer pool. */
         reset(calcMaxMemory(configManager), false /*newEnv*/, configManager);
@@ -750,7 +729,7 @@ public class MemoryBudget implements EnvConfigObserver {
 
     /**
      * @throws IllegalArgumentException via Environment ctor and
-     * setMutableConfig.
+     *                                  setMutableConfig.
      */
     private long calcMaxMemory(DbConfigManager configManager) {
 
@@ -761,40 +740,41 @@ public class MemoryBudget implements EnvConfigObserver {
          * 2. Otherwise, take je.maxMemoryPercent * JVM max memory.
          */
         long newMaxMemory =
-            configManager.getLong(EnvironmentParams.MAX_MEMORY);
+                configManager.getLong(EnvironmentParams.MAX_MEMORY);
         long jvmMemory = JVMSystemUtils.getRuntimeMaxMemory();
 
-        if (newMaxMemory != 0) {
+        if(newMaxMemory != 0) {
             /* Application specified a cache size number, validate it. */
-            if (jvmMemory < newMaxMemory) {
+            if(jvmMemory < newMaxMemory) {
                 throw new IllegalArgumentException
-                    (EnvironmentParams.MAX_MEMORY.getName() +
-                     " has a value of " + newMaxMemory +
-                     " but the JVM is only configured for " +
-                     jvmMemory +
-                     ". Consider using je.maxMemoryPercent.");
+                        (EnvironmentParams.MAX_MEMORY.getName() +
+                                " has a value of " + newMaxMemory +
+                                " but the JVM is only configured for " +
+                                jvmMemory +
+                                ". Consider using je.maxMemoryPercent.");
             }
-            if (newMaxMemory < MIN_MAX_MEMORY_SIZE) {
+            if(newMaxMemory < MIN_MAX_MEMORY_SIZE) {
                 throw new IllegalArgumentException
-                    (EnvironmentParams.MAX_MEMORY.getName() +
-                     " is " + newMaxMemory +
-                     " which is less than the minimum: " +
-                     MIN_MAX_MEMORY_SIZE);
+                        (EnvironmentParams.MAX_MEMORY.getName() +
+                                " is " + newMaxMemory +
+                                " which is less than the minimum: " +
+                                MIN_MAX_MEMORY_SIZE);
             }
-        } else {
+        }
+        else {
 
             /*
              * When no explicit cache size is specified and the JVM memory size
              * is unknown, assume a default sized (64 MB) heap.  This produces
              * a reasonable cache size when no heap size is known.
              */
-            if (jvmMemory == Long.MAX_VALUE) {
+            if(jvmMemory == Long.MAX_VALUE) {
                 jvmMemory = N_64MB;
             }
 
             /* Use the configured percentage of the JVM memory size. */
             int maxMemoryPercent =
-                configManager.getInt(EnvironmentParams.MAX_MEMORY_PERCENT);
+                    configManager.getInt(EnvironmentParams.MAX_MEMORY_PERCENT);
             newMaxMemory = (maxMemoryPercent * jvmMemory) / 100;
         }
 
@@ -805,25 +785,25 @@ public class MemoryBudget implements EnvConfigObserver {
      * Initialize at construction time and when the cache is resized.
      *
      * @param newMaxMemory is the new total cache budget or is less than 0 if
-     * the total should remain unchanged.
-     *
-     * @param newEnv is true if this is the first time we are resetting the
-     * budget for a new environment.  Note that a new environment has not yet
-     * been added to the set of shared cache environments.
+     *                     the total should remain unchanged.
+     * @param newEnv       is true if this is the first time we are resetting the
+     *                     budget for a new environment.  Note that a new environment has not yet
+     *                     been added to the set of shared cache environments.
      */
     void reset(long newMaxMemory,
                boolean newEnv,
                DbConfigManager configManager)
-        throws DatabaseException {
+            throws DatabaseException {
 
         long oldLogBufferBudget = logBufferBudget;
 
         /*
          * Update the new total cache budget.
          */
-        if (newMaxMemory < 0) {
+        if(newMaxMemory < 0) {
             newMaxMemory = getMaxMemory();
-        } else {
+        }
+        else {
             totals.setMaxMemory(newMaxMemory);
         }
 
@@ -844,13 +824,14 @@ public class MemoryBudget implements EnvConfigObserver {
          * percentage.
          */
         long myCachePortion;
-        if (envImpl.getSharedCache()) {
+        if(envImpl.getSharedCache()) {
             int nEnvs = DbEnvPool.getInstance().getNSharedCacheEnvironments();
-            if (newEnv) {
+            if(newEnv) {
                 nEnvs += 1;
             }
             myCachePortion = newMaxMemory / nEnvs;
-        } else {
+        }
+        else {
             myCachePortion = newMaxMemory;
         }
 
@@ -864,10 +845,11 @@ public class MemoryBudget implements EnvConfigObserver {
          * reduce the log buffer budget again.
          */
         long newLogBufferBudget =
-            configManager.getLong(EnvironmentParams.LOG_MEM_SIZE);
-        if (newLogBufferBudget == 0) {
+                configManager.getLong(EnvironmentParams.LOG_MEM_SIZE);
+        if(newLogBufferBudget == 0) {
             newLogBufferBudget = myCachePortion >> 4;
-        } else if (newLogBufferBudget > myCachePortion / 2) {
+        }
+        else if(newLogBufferBudget > myCachePortion / 2) {
             newLogBufferBudget = myCachePortion / 2;
         }
 
@@ -877,32 +859,33 @@ public class MemoryBudget implements EnvConfigObserver {
          * be a waste.
          */
         int numBuffers =
-            configManager.getInt(EnvironmentParams.NUM_LOG_BUFFERS);
+                configManager.getInt(EnvironmentParams.NUM_LOG_BUFFERS);
         long startingBufferSize = newLogBufferBudget / numBuffers;
         int logBufferSize =
-            configManager.getInt(EnvironmentParams.LOG_BUFFER_MAX_SIZE);
-        if (startingBufferSize > logBufferSize) {
+                configManager.getInt(EnvironmentParams.LOG_BUFFER_MAX_SIZE);
+        if(startingBufferSize > logBufferSize) {
             startingBufferSize = logBufferSize;
             newLogBufferBudget = numBuffers * startingBufferSize;
-        } else if (startingBufferSize <
-                   EnvironmentParams.MIN_LOG_BUFFER_SIZE) {
+        }
+        else if(startingBufferSize <
+                EnvironmentParams.MIN_LOG_BUFFER_SIZE) {
             startingBufferSize = EnvironmentParams.MIN_LOG_BUFFER_SIZE;
             newLogBufferBudget = numBuffers * startingBufferSize;
         }
 
         long newCriticalThreshold =
-            (newMaxMemory *
-             envImpl.getConfigManager().getInt
-                (EnvironmentParams.EVICTOR_CRITICAL_PERCENTAGE))/100;
+                (newMaxMemory *
+                        envImpl.getConfigManager().getInt
+                                (EnvironmentParams.EVICTOR_CRITICAL_PERCENTAGE)) / 100;
 
         long newTrackerBudget =
-            (myCachePortion *
-             envImpl.getConfigManager().getInt
-                (EnvironmentParams.CLEANER_DETAIL_MAX_MEMORY_PERCENTAGE))/100;
+                (myCachePortion *
+                        envImpl.getConfigManager().getInt
+                                (EnvironmentParams.CLEANER_DETAIL_MAX_MEMORY_PERCENTAGE)) / 100;
 
         long newMinTreeMemoryUsage = Math.min
-            (configManager.getLong(EnvironmentParams.MIN_TREE_MEMORY),
-             myCachePortion - newLogBufferBudget);
+                (configManager.getLong(EnvironmentParams.MIN_TREE_MEMORY),
+                        myCachePortion - newLogBufferBudget);
 
         /*
          * If all has gone well, update the budget fields.  Once the log buffer
@@ -922,7 +905,7 @@ public class MemoryBudget implements EnvConfigObserver {
          * initialized (we're updating an existing budget) and the log buffer
          * budget has changed (resetting it is expensive and may cause I/O).
          */
-        if (!newEnv && oldLogBufferBudget != logBufferBudget) {
+        if(!newEnv && oldLogBufferBudget != logBufferBudget) {
             envImpl.getLogManager().resetPool(configManager);
         }
     }
@@ -933,10 +916,10 @@ public class MemoryBudget implements EnvConfigObserver {
      * and txns yet, and the items in the admin category are cleaner items and
      * aren't affected by the recovery splicing process.
      */
-    void initCacheMemoryUsage(long dbTreeAdminMemory)  {
+    void initCacheMemoryUsage(long dbTreeAdminMemory) {
         long totalTree = 0;
         long treeAdmin = 0;
-        for (IN in : envImpl.getInMemoryINs()) {
+        for(IN in : envImpl.getInMemoryINs()) {
             totalTree += in.getBudgetedMemorySize();
             treeAdmin += in.getTreeAdminMemorySize();
         }
@@ -951,10 +934,10 @@ public class MemoryBudget implements EnvConfigObserver {
         long oldSize = treeAdminMemoryUsage.getAndSet(newSize);
         long diff = (newSize - oldSize);
 
-        if (DEBUG_TREEADMIN) {
+        if(DEBUG_TREEADMIN) {
             System.err.println("RESET = " + newSize);
         }
-        if (totals.updateCacheUsage(diff)) {
+        if(totals.updateCacheUsage(diff)) {
             envImpl.alertEvictor();
         }
     }
@@ -966,7 +949,7 @@ public class MemoryBudget implements EnvConfigObserver {
         long oldSize = treeMemoryUsage.getAndSet(newSize);
         long diff = (newSize - oldSize);
 
-        if (totals.updateCacheUsage(diff)) {
+        if(totals.updateCacheUsage(diff)) {
             envImpl.alertEvictor();
         }
     }
@@ -990,6 +973,7 @@ public class MemoryBudget implements EnvConfigObserver {
     /**
      * Update the environment wide tree memory count, wake up the evictor if
      * necessary.
+     *
      * @param increment note that increment may be negative.
      */
     public void updateTreeMemoryUsage(long increment) {
@@ -999,6 +983,7 @@ public class MemoryBudget implements EnvConfigObserver {
     /**
      * Update the environment wide tree memory count, wake up the evictor if
      * necessary.
+     *
      * @param increment note that increment may be negative.
      */
     public void updateDOSMemoryUsage(long increment) {
@@ -1008,6 +993,7 @@ public class MemoryBudget implements EnvConfigObserver {
     /**
      * Update the environment wide txn memory count, wake up the evictor if
      * necessary.
+     *
      * @param increment note that increment may be negative.
      */
     public void updateTxnMemoryUsage(long increment) {
@@ -1017,6 +1003,7 @@ public class MemoryBudget implements EnvConfigObserver {
     /**
      * Update the environment wide admin memory count, wake up the evictor if
      * necessary.
+     *
      * @param increment note that increment may be negative.
      */
     public void updateAdminMemoryUsage(long increment) {
@@ -1025,34 +1012,36 @@ public class MemoryBudget implements EnvConfigObserver {
 
     /**
      * Update the treeAdmin memory count, wake up the evictor if necessary.
+     *
      * @param increment note that increment may be negative.
      */
     public void updateTreeAdminMemoryUsage(long increment) {
         updateCounter(increment, treeAdminMemoryUsage, "treeAdmin",
-                      DEBUG_TREEADMIN);
+                DEBUG_TREEADMIN);
     }
 
     private void updateCounter(long increment,
                                AtomicLong counter,
                                String debugName,
                                boolean debug) {
-        if (increment != 0) {
+        if(increment != 0) {
             long newSize = counter.addAndGet(increment);
 
             assert (sizeNotNegative(newSize)) :
-                   makeErrorMessage(debugName, newSize, increment);
+                    makeErrorMessage(debugName, newSize, increment);
 
-            if (debug) {
-                if (increment > 0) {
+            if(debug) {
+                if(increment > 0) {
                     System.err.println("INC-------- =" + increment + " " +
-                                       debugName + " "  + newSize);
-                } else {
+                            debugName + " " + newSize);
+                }
+                else {
                     System.err.println("-------DEC=" + increment + " " +
-                                       debugName + " "  + newSize);
+                            debugName + " " + newSize);
                 }
             }
 
-            if (totals.updateCacheUsage(increment)) {
+            if(totals.updateCacheUsage(increment)) {
                 envImpl.alertEvictor();
             }
         }
@@ -1060,34 +1049,39 @@ public class MemoryBudget implements EnvConfigObserver {
 
     private boolean sizeNotNegative(long newSize) {
 
-        if (CLEANUP_DONE)  {
+        if(CLEANUP_DONE) {
             return (newSize >= 0);
         }
-    	return true;
+        return true;
     }
 
+    /*
+     * The following 2 methods are shorthand for getTotals.getXxx().
+     */
+
     public void updateLockMemoryUsage(long increment, int lockTableIndex) {
-        if (increment != 0) {
+        if(increment != 0) {
             lockMemoryUsage.addAndGet(increment);
 
-            assert lockMemoryUsage.get() >= 0:
-                   makeErrorMessage("lockMem",
-                                    lockMemoryUsage.get(),
-                                    increment);
-            if (DEBUG_LOCK) {
-                if (increment > 0) {
+            assert lockMemoryUsage.get() >= 0 :
+                    makeErrorMessage("lockMem",
+                            lockMemoryUsage.get(),
+                            increment);
+            if(DEBUG_LOCK) {
+                if(increment > 0) {
                     System.err.println("INC-------- =" + increment +
-                                       " lock[" +
-                                       lockTableIndex + "] " +
-                                       lockMemoryUsage.get());
-                } else {
+                            " lock[" +
+                            lockTableIndex + "] " +
+                            lockMemoryUsage.get());
+                }
+                else {
                     System.err.println("-------DEC=" + increment +
-                                       " lock[" + lockTableIndex + "] " +
-                                       lockMemoryUsage.get());
+                            " lock[" + lockTableIndex + "] " +
+                            lockMemoryUsage.get());
                 }
             }
 
-            if (totals.updateCacheUsage(increment)) {
+            if(totals.updateCacheUsage(increment)) {
                 envImpl.alertEvictor();
             }
         }
@@ -1097,8 +1091,8 @@ public class MemoryBudget implements EnvConfigObserver {
                                     long total,
                                     long increment) {
         return memoryType + "=" + total +
-            " increment=" + increment + " " +
-            LoggerUtils.getStackTrace(new Throwable());
+                " increment=" + increment + " " +
+                LoggerUtils.getStackTrace(new Throwable());
     }
 
     void subtractCacheUsage() {
@@ -1127,14 +1121,10 @@ public class MemoryBudget implements EnvConfigObserver {
      */
     public long getLockMemoryUsage() {
         long accLockMemoryUsage =
-            txnMemoryUsage.get() + lockMemoryUsage.get();
+                txnMemoryUsage.get() + lockMemoryUsage.get();
 
         return accLockMemoryUsage;
     }
-
-    /*
-     * The following 2 methods are shorthand for getTotals.getXxx().
-     */
 
     public long getCacheMemoryUsage() {
         return totals.getCacheUsage();
@@ -1180,57 +1170,13 @@ public class MemoryBudget implements EnvConfigObserver {
         return trackerBudget;
     }
 
-    public static int tupleOutputSize(TupleOutput o) {
-        return TUPLE_OUTPUT_OVERHEAD +
-               byteArraySize(o.getBufferBytes().length);
-    }
-
-    /**
-     * Returns the memory size occupied by a byte array of a given length.  All
-     * arrays (regardless of element type) have the same overhead for a zero
-     * length array.  On 32b Java, there are 4 bytes included in that fixed
-     * overhead that can be used for the first N elements -- however many fit
-     * in 4 bytes.  On 64b Java, there is no extra space included.  In all
-     * cases, space is allocated in 8 byte chunks.
-     */
-    public static int byteArraySize(int arrayLen) {
-
-        /*
-         * ARRAY_OVERHEAD accounts for N bytes of data, which is 4 bytes on 32b
-         * Java and 0 bytes on 64b Java.  Data larger than N bytes is allocated
-         * in 8 byte increments.
-         */
-        int size = ARRAY_OVERHEAD;
-        if (arrayLen > ARRAY_SIZE_INCLUDED) {
-            size += ((arrayLen - ARRAY_SIZE_INCLUDED + 7) / 8) * 8;
-        }
-
-        return size;
-    }
-
-    public static int shortArraySize(int arrayLen) {
-        return byteArraySize(arrayLen * 2);
-    }
-
-    public static int intArraySize(int arrayLen) {
-        return byteArraySize(arrayLen * 4);
-    }
-
-    public static int longArraySize(int arrayLen) {
-        return byteArraySize(arrayLen * 8);
-    }
-
-    public static int objectArraySize(int arrayLen) {
-        return byteArraySize(arrayLen * OBJECT_ARRAY_ITEM_OVERHEAD);
-    }
-
     StatGroup loadStats() {
         StatGroup stats = new StatGroup(MB_GROUP_NAME, MB_GROUP_DESC);
         new LongStat(stats, MB_SHARED_CACHE_TOTAL_BYTES,
-                     totals.isSharedCache() ? totals.getCacheUsage() : 0);
+                totals.isSharedCache() ? totals.getCacheUsage() : 0);
         new LongStat(stats, MB_TOTAL_BYTES, getLocalCacheUsage());
         new LongStat(stats, MB_DATA_BYTES,
-                     treeMemoryUsage.get() + treeAdminMemoryUsage.get());
+                treeMemoryUsage.get() + treeAdminMemoryUsage.get());
         new LongStat(stats, MB_DATA_ADMIN_BYTES, treeAdminMemoryUsage.get());
         new LongStat(stats, MB_DOS_BYTES, dosMemoryUsage.get());
         new LongStat(stats, MB_ADMIN_BYTES, adminMemoryUsage.get());
@@ -1269,24 +1215,26 @@ public class MemoryBudget implements EnvConfigObserver {
             maxMemory = 0;
         }
 
-        private void setMaxMemory(long maxMemory) {
-            this.maxMemory = maxMemory;
-        }
-
         public final long getMaxMemory() {
             return maxMemory;
         }
 
-        private void setCriticalThreshold(long criticalThreshold) {
-            this.criticalThreshold = criticalThreshold;
+        private void setMaxMemory(long maxMemory) {
+            this.maxMemory = maxMemory;
         }
 
         public final long getCriticalThreshold() {
             return criticalThreshold;
         }
 
+        private void setCriticalThreshold(long criticalThreshold) {
+            this.criticalThreshold = criticalThreshold;
+        }
+
         public abstract long getCacheUsage();
+
         abstract boolean updateCacheUsage(long increment);
+
         abstract boolean isSharedCache();
     }
 

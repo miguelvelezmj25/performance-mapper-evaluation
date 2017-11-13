@@ -46,7 +46,7 @@ class RawArrayInput extends RawAbstractInput {
 
     @Override
     Object readNext()
-        throws RefreshException {
+            throws RefreshException {
 
         Object o = array[index++];
         return checkAndConvert(o, componentFormat);

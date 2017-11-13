@@ -25,7 +25,7 @@ import berkeley.com.sleepycat.je.SecondaryKeyCreator;
  * The following abstract method must be implemented by a concrete subclass
  * to create the index key using these objects
  * <ul>
- * <li> {@link #createSecondaryKey(Object,Object)} </li>
+ * <li> {@link #createSecondaryKey(Object, Object)} </li>
  * </ul>
  * <p>If {@link com.sleepycat.je.ForeignKeyDeleteAction#NULLIFY} was
  * specified when opening the secondary database, the following method must be
@@ -35,12 +35,11 @@ import berkeley.com.sleepycat.je.SecondaryKeyCreator;
  * <li> {@link #nullifyForeignKey(Object)} </li>
  * </ul>
  *
- * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
- *
  * @author Mark Hayes
+ * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
  */
-public abstract class SerialSerialKeyCreator<PK,D,SK>
-    implements SecondaryKeyCreator, ForeignKeyNullifier {
+public abstract class SerialSerialKeyCreator<PK, D, SK>
+        implements SecondaryKeyCreator, ForeignKeyNullifier {
 
     protected SerialBinding<PK> primaryKeyBinding;
     protected SerialBinding<D> dataBinding;
@@ -49,14 +48,11 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
     /**
      * Creates a serial-serial key creator.
      *
-     * @param classCatalog is the catalog to hold shared class information and
-     * for a database should be a {@link StoredClassCatalog}.
-     *
+     * @param classCatalog    is the catalog to hold shared class information and
+     *                        for a database should be a {@link StoredClassCatalog}.
      * @param primaryKeyClass is the primary key base class.
-     *
-     * @param dataClass is the data base class.
-     *
-     * @param indexKeyClass is the index key base class.
+     * @param dataClass       is the data base class.
+     * @param indexKeyClass   is the index key base class.
      */
     public SerialSerialKeyCreator(ClassCatalog classCatalog,
                                   Class<PK> primaryKeyClass,
@@ -64,18 +60,16 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
                                   Class<SK> indexKeyClass) {
 
         this(new SerialBinding<PK>(classCatalog, primaryKeyClass),
-             new SerialBinding<D>(classCatalog, dataClass),
-             new SerialBinding<SK>(classCatalog, indexKeyClass));
+                new SerialBinding<D>(classCatalog, dataClass),
+                new SerialBinding<SK>(classCatalog, indexKeyClass));
     }
 
     /**
      * Creates a serial-serial entity binding.
      *
      * @param primaryKeyBinding is the primary key binding.
-     *
-     * @param dataBinding is the data binding.
-     *
-     * @param indexKeyBinding is the index key binding.
+     * @param dataBinding       is the data binding.
+     * @param indexKeyBinding   is the index key binding.
      */
     public SerialSerialKeyCreator(SerialBinding<PK> primaryKeyBinding,
                                   SerialBinding<D> dataBinding,
@@ -92,13 +86,14 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
                                       DatabaseEntry dataEntry,
                                       DatabaseEntry indexKeyEntry) {
         PK primaryKeyInput =
-            primaryKeyBinding.entryToObject(primaryKeyEntry);
+                primaryKeyBinding.entryToObject(primaryKeyEntry);
         D dataInput = dataBinding.entryToObject(dataEntry);
         SK indexKey = createSecondaryKey(primaryKeyInput, dataInput);
-        if (indexKey != null) {
+        if(indexKey != null) {
             indexKeyBinding.objectToEntry(indexKey, indexKeyEntry);
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -108,10 +103,11 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
                                      DatabaseEntry dataEntry) {
         D data = dataBinding.entryToObject(dataEntry);
         data = nullifyForeignKey(data);
-        if (data != null) {
+        if(data != null) {
             dataBinding.objectToEntry(data, dataEntry);
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -120,11 +116,9 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
      * Creates the index key object from primary key and data objects.
      *
      * @param primaryKey is the deserialized source primary key entry, or
-     * null if no primary key entry is used to construct the index key.
-     *
-     * @param data is the deserialized source data entry, or null if no
-     * data entry is used to construct the index key.
-     *
+     *                   null if no primary key entry is used to construct the index key.
+     * @param data       is the deserialized source data entry, or null if no
+     *                   data entry is used to construct the index key.
      * @return the destination index key object, or null to indicate that
      * the key is not present.
      */
@@ -132,14 +126,13 @@ public abstract class SerialSerialKeyCreator<PK,D,SK>
 
     /**
      * Clears the index key in a data object.
-     *
+     * <p>
      * <p>On entry the data parameter contains the index key to be cleared.  It
      * should be changed by this method such that {@link #createSecondaryKey}
      * will return false.  Other fields in the data object should remain
      * unchanged.</p>
      *
      * @param data is the source and destination data object.
-     *
      * @return the destination data object, or null to indicate that the
      * key is not present and no change is necessary.  The data returned may
      * be the same object passed as the data parameter or a newly created

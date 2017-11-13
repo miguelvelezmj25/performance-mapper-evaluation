@@ -12,18 +12,7 @@
  */
 package berkeley.com.sleepycat.je.rep.arbiter;
 
-import java.io.File;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
-import berkeley.com.sleepycat.je.EnvironmentNotFoundException;
-import berkeley.com.sleepycat.je.StatsConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.config.ConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.rep.RepInternal;
@@ -33,6 +22,12 @@ import berkeley.com.sleepycat.je.rep.ReplicationMutableConfig;
 import berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
+
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * Provides a mechanism to allow write availability for the Replication
@@ -53,12 +48,11 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  */
 public class Arbiter {
 
-    private ArbiterImpl ai;
     private final ReplicatedEnvironment repEnv;
     private final ArbiterConfig ac;
-
     private final String ARB_CONFIG = "ArbiterConfig";
     private final String ARB_HOME = "ArbiterHome";
+    private ArbiterImpl ai;
 
     /**
      * An Arbiter used in elections and transaction acknowledgments.
@@ -67,62 +61,58 @@ public class Arbiter {
      * used to shutdown the threads that run as part of the Arbiter.
      *
      * @param arbiterConfig Configuration parameters for the Arbiter.
-     *
      * @throws EnvironmentNotFoundException if the environment does not exist
-     *
-     * @throws EnvironmentLockedException when an environment cannot be opened
-     * because another Arbiter has the environment open.
-     *
-     * @throws DatabaseException problem establishing connection to the master.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified,
-     * for example, an invalid {@code ArbiterConfig} parameter.
+     * @throws EnvironmentLockedException   when an environment cannot be opened
+     *                                      because another Arbiter has the environment open.
+     * @throws DatabaseException            problem establishing connection to the master.
+     * @throws IllegalArgumentException     if an invalid parameter is specified,
+     *                                      for example, an invalid {@code ArbiterConfig} parameter.
      */
     public Arbiter(ArbiterConfig arbiterConfig)
-        throws EnvironmentNotFoundException,
-               EnvironmentLockedException,
-               DatabaseException,
-               IllegalArgumentException {
+            throws EnvironmentNotFoundException,
+            EnvironmentLockedException,
+            DatabaseException,
+            IllegalArgumentException {
 
         ac = arbiterConfig.clone();
         verifyParameters(ac);
         File envHome = new File(ac.getArbiterHome());
-        if (!envHome.exists()) {
+        if(!envHome.exists()) {
             throw new IllegalArgumentException(
-                "The specified environment directory " +
-                envHome.getAbsolutePath() +
-                " does not exist.");
+                    "The specified environment directory " +
+                            envHome.getAbsolutePath() +
+                            " does not exist.");
         }
         Properties allProps = ac.getProps();
         EnvironmentConfig envConfig =
-            new EnvironmentConfig(getEnvProps(allProps));
+                new EnvironmentConfig(getEnvProps(allProps));
         envConfig.setReadOnly(true);
         envConfig.setTransactional(true);
         envConfig.setConfigParam(
-            EnvironmentParams.ENV_RECOVERY.getName(), "false");
+                EnvironmentParams.ENV_RECOVERY.getName(), "false");
         envConfig.setConfigParam(
-            EnvironmentParams.ENV_SETUP_LOGGER.getName(), "true");
+                EnvironmentParams.ENV_SETUP_LOGGER.getName(), "true");
         envConfig.setConfigParam(
-            EnvironmentParams.LOG_USE_WRITE_QUEUE.getName(), "false");
+                EnvironmentParams.LOG_USE_WRITE_QUEUE.getName(), "false");
         envConfig.setConfigParam(
-            EnvironmentParams.LOG_WRITE_QUEUE_SIZE.getName(), "4096");
-        if (ac.getLoggingHandler() != null) {
+                EnvironmentParams.LOG_WRITE_QUEUE_SIZE.getName(), "4096");
+        if(ac.getLoggingHandler() != null) {
             envConfig.setLoggingHandler(ac.getLoggingHandler());
         }
 
         ReplicationConfig repConfig =
-            new ReplicationConfig(getRepEnvProps(allProps));
+                new ReplicationConfig(getRepEnvProps(allProps));
         repConfig.setConfigParam(RepParams.ARBITER_USE.getName(), "true");
         repConfig.setRepNetConfig(ac.getRepNetConfig());
 
         repEnv = RepInternal.createInternalEnvHandle(envHome,
-                                                 repConfig,
-                                                 envConfig);
+                repConfig,
+                envConfig);
         try {
             ai = new ArbiterImpl(
-                envHome, RepInternal.getNonNullRepImpl(repEnv));
+                    envHome, RepInternal.getNonNullRepImpl(repEnv));
             ai.runArbiter();
-        } catch (Throwable t) {
+        } catch(Throwable t) {
             shutdown();
             throw t;
         }
@@ -144,7 +134,7 @@ public class Arbiter {
      * @throws DatabaseException
      */
     public void setArbiterMutableConfig(ArbiterMutableConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
         ReplicationMutableConfig rmc = repEnv.getRepMutableConfig();
         Properties newProps = config.getProps();
         copyMutablePropsTo(newProps, rmc);
@@ -162,18 +152,18 @@ public class Arbiter {
     public ReplicatedEnvironment.State getState() {
         return ai.getArbState();
     }
+
     /**
      * Gets the Arbiter statistics.
      *
      * @param config The general statistics attributes.  If null, default
-     * attributes are used.
-     *
+     *               attributes are used.
      * @return Arbiter statistics.
      * @throws DatabaseException
      */
     public ArbiterStats getStats(StatsConfig config)
-        throws DatabaseException {
-        if (ai == null) {
+            throws DatabaseException {
+        if(ai == null) {
             return null;
         }
 
@@ -186,25 +176,26 @@ public class Arbiter {
     /**
      * Shutdown the Arbiter.
      * Threads are stopped and resources are released.
+     *
      * @throws DatabaseException
      */
     public void shutdown()
-        throws DatabaseException {
-        if (ai != null) {
+            throws DatabaseException {
+        if(ai != null) {
             ai.shutdown();
             try {
                 ai.join();
-            } catch (InterruptedException ignore) {
+            } catch(InterruptedException ignore) {
 
             }
         }
-        if (repEnv != null) {
+        if(repEnv != null) {
             repEnv.close();
         }
     }
 
     private void verifyParameters(ArbiterConfig ac)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         DatabaseUtil.checkForNullParam(ac, ARB_CONFIG);
         DatabaseUtil.checkForNullParam(ac.getArbiterHome(), ARB_HOME);
         DatabaseUtil.checkForNullParam(ac.getGroupName(), ReplicationConfig.GROUP_NAME);
@@ -215,10 +206,10 @@ public class Arbiter {
     private Properties getEnvProps(Properties props) {
         Properties envProps = new Properties();
         Iterator<Entry<Object, Object>> iter = props.entrySet().iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Entry<Object, Object> m = iter.next();
-            String key = (String)m.getKey();
-            if (!key.startsWith(EnvironmentParams.REP_PARAM_PREFIX)) {
+            String key = (String) m.getKey();
+            if(!key.startsWith(EnvironmentParams.REP_PARAM_PREFIX)) {
                 envProps.put(key, m.getValue());
             }
         }
@@ -228,10 +219,10 @@ public class Arbiter {
     private Properties getRepEnvProps(Properties props) {
         Properties repEnvProps = new Properties();
         Iterator<Entry<Object, Object>> iter = props.entrySet().iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Entry<Object, Object> m = iter.next();
-            String key = (String)m.getKey();
-            if (key.startsWith(EnvironmentParams.REP_PARAM_PREFIX)) {
+            String key = (String) m.getKey();
+            if(key.startsWith(EnvironmentParams.REP_PARAM_PREFIX)) {
                 repEnvProps.put(key, m.getValue());
             }
         }
@@ -242,13 +233,13 @@ public class Arbiter {
                                     ReplicationMutableConfig toConfig) {
 
         Enumeration<?> propNames = from.propertyNames();
-        while (propNames.hasMoreElements()) {
+        while(propNames.hasMoreElements()) {
             String paramName = (String) propNames.nextElement();
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
 
-            if (param != null && param.isForReplication() &&
-                param.isMutable()) {
+            if(param != null && param.isForReplication() &&
+                    param.isMutable()) {
                 toConfig.setConfigParam(paramName, from.getProperty(paramName));
             }
         }
@@ -258,13 +249,13 @@ public class Arbiter {
                                     EnvironmentMutableConfig toConfig) {
 
         Enumeration<?> propNames = from.propertyNames();
-        while (propNames.hasMoreElements()) {
+        while(propNames.hasMoreElements()) {
             String paramName = (String) propNames.nextElement();
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
 
-            if (param != null && !param.isForReplication() &&
-                param.isMutable()) {
+            if(param != null && !param.isForReplication() &&
+                    param.isMutable()) {
                 toConfig.setConfigParam(paramName, from.getProperty(paramName));
             }
         }

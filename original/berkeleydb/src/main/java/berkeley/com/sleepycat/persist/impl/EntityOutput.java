@@ -13,17 +13,17 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.bind.tuple.TupleOutput;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import berkeley.com.sleepycat.bind.tuple.TupleOutput;
-
 /**
  * Used for writing object fields.
- *
+ * <p>
  * <p>Unlike TupleOutput, Strings should be passed to {@link #writeObject} when
  * using this class.</p>
- *
+ * <p>
  * <p>Note that currently there is only one implementation of EntityOutput:
  * RecordOutput.  There is no RawObjectOutput implemention because we currently
  * have no need to convert from persistent objects to RawObject instances.
@@ -40,14 +40,14 @@ public interface EntityOutput {
      * below).
      */
     void writeObject(Object o, Format fieldFormat)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called for a primary key field or composite key field with a reference
      * type.
      */
     void writeKeyObject(Object o, Format fieldFormat)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Called via Accessor.writeSecKeyFields for a primary key field with a
@@ -70,14 +70,24 @@ public interface EntityOutput {
     /* The following methods are a subset of the methods in TupleOutput. */
 
     TupleOutput writeString(String val);
+
     TupleOutput writeChar(int val);
+
     TupleOutput writeBoolean(boolean val);
+
     TupleOutput writeByte(int val);
+
     TupleOutput writeShort(int val);
+
     TupleOutput writeInt(int val);
+
     TupleOutput writeLong(long val);
+
     TupleOutput writeSortedFloat(float val);
+
     TupleOutput writeSortedDouble(double val);
+
     TupleOutput writeBigInteger(BigInteger val);
+
     TupleOutput writeSortedBigDecimal(BigDecimal val);
 }

@@ -12,10 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.DbTree;
@@ -23,6 +19,10 @@ import berkeley.com.sleepycat.je.dbi.TriggerManager;
 import berkeley.com.sleepycat.je.rep.impl.RepConfigManager;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.txn.Txn;
+
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Cache used to maintain DatabaseImpl handles. The cache retains some
@@ -44,7 +44,7 @@ import berkeley.com.sleepycat.je.txn.Txn;
  */
 
 @SuppressWarnings("serial")
-public class DbCache  {
+public class DbCache {
 
     private final DbCacheLinkedHashMap map;
 
@@ -62,11 +62,11 @@ public class DbCache  {
     /**
      * Creates an instance of a DbCache.
      *
-     * @param dbTree the source of the data being cached
+     * @param dbTree     the source of the data being cached
      * @param maxEntries the max MRU entries to be retained in the cache
-     * @param timeoutMs the timeout used to remove stale entries. A timeout
-     * value of zero means that each call to tick() will move the "clock"
-     * forward. It's useful for testing purposes.
+     * @param timeoutMs  the timeout used to remove stale entries. A timeout
+     *                   value of zero means that each call to tick() will move the "clock"
+     *                   forward. It's useful for testing purposes.
      */
     DbCache(DbTree dbTree, int maxEntries, int timeoutMs) {
         assert dbTree != null;
@@ -84,14 +84,14 @@ public class DbCache  {
      */
     public void tick() {
 
-        if ((timeoutMs > 0) &&
-            (System.currentTimeMillis() - tickTime) <= timeoutMs) {
+        if((timeoutMs > 0) &&
+                (System.currentTimeMillis() - tickTime) <= timeoutMs) {
             return;
         }
 
-        for (Iterator<Info> vi = map.values().iterator(); vi.hasNext();) {
+        for(Iterator<Info> vi = map.values().iterator(); vi.hasNext(); ) {
             Info dbInfo = vi.next();
-            if (dbInfo.lastAccess < tick) {
+            if(dbInfo.lastAccess < tick) {
                 release(dbInfo.dbImpl);
                 vi.remove();
             }
@@ -102,7 +102,7 @@ public class DbCache  {
 
     private void release(DatabaseImpl dbImpl) {
         dbTree.releaseDb(dbImpl);
-        if (dbImpl.noteWriteHandleClose() == 0) {
+        if(dbImpl.noteWriteHandleClose() == 0) {
             TriggerManager.runCloseTriggers(null, dbImpl);
         }
     }
@@ -113,20 +113,19 @@ public class DbCache  {
      * this was the first write reference.
      *
      * @param dbId the dbId that is to be resolved.
-     *
      * @return the corresponding DatabaseImpl
      */
     public DatabaseImpl get(DatabaseId dbId, Txn txn) {
         Info info = map.get(dbId);
 
-        if (info != null) {
+        if(info != null) {
             info.lastAccess = tick;
             return info.dbImpl;
         }
 
         info = new Info(dbTree.getDb(dbId, -1));
         map.put(dbId, info);
-        if (info.dbImpl.noteWriteHandleOpen() == 1) {
+        if(info.dbImpl.noteWriteHandleOpen() == 1) {
             TriggerManager.runOpenTriggers(txn, info.dbImpl, false);
         }
         return info.dbImpl;
@@ -145,6 +144,7 @@ public class DbCache  {
      * operation. This incremental cache size reduction is not expected to be a
      * significant drawback in practice.
      * <p>
+     *
      * @param configMgr the configuration holding the cache parameters
      */
     public void setConfig(RepConfigManager configMgr) {
@@ -174,14 +174,14 @@ public class DbCache  {
      * Clears out the cache releasing db handles as well
      */
     public void clear() {
-        for (Info dbInfo : map.values()) {
+        for(Info dbInfo : map.values()) {
             release(dbInfo.dbImpl);
         }
         map.clear();
     }
 
     /* For testing only. */
-    LinkedHashMap<DatabaseId,DbCache.Info>  getMap() {
+    LinkedHashMap<DatabaseId, DbCache.Info> getMap() {
         return map;
     }
 
@@ -189,8 +189,8 @@ public class DbCache  {
      * Struct to associate a tick with the dbImpl
      */
     private class Info {
-        int lastAccess;
         final DatabaseImpl dbImpl;
+        int lastAccess;
 
         public Info(DatabaseImpl dbImpl) {
             super();
@@ -204,11 +204,11 @@ public class DbCache  {
      * bookkeeping that goes along with it.
      */
     private class DbCacheLinkedHashMap
-        extends LinkedHashMap<DatabaseId,DbCache.Info> {
+            extends LinkedHashMap<DatabaseId, DbCache.Info> {
 
         @Override
-        protected boolean removeEldestEntry(Map.Entry<DatabaseId,Info> eldest) {
-            if (size() <= maxEntries) {
+        protected boolean removeEldestEntry(Map.Entry<DatabaseId, Info> eldest) {
+            if(size() <= maxEntries) {
                 return false;
             }
             release(eldest.getValue().dbImpl);

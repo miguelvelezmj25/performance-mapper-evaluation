@@ -12,15 +12,15 @@
  */
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.TraceLogEntry;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
+
+import java.nio.ByteBuffer;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Trace logs event tracing messages into .jdb files. Only critical messages
@@ -39,14 +39,64 @@ public class Trace extends BasicVersionedWriteLoggable {
     private Timestamp time;
     private String msg;
 
-    /** Create a new debug record. */
+    /**
+     * Create a new debug record.
+     */
     public Trace(String msg) {
         this.time = getCurrentTimestamp();
         this.msg = msg;
     }
 
-    /** Create a trace record that will be filled in from the log. */
+    /**
+     * Create a trace record that will be filled in from the log.
+     */
     public Trace() {
+    }
+
+    /* Check to see if this Environment supports writing. */
+    private static boolean isWritePermitted(EnvironmentImpl envImpl) {
+        if(envImpl == null ||
+                envImpl.isReadOnly() ||
+                envImpl.mayNotWrite() ||
+                envImpl.isDbLoggingDisabled()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Convenience method to create a log entry containing this trace msg.
+     */
+    public static void trace(EnvironmentImpl envImpl, String message) {
+        trace(envImpl, new Trace(message));
+    }
+
+    /**
+     * Trace a trace object, unit tests only.
+     */
+    public static long trace(EnvironmentImpl envImpl, Trace traceMsg) {
+        if(isWritePermitted(envImpl)) {
+            return envImpl.getLogManager().log(
+                    new TraceLogEntry(traceMsg),
+                    ReplicationContext.NO_REPLICATE);
+        }
+
+        return DbLsn.NULL_LSN;
+    }
+
+    /**
+     * Convenience method to create a log entry (lazily) containing this trace
+     * msg. Lazy tracing is used when tracing is desired, but the .jdb files
+     * are not initialized.
+     */
+    public static void traceLazily(EnvironmentImpl envImpl,
+                                   String message) {
+        if(isWritePermitted(envImpl)) {
+            envImpl.getLogManager().logLazily(
+                    new TraceLogEntry(new Trace(message)),
+                    ReplicationContext.NO_REPLICATE);
+        }
     }
 
     /**
@@ -61,48 +111,6 @@ public class Trace extends BasicVersionedWriteLoggable {
         Calendar cal = Calendar.getInstance();
 
         return new Timestamp(cal.getTime().getTime());
-    }
-
-    /* Check to see if this Environment supports writing. */
-    private static boolean isWritePermitted(EnvironmentImpl envImpl) {
-        if (envImpl == null ||
-            envImpl.isReadOnly() ||
-            envImpl.mayNotWrite() ||
-            envImpl.isDbLoggingDisabled()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /** Convenience method to create a log entry containing this trace msg. */
-    public static void trace(EnvironmentImpl envImpl, String message) {
-        trace(envImpl, new Trace(message));
-    }
-
-    /** Trace a trace object, unit tests only. */
-    public static long trace(EnvironmentImpl envImpl, Trace traceMsg) {
-        if (isWritePermitted(envImpl)) {
-            return envImpl.getLogManager().log(
-                new TraceLogEntry(traceMsg),
-                ReplicationContext.NO_REPLICATE);
-        }
-
-    	return DbLsn.NULL_LSN;
-    }
-
-    /**
-     * Convenience method to create a log entry (lazily) containing this trace
-     * msg. Lazy tracing is used when tracing is desired, but the .jdb files
-     * are not initialized.
-     */
-    public static void traceLazily(EnvironmentImpl envImpl,
-                                   String message) {
-        if (isWritePermitted(envImpl)) {
-            envImpl.getLogManager().logLazily(
-                new TraceLogEntry(new Trace(message)),
-                ReplicationContext.NO_REPLICATE);
-        }
     }
 
     @Override
@@ -155,8 +163,9 @@ public class Trace extends BasicVersionedWriteLoggable {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof Trace))
+        if(!(other instanceof Trace)) {
             return false;
+        }
 
         return msg.equals(((Trace) other).msg);
     }
@@ -167,7 +176,7 @@ public class Trace extends BasicVersionedWriteLoggable {
     }
 
     /**
-     *  Just in case it's ever used as a hash key.
+     * Just in case it's ever used as a hash key.
      */
     @Override
     public int hashCode() {
@@ -177,12 +186,12 @@ public class Trace extends BasicVersionedWriteLoggable {
     @Override
     public boolean equals(Object obj) {
         /* Same instance? */
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
 
         /* Is it another Trace? */
-        if (!(obj instanceof Trace)) {
+        if(!(obj instanceof Trace)) {
             return false;
         }
 

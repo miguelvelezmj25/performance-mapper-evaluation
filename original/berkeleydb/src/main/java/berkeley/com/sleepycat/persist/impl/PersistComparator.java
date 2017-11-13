@@ -13,14 +13,15 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.je.DatabaseComparator;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import berkeley.com.sleepycat.compat.DbCompat;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.DatabaseComparator;
 /* <!-- end JE only --> */
 
 /**
@@ -32,9 +33,9 @@ import berkeley.com.sleepycat.je.DatabaseComparator;
  */
 public class PersistComparator implements
     /* <!-- begin JE only --> */
-    DatabaseComparator,
+        DatabaseComparator,
     /* <!-- end JE only --> */
-    Comparator<byte[]>, Serializable {
+        Comparator<byte[]>, Serializable {
 
     private static final long serialVersionUID = 5221576538843355317L;
 
@@ -47,20 +48,20 @@ public class PersistComparator implements
         this.binding = binding;
         /* Save info necessary to recreate binding during deserialization. */
         final CompositeKeyFormat format =
-            (CompositeKeyFormat) binding.keyFormat;
+                (CompositeKeyFormat) binding.keyFormat;
         keyClassName = format.getClassName();
         comositeFieldOrder = CompositeKeyFormat.getFieldNameArray
-            (format.getClassMetadata().getCompositeKeyFields());
+                (format.getClassMetadata().getCompositeKeyFields());
         /* Currently only enum formats have per-class data. */
-        for (FieldInfo field : format.getFieldInfo()) {
+        for(FieldInfo field : format.getFieldInfo()) {
             Format fieldFormat = field.getType();
-            if (fieldFormat.isEnum()) {
+            if(fieldFormat.isEnum()) {
                 EnumFormat enumFormat = (EnumFormat) fieldFormat;
-                if (fieldFormatData == null) {
+                if(fieldFormatData == null) {
                     fieldFormatData = new HashMap<String, String[]>();
                 }
                 fieldFormatData.put(enumFormat.getClassName(),
-                                    enumFormat.getFormatData());
+                        enumFormat.getFormatData());
             }
         }
     }
@@ -73,37 +74,38 @@ public class PersistComparator implements
      */
     public void initialize(ClassLoader loader) {
         final Catalog catalog;
-        if (fieldFormatData == null) {
+        if(fieldFormatData == null) {
             catalog = new ComparatorCatalog(loader, null);
-        } else {
+        }
+        else {
             final Map<String, Format> enumFormats =
-                new HashMap<String, Format>();
+                    new HashMap<String, Format>();
             catalog = new ComparatorCatalog(loader, enumFormats);
-            for (Map.Entry<String, String[]> entry :
-                 fieldFormatData.entrySet()) {
+            for(Map.Entry<String, String[]> entry :
+                    fieldFormatData.entrySet()) {
                 final String fldClassName = entry.getKey();
                 final String[] enumNames = entry.getValue();
                 final Class fldClass;
                 try {
                     fldClass = catalog.resolveClass(fldClassName);
-                } catch (ClassNotFoundException e) {
+                } catch(ClassNotFoundException e) {
                     throw new IllegalStateException(e);
                 }
                 enumFormats.put(fldClassName,
-                                new EnumFormat(catalog, fldClass, enumNames));
+                        new EnumFormat(catalog, fldClass, enumNames));
             }
-            for (Format fldFormat : enumFormats.values()) {
+            for(Format fldFormat : enumFormats.values()) {
                 fldFormat.initializeIfNeeded(catalog, null /*model*/);
             }
         }
         final Class keyClass;
         try {
             keyClass = catalog.resolveClass(keyClassName);
-        } catch (ClassNotFoundException e) {
+        } catch(ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
         binding = new PersistKeyBinding(catalog, keyClass,
-                                        comositeFieldOrder);
+                comositeFieldOrder);
     }
 
     public int compare(byte[] b1, byte[] b2) {
@@ -112,18 +114,18 @@ public class PersistComparator implements
          * In BDB JE, the binding is initialized by the initialize method.  In
          * BDB, the binding is intialized by the constructor.
          */
-        if (binding == null) {
+        if(binding == null) {
             throw DbCompat.unexpectedState("Not initialized");
         }
 
         try {
             Comparable k1 =
-                (Comparable) binding.bytesToObject(b1, 0, b1.length);
+                    (Comparable) binding.bytesToObject(b1, 0, b1.length);
             Comparable k2 =
-                (Comparable) binding.bytesToObject(b2, 0, b2.length);
+                    (Comparable) binding.bytesToObject(b2, 0, b2.length);
 
             return k1.compareTo(k2);
-        } catch (RefreshException e) {
+        } catch(RefreshException e) {
 
             /*
              * Refresh is not applicable to PersistComparator, which is used
@@ -143,14 +145,14 @@ public class PersistComparator implements
         b.append("[DPL comparator ");
         b.append(" keyClassName = ").append(keyClassName);
         b.append(" comositeFieldOrder = [");
-        for (String s : comositeFieldOrder) {
+        for(String s : comositeFieldOrder) {
             b.append(s).append(',');
         }
         b.append(']');
         b.append(" fieldFormatData = {");
-        for (Map.Entry<String, String[]> entry : fieldFormatData.entrySet()) {
+        for(Map.Entry<String, String[]> entry : fieldFormatData.entrySet()) {
             b.append(entry.getKey()).append(": [");
-            for (String s : entry.getValue()) {
+            for(String s : entry.getValue()) {
                 b.append(s).append(',');
             }
             b.append(']');

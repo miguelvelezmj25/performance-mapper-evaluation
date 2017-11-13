@@ -13,12 +13,6 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DbInternal;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.EnvironmentWedgedException;
@@ -26,65 +20,65 @@ import berkeley.com.sleepycat.je.ExceptionListener;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * A StoppableThread is a daemon that obeys the following mandates:
  * - it sets the daemon property for the thread
  * - an uncaught exception handler is always registered
  * - the thread registers with the JE exception listener mechanism.
  * - its shutdown method can only be executed once. StoppableThreads are not
- *   required to implement shutdown() methods, because in some cases their
- *   shutdown processing must be coordinated by an owning, parent thread.
- *
+ * required to implement shutdown() methods, because in some cases their
+ * shutdown processing must be coordinated by an owning, parent thread.
+ * <p>
  * StoppableThread is an alternative to the DaemonThread. It also assumes that
  * the thread's run() method may be more complex than that of the work-queue,
  * task oriented DaemonThread.
- *
+ * <p>
  * A StoppableThread's run method should catch and handle all exceptions. By
  * default, unhandled exceptions are considered programming errors, and
  * invalidate the environment, but StoppableThreads may supply alternative
  * uncaught exception handling.
- *
+ * <p>
  * StoppableThreads usually are created with an EnvironmentImpl, but on
  * occasion an environment may not be available (for components that can
  * execute without an environment). In that case, the thread obviously does not
  * invalidate the environment.
- *
+ * <p>
  * Note that the StoppableThread.cleanup must be invoked upon, or soon after,
  * thread exit.
  */
 public abstract class StoppableThread extends Thread {
-
-    /* The environment, if any, that's associated with this thread. */
-    protected final EnvironmentImpl envImpl;
-
-    /*
-     * Shutdown can only be executed once. The shutdown field protects against
-     * multiple invocations.
-     */
-    private final AtomicBoolean shutdown = new AtomicBoolean(false);
-
-    /* The exception (if any) that forced this node to shut down. */
-    private Exception savedShutdownException = null;
-
-    /* Total cpu time used by thread */
-    private long totalCpuTime = -1;
-
-    /* Total user time used by thread */
-    private long totalUserTime = -1;
 
     /**
      * The default wait period for an interrupted thread to exit as part of a
      * hard shutdown.
      */
     private static final int DEFAULT_INTERRUPT_WAIT_MS = 10 * 1000;
-
     /**
      * The wait period for joining a thread in which shutdown is running.
      * Use a large timeout since we want the shutdown to complete normally,
      * if at all possible.
      */
     private static final int WAIT_FOR_SHUTDOWN_MS =
-        DEFAULT_INTERRUPT_WAIT_MS * 3;
+            DEFAULT_INTERRUPT_WAIT_MS * 3;
+    /* The environment, if any, that's associated with this thread. */
+    protected final EnvironmentImpl envImpl;
+    /*
+     * Shutdown can only be executed once. The shutdown field protects against
+     * multiple invocations.
+     */
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
+    /* The exception (if any) that forced this node to shut down. */
+    private Exception savedShutdownException = null;
+    /* Total cpu time used by thread */
+    private long totalCpuTime = -1;
+    /* Total user time used by thread */
+    private long totalUserTime = -1;
 
     protected StoppableThread(final String threadName) {
         this(null, null, null, threadName);
@@ -92,7 +86,7 @@ public abstract class StoppableThread extends Thread {
 
     protected StoppableThread(final EnvironmentImpl envImpl,
                               final String threadName) {
-        this(envImpl, null /* handler */, null /* runnable */,threadName);
+        this(envImpl, null /* handler */, null /* runnable */, threadName);
     }
 
     protected StoppableThread(final EnvironmentImpl envImpl,
@@ -115,7 +109,78 @@ public abstract class StoppableThread extends Thread {
         setDaemon(true);
 
         setUncaughtExceptionHandler
-            ((handler == null) ? new UncaughtHandler() : handler);
+                ((handler == null) ? new UncaughtHandler() : handler);
+    }
+
+    /*
+     * A static method to handle the uncaught exception. This method
+     * can be called in other places, such as in FileManager.
+     *
+     * When an uncaught exception occurs, log it, publish it to the
+     * exception handler, and invalidate the environment.
+     */
+    public static void handleUncaughtException(
+            final Logger useLogger,
+            final EnvironmentImpl envImpl,
+            final Thread t,
+            final Throwable e) {
+
+        if(useLogger != null) {
+            String envName = (envImpl == null) ? "" : envImpl.getName();
+            String message = envName + ":" + t.getName() +
+                    " exited unexpectedly with exception " + e;
+            if(e != null) {
+                message += LoggerUtils.getStackTrace(e);
+            }
+
+            if(envImpl != null) {
+                /*
+                 * If we have an environment, log this to all three
+                 * handlers.
+                 */
+                LoggerUtils.severe(useLogger, envImpl, message);
+            }
+            else {
+                /*
+                 * We don't have an environment, but at least log this
+                 * to the console.
+                 */
+                useLogger.log(Level.SEVERE, message);
+            }
+        }
+
+
+        if(envImpl == null) {
+            return;
+        }
+
+        /*
+         * If not already invalid, invalidate environment by creating an
+         * EnvironmentFailureException.
+         */
+        if(envImpl.isValid()) {
+
+            /*
+             * Create the exception to invalidate the environment, but do
+             * not throw it since the handle is invoked in some internal
+             * JVM thread and the exception is not meaningful to the
+             * invoker.
+             */
+            @SuppressWarnings("unused")
+            EnvironmentFailureException unused =
+                    new EnvironmentFailureException
+                            (envImpl, EnvironmentFailureReason.UNCAUGHT_EXCEPTION,
+                                    e);
+        }
+
+        final ExceptionListener exceptionListener =
+                envImpl.getExceptionListener();
+
+        if(exceptionListener != null) {
+            exceptionListener.exceptionThrown(
+                    DbInternal.makeExceptionEvent(
+                            envImpl.getInvalidatingException(), t.getName()));
+        }
     }
 
     /**
@@ -146,7 +211,7 @@ public abstract class StoppableThread extends Thread {
      * #shutdownThread}. If the shutdown flag is true, wait for this thread to
      * exit and return true; in this case the caller should not perform
      * shutdown.
-     *
+     * <p>
      * When shutdownDone is initially called by thread X (including from the
      * run method of the thread being shutdown), then a thread Y calling
      * shutdownDone should simply return without performing shutdown (this is
@@ -158,7 +223,7 @@ public abstract class StoppableThread extends Thread {
      * thread, or that EWE is thrown if any JE threads have not died. This
      * allows the app to reliably re-open the env, or exit the process if
      * necessary. [#25648]
-     *
+     * <p>
      * Note than when thread X has sub-components and manages their threads,
      * thread X's shutdown method will call shutdown for its managed threads.
      * Waiting for exit of thread X will therefore wait for exit of its managed
@@ -166,12 +231,11 @@ public abstract class StoppableThread extends Thread {
      * described.
      *
      * @param logger the logger on which to log messages
-     *
      * @return true if shutdown is already set.
      */
     protected boolean shutdownDone(Logger logger) {
 
-        if (shutdown.compareAndSet(false, true)) {
+        if(shutdown.compareAndSet(false, true)) {
             return false;
         }
 
@@ -186,117 +250,28 @@ public abstract class StoppableThread extends Thread {
     protected void cleanup() {
     }
 
-    /*
-     * A static method to handle the uncaught exception. This method
-     * can be called in other places, such as in FileManager.
-     *
-     * When an uncaught exception occurs, log it, publish it to the
-     * exception handler, and invalidate the environment.
-     */
-    public static void handleUncaughtException(
-        final Logger useLogger,
-        final EnvironmentImpl envImpl,
-        final Thread t,
-        final Throwable e) {
-
-        if (useLogger != null) {
-            String envName = (envImpl == null)? "" : envImpl.getName();
-            String message = envName + ":" + t.getName() +
-                " exited unexpectedly with exception " + e;
-            if (e != null) {
-                message += LoggerUtils.getStackTrace(e);
-            }
-
-            if (envImpl != null) {
-                /*
-                 * If we have an environment, log this to all three
-                 * handlers.
-                 */
-                LoggerUtils.severe(useLogger, envImpl, message);
-            } else {
-                /*
-                 * We don't have an environment, but at least log this
-                 * to the console.
-                 */
-                useLogger.log(Level.SEVERE, message);
-            }
-        }
-
-
-        if (envImpl == null) {
-            return;
-        }
-
-        /*
-         * If not already invalid, invalidate environment by creating an
-         * EnvironmentFailureException.
-         */
-        if (envImpl.isValid()) {
-
-            /*
-             * Create the exception to invalidate the environment, but do
-             * not throw it since the handle is invoked in some internal
-             * JVM thread and the exception is not meaningful to the
-             * invoker.
-             */
-            @SuppressWarnings("unused")
-            EnvironmentFailureException unused =
-                new EnvironmentFailureException
-                    (envImpl, EnvironmentFailureReason.UNCAUGHT_EXCEPTION,
-                     e);
-        }
-
-        final ExceptionListener exceptionListener =
-            envImpl.getExceptionListener();
-
-        if (exceptionListener != null) {
-            exceptionListener.exceptionThrown(
-                DbInternal.makeExceptionEvent(
-                    envImpl.getInvalidatingException(), t.getName()));
-        }
-    }
-
-    /**
-     * An uncaught exception should invalidate the environment. Check if the
-     * environmentImpl is null, because there are a few cases where a
-     * StoppableThread is created for components that work both in replicated
-     * nodes and independently.
-     */
-    private class UncaughtHandler implements UncaughtExceptionHandler {
-
-        /**
-         * When an uncaught exception occurs, log it, publish it to the
-         * exception handler, and invalidate the environment.
-         */
-        @Override
-        public void uncaughtException(Thread t, Throwable e) {
-            Logger useLogger = getLogger();
-            handleUncaughtException(useLogger, envImpl, t, e);
-        }
-    }
-
     /**
      * This method is invoked from another thread of control to shutdown this
      * thread. The method tries shutting down the thread using a variety of
      * techniques, starting with the gentler techniques in order to limit of
      * stopping the thread on the overall process and proceeding to harsher
      * techniques:
-     *
+     * <p>
      * 1) It first tries a "soft" shutdown by invoking
      * <code>initiateSoftShutdown()</code>. This is the technique of choice.
      * Each StoppableThread is expected to make provisions for a clean shutdown
      * via this method. The techniques used to implement this method may vary
      * based upon the specifics of the thread.
-     *
+     * <p>
      * 2) If that fails it interrupts the thread.
-     *
+     * <p>
      * 3) If the thread does not respond to the interrupt, it invalidates the
      * environment.
-     *
+     * <p>
      * All Stoppable threads are expected to catch an interrupt, clean up and
      * then exit. The cleanup may involve invalidation of the environment, if
      * the thread is not in a position to handle the interrupt cleanly.
-     *
+     * <p>
      * If the method has to resort to step 3, it means that thread and other
      * resources may not have been freed and it would be best to exit and
      * restart the process itself to ensure they are freed. In this case an
@@ -312,23 +287,24 @@ public abstract class StoppableThread extends Thread {
          * thread has exited.
          */
         ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
-        if (threadBean.isThreadCpuTimeSupported()) {
+        if(threadBean.isThreadCpuTimeSupported()) {
             totalCpuTime = threadBean.getThreadCpuTime(getId());
             totalUserTime = threadBean.getThreadUserTime(getId());
-        } else if (threadBean.isCurrentThreadCpuTimeSupported() &&
-                   Thread.currentThread() == this) {
+        }
+        else if(threadBean.isCurrentThreadCpuTimeSupported() &&
+                Thread.currentThread() == this) {
             totalCpuTime = threadBean.getCurrentThreadCpuTime();
             totalUserTime = threadBean.getCurrentThreadUserTime();
         }
 
-        if (Thread.currentThread() == this) {
+        if(Thread.currentThread() == this) {
             /* Shutdown was called from this thread's run method. */
             return;
         }
 
         try {
             LoggerUtils.info(logger, envImpl,
-                             getName() + " soft shutdown initiated.");
+                    getName() + " soft shutdown initiated.");
 
             final int waitMs = initiateSoftShutdown();
 
@@ -336,20 +312,20 @@ public abstract class StoppableThread extends Thread {
              * Wait for a soft shutdown to take effect, the preferred method
              * for thread shutdown.
              */
-            if (waitMs >= 0) {
+            if(waitMs >= 0) {
                 join(waitMs);
             }
 
-            if (!isAlive()) {
+            if(!isAlive()) {
                 LoggerUtils.fine(logger, envImpl, this + " has exited.");
                 return;
             }
 
             LoggerUtils.warning(
-                logger, envImpl,
-                "Soft shutdown failed for thread:" + this +
-                    " after waiting for " +  waitMs +
-                    "ms resorting to interrupt.");
+                    logger, envImpl,
+                    "Soft shutdown failed for thread:" + this +
+                            " after waiting for " + waitMs +
+                            "ms resorting to interrupt.");
 
             interrupt();
 
@@ -358,13 +334,13 @@ public abstract class StoppableThread extends Thread {
              * interrupt.
              */
             final long joinWaitTime =
-                (waitMs > 0) ? 2 * waitMs : DEFAULT_INTERRUPT_WAIT_MS;
+                    (waitMs > 0) ? 2 * waitMs : DEFAULT_INTERRUPT_WAIT_MS;
 
             join(joinWaitTime);
 
-            if (!isAlive()) {
+            if(!isAlive()) {
                 LoggerUtils.warning(logger, envImpl,
-                                    this + " shutdown via interrupt.");
+                        this + " shutdown via interrupt.");
                 return;
             }
 
@@ -374,22 +350,22 @@ public abstract class StoppableThread extends Thread {
              * to get to an interruptible point.
              */
             final String msg = this +
-                " shutdown via interrupt FAILED. " +
-                "Thread still alive despite waiting for " +
-                joinWaitTime + "ms.";
+                    " shutdown via interrupt FAILED. " +
+                    "Thread still alive despite waiting for " +
+                    joinWaitTime + "ms.";
 
             LoggerUtils.severe(logger, envImpl, msg);
             LoggerUtils.fullThreadDump(logger, envImpl, Level.SEVERE);
 
-            if (envImpl != null) {
+            if(envImpl != null) {
                 @SuppressWarnings("unused")
                 EnvironmentFailureException unused =
-                    new EnvironmentWedgedException(envImpl, msg);
+                        new EnvironmentWedgedException(envImpl, msg);
             }
-        } catch (InterruptedException e1) {
+        } catch(InterruptedException e1) {
             LoggerUtils.warning(
-                logger, envImpl,
-                "Interrupted while shutting down thread:" + this);
+                    logger, envImpl,
+                    "Interrupted while shutting down thread:" + this);
         }
     }
 
@@ -401,7 +377,7 @@ public abstract class StoppableThread extends Thread {
 
         assert shutdown.get();
 
-        if (Thread.currentThread() == this) {
+        if(Thread.currentThread() == this) {
             /* Shutdown was called from this thread's run method. */
             return;
         }
@@ -409,7 +385,7 @@ public abstract class StoppableThread extends Thread {
         try {
             join(WAIT_FOR_SHUTDOWN_MS);
 
-            if (!isAlive()) {
+            if(!isAlive()) {
                 return;
             }
 
@@ -419,15 +395,15 @@ public abstract class StoppableThread extends Thread {
              * thread before giving up.
              */
             LoggerUtils.warning(
-                logger, envImpl,
-                "Soft shutdown failed for thread:" + this +
-                    " after waiting for " + WAIT_FOR_SHUTDOWN_MS +
-                    "ms, resorting to interrupt in wait-for-shutdown.");
+                    logger, envImpl,
+                    "Soft shutdown failed for thread:" + this +
+                            " after waiting for " + WAIT_FOR_SHUTDOWN_MS +
+                            "ms, resorting to interrupt in wait-for-shutdown.");
 
             interrupt();
             join(WAIT_FOR_SHUTDOWN_MS);
 
-            if (!isAlive()) {
+            if(!isAlive()) {
                 return;
             }
 
@@ -437,29 +413,29 @@ public abstract class StoppableThread extends Thread {
              * to get to an interruptible point.
              */
             final String msg = this +
-                " shutdown via interrupt FAILED during wait-for-shutdown. " +
-                "Thread still alive despite waiting for " +
-                WAIT_FOR_SHUTDOWN_MS + "ms.";
+                    " shutdown via interrupt FAILED during wait-for-shutdown. " +
+                    "Thread still alive despite waiting for " +
+                    WAIT_FOR_SHUTDOWN_MS + "ms.";
 
             LoggerUtils.severe(logger, envImpl, msg);
             LoggerUtils.fullThreadDump(logger, envImpl, Level.SEVERE);
 
-            if (envImpl != null) {
+            if(envImpl != null) {
                 @SuppressWarnings("unused")
                 EnvironmentFailureException unused =
-                    new EnvironmentWedgedException(envImpl, msg);
+                        new EnvironmentWedgedException(envImpl, msg);
             }
-        } catch (InterruptedException e1) {
+        } catch(InterruptedException e1) {
             LoggerUtils.warning(
-                logger, envImpl,
-                "Interrupted during wait-for-shutdown:" + this);
+                    logger, envImpl,
+                    "Interrupted during wait-for-shutdown:" + this);
         }
     }
 
     /**
      * Threads that use shutdownThread() must define this method. It's invoked
      * by shutdownThread as an attempt at a soft shutdown.
-     *
+     * <p>
      * This method makes provisions for this thread to exit on its own. The
      * technique used to make the thread exit can vary based upon the nature of
      * the service being provided by the thread. For example, the thread may be
@@ -488,5 +464,24 @@ public abstract class StoppableThread extends Thread {
      */
     public long getTotalUserTime() {
         return totalUserTime;
+    }
+
+    /**
+     * An uncaught exception should invalidate the environment. Check if the
+     * environmentImpl is null, because there are a few cases where a
+     * StoppableThread is created for components that work both in replicated
+     * nodes and independently.
+     */
+    private class UncaughtHandler implements UncaughtExceptionHandler {
+
+        /**
+         * When an uncaught exception occurs, log it, publish it to the
+         * exception handler, and invalidate the environment.
+         */
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            Logger useLogger = getLogger();
+            handleUncaughtException(useLogger, envImpl, t, e);
+        }
     }
 }

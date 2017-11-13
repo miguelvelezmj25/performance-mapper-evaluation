@@ -33,7 +33,7 @@ public abstract class PollCondition {
 
     public boolean await() {
 
-        if (condition()) {
+        if(condition()) {
             return true;
         }
 
@@ -41,13 +41,13 @@ public abstract class PollCondition {
         do {
             try {
                 Thread.sleep(checkPeriodMs);
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 return false;
             }
-            if (condition()) {
+            if(condition()) {
                 return true;
             }
-        } while (System.currentTimeMillis() < timeLimit);
+        } while(System.currentTimeMillis() < timeLimit);
 
         return false;
     }

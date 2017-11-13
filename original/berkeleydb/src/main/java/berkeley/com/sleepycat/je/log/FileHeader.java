@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.Calendar;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.VersionMismatchException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
+
+import java.nio.ByteBuffer;
+import java.util.Calendar;
 
 /**
  * A FileHeader embodies the header information at the beginning of each log
@@ -52,6 +52,17 @@ public class FileHeader implements Loggable {
     public FileHeader() {
     }
 
+    /**
+     * A header is always a known size.
+     */
+    public static int entrySize() {
+        return
+                LogUtils.LONG_BYTES +                // time
+                        LogUtils.UNSIGNED_INT_BYTES +        // file number
+                        LogUtils.LONG_BYTES +                // lastEntryInPrevFileOffset
+                        LogUtils.INT_BYTES;                  // logVersion
+    }
+
     public int getLogVersion() {
         return logVersion;
     }
@@ -62,25 +73,29 @@ public class FileHeader implements Loggable {
     int validate(EnvironmentImpl envImpl,
                  String fileName,
                  long expectedFileNum)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (logVersion > LogEntryType.LOG_VERSION) {
+        if(logVersion > LogEntryType.LOG_VERSION) {
             throw new VersionMismatchException
-                (envImpl,
-                 "Expected log version " + LogEntryType.LOG_VERSION +
-                 " or earlier but found " + logVersion);
+                    (envImpl,
+                            "Expected log version " + LogEntryType.LOG_VERSION +
+                                    " or earlier but found " + logVersion);
         }
 
-        if (fileNum != expectedFileNum) {
+        if(fileNum != expectedFileNum) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
-                 "Wrong filenum in header for file " +
-                 fileName + " expected " +
-                 expectedFileNum + " got " + fileNum);
+                    (envImpl, EnvironmentFailureReason.LOG_INTEGRITY,
+                            "Wrong filenum in header for file " +
+                                    fileName + " expected " +
+                                    expectedFileNum + " got " + fileNum);
         }
 
         return logVersion;
     }
+
+    /*
+     * Logging support
+     */
 
     /**
      * @return the offset of the last entry in the previous file.
@@ -89,34 +104,19 @@ public class FileHeader implements Loggable {
         return lastEntryInPrevFileOffset;
     }
 
-    /*
-     * Logging support
-     */
-
     /**
-     * A header is always a known size.
-     */
-    public static int entrySize() {
-        return
-            LogUtils.LONG_BYTES +                // time
-            LogUtils.UNSIGNED_INT_BYTES +        // file number
-            LogUtils.LONG_BYTES +                // lastEntryInPrevFileOffset
-            LogUtils.INT_BYTES;                  // logVersion
-    }
-
-    /**
-     * @see Loggable#getLogSize
      * @return number of bytes used to store this object
+     * @see Loggable#getLogSize
      */
     public int getLogSize() {
         return entrySize();
     }
 
     /**
+     * @param logBuffer is the destination buffer
      * @see Loggable#writeToLog
      * Serialize this object into the buffer. Update cksum with all
      * the bytes used by this object
-     * @param logBuffer is the destination buffer
      */
     public void writeToLog(ByteBuffer logBuffer) {
         LogUtils.writeLong(logBuffer, time.getTime());
@@ -126,9 +126,9 @@ public class FileHeader implements Loggable {
     }
 
     /**
+     * @param itemBuf the source buffer
      * @see Loggable#readFromLog
      * Initialize this object from the data in itemBuf.
-     * @param itemBuf the source buffer
      */
     public void readFromLog(ByteBuffer logBuffer, int unusableEntryVersion) {
 
@@ -146,9 +146,9 @@ public class FileHeader implements Loggable {
     }
 
     /**
-     * @see Loggable#dumpLog
-     * @param sb destination string buffer
+     * @param sb      destination string buffer
      * @param verbose if true, dump the full, verbose version
+     * @see Loggable#dumpLog
      */
     public void dumpLog(StringBuilder sb, boolean verbose) {
         sb.append("<FileHeader num=\"0x");

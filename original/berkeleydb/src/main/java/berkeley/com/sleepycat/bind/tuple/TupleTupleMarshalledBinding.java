@@ -19,7 +19,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * A concrete <code>TupleTupleBinding</code> that delegates to the
  * <code>MarshalledTupleEntry</code> and
  * <code>MarshalledTupleKeyEntity</code> interfaces of the entity class.
- *
+ * <p>
  * <p>This class calls the methods of the {@link MarshalledTupleEntry}
  * interface to convert between the data entry and entity object.  It calls the
  * methods of the {@link MarshalledTupleKeyEntity} interface to convert between
@@ -29,14 +29,14 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class TupleTupleMarshalledBinding<E extends
-    MarshalledTupleEntry & MarshalledTupleKeyEntity>
-    extends TupleTupleBinding<E> {
+        MarshalledTupleEntry & MarshalledTupleKeyEntity>
+        extends TupleTupleBinding<E> {
 
     private Class<E> cls;
 
     /**
      * Creates a tuple-tuple marshalled binding object.
-     *
+     * <p>
      * <p>The given class is used to instantiate entity objects using {@link
      * Class#newInstance}, and therefore must be a public class and have a
      * public no-arguments constructor.  It must also implement the {@link
@@ -51,14 +51,14 @@ public class TupleTupleMarshalledBinding<E extends
 
         // The entity class will be used to instantiate the entity object.
         //
-        if (!MarshalledTupleKeyEntity.class.isAssignableFrom(cls)) {
+        if(!MarshalledTupleKeyEntity.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException
-                (cls.toString() +
-                 " does not implement MarshalledTupleKeyEntity");
+                    (cls.toString() +
+                            " does not implement MarshalledTupleKeyEntity");
         }
-        if (!MarshalledTupleEntry.class.isAssignableFrom(cls)) {
+        if(!MarshalledTupleEntry.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException
-                (cls.toString() + " does not implement MarshalledTupleEntry");
+                    (cls.toString() + " does not implement MarshalledTupleEntry");
         }
     }
 
@@ -72,15 +72,15 @@ public class TupleTupleMarshalledBinding<E extends
         E obj;
         try {
             obj = cls.newInstance();
-        } catch (IllegalAccessException e) {
+        } catch(IllegalAccessException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
-        } catch (InstantiationException e) {
+        } catch(InstantiationException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
-        if (dataInput != null) { // may be null if used by key extractor
+        if(dataInput != null) { // may be null if used by key extractor
             obj.unmarshalEntry(dataInput);
         }
-        if (keyInput != null) { // may be null if used by key extractor
+        if(keyInput != null) { // may be null if used by key extractor
             obj.unmarshalPrimaryKey(keyInput);
         }
         return obj;

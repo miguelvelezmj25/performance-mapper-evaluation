@@ -14,39 +14,21 @@
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
 import berkeley.com.sleepycat.je.rep.ReplicationSSLConfig;
-import berkeley.com.sleepycat.je.rep.net.DataChannel;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
-import berkeley.com.sleepycat.je.rep.net.InstanceContext;
-import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
-import berkeley.com.sleepycat.je.rep.net.InstanceParams;
-import berkeley.com.sleepycat.je.rep.net.PasswordSource;
-import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
+import berkeley.com.sleepycat.je.rep.net.*;
 import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
 import berkeley.com.sleepycat.je.rep.utilint.net.DataChannelFactoryBuilder.CtorArgSpec;
 
+import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.ArrayList;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedKeyManager;
+import java.util.Arrays;
 
 /**
  * A factory class for generating SSLDataChannel instances based on
@@ -67,7 +49,7 @@ public class SSLChannelFactory implements DataChannelFactory {
      * algorithm name based on the JVMs they are using.
      */
     private static final String X509_ALGO_NAME_PROPERTY =
-        "je.ssl.x509AlgoName";
+            "je.ssl.x509AlgoName";
 
     /**
      * The algorithm name of X509 certificate. It depends on the vendor of JVM.
@@ -112,8 +94,8 @@ public class SSLChannelFactory implements DataChannelFactory {
         serverSSLContext = constructSSLContext(params, false);
         clientSSLContext = constructSSLContext(params, true);
         baseSSLParameters =
-            filterSSLParameters(constructSSLParameters(params),
-                                serverSSLContext);
+                filterSSLParameters(constructSSLParameters(params),
+                        serverSSLContext);
         sslAuthenticator = constructSSLAuthenticator(params);
         sslHostVerifier = constructSSLHostVerifier(params);
         logger = params.getContext().getLoggerFactory().getLogger(getClass());
@@ -133,72 +115,10 @@ public class SSLChannelFactory implements DataChannelFactory {
         this.serverSSLContext = serverSSLContext;
         this.clientSSLContext = clientSSLContext;
         this.baseSSLParameters =
-            filterSSLParameters(baseSSLParameters, serverSSLContext);
+                filterSSLParameters(baseSSLParameters, serverSSLContext);
         this.sslAuthenticator = sslAuthenticator;
         this.sslHostVerifier = sslHostVerifier;
         this.logger = logger;
-    }
-
-    /**
-     * Construct a DataChannel wrapping the newly accepted SocketChannel
-     */
-    @Override
-    public DataChannel acceptChannel(SocketChannel socketChannel) {
-
-        final SocketAddress socketAddress =
-            socketChannel.socket().getRemoteSocketAddress();
-        String host = null;
-        if (socketAddress == null) {
-            throw new IllegalArgumentException(
-                "socketChannel is not connected");
-        }
-
-        if (socketAddress instanceof InetSocketAddress) {
-            host = ((InetSocketAddress)socketAddress).getAddress().toString();
-        }
-
-        final SSLEngine engine =
-            serverSSLContext.createSSLEngine(host,
-                                             socketChannel.socket().getPort());
-        engine.setSSLParameters(baseSSLParameters);
-        engine.setUseClientMode(false);
-        if (sslAuthenticator != null) {
-            engine.setWantClientAuth(true);
-        }
-
-        return new SSLDataChannel(socketChannel, engine, null, null,
-                                  sslAuthenticator, logger);
-    }
-
-    /**
-     * Construct a DataChannel wrapping a new connection to the specified
-     * address using the associated connection options.
-     */
-    @Override
-    public DataChannel connect(InetSocketAddress addr,
-                               ConnectOptions connectOptions)
-        throws IOException {
-
-        final SocketChannel socketChannel =
-            RepUtils.openSocketChannel(addr, connectOptions);
-
-        /*
-         * Figure out a good host to specify.  This is used for session caching
-         * so it's not critical what answer we come up with, so long as it
-         * is relatively repeatable.
-         */
-        String host = addr.getHostName();
-        if (host == null) {
-            host = addr.getAddress().toString();
-        }
-
-        final SSLEngine engine =
-            clientSSLContext.createSSLEngine(host, addr.getPort());
-        engine.setSSLParameters(baseSSLParameters);
-        engine.setUseClientMode(true);
-
-        return new SSLDataChannel(
-            socketChannel, engine, host, sslHostVerifier, null, logger);
     }
 
     /**
@@ -221,11 +141,11 @@ public class SSLChannelFactory implements DataChannelFactory {
     public static boolean isValidAuthenticator(String authSpec) {
         authSpec = authSpec.trim();
 
-        if (authSpec.equals("") || authSpec.equals("mirror")) {
+        if(authSpec.equals("") || authSpec.equals("mirror")) {
             return true;
         }
 
-        if (authSpec.startsWith("dnmatch(") && authSpec.endsWith(")")) {
+        if(authSpec.startsWith("dnmatch(") && authSpec.endsWith(")")) {
             try {
                 SSLDNAuthenticator.validate(authSpec);
                 return true;
@@ -244,15 +164,15 @@ public class SSLChannelFactory implements DataChannelFactory {
 
         hvSpec = hvSpec.trim();
 
-        if (hvSpec.equals("") || hvSpec.equals("mirror") ||
-            hvSpec.equals("hostname")) {
+        if(hvSpec.equals("") || hvSpec.equals("mirror") ||
+                hvSpec.equals("hostname")) {
             return true;
         }
 
-        if (hvSpec.startsWith("dnmatch(") && hvSpec.endsWith(")")) {
+        if(hvSpec.startsWith("dnmatch(") && hvSpec.endsWith(")")) {
             try {
                 SSLDNHostVerifier.validate(hvSpec);
-            } catch (IllegalArgumentException iae) {
+            } catch(IllegalArgumentException iae) {
                 return false;
             }
             return true;
@@ -262,29 +182,30 @@ public class SSLChannelFactory implements DataChannelFactory {
 
     /**
      * Builds an SSLContext object for the specified access mode.
-     * @param params general instantiation information
+     *
+     * @param params     general instantiation information
      * @param clientMode set to true if the SSLContext is being created for
-     * the client side of an SSL connection and false otherwise
+     *                   the client side of an SSL connection and false otherwise
      */
     private static SSLContext constructSSLContext(
-        InstanceParams params, boolean clientMode) {
+            InstanceParams params, boolean clientMode) {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) params.getContext().getRepNetConfig();
+                (ReplicationSSLConfig) params.getContext().getRepNetConfig();
 
         KeyManager[] kmList = null;
         final KeyStoreInfo ksInfo = readKeyStoreInfo(params.getContext());
 
-        if (ksInfo != null) {
+        if(ksInfo != null) {
             try {
 
                 /*
                  * Determine whether a specific key is supposed to be used
                  */
                 String ksAliasProp = clientMode ?
-                    config.getSSLClientKeyAlias() :
-                    config.getSSLServerKeyAlias();
-                if (ksAliasProp != null && ksAliasProp.isEmpty()) {
+                        config.getSSLClientKeyAlias() :
+                        config.getSSLServerKeyAlias();
+                if(ksAliasProp != null && ksAliasProp.isEmpty()) {
                     ksAliasProp = null;
                 }
 
@@ -296,7 +217,7 @@ public class SSLChannelFactory implements DataChannelFactory {
 
         TrustManager[] tmList = null;
         final KeyStoreInfo tsInfo = readTrustStoreInfo(params.getContext());
-        if (tsInfo != null) {
+        if(tsInfo != null) {
             try {
                 tmList = buildTrustManagerList(tsInfo);
             } finally {
@@ -310,9 +231,9 @@ public class SSLChannelFactory implements DataChannelFactory {
         SSLContext newContext = null;
         try {
             newContext = SSLContext.getInstance(SSL_CONTEXT_PROTOCOL);
-        } catch (NoSuchAlgorithmException nsae) {
+        } catch(NoSuchAlgorithmException nsae) {
             throw new IllegalStateException(
-                "Unable to find a suitable SSLContext", nsae);
+                    "Unable to find a suitable SSLContext", nsae);
         }
 
         /*
@@ -320,9 +241,9 @@ public class SSLChannelFactory implements DataChannelFactory {
          */
         try {
             newContext.init(kmList, tmList, null);
-        } catch (KeyManagementException kme) {
+        } catch(KeyManagementException kme) {
             throw new IllegalStateException(
-                "Error establishing SSLContext", kme);
+                    "Error establishing SSLContext", kme);
         }
 
         return newContext;
@@ -331,13 +252,13 @@ public class SSLChannelFactory implements DataChannelFactory {
     /**
      * Builds a list of KeyManagers for incorporation into an SSLContext.
      *
-     * @param ksInfo a KeyStoreInfo referencing the Keystore for which the
-     * the key manager list is to be built.
-     * @param ksAlias an optional KeyStore alias.  If set, the key manager
-     * for X509 certs will always select the certificate with the specified
-     * alias.
+     * @param ksInfo     a KeyStoreInfo referencing the Keystore for which the
+     *                   the key manager list is to be built.
+     * @param ksAlias    an optional KeyStore alias.  If set, the key manager
+     *                   for X509 certs will always select the certificate with the specified
+     *                   alias.
      * @param clientMode set to true if this is for the client side of
-     * an SSL connection and fals otherwise.
+     *                   an SSL connection and fals otherwise.
      */
     private static KeyManager[] buildKeyManagerList(KeyStoreInfo ksInfo,
                                                     String ksAlias,
@@ -349,9 +270,9 @@ public class SSLChannelFactory implements DataChannelFactory {
         final KeyManagerFactory kmf;
         try {
             kmf = KeyManagerFactory.getInstance(X509_ALGO_NAME);
-        } catch (NoSuchAlgorithmException nsae) {
+        } catch(NoSuchAlgorithmException nsae) {
             throw new IllegalStateException(
-                "Unable to find a suitable KeyManagerFactory", nsae);
+                    "Unable to find a suitable KeyManagerFactory", nsae);
         }
 
         /*
@@ -359,18 +280,18 @@ public class SSLChannelFactory implements DataChannelFactory {
          */
         try {
             kmf.init(ksInfo.ks, ksInfo.ksPwd);
-        } catch (KeyStoreException kse) {
+        } catch(KeyStoreException kse) {
             throw new IllegalStateException(
-                "Error processing keystore file " + ksInfo.ksFile,
-                kse);
-        } catch (NoSuchAlgorithmException nsae) {
+                    "Error processing keystore file " + ksInfo.ksFile,
+                    kse);
+        } catch(NoSuchAlgorithmException nsae) {
             throw new IllegalStateException(
-                "Unable to find appropriate algorithm for " +
-                "keystore file " + ksInfo.ksFile, nsae);
-        } catch (UnrecoverableKeyException uke) {
+                    "Unable to find appropriate algorithm for " +
+                            "keystore file " + ksInfo.ksFile, nsae);
+        } catch(UnrecoverableKeyException uke) {
             throw new IllegalStateException(
-                "Unable to recover key from keystore file " +
-                ksInfo.ksFile, uke);
+                    "Unable to recover key from keystore file " +
+                            ksInfo.ksFile, uke);
         }
 
         /*
@@ -383,29 +304,29 @@ public class SSLChannelFactory implements DataChannelFactory {
          * AliasKeyManager, which will delegate to the correct
          * underlying KeyManager, which we need to locate.
          */
-        if (ksAlias != null) {
+        if(ksAlias != null) {
 
             /*
              * Locate the first appropriate keymanager in the list
              */
             X509ExtendedKeyManager x509KeyManager = null;
-            for (KeyManager km : kmList) {
-                if (km instanceof X509ExtendedKeyManager) {
+            for(KeyManager km : kmList) {
+                if(km instanceof X509ExtendedKeyManager) {
                     x509KeyManager = (X509ExtendedKeyManager) km;
                     break;
                 }
             }
 
-            if (x509KeyManager == null) {
+            if(x509KeyManager == null) {
                 throw new IllegalStateException(
-                    "Unable to locate an X509ExtendedKeyManager " +
-                    "corresponding to keyStore " + ksInfo.ksFile);
+                        "Unable to locate an X509ExtendedKeyManager " +
+                                "corresponding to keyStore " + ksInfo.ksFile);
             }
 
-            kmList = new KeyManager[] {
-                (clientMode ?
-                 new AliasKeyManager(x509KeyManager, null, ksAlias) :
-                 new AliasKeyManager(x509KeyManager, ksAlias, null)) };
+            kmList = new KeyManager[]{
+                    (clientMode ?
+                            new AliasKeyManager(x509KeyManager, null, ksAlias) :
+                            new AliasKeyManager(x509KeyManager, ksAlias, null))};
         }
 
         return kmList;
@@ -415,19 +336,19 @@ public class SSLChannelFactory implements DataChannelFactory {
      * Reads a KeyStore into memory based on the config.
      */
     private static KeyStoreInfo readKeyStoreInfo(InstanceContext context) {
-        
+
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) context.getRepNetConfig();
+                (ReplicationSSLConfig) context.getRepNetConfig();
 
         /*
          * Determine what KeyStore file to access
          */
         String ksProp = config.getSSLKeyStore();
-        if (ksProp == null || ksProp.isEmpty()) {
+        if(ksProp == null || ksProp.isEmpty()) {
             ksProp = System.getProperty("javax.net.ssl.keyStore");
         }
 
-        if (ksProp == null) {
+        if(ksProp == null) {
             return null;
         }
 
@@ -439,9 +360,9 @@ public class SSLChannelFactory implements DataChannelFactory {
 
         final char[] ksPw = getKeyStorePassword(context);
         try {
-            if (ksPw == null) {
+            if(ksPw == null) {
                 throw new IllegalArgumentException(
-                    "Unable to open keystore without a password");
+                        "Unable to open keystore without a password");
             }
 
             /*
@@ -451,7 +372,7 @@ public class SSLChannelFactory implements DataChannelFactory {
 
             return new KeyStoreInfo(ksProp, ks, ksPw);
         } finally {
-            if (ksPw != null) {
+            if(ksPw != null) {
                 Arrays.fill(ksPw, ' ');
             }
         }
@@ -463,7 +384,7 @@ public class SSLChannelFactory implements DataChannelFactory {
     private static char[] getKeyStorePassword(InstanceContext context) {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) context.getRepNetConfig();
+                (ReplicationSSLConfig) context.getRepNetConfig();
 
         char[] ksPw = null;
 
@@ -473,26 +394,27 @@ public class SSLChannelFactory implements DataChannelFactory {
          * constructed.
          */
         PasswordSource ksPwSource = config.getSSLKeyStorePasswordSource();
-        if (ksPwSource == null) {
-            ksPwSource = 
-                constructKSPasswordSource(new InstanceParams(context, null));
+        if(ksPwSource == null) {
+            ksPwSource =
+                    constructKSPasswordSource(new InstanceParams(context, null));
         }
 
-        if (ksPwSource != null) {
+        if(ksPwSource != null) {
             ksPw = ksPwSource.getPassword();
-        } else {
+        }
+        else {
             /* Next look for an explicit password setting */
             String ksPwProp = config.getSSLKeyStorePassword();
-            if (ksPwProp == null || ksPwProp.isEmpty()) {
+            if(ksPwProp == null || ksPwProp.isEmpty()) {
 
                 /*
                  * Finally, consider the standard Java Keystore
                  * password system property
                  */
                 ksPwProp =
-                    System.getProperty("javax.net.ssl.keyStorePassword");
+                        System.getProperty("javax.net.ssl.keyStorePassword");
             }
-            if (ksPwProp != null) {
+            if(ksPwProp != null) {
                 ksPw = ksPwProp.toCharArray();
             }
         }
@@ -509,16 +431,16 @@ public class SSLChannelFactory implements DataChannelFactory {
         final TrustManagerFactory tmf;
         try {
             tmf = TrustManagerFactory.getInstance(X509_ALGO_NAME);
-        } catch (NoSuchAlgorithmException nsae) {
+        } catch(NoSuchAlgorithmException nsae) {
             throw new IllegalStateException(
-                "Unable to find a suitable TrustManagerFactory", nsae);
+                    "Unable to find a suitable TrustManagerFactory", nsae);
         }
 
         try {
             tmf.init(tsInfo.ks);
-        } catch (KeyStoreException kse) {
+        } catch(KeyStoreException kse) {
             throw new IllegalStateException(
-                "Error initializing truststore " + tsInfo.ksFile, kse);
+                    "Error initializing truststore " + tsInfo.ksFile, kse);
         }
 
         return tmf.getTrustManagers();
@@ -530,13 +452,13 @@ public class SSLChannelFactory implements DataChannelFactory {
     private static KeyStoreInfo readTrustStoreInfo(InstanceContext context) {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) context.getRepNetConfig();
+                (ReplicationSSLConfig) context.getRepNetConfig();
 
         /*
          * Determine what truststore file, if any, to use
          */
         String tsProp = config.getSSLTrustStore();
-        if (tsProp == null || tsProp.isEmpty()) {
+        if(tsProp == null || tsProp.isEmpty()) {
             tsProp = System.getProperty("javax.net.ssl.trustStore");
         }
 
@@ -544,7 +466,7 @@ public class SSLChannelFactory implements DataChannelFactory {
          * Determine what type of truststore to assume
          */
         String tsTypeProp = config.getSSLTrustStoreType();
-        if (tsTypeProp == null || tsTypeProp.isEmpty()) {
+        if(tsTypeProp == null || tsTypeProp.isEmpty()) {
             tsTypeProp = KeyStore.getDefaultType();
         }
 
@@ -552,9 +474,9 @@ public class SSLChannelFactory implements DataChannelFactory {
          * Build a TrustStore, if specified
          */
 
-        if (tsProp != null) {
+        if(tsProp != null) {
             final KeyStore ts =
-                loadStore(tsProp, null, "truststore", tsTypeProp);
+                    loadStore(tsProp, null, "truststore", tsTypeProp);
 
             return new KeyStoreInfo(tsProp, ts, null);
         }
@@ -566,17 +488,17 @@ public class SSLChannelFactory implements DataChannelFactory {
      * Create an SSLParameters base on the input configuration.
      */
     private static SSLParameters constructSSLParameters(
-        InstanceParams params) {
+            InstanceParams params) {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) params.getContext().getRepNetConfig();
+                (ReplicationSSLConfig) params.getContext().getRepNetConfig();
 
         /*
          * Determine cipher suites configuration
          */
         String cipherSuitesProp = config.getSSLCipherSuites();
         String[] cipherSuites = null;
-        if (cipherSuitesProp != null && !cipherSuitesProp.isEmpty()) {
+        if(cipherSuitesProp != null && !cipherSuitesProp.isEmpty()) {
             cipherSuites = cipherSuitesProp.split(",");
         }
 
@@ -585,7 +507,7 @@ public class SSLChannelFactory implements DataChannelFactory {
          */
         String protocolsProp = config.getSSLProtocols();
         String[] protocols = null;
-        if (protocolsProp != null && !protocolsProp.isEmpty()) {
+        if(protocolsProp != null && !protocolsProp.isEmpty()) {
             protocols = protocolsProp.split(",");
         }
 
@@ -597,39 +519,39 @@ public class SSLChannelFactory implements DataChannelFactory {
      * configuration capabilities of the context.
      */
     private static SSLParameters filterSSLParameters(
-        SSLParameters configParams, SSLContext filterContext)
-        throws IllegalArgumentException {
+            SSLParameters configParams, SSLContext filterContext)
+            throws IllegalArgumentException {
 
         SSLParameters suppParams = filterContext.getSupportedSSLParameters();
 
         /* Filter the cipher suite selection */
         String[] configCipherSuites = configParams.getCipherSuites();
-        if (configCipherSuites != null) {
+        if(configCipherSuites != null) {
             final String[] suppCipherSuites = suppParams.getCipherSuites();
             configCipherSuites =
-                filterConfig(configCipherSuites, suppCipherSuites);
-            if (configCipherSuites.length == 0) {
+                    filterConfig(configCipherSuites, suppCipherSuites);
+            if(configCipherSuites.length == 0) {
                 throw new IllegalArgumentException(
-                    "None of the configured SSL cipher suites are supported " +
-                    "by the environment.");
+                        "None of the configured SSL cipher suites are supported " +
+                                "by the environment.");
             }
         }
 
         /* Filter the protocol selection */
         String[] configProtocols =
-            configParams.getProtocols();
-        if (configProtocols != null) {
+                configParams.getProtocols();
+        if(configProtocols != null) {
             final String[] suppProtocols = suppParams.getProtocols();
             configProtocols = filterConfig(configProtocols, suppProtocols);
-            if (configProtocols.length == 0) {
+            if(configProtocols.length == 0) {
                 throw new IllegalArgumentException(
-                    "None of the configured SSL protocols are supported " +
-                    "by the environment.");
+                        "None of the configured SSL protocols are supported " +
+                                "by the environment.");
             }
         }
 
         final SSLParameters newParams =
-            new SSLParameters(configCipherSuites, configProtocols);
+                new SSLParameters(configCipherSuites, configProtocols);
         newParams.setWantClientAuth(configParams.getWantClientAuth());
         newParams.setNeedClientAuth(configParams.getNeedClientAuth());
         return newParams;
@@ -642,9 +564,9 @@ public class SSLChannelFactory implements DataChannelFactory {
                                          String[] supported) {
 
         ArrayList<String> keep = new ArrayList<String>();
-        for (String choice : configChoices) {
-            for (String supp : supported) {
-                if (choice.equals(supp)) {
+        for(String choice : configChoices) {
+            for(String supp : supported) {
+                if(choice.equals(supp)) {
                     keep.add(choice);
                     break;
                 }
@@ -661,31 +583,31 @@ public class SSLChannelFactory implements DataChannelFactory {
      * validates that the instance extends or implements the mustImplement
      * class specified.
      *
-     * @param params the parameters for constructing this factory.
+     * @param params           the parameters for constructing this factory.
      * @param checkerClassName the name of the class to instantiate
-     * @param the value of the configured String params argument
-     * @param mustImplement a class denoting a required base class or
-     *   required implemented interface of the class whose name is
-     *   specified by checkerClassName.
-     * @param miDesc a descriptive term for the class to be instantiated
+     * @param the              value of the configured String params argument
+     * @param mustImplement    a class denoting a required base class or
+     *                         required implemented interface of the class whose name is
+     *                         specified by checkerClassName.
+     * @param miDesc           a descriptive term for the class to be instantiated
      * @return an instance of the specified class
      */
     private static Object constructSSLChecker(
-        InstanceParams params,
-        String checkerClassName,
-        String checkerClassParams,
-        Class<?> mustImplement,
-        String miDesc) {
+            InstanceParams params,
+            String checkerClassName,
+            String checkerClassParams,
+            Class<?> mustImplement,
+            String miDesc) {
 
         InstanceParams objParams =
-            new InstanceParams(params.getContext(), checkerClassParams);
+                new InstanceParams(params.getContext(), checkerClassParams);
 
         return DataChannelFactoryBuilder.constructObject(
-            checkerClassName, mustImplement, miDesc,
+                checkerClassName, mustImplement, miDesc,
             /* class(InstanceParams) */
-            new CtorArgSpec(
-                new Class<?>[] { InstanceParams.class },
-                new Object[]   { objParams }));
+                new CtorArgSpec(
+                        new Class<?>[]{InstanceParams.class},
+                        new Object[]{objParams}));
     }
 
     /**
@@ -693,29 +615,29 @@ public class SSLChannelFactory implements DataChannelFactory {
      * by params.
      */
     private static SSLAuthenticator constructSSLAuthenticator(
-        InstanceParams params)
-        throws IllegalArgumentException {
+            InstanceParams params)
+            throws IllegalArgumentException {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) params.getContext().getRepNetConfig();
+                (ReplicationSSLConfig) params.getContext().getRepNetConfig();
 
         final String authSpec = config.getSSLAuthenticator();
         final String authClassName = config.getSSLAuthenticatorClass();
 
         /* check for conflicts */
-        if (authSpec != null && !authSpec.equals("") &&
-            authClassName != null && !authClassName.equals("")) {
+        if(authSpec != null && !authSpec.equals("") &&
+                authClassName != null && !authClassName.equals("")) {
 
             throw new IllegalArgumentException(
-                "Cannot specify both authenticator and authenticatorClass");
+                    "Cannot specify both authenticator and authenticatorClass");
         }
 
-        if (authSpec != null && !authSpec.equals("")) {
+        if(authSpec != null && !authSpec.equals("")) {
             /* construct an authenticator of a known type */
             return constructStdAuthenticator(params, authSpec);
         }
 
-        if (authClassName == null || authClassName.equals("")) {
+        if(authClassName == null || authClassName.equals("")) {
             return null;
         }
 
@@ -723,33 +645,34 @@ public class SSLChannelFactory implements DataChannelFactory {
         final String authParams = config.getSSLAuthenticatorParams();
 
         return (SSLAuthenticator) constructSSLChecker(
-            params, authClassName, authParams, SSLAuthenticator.class,
-            "authenticator");
+                params, authClassName, authParams, SSLAuthenticator.class,
+                "authenticator");
     }
 
     /**
      * Builds an SSLAuthenticator of a known type.
      */
     private static SSLAuthenticator constructStdAuthenticator(
-        InstanceParams params, String authSpec)
-        throws IllegalArgumentException {
+            InstanceParams params, String authSpec)
+            throws IllegalArgumentException {
 
         authSpec = authSpec.trim();
-        if (authSpec.startsWith("dnmatch(") && authSpec.endsWith(")")) {
+        if(authSpec.startsWith("dnmatch(") && authSpec.endsWith(")")) {
             /* a DN matching authenticator */
             final String match =
-                authSpec.substring("dnmatch(".length(),
-                                        authSpec.length()-1);
+                    authSpec.substring("dnmatch(".length(),
+                            authSpec.length() - 1);
             return new SSLDNAuthenticator(
-                new InstanceParams(params.getContext(), match));
-        } else if (authSpec.equals("mirror")) {
+                    new InstanceParams(params.getContext(), match));
+        }
+        else if(authSpec.equals("mirror")) {
             /* a mirroring  authenticator */
             return new SSLMirrorAuthenticator(
-                new InstanceParams(params.getContext(), null));
+                    new InstanceParams(params.getContext(), null));
         }
 
         throw new IllegalArgumentException(
-            authSpec  + " is not a valid authenticator specification.");
+                authSpec + " is not a valid authenticator specification.");
     }
 
     /**
@@ -757,28 +680,28 @@ public class SSLChannelFactory implements DataChannelFactory {
      * params.
      */
     private static HostnameVerifier constructSSLHostVerifier(
-        InstanceParams params)
-        throws IllegalArgumentException {
+            InstanceParams params)
+            throws IllegalArgumentException {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) params.getContext().getRepNetConfig();
+                (ReplicationSSLConfig) params.getContext().getRepNetConfig();
         final String hvSpec = config.getSSLHostVerifier();
         final String hvClassName = config.getSSLHostVerifierClass();
 
         /* Check for conflicts */
-        if (hvSpec != null && !hvSpec.equals("") &&
-            hvClassName != null && !hvClassName.equals("")) {
+        if(hvSpec != null && !hvSpec.equals("") &&
+                hvClassName != null && !hvClassName.equals("")) {
 
             throw new IllegalArgumentException(
-                "Cannot specify both hostVerifier and hostVerifierClass");
+                    "Cannot specify both hostVerifier and hostVerifierClass");
         }
 
-        if (hvSpec != null && !hvSpec.equals("")) {
+        if(hvSpec != null && !hvSpec.equals("")) {
             /* construct a host verifier of a known type */
             return constructStdHostVerifier(params, hvSpec);
         }
 
-        if (hvClassName == null || hvClassName.equals("")) {
+        if(hvClassName == null || hvClassName.equals("")) {
             return null;
         }
 
@@ -786,62 +709,64 @@ public class SSLChannelFactory implements DataChannelFactory {
         final String hvParams = config.getSSLHostVerifierParams();
 
         return (HostnameVerifier) constructSSLChecker(
-            params, hvClassName, hvParams, HostnameVerifier.class,
-            "hostname verifier");
+                params, hvClassName, hvParams, HostnameVerifier.class,
+                "hostname verifier");
     }
 
     /**
      * Builds a HostnameVerifier of a known type.
      */
     private static HostnameVerifier constructStdHostVerifier(
-        InstanceParams params, String hvSpec)
-        throws IllegalArgumentException {
+            InstanceParams params, String hvSpec)
+            throws IllegalArgumentException {
 
         hvSpec = hvSpec.trim();
-        if (hvSpec.startsWith("dnmatch(") && hvSpec.endsWith(")")) {
+        if(hvSpec.startsWith("dnmatch(") && hvSpec.endsWith(")")) {
             /* a DN matching host verifier */
             final String match = hvSpec.substring("dnmatch(".length(),
-                                                       hvSpec.length()-1);
+                    hvSpec.length() - 1);
             return new SSLDNHostVerifier(
-                new InstanceParams(params.getContext(), match));
+                    new InstanceParams(params.getContext(), match));
 
-        } else if (hvSpec.equals("mirror")) {
+        }
+        else if(hvSpec.equals("mirror")) {
             /* a mirroring  host verifier */
             return new SSLMirrorHostVerifier(
-                new InstanceParams(params.getContext(), null));
+                    new InstanceParams(params.getContext(), null));
 
-        } else if (hvSpec.equals("hostname")) {
+        }
+        else if(hvSpec.equals("hostname")) {
             /* a standard  hostname verifier */
             return new SSLStdHostVerifier(
-                new InstanceParams(params.getContext(), null));
+                    new InstanceParams(params.getContext(), null));
         }
 
         throw new IllegalArgumentException(
-            hvSpec  + " is not a valid hostVerifier specification.");
+                hvSpec + " is not a valid hostVerifier specification.");
     }
 
     /**
      * Builds a PasswordSource instance via generic instantiation.
      *
-     * @param params the parameters driving the instantiation
+     * @param params          the parameters driving the instantiation
      * @param pwdSrcClassName the name of the class to instantiate
-     * @param pwSrcParams a possibly null String that has been configured as
-     * an argument to the class's constructor.
+     * @param pwSrcParams     a possibly null String that has been configured as
+     *                        an argument to the class's constructor.
      * @return the new instance
      */
     private static PasswordSource constructPasswordSource(
-        InstanceParams params, String pwdSrcClassName, String pwSrcParams) {
+            InstanceParams params, String pwdSrcClassName, String pwSrcParams) {
 
         final InstanceParams objParams =
-            new InstanceParams(params.getContext(), pwSrcParams);
+                new InstanceParams(params.getContext(), pwSrcParams);
 
         return (PasswordSource)
-            DataChannelFactoryBuilder.constructObject(
-                pwdSrcClassName, PasswordSource.class, "password source",
+                DataChannelFactoryBuilder.constructObject(
+                        pwdSrcClassName, PasswordSource.class, "password source",
                 /* class(InstanceParams) */
-                new CtorArgSpec(
-                    new Class<?>[] { InstanceParams.class },
-                    new Object[]   { objParams }));
+                        new CtorArgSpec(
+                                new Class<?>[]{InstanceParams.class},
+                                new Object[]{objParams}));
     }
 
     /**
@@ -849,79 +774,80 @@ public class SSLChannelFactory implements DataChannelFactory {
      * referenced by params.
      */
     private static PasswordSource constructKSPasswordSource(
-        InstanceParams params) {
+            InstanceParams params) {
 
         final ReplicationSSLConfig config =
-            (ReplicationSSLConfig) params.getContext().getRepNetConfig();
+                (ReplicationSSLConfig) params.getContext().getRepNetConfig();
 
         final String pwSrcClassName =
-            config.getSSLKeyStorePasswordClass();
+                config.getSSLKeyStorePasswordClass();
 
-        if (pwSrcClassName == null || pwSrcClassName.equals("")) {
+        if(pwSrcClassName == null || pwSrcClassName.equals("")) {
             return null;
         }
 
         final String pwSrcParams =
-            config.getSSLKeyStorePasswordParams();
+                config.getSSLKeyStorePasswordParams();
 
         return constructPasswordSource(params, pwSrcClassName, pwSrcParams);
     }
 
     /**
      * Load a keystore/truststore file into memory
-     * @param storeName the name of the store file
+     *
+     * @param storeName   the name of the store file
      * @param storeFlavor a descriptive name of store type
-     * @param storeType JKS, etc
+     * @param storeType   JKS, etc
      * @throws IllegalArgumentException if the specified parameters
-     * do now allow a store to be successfully loaded
+     *                                  do now allow a store to be successfully loaded
      */
     private static KeyStore loadStore(String storeName,
                                       char[] storePassword,
                                       String storeFlavor,
                                       String storeType)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (storeType == null || storeType.isEmpty()) {
+        if(storeType == null || storeType.isEmpty()) {
             storeType = KeyStore.getDefaultType();
         }
 
         final KeyStore ks;
         try {
             ks = KeyStore.getInstance(storeType);
-        } catch (KeyStoreException kse) {
+        } catch(KeyStoreException kse) {
             throw new IllegalArgumentException(
-                "Unable to find a " + storeFlavor + " instance of type " +
-                storeType,
-                kse);
+                    "Unable to find a " + storeFlavor + " instance of type " +
+                            storeType,
+                    kse);
         }
 
         final FileInputStream fis;
         try {
             fis = new FileInputStream(storeName);
-        } catch (FileNotFoundException fnfe) {
+        } catch(FileNotFoundException fnfe) {
             throw new IllegalArgumentException(
-                "Unable to locate specified " + storeFlavor +
-                " " + storeName, fnfe);
+                    "Unable to locate specified " + storeFlavor +
+                            " " + storeName, fnfe);
         }
 
         try {
             ks.load(fis, storePassword);
-        } catch (IOException ioe) {
+        } catch(IOException ioe) {
             throw new IllegalArgumentException(
-                "Error reading from " + storeFlavor + " file " + storeName,
-                ioe);
-        } catch (NoSuchAlgorithmException nsae) {
+                    "Error reading from " + storeFlavor + " file " + storeName,
+                    ioe);
+        } catch(NoSuchAlgorithmException nsae) {
             throw new IllegalArgumentException(
-                "Unable to check " + storeFlavor + " integrity: " + storeName,
-                nsae);
-        } catch (CertificateException ce) {
+                    "Unable to check " + storeFlavor + " integrity: " + storeName,
+                    nsae);
+        } catch(CertificateException ce) {
             throw new IllegalArgumentException(
-                "Not all certificates could be loaded: " + storeName,
-                ce);
+                    "Not all certificates could be loaded: " + storeName,
+                    ce);
         } finally {
             try {
                 fis.close();
-            } catch (IOException ioe) {
+            } catch(IOException ioe) {
                 /* ignored */
             }
         }
@@ -940,14 +866,76 @@ public class SSLChannelFactory implements DataChannelFactory {
      */
     private static String getX509AlgoName() {
         final String x509Name = System.getProperty(X509_ALGO_NAME_PROPERTY);
-        if (x509Name != null && !x509Name.isEmpty()) {
+        if(x509Name != null && !x509Name.isEmpty()) {
             return x509Name;
         }
         final String jvmVendor = System.getProperty("java.vendor");
-        if (jvmVendor.startsWith("IBM")) {
+        if(jvmVendor.startsWith("IBM")) {
             return "IbmX509";
         }
         return "SunX509";
+    }
+
+    /**
+     * Construct a DataChannel wrapping the newly accepted SocketChannel
+     */
+    @Override
+    public DataChannel acceptChannel(SocketChannel socketChannel) {
+
+        final SocketAddress socketAddress =
+                socketChannel.socket().getRemoteSocketAddress();
+        String host = null;
+        if(socketAddress == null) {
+            throw new IllegalArgumentException(
+                    "socketChannel is not connected");
+        }
+
+        if(socketAddress instanceof InetSocketAddress) {
+            host = ((InetSocketAddress) socketAddress).getAddress().toString();
+        }
+
+        final SSLEngine engine =
+                serverSSLContext.createSSLEngine(host,
+                        socketChannel.socket().getPort());
+        engine.setSSLParameters(baseSSLParameters);
+        engine.setUseClientMode(false);
+        if(sslAuthenticator != null) {
+            engine.setWantClientAuth(true);
+        }
+
+        return new SSLDataChannel(socketChannel, engine, null, null,
+                sslAuthenticator, logger);
+    }
+
+    /**
+     * Construct a DataChannel wrapping a new connection to the specified
+     * address using the associated connection options.
+     */
+    @Override
+    public DataChannel connect(InetSocketAddress addr,
+                               ConnectOptions connectOptions)
+            throws IOException {
+
+        final SocketChannel socketChannel =
+                RepUtils.openSocketChannel(addr, connectOptions);
+
+        /*
+         * Figure out a good host to specify.  This is used for session caching
+         * so it's not critical what answer we come up with, so long as it
+         * is relatively repeatable.
+         */
+        String host = addr.getHostName();
+        if(host == null) {
+            host = addr.getAddress().toString();
+        }
+
+        final SSLEngine engine =
+                clientSSLContext.createSSLEngine(host, addr.getPort());
+        engine.setSSLParameters(baseSSLParameters);
+        engine.setUseClientMode(true);
+
+        return new SSLDataChannel(
+                socketChannel, engine, host, sslHostVerifier, null, logger);
     }
 
     /**
@@ -962,11 +950,11 @@ public class SSLChannelFactory implements DataChannelFactory {
             this.ksFile = ksFile;
             this.ks = ks;
             this.ksPwd =
-                (ksPwd == null) ? null : Arrays.copyOf(ksPwd, ksPwd.length);
+                    (ksPwd == null) ? null : Arrays.copyOf(ksPwd, ksPwd.length);
         }
 
         private void clearPassword() {
-            if (ksPwd != null) {
+            if(ksPwd != null) {
                 Arrays.fill(ksPwd, ' ');
             }
         }

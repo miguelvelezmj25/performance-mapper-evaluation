@@ -29,7 +29,7 @@ import berkeley.com.sleepycat.je.Transaction;
  * <tr>
  * <td ALIGN=CENTER><b>Transaction Operation</b></td>
  * <td ALIGN=CENTER><b>Trigger Method</b></td>
- *
+ * <p>
  * <tr>
  * <td>{@link Transaction#commit Transaction.commit}. If the database was was
  * modified in the scope of the transaction.</td>

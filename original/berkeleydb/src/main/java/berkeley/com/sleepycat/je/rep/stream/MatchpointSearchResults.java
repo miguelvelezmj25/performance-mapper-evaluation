@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.txn.TxnAbort;
@@ -25,27 +21,16 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Holds information seen by the ReplicaSyncupReader when
  * scanning a replica's log for a matchpoint.
  */
 public class MatchpointSearchResults implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    private long matchpointLSN;
-
-    /*
-     * Track whether we passed a checkpoint which deleted cleaned log files.
-     * If so, we cannot do a hard recovery.
-     */
-    private boolean passedCheckpointEnd;
-
-    /*
-     * If we skip a gap in the log file when searching for a matchpoint, we
-     * no longer can be sure if we have passed checkpoints.
-     */
-    private boolean passedSkippedGap;
-
     /*
      * We save a set number of passed transactions for debugging information.
      * The list is limited in size in case we end up passing a large number
@@ -54,7 +39,17 @@ public class MatchpointSearchResults implements Serializable {
      */
     private final List<PassedTxnInfo> passedTxns;
     private final int passedTxnLimit;
-
+    private long matchpointLSN;
+    /*
+     * Track whether we passed a checkpoint which deleted cleaned log files.
+     * If so, we cannot do a hard recovery.
+     */
+    private boolean passedCheckpointEnd;
+    /*
+     * If we skip a gap in the log file when searching for a matchpoint, we
+     * no longer can be sure if we have passed checkpoints.
+     */
+    private boolean passedSkippedGap;
     /*
      * We need to keep the penultimate passed txn so we can readjust the
      * passed transaction information when the matchpoint is found. For
@@ -89,7 +84,7 @@ public class MatchpointSearchResults implements Serializable {
         matchpointLSN = DbLsn.makeLsn(0, 0);
 
         passedTxnLimit =
-            envImpl.getConfigManager().getInt(RepParams.TXN_ROLLBACK_LIMIT);
+                envImpl.getConfigManager().getInt(RepParams.TXN_ROLLBACK_LIMIT);
         passedTxns = new ArrayList<PassedTxnInfo>();
         numPassedCommits = 0;
         numPassedDurableCommits = 0;
@@ -118,16 +113,16 @@ public class MatchpointSearchResults implements Serializable {
      */
     void setMatchpoint(long match) {
         matchpointLSN = match;
-        if ((earliestPassedTxn != null) &&
-            (earliestPassedTxn.lsn == matchpointLSN)) {
+        if((earliestPassedTxn != null) &&
+                (earliestPassedTxn.lsn == matchpointLSN)) {
             numPassedCommits--;
 
-            if (passedTxns.size() > 0) {
-               int lastSavedTxn = passedTxns.size() - 1;
-               if (passedTxns.get(lastSavedTxn).lsn == match) {
-                  passedTxns.remove(lastSavedTxn);
-               }
-               earliestPassedTxn = penultimatePassedTxn;
+            if(passedTxns.size() > 0) {
+                int lastSavedTxn = passedTxns.size() - 1;
+                if(passedTxns.get(lastSavedTxn).lsn == match) {
+                    passedTxns.remove(lastSavedTxn);
+                }
+                earliestPassedTxn = penultimatePassedTxn;
             }
         }
     }
@@ -140,13 +135,11 @@ public class MatchpointSearchResults implements Serializable {
      * the log backwards, so we are encountering commits in decreasing VLSN
      * sequence.
      *
-     * @param commit the commit being passed. Note that this object is reused
-     * and so should not be saved.
-     *
+     * @param commit     the commit being passed. Note that this object is reused
+     *                   and so should not be saved.
      * @param commitVLSN the VLSN associated with the commit. It could be null
-     * if the commit was local and not HA
-     *
-     * @param commitLSN the LSN at which the commit is located
+     *                   if the commit was local and not HA
+     * @param commitLSN  the LSN at which the commit is located
      */
     void notePassedCommits(TxnCommit commit,
                            VLSN commitVLSN,
@@ -156,53 +149,54 @@ public class MatchpointSearchResults implements Serializable {
         final long txnId = commit.getId();
         final long commitDTVLSN = commit.getDTVLSN();
 
-        if ((commitVLSN != null) && !commitVLSN.isNull()) {
+        if((commitVLSN != null) && !commitVLSN.isNull()) {
             /* A replicated txn */
             processDTVLSN(commitVLSN, commitDTVLSN);
 
-            if (commit.hasLoggedEntries() &&
-                ((dtvlsn.getSequence() == VLSN.UNINITIALIZED_VLSN_SEQUENCE) ||
-                 (commitVLSN.compareTo(dtvlsn) <= 0))) {
+            if(commit.hasLoggedEntries() &&
+                    ((dtvlsn.getSequence() == VLSN.UNINITIALIZED_VLSN_SEQUENCE) ||
+                            (commitVLSN.compareTo(dtvlsn) <= 0))) {
                 numPassedDurableCommits++;
                 durableCommit = true;
             }
         }
 
         numPassedCommits++;
-        if (earliestPassedTxn != null) {
+        if(earliestPassedTxn != null) {
             penultimatePassedTxn = earliestPassedTxn;
         }
         earliestPassedTxn =
-            new PassedTxnInfo(commitTime, txnId, commitVLSN, commitLSN,
-                              durableCommit);
+                new PassedTxnInfo(commitTime, txnId, commitVLSN, commitLSN,
+                        durableCommit);
 
         /*
          * Save only a limited number of passed txns, for displaying to the log
          */
-        if (numPassedCommits <= passedTxnLimit) {
+        if(numPassedCommits <= passedTxnLimit) {
             passedTxns.add(earliestPassedTxn);
         }
     }
 
     private void processDTVLSN(VLSN txnEndVLSN, final long txnEndDTVLSN) {
-        if (dtvlsn.isNull()) {
+        if(dtvlsn.isNull()) {
             /*
              * The first commit/abort record, set the dtvlsn to a
              * non null value
              */
             dtvlsn = new VLSN(txnEndDTVLSN);
-        } else {
+        }
+        else {
             /*
              * Already set, verify sequencing. Make allowance for transitions
              * from pre to post-DTVLSN stream segments. Note that we are going
              * backwards in the log at this point.
              */
-            if ((txnEndDTVLSN > dtvlsn.getSequence()) &&
-                (dtvlsn.getSequence() != VLSN.UNINITIALIZED_VLSN_SEQUENCE)) {
+            if((txnEndDTVLSN > dtvlsn.getSequence()) &&
+                    (dtvlsn.getSequence() != VLSN.UNINITIALIZED_VLSN_SEQUENCE)) {
                 throw new IllegalStateException
-                    ("DTVLSNs should only decrease with decreasing VLSNs." +
-                     " prev:" + dtvlsn + " next:" + txnEndDTVLSN +
-                     " commit VLSN:" + txnEndVLSN);
+                        ("DTVLSNs should only decrease with decreasing VLSNs." +
+                                " prev:" + dtvlsn + " next:" + txnEndDTVLSN +
+                                " commit VLSN:" + txnEndVLSN);
             }
         }
     }
@@ -210,14 +204,13 @@ public class MatchpointSearchResults implements Serializable {
     /**
      * Use the DTVLSN value from a replicated abort to set the dtvlsn.
      *
-     * @param abort the abort log record
-     *
+     * @param abort     the abort log record
      * @param abortVLSN the VLSN associated with the abort log record
      */
     void notePassedAborts(TxnAbort abort,
                           VLSN abortVLSN) {
 
-        if (abortVLSN.isNull()) {
+        if(abortVLSN.isNull()) {
             /* A non-replicated abort. */
             return;
         }
@@ -259,7 +252,7 @@ public class MatchpointSearchResults implements Serializable {
      */
     public String dumpPassedTxns() {
         StringBuilder sb = new StringBuilder();
-        for (PassedTxnInfo info : passedTxns) {
+        for(PassedTxnInfo info : passedTxns) {
             sb.append(info);
             sb.append("\n");
         }
@@ -269,14 +262,14 @@ public class MatchpointSearchResults implements Serializable {
     @Override
     public String toString() {
         return "matchpointLSN=" + DbLsn.getNoFormatString(matchpointLSN) +
-            " passedCkpt=" + passedCheckpointEnd +
-            " passedTxnLimit=" + passedTxnLimit +
-            " passedTxns=" + passedTxns +
-            " earliestTxn=" + earliestPassedTxn +
-            " penultimateTxn=" + penultimatePassedTxn +
-            " numPassedCommits=" + numPassedCommits +
-            " numPassedDurableCommits=" + numPassedDurableCommits +
-            " passedSkippedGap=" + passedSkippedGap;
+                " passedCkpt=" + passedCheckpointEnd +
+                " passedTxnLimit=" + passedTxnLimit +
+                " passedTxns=" + passedTxns +
+                " earliestTxn=" + earliestPassedTxn +
+                " penultimateTxn=" + penultimatePassedTxn +
+                " numPassedCommits=" + numPassedCommits +
+                " numPassedDurableCommits=" + numPassedDurableCommits +
+                " passedSkippedGap=" + passedSkippedGap;
     }
 
     /**
@@ -284,24 +277,24 @@ public class MatchpointSearchResults implements Serializable {
      * be used by RollbackException and RollbackProhibitedException.
      */
     public String getRollbackMsg() {
-        if (numPassedCommits == 0) {
+        if(numPassedCommits == 0) {
             return " uncommitted operations";
         }
 
-        if (numPassedDurableCommits == 0) {
+        if(numPassedDurableCommits == 0) {
             return " " + numPassedCommits +
-                " total commits to the earliest point indicated by transaction " +
-                earliestPassedTxn;
+                    " total commits to the earliest point indicated by transaction " +
+                    earliestPassedTxn;
         }
 
         return " " + numPassedCommits + " total commits(" +
                 numPassedDurableCommits + " of which were durable) " +
                 "to the earliest point indicated by transaction " +
-            earliestPassedTxn;
+                earliestPassedTxn;
     }
 
     /* Struct to hold information about passed txns. */
-    public static class PassedTxnInfo  implements Serializable {
+    public static class PassedTxnInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         public final Timestamp time;
@@ -322,10 +315,10 @@ public class MatchpointSearchResults implements Serializable {
         @Override
         public String toString() {
             return "id=" + id +
-                " time=" + time +
-                " vlsn=" + vlsn +
-                " lsn=" + DbLsn.getNoFormatString(lsn) +
-                " durable=" + durableCommit;
+                    " time=" + time +
+                    " vlsn=" + vlsn +
+                    " lsn=" + DbLsn.getNoFormatString(lsn) +
+                    " durable=" + durableCommit;
         }
     }
 }

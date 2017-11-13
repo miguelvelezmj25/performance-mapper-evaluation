@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a <code>Byte</code> primitive
  * wrapper or a <code>byte</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class ByteBinding extends TupleBinding<Byte> {
 
     private static final int BYTE_SIZE = 1;
 
+    /**
+     * Converts an entry buffer into a simple <code>byte</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static byte entryToByte(DatabaseEntry entry) {
+
+        return entryToInput(entry).readByte();
+    }
+
+    /**
+     * Converts a simple <code>byte</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void byteToEntry(byte val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeByte(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[BYTE_SIZE]);
+    }
+
     // javadoc is inherited
     public Byte entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class ByteBinding extends TupleBinding<Byte> {
     protected TupleOutput getTupleOutput(Byte object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>byte</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static byte entryToByte(DatabaseEntry entry) {
-
-        return entryToInput(entry).readByte();
-    }
-
-    /**
-     * Converts a simple <code>byte</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void byteToEntry(byte val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeByte(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[BYTE_SIZE]);
     }
 }

@@ -15,7 +15,7 @@ package berkeley.com.sleepycat.persist.raw;
 
 /**
  * The definition of a field in a {@link RawType}.
- *
+ * <p>
  * <p>{@code RawField} objects are thread-safe.  Multiple threads may safely
  * call the methods of a shared {@code RawField} object.</p>
  *

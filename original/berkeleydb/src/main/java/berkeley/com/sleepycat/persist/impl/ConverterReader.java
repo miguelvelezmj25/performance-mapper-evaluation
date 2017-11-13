@@ -13,8 +13,8 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import berkeley.com.sleepycat.persist.model.EntityModel;
 import berkeley.com.sleepycat.persist.evolve.Converter;
+import berkeley.com.sleepycat.persist.model.EntityModel;
 import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
@@ -41,21 +41,21 @@ public class ConverterReader implements Reader {
     }
 
     public Object newInstance(EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
         /* Create the old format RawObject. */
         return oldFormat.newInstance(input, true);
     }
 
     public void readPriKey(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
         
         /* Read the old format RawObject's primary key. */
         oldFormat.readPriKey(o, input, true);
     }
 
     public Object readObject(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException {
+            throws RefreshException {
 
         Catalog catalog = input.getCatalog();
 
@@ -69,12 +69,12 @@ public class ConverterReader implements Reader {
         o = converter.getConversion().convert(o);
 
         /* Convert the current format RawObject to a live Object. */
-        if (!rawAccess && o instanceof RawObject) {
+        if(!rawAccess && o instanceof RawObject) {
             o = catalog.convertRawObject((RawObject) o, null);
         }
         return o;
     }
-    
+
     public Accessor getAccessor(boolean rawAccess) {
         return oldFormat.getAccessor(rawAccess);
     }

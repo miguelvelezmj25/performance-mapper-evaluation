@@ -13,18 +13,11 @@
 
 package berkeley.com.sleepycat.je;
 
+import berkeley.com.sleepycat.je.utilint.StatGroup;
+
 import java.io.Serializable;
 
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHED_GETS;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_LAST;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_SIZE;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_VALUE;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_GETS;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_RANGE_MAX;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_RANGE_MIN;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_STORED_VALUE;
-
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.*;
 
 /**
  * A SequenceStats object is used to return sequence statistics.
@@ -35,8 +28,7 @@ public class SequenceStats implements Serializable {
     private StatGroup stats;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public SequenceStats(StatGroup stats) {
         this.stats = stats;

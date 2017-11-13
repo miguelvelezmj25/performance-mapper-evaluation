@@ -12,14 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import static berkeley.com.sleepycat.je.rep.stream.ArbiterFeederStatDefinition.QUEUE_FULL;
-
-import java.io.IOException;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -28,6 +20,14 @@ import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.utilint.LongStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import static berkeley.com.sleepycat.je.rep.stream.ArbiterFeederStatDefinition.QUEUE_FULL;
 
 /**
  * Implementation of a master node acting as a FeederSource for an Arbiter.
@@ -41,22 +41,22 @@ public class ArbiterFeederSource implements FeederSource {
     private final LongStat nQueueFull;
 
     public ArbiterFeederSource(EnvironmentImpl envImpl)
-        throws DatabaseException {
+            throws DatabaseException {
 
         int queueSize =
-            envImpl.getConfigManager().getInt
-            (RepParams.ARBITER_OUTPUT_QUEUE_SIZE);
+                envImpl.getConfigManager().getInt
+                        (RepParams.ARBITER_OUTPUT_QUEUE_SIZE);
         queue = new ArrayBlockingQueue<LogItem>(queueSize);
         this.envImpl = envImpl;
         stats =
-            new StatGroup(ArbiterFeederStatDefinition.GROUP_NAME,
-                          ArbiterFeederStatDefinition.GROUP_DESC);
+                new StatGroup(ArbiterFeederStatDefinition.GROUP_NAME,
+                        ArbiterFeederStatDefinition.GROUP_DESC);
         nQueueFull = new LongStat(stats, QUEUE_FULL);
     }
 
     public void addCommit(LogItem commitItem) {
 
-        if (!queue.offer(commitItem)) {
+        if(!queue.offer(commitItem)) {
 
             /*
              * If the commit could not be added to the queue because
@@ -69,14 +69,14 @@ public class ArbiterFeederSource implements FeederSource {
             try {
                 LogItem queuedItem = queue.remove();
                 VLSN vlsn = commitItem.header.getVLSN();
-                if (queuedItem.header.getVLSN().compareTo(vlsn) > 0) {
+                if(queuedItem.header.getVLSN().compareTo(vlsn) > 0) {
 
                     /*
                      * The removed item has higher vlsn so use that one.
                      */
                     commitItem = queuedItem;
                 }
-            } catch (NoSuchElementException noe) {
+            } catch(NoSuchElementException noe) {
                 /* Queue was empty so try to insert one last time. */
             }
 
@@ -97,7 +97,7 @@ public class ArbiterFeederSource implements FeederSource {
      */
     @Override
     public void init(VLSN startVLSN)
-        throws DatabaseException, IOException {
+            throws DatabaseException, IOException {
         queue.clear();
     }
 
@@ -107,20 +107,20 @@ public class ArbiterFeederSource implements FeederSource {
      */
     @Override
     public OutputWireRecord getWireRecord(VLSN vlsn, int waitTime)
-        throws DatabaseException, InterruptedException, IOException {
+            throws DatabaseException, InterruptedException, IOException {
 
         LogItem commitItem = queue.poll(waitTime, TimeUnit.MILLISECONDS);
-        if (commitItem != null) {
-            return new OutputWireRecord(envImpl, commitItem) ;
+        if(commitItem != null) {
+            return new OutputWireRecord(envImpl, commitItem);
         }
         return null;
     }
 
     public StatGroup loadStats(StatsConfig config)
             throws DatabaseException {
-            StatGroup copyStats = stats.cloneGroup(config.getClear());
-            return copyStats;
-        }
+        StatGroup copyStats = stats.cloneGroup(config.getClear());
+        return copyStats;
+    }
 
     @Override
     public String dumpState() {

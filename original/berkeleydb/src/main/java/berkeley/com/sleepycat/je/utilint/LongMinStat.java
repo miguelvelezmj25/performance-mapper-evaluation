@@ -56,7 +56,7 @@ public class LongMinStat extends LongStat {
 
     @Override
     protected String getFormattedValue() {
-        if (counter == Long.MAX_VALUE) {
+        if(counter == Long.MAX_VALUE) {
             return "NONE";
         }
 

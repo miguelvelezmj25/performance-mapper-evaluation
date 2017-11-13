@@ -33,31 +33,31 @@ public class PropUtil {
      * waits forever.
      *
      * @throws IllegalArgumentException if the duration argument is illegal.
-     * Thrown via API setter methods such as Transaction.setLockTimeout.
+     *                                  Thrown via API setter methods such as Transaction.setLockTimeout.
      */
     public static int durationToMillis(final long val, final TimeUnit unit) {
-        if (val == 0) {
+        if(val == 0) {
             /* Allow zero duration with null unit. */
             return 0;
         }
-        if (unit == null) {
+        if(unit == null) {
             throw new IllegalArgumentException
-                ("Duration TimeUnit argument may not be null if interval " +
-                 "is non-zero");
+                    ("Duration TimeUnit argument may not be null if interval " +
+                            "is non-zero");
         }
-        if (val < 0) {
+        if(val < 0) {
             throw new IllegalArgumentException
-                ("Duration argument may not be negative: " + val);
+                    ("Duration argument may not be negative: " + val);
         }
         final long newVal = unit.toMillis(val);
-        if (newVal == 0) {
+        if(newVal == 0) {
             /* Input val is positive, so return at least one. */
             return 1;
         }
-        if (newVal > Integer.MAX_VALUE) {
+        if(newVal > Integer.MAX_VALUE) {
             throw new IllegalArgumentException
-                ("Duration argument may not be greater than " +
-                 "Integer.MAX_VALUE milliseconds: " + newVal);
+                    ("Duration argument may not be greater than " +
+                            "Integer.MAX_VALUE milliseconds: " + newVal);
         }
         return (int) newVal;
     }
@@ -66,12 +66,12 @@ public class PropUtil {
      * Converts the given duration value in milliseconds to the given unit.
      *
      * @throws IllegalArgumentException if the unit is null. Thrown via API
-     * getter methods such as Transaction.getLockTimeout.
+     *                                  getter methods such as Transaction.getLockTimeout.
      */
     public static long millisToDuration(final int val, final TimeUnit unit) {
-        if (unit == null) {
+        if(unit == null) {
             throw new IllegalArgumentException
-                ("TimeUnit argument may not be null");
+                    ("TimeUnit argument may not be null");
         }
         return unit.convert(val, TimeUnit.MILLISECONDS);
     }
@@ -81,24 +81,24 @@ public class PropUtil {
      * value in millis.
      *
      * @throws IllegalArgumentException if the duration string is illegal.
-     * Thrown via the Environment ctor and setMutableConfig, and likewise for a
-     * ReplicatedEnvironment.
+     *                                  Thrown via the Environment ctor and setMutableConfig, and likewise for a
+     *                                  ReplicatedEnvironment.
      */
     public static int parseDuration(final String property) {
         long ns = parseDurationNS(property);
         long millis = ns / NS_IN_MS;
 
         /* If input val is positive, return at least one. */
-        if (ns > 0 && millis == 0) {
+        if(ns > 0 && millis == 0) {
             return 1;
         }
-        if (millis > Integer.MAX_VALUE) {
+        if(millis > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
-                "Duration argument may not be greater than " +
-                "Integer.MAX_VALUE milliseconds: " + property);
+                    "Duration argument may not be greater than " +
+                            "Integer.MAX_VALUE milliseconds: " + property);
         }
 
-        return (int)millis;
+        return (int) millis;
     }
 
     /**
@@ -106,52 +106,53 @@ public class PropUtil {
      * value in nanos.
      *
      * @throws IllegalArgumentException if the duration string is illegal.
-     * Thrown via the Environment ctor and setMutableConfig, and likewise for a
-     * ReplicatedEnvironment.
+     *                                  Thrown via the Environment ctor and setMutableConfig, and likewise for a
+     *                                  ReplicatedEnvironment.
      */
     public static long parseDurationNS(final String property) {
         StringTokenizer tokens =
-            new StringTokenizer(property.toUpperCase(java.util.Locale.ENGLISH),
-                                " \t");
-        if (!tokens.hasMoreTokens()) {
+                new StringTokenizer(property.toUpperCase(java.util.Locale.ENGLISH),
+                        " \t");
+        if(!tokens.hasMoreTokens()) {
             throw new IllegalArgumentException("Duration argument is empty");
         }
         final long time;
         try {
             time = Long.parseLong(tokens.nextToken());
-        } catch (NumberFormatException e) {
+        } catch(NumberFormatException e) {
             throw new IllegalArgumentException
-                ("Duration argument does not start with a long integer: " +
-                 property);
+                    ("Duration argument does not start with a long integer: " +
+                            property);
         }
         /* Convert time from specified unit to millis. */
         long ns;
-        if (tokens.hasMoreTokens()) {
+        if(tokens.hasMoreTokens()) {
             final String unitName = tokens.nextToken();
-            if (tokens.hasMoreTokens()) {
+            if(tokens.hasMoreTokens()) {
                 throw new IllegalArgumentException
-                    ("Duration argument has extra characters after unit: " +
-                     property);
+                        ("Duration argument has extra characters after unit: " +
+                                property);
             }
             try {
                 final TimeUnit unit = TimeUnit.valueOf(unitName);
                 ns = TimeUnit.NANOSECONDS.convert(time, unit);
-            } catch (IllegalArgumentException e) {
+            } catch(IllegalArgumentException e) {
                 try {
                     final IEEETimeUnit unit = IEEETimeUnit.valueOf(unitName);
                     ns = unit.toNanos(time);
-                } catch (IllegalArgumentException e2) {
+                } catch(IllegalArgumentException e2) {
                     throw new IllegalArgumentException
-                        ("Duration argument has unknown unit name: " +
-                         property);
+                            ("Duration argument has unknown unit name: " +
+                                    property);
                 }
             }
-        } else {
+        }
+        else {
             /* Default unit is micros. */
             ns = TimeUnit.NANOSECONDS.convert(time, TimeUnit.MICROSECONDS);
         }
         /* If input val is positive, return at least one. */
-        if (time > 0 && ns == 0) {
+        if(time > 0 && ns == 0) {
             return 1;
         }
         return ns;

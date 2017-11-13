@@ -32,26 +32,11 @@ import berkeley.com.sleepycat.je.rep.ReplicationGroup;
 public class GroupChangeEvent extends MonitorChangeEvent {
 
     /**
-     * The kind of GroupChangeEvent.
-     */
-    public static enum GroupChangeType {
-
-        /**
-         * A new node was <code>added</code> to the replication group.
-         */
-        ADD,
-
-        /**
-         * A node was <code>removed</code> from the replication group.
-         */
-        REMOVE
-    };
-
-    /**
      * The latest information about the replication group.
      */
     private final ReplicationGroup repGroup;
 
+    ;
     /**
      * The type of this change.
      */
@@ -87,5 +72,21 @@ public class GroupChangeEvent extends MonitorChangeEvent {
     @Override
     public String toString() {
         return "Node " + getNodeName() + " change type=" + getChangeType();
+    }
+
+    /**
+     * The kind of GroupChangeEvent.
+     */
+    public static enum GroupChangeType {
+
+        /**
+         * A new node was <code>added</code> to the replication group.
+         */
+        ADD,
+
+        /**
+         * A node was <code>removed</code> from the replication group.
+         */
+        REMOVE
     }
 }

@@ -50,7 +50,7 @@ public class ExampleInventoryRead {
         ExampleInventoryRead eir = new ExampleInventoryRead();
         try {
             eir.run(args);
-        } catch (DatabaseException dbe) {
+        } catch(DatabaseException dbe) {
             System.err.println("ExampleInventoryRead: " + dbe.toString());
             dbe.printStackTrace();
         } finally {
@@ -62,7 +62,7 @@ public class ExampleInventoryRead {
     private static void parseArgs(String args[]) {
         for(int i = 0; i < args.length; ++i) {
             if(args[i].startsWith("-")) {
-                switch (args[i].charAt(1)) {
+                switch(args[i].charAt(1)) {
                     case 'h':
                         myDbEnvPath = new File(args[++i]);
                         break;
@@ -123,14 +123,14 @@ public class ExampleInventoryRead {
 
             // Display the entry, if one is found. Repeat until no more
             // secondary duplicate entries are found
-            while (retVal == OperationStatus.SUCCESS) {
+            while(retVal == OperationStatus.SUCCESS) {
                 Inventory theInventory =
                         (Inventory) inventoryBinding.entryToObject(foundData);
                 displayInventoryRecord(foundKey, theInventory);
                 retVal = secCursor.getNextDup(searchKey, foundKey,
                         foundData, LockMode.DEFAULT);
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Error on inventory secondary cursor:");
             System.err.println(e.toString());
             e.printStackTrace();
@@ -151,13 +151,13 @@ public class ExampleInventoryRead {
         DatabaseEntry foundData = new DatabaseEntry();
 
         try { // always want to make sure the cursor gets closed
-            while (cursor.getNext(foundKey, foundData,
+            while(cursor.getNext(foundKey, foundData,
                     LockMode.DEFAULT) == OperationStatus.SUCCESS) {
                 Inventory theInventory =
                         (Inventory) inventoryBinding.entryToObject(foundData);
                 displayInventoryRecord(foundKey, theInventory);
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Error on inventory cursor:");
             System.err.println(e.toString());
             e.printStackTrace();
@@ -185,7 +185,7 @@ public class ExampleInventoryRead {
 
             searchKey =
                     new DatabaseEntry(theInventory.getVendor().getBytes("UTF-8"));
-        } catch (IOException willNeverOccur) {
+        } catch(IOException willNeverOccur) {
         }
         DatabaseEntry foundVendor = new DatabaseEntry();
 

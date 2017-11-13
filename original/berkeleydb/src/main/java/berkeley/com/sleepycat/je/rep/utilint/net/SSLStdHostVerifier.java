@@ -13,22 +13,22 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
-import static java.util.logging.Level.INFO;
+import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
+import berkeley.com.sleepycat.je.rep.net.InstanceParams;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
-import java.security.Principal;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateParsingException;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.auth.x500.X500Principal;
+import java.math.BigInteger;
+import java.security.Principal;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.List;
 
-import berkeley.com.sleepycat.je.rep.net.InstanceParams;
-import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
+import static java.util.logging.Level.INFO;
 
 /**
  * This is an implementation of HostnameVerifier which verifies that the
@@ -38,10 +38,9 @@ import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
  */
 public class SSLStdHostVerifier implements HostnameVerifier {
 
-    private final InstanceLogger logger;
-
     private final static int ALTNAME_DNS = 2;
-    private final static int ALTNAME_IP  = 7;
+    private final static int ALTNAME_IP = 7;
+    private final InstanceLogger logger;
 
     /**
      * Construct an SSLStdHostVerifier
@@ -52,7 +51,7 @@ public class SSLStdHostVerifier implements HostnameVerifier {
 
     @Override
     public boolean verify(String targetHost, SSLSession sslSession) {
-        if (targetHost == null) {
+        if(targetHost == null) {
             return false;
         }
 
@@ -61,50 +60,50 @@ public class SSLStdHostVerifier implements HostnameVerifier {
         try {
             principal = sslSession.getPeerPrincipal();
             peerCerts = sslSession.getPeerCertificates();
-        } catch (SSLPeerUnverifiedException pue) {
+        } catch(SSLPeerUnverifiedException pue) {
             return false;
         }
 
-        if (principal != null && principal instanceof X500Principal) {
+        if(principal != null && principal instanceof X500Principal) {
             final X500Principal x500Principal = (X500Principal) principal;
             final String name = x500Principal.getName(X500Principal.RFC1779);
-            if (targetHost.equalsIgnoreCase(name)) {
+            if(targetHost.equalsIgnoreCase(name)) {
                 return true;
             }
         }
 
         /* Check for SubjectAlternativeNames */
-        if (peerCerts[0] instanceof X509Certificate) {
+        if(peerCerts[0] instanceof X509Certificate) {
 
-            final X509Certificate peerCert = (X509Certificate)peerCerts[0];
+            final X509Certificate peerCert = (X509Certificate) peerCerts[0];
 
             Collection<List<?>> altNames = null;
             try {
                 altNames = peerCert.getSubjectAlternativeNames();
-            } catch (CertificateParsingException cpe) {
+            } catch(CertificateParsingException cpe) {
                 final Principal issuerPrinc = peerCert.getIssuerX500Principal();
                 final BigInteger serNo = peerCert.getSerialNumber();
 
                 logger.log(INFO, "Unable to parse peer certificate: " +
-                           "issuer = " + issuerPrinc +
-                           ", serialNumber = " + serNo);
-                
+                        "issuer = " + issuerPrinc +
+                        ", serialNumber = " + serNo);
+
             }
 
-            if (altNames == null) {
+            if(altNames == null) {
                 return false;
             }
 
-            for (List<?> altName : altNames) {
+            for(List<?> altName : altNames) {
                 /*
                  * altName will be a 2-element list, with the first being
                  * the name type and the second being the "name".  For
                  * DNS and IP entries, the "name" will be a string.
                  */
-                final int nameType = ((Integer)altName.get(0)).intValue();
-                if (nameType == ALTNAME_IP || nameType == ALTNAME_DNS) {
-                    final String nameValue = (String)altName.get(1);
-                    if (targetHost.equals(nameValue)) {
+                final int nameType = ((Integer) altName.get(0)).intValue();
+                if(nameType == ALTNAME_IP || nameType == ALTNAME_DNS) {
+                    final String nameValue = (String) altName.get(1);
+                    if(targetHost.equals(nameValue)) {
                         return true;
                     }
                 }

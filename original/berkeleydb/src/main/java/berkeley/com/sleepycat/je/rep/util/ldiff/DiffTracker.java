@@ -22,16 +22,16 @@ import java.util.List;
  * on both local and remote database.
  */
 public class DiffTracker {
+    /* Size of each block. */
+    private final long blockSize;
+    /* Collection of different areas. */
+    private final List<MismatchedRegion> regions;
     /* Start block for the block different area. */
     private Block startBlock;
     /* Start position for the different block in the database. */
     private long remoteStart;
     /* Size of a block different area. */
     private long remoteDiffSize;
-    /* Size of each block. */
-    private final long blockSize;
-    /* Collection of different areas. */
-    private final List<MismatchedRegion> regions;
 
     public DiffTracker(long blockSize) {
         this.blockSize = blockSize;
@@ -55,18 +55,18 @@ public class DiffTracker {
         setBlockDiff(region, startBlock, remoteDiffSize, true);
         setWindowDiff(region, window, window.getDiffSize(), true);
 
-        if (!region.isNull()) {
+        if(!region.isNull()) {
             regions.add(region);
         }
 
         remoteDiffSize = 0;
     }
 
-    private void setWindowDiff(MismatchedRegion region, 
+    private void setWindowDiff(MismatchedRegion region,
                                Window window,
-                               long diffSize, 
+                               long diffSize,
                                boolean doCheck) {
-        if (doCheck && window.getDiffSize() == 0) {
+        if(doCheck && window.getDiffSize() == 0) {
             return;
         }
 
@@ -79,7 +79,7 @@ public class DiffTracker {
                               Block block,
                               long diffSize,
                               boolean doCheck) {
-        if (doCheck && remoteDiffSize == 0) {
+        if(doCheck && remoteDiffSize == 0) {
             return;
         }
 
@@ -98,8 +98,8 @@ public class DiffTracker {
     /* Add the block additional area to the different collection. */
     public void addBlockBagAdditionalDiffs(Window window, BlockBag blkBag) {
         MismatchedRegion region = new MismatchedRegion();
-        setBlockDiff(region, blkBag.getBlock(), 
-                     DiffRecordAnalyzer.DATABASE_END, false);
+        setBlockDiff(region, blkBag.getBlock(),
+                DiffRecordAnalyzer.DATABASE_END, false);
         setWindowDiff(region, window, DiffRecordAnalyzer.DATABASE_END, true);
         regions.add(region);
     }

@@ -22,15 +22,15 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 
 /**
  * A sequence of obsolete info.
- *
+ * <p>
  * To save memory, a TupleOutput is used to contain a sequence of {LSN-file,
  * LSN-offset} tuples. Packed integers are used and memory is saved by not
  * using an Object for each tuple, as would be needed in a Java collection.
- *
+ * <p>
  * An OffsetList was not used because it does not use packed integers.
  * PackedOffsets was not used because it depends on offsets being sorted in
  * ascending order.
- *
+ * <p>
  * Only obsolete IN LSNs are supported. LNs are not counted using this
  * approach.
  */
@@ -45,29 +45,29 @@ public class PackedObsoleteInfo extends TupleOutput {
 
     public void copyObsoleteInfo(final PackedObsoleteInfo other) {
         writeFast(other.getBufferBytes(),
-                  other.getBufferOffset(),
-                  other.getBufferLength());
+                other.getBufferOffset(),
+                other.getBufferLength());
     }
 
     public void addObsoleteInfo(final long obsoleteLsn) {
-        
+
         writePackedLong(DbLsn.getFileNumber(obsoleteLsn));
         writePackedLong(DbLsn.getFileOffset(obsoleteLsn));
     }
 
     public void countObsoleteInfo(
-        final UtilizationTracker tracker,
-        final DatabaseImpl nodeDb) {
+            final UtilizationTracker tracker,
+            final DatabaseImpl nodeDb) {
 
         final TupleInput in = new TupleInput(this);
 
-        while (in.available() > 0) {
+        while(in.available() > 0) {
             final long fileNumber = in.readPackedLong();
             long fileOffset = in.readPackedLong();
 
             tracker.countObsoleteNode(
-                DbLsn.makeLsn(fileNumber, fileOffset),
-                LogEntryType.LOG_IN, 0, nodeDb);
+                    DbLsn.makeLsn(fileNumber, fileOffset),
+                    LogEntryType.LOG_IN, 0, nodeDb);
         }
     }
 }

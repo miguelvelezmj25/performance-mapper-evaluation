@@ -23,26 +23,29 @@ public class MasterTransferFailureException extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public MasterTransferFailureException(String message) {
         super(null /*locker*/, false /*abortOnly*/, message, null /*cause*/);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private MasterTransferFailureException
-        (String message, MasterTransferFailureException cause) {
+    (String message, MasterTransferFailureException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public MasterTransferFailureException wrapSelf(String message) {

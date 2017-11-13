@@ -13,25 +13,25 @@
 
 package berkeley.com.sleepycat.je.rep.util.ldiff;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-
 import berkeley.com.sleepycat.je.Cursor;
 import berkeley.com.sleepycat.je.DatabaseEntry;
 import berkeley.com.sleepycat.je.LockMode;
 import berkeley.com.sleepycat.je.OperationStatus;
 import berkeley.com.sleepycat.je.utilint.Adler32;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A rolling window of key/data pairs used by the ldiff algorithm.
  */
 public class Window {
     private final Cursor cursor;
-    private List<byte[]> window;
     private final MessageDigest md;
     private final int windowSize;
+    private List<byte[]> window;
     private long chksum;
 
     /* The begin key/data pair of a window. */
@@ -43,20 +43,20 @@ public class Window {
     /**
      * Create a window of the given size, starting at the next record pointed
      * at by the Cursor.
-     * 
-     * @param cursor an open cursor on the database being diff'd
+     *
+     * @param cursor     an open cursor on the database being diff'd
      * @param windowSize the number of records to include in the window
      * @throws Exception
      */
     public Window(Cursor cursor, int windowSize)
-        throws Exception {
+            throws Exception {
 
         this.cursor = cursor;
         this.windowSize = windowSize;
         /* To compute a MD5 hash for each block. */
         try {
             md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        } catch(NoSuchAlgorithmException e) {
             e.printStackTrace();
             throw new Exception("MD5 hashes are required for ldiff.");
         }
@@ -71,19 +71,20 @@ public class Window {
      * here.
      */
     public void rollWindow()
-        throws Exception {
+            throws Exception {
 
         DatabaseEntry key = new DatabaseEntry();
         DatabaseEntry data = new DatabaseEntry();
-        if (cursor.getNext(key, data, LockMode.DEFAULT) ==
-            OperationStatus.SUCCESS) {
+        if(cursor.getNext(key, data, LockMode.DEFAULT) ==
+                OperationStatus.SUCCESS) {
             byte[] keyValue = LDiffUtil.concatByteArray(key.getData(),
-                                                        data.getData());
+                    data.getData());
             int removeXi = LDiffUtil.getXi(window.remove(0));
             window.add(keyValue);
             int addXi = LDiffUtil.getXi(keyValue);
             rollChecksum(removeXi, addXi);
-        } else {
+        }
+        else {
             chksum = 0;
         }
         diffSize++;
@@ -102,15 +103,15 @@ public class Window {
         diffSize = 0;
 
         /* Please pay attention to the check order in while loop. */
-        while ((i < windowSize) &&
+        while((i < windowSize) &&
                 (cursor.getNext(key, data, LockMode.DEFAULT) ==
-                 OperationStatus.SUCCESS)) {
-            if (i == 0) {
+                        OperationStatus.SUCCESS)) {
+            if(i == 0) {
                 beginKey = key.getData();
                 beginData = data.getData();
             }
             window.add(LDiffUtil.concatByteArray(key.getData(),
-                                                 data.getData()));
+                    data.getData()));
             i++;
         }
 
@@ -119,7 +120,7 @@ public class Window {
 
     /**
      * The checksum for the window.
-     * 
+     *
      * @return the checksum for the window.
      */
     public long getChecksum() {
@@ -141,14 +142,14 @@ public class Window {
     /**
      * Compute the MD5 hash for the window. This is an expensive operation and
      * should be used sparingly.
-     * 
+     *
      * @return the MD5 for the window.
      */
     public byte[] getMd5Hash() {
         /* Reset the Message Digest first. */
         md.reset();
         /* Feed the data into the Message Digest. */
-        for (byte[] ba : window) {
+        for(byte[] ba : window) {
             md.update(ba);
         }
         return md.digest();
@@ -158,7 +159,7 @@ public class Window {
      * The number of records in the window. The size of the window will match
      * the value set during instantiation, until the end of the database is
      * reached.
-     * 
+     *
      * @return the number of records in the window.
      */
     public int size() {
@@ -167,11 +168,11 @@ public class Window {
 
     /**
      * We use the rsync rolling checksum algorithm with the following changes:
-     * 
+     * <p>
      * 1. Each byte (Xi in the tech report) is replaced by a 32 bit Adler
      * checksum of the bytes representing the concatenation of the key/value
      * pair.
-     * 
+     * <p>
      * 2. The value for M is 64 instead of 32 to reduce the chances of false
      * collisions on the rolling checksum, given our adaptation of the original
      * algorithm to logically use 32 bit bytes.
@@ -182,7 +183,7 @@ public class Window {
         Adler32 adler32 = new Adler32();
 
         int a = 0, b = 0;
-        for (int i = 0; i < size(); i++) {
+        for(int i = 0; i < size(); i++) {
             byte[] element = window.get(i);
             adler32.reset();
             adler32.update(element, 0, element.length);
@@ -196,11 +197,9 @@ public class Window {
     /**
      * Update the checksum by removing removeXi and adding addXi, according to
      * the rsync algorithm.
-     * 
-     * @param removeXi
-     *            the value to remove from the checksum
-     * @param addXi
-     *            the value to add to the checksum
+     *
+     * @param removeXi the value to remove from the checksum
+     * @param addXi    the value to add to the checksum
      */
     private void rollChecksum(int removeXi, int addXi) {
         final int a = (int) chksum - removeXi + addXi;

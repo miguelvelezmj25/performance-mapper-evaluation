@@ -13,26 +13,21 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.persist.raw.RawObject;
 import berkeley.com.sleepycat.util.ClassResolver;
 
+import java.util.*;
+
 /**
  * A static catalog containing simple types only.  Once created, this catalog
  * is immutable.
- *
+ * <p>
  * For bindings accessed by a PersistComparator during recovery, the
  * SimpleCatalog provides formats for all simple types.  To reduce redundant
  * format objects, the SimpleCatalog's formats are copied when creating a
  * regular PersistCatalog.
- *
+ * <p>
  * This class also contains utility methods for dealing with primitives.
  *
  * @author Mark Hayes
@@ -40,6 +35,9 @@ import berkeley.com.sleepycat.util.ClassResolver;
 public class SimpleCatalog implements Catalog {
 
     private static final Map<String, Class> keywordToPrimitive;
+    private static final Map<Class, Class> primitiveTypeToWrapper;
+    private static final SimpleCatalog instance = new SimpleCatalog(null);
+
     static {
         keywordToPrimitive = new HashMap<String, Class>(8);
         keywordToPrimitive.put("boolean", Boolean.TYPE);
@@ -52,7 +50,6 @@ public class SimpleCatalog implements Catalog {
         keywordToPrimitive.put("double", Double.TYPE);
     }
 
-    private static final Map<Class, Class> primitiveTypeToWrapper;
     static {
         primitiveTypeToWrapper = new HashMap<Class, Class>(8);
         primitiveTypeToWrapper.put(Boolean.TYPE, Boolean.class);
@@ -63,78 +60,6 @@ public class SimpleCatalog implements Catalog {
         primitiveTypeToWrapper.put(Long.TYPE, Long.class);
         primitiveTypeToWrapper.put(Float.TYPE, Float.class);
         primitiveTypeToWrapper.put(Double.TYPE, Double.class);
-    }
-
-    private static final SimpleCatalog instance = new SimpleCatalog(null);
-
-    static boolean isSimpleType(Class type) {
-        return instance.formatMap.containsKey(type.getName());
-    }
-
-    static Class primitiveToWrapper(Class type) {
-        Class cls = primitiveTypeToWrapper.get(type);
-        if (cls == null) {
-            throw DbCompat.unexpectedState(type.getName());
-        }
-        return cls;
-    }
-
-    public static Class resolveClass(String className, ClassLoader loader)
-        throws ClassNotFoundException {
-
-        Class cls = keywordToPrimitive.get(className);
-        if (cls == null) {
-            cls = ClassResolver.resolveClass(className, loader);
-        }
-        return cls;
-    }
-
-    public static Class resolveKeyClass(String className, ClassLoader loader) {
-        Class cls = keywordToPrimitive.get(className);
-        if (cls != null) {
-            cls = primitiveTypeToWrapper.get(cls);
-        } else {
-            try {
-                cls = ClassResolver.resolveClass(className, loader);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException
-                    ("Key class not found: " + className);
-            }
-        }
-        return cls;
-    }
-
-    public static String keyClassName(String className) {
-        Class cls = keywordToPrimitive.get(className);
-        if (cls != null) {
-            cls = primitiveTypeToWrapper.get(cls);
-            return cls.getName();
-        } else {
-            return className;
-        }
-    }
-
-    static List<Format> getAllSimpleFormats(ClassLoader loader) {
-        return new ArrayList<Format>(new SimpleCatalog(loader).formatList);
-    }
-
-    static boolean addMissingSimpleFormats(ClassLoader loader,
-                                           List<Format> copyToList) {
-        boolean anyCopied = false;
-        SimpleCatalog tempCatalog = null;
-        for (int i = 0; i <= Format.ID_PREDEFINED; i += 1) {
-            final Format thisFormat = instance.formatList.get(i);
-            final Format otherFormat = copyToList.get(i);
-            if (thisFormat != null && otherFormat == null) {
-                assert thisFormat.getWrapperFormat() == null;
-                if (tempCatalog == null) {
-                    tempCatalog = new SimpleCatalog(loader);
-                }
-                copyToList.set(i, tempCatalog.formatList.get(i));
-                anyCopied = true;
-            }
-        }
-        return anyCopied;
     }
 
     private final ClassLoader classLoader;
@@ -152,31 +77,31 @@ public class SimpleCatalog implements Catalog {
         formatList = new ArrayList<SimpleFormat>(initCapacity);
         formatMap = new HashMap<String, SimpleFormat>(initCapacity);
 
-        for (int i = 0; i <= Format.ID_PREDEFINED; i += 1) {
+        for(int i = 0; i <= Format.ID_PREDEFINED; i += 1) {
             formatList.add(null);
         }
 
         /* Initialize all predefined formats.  */
-        setFormat(Format.ID_BOOL,     new SimpleFormat.FBool(this, true));
-        setFormat(Format.ID_BOOL_W,   new SimpleFormat.FBool(this, false));
-        setFormat(Format.ID_BYTE,     new SimpleFormat.FByte(this, true));
-        setFormat(Format.ID_BYTE_W,   new SimpleFormat.FByte(this, false));
-        setFormat(Format.ID_SHORT,    new SimpleFormat.FShort(this, true));
-        setFormat(Format.ID_SHORT_W,  new SimpleFormat.FShort(this, false));
-        setFormat(Format.ID_INT,      new SimpleFormat.FInt(this, true));
-        setFormat(Format.ID_INT_W,    new SimpleFormat.FInt(this, false));
-        setFormat(Format.ID_LONG,     new SimpleFormat.FLong(this, true));
-        setFormat(Format.ID_LONG_W,   new SimpleFormat.FLong(this, false));
-        setFormat(Format.ID_FLOAT,    new SimpleFormat.FFloat(this, true));
-        setFormat(Format.ID_FLOAT_W,  new SimpleFormat.FFloat(this, false));
-        setFormat(Format.ID_DOUBLE,   new SimpleFormat.FDouble(this, true));
+        setFormat(Format.ID_BOOL, new SimpleFormat.FBool(this, true));
+        setFormat(Format.ID_BOOL_W, new SimpleFormat.FBool(this, false));
+        setFormat(Format.ID_BYTE, new SimpleFormat.FByte(this, true));
+        setFormat(Format.ID_BYTE_W, new SimpleFormat.FByte(this, false));
+        setFormat(Format.ID_SHORT, new SimpleFormat.FShort(this, true));
+        setFormat(Format.ID_SHORT_W, new SimpleFormat.FShort(this, false));
+        setFormat(Format.ID_INT, new SimpleFormat.FInt(this, true));
+        setFormat(Format.ID_INT_W, new SimpleFormat.FInt(this, false));
+        setFormat(Format.ID_LONG, new SimpleFormat.FLong(this, true));
+        setFormat(Format.ID_LONG_W, new SimpleFormat.FLong(this, false));
+        setFormat(Format.ID_FLOAT, new SimpleFormat.FFloat(this, true));
+        setFormat(Format.ID_FLOAT_W, new SimpleFormat.FFloat(this, false));
+        setFormat(Format.ID_DOUBLE, new SimpleFormat.FDouble(this, true));
         setFormat(Format.ID_DOUBLE_W, new SimpleFormat.FDouble(this, false));
-        setFormat(Format.ID_CHAR,     new SimpleFormat.FChar(this, true));
-        setFormat(Format.ID_CHAR_W,   new SimpleFormat.FChar(this, false));
-        setFormat(Format.ID_STRING,   new SimpleFormat.FString(this));
-        setFormat(Format.ID_BIGINT,   new SimpleFormat.FBigInt(this));
-        setFormat(Format.ID_BIGDEC,   new SimpleFormat.FBigDec(this));
-        setFormat(Format.ID_DATE,     new SimpleFormat.FDate(this));
+        setFormat(Format.ID_CHAR, new SimpleFormat.FChar(this, true));
+        setFormat(Format.ID_CHAR_W, new SimpleFormat.FChar(this, false));
+        setFormat(Format.ID_STRING, new SimpleFormat.FString(this));
+        setFormat(Format.ID_BIGINT, new SimpleFormat.FBigInt(this));
+        setFormat(Format.ID_BIGDEC, new SimpleFormat.FBigDec(this));
+        setFormat(Format.ID_DATE, new SimpleFormat.FDate(this));
 
         /* Tell primitives about their wrapper class. */
         setWrapper(Format.ID_BOOL, Format.ID_BOOL_W);
@@ -187,6 +112,83 @@ public class SimpleCatalog implements Catalog {
         setWrapper(Format.ID_FLOAT, Format.ID_FLOAT_W);
         setWrapper(Format.ID_DOUBLE, Format.ID_DOUBLE_W);
         setWrapper(Format.ID_CHAR, Format.ID_CHAR_W);
+    }
+
+    static boolean isSimpleType(Class type) {
+        return instance.formatMap.containsKey(type.getName());
+    }
+
+    static Class primitiveToWrapper(Class type) {
+        Class cls = primitiveTypeToWrapper.get(type);
+        if(cls == null) {
+            throw DbCompat.unexpectedState(type.getName());
+        }
+        return cls;
+    }
+
+    public static Class resolveClass(String className, ClassLoader loader)
+            throws ClassNotFoundException {
+
+        Class cls = keywordToPrimitive.get(className);
+        if(cls == null) {
+            cls = ClassResolver.resolveClass(className, loader);
+        }
+        return cls;
+    }
+
+    public static Class resolveKeyClass(String className, ClassLoader loader) {
+        Class cls = keywordToPrimitive.get(className);
+        if(cls != null) {
+            cls = primitiveTypeToWrapper.get(cls);
+        }
+        else {
+            try {
+                cls = ClassResolver.resolveClass(className, loader);
+            } catch(ClassNotFoundException e) {
+                throw new IllegalArgumentException
+                        ("Key class not found: " + className);
+            }
+        }
+        return cls;
+    }
+
+    public static String keyClassName(String className) {
+        Class cls = keywordToPrimitive.get(className);
+        if(cls != null) {
+            cls = primitiveTypeToWrapper.get(cls);
+            return cls.getName();
+        }
+        else {
+            return className;
+        }
+    }
+
+    static List<Format> getAllSimpleFormats(ClassLoader loader) {
+        return new ArrayList<Format>(new SimpleCatalog(loader).formatList);
+    }
+
+    static boolean addMissingSimpleFormats(ClassLoader loader,
+                                           List<Format> copyToList) {
+        boolean anyCopied = false;
+        SimpleCatalog tempCatalog = null;
+        for(int i = 0; i <= Format.ID_PREDEFINED; i += 1) {
+            final Format thisFormat = instance.formatList.get(i);
+            final Format otherFormat = copyToList.get(i);
+            if(thisFormat != null && otherFormat == null) {
+                assert thisFormat.getWrapperFormat() == null;
+                if(tempCatalog == null) {
+                    tempCatalog = new SimpleCatalog(loader);
+                }
+                copyToList.set(i, tempCatalog.formatList.get(i));
+                anyCopied = true;
+            }
+        }
+        return anyCopied;
+    }
+
+    /* Registering proxy is not allowed for SimpleType. */
+    public static boolean allowRegisterProxy(Class type) {
+        return !isSimpleType(type);
     }
 
     /**
@@ -218,22 +220,22 @@ public class SimpleCatalog implements Catalog {
         Format format;
         try {
             format = formatList.get(formatId);
-            if (format == null) {
+            if(format == null) {
                 throw DbCompat.unexpectedState
-                    ("Not a simple type: " + formatId);
+                        ("Not a simple type: " + formatId);
             }
             return format;
-        } catch (NoSuchElementException e) {
+        } catch(NoSuchElementException e) {
             throw DbCompat.unexpectedState
-                ("Not a simple type: " + formatId);
+                    ("Not a simple type: " + formatId);
         }
     }
 
     public Format getFormat(Class cls, boolean checkEntitySubclassIndexes) {
         Format format = formatMap.get(cls.getName());
-        if (format == null) {
+        if(format == null) {
             throw new IllegalArgumentException
-                ("Not a simple type: " + cls.getName());
+                    ("Not a simple type: " + cls.getName());
         }
         return format;
     }
@@ -260,17 +262,12 @@ public class SimpleCatalog implements Catalog {
     }
 
     public Class resolveClass(String clsName)
-        throws ClassNotFoundException {
+            throws ClassNotFoundException {
 
         return SimpleCatalog.resolveClass(clsName, classLoader);
     }
 
     public Class resolveKeyClass(String clsName) {
         return SimpleCatalog.resolveKeyClass(clsName, classLoader);
-    }
-    
-    /* Registering proxy is not allowed for SimpleType. */
-    public static boolean allowRegisterProxy(Class type) {
-        return !isSimpleType(type);
     }
 }

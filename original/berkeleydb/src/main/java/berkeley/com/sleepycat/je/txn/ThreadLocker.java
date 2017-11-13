@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.util.Iterator;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.Iterator;
 
 /**
  * Extends BasicLocker to share locks among all lockers for the same thread.
@@ -44,11 +44,11 @@ public class ThreadLocker extends BasicLocker {
 
     public static ThreadLocker createThreadLocker(EnvironmentImpl env,
                                                   boolean replicated)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return (env.isReplicated() && replicated) ?
-               env.createRepThreadLocker() :
-               new ThreadLocker(env);
+                env.createRepThreadLocker() :
+                new ThreadLocker(env);
     }
 
     @Override
@@ -61,12 +61,12 @@ public class ThreadLocker extends BasicLocker {
      * Checks for preemption in all thread lockers for this thread.
      */
     @Override
-    public void checkPreempted(final Locker allowPreemptedLocker) 
-        throws OperationFailureException {
+    public void checkPreempted(final Locker allowPreemptedLocker)
+            throws OperationFailureException {
 
         final Iterator<ThreadLocker> iter =
-            lockManager.getThreadLockers(thread);
-        while (iter.hasNext()) {
+                lockManager.getThreadLockers(thread);
+        while(iter.hasNext()) {
             final ThreadLocker locker = iter.next();
             locker.throwIfPreempted(allowPreemptedLocker);
         }
@@ -94,15 +94,15 @@ public class ThreadLocker extends BasicLocker {
      * Check that this locker is not used in the wrong thread.
      *
      * @throws IllegalStateException via all Cursor methods that use a
-     * non-transactional locker.
+     *                               non-transactional locker.
      */
     @Override
     protected synchronized void checkState(boolean ignoreCalledByAbort) {
-        if (!allowMultithreadedAccess && thread != Thread.currentThread()) {
+        if(!allowMultithreadedAccess && thread != Thread.currentThread()) {
             throw new IllegalStateException
-                ("Non-transactional Cursors may not be used in multiple " +
-                 "threads; Cursor was created in " + thread +
-                 " but used in " + Thread.currentThread());
+                    ("Non-transactional Cursors may not be used in multiple " +
+                            "threads; Cursor was created in " + thread +
+                            " but used in " + Thread.currentThread());
         }
     }
 
@@ -112,7 +112,7 @@ public class ThreadLocker extends BasicLocker {
      */
     @Override
     public Locker newNonTxnLocker()
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkState(false);
         return newEmptyThreadLockerClone();
@@ -130,11 +130,13 @@ public class ThreadLocker extends BasicLocker {
     @Override
     public boolean sharesLocksWith(Locker other) {
 
-        if (super.sharesLocksWith(other)) {
+        if(super.sharesLocksWith(other)) {
             return true;
-        } else if (other instanceof ThreadLocker) {
+        }
+        else if(other instanceof ThreadLocker) {
             return thread == other.thread;
-        } else {
+        }
+        else {
             return false;
         }
     }

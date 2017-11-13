@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.lang.reflect.Array;
-import java.util.Map;
-
 import berkeley.com.sleepycat.compat.DbCompat;
 import berkeley.com.sleepycat.persist.model.EntityModel;
+
+import java.lang.reflect.Array;
+import java.util.Map;
 
 /**
  * Format for a non-persistent class that is only used for declared field
@@ -50,7 +50,7 @@ class NonPersistentFormat extends Format {
     @Override
     public Object newInstance(EntityInput input, boolean rawAccess) {
         throw DbCompat.unexpectedState
-            ("Cannot instantiate non-persistent class: " + getClassName());
+                ("Cannot instantiate non-persistent class: " + getClassName());
     }
 
     @Override

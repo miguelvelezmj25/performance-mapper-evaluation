@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.nio.ByteBuffer;
 
 /**
  * DeltaInfo holds the delta for one BIN entry in a partial BIN log entry.
@@ -37,7 +37,7 @@ public class DeltaInfo implements Loggable {
 
     /**
      * For reading from the log only.
-     *
+     * <p>
      * Is public for Sizeof.
      */
     public DeltaInfo() {
@@ -47,9 +47,9 @@ public class DeltaInfo implements Loggable {
     @Override
     public int getLogSize() {
         return
-            LogUtils.getByteArrayLogSize(key) +
-            LogUtils.getPackedLongLogSize(lsn) + // LSN
-            1; // state
+                LogUtils.getByteArrayLogSize(key) +
+                        LogUtils.getPackedLongLogSize(lsn) + // LSN
+                        1; // state
     }
 
     @Override
@@ -112,6 +112,6 @@ public class DeltaInfo implements Loggable {
      */
     long getMemorySize() {
         return MemoryBudget.DELTAINFO_OVERHEAD +
-               MemoryBudget.byteArraySize(key.length);
+                MemoryBudget.byteArraySize(key.length);
     }
 }

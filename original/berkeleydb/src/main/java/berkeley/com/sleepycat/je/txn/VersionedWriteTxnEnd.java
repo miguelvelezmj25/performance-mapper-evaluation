@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
@@ -24,12 +20,16 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 import berkeley.com.sleepycat.util.PackedInteger;
 
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Based class for commit and abort records, which are replicated.
  * The log formats for commit and abort are identical.
  */
 public abstract class VersionedWriteTxnEnd
-    extends TxnEnd implements VersionedWriteLoggable {
+        extends TxnEnd implements VersionedWriteLoggable {
 
     /**
      * The log version of the most recent format change for this loggable.
@@ -70,23 +70,23 @@ public abstract class VersionedWriteTxnEnd
     @Override
     public void writeToLog(final ByteBuffer logBuffer) {
         writeToLog(
-            logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
+                logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
     }
 
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
 
-        if (dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
+        if(dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
             throw new IllegalStateException("DTVLSN is null");
         }
 
         return LogUtils.getPackedLongLogSize(id) +
-            LogUtils.getTimestampLogSize(time) +
-            LogUtils.getPackedLongLogSize(
-                forReplication ? DbLsn.NULL_LSN : lastLsn) +
-            LogUtils.getPackedIntLogSize(repMasterNodeId) +
-            ((logVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) ?
-             LogUtils.getPackedLongLogSize(dtvlsn) : 0);
+                LogUtils.getTimestampLogSize(time) +
+                LogUtils.getPackedLongLogSize(
+                        forReplication ? DbLsn.NULL_LSN : lastLsn) +
+                LogUtils.getPackedIntLogSize(repMasterNodeId) +
+                ((logVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) ?
+                        LogUtils.getPackedLongLogSize(dtvlsn) : 0);
     }
 
     @Override
@@ -94,20 +94,20 @@ public abstract class VersionedWriteTxnEnd
                            final int entryVersion,
                            final boolean forReplication) {
 
-        if (entryVersion >= 12) {
+        if(entryVersion >= 12) {
             LogUtils.writePackedLong(logBuffer,
-                forReplication ? DbLsn.NULL_LSN : lastLsn);
+                    forReplication ? DbLsn.NULL_LSN : lastLsn);
         }
         LogUtils.writePackedLong(logBuffer, id);
         LogUtils.writeTimestamp(logBuffer, time);
-        if (entryVersion < 12) {
+        if(entryVersion < 12) {
             LogUtils.writePackedLong(logBuffer,
-                forReplication ? DbLsn.NULL_LSN : lastLsn);
+                    forReplication ? DbLsn.NULL_LSN : lastLsn);
         }
         LogUtils.writePackedInt(logBuffer, repMasterNodeId);
 
-        if (entryVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) {
-            if (dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
+        if(entryVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) {
+            if(dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
                 throw new IllegalStateException("Unexpected null dtvlsn");
             }
             LogUtils.writePackedLong(logBuffer, dtvlsn);
@@ -118,25 +118,26 @@ public abstract class VersionedWriteTxnEnd
     public void readFromLog(ByteBuffer logBuffer, int entryVersion) {
         final boolean isUnpacked = (entryVersion < 6);
 
-        if (entryVersion >= 12) {
+        if(entryVersion >= 12) {
             lastLsn = LogUtils.readLong(logBuffer, isUnpacked);
         }
         id = LogUtils.readLong(logBuffer, isUnpacked);
         time = LogUtils.readTimestamp(logBuffer, isUnpacked);
-        if (entryVersion < 12) {
+        if(entryVersion < 12) {
             lastLsn = LogUtils.readLong(logBuffer, isUnpacked);
         }
-        if (entryVersion >= 6) {
+        if(entryVersion >= 6) {
             repMasterNodeId = LogUtils.readInt(logBuffer,
-                false /* unpacked */);
+                    false /* unpacked */);
         }
 
-        if (entryVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) {
+        if(entryVersion >= LogEntryType.LOG_VERSION_DURABLE_VLSN) {
             dtvlsn = LogUtils.readPackedLong(logBuffer);
-            if (dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
+            if(dtvlsn == VLSN.NULL_VLSN_SEQUENCE) {
                 throw new IllegalStateException("Unexpected null dtvlsn");
             }
-        } else {
+        }
+        else {
             /*
              * Distinguished value to make it clear that the value was derived
              * from an old log entry.
@@ -158,7 +159,7 @@ public abstract class VersionedWriteTxnEnd
          * It is too much trouble to parse versions older than 12, because the
          * lastLsn is not at the front in older versions.
          */
-        if (srcVersion < 12) {
+        if(srcVersion < 12) {
             return false;
         }
 
@@ -167,8 +168,8 @@ public abstract class VersionedWriteTxnEnd
          * NULL_LSN), then we should re-serialize.
          */
         return PackedInteger.getReadLongLength(
-            logBuffer.array(),
-            logBuffer.arrayOffset() + logBuffer.position()) > 1;
+                logBuffer.array(),
+                logBuffer.arrayOffset() + logBuffer.position()) > 1;
     }
 
     @Override

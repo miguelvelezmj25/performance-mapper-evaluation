@@ -13,21 +13,6 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHED_GETS;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_LAST;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_SIZE;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_CACHE_VALUE;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_GETS;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_RANGE_MAX;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_RANGE_MIN;
-import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.SEQUENCE_STORED_VALUE;
-
-import java.io.Closeable;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.dbi.SequenceStatDefinition;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.txn.Locker;
@@ -36,6 +21,14 @@ import berkeley.com.sleepycat.je.utilint.IntStat;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.LongStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import java.io.Closeable;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.dbi.SequenceStatDefinition.*;
 
 /**
  * A Sequence handle is used to manipulate a sequence record in a
@@ -57,7 +50,9 @@ public class Sequence implements Closeable {
     /* A sequence is a unique record in a database. */
     private final Database db;
     private final DatabaseEntry key;
-
+    /* Handle-specific fields. */
+    private final int cacheSize;
+    private final Logger logger;
     /* Persistent fields. */
     private boolean wrapAllowed;
     private boolean increment;
@@ -65,15 +60,11 @@ public class Sequence implements Closeable {
     private long rangeMin;
     private long rangeMax;
     private long storedValue;
-
-    /* Handle-specific fields. */
-    private final int cacheSize;
     private long cacheValue;
     private long cacheLast;
     private int nGets;
     private int nCachedGets;
     private TransactionConfig autoCommitConfig;
-    private final Logger logger;
 
     /*
      * The cache holds the range of values [cacheValue, cacheLast], which is
@@ -89,46 +80,46 @@ public class Sequence implements Closeable {
      * Opens a sequence handle, adding the sequence record if appropriate.
      *
      * @throws IllegalArgumentException via Database.openSequence.
-     *
-     * @throws IllegalStateException via Database.openSequence.
+     * @throws IllegalStateException    via Database.openSequence.
      */
     Sequence(Database db,
              Transaction txn,
              DatabaseEntry key,
              SequenceConfig config)
-        throws SequenceNotFoundException, SequenceExistsException {
+            throws SequenceNotFoundException, SequenceExistsException {
 
-        if (db.getDbImpl().getSortedDuplicates()) {
+        if(db.getDbImpl().getSortedDuplicates()) {
             throw new UnsupportedOperationException
-                ("Sequences not supported in databases configured for " +
-                 "duplicates");
+                    ("Sequences not supported in databases configured for " +
+                            "duplicates");
         }
 
         SequenceConfig useConfig = (config != null) ?
-            config : SequenceConfig.DEFAULT;
+                config : SequenceConfig.DEFAULT;
 
-        if (useConfig.getRangeMin() >= useConfig.getRangeMax()) {
+        if(useConfig.getRangeMin() >= useConfig.getRangeMax()) {
             throw new IllegalArgumentException
-                ("Minimum sequence value must be less than the maximum");
+                    ("Minimum sequence value must be less than the maximum");
         }
 
-        if (useConfig.getInitialValue() > useConfig.getRangeMax() ||
-            useConfig.getInitialValue() < useConfig.getRangeMin()) {
+        if(useConfig.getInitialValue() > useConfig.getRangeMax() ||
+                useConfig.getInitialValue() < useConfig.getRangeMin()) {
             throw new IllegalArgumentException
-                ("Initial sequence value is out of range");
+                    ("Initial sequence value is out of range");
         }
 
-        if (useConfig.getRangeMin() >
-            useConfig.getRangeMax() - useConfig.getCacheSize()) {
+        if(useConfig.getRangeMin() >
+                useConfig.getRangeMax() - useConfig.getCacheSize()) {
             throw new IllegalArgumentException
-                ("The cache size is larger than the sequence range");
+                    ("The cache size is larger than the sequence range");
         }
 
-        if (useConfig.getAutoCommitNoSync()) {
+        if(useConfig.getAutoCommitNoSync()) {
             autoCommitConfig =
-                DbInternal.getDefaultTxnConfig(db.getEnvironment()).clone();
+                    DbInternal.getDefaultTxnConfig(db.getEnvironment()).clone();
             autoCommitConfig.overrideDurability(Durability.COMMIT_NO_SYNC);
-        } else {
+        }
+        else {
             /* Use the environment's default transaction config. */
             autoCommitConfig = null;
         }
@@ -143,38 +134,39 @@ public class Sequence implements Closeable {
         OperationStatus status = OperationStatus.NOTFOUND;
         try {
             locker = LockerFactory.getReadableLocker(
-                db, txn, false /*readCommitedIsolation*/);
+                    db, txn, false /*readCommitedIsolation*/);
 
             cursor = new Cursor(db, locker, null);
 
             boolean sequenceExists = readData(cursor, null);
             boolean isWritableLocker = !db.getConfig().getTransactional() ||
-                (locker.isTransactional() &&
-                 !DbInternal.getNonNullEnvImpl(db.getEnvironment()).
-                 isReplicated());
+                    (locker.isTransactional() &&
+                            !DbInternal.getNonNullEnvImpl(db.getEnvironment()).
+                                    isReplicated());
 
-            if (sequenceExists) {
-                if (useConfig.getAllowCreate() &&
-                    useConfig.getExclusiveCreate()) {
+            if(sequenceExists) {
+                if(useConfig.getAllowCreate() &&
+                        useConfig.getExclusiveCreate()) {
                     throw new SequenceExistsException
-                       ("ExclusiveCreate=true and the sequence record " +
-                        "already exists.");
+                            ("ExclusiveCreate=true and the sequence record " +
+                                    "already exists.");
                 }
-            } else {
-                if (useConfig.getAllowCreate()) {
-                    if (!isWritableLocker) {
-                        if (cursor != null) {
+            }
+            else {
+                if(useConfig.getAllowCreate()) {
+                    if(!isWritableLocker) {
+                        if(cursor != null) {
                             cursor.close();
                         }
                         locker.operationEnd(OperationStatus.SUCCESS);
 
                         locker = LockerFactory.getWritableLocker
-                            (db.getEnvironment(),
-                             txn,
-                             db.getDbImpl().isInternalDb(),
-                             db.isTransactional(),
-                             db.getDbImpl().isReplicated(),
-                             autoCommitConfig);
+                                (db.getEnvironment(),
+                                        txn,
+                                        db.getDbImpl().isInternalDb(),
+                                        db.isTransactional(),
+                                        db.getDbImpl().isReplicated(),
+                                        autoCommitConfig);
                         cursor = new Cursor(db, locker, null);
                     }
 
@@ -192,23 +184,24 @@ public class Sequence implements Closeable {
                      */
                     status = cursor.putNoOverwrite(key, makeData());
 
-                    if (!readData(cursor, null)) {
+                    if(!readData(cursor, null)) {
                         /* A retry loop should be performed here. */
                         throw new IllegalStateException
-                            ("Sequence record removed during openSequence.");
+                                ("Sequence record removed during openSequence.");
                     }
                     status = OperationStatus.SUCCESS;
-                } else {
+                }
+                else {
                     throw new SequenceNotFoundException
-                        ("AllowCreate=false and the sequence record " +
-                         "does not exist.");
+                            ("AllowCreate=false and the sequence record " +
+                                    "does not exist.");
                 }
             }
         } finally {
-            if (cursor != null) {
+            if(cursor != null) {
                 cursor.close();
             }
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd(status);
             }
         }
@@ -224,10 +217,10 @@ public class Sequence implements Closeable {
 
     /**
      * Closes a sequence.  Any unused cached values are lost.
-     *
+     * <p>
      * <p>The sequence handle may not be used again after this method has
      * been called, regardless of the method's success or failure.</p>
-     *
+     * <p>
      * <p>WARNING: To guard against memory leaks, the application should
      * discard all references to the closed handle.  While BDB makes an effort
      * to discard references from closed objects to the allocated memory for an
@@ -236,10 +229,10 @@ public class Sequence implements Closeable {
      * objects.</p>
      *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      */
     public void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Defined only for DB compatibility and possible future use. */
     }
@@ -252,14 +245,14 @@ public class Sequence implements Closeable {
      * will be fetched from the database and incremented (decremented) by
      * enough to cover the <code>delta</code> and the next batch of cached
      * values.
-     *
+     * <p>
      * This method is synchronized to protect updating of the cached value,
      * since multiple threads may share a single handle.  Multiple handles for
      * the same database/key may be used to increase concurrency.</p>
-     *
+     * <p>
      * <p>The <code>txn</code> handle must be null if the sequence handle was
      * opened with a non-zero cache size.</p>
-     *
+     * <p>
      * <p>For maximum concurrency, a non-zero cache size should be specified
      * prior to opening the sequence handle, the <code>txn</code> handle should
      * be <code>null</code>, and {@link
@@ -267,41 +260,34 @@ public class Sequence implements Closeable {
      * SequenceConfig.setAutoCommitNoSync} should be called to disable log
      * flushes.</p>
      *
-     * @param txn For a transactional database, an explicit transaction may be
-     * specified, or null may be specified to use auto-commit.  For a
-     * non-transactional database, null must be specified.
-     *
+     * @param txn   For a transactional database, an explicit transaction may be
+     *              specified, or null may be specified to use auto-commit.  For a
+     *              non-transactional database, null must be specified.
      * @param delta the amount by which to increment or decrement the sequence
-     *
      * @return the next available element in the sequence
-     *
-     * @throws SequenceOverflowException if the end of the sequence is reached
-     * and wrapping is not configured.
-     *
-     * @throws SequenceIntegrityException if the sequence record has been
-     * deleted.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws SequenceOverflowException   if the end of the sequence is reached
+     *                                     and wrapping is not configured.
+     * @throws SequenceIntegrityException  if the sequence record has been
+     *                                     deleted.
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalArgumentException if the delta is less than or equal to
-     * zero, or larger than the size of the sequence's range.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalArgumentException    if the delta is less than or equal to
+     *                                     zero, or larger than the size of the sequence's range.
      */
     public synchronized long get(Transaction txn, int delta)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Check parameters, being careful of overflow. */
-        if (delta <= 0) {
+        if(delta <= 0) {
             throw new IllegalArgumentException
-                ("Sequence delta must be greater than zero");
+                    ("Sequence delta must be greater than zero");
         }
-        if (rangeMin > rangeMax - delta) {
+        if(rangeMin > rangeMax - delta) {
             throw new IllegalArgumentException
-                ("Sequence delta is larger than the range");
+                    ("Sequence delta is larger than the range");
         }
 
         /* Status variables for tracing. */
@@ -313,8 +299,8 @@ public class Sequence implements Closeable {
          * always <= Integer.MAX_VALUE, so we don't have to worry about
          * overflow here as long as we subtract the two long values first.
          */
-        if ((increment && delta > ((cacheLast - cacheValue) + 1)) ||
-            (!increment && delta > ((cacheValue - cacheLast) + 1))) {
+        if((increment && delta > ((cacheLast - cacheValue) + 1)) ||
+                (!increment && delta > ((cacheValue - cacheLast) + 1))) {
 
             cached = false;
 
@@ -331,13 +317,13 @@ public class Sequence implements Closeable {
             OperationStatus status = OperationStatus.NOTFOUND;
             try {
                 locker = LockerFactory.getWritableLocker
-                    (db.getEnvironment(),
-                     txn,
-                     db.getDbImpl().isInternalDb(),
-                     db.isTransactional(),
-                     db.getDbImpl().isReplicated(),
-                                             // autoTxnIsReplicated
-                     autoCommitConfig);
+                        (db.getEnvironment(),
+                                txn,
+                                db.getDbImpl().isInternalDb(),
+                                db.isTransactional(),
+                                db.getDbImpl().isReplicated(),
+                                // autoTxnIsReplicated
+                                autoCommitConfig);
 
                 cursor = new Cursor(db, locker, null);
 
@@ -345,9 +331,9 @@ public class Sequence implements Closeable {
                 readDataRequired(cursor, LockMode.RMW);
 
                 /* If we would have wrapped when not allowed, overflow. */
-                if (overflow) {
+                if(overflow) {
                     throw new SequenceOverflowException
-                        ("Sequence overflow " + storedValue);
+                            ("Sequence overflow " + storedValue);
                 }
 
                 /*
@@ -357,30 +343,33 @@ public class Sequence implements Closeable {
                  * overhead is acceptable.
                  */
                 BigInteger availBig;
-                if (increment) {
+                if(increment) {
                     /* Available amount: rangeMax - storedValue */
                     availBig = BigInteger.valueOf(rangeMax).
-                        subtract(BigInteger.valueOf(storedValue));
-                } else {
+                            subtract(BigInteger.valueOf(storedValue));
+                }
+                else {
                     /* Available amount: storedValue - rangeMin */
                     availBig = BigInteger.valueOf(storedValue).
-                        subtract(BigInteger.valueOf(rangeMin));
+                            subtract(BigInteger.valueOf(rangeMin));
                 }
 
-                if (availBig.compareTo(BigInteger.valueOf(adjust)) < 0) {
+                if(availBig.compareTo(BigInteger.valueOf(adjust)) < 0) {
                     /* If availBig < adjust then availBig fits in an int. */
                     int availInt = (int) availBig.longValue();
-                    if (availInt < delta) {
-                        if (wrapAllowed) {
+                    if(availInt < delta) {
+                        if(wrapAllowed) {
                             /* Wrap to the opposite range end point. */
                             storedValue = increment ? rangeMin : rangeMax;
                             wrapped = true;
-                        } else {
+                        }
+                        else {
                             /* Signal an overflow next time. */
                             overflow = true;
                             adjust = 0;
                         }
-                    } else {
+                    }
+                    else {
 
                         /*
                          * If the delta fits in the cache available, don't wrap
@@ -392,7 +381,7 @@ public class Sequence implements Closeable {
                 }
 
                 /* Negate the adjustment for decrementing. */
-                if (!increment) {
+                if(!increment) {
                     adjust = -adjust;
                 }
 
@@ -403,10 +392,10 @@ public class Sequence implements Closeable {
                 cursor.put(key, makeData());
                 status = OperationStatus.SUCCESS;
             } finally {
-                if (cursor != null) {
+                if(cursor != null) {
                     cursor.close();
                 }
-                if (locker != null) {
+                if(locker != null) {
                     locker.operationEnd(status);
                 }
             }
@@ -418,24 +407,25 @@ public class Sequence implements Closeable {
 
         /* Return the current value and increment/decrement it by delta. */
         long retVal = cacheValue;
-        if (increment) {
+        if(increment) {
             cacheValue += delta;
-        } else {
+        }
+        else {
             cacheValue -= delta;
         }
 
         /* Increment stats. */
         nGets += 1;
-        if (cached) {
+        if(cached) {
             nCachedGets += 1;
         }
 
         /* Trace this method at the FINEST level. */
-        if (logger.isLoggable(Level.FINEST)) {
+        if(logger.isLoggable(Level.FINEST)) {
             LoggerUtils.finest(logger,
-                               db.getEnvironment().getNonNullEnvImpl(),
-                               "Sequence.get" + " value=" + retVal +
-                               " cached=" + cached + " wrapped=" + wrapped);
+                    db.getEnvironment().getNonNullEnvImpl(),
+                    "Sequence.get" + " value=" + retVal +
+                            " cached=" + cached + " wrapped=" + wrapped);
         }
 
         return retVal;
@@ -461,31 +451,29 @@ public class Sequence implements Closeable {
 
     /**
      * Returns statistical information about the sequence.
-     *
+     * <p>
      * <p>In the presence of multiple threads or processes accessing an active
      * sequence, the information returned by this method may be
      * out-of-date.</p>
-     *
+     * <p>
      * <p>The getStats method cannot be transaction-protected. For this reason,
      * it should be called in a thread of control that has no open cursors or
      * active transactions.</p>
      *
      * @param config The statistics returned; if null, default statistics are
-     * returned.
-     *
+     *               returned.
      * @return Sequence statistics.
-     *
      * @throws SequenceIntegrityException if the sequence record has been
-     * deleted.
+     *                                    deleted.
      */
     public SequenceStats getStats(StatsConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (config == null) {
+        if(config == null) {
             config = StatsConfig.DEFAULT;
         }
 
-        if (!config.getFast()) {
+        if(!config.getFast()) {
 
             /*
              * storedValue may have been updated by another handle since it
@@ -501,7 +489,7 @@ public class Sequence implements Closeable {
         }
 
         StatGroup stats = new StatGroup(SequenceStatDefinition.GROUP_NAME,
-                                        SequenceStatDefinition.GROUP_DESC);
+                SequenceStatDefinition.GROUP_DESC);
         new IntStat(stats, SEQUENCE_GETS, nGets);
         new IntStat(stats, SEQUENCE_CACHED_GETS, nCachedGets);
         new IntStat(stats, SEQUENCE_CACHE_SIZE, cacheSize);
@@ -513,7 +501,7 @@ public class Sequence implements Closeable {
 
         SequenceStats seqStats = new SequenceStats(stats);
 
-        if (config.getClear()) {
+        if(config.getClear()) {
             nGets = 0;
             nCachedGets = 0;
         }
@@ -526,11 +514,11 @@ public class Sequence implements Closeable {
      * if the key is not present in the database.
      */
     private void readDataRequired(Cursor cursor, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!readData(cursor, lockMode)) {
+        if(!readData(cursor, lockMode)) {
             throw new SequenceIntegrityException
-                ("The sequence record has been deleted while it is open.");
+                    ("The sequence record has been deleted while it is open.");
         }
     }
 
@@ -539,12 +527,12 @@ public class Sequence implements Closeable {
      * key is not present in the database.
      */
     private boolean readData(Cursor cursor, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Fetch the sequence record. */
         DatabaseEntry data = new DatabaseEntry();
         OperationStatus status = cursor.getSearchKey(key, data, lockMode);
-        if (status != OperationStatus.SUCCESS) {
+        if(status != OperationStatus.SUCCESS) {
             return false;
         }
         ByteBuffer buf = ByteBuffer.wrap(data.getData());
@@ -573,13 +561,13 @@ public class Sequence implements Closeable {
         ByteBuffer buf = ByteBuffer.wrap(data);
 
         byte flags = 0;
-        if (increment) {
+        if(increment) {
             flags |= FLAG_INCR;
         }
-        if (wrapAllowed) {
+        if(wrapAllowed) {
             flags |= FLAG_WRAP;
         }
-        if (overflow) {
+        if(overflow) {
             flags |= FLAG_OVER;
         }
 
@@ -599,12 +587,13 @@ public class Sequence implements Closeable {
 
         int len = entry.getSize();
         byte[] data;
-        if (len == 0) {
+        if(len == 0) {
             data = LogUtils.ZERO_LENGTH_BYTE_ARRAY;
-        } else {
+        }
+        else {
             data = new byte[len];
             System.arraycopy
-                (entry.getData(), entry.getOffset(), data, 0, data.length);
+                    (entry.getData(), entry.getOffset(), data, 0, data.length);
         }
 
         return new DatabaseEntry(data);

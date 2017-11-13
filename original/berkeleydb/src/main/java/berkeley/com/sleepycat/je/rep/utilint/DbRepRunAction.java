@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import java.io.File;
-
 import berkeley.com.sleepycat.je.CheckpointConfig;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.rep.RepInternal;
@@ -22,21 +20,22 @@ import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
 import berkeley.com.sleepycat.je.rep.ReplicationConfig;
 import berkeley.com.sleepycat.je.utilint.CmdUtil;
 
+import java.io.File;
+
 /**
- * @hidden
- * RepRunAction is a debugging aid that invokes a ReplicatedEnvironment recovery
+ * @hidden RepRunAction is a debugging aid that invokes a ReplicatedEnvironment recovery
  * from the command line.
  */
 public class DbRepRunAction {
     private static final String USAGE =
 
-        "usage: " + CmdUtil.getJavaCommand(DbRepRunAction.class) + "\n" +
-        "       -h <dir> # environment home directory\n" +
-        "       -group <name> # groupName\n" +
-        "       -name <name> # nodeName\n" +
-        "       -host <host> # nodeHost\n" +
-        "       -showVLSN (dump vlsn index )\n" +
-        "       -checkpoint (forced )\n";
+            "usage: " + CmdUtil.getJavaCommand(DbRepRunAction.class) + "\n" +
+                    "       -h <dir> # environment home directory\n" +
+                    "       -group <name> # groupName\n" +
+                    "       -name <name> # nodeName\n" +
+                    "       -host <host> # nodeHost\n" +
+                    "       -showVLSN (dump vlsn index )\n" +
+                    "       -checkpoint (forced )\n";
 
     private File envHome;
     private String nodeName;
@@ -53,7 +52,7 @@ public class DbRepRunAction {
         try {
             runAction.run();
             System.exit(0);
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             e.printStackTrace(System.err);
             System.exit(1);
         }
@@ -64,42 +63,52 @@ public class DbRepRunAction {
         int argc = 0;
         int nArgs = argv.length;
 
-        if (nArgs < 4) {
+        if(nArgs < 4) {
             printUsage(null);
             System.exit(0);
         }
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
-            if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(argv[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else if (thisArg.equals("-name")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-name")) {
+                if(argc < nArgs) {
                     nodeName = argv[argc++];
-                } else {
+                }
+                else {
                     printUsage("-name requires an argument");
                 }
-            } else if (thisArg.equals("-host")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-host")) {
+                if(argc < nArgs) {
                     nodeHost = argv[argc++];
-                } else {
+                }
+                else {
                     printUsage("-host requires an argument");
                 }
-            } else if (thisArg.equals("-group")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-group")) {
+                if(argc < nArgs) {
                     groupName = argv[argc++];
-                } else {
+                }
+                else {
                     printUsage("-group requires an argument");
                 }
-            } else if (thisArg.equals("-showVLSN")) {
+            }
+            else if(thisArg.equals("-showVLSN")) {
                 showVLSN = true;
-            } else if (thisArg.equals("-checkpoint")) {
+            }
+            else if(thisArg.equals("-checkpoint")) {
                 doCheckpoint = true;
-            } else {
+            }
+            else {
                 printUsage(thisArg + " is not a valid argument");
             }
         }
@@ -107,10 +116,10 @@ public class DbRepRunAction {
 
     private void run() {
         ReplicatedEnvironment repEnv = recover();
-        if (showVLSN) {
+        if(showVLSN) {
             RepInternal.getNonNullRepImpl(repEnv).getVLSNIndex().dumpDb(true);
         }
-        if (doCheckpoint) {
+        if(doCheckpoint) {
             repEnv.checkpoint(new CheckpointConfig().setForce(true));
         }
         repEnv.close();
@@ -126,13 +135,13 @@ public class DbRepRunAction {
         envConfig.setTransactional(true);
 
         return RepInternal.createDetachedEnv(envHome,
-                                             repConfig,
-                                             envConfig);
+                repConfig,
+                envConfig);
 
     }
 
     private void printUsage(String msg) {
-        if (msg != null) {
+        if(msg != null) {
             System.out.println(msg);
         }
         System.out.println(USAGE);

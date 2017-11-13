@@ -13,16 +13,16 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
 /**
  * Redirects logging messages to the the owning environment's file handler, so
  * that messages can be prefixed with an environment name and sent to the
  * correct logging file.
- *
+ * <p>
  * This class must not extend FileHandler itself, since FileHandlers open their
  * target log files at construction time, and this FileHandler is meant to be
  * stateless.
@@ -36,14 +36,14 @@ public class FileRedirectHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         EnvironmentImpl envImpl =
-            LoggerUtils.envMap.get(Thread.currentThread());
+                LoggerUtils.envMap.get(Thread.currentThread());
 
         /*
          * Prefer to lose logging output, rather than risk a
          * NullPointerException if the caller forgets to set and release the
          * environmentImpl.
          */
-        if (envImpl == null) {
+        if(envImpl == null) {
             return;
         }
 
@@ -53,7 +53,7 @@ public class FileRedirectHandler extends Handler {
          * we avoid doing that for read only environments. Because of that,
          * there may legitimately be no environment file handler.
          */
-        if (envImpl.getFileHandler() == null) {
+        if(envImpl.getFileHandler() == null) {
             return;
         }
 
@@ -62,7 +62,7 @@ public class FileRedirectHandler extends Handler {
 
     @Override
     public void close()
-        throws SecurityException {
+            throws SecurityException {
 
         /*
          * Nothing to do. The redirect target file handler is closed by

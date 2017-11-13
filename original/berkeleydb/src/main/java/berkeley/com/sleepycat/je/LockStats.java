@@ -13,27 +13,16 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_CONTENTION;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NOWAIT_SUCCESS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NOWAIT_UNSUCCESS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_NO_WAITERS;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_RELEASES;
-import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.LATCH_SELF_OWNED;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_OWNERS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_READ_LOCKS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_REQUESTS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_TOTAL;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WAITERS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WAITS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WRITE_LOCKS;
+import berkeley.com.sleepycat.je.utilint.StatGroup;
 
 import java.io.Serializable;
 
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import static berkeley.com.sleepycat.je.latch.LatchStatDefinition.*;
+import static berkeley.com.sleepycat.je.txn.LockStatDefinition.*;
 
 /**
  * Lock statistics for a database environment.
- *
+ * <p>
  * <p> Note that some of the lock statistics may be expensive to obtain because
  * the lock table is unavailable to other operations while the statistics are
  * gathered. These expensive statistics are only provided if {@link
@@ -58,12 +47,11 @@ public class LockStats implements Serializable {
     private final StatGroup tableStats;
 
     /**
-     * @hidden
-     * For internal use only. Create a stat api instance to house lock related
+     * @hidden For internal use only. Create a stat api instance to house lock related
      * information.
      */
     public LockStats(StatGroup basicStats,
-                     StatGroup latchStats, 
+                     StatGroup latchStats,
                      StatGroup tableStats) {
         this.basicStats = basicStats;
         this.latchStats = latchStats;

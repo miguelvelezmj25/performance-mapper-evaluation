@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep;
 
+import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 
 /**
  * An administrative view of the collection of nodes that form the replication
@@ -29,8 +29,7 @@ public class ReplicationGroup {
     final RepGroupImpl repGroupImpl;
 
     /**
-     * @hidden
-     * For internal use only
+     * @hidden For internal use only
      * Used to wrap the actual group object implementation.
      */
     public ReplicationGroup(RepGroupImpl repGroupImpl) {
@@ -49,7 +48,7 @@ public class ReplicationGroup {
     /**
      * Returns the set of all nodes in the group. The return value includes
      * ELECTABLE, MONITOR, and SECONDARY nodes.
-     *
+     * <p>
      * <p>Note that SECONDARY nodes will only be included in the result when
      * this method is called for a replicated environment that is the master.
      *
@@ -90,7 +89,7 @@ public class ReplicationGroup {
      * that do not participate in elections and cannot become masters. The
      * return value includes SECONDARY nodes, and excludes ELECTABLE and
      * MONITOR nodes.
-     *
+     * <p>
      * <p>Note that SECONDARY nodes will only be returned when this method is
      * called for a replicated environment that is the master.
      *
@@ -130,7 +129,7 @@ public class ReplicationGroup {
      * Returns the subset of nodes in the group that store replication data.
      * The return value includes all ELECTABLE and SECONDARY nodes, but
      * excludes MONITOR nodes.
-     *
+     * <p>
      * <p>Note that SECONDARY nodes will only be included in the result when
      * this method is called for a replicated environment that is the master.
      *
@@ -164,12 +163,11 @@ public class ReplicationGroup {
 
     /**
      * Get administrative information about a node by its node name.
-     *
+     * <p>
      * <p>Note that SECONDARY nodes will only be returned when this method is
      * called for a replicated environment that is the master.
      *
      * @param nodeName the node name to be used in the lookup
-     *
      * @return an administrative view of the node associated with nodeName, or
      * null if there isn't such a node currently in the group
      */
@@ -182,9 +180,8 @@ public class ReplicationGroup {
     }
 
     /**
-     * @hidden
-     * Internal use only.
-     *
+     * @hidden Internal use only.
+     * <p>
      * Returns the underlying group implementation object.
      */
     public RepGroupImpl getRepGroupImpl() {

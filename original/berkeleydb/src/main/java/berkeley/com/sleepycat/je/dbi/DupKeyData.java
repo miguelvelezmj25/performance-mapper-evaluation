@@ -13,23 +13,23 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.util.Comparator;
-
 import berkeley.com.sleepycat.je.DatabaseEntry;
 import berkeley.com.sleepycat.je.tree.Key;
 import berkeley.com.sleepycat.je.tree.LN;
 import berkeley.com.sleepycat.util.PackedInteger;
 
+import java.util.Comparator;
+
 /**
  * Utility methods for combining, splitting and comparing two-part key values
  * for duplicates databases.
- *
+ * <p>
  * At the Btree storage level, for the key/data pairs in a duplicates database,
  * the data is always zero length and the key is a two-part key. For embedded
  * records, the key and data parts are visible at the BTree level as well. In
- * both cases, the 'key' parameter in the API is the first part of the key. 
+ * both cases, the 'key' parameter in the API is the first part of the key.
  * The the 'data' parameter in the API is the second part of the key.
- *
+ * <p>
  * The length of the first part is stored at the end of the combined key as a
  * packed integer, so that the two parts can be split, combined, and compared
  * separately.  The length is stored at the end, rather than the start, to
@@ -42,10 +42,10 @@ public class DupKeyData {
 
     /**
      * Returns twoPartKey as:
-     *   paramKey bytes,
-     *   paramData bytes,
-     *   reverse-packed len of paramKey bytes.
-     *
+     * paramKey bytes,
+     * paramData bytes,
+     * reverse-packed len of paramKey bytes.
+     * <p>
      * The byte array in the resulting twoPartKey will be copied again by JE at
      * a lower level.  It would be nice if there were a way to give ownership
      * of the array to JE, to avoid the extra copy.
@@ -53,8 +53,8 @@ public class DupKeyData {
     public static DatabaseEntry combine(final DatabaseEntry paramKey,
                                         final DatabaseEntry paramData) {
         final byte[] buf = combine
-            (paramKey.getData(), paramKey.getOffset(), paramKey.getSize(),
-             paramData.getData(), paramData.getOffset(), paramData.getSize());
+                (paramKey.getData(), paramKey.getOffset(), paramKey.getSize(),
+                        paramData.getData(), paramData.getOffset(), paramData.getSize());
         return new DatabaseEntry(buf);
     }
 
@@ -73,7 +73,7 @@ public class DupKeyData {
         System.arraycopy(key, keyOff, buf, 0, keySize);
         System.arraycopy(data, dataOff, buf, keySize, dataSize);
         final int nextOff =
-            PackedInteger.writeReverseInt(buf, keySize + dataSize, keySize);
+                PackedInteger.writeReverseInt(buf, keySize + dataSize, keySize);
         assert nextOff == buf.length;
         return buf;
     }
@@ -81,11 +81,11 @@ public class DupKeyData {
     /**
      * Splits twoPartKey, previously set by combine, into original paramKey and
      * paramData if they are non-null.
-     *
+     * <p>
      * The offset of the twoPartKey must be zero.  This can be assumed because
      * the entry is read from the database and JE always returns entries with a
      * zero offset.
-     *
+     * <p>
      * This method copies the bytes into to new arrays rather than using the
      * DatabaseEntry offset and size to shared the array, to keep with the
      * convention that JE always returns whole arrays.  It would be nice to
@@ -107,31 +107,33 @@ public class DupKeyData {
                              final DatabaseEntry paramKey,
                              final DatabaseEntry paramData) {
         final int keySize =
-            PackedInteger.readReverseInt(twoPartKey, twoPartKeySize - 1);
+                PackedInteger.readReverseInt(twoPartKey, twoPartKeySize - 1);
         assert keySize != PREFIX_ONLY;
 
-        if (paramKey != null) {
+        if(paramKey != null) {
             final byte[] keyBuf = new byte[keySize];
             System.arraycopy(twoPartKey, 0, keyBuf, 0, keySize);
 
-            if (keySize == 0 || paramKey.getPartial()) {
+            if(keySize == 0 || paramKey.getPartial()) {
                 LN.setEntry(paramKey, keyBuf);
-            } else {
+            }
+            else {
                 paramKey.setData(keyBuf, 0, keySize);
             }
         }
 
-        if (paramData != null) {
+        if(paramData != null) {
             final int keySizeLen =
-                PackedInteger.getReadIntLength(twoPartKey, twoPartKeySize - 1);
+                    PackedInteger.getReadIntLength(twoPartKey, twoPartKeySize - 1);
 
             final int dataSize = twoPartKeySize - keySize - keySizeLen;
             final byte[] dataBuf = new byte[dataSize];
             System.arraycopy(twoPartKey, keySize, dataBuf, 0, dataSize);
 
-            if (dataSize == 0 || paramData.getPartial()) {
+            if(dataSize == 0 || paramData.getPartial()) {
                 LN.setEntry(paramData, dataBuf);
-            } else {
+            }
+            else {
                 paramData.setData(dataBuf, 0, dataSize);
             }
         }
@@ -144,10 +146,10 @@ public class DupKeyData {
     public static byte[] replaceData(final byte[] twoPartKey,
                                      final byte[] newData) {
         final int origKeySize =
-            PackedInteger.readReverseInt(twoPartKey, twoPartKey.length - 1);
+                PackedInteger.readReverseInt(twoPartKey, twoPartKey.length - 1);
         final int keySize = (origKeySize == PREFIX_ONLY) ?
-            (twoPartKey.length - 1) :
-            origKeySize;
+                (twoPartKey.length - 1) :
+                origKeySize;
         return combine(twoPartKey, 0, keySize, newData, 0, newData.length);
     }
 
@@ -160,7 +162,7 @@ public class DupKeyData {
      */
     public static DatabaseEntry removeData(final byte[] twoPartKey) {
         final int keySize =
-            PackedInteger.readReverseInt(twoPartKey, twoPartKey.length - 1);
+                PackedInteger.readReverseInt(twoPartKey, twoPartKey.length - 1);
         assert keySize != PREFIX_ONLY;
         return new DatabaseEntry(makePrefixKey(twoPartKey, 0, keySize));
     }
@@ -172,9 +174,9 @@ public class DupKeyData {
      * first part, i.e., in the same duplicate set.
      */
     public static byte[] makePrefixKey(
-        final byte[] key,
-        final int keyOff,
-        final int keySize) {
+            final byte[] key,
+            final int keyOff,
+            final int keySize) {
 
         final byte[] buf = new byte[keySize + 1];
         System.arraycopy(key, 0, buf, 0, keySize);
@@ -184,22 +186,22 @@ public class DupKeyData {
 
     public static int getKeyLength(final byte[] buf, int off, int len) {
 
-        assert(buf.length >= off + len);
+        assert (buf.length >= off + len);
 
         int keyLen = PackedInteger.readReverseInt(buf, off + len - 1);
-        assert(keyLen != PREFIX_ONLY);
-        assert(keyLen >= 0 && keyLen <= len);
+        assert (keyLen != PREFIX_ONLY);
+        assert (keyLen >= 0 && keyLen <= len);
 
         return keyLen;
     }
 
     public static byte[] getKey(final byte[] buf, int off, int len) {
 
-        assert(buf.length >= off + len);
+        assert (buf.length >= off + len);
 
         int keyLen = PackedInteger.readReverseInt(buf, off + len - 1);
-        assert(keyLen != PREFIX_ONLY);
-        assert(keyLen >= 0 && keyLen <= len);
+        assert (keyLen != PREFIX_ONLY);
+        assert (keyLen >= 0 && keyLen <= len);
 
         byte[] key = new byte[keyLen];
         System.arraycopy(buf, off, key, 0, keyLen);
@@ -209,21 +211,69 @@ public class DupKeyData {
 
     public static byte[] getData(final byte[] buf, int off, int len) {
 
-        assert(buf.length >= off + len);
+        assert (buf.length >= off + len);
 
-       int keyLen = PackedInteger.readReverseInt(buf, off + len - 1);
-       assert(keyLen != PREFIX_ONLY);
-       assert(keyLen >= 0 && keyLen <= len);
+        int keyLen = PackedInteger.readReverseInt(buf, off + len - 1);
+        assert (keyLen != PREFIX_ONLY);
+        assert (keyLen >= 0 && keyLen <= len);
 
-       int keyLenSize = PackedInteger.getReadIntLength(buf, off + len - 1);
+        int keyLenSize = PackedInteger.getReadIntLength(buf, off + len - 1);
 
-       int dataLen = len - keyLen - keyLenSize;
-       assert(dataLen > 0);
-       assert(keyLen + dataLen <= len);
+        int dataLen = len - keyLen - keyLenSize;
+        assert (dataLen > 0);
+        assert (keyLen + dataLen <= len);
 
-       byte[] data = new byte[dataLen];
-       System.arraycopy(buf, off + keyLen, data, 0, dataLen);
-       return data;
+        byte[] data = new byte[dataLen];
+        System.arraycopy(buf, off + keyLen, data, 0, dataLen);
+        return data;
+    }
+
+    /**
+     * Compares the first part of the two keys.
+     */
+    public static int compareMainKey(
+            final byte[] keyBytes1,
+            final byte[] keyBytes2,
+            final Comparator<byte[]> btreeComparator) {
+
+        final int origKeySize2 =
+                PackedInteger.readReverseInt(keyBytes2, keyBytes2.length - 1);
+        final int keySize2 = (origKeySize2 == PREFIX_ONLY) ?
+                (keyBytes2.length - 1) :
+                origKeySize2;
+        return compareMainKey(keyBytes1, keyBytes2, 0, keySize2,
+                btreeComparator);
+    }
+
+    /**
+     * Compares the first part of the two keys.
+     */
+    public static int compareMainKey(
+            final byte[] keyBytes1,
+            final byte[] keyBytes2,
+            final int keyOff2,
+            final int keySize2,
+            final Comparator<byte[]> btreeComparator) {
+
+        final int origKeySize1 =
+                PackedInteger.readReverseInt(keyBytes1, keyBytes1.length - 1);
+        final int keySize1 = (origKeySize1 == PREFIX_ONLY) ?
+                (keyBytes1.length - 1) :
+                origKeySize1;
+        final int keyCmp;
+        if(btreeComparator == null) {
+            keyCmp = Key.compareUnsignedBytes
+                    (keyBytes1, 0, keySize1,
+                            keyBytes2, keyOff2, keySize2);
+        }
+        else {
+            final byte[] key1 = new byte[keySize1];
+            final byte[] key2 = new byte[keySize2];
+            System.arraycopy(keyBytes1, 0, key1, 0, keySize1);
+            System.arraycopy(keyBytes2, keyOff2, key2, 0, keySize2);
+            keyCmp = btreeComparator.compare(key1, key2);
+        }
+        return keyCmp;
     }
 
     /**
@@ -246,25 +296,26 @@ public class DupKeyData {
 
             /* Compare key portion. */
             final int origKeySize1 = PackedInteger.readReverseInt
-                (twoPartKey1, twoPartKey1.length - 1);
+                    (twoPartKey1, twoPartKey1.length - 1);
 
             final int keySize1 = (origKeySize1 == PREFIX_ONLY) ?
-                (twoPartKey1.length - 1) :
-                origKeySize1;
+                    (twoPartKey1.length - 1) :
+                    origKeySize1;
 
             final int origKeySize2 = PackedInteger.readReverseInt
-                (twoPartKey2, twoPartKey2.length - 1);
+                    (twoPartKey2, twoPartKey2.length - 1);
 
             final int keySize2 = (origKeySize2 == PREFIX_ONLY) ?
-                (twoPartKey2.length - 1) :
-                origKeySize2;
+                    (twoPartKey2.length - 1) :
+                    origKeySize2;
 
             final int keyCmp;
 
-            if (btreeComparator == null) {
+            if(btreeComparator == null) {
                 keyCmp = Key.compareUnsignedBytes(
-                    twoPartKey1, 0, keySize1, twoPartKey2, 0, keySize2);
-            } else {
+                        twoPartKey1, 0, keySize1, twoPartKey2, 0, keySize2);
+            }
+            else {
                 final byte[] key1 = new byte[keySize1];
                 final byte[] key2 = new byte[keySize2];
                 System.arraycopy(twoPartKey1, 0, key1, 0, keySize1);
@@ -272,12 +323,12 @@ public class DupKeyData {
                 keyCmp = btreeComparator.compare(key1, key2);
             }
 
-            if (keyCmp != 0) {
+            if(keyCmp != 0) {
                 return keyCmp;
             }
 
-            if (origKeySize1 == PREFIX_ONLY || origKeySize2 == PREFIX_ONLY) {
-                if (origKeySize1 == origKeySize2) {
+            if(origKeySize1 == PREFIX_ONLY || origKeySize2 == PREFIX_ONLY) {
+                if(origKeySize1 == origKeySize2) {
                     return 0;
                 }
                 return (origKeySize1 == PREFIX_ONLY) ? -1 : 1;
@@ -285,19 +336,20 @@ public class DupKeyData {
 
             /* Compare data portion. */
             final int keySizeLen1 = PackedInteger.getReadIntLength
-                (twoPartKey1, twoPartKey1.length - 1);
+                    (twoPartKey1, twoPartKey1.length - 1);
             final int keySizeLen2 = PackedInteger.getReadIntLength
-                (twoPartKey2, twoPartKey2.length - 1);
+                    (twoPartKey2, twoPartKey2.length - 1);
 
             final int dataSize1 = twoPartKey1.length - keySize1 - keySizeLen1;
             final int dataSize2 = twoPartKey2.length - keySize2 - keySizeLen2;
 
             final int dataCmp;
-            if (duplicateComparator == null) {
+            if(duplicateComparator == null) {
                 dataCmp = Key.compareUnsignedBytes
-                    (twoPartKey1, keySize1, dataSize1,
-                     twoPartKey2, keySize2, dataSize2);
-            } else {
+                        (twoPartKey1, keySize1, dataSize1,
+                                twoPartKey2, keySize2, dataSize2);
+            }
+            else {
                 final byte[] data1 = new byte[dataSize1];
                 final byte[] data2 = new byte[dataSize2];
                 System.arraycopy(twoPartKey1, keySize1, data1, 0, dataSize1);
@@ -310,16 +362,16 @@ public class DupKeyData {
 
     /**
      * Used to perform the getNextNoDup operation.
-     *
+     * <p>
      * Compares the left parameter (the key parameter in a user-initiated
      * search operation) as:
-     *  - less than a right operand with a prefix with is less than the
-     *    prefix of the left operand.  This is standard.
-     *  - greater than a right operand with a prefix with is greater than the
-     *    prefix of the left operand.  This is standard.
-     *  - greater than a right operand with a prefix equal to the prefix of
-     *    the left operation.  This is non-standard.
-     *
+     * - less than a right operand with a prefix with is less than the
+     * prefix of the left operand.  This is standard.
+     * - greater than a right operand with a prefix with is greater than the
+     * prefix of the left operand.  This is standard.
+     * - greater than a right operand with a prefix equal to the prefix of
+     * the left operation.  This is non-standard.
+     * <p>
      * The last property causes the range search to find the first duplicate in
      * the duplicate set following the duplicate set of the left operand.
      */
@@ -334,7 +386,7 @@ public class DupKeyData {
         public int compare(final byte[] twoPartKey1,
                            final byte[] twoPartKey2) {
             final int cmp = compareMainKey(twoPartKey1, twoPartKey2,
-                                           btreeComparator);
+                    btreeComparator);
             return (cmp != 0) ? cmp : 1;
         }
     }
@@ -346,7 +398,7 @@ public class DupKeyData {
      * it prevents insertion of a duplicate for the main key given.
      */
     public static class PutNoOverwriteComparator
-        implements Comparator<byte[]> {
+            implements Comparator<byte[]> {
 
         private final Comparator<byte[]> btreeComparator;
 
@@ -358,52 +410,5 @@ public class DupKeyData {
                            final byte[] twoPartKey2) {
             return compareMainKey(twoPartKey1, twoPartKey2, btreeComparator);
         }
-    }
-
-    /**
-     * Compares the first part of the two keys.
-     */
-    public static int compareMainKey(
-        final byte[] keyBytes1,
-        final byte[] keyBytes2,
-        final Comparator<byte[]> btreeComparator) {
-
-        final int origKeySize2 =
-            PackedInteger.readReverseInt(keyBytes2, keyBytes2.length - 1);
-        final int keySize2 = (origKeySize2 == PREFIX_ONLY) ?
-            (keyBytes2.length - 1) :
-            origKeySize2;
-        return compareMainKey(keyBytes1, keyBytes2, 0, keySize2,
-                              btreeComparator);
-    }
-
-    /**
-     * Compares the first part of the two keys.
-     */
-    public static int compareMainKey(
-        final byte[] keyBytes1,
-        final byte[] keyBytes2,
-        final int keyOff2,
-        final int keySize2,
-        final Comparator<byte[]> btreeComparator) {
-
-        final int origKeySize1 =
-            PackedInteger.readReverseInt(keyBytes1, keyBytes1.length - 1);
-        final int keySize1 = (origKeySize1 == PREFIX_ONLY) ?
-            (keyBytes1.length - 1) :
-            origKeySize1;
-        final int keyCmp;
-        if (btreeComparator == null) {
-            keyCmp = Key.compareUnsignedBytes
-                (keyBytes1, 0, keySize1,
-                 keyBytes2, keyOff2, keySize2);
-        } else {
-            final byte[] key1 = new byte[keySize1];
-            final byte[] key2 = new byte[keySize2];
-            System.arraycopy(keyBytes1, 0, key1, 0, keySize1);
-            System.arraycopy(keyBytes2, keyOff2, key2, 0, keySize2);
-            keyCmp = btreeComparator.compare(key1, key2);
-        }
-        return keyCmp;
     }
 }

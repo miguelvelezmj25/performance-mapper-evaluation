@@ -12,10 +12,10 @@
  */
 package berkeley.com.sleepycat.je.rep.impl.node;
 
+import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
 
 /**
  * Ensures that a VLSN is not advanced at this node while an election is in
@@ -24,38 +24,35 @@ import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
  * communications may not always be reliable. So, the implementation really
  * represents a good faith effort to freeze the VLSN. JE HA itself should be
  * able to make forward progress in the event of such a failure.
- *
+ * <p>
  * The class coordinates three threads: the acceptor, the learner, and the
  * replay thread. There is exactly one instance of each thread per replication
  * node, so it coordinates the activity of these three threads.
- *
+ * <p>
  * The typical serialized sequence of calls is therefore:
- *
+ * <p>
  * latch.freeze() -- invoked in response to a Promise by an Acceptor
  * latch.vlsnEvent() -- one or more of them in response to ongoing election
  * latch.awaitThaw() -- by the replica thread waiting for the freeze to lift
- *
+ * <p>
  * Both vlsnEvent() and awaitThaw() are NOPs in the absence of a freeze.
  *
  * @see <a href="https://sleepycat.oracle.com/trac/wiki/ElectionsImplementation#FreezingVLSNs">Freezing VLSNs</a>
  */
 public class CommitFreezeLatch {
 
+    private static long DEFAULT_LATCH_TIMEOUT = 5000; // ms
     /* The current frozen promise/vlsn pair */
     private Proposal proposal = null;
-
     /* Statistics */
     private int freezeCount = 0;
     private int awaitTimeoutCount = 0;
     private int awaitElectionCount = 0;
-
     /* The latch used internally. */
     private CountDownLatch latch = null;
     /* The end time of the freeze. */
     private long freezeEnd = 0;
     private long timeOut = DEFAULT_LATCH_TIMEOUT;
-
-    private static long DEFAULT_LATCH_TIMEOUT = 5000; // ms
 
     public int getAwaitTimeoutCount() {
         return awaitTimeoutCount;
@@ -84,11 +81,11 @@ public class CommitFreezeLatch {
      * @param freezeProposal identifies the election that is provoking the freeze
      */
     public synchronized void freeze(Proposal freezeProposal) {
-        if ((proposal != null) && (freezeProposal.compareTo(proposal) <= 0)) {
+        if((proposal != null) && (freezeProposal.compareTo(proposal) <= 0)) {
             // Older proposal ignore it.
             return;
         }
-        if (latch != null) {
+        if(latch != null) {
             /* Enable waiters who will reacquire the new latch below. */
             latch.countDown();
         }
@@ -107,11 +104,11 @@ public class CommitFreezeLatch {
      * @param listenerProposal identifies the election that just concluded
      */
     public synchronized void vlsnEvent(Proposal listenerProposal) {
-        if (proposal == null) {
+        if(proposal == null) {
             // No VLSN to unfreeze
             return;
         }
-        if (listenerProposal.compareTo(this.proposal) >= 0) {
+        if(listenerProposal.compareTo(this.proposal) >= 0) {
             latch.countDown();
         }
     }
@@ -120,7 +117,7 @@ public class CommitFreezeLatch {
      * Clears the latch freeing any waiters.
      */
     public synchronized void clearLatch() {
-        if (latch != null) {
+        if(latch != null) {
             latch.countDown();
         }
         latch = null;
@@ -133,25 +130,24 @@ public class CommitFreezeLatch {
      * event is a message to the Learner agent announcing the result of an
      * election. Note that the latch must be re-initialized after a return from
      * this await method.
-     *
+     * <p>
      * This method is invoked by the Replay thread. Completion of an awaitThaw
      * always results in the freeze being lifted.
      *
      * @return true if the await was satisfied due to completion of an
      * election, false if no freeze was in effect, or the latch was timed out.
-     *
      * @throws InterruptedException
      */
     public boolean awaitThaw()
-        throws InterruptedException {
+            throws InterruptedException {
 
         CountDownLatch awaitLatch;
         long awaitTimeout;
 
-        synchronized (this) {
+        synchronized(this) {
             /* Copy out the values of interest  */
             awaitLatch = latch;
-            if (awaitLatch == null) {
+            if(awaitLatch == null) {
                 return false;
             }
             awaitTimeout = this.freezeEnd - System.currentTimeMillis();
@@ -160,13 +156,13 @@ public class CommitFreezeLatch {
 
         boolean done = awaitLatch.await(awaitTimeout, TimeUnit.MILLISECONDS);
 
-        synchronized (this) {
-            if (done) {
+        synchronized(this) {
+            if(done) {
                 awaitElectionCount++;
                 clearLatch();
                 return true;
             }
-            if (this.freezeEnd - System.currentTimeMillis() <= 0) {
+            if(this.freezeEnd - System.currentTimeMillis() <= 0) {
                 awaitTimeoutCount++;
                 /* freeze end was not extended, election completed. */
                 clearLatch();

@@ -12,28 +12,24 @@
  */
 package berkeley.com.sleepycat.je.utilint;
 
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+
 public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
-    private static final long serialVersionUID = 1L;
-
     public static final int LOG_SIZE = 8;
-
     public static final int NULL_VLSN_SEQUENCE = -1;
     public static final VLSN NULL_VLSN = new VLSN(NULL_VLSN_SEQUENCE);
     public static final VLSN FIRST_VLSN = new VLSN(1);
-
     /*
      * The distinguished value used to represent VLSN values that have not
      * been set in log entry fields, because the field did not exist in that
      * version of the log or in a non-HA commit/abort variant of a log entry.
      */
     public static final int UNINITIALIZED_VLSN_SEQUENCE = 0;
-
+    private static final long serialVersionUID = 1L;
     /*
      * A replicated log entry is identified by a sequence id. We may change the
      * VLSN implementation so it's not a first-class object, in order to reduce
@@ -52,13 +48,41 @@ public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
     public VLSN() {
     }
 
+    public static boolean isNull(long sequence) {
+        return sequence == NULL_VLSN.sequence;
+    }
+
+    /**
+     * Returns the smaller of two VLSNS, ignoring NULL_VLSN values if one value
+     * is not NULL_VLSN.
+     *
+     * @param a a VLSN
+     * @param b another VLSN
+     * @return the smaller of {@code a} and {@code b}, ignoring NULL_VLSN
+     * unless both are NULL_VLSN
+     * @throws IllegalArgumentException if either argument is null
+     */
+    public static VLSN min(final VLSN a, final VLSN b) {
+        if((a == null) || (b == null)) {
+            throw new IllegalArgumentException(
+                    "The arguments must not be null");
+        }
+        if(a.isNull()) {
+            return b;
+        }
+        else if(b.isNull()) {
+            return a;
+        }
+        return (a.compareTo(b) <= 0) ? a : b;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
 
-        if (!(obj instanceof VLSN)) {
+        if(!(obj instanceof VLSN)) {
             return false;
         }
 
@@ -80,10 +104,6 @@ public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
     }
 
     public final boolean isNull() {
-        return sequence == NULL_VLSN.sequence;
-    }
-
-    public static boolean isNull(long sequence) {
         return sequence == NULL_VLSN.sequence;
     }
 
@@ -110,7 +130,7 @@ public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
     public boolean follows(VLSN other) {
         return ((other.isNull() && sequence == 1) ||
                 ((!other.isNull()) &&
-                 (other.getSequence() == (sequence - 1))));
+                        (other.getSequence() == (sequence - 1))));
     }
 
     /**
@@ -121,52 +141,31 @@ public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
     @Override
     public int compareTo(VLSN other) {
 
-        if ((sequence == NULL_VLSN.sequence) &&
-            (other.sequence == NULL_VLSN.sequence)) {
+        if((sequence == NULL_VLSN.sequence) &&
+                (other.sequence == NULL_VLSN.sequence)) {
             return 0;
         }
 
-        if (sequence == NULL_VLSN.sequence) {
+        if(sequence == NULL_VLSN.sequence) {
             /* If "this" is null, the other VLSN is always greater. */
             return -1;
         }
 
-        if  (other.sequence == NULL_VLSN.sequence) {
+        if(other.sequence == NULL_VLSN.sequence) {
             /* If the "other" is null, this VLSN is always greater. */
             return 1;
         }
 
         long otherSequence = other.getSequence();
-        if ((sequence - otherSequence) > 0) {
+        if((sequence - otherSequence) > 0) {
             return 1;
-        } else if (sequence == otherSequence) {
+        }
+        else if(sequence == otherSequence) {
             return 0;
-        } else {
+        }
+        else {
             return -1;
         }
-    }
-
-    /**
-     * Returns the smaller of two VLSNS, ignoring NULL_VLSN values if one value
-     * is not NULL_VLSN.
-     *
-     * @param a a VLSN
-     * @param b another VLSN
-     * @return the smaller of {@code a} and {@code b}, ignoring NULL_VLSN
-     * unless both are NULL_VLSN
-     * @throws IllegalArgumentException if either argument is null
-     */
-    public static VLSN min(final VLSN a, final VLSN b) {
-        if ((a == null) || (b == null)) {
-            throw new IllegalArgumentException(
-                "The arguments must not be null");
-        }
-        if (a.isNull()) {
-            return b;
-        } else if (b.isNull()) {
-            return a;
-        }
-        return (a.compareTo(b) <= 0) ? a : b;
     }
 
     /**
@@ -219,7 +218,7 @@ public class VLSN implements Loggable, Comparable<VLSN>, Serializable {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof VLSN)) {
+        if(!(other instanceof VLSN)) {
             return false;
         }
 

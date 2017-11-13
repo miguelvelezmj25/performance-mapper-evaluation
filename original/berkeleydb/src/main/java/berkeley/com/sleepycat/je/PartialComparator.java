@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.je;
 /**
  * A tag interface used to mark a B-tree or duplicate comparator class as a
  * partial comparator.
- *
+ * <p>
  * Comparators are configured using
  * {@link DatabaseConfig#setBtreeComparator(java.util.Comparator)} or
  * {@link DatabaseConfig#setBtreeComparator(Class)}, and

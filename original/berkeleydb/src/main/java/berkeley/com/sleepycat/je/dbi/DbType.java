@@ -30,14 +30,17 @@ public enum DbType {
         public boolean mayCreateDeletedLN() {
             return false;
         }
+
         @Override
         public LN createDeletedLN(EnvironmentImpl envImpl) {
             throw EnvironmentFailureException.unexpectedState();
         }
+
         @Override
         public boolean mayCreateUpdatedLN() {
             return false;
         }
+
         @Override
         public LN createUpdatedLN(EnvironmentImpl envImpl, byte[] newData) {
             throw EnvironmentFailureException.unexpectedState();
@@ -49,14 +52,17 @@ public enum DbType {
         public boolean mayCreateDeletedLN() {
             return false;
         }
+
         @Override
         public LN createDeletedLN(EnvironmentImpl envImpl) {
             throw EnvironmentFailureException.unexpectedState();
         }
+
         @Override
         public boolean mayCreateUpdatedLN() {
             return false;
         }
+
         @Override
         public LN createUpdatedLN(EnvironmentImpl envImpl, byte[] newData) {
             throw EnvironmentFailureException.unexpectedState();
@@ -68,10 +74,12 @@ public enum DbType {
         public LN createDeletedLN(EnvironmentImpl envImpl) {
             return FileSummaryLN.makeDeletedLN();
         }
+
         @Override
         public boolean mayCreateUpdatedLN() {
             return false;
         }
+
         @Override
         public LN createUpdatedLN(EnvironmentImpl envImpl, byte[] newData) {
             throw EnvironmentFailureException.unexpectedState();
@@ -107,7 +115,7 @@ public enum DbType {
      * @throws EnvironmentFailureException if this is not an internal DB type.
      */
     public String getInternalName() {
-        if (internalName == null) {
+        if(internalName == null) {
             throw EnvironmentFailureException.unexpectedState();
         }
         return internalName;
@@ -124,7 +132,7 @@ public enum DbType {
      * Creates an updated LN for use in an optimization in
      * CursorImpl.putCurrentAlreadyLatchedAndLocked.  Without this method it
      * would be necessary to fetch the existing LN and call LN.modify.
-     *
+     * <p>
      * Does NOT copy the byte array, so after calling this method the array is
      * "owned" by the Btree and should not be modified.
      *

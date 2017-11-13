@@ -13,13 +13,12 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.nio.ByteBuffer;
-
-import javax.transaction.xa.Xid;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import javax.transaction.xa.Xid;
+import java.nio.ByteBuffer;
 
 /**
  * This class writes out a transaction prepare record.
@@ -31,8 +30,8 @@ public class TxnPrepare extends TxnEnd implements Loggable {
     public TxnPrepare(long id, Xid xid) {
         /* LastLSN is never used. */
         super(id, DbLsn.NULL_LSN,
-              0 /* masterNodeId, never replicated. */,
-              0l /* dtvlsn, never replicated. */);
+                0 /* masterNodeId, never replicated. */,
+                0l /* dtvlsn, never replicated. */);
         this.xid = xid;
     }
 
@@ -58,8 +57,8 @@ public class TxnPrepare extends TxnEnd implements Loggable {
     @Override
     public int getLogSize() {
         return LogUtils.getPackedLongLogSize(id) +
-            LogUtils.getTimestampLogSize(time) +
-            LogUtils.getXidSize(xid);
+                LogUtils.getTimestampLogSize(time) +
+                LogUtils.getXidSize(xid);
     }
 
     @Override

@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.io.File;
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.log.FileManager;
 import berkeley.com.sleepycat.je.tree.TreeUtils;
+
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * DbLsn is a class that operates on Log Sequence Numbers (LSNs). An LSN is a
@@ -29,21 +29,18 @@ import berkeley.com.sleepycat.je.tree.TreeUtils;
  * lack of unsigned quantities.
  */
 public class DbLsn {
-    static final long INT_MASK = 0xFFFFFFFFL;
-
     public static final long MAX_FILE_OFFSET = 0xFFFFFFFFL;
-
+    public static final long NULL_LSN = -1;
+    static final long INT_MASK = 0xFFFFFFFFL;
     /* Signifies a transient LSN. */
     private static final long MAX_FILE_NUM = 0xFFFFFFFFL;
-
-    public static final long NULL_LSN = -1;
 
     private DbLsn() {
     }
 
     public static long makeLsn(long fileNumber, long fileOffset) {
         return fileOffset & INT_MASK |
-            ((fileNumber & INT_MASK) << 32);
+                ((fileNumber & INT_MASK) << 32);
     }
 
     /**
@@ -52,7 +49,7 @@ public class DbLsn {
      */
     public static long makeLsn(long fileNumber, int fileOffset) {
         return fileOffset & INT_MASK |
-            ((fileNumber & INT_MASK) << 32);
+                ((fileNumber & INT_MASK) << 32);
     }
 
     /**
@@ -75,7 +72,7 @@ public class DbLsn {
     }
 
     public static long longToLsn(Long lsn) {
-        if (lsn == null) {
+        if(lsn == null) {
             return NULL_LSN;
         }
 
@@ -84,6 +81,7 @@ public class DbLsn {
 
     /**
      * Return the file number for this DbLsn.
+     *
      * @return the number for this DbLsn.
      */
     public static long getFileNumber(long lsn) {
@@ -92,6 +90,7 @@ public class DbLsn {
 
     /**
      * Return the file offset for this DbLsn.
+     *
      * @return the offset for this DbLsn.
      */
     public static long getFileOffset(long lsn) {
@@ -114,26 +113,28 @@ public class DbLsn {
     }
 
     private static int compareLong(long l1, long l2) {
-        if (l1 < l2) {
+        if(l1 < l2) {
             return -1;
-        } else if (l1 > l2) {
+        }
+        else if(l1 > l2) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
     }
 
     public static int compareTo(long lsn1, long lsn2) {
-        if (lsn1 == NULL_LSN ||
-            lsn2 == NULL_LSN) {
+        if(lsn1 == NULL_LSN ||
+                lsn2 == NULL_LSN) {
             throw EnvironmentFailureException.unexpectedState
-                ("NULL_LSN lsn1=" + getNoFormatString(lsn1) + 
-                 " lsn2=" + getNoFormatString(lsn2));
+                    ("NULL_LSN lsn1=" + getNoFormatString(lsn1) +
+                            " lsn2=" + getNoFormatString(lsn2));
         }
 
         long fileNumber1 = getFileNumber(lsn1);
         long fileNumber2 = getFileNumber(lsn2);
-        if (fileNumber1 == fileNumber2) {
+        if(fileNumber1 == fileNumber2) {
             return compareLong(getFileOffset(lsn1), getFileOffset(lsn2));
         }
         return compareLong(fileNumber1, fileNumber2);
@@ -141,15 +142,15 @@ public class DbLsn {
 
     public static String toString(long lsn) {
         return "<DbLsn val=\"0x" +
-            Long.toHexString(getFileNumber(lsn)) +
-            "/0x" +
-            Long.toHexString(getFileOffset(lsn)) +
-            "\"/>";
+                Long.toHexString(getFileNumber(lsn)) +
+                "/0x" +
+                Long.toHexString(getFileOffset(lsn)) +
+                "\"/>";
     }
 
     public static String getNoFormatString(long lsn) {
         return "0x" + Long.toHexString(getFileNumber(lsn)) + "/0x" +
-            Long.toHexString(getFileOffset(lsn));
+                Long.toHexString(getFileOffset(lsn));
     }
 
     public static String dumpString(long lsn, int nSpaces) {
@@ -172,18 +173,20 @@ public class DbLsn {
         assert thisLsn != NULL_LSN;
         /* First figure out how many files lay between the two. */
         long myFile = getFileNumber(thisLsn);
-        if (otherLsn == NULL_LSN) {
+        if(otherLsn == NULL_LSN) {
             otherLsn = 0;
         }
         long otherFile = getFileNumber(otherLsn);
-        if (myFile == otherFile) {
+        if(myFile == otherFile) {
             diff = Math.abs(getFileOffset(thisLsn) - getFileOffset(otherLsn));
-        } else if (myFile > otherFile) {
+        }
+        else if(myFile > otherFile) {
             diff = calcDiff(myFile - otherFile,
-                            logFileSize, thisLsn, otherLsn);
-        } else {
+                    logFileSize, thisLsn, otherLsn);
+        }
+        else {
             diff = calcDiff(otherFile - myFile,
-                            logFileSize, otherLsn, thisLsn);
+                    logFileSize, otherLsn, thisLsn);
         }
         return diff;
     }
@@ -202,25 +205,27 @@ public class DbLsn {
         assert thisLsn != NULL_LSN;
         /* First figure out how many files lay between the two. */
         long myFile = getFileNumber(thisLsn);
-        if (otherLsn == NULL_LSN) {
+        if(otherLsn == NULL_LSN) {
             otherLsn = 0;
         }
         long otherFile = getFileNumber(otherLsn);
-        if (myFile == otherFile) {
+        if(myFile == otherFile) {
             diff = Math.abs(getFileOffset(thisLsn) - getFileOffset(otherLsn));
-        } else {
+        }
+        else {
             /* Figure out how many files lie between. */
             Long[] fileNums = fileManager.getAllFileNumbers();
             int myFileIdx = Arrays.binarySearch(fileNums,
-                                                Long.valueOf(myFile));
+                    Long.valueOf(myFile));
             int otherFileIdx =
-                Arrays.binarySearch(fileNums, Long.valueOf(otherFile));
-            if (myFileIdx > otherFileIdx) {
+                    Arrays.binarySearch(fileNums, Long.valueOf(otherFile));
+            if(myFileIdx > otherFileIdx) {
                 diff = calcDiff(myFileIdx - otherFileIdx,
-                                logFileSize, thisLsn, otherLsn);
-            } else {
+                        logFileSize, thisLsn, otherLsn);
+            }
+            else {
                 diff = calcDiff(otherFileIdx - myFileIdx,
-                                logFileSize, otherLsn, thisLsn);
+                        logFileSize, otherLsn, thisLsn);
             }
         }
         return diff;
@@ -249,10 +254,11 @@ public class DbLsn {
         final long lsn1;
         final long lsn2;
 
-        if (compareTo(thisLsn, otherLsn) < 0) {
+        if(compareTo(thisLsn, otherLsn) < 0) {
             lsn1 = thisLsn;
             lsn2 = otherLsn;
-        } else {
+        }
+        else {
             lsn1 = otherLsn;
             lsn2 = thisLsn;
         }
@@ -262,7 +268,7 @@ public class DbLsn {
 
         long dist = getFileOffset(lsn2) - getFileOffset(lsn1);
 
-        if (file1 == file2) {
+        if(file1 == file2) {
             return dist;
         }
 
@@ -275,7 +281,7 @@ public class DbLsn {
          * File2 has already been counted, and we've already subtracted the
          * offset of file1. Add lengths of file1 to file2-1.
          */
-        for (int i = idx1; i < idx2; i += 1) {
+        for(int i = idx1; i < idx2; i += 1) {
             final String path = fileManager.getFullFileName(fileNums[i]);
             dist += new File(path).length();
         }

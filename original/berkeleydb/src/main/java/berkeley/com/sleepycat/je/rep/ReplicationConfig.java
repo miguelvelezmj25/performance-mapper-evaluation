@@ -13,11 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.net.InetSocketAddress;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.ProgressListener;
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
@@ -28,6 +23,11 @@ import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.rep.stream.FeederFilter;
 import berkeley.com.sleepycat.je.rep.utilint.HostPortPair;
 import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
+
+import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Specifies the immutable attributes of a replicated environment.
@@ -54,7 +54,7 @@ import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
  * <li>Any configuration parameters not set by the application are set to
  * system defaults, described along with the parameter name String constants
  * in this class.</li>
- *</ol>
+ * </ol>
  * <p>
  * After a {@code ReplicatedEnvironment} has been constructed, its mutable
  * properties may be changed using {@code
@@ -62,9 +62,9 @@ import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
  * ReplicationMutableConfig} for a list of mutable properties; all other
  * properties are immutable.  Whether a property is mutable or immutable is
  * also described along with the parameter name String constants in this class.
- *
+ * <p>
  * <h4>Getting the Current ReplicatedEnvironment Properties</h4>
- *
+ * <p>
  * To get the current "live" properties of a replicated environment after
  * constructing it or changing its properties, you must call {@link
  * ReplicatedEnvironment#getRepConfig} or {@link
@@ -74,21 +74,13 @@ import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
  * or properties that are computed.
  */
 public class ReplicationConfig extends ReplicationMutableConfig
-    implements RepConfigProxy {
-
-    private static final long serialVersionUID = 1L;
-
-    /*
-     * Note: all replicated parameters should start with
-     * EnvironmentParams.REP_PARAMS_PREFIX, which is "je.rep.",
-     * see SR [#19080].
-     */
+        implements RepConfigProxy {
 
     /**
      * The name for the replication group.
      * The name should consist of letters, digits, and/or hyphen ("-"),
      * underscore ("_"), or period (".").
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -98,23 +90,29 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <td>"DefaultGroup"</td>
      * </tr>
      * </table></p>
+     *
      * @see ReplicationConfig#setGroupName
      * @see ReplicationConfig#getGroupName
      */
     public static final String GROUP_NAME =
-        EnvironmentParams.REP_PARAM_PREFIX + "groupName";
+            EnvironmentParams.REP_PARAM_PREFIX + "groupName";
 
+    /*
+     * Note: all replicated parameters should start with
+     * EnvironmentParams.REP_PARAMS_PREFIX, which is "je.rep.",
+     * see SR [#19080].
+     */
     /**
      * The node name uniquely identifies this node within the replication
      * group.
      * The name should consist of letters, digits, and/or hyphen ("-"),
      * underscore ("_"), or period (".").
-     *
+     * <p>
      * <p>Note that the node name is immutable. Normally the host name should
      * not be used as the node name, unless you intend to reuse the host
      * name when a machine fails and is replaced, or the node is upgraded to
      * new hardware.</p>
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -124,15 +122,15 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <td>"DefaultRepNodeName"</td>
      * </tr>
      * </table></p>
+     *
      * @see ReplicationConfig#setNodeName
      * @see ReplicationConfig#getNodeName
      */
     public static final String NODE_NAME =
-        EnvironmentParams.REP_PARAM_PREFIX + "nodeName";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "nodeName";
     /**
      * The type of this node.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -142,12 +140,12 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <td>ELECTABLE</td>
      * </tr>
      * </table></p>
+     *
      * @see ReplicationConfig#setNodeType
      * @see ReplicationConfig#getNodeType
      */
     public static final String NODE_TYPE =
-        EnvironmentParams.REP_PARAM_PREFIX + "nodeType";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "nodeType";
     /**
      * The string identifying one or more helper host and port pairs in
      * this format:
@@ -163,14 +161,14 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <td>""</td>
      * </tr>
      * </table></p>
+     *
      * @see ReplicationConfig#setHelperHosts
      * @see ReplicationConfig#getHelperHosts
      * @deprecated replaced by {@link ReplicationMutableConfig#HELPER_HOSTS}.
      */
     @Deprecated
     public static final String HELPER_HOSTS =
-        EnvironmentParams.REP_PARAM_PREFIX + "helperHosts";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "helperHosts";
     /**
      * The default port used for replication.
      * <p><table border="1">
@@ -187,8 +185,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </table></p>
      */
     public static final String DEFAULT_PORT =
-        EnvironmentParams.REP_PARAM_PREFIX + "defaultPort";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "defaultPort";
     /**
      * Names the hostname and port associated with this node in the
      * replication group, e.g. je.rep.nodeHostPort=foo.com:5001.
@@ -212,19 +209,19 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <td>"localhost"</td>
      * </tr>
      * </table></p>
+     *
      * @see ReplicationConfig#setNodeHostPort
      * @see ReplicationConfig#getNodeHostPort
      */
     public static final String NODE_HOST_PORT =
-        EnvironmentParams.REP_PARAM_PREFIX + "nodeHostPort";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "nodeHostPort";
     /**
      * When this configuration parameter is set to true, it binds the HA socket
      * to INADDR_ANY, so that HA services are available on all network
      * interfaces. The default value (false) results in the HA socket being
      * bound to the specific interface specified by the {@link #NODE_HOST_PORT}
      * configuration.
-     *
+     * <p>
      * <p>
      * <table border="1">
      * <tr>
@@ -243,8 +240,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </p>
      */
     public static final String BIND_INADDR_ANY =
-        EnvironmentParams.REP_PARAM_PREFIX + "bindInaddrAny";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "bindInaddrAny";
     /**
      * The default consistency policy used by a replica. Only two
      * policies are meaningful as properties denoting environment level default
@@ -279,8 +275,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String CONSISTENCY_POLICY =
-        EnvironmentParams.REP_PARAM_PREFIX + "consistencyPolicy";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "consistencyPolicy";
     /**
      * The maximum amount of time the replication group guarantees preservation
      * of the log files constituting the replication stream. After this period
@@ -288,7 +283,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * earlier than this period. If a node has crashed and does not re-join the
      * group within this timeout period it may need to perform a network
      * restore operation to catch up.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -308,8 +303,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String REP_STREAM_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "repStreamTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "repStreamTimeout";
     /**
      * The cost of replaying the replication stream as compared to the cost of
      * performing a network restore, represented as a percentage.  Specifies
@@ -323,7 +317,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * transactions.  If the value is 0, then the parameter is disabled, and no
      * log files will be retained based on the relative costs of replay and
      * network restore.
-     *
+     * <p>
      * <p>Note that log files are always retained if they are known to be
      * needed to support replication for electable replicas that have been in
      * contact with the master within the {@link #REP_STREAM_TIMEOUT} period,
@@ -331,10 +325,10 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * applies to the retention of additional files that might be useful to
      * secondary nodes that are out of contact, or to electable nodes that have
      * been out of contact for longer than REP_STREAM_TIMEOUT.</p>
-     *
+     * <p>
      * <p>To disable the retention of these additional files, set this
      * parameter to zero.</p>
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name<td>Type<td>Mutable<td>Default<td>Minimum<td>Maximum</tr>
      * <tr><td>{@value}<td>Integer<td>No<td>150<td>0<td>1000</tr>
@@ -343,8 +337,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see #REPLAY_FREE_DISK_PERCENT
      */
     public static final String REPLAY_COST_PERCENT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replayCostPercent";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replayCostPercent";
     /**
      * The amount of free disk space that should be maintained when deciding
      * whether to retain log files for use in replaying the replication stream,
@@ -354,7 +347,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * space below the specified percentage.  If the value is 0, then the
      * parameter is disabled, and decisions about which log files to remove
      * will not consider the amount of free disk space.
-     *
+     * <p>
      * <p>Note that log files are always retained if they are known to be
      * needed to support replication for electable replicas that have been in
      * contact with the master within the {@link #REP_STREAM_TIMEOUT} period,
@@ -362,10 +355,10 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * applies to the retention of additional files that might be useful to
      * secondary nodes that are out of contact, or to electable nodes that have
      * been out of contact for longer than REP_STREAM_TIMEOUT.</p>
-     *
+     * <p>
      * <p>To disable the retention of these additional files, set {@link
      * #REPLAY_COST_PERCENT} to zero.</p>
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name<td>Type<td>Mutable<td>Default<td>Minimum<td>Maximum</tr>
      * <tr><td>{@value}<td>Integer<td>No<td>10<td>0<td>99</tr>
@@ -374,11 +367,10 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see #REPLAY_COST_PERCENT
      */
     public static final String REPLAY_FREE_DISK_PERCENT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replayFreeDiskPercent";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replayFreeDiskPercent";
     /**
      * The maximum amount of time for a replay transaction to wait for a lock.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -398,12 +390,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String REPLAY_TXN_LOCK_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replayTxnLockTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replayTxnLockTimeout";
     /**
      * The maximum number of <i>most recently used</i> database handles that
      * are kept open during the replay of the replication stream.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -421,14 +412,13 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     @Deprecated
     public static final String REPLAY_MAX_OPEN_DB_HANDLES =
-        EnvironmentParams.REP_PARAM_PREFIX + "replayMaxOpenDbHandles";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replayMaxOpenDbHandles";
     /**
      * The maximum amount of time that an inactive database handle is kept open
      * during a replay of the replication stream. Handles that are inactive for
      * more than this time period are automatically closed. Note that this does
      * not impact any handles that may have been opened by the application.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -444,13 +434,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      *
      * @see <a href="../EnvironmentConfig.html#timeDuration">Time Duration
      * Properties</a>
-     *
      * @deprecated replaced by {@link ReplicationMutableConfig#REPLAY_DB_HANDLE_TIMEOUT}.
      */
     @Deprecated
     public static final String REPLAY_DB_HANDLE_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replayOpenHandleTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replayOpenHandleTimeout";
     /**
      * The amount of time to wait for a Replica to become consistent with the
      * Master, when a <code>ReplicatedEnvironment</code> handle is created and
@@ -489,8 +477,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String ENV_CONSISTENCY_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "envConsistencyTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "envConsistencyTimeout";
     /**
      * The amount of time that the
      * {@link com.sleepycat.je.Transaction#commit(com.sleepycat.je.Durability)}
@@ -530,12 +517,9 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see ReplicationMutableConfig#DESIGNATED_PRIMARY
      */
     public static final String REPLICA_ACK_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replicaAckTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replicaAckTimeout";
     /**
-     * @hidden
-     *
-     * The amount of time that the
+     * @hidden The amount of time that the
      * {@link com.sleepycat.je.Transaction#commit(com.sleepycat.je.Durability)}
      * on the Master will wait for acknowledgments from an Arbiter. This wait
      * occurs after waiting for the REPLICA_ACK_TIMEOUT period and not
@@ -565,13 +549,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </tr>
      * </table>
      * </p>
-     *
      * @see <a href="../EnvironmentConfig.html#timeDuration">Time Duration
      * Properties</a>
      */
     public static final String ARBITER_ACK_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "arbiterAckTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "arbiterAckTimeout";
     /**
      * The amount of time that a
      * {@link ReplicatedEnvironment#beginTransaction(com.sleepycat.je.Transaction, com.sleepycat.je.TransactionConfig)}
@@ -613,8 +595,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see ReplicationMutableConfig#DESIGNATED_PRIMARY
      */
     public static final String INSUFFICIENT_REPLICAS_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "insufficientReplicasTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "insufficientReplicasTimeout";
     /**
      * The maximum message size which will be accepted by a node (to prevent
      * DOS attacks).  While the default shown here is 0, it dynamically
@@ -638,15 +619,14 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </table></p>
      */
     public static final String MAX_MESSAGE_SIZE =
-        EnvironmentParams.REP_PARAM_PREFIX + "maxMessageSize";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "maxMessageSize";
     /**
      * Sets the maximum acceptable clock skew between this Replica and its
      * Feeder, which is the node that is the source of its replication stream.
      * This value is checked whenever a Replica establishes a connection to its
      * replication stream source. The connection is abandoned if the clock skew
      * is larger than this value.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -668,13 +648,12 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String MAX_CLOCK_DELTA =
-        EnvironmentParams.REP_PARAM_PREFIX + "maxClockDelta";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "maxClockDelta";
     /**
      * The number of times an unsuccessful election will be retried by a
      * designated <code>Primary</code> in a two node group before it is
      * activated and becomes the Master.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td>
      * <td>Default</td><td>Minimum</td><td>Maximum</td></tr>
@@ -691,8 +670,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see ReplicationMutableConfig#DESIGNATED_PRIMARY
      */
     public static final String ELECTIONS_PRIMARY_RETRIES =
-        EnvironmentParams.REP_PARAM_PREFIX + "electionsPrimaryRetries";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "electionsPrimaryRetries";
     /**
      * The time interval between rebroadcasts of election results by the master
      * node to all nodes not currently connected to it. These rebroadcasts help
@@ -712,7 +690,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Decreasing the period will result in more frequent broadcasts and thus a
      * faster return to normal operations after a network partition has been
      * resolved.
-     *
+     * <p>
      * <p>
      * <table border="1">
      * <tr>
@@ -736,8 +714,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </p>
      */
     public static final String ELECTIONS_REBROADCAST_PERIOD =
-        EnvironmentParams.REP_PARAM_PREFIX + "electionsRebroadcastPeriod";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "electionsRebroadcastPeriod";
     /**
      * In rare cases, a node may need to rollback committed transactions in
      * order to rejoin a replication group. This parameter limits the number of
@@ -747,7 +724,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * the number of durable committed transactions targeted for rollback
      * exceeds this parameter, a {@link RollbackProhibitedException} will be
      * thrown.
-     *
+     * <p>
      * <p>
      * <table border="1">
      * <tr>
@@ -772,8 +749,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @see RollbackProhibitedException
      */
     public static final String TXN_ROLLBACK_LIMIT =
-        EnvironmentParams.REP_PARAM_PREFIX + "txnRollbackLimit";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "txnRollbackLimit";
     /**
      * A heartbeat is exchanged between the feeder and replica to ensure they
      * are alive. This is the timeout associated with the heartbeat on the
@@ -784,7 +760,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * false timeouts, if the network is experiencing transient problems, or
      * the Java GC is responsible for long pauses. In the latter case, it's
      * generally better to tune the GC to avoid such pauses.
-     *
+     * <p>
      * <p>
      * <table border="1">
      * <tr>
@@ -813,8 +789,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @since 4.0.100
      */
     public static final String FEEDER_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "feederTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "feederTimeout";
     /**
      * A heartbeat is exchanged between the feeder and replica to ensure they
      * are alive. This is the timeout associated with the heartbeat on the
@@ -854,8 +829,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @since 4.0.100
      */
     public static final String REPLICA_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replicaTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replicaTimeout";
     /**
      * The size of the the TCP receive buffer associated with the socket used
      * by the replica to transfer the replication stream.
@@ -873,7 +847,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <p>
      * A parameter value of zero will result in the use of operating system
      * specified default socket buffer size.
-     *
+     * <p>
      * <p>
      * <table border="1">
      * <tr>
@@ -899,7 +873,6 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public static final String REPLICA_RECEIVE_BUFFER_SIZE =
             EnvironmentParams.REP_PARAM_PREFIX + "replicaReceiveBufferSize";
-
     /**
      * The maximum number of transactions that can be grouped to amortize the
      * cost of an fsync when a transaction commits with SyncPolicy#SYNC on the
@@ -938,12 +911,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </table>
      * </p>
      *
-     * @since 5.0.76
      * @see #REPLICA_GROUP_COMMIT_INTERVAL
+     * @since 5.0.76
      */
     public static final String REPLICA_MAX_GROUP_COMMIT =
-        EnvironmentParams.REP_PARAM_PREFIX + "replicaMaxGroupCommit";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replicaMaxGroupCommit";
     /**
      * The time interval during which transactions may be grouped to amortize
      * the cost of fsync when a transaction commits with SyncPolicy#SYNC on the
@@ -982,12 +954,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </table>
      * </p>
      *
-     * @since 5.0.76
      * @see #REPLICA_MAX_GROUP_COMMIT
+     * @since 5.0.76
      */
     public static final String REPLICA_GROUP_COMMIT_INTERVAL =
-        EnvironmentParams.REP_PARAM_PREFIX + "replicaGroupCommitInterval";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "replicaGroupCommitInterval";
     /**
      * The maximum amount of time for the internal housekeeping, like
      * elections, syncup with the master, etc. to be accomplished when opening
@@ -1028,14 +999,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Properties</a>
      */
     public static final String ENV_SETUP_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "envSetupTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "envSetupTimeout";
     /**
      * @hidden
-     * @deprecated
-     *
-     * For internal use only.
-     *
+     * @deprecated For internal use only.
+     * <p>
      * When set to <code>true</code>, it permits opening of a
      * ReplicatedEnvironment handle in the {@link
      * ReplicatedEnvironment.State#UNKNOWN} state, if a Master could not be
@@ -1069,8 +1037,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     @Deprecated
     public static final String ALLOW_UNKNOWN_STATE_ENV_OPEN =
-        EnvironmentParams.REP_PARAM_PREFIX + "allowUnknownStateEnvOpen";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "allowUnknownStateEnvOpen";
     /**
      * Permits opening of a ReplicatedEnvironment handle in the
      * {@link ReplicatedEnvironment.State#UNKNOWN} state, if a Master cannot be
@@ -1112,8 +1079,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * @since 5.0.33
      */
     public static final String ENV_UNKNOWN_STATE_TIMEOUT =
-        EnvironmentParams.REP_PARAM_PREFIX + "envUnknownStateTimeout";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "envUnknownStateTimeout";
     /**
      * When set to <code>true</code>, which is currently the default, the
      * replication network protocol will use the JVM platform default charset
@@ -1162,13 +1128,10 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </table>
      */
     public static final String PROTOCOL_OLD_STRING_ENCODING =
-        EnvironmentParams.REP_PARAM_PREFIX + "protocolOldStringEncoding";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "protocolOldStringEncoding";
     /**
-     * @hidden
-     *
-     * For internal use only.
-     *
+     * @hidden For internal use only.
+     * <p>
      * When set to <code>true</code> the ReplicatedEnvironment will
      * be used by the Arbiter.
      * * <p>
@@ -1189,7 +1152,6 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public static final String ARBITER_USE =
             EnvironmentParams.REP_PARAM_PREFIX + "arbiterUse";
-
     /**
      * The size of the the queue used to hold commit records that the Feeder
      * uses to request acknowledgment from an Arbiter.
@@ -1217,19 +1179,16 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * </tr>
      * </table>
      * </p>
-     *
      */
     public static final String ARBITER_OUTPUT_QUEUE_SIZE =
             EnvironmentParams.REP_PARAM_PREFIX + "arbiterOutputQueueSize";
-
     /**
-     * @hidden
-     * For internal use, to allow null as a valid value for the config
+     * @hidden For internal use, to allow null as a valid value for the config
      * parameter.
      */
     public static final ReplicationConfig DEFAULT =
-        new ReplicationConfig();
-
+            new ReplicationConfig();
+    private static final long serialVersionUID = 1L;
     /* Support conversion of a non-replicated environment to replicated. */
     private boolean allowConvert = false;
 
@@ -1252,7 +1211,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
 
     /* A ProgressListener for tracking this node's syncups. */
     private transient
-        ProgressListener<SyncupProgress> syncupProgressListener;
+    ProgressListener<SyncupProgress> syncupProgressListener;
 
     private transient LogFileRewriteListener logRewriteListener;
 
@@ -1271,16 +1230,15 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Creates a ReplicationConfig initialized with the system default
      * settings and the specified group name, node name, and hostname/port
      * values.
-     *
+     * <p>
      * <p>Note that the node name is immutable. Normally the host name should
      * not be used as the node name, unless you intend to reuse the host
      * name when a machine fails and is replaced, or the node is upgraded to
      * new hardware.</p>
      *
      * @param groupName the name for the replication group
-     * @param nodeName the name for this node
-     * @param hostPort the hostname and port for this node
-     *
+     * @param nodeName  the name for this node
+     * @param hostPort  the hostname and port for this node
      * @see #setGroupName
      * @see #setNodeName
      */
@@ -1298,13 +1256,12 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * the properties parameter.
      *
      * @param properties Supported properties are described as the string
-     * constants in this class.
-     *
+     *                   constants in this class.
      * @throws IllegalArgumentException If any properties read from the
-     * properties parameter are invalid.
+     *                                  properties parameter are invalid.
      */
     public ReplicationConfig(Properties properties)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super(properties, true /* validateParams */);
         propagateRepNetProps();
@@ -1314,7 +1271,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * Internal use only, from RepConfigManager.
      */
     ReplicationConfig(Properties properties, boolean validateParams)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super(properties, validateParams);
         propagateRepNetProps();
@@ -1336,32 +1293,29 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * underscore ("_"), or period (".").
      *
      * @param groupName the string representing the name
-     *
      * @return this
-     *
      * @throws IllegalArgumentException If the string name is not valid
      */
     public ReplicationConfig setGroupName(String groupName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         setGroupNameVoid(groupName);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setGroupNameVoid(String groupName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, RepParams.GROUP_NAME, groupName,
-                               validateParams);
+                validateParams);
     }
 
     /**
      * For internal use only.
-     *
+     * <p>
      * Returns a boolean that specifies if we need to convert the existing logs
      * to replicated format.
      *
@@ -1374,12 +1328,12 @@ public class ReplicationConfig extends ReplicationMutableConfig
 
     /**
      * For internal use only.
-     *
+     * <p>
      * If set to true, this environment should be converted to replicated
      * format.
      *
      * @param allowConvert if true, this environment should be converted to
-     * replicated format.
+     *                     replicated format.
      */
     void setAllowConvert(boolean allowConvert) {
         this.allowConvert = allowConvert;
@@ -1402,33 +1356,31 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <p>
      * The name should consist of letters, digits, and/or hyphen ("-"),
      * underscore ("_"), or period (".").
-     *
+     * <p>
      * <p>Note that the node name is immutable. Normally the host name should
      * not be used as the node name, unless you intend to reuse the host
      * name when a machine fails and is replaced, or the node is upgraded to
      * new hardware.</p>
      *
      * @param nodeName the node name for this replicated environment.
-     *
      * @return this
      * @throws IllegalArgumentException If the name is not valid
      */
     public ReplicationConfig setNodeName(String nodeName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         setNodeNameVoid(nodeName);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setNodeNameVoid(String nodeName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, RepParams.NODE_NAME, nodeName,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -1438,28 +1390,26 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public NodeType getNodeType() {
         return RepParams.NODE_TYPE.getEnumerator
-            (DbConfigManager.getVal(props, RepParams.NODE_TYPE));
+                (DbConfigManager.getVal(props, RepParams.NODE_TYPE));
     }
 
     /**
      * Sets the type of this node.
      *
      * @param nodeType the node type
-     *
      * @return this
      */
-    public ReplicationConfig setNodeType(NodeType nodeType){
+    public ReplicationConfig setNodeType(NodeType nodeType) {
         setNodeTypeVoid(nodeType);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
-    public void setNodeTypeVoid(NodeType nodeType){
+    public void setNodeTypeVoid(NodeType nodeType) {
         DbConfigManager.setVal
-            (props, RepParams.NODE_TYPE, nodeType.name(), validateParams);
+                (props, RepParams.NODE_TYPE, nodeType.name(), validateParams);
     }
 
     /**
@@ -1468,8 +1418,8 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * <pre>
      *   hostname:port
      * </pre>
-     * @return the hostname and port string.
      *
+     * @return the hostname and port string.
      * @see ReplicationConfig#NODE_HOST_PORT
      */
     public String getNodeHostPort() {
@@ -1486,9 +1436,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * (zero through 1023).
      *
      * @param hostPort the string containing the hostname and port as above.
-     *
      * @return this
-     *
      * @see ReplicationConfig#NODE_HOST_PORT
      */
     public ReplicationConfig setNodeHostPort(String hostPort) {
@@ -1497,12 +1445,11 @@ public class ReplicationConfig extends ReplicationMutableConfig
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setNodeHostPortVoid(String hostPort) {
         DbConfigManager.setVal(props, RepParams.NODE_HOST_PORT, hostPort,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -1512,14 +1459,13 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public long getReplicaAckTimeout(TimeUnit unit) {
         return DbConfigManager.getDurationVal
-            (props, RepParams.REPLICA_ACK_TIMEOUT, unit);
+                (props, RepParams.REPLICA_ACK_TIMEOUT, unit);
     }
 
     /**
      * Set the replica commit timeout.
      *
      * @param replicaAckTimeout time in milliseconds
-     *
      * @return this
      */
     public ReplicationConfig setReplicaAckTimeout(long replicaAckTimeout,
@@ -1529,14 +1475,13 @@ public class ReplicationConfig extends ReplicationMutableConfig
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setReplicaAckTimeoutVoid(long replicaAckTimeout,
                                          TimeUnit unit) {
         DbConfigManager.setDurationVal
-            (props, RepParams.REPLICA_ACK_TIMEOUT, replicaAckTimeout, unit,
-             validateParams);
+                (props, RepParams.REPLICA_ACK_TIMEOUT, replicaAckTimeout, unit,
+                        validateParams);
     }
 
     /**
@@ -1547,7 +1492,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public long getMaxClockDelta(TimeUnit unit) {
         return DbConfigManager.getDurationVal(props, RepParams.MAX_CLOCK_DELTA,
-                                              unit);
+                unit);
     }
 
     /**
@@ -1558,58 +1503,36 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * if the clock skew is larger than this value.
      *
      * @param maxClockDelta the maximum acceptable clock skew
-     *
      * @return this
-     *
      * @throws IllegalArgumentException if the value is not a positive integer
      */
     public ReplicationConfig setMaxClockDelta(long maxClockDelta,
                                               TimeUnit unit)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         setMaxClockDeltaVoid(maxClockDelta, unit);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMaxClockDeltaVoid(long maxClockDelta, TimeUnit unit)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setDurationVal(props, RepParams.MAX_CLOCK_DELTA,
-                                       maxClockDelta, unit, validateParams);
+                maxClockDelta, unit, validateParams);
     }
 
     /**
-     * Sets the consistency policy to be associated with the configuration.
-     * This policy acts as the default policy used to govern the consistency
-     * requirements when starting new transactions. See the {@link <a
-     * href="{@docRoot}../ReplicationGuide/consistency.html">overview on
-     * consistency in replicated systems</a>} for more background.
-     * <p>
-     * @param policy the consistency policy to be set for this config.
-     *
-     * @return this
-     */
-    public ReplicationConfig
-        setConsistencyPolicy(ReplicaConsistencyPolicy policy) {
-
-        setConsistencyPolicyVoid(policy);
-        return this;
-    }
-
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setConsistencyPolicyVoid(ReplicaConsistencyPolicy policy) {
 
         DbConfigManager.setVal(props,
-                               RepParams.CONSISTENCY_POLICY,
-                               RepUtils.getPropertyString(policy),
-                               validateParams);
+                RepParams.CONSISTENCY_POLICY,
+                RepUtils.getPropertyString(policy),
+                validateParams);
     }
 
     /**
@@ -1622,29 +1545,48 @@ public class ReplicationConfig extends ReplicationMutableConfig
      *
      * @return the consistency policy currently associated with this config.
      */
-   @Override
-   public ReplicaConsistencyPolicy getConsistencyPolicy() {
+    @Override
+    public ReplicaConsistencyPolicy getConsistencyPolicy() {
         String propertyValue =
-            DbConfigManager.getVal(props,
-                                   RepParams.CONSISTENCY_POLICY);
+                DbConfigManager.getVal(props,
+                        RepParams.CONSISTENCY_POLICY);
         return RepUtils.getReplicaConsistencyPolicy(propertyValue);
+    }
+
+    /**
+     * Sets the consistency policy to be associated with the configuration.
+     * This policy acts as the default policy used to govern the consistency
+     * requirements when starting new transactions. See the {@link <a
+     * href="{@docRoot}../ReplicationGuide/consistency.html">overview on
+     * consistency in replicated systems</a>} for more background.
+     * <p>
+     *
+     * @param policy the consistency policy to be set for this config.
+     * @return this
+     */
+    public ReplicationConfig
+    setConsistencyPolicy(ReplicaConsistencyPolicy policy) {
+
+        setConsistencyPolicyVoid(policy);
+        return this;
     }
 
     @Override
     public ReplicationConfig setConfigParam(String paramName, String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (ReplicationNetworkConfig.getRepNetPropertySet().
-            contains(paramName)) {
+        if(ReplicationNetworkConfig.getRepNetPropertySet().
+                contains(paramName)) {
             getRepNetConfig().setConfigParam(paramName, value);
-        } else {
+        }
+        else {
             DbConfigManager.setConfigParam(props,
-                                           paramName,
-                                           value,
-                                           false,   /* require mutability. */
-                                           validateParams,
-                                           true,   /* forReplication */
-                                           true);  /* verifyForReplication */
+                    paramName,
+                    value,
+                    false,   /* require mutability. */
+                    validateParams,
+                    true,   /* forReplication */
+                    true);  /* verifyForReplication */
         }
         return this;
     }
@@ -1659,28 +1601,25 @@ public class ReplicationConfig extends ReplicationMutableConfig
     }
 
     /**
+     * @param netConfig the new ReplicationNetworkConfig to be associated
+     *                  with this ReplicationConfig.  This must not be null.
+     * @throws IllegalArgumentException if the netConfig is null
      * @hidden SSL deferred
      * Set the replication service net configuration associated with
      * this ReplicationConfig.
-     *
-     * @param netConfig the new ReplicationNetworkConfig to be associated
-     * with this ReplicationConfig.  This must not be null.
-     *
-     * @throws IllegalArgumentException if the netConfig is null
      */
     public ReplicationConfig setRepNetConfig(
-        ReplicationNetworkConfig netConfig) {
+            ReplicationNetworkConfig netConfig) {
 
         setRepNetConfigVoid(netConfig);
         return this;
     }
 
     /**
-     * @hidden
-     * For bean editors
+     * @hidden For bean editors
      */
     public void setRepNetConfigVoid(ReplicationNetworkConfig netConfig) {
-        if (netConfig == null) {
+        if(netConfig == null) {
             throw new IllegalArgumentException("netConfig may not be null");
         }
         repNetConfig = netConfig;
@@ -1695,14 +1634,13 @@ public class ReplicationConfig extends ReplicationMutableConfig
             ReplicationConfig copy = (ReplicationConfig) super.clone();
             copy.setRepNetConfig(getRepNetConfig().clone());
             return copy;
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
 
     /**
-     * @hidden
-     * For use by this class and by ReplicatedEnvironment.setupRepConfig()
+     * @hidden For use by this class and by ReplicatedEnvironment.setupRepConfig()
      * Moves any properties that belong to ReplicationNetworkConfig to
      * repNetConfig.
      * This is intended to be called after a bulk property load.
@@ -1711,7 +1649,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
 
         /* If there is no current RepNetConfig, simply adopt the new config. */
         final ReplicationNetworkConfig rnConfig = getRepNetConfig();
-        if (rnConfig == null) {
+        if(rnConfig == null) {
             setRepNetConfig(ReplicationNetworkConfig.create(props));
             return;
         }
@@ -1723,7 +1661,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
          * repNetConfig.
          */
         final Properties combProps = new Properties(rnConfig.getProps());
-        for (String propName : props.stringPropertyNames()) {
+        for(String propName : props.stringPropertyNames()) {
             combProps.setProperty(propName, props.getProperty(propName));
         }
 
@@ -1732,42 +1670,39 @@ public class ReplicationConfig extends ReplicationMutableConfig
          * properties.
          */
         ReplicationNetworkConfig newRepNetConfig =
-            ReplicationNetworkConfig.create(combProps);
+                ReplicationNetworkConfig.create(combProps);
 
         /*
          * If the type of the config object did not change, there may be
          * non-property fields that should be retained from the original,
          * so use the orignal object and just change the properties.
          */
-        if (newRepNetConfig.getClass() == repNetConfig.getClass()) {
+        if(newRepNetConfig.getClass() == repNetConfig.getClass()) {
             rnConfig.applyRepNetProperties(combProps);
-        } else {
+        }
+        else {
             setRepNetConfig(newRepNetConfig);
         }
     }
 
     /**
-     * @hidden
-     *
-     * For internal use only: Internal convenience method.
-     *
+     * @return the set of helper sockets, returns an empty set if there are no
+     * helpers.
+     * @hidden For internal use only: Internal convenience method.
+     * <p>
      * Returns the set of sockets associated with helper nodes. This method
      * should only be used when the configuration object is known to have an
      * authoritative value for the helper hosts values. In a replication node,
      * the je.properties file may override the values in this configuration
      * object.
-     *
-     * @return the set of helper sockets, returns an empty set if there are no
-     * helpers.
      */
     public Set<InetSocketAddress> getHelperSockets() {
         return HostPortPair.getSockets(getHelperHosts());
     }
 
     /**
-     * @hidden
-     * Internal convenience methods for returning replication sockets.
-     *
+     * @hidden Internal convenience methods for returning replication sockets.
+     * <p>
      * This method should only be used when the configuration object is known
      * to have an authoritative value for its socket value. In a replication
      * node, the je.properties file may override the values in this
@@ -1785,7 +1720,7 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public String getNodeHostname() {
         String hostAndPort =
-            DbConfigManager.getVal(props, RepParams.NODE_HOST_PORT);
+                DbConfigManager.getVal(props, RepParams.NODE_HOST_PORT);
         int colonToken = hostAndPort.indexOf(":");
 
         return (colonToken >= 0) ?
@@ -1799,14 +1734,29 @@ public class ReplicationConfig extends ReplicationMutableConfig
      */
     public int getNodePort() {
         String hostAndPort =
-            DbConfigManager.getVal(props, RepParams.NODE_HOST_PORT);
+                DbConfigManager.getVal(props, RepParams.NODE_HOST_PORT);
         int colonToken = hostAndPort.indexOf(":");
 
         String portString = (colonToken >= 0) ?
-            hostAndPort.substring(colonToken + 1) :
-            DbConfigManager.getVal(props, RepParams.DEFAULT_PORT);
+                hostAndPort.substring(colonToken + 1) :
+                DbConfigManager.getVal(props, RepParams.DEFAULT_PORT);
 
-        return Integer.parseInt(portString) ;
+        return Integer.parseInt(portString);
+    }
+
+    /**
+     * @hidden The void return setter for use by Bean editors.
+     */
+    public void setSyncupProgressListenerVoid
+    (final ProgressListener<SyncupProgress> progressListener) {
+        this.syncupProgressListener = progressListener;
+    }
+
+    /**
+     * Return the ProgressListener to be used at this environment startup.
+     */
+    public ProgressListener<SyncupProgress> getSyncupProgressListener() {
+        return syncupProgressListener;
     }
 
     /**
@@ -1819,102 +1769,87 @@ public class ReplicationConfig extends ReplicationMutableConfig
      * When using progress listeners, review the information at {@link
      * ProgressListener#progress} to avoid any unintended disruption to
      * replication stream syncup.
+     *
      * @param progressListener The ProgressListener to callback during
-     * environment instantiation (syncup).
+     *                         environment instantiation (syncup).
      * @see <a href="{@docRoot}/../ReplicationGuide/progoverviewlifecycle.html"
      * target="_top">Replication Group Life Cycle</a>
      * @since 5.0
      */
     public ReplicationConfig setSyncupProgressListener
-        (final ProgressListener<SyncupProgress> progressListener) {
+    (final ProgressListener<SyncupProgress> progressListener) {
         setSyncupProgressListenerVoid(progressListener);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
-    public void setSyncupProgressListenerVoid
-        (final ProgressListener<SyncupProgress> progressListener) {
-        this.syncupProgressListener = progressListener;
-    }
-
-    /**
-     * Return the ProgressListener to be used at this environment startup.
-     */
-    public ProgressListener<SyncupProgress> getSyncupProgressListener() {
-        return syncupProgressListener;
+    public void setLogFileRewriteListenerVoid(final LogFileRewriteListener l) {
+        logRewriteListener = l;
     }
 
     /**
      * @hidden
-     * Installs a callback to be notified when JE is about to modify previously
+     */
+    public LogFileRewriteListener getLogFileRewriteListener() {
+        return logRewriteListener;
+    }
+
+    /**
+     * @hidden Installs a callback to be notified when JE is about to modify previously
      * written log files.
      */
     public ReplicationConfig setLogFileRewriteListener
-        (final LogFileRewriteListener listener) {
+    (final LogFileRewriteListener listener) {
         setLogFileRewriteListenerVoid(listener);
         return this;
     }
 
     /**
      * @hidden
-     * The void return setter for use by Bean editors.
      */
-    public void setLogFileRewriteListenerVoid(final LogFileRewriteListener l) {
-        logRewriteListener = l;
-    }
-
-    /** @hidden */
-    public LogFileRewriteListener getLogFileRewriteListener() {
-        return logRewriteListener;
+    public void setFeederFilterVoid(final FeederFilter feederFilter) {
+        this.feederFilter = feederFilter;
     }
 
     /**
      * @hidden
-     *
-     * Configures a filter object that is transmitted to the remote Feeder as
+     */
+    public FeederFilter getFeederFilter() {
+        return feederFilter;
+    }
+
+    /**
+     * @hidden Configures a filter object that is transmitted to the remote Feeder as
      * part of the replica feeder syncup. The remote feeder then invokes this
      * filter on each record before it sends the record to the replica. The
      * filter can be used to filter out replication records at the feeder
      * itself and this eliminate the feeder to replica transmission overhead
      * for records in which it has no interest.
-     *
      */
     public ReplicationConfig setFeederFilter(final FeederFilter feederFilter) {
         setFeederFilterVoid(feederFilter);
         return this;
     }
 
-    /** @hidden */
-    public void setFeederFilterVoid(final FeederFilter feederFilter) {
-        this.feederFilter = feederFilter;
-    }
-
-    /** @hidden */
-    public FeederFilter getFeederFilter() {
-        return feederFilter;
-    }
-
     /**
-     * @hidden
-     * For internal use only.
-     *
+     * @hidden For internal use only.
+     * <p>
      * Performs the checks need to ensure that this is a valid replicated
      * environment configuration. This method must only be invoked after all
      * the appropriate fields are set.
      */
     public void verify() throws IllegalArgumentException {
-        if ((getGroupName() == null) || "".equals(getGroupName())) {
+        if((getGroupName() == null) || "".equals(getGroupName())) {
             throw new IllegalArgumentException("Missing group name");
         }
 
-        if ((getNodeName() == null) || "".equals(getNodeName())){
+        if((getNodeName() == null) || "".equals(getNodeName())) {
             throw new IllegalArgumentException("Missing node name");
         }
 
-        if ((getNodeHostPort() == null) || "".equals(getNodeHostPort())) {
+        if((getNodeHostPort() == null) || "".equals(getNodeHostPort())) {
             throw new IllegalArgumentException("Missing node host");
         }
     }

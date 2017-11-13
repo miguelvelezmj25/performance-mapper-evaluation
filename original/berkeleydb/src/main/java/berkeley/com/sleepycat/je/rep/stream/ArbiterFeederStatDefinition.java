@@ -24,6 +24,6 @@ public class ArbiterFeederStatDefinition {
     public static final String GROUP_DESC = "ArbiterFeeder statistics";
 
     public static StatDefinition QUEUE_FULL =
-        new StatDefinition("queueFull", "Number of times a item could " +
-                           "not be queued because the queue was full.");
+            new StatDefinition("queueFull", "Number of times a item could " +
+                    "not be queued because the queue was full.");
 }

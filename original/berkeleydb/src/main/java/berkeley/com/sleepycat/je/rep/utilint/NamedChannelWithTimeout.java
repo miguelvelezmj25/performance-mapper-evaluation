@@ -12,16 +12,16 @@
  */
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.ChannelTimeoutTask;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 /**
  * NamedChannelWithTimeout permits association of timeouts with a DataChannel.
@@ -30,8 +30,11 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * SocketChannels.
  */
 public class NamedChannelWithTimeout
-    extends NamedChannel {
+        extends NamedChannel {
 
+    /* Values to help with logging. */
+    private final EnvironmentImpl envImpl;
+    private final Logger logger;
     /*
      * Denotes read activity associated with the channel. It's set each time a
      * read is successfully executed on the channel. The presence of heartbeats
@@ -39,17 +42,11 @@ public class NamedChannelWithTimeout
      * channel.
      */
     private volatile boolean readActivity;
-
     /*
      * The timeout associated with the channel. A value of zero indicates no
      * timeout.
      */
     private volatile int timeoutMs;
-
-    /* Values to help with logging. */
-    private final EnvironmentImpl envImpl;
-    private final Logger logger;
-
     /* The "time" of the last check for read activity on the channel. */
     private long lastCheckMs = 0l;
 
@@ -57,10 +54,10 @@ public class NamedChannelWithTimeout
                                    DataChannel channel,
                                    int timeoutMs) {
         this(repNode.getRepImpl(),
-             repNode.getLogger(),
-             repNode.getChannelTimeoutTask(),
-             channel,
-             timeoutMs);
+                repNode.getLogger(),
+                repNode.getChannelTimeoutTask(),
+                channel,
+                timeoutMs);
     }
 
     public NamedChannelWithTimeout(RepImpl repImpl,
@@ -73,7 +70,7 @@ public class NamedChannelWithTimeout
         this.envImpl = repImpl;
         this.logger = logger;
         readActivity = true;
-        if (timeoutMs > 0) {
+        if(timeoutMs > 0) {
             /* Only register with a timer, if a timeout is being requested. */
             channelTimeoutTask.register(this);
         }
@@ -98,10 +95,10 @@ public class NamedChannelWithTimeout
      */
     @Override
     public int read(ByteBuffer dst)
-        throws IOException {
+            throws IOException {
 
         final int bytes = channel.read(dst);
-        if (bytes > 0) {
+        if(bytes > 0) {
             readActivity = true;
         }
         return bytes;
@@ -109,7 +106,7 @@ public class NamedChannelWithTimeout
 
     @Override
     public void close()
-        throws IOException {
+            throws IOException {
 
         channel.close();
         readActivity = false;
@@ -126,28 +123,27 @@ public class NamedChannelWithTimeout
      * only meaningful for calculating time differences.
      *
      * @param timeMs the pseudo time
-     *
      * @return true if the channel is active, false if it isn't and has been
      * closed
      */
     public boolean isActive(long timeMs) {
 
-        if (!channel.isOpen()) {
+        if(!channel.isOpen()) {
             /* some thread closed it. */
             return false;
         }
 
-        if (!channel.getSocketChannel().isConnected()) {
+        if(!channel.getSocketChannel().isConnected()) {
             /* Not yet connected, wait for it to be connected. */
             return true;
         }
 
-        if (readActivity) {
+        if(readActivity) {
             resetActivityCounter(timeMs);
             return true;
         }
 
-        if ((timeoutMs == 0) || (timeMs - lastCheckMs) < timeoutMs) {
+        if((timeoutMs == 0) || (timeMs - lastCheckMs) < timeoutMs) {
             return true;
         }
 
@@ -156,11 +152,11 @@ public class NamedChannelWithTimeout
          * AsynchronousCloseException in the read/write threads.
          */
         LoggerUtils.info(logger, envImpl,
-                         "Inactive channel: " + getNameIdPair() +
-                         " forced close. Timeout: " + timeoutMs + "ms.");
+                "Inactive channel: " + getNameIdPair() +
+                        " forced close. Timeout: " + timeoutMs + "ms.");
         try {
             channel.close();
-        } catch (IOException e) {
+        } catch(IOException e) {
             /* Ignore the exception. */
         }
         return false;

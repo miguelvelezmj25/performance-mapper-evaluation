@@ -12,20 +12,13 @@
  */
 package berkeley.com.sleepycat.je.rep.arbiter;
 
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_DTVLSN;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_MASTER;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_N_ACKS;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_N_FSYNCS;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_N_REPLAY_QUEUE_OVERFLOW;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_N_WRITES;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_STATE;
-import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.ARB_VLSN;
-
-import java.io.Serializable;
-
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import java.io.Serializable;
+
+import static berkeley.com.sleepycat.je.rep.arbiter.impl.ArbiterStatDefinition.*;
 
 /**
  * Statistics for an {@link Arbiter}.
@@ -39,13 +32,13 @@ public class ArbiterStats implements Serializable {
     private final StatGroup arbStats;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     ArbiterStats(StatGroup arbGrp) {
-        if (arbGrp != null) {
+        if(arbGrp != null) {
             arbStats = arbGrp;
-        } else {
+        }
+        else {
             arbStats = new StatGroup(ArbiterStatDefinition.GROUP_NAME,
                     ArbiterStatDefinition.GROUP_DESC);
         }

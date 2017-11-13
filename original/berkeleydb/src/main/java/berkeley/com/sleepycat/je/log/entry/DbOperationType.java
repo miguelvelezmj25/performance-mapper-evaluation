@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * DbOperationType is a persistent enum used in NameLNLogEntries. It supports
@@ -50,29 +50,37 @@ public enum DbOperationType implements VersionedWriteLoggable {
 
     public static DbOperationType readTypeFromLog(final ByteBuffer entryBuffer,
                                                   @SuppressWarnings("unused")
-                                                  int entryVersion) {
+                                                          int entryVersion) {
         byte opVal = entryBuffer.get();
-        switch (opVal) {
-        case 1:
-            return CREATE;
+        switch(opVal) {
+            case 1:
+                return CREATE;
 
-        case 2:
-            return REMOVE;
+            case 2:
+                return REMOVE;
 
-        case 3:
-            return TRUNCATE;
+            case 3:
+                return TRUNCATE;
 
-        case 4:
-            return RENAME;
+            case 4:
+                return RENAME;
 
-        case 5:
-            return UPDATE_CONFIG;
+            case 5:
+                return UPDATE_CONFIG;
 
-        case 0:
-        default:
-            return NONE;
+            case 0:
+            default:
+                return NONE;
 
         }
+    }
+
+    /**
+     * Return true if this database operation type needs to write
+     * DatabaseConfig.
+     */
+    public static boolean isWriteConfigType(DbOperationType opType) {
+        return (opType == CREATE || opType == UPDATE_CONFIG);
     }
 
     @Override
@@ -93,7 +101,7 @@ public enum DbOperationType implements VersionedWriteLoggable {
     @Override
     public void writeToLog(final ByteBuffer logBuffer) {
         writeToLog(
-            logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
+                logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
     }
 
     @Override
@@ -137,17 +145,10 @@ public enum DbOperationType implements VersionedWriteLoggable {
 
     @Override
     public boolean logicalEquals(Loggable other) {
-        if (!(other instanceof DbOperationType))
+        if(!(other instanceof DbOperationType)) {
             return false;
+        }
 
         return value == ((DbOperationType) other).value;
-    }
-
-    /**
-     * Return true if this database operation type needs to write
-     * DatabaseConfig.
-     */
-    public static boolean isWriteConfigType(DbOperationType opType) {
-        return (opType == CREATE || opType == UPDATE_CONFIG);
     }
 }

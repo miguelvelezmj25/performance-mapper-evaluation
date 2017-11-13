@@ -13,6 +13,18 @@
 
 package berkeley.com.sleepycat.je.rep.util.ldiff;
 
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+import berkeley.com.sleepycat.je.rep.net.DataChannel;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
+import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
+import berkeley.com.sleepycat.je.rep.utilint.net.SimpleChannelFactory;
+import berkeley.com.sleepycat.je.utilint.CmdUtil;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,26 +34,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseNotFoundException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
-import berkeley.com.sleepycat.je.rep.net.DataChannel;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
-import berkeley.com.sleepycat.je.rep.utilint.net.SimpleChannelFactory;
-import berkeley.com.sleepycat.je.utilint.CmdUtil;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-
 /**
  * LDiff provides a mechanism for efficiently comparing two quiescent
  * databases, typically residing on different machines connected by a
@@ -50,153 +42,30 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * where the logical contents may be identical, but the physical logs may be
  * very different. If the databases are found to be different, it provides
  * information that would help identify the specific nature of the differences.
- *
+ * <p>
  * This class provides the external API used to initiate a comparison.
- *
+ * <p>
  * For details, please review the document at:
  *
  * @see <a href="https://sleepycat.oracle.com/trac/wiki/JEDatabaseLogicalDiff">
- *      LDiff </a>
+ * LDiff </a>
  */
 public class LDiff {
 
+    private static final String usageString = "usage: " +
+            CmdUtil.getJavaCommand(LDiff.class) +
+            "\n" +
+            "  -h <dir>[,<dir2>]   # environment home directory\n" +
+            "  [-a]                # analyze diff\n" +
+            "  [-b <blockSize>]    # number of records to put in each block\n" +
+            "  [-m <maxErrors>]    # abort diff after a number of errors\n" +
+            "  [-s <databaseName>,<databaseName>] # database(s) to compare\n" +
+            "  [-q]                # be quiet, do not print to stdout";
+    private static final int SOCKET_TIMEOUT_MS = 10000;
     private LDiffConfig cfg;
     private File home1, home2;
     private String file1, file2;
     private DiffTracker tracker;
-
-    private static final String usageString = "usage: " +
-        CmdUtil.getJavaCommand(LDiff.class) +
-        "\n" +
-        "  -h <dir>[,<dir2>]   # environment home directory\n" +
-        "  [-a]                # analyze diff\n" +
-        "  [-b <blockSize>]    # number of records to put in each block\n" +
-        "  [-m <maxErrors>]    # abort diff after a number of errors\n" +
-        "  [-s <databaseName>,<databaseName>] # database(s) to compare\n" +
-        "  [-q]                # be quiet, do not print to stdout";
-
-    private static final int SOCKET_TIMEOUT_MS = 10000;
-
-    /**
-     * The main used by the LDiff utility.
-     *
-     * @param args The arguments accepted by the LDiff utility.
-     *
-     * <pre>
-     * usage: java com.sleepycat.je.rep.util.ldiff.LDiff
-     *             [-s database1,database2] -h dbEnvHome1[,dbEnvHome2]
-     *             [-a] [-b blockSize] [-m maxErrors] [-q]
-     * </pre>
-     *
-     * <p>
-     * -a - generate an analysis of the differences<br>
-     * -b blockSize - the number of records to compare at one time<br>
-     * -h dbEnvHome - the directory or directories containing environment(s) in
-     * which to perform the ldiff<br>
-     * -m maxErrors - the maximum number of errors to detect before declaring
-     * the databases different and ending the operation.<br>
-     * -s database1,database2 - the databases to ldiff.<br>
-     * -q - be quiet, do not write to stdout
-     * </p>
-     * <p>
-     * If ldiff-ing a specific database, two database names must be specified.
-     * If no database names are given, two environments must be specified.  If
-     * two database names and two environments are specified, the first
-     * database is opened in the first environment and the second database is
-     * opened in the second environment.
-     * </p>
-     */
-    public static void main(String[] args) {
-        LDiff differ = new LDiff();
-        differ.parseArgs(args);
-        try {
-            if (differ.diff()) {
-                System.exit(0);
-            } else {
-                System.exit(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    private void parseArgs(String[] argv) {
-        cfg = new LDiffConfig();
-        cfg.setVerbose(true);
-
-        int argc = 0;
-        int nArgs = argv.length;
-        while (argc < nArgs) {
-            String thisArg = argv[argc++];
-            if (thisArg.equals("-a")) {
-                cfg.setDiffAnalysis(true);
-            } else if (thisArg.equals("-b")) {
-                if (argc < nArgs) {
-                    try {
-                        cfg.setBlockSize(Integer.parseInt(argv[argc++]));
-                    } catch (NumberFormatException nfe) {
-                        printUsage("-b requires an integer argument");
-                    }
-                } else {
-                    printUsage("-b requires an argument");
-                }
-            } else if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
-                    String[] envDirs = argv[argc++].split(",");
-                    if (envDirs.length > 2) {
-                        printUsage("Only 2 environments supported");
-                    }
-
-                    home1 = new File(envDirs[0]);
-                    if (envDirs.length == 2) {
-                        home2 = new File(envDirs[1]);
-                    }
-                } else {
-                    printUsage("-h requires an argument");
-                }
-            } else if (thisArg.equals("-m")) {
-                if (argc < nArgs) {
-                    try {
-                        cfg.setMaxErrors(Integer.parseInt(argv[argc++]));
-                    } catch (NumberFormatException nfe) {
-                        printUsage("-m requires an integer argument");
-                    }
-                } else {
-                    printUsage("-m requires an argument");
-                }
-            } else if (thisArg.equals("-s")) {
-                if (argc < nArgs) {
-                    String[] dbNames = argv[argc++].split(",");
-                    if (dbNames.length != 2) {
-                        printUsage("-s requires two database names");
-                    }
-                    file1 = dbNames[0];
-                    file2 = dbNames[1];
-                } else {
-                    printUsage("-s requires an argument");
-                }
-            } else if (thisArg.equals("-q")) {
-                cfg.setVerbose(false);
-            } else {
-                printUsage(thisArg + " is not a valid option.");
-            }
-        }
-
-        if (home1 == null) {
-            printUsage("-h is a required argument");
-        }
-
-        if (home2 == null && file1 == null) {
-            printUsage("2 databases must be specified with 1 environment");
-        }
-    }
-
-    private void printUsage(String msg) {
-        System.err.println(msg);
-        System.err.println(usageString);
-        System.exit(-1);
-    }
 
     private LDiff() {
     }
@@ -211,13 +80,145 @@ public class LDiff {
         this.cfg = cfg;
     }
 
+    /**
+     * The main used by the LDiff utility.
+     *
+     * @param args The arguments accepted by the LDiff utility.
+     *             <p>
+     *             <pre>
+     *             usage: java com.sleepycat.je.rep.util.ldiff.LDiff
+     *                         [-s database1,database2] -h dbEnvHome1[,dbEnvHome2]
+     *                         [-a] [-b blockSize] [-m maxErrors] [-q]
+     *             </pre>
+     *             <p>
+     *             <p>
+     *             -a - generate an analysis of the differences<br>
+     *             -b blockSize - the number of records to compare at one time<br>
+     *             -h dbEnvHome - the directory or directories containing environment(s) in
+     *             which to perform the ldiff<br>
+     *             -m maxErrors - the maximum number of errors to detect before declaring
+     *             the databases different and ending the operation.<br>
+     *             -s database1,database2 - the databases to ldiff.<br>
+     *             -q - be quiet, do not write to stdout
+     *             </p>
+     *             <p>
+     *             If ldiff-ing a specific database, two database names must be specified.
+     *             If no database names are given, two environments must be specified.  If
+     *             two database names and two environments are specified, the first
+     *             database is opened in the first environment and the second database is
+     *             opened in the second environment.
+     *             </p>
+     */
+    public static void main(String[] args) {
+        LDiff differ = new LDiff();
+        differ.parseArgs(args);
+        try {
+            if(differ.diff()) {
+                System.exit(0);
+            }
+            else {
+                System.exit(1);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    private void parseArgs(String[] argv) {
+        cfg = new LDiffConfig();
+        cfg.setVerbose(true);
+
+        int argc = 0;
+        int nArgs = argv.length;
+        while(argc < nArgs) {
+            String thisArg = argv[argc++];
+            if(thisArg.equals("-a")) {
+                cfg.setDiffAnalysis(true);
+            }
+            else if(thisArg.equals("-b")) {
+                if(argc < nArgs) {
+                    try {
+                        cfg.setBlockSize(Integer.parseInt(argv[argc++]));
+                    } catch(NumberFormatException nfe) {
+                        printUsage("-b requires an integer argument");
+                    }
+                }
+                else {
+                    printUsage("-b requires an argument");
+                }
+            }
+            else if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
+                    String[] envDirs = argv[argc++].split(",");
+                    if(envDirs.length > 2) {
+                        printUsage("Only 2 environments supported");
+                    }
+
+                    home1 = new File(envDirs[0]);
+                    if(envDirs.length == 2) {
+                        home2 = new File(envDirs[1]);
+                    }
+                }
+                else {
+                    printUsage("-h requires an argument");
+                }
+            }
+            else if(thisArg.equals("-m")) {
+                if(argc < nArgs) {
+                    try {
+                        cfg.setMaxErrors(Integer.parseInt(argv[argc++]));
+                    } catch(NumberFormatException nfe) {
+                        printUsage("-m requires an integer argument");
+                    }
+                }
+                else {
+                    printUsage("-m requires an argument");
+                }
+            }
+            else if(thisArg.equals("-s")) {
+                if(argc < nArgs) {
+                    String[] dbNames = argv[argc++].split(",");
+                    if(dbNames.length != 2) {
+                        printUsage("-s requires two database names");
+                    }
+                    file1 = dbNames[0];
+                    file2 = dbNames[1];
+                }
+                else {
+                    printUsage("-s requires an argument");
+                }
+            }
+            else if(thisArg.equals("-q")) {
+                cfg.setVerbose(false);
+            }
+            else {
+                printUsage(thisArg + " is not a valid option.");
+            }
+        }
+
+        if(home1 == null) {
+            printUsage("-h is a required argument");
+        }
+
+        if(home2 == null && file1 == null) {
+            printUsage("2 databases must be specified with 1 environment");
+        }
+    }
+
+    private void printUsage(String msg) {
+        System.err.println(msg);
+        System.err.println(usageString);
+        System.exit(-1);
+    }
+
     /*
      * Run an LDiff called from the command line.  What actually gets diffed
      * depends upon the args passed in, either 2 environments, databases in two
      * separate environments or databases in the same environment.
      */
     private boolean diff()
-        throws Exception {
+            throws Exception {
 
         EnvironmentConfig envConfiguration = new EnvironmentConfig();
         envConfiguration.setReadOnly(true);
@@ -229,9 +230,9 @@ public class LDiff {
         DbInternal.setUseExistingConfig(dbConfig, true);
 
         Database db2;
-        if (home2 != null) {
+        if(home2 != null) {
             Environment env2 = new Environment(home2, envConfiguration);
-            if (file1 == null) {
+            if(file1 == null) {
                 /* No dbs given, ldiff the environments. */
                 boolean ret = diff(env1, env2);
                 env1.close();
@@ -239,7 +240,8 @@ public class LDiff {
                 return ret;
             }
             db2 = env2.openDatabase(null, file2, dbConfig);
-        } else {
+        }
+        else {
             db2 = env1.openDatabase(null, file2, dbConfig);
         }
         Database db1 = env1.openDatabase(null, file1, dbConfig);
@@ -262,45 +264,46 @@ public class LDiff {
      * @throws Exception
      */
     public boolean diff(Environment env1, Environment env2)
-        throws Exception {
+            throws Exception {
 
         List<String> env1names = env1.getDatabaseNames();
         List<String> env2names = env2.getDatabaseNames();
         boolean ret = (env1names.size() == env2names.size());
-        if (!ret) {
+        if(!ret) {
             output("Environments have different number of databases.");
         }
-        for (String dbName : env1names) {
+        for(String dbName : env1names) {
             DatabaseConfig dbConfig = new DatabaseConfig();
             dbConfig.setReadOnly(true);
             DbInternal.setUseExistingConfig(dbConfig, true);
             Database db1, db2;
             try {
                 db1 = env1.openDatabase(null, dbName, dbConfig);
-            } catch (DatabaseNotFoundException e) {
+            } catch(DatabaseNotFoundException e) {
                 /* Should never happen, ExclusiveCreate is false. */
                 throw EnvironmentFailureException.unexpectedException(e);
             }
             try {
                 db2 = env2.openDatabase(null, dbName, dbConfig);
-            } catch (DatabaseNotFoundException e) {
+            } catch(DatabaseNotFoundException e) {
                 /* There's a database in env1 that's not in env2. */
                 db1.close();
                 output(dbName +
-                       " does not exist in " + env2.getHome().getName());
+                        " does not exist in " + env2.getHome().getName());
                 ret = false;
                 continue;
             }
 
-            if (!diff(db1, db2)) {
+            if(!diff(db1, db2)) {
                 ret = false;
             }
             db1.close();
             db2.close();
         }
-        if (ret) {
+        if(ret) {
             output("No differences exist between the two environments.");
-        } else {
+        }
+        else {
             output("Differences exist between the two environments.");
         }
         return ret;
@@ -315,31 +318,34 @@ public class LDiff {
      * @throws Exception
      */
     public boolean diff(Database db1, Database db2)
-        throws Exception {
+            throws Exception {
 
         BlockBag bag = createBlockBag(db2);
         final boolean ret = diff(db1, bag);
-        if (cfg.getVerbose()) {
+        if(cfg.getVerbose()) {
             final String db1Name = db1.getDatabaseName();
             final String db2Name = db2.getDatabaseName();
             final boolean namesMatch = db1Name.equals(db2Name);
-            if (ret) {
-                if (namesMatch) {
+            if(ret) {
+                if(namesMatch) {
                     output("No differences in " + db1Name);
-                } else {
+                }
+                else {
                     output(db1Name + " matches " + db2Name);
                 }
-            } else {
-                if (namesMatch) {
+            }
+            else {
+                if(namesMatch) {
                     output("Differences in " + db1Name);
-                } else {
+                }
+                else {
                     output(db1Name + " does not match " + db2Name);
                 }
             }
         }
 
         /* Do the analysis for these two databases. */
-        if (cfg.getDiffAnalysis() && tracker.getDiffRegions().size() != 0) {
+        if(cfg.getDiffAnalysis() && tracker.getDiffRegions().size() != 0) {
             DiffRecordAnalyzer.doAnalysis(db1, db2, tracker, cfg.getVerbose());
         }
 
@@ -351,19 +357,19 @@ public class LDiff {
      * local and one on a remote machine.  This method assumes that only basic,
      * unauthenticated communication is in use.
      *
-     * @param env a valid, open Environment handle
+     * @param env  a valid, open Environment handle
      * @param addr the address of the remote machine
      * @return true if all the databases in both environments are the same
-     * @throws IOException if a network error occurs
-     * @throws ProtocolException if an unexpected message is received
+     * @throws IOException                   if a network error occurs
+     * @throws ProtocolException             if an unexpected message is received
      * @throws ServiceConnectFailedException if the remote service was busy
      * @throws Exception
      */
     public boolean diff(Environment env, InetSocketAddress addr)
-        throws IOException,
-               ProtocolException,
-               ServiceConnectFailedException,
-               Exception {
+            throws IOException,
+            ProtocolException,
+            ServiceConnectFailedException,
+            Exception {
         return diff(env, addr, new SimpleChannelFactory());
     }
 
@@ -371,22 +377,22 @@ public class LDiff {
      * A mechanism for efficiently comparing two quiescent environments, one
      * local and one on a remote machine.
      *
-     * @param env a valid, open Environment handle
-     * @param addr the address of the remote machine
+     * @param env       a valid, open Environment handle
+     * @param addr      the address of the remote machine
      * @param dcFactory the channel factory for connection creation
      * @return true if all the databases in both environments are the same
-     * @throws IOException if a network error occurs
-     * @throws ProtocolException if an unexpected message is received
+     * @throws IOException                   if a network error occurs
+     * @throws ProtocolException             if an unexpected message is received
      * @throws ServiceConnectFailedException if the remote service was busy
      * @throws Exception
      */
     public boolean diff(Environment env,
                         InetSocketAddress addr,
                         DataChannelFactory dcFactory)
-        throws IOException,
-               ProtocolException,
-               ServiceConnectFailedException,
-               Exception {
+            throws IOException,
+            ProtocolException,
+            ServiceConnectFailedException,
+            Exception {
 
         List<String> envNames = env.getDatabaseNames();
         boolean ret = true;
@@ -405,9 +411,9 @@ public class LDiff {
          */
         Protocol.EnvInfo msg = protocol.read(channel, Protocol.EnvInfo.class);
         ret = (envNames.size() == msg.getNumberOfDBs());
-        if (!ret) {
+        if(!ret) {
             output("Number of databases in local and remote environments " +
-                   "does not match.");
+                    "does not match.");
         }
         channel.close();
 
@@ -415,7 +421,7 @@ public class LDiff {
          * Run LDiff for every database in the local environment.  If they all
          * succeed, the environments match.
          */
-        for (String dbName : envNames) {
+        for(String dbName : envNames) {
             channel = connect(addr, dcFactory);
 
             DatabaseConfig dbConfig = new DatabaseConfig();
@@ -424,28 +430,29 @@ public class LDiff {
             Database db;
             try {
                 db = env.openDatabase(null, dbName, dbConfig);
-            } catch (DatabaseNotFoundException e) {
+            } catch(DatabaseNotFoundException e) {
                 /* Should never happen, ExclusiveCreate is false. */
                 throw EnvironmentFailureException.unexpectedException(e);
             }
 
             try {
-                if (!diff(db, channel)) {
+                if(!diff(db, channel)) {
                     ret = false;
                 }
-            } catch (ProtocolException pe) {
+            } catch(ProtocolException pe) {
                 output(dbName + " does not exist in remote environment.");
                 ret = false;
             } finally {
                 db.close();
-                if (channel.isOpen()) {
+                if(channel.isOpen()) {
                     channel.close();
                 }
             }
         }
-        if (ret) {
+        if(ret) {
             output("Local environment matches remote.");
-        } else {
+        }
+        else {
             output("Local environment does not match remote.");
         }
         return ret;
@@ -455,22 +462,22 @@ public class LDiff {
      * A mechanism for efficiently comparing two quiescent databases, one of
      * which resides on a remote machine.
      *
-     * @param db a valid, open Database handle
-     * @param addr the address of the remote host
+     * @param db        a valid, open Database handle
+     * @param addr      the address of the remote host
      * @param dcFactory the channel factory for connection creation
      * @return true if the local Database and the remote Database are identical
-     * @throws IOException if a network error occurs
-     * @throws ProtocolException if the remote database does not exist
+     * @throws IOException                   if a network error occurs
+     * @throws ProtocolException             if the remote database does not exist
      * @throws ServiceConnectFailedException if the remote service is busy
      * @throws Exception
      */
     public boolean diff(Database db,
                         InetSocketAddress addr,
                         DataChannelFactory dcFactory)
-        throws IOException,
-               ProtocolException,
-               ServiceConnectFailedException,
-               Exception {
+            throws IOException,
+            ProtocolException,
+            ServiceConnectFailedException,
+            Exception {
 
         final DataChannel channel = connect(addr, dcFactory);
         boolean ret;
@@ -484,13 +491,13 @@ public class LDiff {
     }
 
     private boolean diff(Database db, DataChannel channel)
-        throws IOException, ProtocolException, Exception {
+            throws IOException, ProtocolException, Exception {
 
         final Protocol protocol = new Protocol(
                 new NameIdPair("Ldiff", -1),
                 DbInternal.getNonNullEnvImpl(db.getEnvironment()));
         protocol.write(protocol.new DbBlocks
-                       (db.getDatabaseName(), cfg.getBlockSize()), channel);
+                (db.getDatabaseName(), cfg.getBlockSize()), channel);
 
         /*
          * A protocol exception will be thrown here if the remote env does not
@@ -500,13 +507,13 @@ public class LDiff {
 
         BlockBag bag = new BlockBag();
         Protocol.BlockInfo blockMsg;
-        while (true) {
+        while(true) {
             try {
                 blockMsg = protocol.read(channel, Protocol.BlockInfo.class);
                 bag.add(blockMsg.getBlock());
-            } catch (ProtocolException pe) {
-                if (pe.getUnexpectedMessage().getOp() !=
-                    Protocol.BLOCK_LIST_END) {
+            } catch(ProtocolException pe) {
+                if(pe.getUnexpectedMessage().getOp() !=
+                        Protocol.BLOCK_LIST_END) {
                     throw pe;
                 }
                 break;
@@ -515,15 +522,16 @@ public class LDiff {
         }
 
         boolean match = diff(db, bag);
-        if (match) {
+        if(match) {
             output(db.getDatabaseName() + " matches remote database.");
-        } else {
+        }
+        else {
             output(db.getDatabaseName() + "does not match remote database.");
         }
 
-        if (cfg.getDiffAnalysis() && tracker.getDiffRegions().size() != 0) {
+        if(cfg.getDiffAnalysis() && tracker.getDiffRegions().size() != 0) {
             DiffRecordAnalyzer.doAnalysis
-                (db, protocol, channel, tracker, cfg.getVerbose());
+                    (db, protocol, channel, tracker, cfg.getVerbose());
         }
         protocol.write(protocol.new Done(), channel);
 
@@ -534,14 +542,13 @@ public class LDiff {
      * A mechanism for efficiently comparing two quiescent databases, typically
      * residing on different machines connected by a network.
      *
-     * @param db a valid, open Database handle
+     * @param db     a valid, open Database handle
      * @param blkBag a bag of blocks to diff against db.
-     *
      * @return true if the two comparing databases are identical.
      * @throws Exception
      */
     public boolean diff(Database db, BlockBag blkBag)
-        throws Exception {
+            throws Exception {
 
         /* Suppose the two comparing databases are identical, by default. */
         boolean identical = true;
@@ -559,23 +566,23 @@ public class LDiff {
         int errors = 0;
         int maxerrors = cfg.getMaxErrors();
         tracker = new DiffTracker(numKeys);
-        while (window.getChecksum() != 0 && blkBag.size() > 0) {
+        while(window.getChecksum() != 0 && blkBag.size() > 0) {
 
             /*
              * Find the block in the bag whose checksum and md5 match the
              * current window. This block, if it exists, is match.
              */
             Block match = findMatch(db.getEnvironment(), blkBag, window);
-            if (match != null) {
+            if(match != null) {
                 tracker.setBlockDiffBegin
-                    (blkBag.getBlock(), blkBag.getBlockIndex());
+                        (blkBag.getBlock(), blkBag.getBlockIndex());
                 /* Remove match and any earlier blocks from the bag. */
                 List<Block> removed = blkBag.remove(match);
-                if (removed != null) {
+                if(removed != null) {
                     identical = false;
                     errors += removed.size();
                     tracker.calBlockDiffSize(blkBag.getBlockIndex());
-                    if (maxerrors > 0 && errors >= maxerrors) {
+                    if(maxerrors > 0 && errors >= maxerrors) {
                         break;
                     }
                 }
@@ -591,45 +598,45 @@ public class LDiff {
 
             identical = false;
             LoggerUtils.envLogMsg
-                (Level.FINE,
-                 DbInternal.getNonNullEnvImpl(db.getEnvironment()),
-                 "Unmatched block at position " + pos);
+                    (Level.FINE,
+                            DbInternal.getNonNullEnvImpl(db.getEnvironment()),
+                            "Unmatched block at position " + pos);
             errors++;
-            if (maxerrors > 0 && errors >= maxerrors) {
+            if(maxerrors > 0 && errors >= maxerrors) {
                 break;
             }
 
             /* Roll the window forward by one key. */
             window.rollWindow();
 
-            if (window.getChecksum() != 0) {
+            if(window.getChecksum() != 0) {
                 pos++;
             }
         }
 
         cursor.close();
 
-        if (window.getChecksum() != 0) {
+        if(window.getChecksum() != 0) {
 
             /*
              * We ran out of blocks in blkBag before we got to the end of db.
              * Update the unmatched key range.
              */
             LoggerUtils.envLogMsg
-                (Level.FINE,
-                 DbInternal.getNonNullEnvImpl(db.getEnvironment()),
-                 "Local Db has addtional records starting at " + pos + ".");
+                    (Level.FINE,
+                            DbInternal.getNonNullEnvImpl(db.getEnvironment()),
+                            "Local Db has addtional records starting at " + pos + ".");
             identical = false;
             tracker.addWindowAdditionalDiffs(window);
         }
 
-        if (blkBag.size() > 0) {
+        if(blkBag.size() > 0) {
             /* All remaining blocks in the bag are unmatched. */
-            for (Block b : blkBag) {
+            for(Block b : blkBag) {
                 LoggerUtils.envLogMsg
-                    (Level.FINE,
-                     DbInternal.getNonNullEnvImpl(db.getEnvironment()),
-                     "Unmatched remote block: " + b);
+                        (Level.FINE,
+                                DbInternal.getNonNullEnvImpl(db.getEnvironment()),
+                                "Unmatched remote block: " + b);
             }
             identical = false;
             tracker.addBlockBagAdditionalDiffs(window, blkBag);
@@ -640,7 +647,7 @@ public class LDiff {
 
     /* For unit test only. */
     public List<MismatchedRegion> getDiffRegions() {
-        if (tracker == null) {
+        if(tracker == null) {
             return null;
         }
 
@@ -661,21 +668,21 @@ public class LDiff {
      */
     private Block findMatch(Environment env, BlockBag blkBag, Window window) {
         List<Block> matches = blkBag.get(window.getChecksum());
-        if (matches == null) {
+        if(matches == null) {
             return null;
         }
 
         /* Delay the computation of the hash until we know we need it. */
         byte[] md5 = window.getMd5Hash();
-        for (Block b : matches) {
-            if (Arrays.equals(b.getMd5Hash(), md5)) {
+        for(Block b : matches) {
+            if(Arrays.equals(b.getMd5Hash(), md5)) {
                 return b;
             }
             LoggerUtils.envLogMsg
-                (Level.FINE,
-                 DbInternal.getNonNullEnvImpl(env),
-                 "Found a remote block whose rolling checksum " +
-                 "matches LB but md5 hash doesn't:" + b);
+                    (Level.FINE,
+                            DbInternal.getNonNullEnvImpl(env),
+                            "Found a remote block whose rolling checksum " +
+                                    "matches LB but md5 hash doesn't:" + b);
         }
         /* No matches. */
         return null;
@@ -694,14 +701,14 @@ public class LDiff {
         /* Retrieve the key/data pairs and fill into blocks. */
         long start = System.currentTimeMillis();
         Iterator<Block> iter = iterator(db);
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             bag.add(iter.next());
         }
         long end = System.currentTimeMillis();
         LoggerUtils.envLogMsg
-            (Level.FINE,
-             DbInternal.getNonNullEnvImpl(db.getEnvironment()),
-             "Block bag created in : " + (end - start) + " ms.");
+                (Level.FINE,
+                        DbInternal.getNonNullEnvImpl(db.getEnvironment()),
+                        "Block bag created in : " + (end - start) + " ms.");
         return bag;
     }
 
@@ -713,30 +720,30 @@ public class LDiff {
      * Connect to addr and perform a service handshake.  Retry as specified by
      * the config object.
      *
-     * @param addr the remote address to connect to
+     * @param addr      the remote address to connect to
      * @param dcFactory the channel factory for connection creation
      * @return an open DataChannel
-     * @throws IOException if an exception occurs with the DataChannel
+     * @throws IOException                   if an exception occurs with the DataChannel
      * @throws ServiceConnectFailedException if the remote service is busy
      */
     private DataChannel connect(InetSocketAddress addr,
                                 DataChannelFactory dcFactory)
-        throws IOException, ServiceConnectFailedException {
+            throws IOException, ServiceConnectFailedException {
 
         int triesLeft = cfg.getMaxConnectionAttempts();
         DataChannel ret = null;
-        while (true) {
+        while(true) {
             try {
                 ret = dcFactory.connect(addr,
-                                        new ConnectOptions().
-                                        setBlocking(true).
-                                        setTcpNoDelay(true).
-                                        setOpenTimeout(SOCKET_TIMEOUT_MS).
-                                        setReadTimeout(SOCKET_TIMEOUT_MS));
+                        new ConnectOptions().
+                                setBlocking(true).
+                                setTcpNoDelay(true).
+                                setOpenTimeout(SOCKET_TIMEOUT_MS).
+                                setReadTimeout(SOCKET_TIMEOUT_MS));
                 ServiceDispatcher.doServiceHandshake(ret, LDiffService.NAME);
                 break;
-            } catch (ServiceConnectFailedException scfe) {
-                if ((ret != null) && ret.isOpen()) {
+            } catch(ServiceConnectFailedException scfe) {
+                if((ret != null) && ret.isOpen()) {
                     ret.close();
                 }
 
@@ -745,11 +752,11 @@ public class LDiff {
                  * the user requested it, keep re-trying.  triesLeft == -1
                  * means never abort.
                  */
-                if (triesLeft > 0) {
+                if(triesLeft > 0) {
                     triesLeft--;
                 }
 
-                if (!cfg.getWaitIfBusy() || triesLeft == 0) {
+                if(!cfg.getWaitIfBusy() || triesLeft == 0) {
                     throw scfe;
                 }
             }
@@ -759,14 +766,14 @@ public class LDiff {
     }
 
     private void output(String msg) {
-        if (cfg.getVerbose()) {
+        if(cfg.getVerbose()) {
             System.out.println(msg);
         }
     }
 
     /**
      * The exception that is thrown when a database diff detects differences.
-     *
+     * <p>
      * TODO: we start simple, by just using it as a boolean indicator and
      * perhaps a block id for unit test purposes? As as the local processing
      * gains in sophistication will provide block and key (insert, update,
@@ -781,13 +788,13 @@ public class LDiff {
     }
 
     private class LDiffIterator implements Iterator<Block> {
+        private final Database db;
+        private final int numKeys;
         private Block cached;
         private Cursor cursor;
-        private final Database db;
         private DatabaseEntry lastKey, lastData;
         private boolean more;
         private int i;
-        private final int numKeys;
 
         public LDiffIterator(Database db) {
             i = 0;
@@ -812,7 +819,7 @@ public class LDiff {
 
         @Override
         public Block next() {
-            if (!more) {
+            if(!more) {
                 throw new NoSuchElementException();
             }
 
@@ -826,17 +833,19 @@ public class LDiff {
              * returned.
              */
             cursor = db.openCursor(null, null);
-            if (lastKey == null) {
+            if(lastKey == null) {
                 lastKey = new DatabaseEntry();
                 lastData = new DatabaseEntry();
-            } else {
+            }
+            else {
                 cursor.getSearchBoth(lastKey, lastData, null);
             }
             Block ret = cached;
             cached = LDiffUtil.readBlock(i++, cursor, numKeys);
-            if (cached.numRecords == 0) {
+            if(cached.numRecords == 0) {
                 more = false;
-            } else {
+            }
+            else {
                 cursor.getCurrent(lastKey, lastData, null);
             }
             cursor.close();

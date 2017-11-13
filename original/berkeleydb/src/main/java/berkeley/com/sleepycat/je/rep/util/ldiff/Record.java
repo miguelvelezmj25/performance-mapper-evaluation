@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.rep.util.ldiff;
 
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.util.Arrays;
 
 /*
  * An object used to record a key/data pair in the different area, also
@@ -57,22 +57,22 @@ public class Record {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
+        if(o == null) {
             return false;
         }
-        if (!(o instanceof Record)) {
+        if(!(o instanceof Record)) {
             return false;
         }
 
         final Record record = (Record) o;
 
         return Arrays.equals(record.getKey(), getKey()) &&
-               Arrays.equals(record.getData(), getData());
+                Arrays.equals(record.getData(), getData());
     }
 
     @Override
     public int hashCode() {
-        if (mix == null && key != null && data != null) {
+        if(mix == null && key != null && data != null) {
             generateMix();
         }
 

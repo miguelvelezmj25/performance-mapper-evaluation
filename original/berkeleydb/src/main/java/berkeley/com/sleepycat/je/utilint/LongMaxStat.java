@@ -44,7 +44,7 @@ public class LongMaxStat extends LongStat {
      * @return true if the max value was updated.
      */
     public boolean setMax(long newValue) {
-        if (counter < newValue) {
+        if(counter < newValue) {
             counter = newValue;
             return true;
         }
@@ -62,7 +62,7 @@ public class LongMaxStat extends LongStat {
 
     @Override
     protected String getFormattedValue() {
-        if (counter == Long.MIN_VALUE) {
+        if(counter == Long.MIN_VALUE) {
             return "NONE";
         }
 

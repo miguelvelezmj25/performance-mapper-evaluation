@@ -22,5 +22,6 @@ public abstract class DatabaseStats implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // no public constructor
-    protected DatabaseStats() {}
+    protected DatabaseStats() {
+    }
 }

@@ -13,18 +13,18 @@
 
 package berkeley.com.sleepycat.persist.evolve;
 
+import berkeley.com.sleepycat.persist.EntityStore;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import berkeley.com.sleepycat.persist.EntityStore;
 
 /**
  * Configuration properties for eager conversion of unevolved objects.  This
  * configuration is used with {@link EntityStore#evolve EntityStore.evolve}.
  *
- * @see com.sleepycat.persist.evolve Class Evolution
  * @author Mark Hayes
+ * @see com.sleepycat.persist.evolve Class Evolution
  */
 public class EvolveConfig implements Cloneable {
 
@@ -42,14 +42,13 @@ public class EvolveConfig implements Cloneable {
      * Returns a shallow copy of the configuration.
      *
      * @return a shallow copy of the configuration.
-     *
      * @deprecated As of JE 4.0.13, replaced by {@link
      * EvolveConfig#clone()}.
      */
     public EvolveConfig cloneConfig() {
         try {
             return (EvolveConfig) super.clone();
-        } catch (CloneNotSupportedException cannotHappen) {
+        } catch(CloneNotSupportedException cannotHappen) {
             return null;
         }
     }
@@ -61,7 +60,7 @@ public class EvolveConfig implements Cloneable {
     public EvolveConfig clone() {
         try {
             return (EvolveConfig) super.clone();
-        } catch (CloneNotSupportedException cannotHappen) {
+        } catch(CloneNotSupportedException cannotHappen) {
             return null;
         }
     }
@@ -71,7 +70,6 @@ public class EvolveConfig implements Cloneable {
      * are added, all indexes that require evolution will be converted.
      *
      * @param entityClass the entity class name.
-     *
      * @return 'this'.
      */
     public EvolveConfig addClassToEvolve(String entityClass) {
@@ -89,24 +87,11 @@ public class EvolveConfig implements Cloneable {
     }
 
     /**
-     * Sets a progress listener that is notified each time an entity is read.
-     *
-     * @param listener the EvolveListener.
-     *
-     * @return 'this'.
-     */
-    public EvolveConfig setEvolveListener(EvolveListener listener) {
-        setEvolveListenerVoid(listener);
-        return this;
-    }
-    
-    /**
      * <!-- begin JE only -->
-     * @hidden
-     * <!-- end JE only -->
-     * The void return setter for use by Bean editors.
      *
      * @param listener the EvolveListener.
+     * @hidden <!-- end JE only -->
+     * The void return setter for use by Bean editors.
      */
     public void setEvolveListenerVoid(EvolveListener listener) {
         this.evolveListener = listener;
@@ -120,5 +105,16 @@ public class EvolveConfig implements Cloneable {
      */
     public EvolveListener getEvolveListener() {
         return evolveListener;
+    }
+
+    /**
+     * Sets a progress listener that is notified each time an entity is read.
+     *
+     * @param listener the EvolveListener.
+     * @return 'this'.
+     */
+    public EvolveConfig setEvolveListener(EvolveListener listener) {
+        setEvolveListenerVoid(listener);
+        return this;
     }
 }

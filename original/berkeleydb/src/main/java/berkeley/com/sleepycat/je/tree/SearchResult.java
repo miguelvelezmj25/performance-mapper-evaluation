@@ -26,7 +26,7 @@ public class SearchResult {
      * we are doing a do-not-fetch kind of search.
      */
     public boolean childNotResident;
-        
+
     public SearchResult() {
         reset();
     }
@@ -41,10 +41,10 @@ public class SearchResult {
     @Override
     public String toString() {
         return
-            "exactParentFound="+ exactParentFound +
-            " parent=" + ((parent == null)? "null":
-                          Long.toString(parent.getNodeId())) +
-            " index=" + index +
-            " childNotResident=" + childNotResident;
+                "exactParentFound=" + exactParentFound +
+                        " parent=" + ((parent == null) ? "null" :
+                        Long.toString(parent.getNodeId())) +
+                        " index=" + index +
+                        " childNotResident=" + childNotResident;
     }
 }

@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DupKeyData;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -23,14 +21,16 @@ import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.tree.Key;
 import berkeley.com.sleepycat.je.tree.LN;
 
+import java.nio.ByteBuffer;
+
 /**
  * DupDeletedLNEntry encapsulates a deleted dupe LN entry. This contains all
  * the regular transactional LN log entry fields and an extra key, which is the
  * nulled out data field of the LN (which becomes the key in the duplicate
  * tree.
- *
+ * <p>
  * WARNING: Obsolete in version 8, only used by some log readers.
- *
+ * <p>
  * TODO Move to dupConvert package, after testing is complete.
  */
 public class DeletedDupLNLogEntry extends LNLogEntry<LN> {
@@ -62,8 +62,8 @@ public class DeletedDupLNLogEntry extends LNLogEntry<LN> {
                           LogEntryHeader header,
                           ByteBuffer entryBuffer) {
 
-        readBaseLNEntry(envImpl, header, entryBuffer, 
-                        false /*keyIsLastSerializedField*/);
+        readBaseLNEntry(envImpl, header, entryBuffer,
+                false /*keyIsLastSerializedField*/);
 
         /* Key */
         int logVersion = header.getVersion();

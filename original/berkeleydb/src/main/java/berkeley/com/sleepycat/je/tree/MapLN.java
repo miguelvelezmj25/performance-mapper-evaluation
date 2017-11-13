@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -26,9 +24,11 @@ import berkeley.com.sleepycat.je.txn.LockGrantType;
 import berkeley.com.sleepycat.je.txn.LockResult;
 import berkeley.com.sleepycat.je.txn.LockType;
 
+import java.nio.ByteBuffer;
+
 /**
  * A MapLN represents a Leaf Node in the JE Db Mapping Tree.
- *
+ * <p>
  * MapLNs contain a DatabaseImpl, which in turn contains three categories of
  * information - database configuration information, the per-database File
  * Summary utilization information, and each database's btree root. While LNs
@@ -41,23 +41,23 @@ import berkeley.com.sleepycat.je.txn.LockType;
  * The basic rule is that in order to ensure that the MapLN contains the
  * proper btree root, the btree root latch is used to protect both any logging
  * of the MapLN, and any updates to the root lsn.
- *
+ * <p>
  * Updates to the internal btree nodes obey a strict bottom up approach, in
  * accordance with the log semantics which require that later log entries are
  * known to supercede earlier log entries. In other words, for a btree that
  * looks like
- *      MapLN
- *        |
- *       IN
- *        |
- *       BIN
- *        |
- *       LN
+ * MapLN
+ * |
+ * IN
+ * |
+ * BIN
+ * |
+ * LN
  * we know that update operations cause the btree nodes must be logged in this
  * order: LN, BIN, IN, MapLN, so that the reference to each on disk node is
  * correct. (Note that logging order is special and different when the btree
  * is initially created.)
- *
+ * <p>
  * However, MapLNs may need to be written to disk at arbitrary points in time
  * in order to save database config or utilization data. Those writes don't
  * have the time and context to be done in a cascading-upwards fashion.  We
@@ -67,42 +67,42 @@ import berkeley.com.sleepycat.je.txn.LockType;
  * ensure that the root doesn't change during the time when the MapLN is
  * written. For example, suppose thread 1 is doing a cascading-up MapLN write,
  * and thread 2 is doing an arbitrary-point MapLN write:
- *
+ * <p>
  * Thread 1                   Thread 2
  * --------                   --------
  * latch root                 latch BIN parent of MapLN
  * log root IN
  * log MapLN (Tree root)       wants to log MapLN too -- but has to take
- *  to refer to new root IN    root latch, so we'll get the right rootIN
- *
+ * to refer to new root IN    root latch, so we'll get the right rootIN
+ * <p>
  * Without latching the root this could produce the following, incorrect log
- *  30 LNa
- *  40 BIN
- *  50 IN (first version of root)
- *  60 MapLN, refers to IN(50)
- *  ...
- *  90 LNb
- *  100 BIN
- *  110 IN (second version of root)
- *  120 CkptStart (the tree is not dirty, no IN will be logged during the
- *   ckpt interval))
- *   ..  something arbirarily writes out the MapLN
- *  130 MapLN refers to first root, IN(50)    <------ impossible
- *
+ * 30 LNa
+ * 40 BIN
+ * 50 IN (first version of root)
+ * 60 MapLN, refers to IN(50)
+ * ...
+ * 90 LNb
+ * 100 BIN
+ * 110 IN (second version of root)
+ * 120 CkptStart (the tree is not dirty, no IN will be logged during the
+ * ckpt interval))
+ * ..  something arbirarily writes out the MapLN
+ * 130 MapLN refers to first root, IN(50)    <------ impossible
+ * <p>
  * While a MapLN can't be written out with the wrong root, it's possible
  * for a rootIN to be logged without the MapLN, and for that rootIN not
  * to be processed at recovery. Suppose a checkpoint begins and ends
  * in the window between when a rootIN is written, and DbTree.modifyDbRoot is
  * called:
- *   300 log new root IN,
- *   update root reference in tree
- *   unlatch root
- *
- *   310 Checkpoint starts
- *   320 Checkpoint ends
- *   ...if we crash here, before the MapLN is logged, , we won't see the new
- *   root IN at lsn 300. However, the IN is non-txnal and will be recreated
- *   during reply of txnal information (LNs) by normal recovery processing.
+ * 300 log new root IN,
+ * update root reference in tree
+ * unlatch root
+ * <p>
+ * 310 Checkpoint starts
+ * 320 Checkpoint ends
+ * ...if we crash here, before the MapLN is logged, , we won't see the new
+ * root IN at lsn 300. However, the IN is non-txnal and will be recreated
+ * during reply of txnal information (LNs) by normal recovery processing.
  */
 public final class MapLN extends LN {
 
@@ -164,8 +164,8 @@ public final class MapLN extends LN {
     private boolean isEvictableInexact() {
         /* Always prohibit eviction when je.env.dbEviction=false. */
         return databaseImpl.getEnv().getDbEviction() &&
-               !databaseImpl.isInUse() &&
-               !databaseImpl.getTree().isRootResident();
+                !databaseImpl.isInUse() &&
+                !databaseImpl.getTree().isRootResident();
     }
 
     /**
@@ -177,7 +177,7 @@ public final class MapLN extends LN {
      */
     @Override
     boolean isEvictable(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         boolean evictable = false;
 
@@ -187,15 +187,15 @@ public final class MapLN extends LN {
         DatabaseImpl idDatabaseImpl = envImpl.getDbTree().getIdDatabaseImpl();
         try {
             LockResult lockResult = locker.nonBlockingLock
-                (lsn, LockType.WRITE, false /*jumpAheadOfWaiters*/,
-                 idDatabaseImpl);
+                    (lsn, LockType.WRITE, false /*jumpAheadOfWaiters*/,
+                            idDatabaseImpl);
 
             /*
              * The isEvictableInexact result is guaranteed to hold true during
              * LN stripping if it is still true after acquiring the write-lock.
              */
-            if (lockResult.getLockGrant() != LockGrantType.DENIED &&
-                isEvictableInexact()) {
+            if(lockResult.getLockGrant() != LockGrantType.DENIED &&
+                    isEvictableInexact()) {
 
                 /*
                  * While holding both the BIN latch and a write-lock on the
@@ -290,21 +290,21 @@ public final class MapLN extends LN {
      */
 
     /**
-     * Return the correct log entry type for a MapLN depends on whether it's 
+     * Return the correct log entry type for a MapLN depends on whether it's
      * transactional.
      */
     @Override
     protected LogEntryType getLogType(boolean isInsert,
                                       boolean isTransactional) {
-        assert(!isTransactional);
+        assert (!isTransactional);
         return LogEntryType.LOG_MAPLN;
     }
 
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
         return super.getLogSize(logVersion, forReplication) +
-            databaseImpl.getLogSize() +
-            1; // deleted
+                databaseImpl.getLogSize() +
+                1; // deleted
     }
 
     @Override

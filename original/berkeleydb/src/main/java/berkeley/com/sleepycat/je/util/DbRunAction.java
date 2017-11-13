@@ -13,50 +13,36 @@
 
 package berkeley.com.sleepycat.je.util;
 
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.cleaner.VerifyUtils;
+import berkeley.com.sleepycat.je.config.EnvironmentParams;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.utilint.CmdUtil;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 
-import berkeley.com.sleepycat.je.CheckpointConfig;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
-import berkeley.com.sleepycat.je.EnvironmentStats;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.cleaner.VerifyUtils;
-import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.utilint.CmdUtil;
-
 /**
- * @hidden
- * For internal use only.
+ * @hidden For internal use only.
  * DbRunAction is a debugging aid that can invoke a JE operation or background
  * activity from the command line.
- *
- *   batchClean calls Environment.cleanLog() in a loop
- *   checkpoint calls Environment.checkpoint() with force=true
- *   compress calls Environment.compress
- *   evict calls Environment.preload, then evictMemory
- *   removeDb calls Environment.removeDatabase, but doesn't do any cleaning
- *   removeDbAndClean calls removeDatabase, then cleanLog in a loop
- *   activateCleaner wakes up the cleaner, and then the main thread waits
- *     until you type "y" to the console before calling Environment.close().
- *     The control provided by the prompt is necessary for daemon activities
- *     because often threads check and bail out if the environment is closed.
- *   verifyUtilization calls CleanerTestUtils.verifyUtilization() to compare
- *     utilization as calculated by UtilizationProfile to utilization as
- *     calculated by UtilizationFileReader.
+ * <p>
+ * batchClean calls Environment.cleanLog() in a loop
+ * checkpoint calls Environment.checkpoint() with force=true
+ * compress calls Environment.compress
+ * evict calls Environment.preload, then evictMemory
+ * removeDb calls Environment.removeDatabase, but doesn't do any cleaning
+ * removeDbAndClean calls removeDatabase, then cleanLog in a loop
+ * activateCleaner wakes up the cleaner, and then the main thread waits
+ * until you type "y" to the console before calling Environment.close().
+ * The control provided by the prompt is necessary for daemon activities
+ * because often threads check and bail out if the environment is closed.
+ * verifyUtilization calls CleanerTestUtils.verifyUtilization() to compare
+ * utilization as calculated by UtilizationProfile to utilization as
+ * calculated by UtilizationFileReader.
  */
 public class DbRunAction {
 
@@ -67,7 +53,7 @@ public class DbRunAction {
     private static final int REMOVEDB = 5;
     private static final int REMOVEDB_AND_CLEAN = 6;
     private static final int ACTIVATE_CLEANER_THREADS = 7;
-                                           // wake up cleaner threads
+    // wake up cleaner threads
     private static final int VERIFY_UTILIZATION = 8;
 
     public static void main(String[] argv) {
@@ -78,7 +64,7 @@ public class DbRunAction {
 
         try {
             int whichArg = 0;
-            if (argv.length == 0) {
+            if(argv.length == 0) {
                 usage();
                 System.exit(1);
             }
@@ -89,44 +75,57 @@ public class DbRunAction {
             boolean readOnly = false;
             boolean printStats = false;
 
-            while (whichArg < argv.length) {
+            while(whichArg < argv.length) {
                 String nextArg = argv[whichArg];
 
-                if (nextArg.equals("-h")) {
+                if(nextArg.equals("-h")) {
                     whichArg++;
                     envHome = CmdUtil.getArg(argv, whichArg);
-                } else if (nextArg.equals("-a")) {
+                }
+                else if(nextArg.equals("-a")) {
                     whichArg++;
                     String action = CmdUtil.getArg(argv, whichArg);
-                    if (action.equalsIgnoreCase("batchClean")) {
+                    if(action.equalsIgnoreCase("batchClean")) {
                         doAction = BATCH_CLEAN;
-                    } else if (action.equalsIgnoreCase("compress")) {
+                    }
+                    else if(action.equalsIgnoreCase("compress")) {
                         doAction = COMPRESS;
-                    } else if (action.equalsIgnoreCase("checkpoint")) {
+                    }
+                    else if(action.equalsIgnoreCase("checkpoint")) {
                         doAction = CHECKPOINT;
-                    } else if (action.equalsIgnoreCase("evict")) {
+                    }
+                    else if(action.equalsIgnoreCase("evict")) {
                         doAction = EVICT;
-                    } else if (action.equalsIgnoreCase("removedb")) {
+                    }
+                    else if(action.equalsIgnoreCase("removedb")) {
                         doAction = REMOVEDB;
-                    } else if (action.equalsIgnoreCase("removedbAndClean")) {
+                    }
+                    else if(action.equalsIgnoreCase("removedbAndClean")) {
                         doAction = REMOVEDB_AND_CLEAN;
-                    } else if (action.equalsIgnoreCase("activateCleaner")) {
+                    }
+                    else if(action.equalsIgnoreCase("activateCleaner")) {
                         doAction = ACTIVATE_CLEANER_THREADS;
-                    } else if (action.equalsIgnoreCase("verifyUtilization")) {
+                    }
+                    else if(action.equalsIgnoreCase("verifyUtilization")) {
                         doAction = VERIFY_UTILIZATION;
-                    } else {
+                    }
+                    else {
                         usage();
                         System.exit(1);
                     }
-                } else if (nextArg.equals("-ro")) {
+                }
+                else if(nextArg.equals("-ro")) {
                     readOnly = true;
-                } else if (nextArg.equals("-s")) {
+                }
+                else if(nextArg.equals("-s")) {
                     dbName = argv[++whichArg];
-                } else if (nextArg.equals("-stats")) {
+                }
+                else if(nextArg.equals("-stats")) {
                     printStats = true;
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException
-                        (nextArg + " is not a supported option.");
+                            (nextArg + " is not a supported option.");
                 }
                 whichArg++;
             }
@@ -134,9 +133,9 @@ public class DbRunAction {
             EnvironmentConfig envConfig = new EnvironmentConfig();
 
             /* Don't debug log to the database log. */
-            if (readOnly) {
+            if(readOnly) {
                 envConfig.setConfigParam
-                    (EnvironmentParams.JE_LOGGING_DBLOG.getName(), "false");
+                        (EnvironmentParams.JE_LOGGING_DBLOG.getName(), "false");
 
                 envConfig.setReadOnly(true);
             }
@@ -145,12 +144,12 @@ public class DbRunAction {
              * If evicting, scan the given database first and don't run the
              * background evictor.
              */
-            if (doAction == EVICT) {
+            if(doAction == EVICT) {
                 envConfig.setConfigParam
-                    (EnvironmentParams.ENV_RUN_EVICTOR.getName(), "false");
+                        (EnvironmentParams.ENV_RUN_EVICTOR.getName(), "false");
                 envConfig.setConfigParam
-                    (EnvironmentParams.EVICTOR_CRITICAL_PERCENTAGE.getName(),
-                     "1000");
+                        (EnvironmentParams.EVICTOR_CRITICAL_PERCENTAGE.getName(),
+                                "1000");
             }
 
             /*
@@ -158,73 +157,73 @@ public class DbRunAction {
              * done by these threads is aborted when the environment is closed,
              * which can result in incomplete log cleaning.
              */
-            if (doAction == BATCH_CLEAN) {
+            if(doAction == BATCH_CLEAN) {
                 envConfig.setConfigParam
-                    (EnvironmentParams.ENV_RUN_CLEANER.getName(), "false");
+                        (EnvironmentParams.ENV_RUN_CLEANER.getName(), "false");
             }
 
             recoveryStart = System.currentTimeMillis();
 
             Environment env =
-                new Environment(new File(envHome), envConfig);
+                    new Environment(new File(envHome), envConfig);
 
             CheckpointConfig forceConfig = new CheckpointConfig();
             forceConfig.setForce(true);
 
             Thread statsPrinter = null;
-            if (printStats) {
+            if(printStats) {
                 statsPrinter = new StatsPrinter(env);
                 statsPrinter.start();
             }
-            
+
             boolean promptForShutdown = false;
             actionStart = System.currentTimeMillis();
             switch(doAction) {
-            case BATCH_CLEAN:
+                case BATCH_CLEAN:
                 /* Since this is batch cleaning, repeat until no progress. */
-                while (true) {
-                    int nFiles = env.cleanLog();
-                    System.out.println("Files cleaned: " + nFiles);
-                    if (nFiles == 0) {
-                        break;
+                    while(true) {
+                        int nFiles = env.cleanLog();
+                        System.out.println("Files cleaned: " + nFiles);
+                        if(nFiles == 0) {
+                            break;
+                        }
                     }
-                }
-                env.checkpoint(forceConfig);
-                break;
-            case COMPRESS:
-                env.compress();
-                break;
-            case CHECKPOINT:
-                env.checkpoint(forceConfig);
-                break;
-            case EVICT:
-                preload(env, dbName);
-                break;
-            case REMOVEDB:
-                removeAndClean(env, dbName, false);
-                break;
-            case REMOVEDB_AND_CLEAN:
-                removeAndClean(env, dbName, true);
-                break;
-            case ACTIVATE_CLEANER_THREADS:
-                EnvironmentImpl envImpl =
-                    DbInternal.getNonNullEnvImpl(env);
-                envImpl.getCleaner().wakeupActivate();
-                promptForShutdown = true;
-                break;
-            case VERIFY_UTILIZATION:
-                EnvironmentImpl envImpl2 =
-                    DbInternal.getNonNullEnvImpl(env);
-                VerifyUtils. verifyUtilization
-                    (envImpl2,
-                     true,  // expectAccurateObsoleteLNCount
-                     true,  // expectAccurateObsoleteLNSize
-                     true); // expectAccurateDbUtilization
-                break;
+                    env.checkpoint(forceConfig);
+                    break;
+                case COMPRESS:
+                    env.compress();
+                    break;
+                case CHECKPOINT:
+                    env.checkpoint(forceConfig);
+                    break;
+                case EVICT:
+                    preload(env, dbName);
+                    break;
+                case REMOVEDB:
+                    removeAndClean(env, dbName, false);
+                    break;
+                case REMOVEDB_AND_CLEAN:
+                    removeAndClean(env, dbName, true);
+                    break;
+                case ACTIVATE_CLEANER_THREADS:
+                    EnvironmentImpl envImpl =
+                            DbInternal.getNonNullEnvImpl(env);
+                    envImpl.getCleaner().wakeupActivate();
+                    promptForShutdown = true;
+                    break;
+                case VERIFY_UTILIZATION:
+                    EnvironmentImpl envImpl2 =
+                            DbInternal.getNonNullEnvImpl(env);
+                    VerifyUtils.verifyUtilization
+                            (envImpl2,
+                                    true,  // expectAccurateObsoleteLNCount
+                                    true,  // expectAccurateObsoleteLNSize
+                                    true); // expectAccurateDbUtilization
+                    break;
             }
             actionEnd = System.currentTimeMillis();
 
-            if (promptForShutdown) {
+            if(promptForShutdown) {
 
                 /*
                  * If the requested action is a daemon driven one, we don't
@@ -233,12 +232,12 @@ public class DbRunAction {
                  */
                 waitForShutdown();
             }
-            if (statsPrinter != null) {
+            if(statsPrinter != null) {
                 statsPrinter.interrupt();
                 statsPrinter.join();
             }
             env.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
             usage();
@@ -249,24 +248,24 @@ public class DbRunAction {
 
             long recoveryDuration = actionStart - recoveryStart;
             System.out.println("\nrecovery time = " +
-                               f.format(recoveryDuration) +
-                               " millis " +
-                               f.format((double)recoveryDuration/60000) +
-                               " minutes");
+                    f.format(recoveryDuration) +
+                    " millis " +
+                    f.format((double) recoveryDuration / 60000) +
+                    " minutes");
 
             long actionDuration = actionEnd - actionStart;
             System.out.println("action time = " +
-                               f.format(actionDuration) +
-                               " millis " +
-                               f.format(actionDuration/60000) +
-                               " minutes");
+                    f.format(actionDuration) +
+                    " millis " +
+                    f.format(actionDuration / 60000) +
+                    " minutes");
         }
     }
 
     private static void removeAndClean(Environment env,
                                        String name,
                                        boolean doCleaning)
-        throws Exception {
+            throws Exception {
 
         long a, c, d, e, f;
 
@@ -279,8 +278,8 @@ public class DbRunAction {
         c = System.currentTimeMillis();
 
         int cleanedCount = 0;
-        if (doCleaning) {
-            while (env.cleanLog() > 0) {
+        if(doCleaning) {
+            while(env.cleanLog() > 0) {
                 cleanedCount++;
             }
         }
@@ -289,24 +288,24 @@ public class DbRunAction {
         System.out.println("cleanedCount=" + cleanedCount);
         e = 0;
         f = 0;
-        if (cleanedCount > 0) {
+        if(cleanedCount > 0) {
             e = System.currentTimeMillis();
             env.checkpoint(force);
             f = System.currentTimeMillis();
         }
 
-        System.out.println("Remove of " + name  +
-                           " remove: " + getSecs(a, c) +
-                           " clean: " + getSecs(c, d) +
-                           " checkpoint: " + getSecs(e, f));
+        System.out.println("Remove of " + name +
+                " remove: " + getSecs(a, c) +
+                " clean: " + getSecs(c, d) +
+                " checkpoint: " + getSecs(e, f));
     }
 
     private static String getSecs(long start, long end) {
-        return (end-start) / 1000 + " secs";
+        return (end - start) / 1000 + " secs";
     }
 
     private static void preload(Environment env, String dbName)
-        throws Exception {
+            throws Exception {
 
         System.out.println("Preload starting");
         Database db = env.openDatabase(null, dbName, null);
@@ -315,10 +314,10 @@ public class DbRunAction {
             DatabaseEntry key = new DatabaseEntry();
             DatabaseEntry data = new DatabaseEntry();
             int count = 0;
-            while (cursor.getNext(key, data, LockMode.DEFAULT) ==
-                   OperationStatus.SUCCESS) {
+            while(cursor.getNext(key, data, LockMode.DEFAULT) ==
+                    OperationStatus.SUCCESS) {
                 count++;
-                if ((count % 50000) == 0) {
+                if((count % 50000) == 0) {
                     System.out.println(count + "...");
                 }
             }
@@ -331,13 +330,13 @@ public class DbRunAction {
 
     @SuppressWarnings("unused")
     private static void doEvict(Environment env)
-        throws DatabaseException {
+            throws DatabaseException {
             
         /* Push the cache size down by half to force eviction. */
         EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
         long cacheUsage = envImpl.getMemoryBudget().getCacheMemoryUsage();
         EnvironmentMutableConfig c = new EnvironmentMutableConfig();
-        c.setCacheSize(cacheUsage/2);
+        c.setCacheSize(cacheUsage / 2);
         env.setMutableConfig(c);
 
         long start = System.currentTimeMillis();
@@ -346,26 +345,39 @@ public class DbRunAction {
 
         DecimalFormat f = new DecimalFormat();
         f.setMaximumFractionDigits(2);
-        System.out.println("evict time=" + f.format(end-start));
+        System.out.println("evict time=" + f.format(end - start));
     }
 
     private static void waitForShutdown()
-        throws IOException {
+            throws IOException {
 
         System.out.println
-            ("Wait for daemon activity to run. When ready to stop, type (y)");
+                ("Wait for daemon activity to run. When ready to stop, type (y)");
         BufferedReader reader =
-            new BufferedReader(new InputStreamReader(System.in));
+                new BufferedReader(new InputStreamReader(System.in));
         do {
             String val = reader.readLine();
-            if (val != null &&
-                (val.equalsIgnoreCase("y") ||
-                 val.equalsIgnoreCase("yes"))) {
+            if(val != null &&
+                    (val.equalsIgnoreCase("y") ||
+                            val.equalsIgnoreCase("yes"))) {
                 break;
-            } else {
+            }
+            else {
                 System.out.println("Shutdown? (y)");
             }
-        } while (true);
+        } while(true);
+    }
+
+    private static void usage() {
+        System.out.println("Usage: \n " +
+                CmdUtil.getJavaCommand(DbRunAction.class));
+        System.out.println("  -h <environment home> ");
+        System.out.println("  -a <batchClean|compress|evict|checkpoint|" +
+                "removeDb|removeDbAndClean|activateCleaner|" +
+                "verifyUtilization>");
+        System.out.println("  -ro (read-only - defaults to read-write)");
+        System.out.println("  -s <dbName> (for removeDb)");
+        System.out.println("  -stats (print every 30 seconds)");
     }
 
     private static class StatsPrinter extends Thread {
@@ -382,32 +394,20 @@ public class DbRunAction {
             StatsConfig clearConfig = new StatsConfig();
             clearConfig.setClear(true);
 
-            while (true) {
+            while(true) {
                 try {
-                    synchronized (this) {
+                    synchronized(this) {
                         wait(30 * 1000);
                     }
                     EnvironmentStats stats = env.getStats(clearConfig);
                     System.out.println("\n" + stats + "\n");
-                } catch (DatabaseException e) {
+                } catch(DatabaseException e) {
                     e.printStackTrace();
                     break;
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
                     break;
                 }
             }
         }
-    }
-
-    private static void usage() {
-        System.out.println("Usage: \n " +
-                           CmdUtil.getJavaCommand(DbRunAction.class));
-        System.out.println("  -h <environment home> ");
-        System.out.println("  -a <batchClean|compress|evict|checkpoint|" +
-                           "removeDb|removeDbAndClean|activateCleaner|" +
-                           "verifyUtilization>");
-        System.out.println("  -ro (read-only - defaults to read-write)");
-        System.out.println("  -s <dbName> (for removeDb)");
-        System.out.println("  -stats (print every 30 seconds)");
     }
 }

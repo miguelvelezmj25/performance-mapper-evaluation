@@ -19,14 +19,13 @@ package berkeley.com.sleepycat.je.tree;
  */
 public class NodeNotEmptyException extends Exception {
 
-    private static final long serialVersionUID = 933349511L;
-
     /*
      * Throw this static instance, in order to reduce the cost of
      * fill in the stack trace.
      */
     public static final NodeNotEmptyException NODE_NOT_EMPTY =
-        new NodeNotEmptyException();
+            new NodeNotEmptyException();
+    private static final long serialVersionUID = 933349511L;
 
     /* Make the constructor public for serializability testing. */
     public NodeNotEmptyException() {

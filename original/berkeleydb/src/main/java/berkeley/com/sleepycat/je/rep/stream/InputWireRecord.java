@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryHeader;
@@ -23,11 +21,13 @@ import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+
 /**
  * Format for messages received at across the wire for replication. Instead of
  * sending a direct copy of the log entry as it is stored on the JE log files
  * (LogEntryHeader + LogEntry), select parts of the header are sent.
- *
+ * <p>
  * An InputWireRecord de-serializes the logEntry from the message bytes and
  * releases any claim on the backing ByteBuffer.
  */
@@ -38,20 +38,41 @@ public class InputWireRecord extends WireRecord {
     /**
      * Make a InputWireRecord from an incoming replication message buffer for
      * applying at a replica.
+     *
      * @throws DatabaseException
      */
     InputWireRecord(final EnvironmentImpl envImpl,
                     final ByteBuffer msgBuffer,
                     final BaseProtocol protocol)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(createLogEntryHeader(msgBuffer, protocol));
 
         logEntry = instantiateEntry(envImpl, msgBuffer);
     }
 
+    /**
+     * Unit test support.
+     *
+     * @throws DatabaseException
+     */
+    InputWireRecord(final EnvironmentImpl envImpl,
+                    final byte entryType,
+                    final int entryVersion,
+                    final int itemSize,
+                    final VLSN vlsn,
+                    final ByteBuffer entryBuffer)
+            throws DatabaseException {
+
+        super(new LogEntryHeader(entryType, entryVersion, itemSize, vlsn));
+        logEntry = LogEntryType.findType(header.getType()).
+                getNewLogEntry();
+        logEntry.readEntry(envImpl, header, entryBuffer);
+
+    }
+
     private static LogEntryHeader createLogEntryHeader(
-        final ByteBuffer msgBuffer, final BaseProtocol protocol) {
+            final ByteBuffer msgBuffer, final BaseProtocol protocol) {
 
         final byte entryType = msgBuffer.get();
         int entryVersion = LogUtils.readInt(msgBuffer);
@@ -62,31 +83,12 @@ public class InputWireRecord extends WireRecord {
          * Check to see if we need to fix the entry's log version to work
          * around [#25222].
          */
-        if ((entryVersion > LogEntryType.LOG_VERSION_EXPIRE_INFO)
-            && protocol.getFixLogVersion12Entries()) {
+        if((entryVersion > LogEntryType.LOG_VERSION_EXPIRE_INFO)
+                && protocol.getFixLogVersion12Entries()) {
             entryVersion = LogEntryType.LOG_VERSION_EXPIRE_INFO;
         }
 
         return new LogEntryHeader(entryType, entryVersion, itemSize, vlsn);
-    }
-
-    /**
-     * Unit test support.
-     * @throws DatabaseException
-     */
-    InputWireRecord(final EnvironmentImpl envImpl,
-                    final byte entryType,
-                    final int entryVersion,
-                    final int itemSize,
-                    final VLSN vlsn,
-                    final ByteBuffer entryBuffer)
-        throws DatabaseException {
-
-        super(new LogEntryHeader(entryType, entryVersion, itemSize, vlsn));
-        logEntry = LogEntryType.findType(header.getType()).
-            getNewLogEntry();
-        logEntry.readEntry(envImpl, header, entryBuffer);
-
     }
 
     public VLSN getVLSN() {

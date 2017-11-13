@@ -13,76 +13,12 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import static berkeley.com.sleepycat.je.log.LogEntryType.LOG_NAMELN_TRANSACTIONAL;
-import static berkeley.com.sleepycat.je.log.LogEntryType.LOG_TXN_ABORT;
-import static berkeley.com.sleepycat.je.log.LogEntryType.LOG_TXN_COMMIT;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.LATEST_COMMIT_LAG_MS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.MAX_COMMIT_PROCESSING_NANOS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.MIN_COMMIT_PROCESSING_NANOS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_ABORTS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_ACKS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_NO_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_COMMIT_WRITE_NO_SYNCS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_ELAPSED_TXN_TIME;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMITS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_MAX_EXCEEDED;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_TIMEOUTS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_GROUP_COMMIT_TXNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_LNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_MESSAGE_QUEUE_OVERFLOWS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.N_NAME_LNS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.TOTAL_COMMIT_LAG_MS;
-import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.TOTAL_COMMIT_PROCESSING_NANOS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DatabaseNotFoundException;
-import berkeley.com.sleepycat.je.DbInternal;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.Durability.SyncPolicy;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationResult;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.TransactionConfig;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.dbi.DbTree.TruncateDbResult;
-import berkeley.com.sleepycat.je.dbi.DbType;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.PutMode;
-import berkeley.com.sleepycat.je.dbi.SearchMode;
-import berkeley.com.sleepycat.je.dbi.TriggerManager;
-import berkeley.com.sleepycat.je.log.DbOpReplicationContext;
-import berkeley.com.sleepycat.je.log.FileManager;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.LogManager;
-import berkeley.com.sleepycat.je.log.ReplicationContext;
-import berkeley.com.sleepycat.je.log.entry.DbOperationType;
-import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
-import berkeley.com.sleepycat.je.log.entry.LogEntry;
-import berkeley.com.sleepycat.je.log.entry.NameLNLogEntry;
-import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
+import berkeley.com.sleepycat.je.log.*;
+import berkeley.com.sleepycat.je.log.entry.*;
 import berkeley.com.sleepycat.je.recovery.RecoveryInfo;
 import berkeley.com.sleepycat.je.recovery.RollbackTracker;
 import berkeley.com.sleepycat.je.rep.LogFileRewriteListener;
@@ -100,55 +36,55 @@ import berkeley.com.sleepycat.je.rep.vlsn.VLSNRange;
 import berkeley.com.sleepycat.je.tree.Key;
 import berkeley.com.sleepycat.je.tree.LN;
 import berkeley.com.sleepycat.je.tree.NameLN;
-import berkeley.com.sleepycat.je.txn.RollbackEnd;
-import berkeley.com.sleepycat.je.txn.RollbackStart;
-import berkeley.com.sleepycat.je.txn.Txn;
-import berkeley.com.sleepycat.je.txn.TxnAbort;
-import berkeley.com.sleepycat.je.txn.TxnCommit;
-import berkeley.com.sleepycat.je.txn.TxnEnd;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongMaxStat;
-import berkeley.com.sleepycat.je.utilint.LongMaxZeroStat;
-import berkeley.com.sleepycat.je.utilint.LongMinStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.NanoTimeUtil;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.txn.*;
+import berkeley.com.sleepycat.je.utilint.*;
 import berkeley.com.sleepycat.utilint.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.log.LogEntryType.*;
+import static berkeley.com.sleepycat.je.rep.impl.node.ReplayStatDefinition.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 /**
  * Replays log records from the replication stream, and manages the
  * transactions for those records.
- *
+ * <p>
  * The Replay module has a lifetime equivalent to the environment owned by
  * this replicator. Its lifetime is longer than the feeder/replica stream.
  * For example, suppose this is nodeX:
- *
+ * <p>
  * t1 - Node X is a replica, node A is master. Replay X is alive
  * t2 - Node X is a replica, node B takes over as master. X's Replay module
- *      is still alive and has the same set of active txns. It doesn't matter
- *      to X that the master has changed.
+ * is still alive and has the same set of active txns. It doesn't matter
+ * to X that the master has changed.
  * t3 - Node X becomes the master. Now its Replay unit is cleared, because
- *      anything managed by the Replay is defunct.
+ * anything managed by the Replay is defunct.
  */
 public class Replay {
 
     /* These are strings for the rollback logging. */
     private static final String RBSTATUS_START =
-        "Started Rollback";
+            "Started Rollback";
     private static final String RBSTATUS_NO_ACTIVE =
-        "No active txns, nothing to rollback";
+            "No active txns, nothing to rollback";
     private static final String RBSTATUS_RANGE_EQUALS =
-        "End of range equals matchpoint, nothing to rollback";
+            "End of range equals matchpoint, nothing to rollback";
     private static final String RBSTATUS_LOG_RBSTART =
-        "Logged RollbackStart entry";
+            "Logged RollbackStart entry";
     private static final String RBSTATUS_MEM_ROLLBACK =
-        "Finished in-memory rollback";
+            "Finished in-memory rollback";
     private static final String RBSTATUS_INVISIBLE =
-        "Finished invisible setting";
+            "Finished invisible setting";
     private static final String RBSTATUS_FINISH =
-        "Finished rollback";
+            "Finished rollback";
 
     /*
      * DatabaseEntry objects reused during replay, to minimize allocation in
@@ -161,16 +97,16 @@ public class Replay {
     private final RepImpl repImpl;
 
     /**
-     *  If a commit replay operation takes more than this threshold, it's
-     *  logged. This information helps determine whether ack timeouts on the
-     *  master are due to a slow replica, or the network.
+     * If a commit replay operation takes more than this threshold, it's
+     * logged. This information helps determine whether ack timeouts on the
+     * master are due to a slow replica, or the network.
      */
     private final long ackTimeoutLogThresholdNs;
 
     /**
      * ActiveTxns is a collection of txn objects used for applying replicated
      * transactions. This collection should be empty if the node is a master.
-     *
+     * <p>
      * Note that there is an interesting relationship between ActiveTxns and
      * the txn collection managed by the environment TxnManager. ActiveTxns is
      * effectively a subset of the set of txns held by the
@@ -181,79 +117,57 @@ public class Replay {
      * a set, not a map) for a given ReplayTxn. Another is to subclass
      * TxnManager so that replicated nodes have their own replayTxn map, just
      * as XATxns have a XID->Txn map.
-     *
+     * <p>
      * Both alternatives seemed too costly in terms of performance or elaborate
      * in terms of code to do for the current function. It seems clearer to
      * make the ActiveTxns a map in the one place that it is currently
      * used. This choice may change over time, and should be reevaluated if the
      * implementation changes.
-     *
+     * <p>
      * The ActiveTxns key is the transaction id. These transactions are closed
      * when:
      * - the replay unit executes a commit received over the replication stream
      * - the replay unit executes an abort received over the replication stream
      * - the replication node realizes that it has just become the new master,
-     *   and was not previously the master.
-     *
+     * and was not previously the master.
+     * <p>
      * Note that the Replay class has a lifetime that is longer than that of a
      * RepNode. This means in particular, that transactions may be left open,
      * and will be resumed when a replica switches from one master to another,
      * creating a new RepNode in the process. Because of that, part of the
      * transaction may be implemented by the rep stream from one master and
      * another part by another.
-     *
+     * <p>
      * The map is synchronized, so simple get/put operations do not require
      * additional synchronization.  However, iteration requires synchronization
      * and copyActiveTxns can be used in most cases.
      */
     private final SimpleTxnMap<ReplayTxn> activeTxns;
-
-    /*
-     * The entry representing the last replayed txn commit. Supports the
-     * replica's notion of consistency.
-     */
-    private volatile TxnInfo lastReplayedTxn = null;
-
-    /*
-     * The last replayed entry of any kind. Supports PointConsistencyPolicy.
-     */
-    private volatile VLSN lastReplayedVLSN = null;
-
-    /*
-     * The last replayed DTVLSN in the stream. It's used to ensure that the
-     * DTVLSNs in the stream are correctly sequenced.
-     */
-    private long lastReplayedDTVLSN = VLSN.NULL_VLSN_SEQUENCE;
-
     /*
      * The sync policy to be used in the absence of an ACK request. The replica
      * in this case has some latitude about how it syncs the commit.
      */
     private final SyncPolicy noAckSyncPolicy = SyncPolicy.NO_SYNC;
-
     /**
-     *  The RepParams.REPLAY_LOGGING_THRESHOLD configured logging threshold.
+     * The RepParams.REPLAY_LOGGING_THRESHOLD configured logging threshold.
      */
     private final long replayLoggingThresholdNs;
+    /**
+     * All writes (predominantly acks) are queued here, so they do not block
+     * the replay thread.
+     */
+    private final BlockingQueue<Long> outputQueue;
+    /**
+     * Holds the state associated with group commits.
+     */
+    private final GroupCommit groupCommit;
+    /* Maintains the statistics associated with stream replay. */
+    private final StatGroup statistics;
 
     /**
      * State that is reinitialized by the reinit() method each time a replay
      * loop is started with a new feeder.
      */
-
-    /**
-     *  All writes (predominantly acks) are queued here, so they do not block
-     *  the replay thread.
-     */
-    private final BlockingQueue<Long> outputQueue;
-
-    /**
-     * Holds the state associated with group commits.
-     */
-    private final GroupCommit groupCommit;
-
-    /* Maintains the statistics associated with stream replay. */
-    private final StatGroup statistics;
     private final LongStat nCommits;
     private final LongStat nCommitAcks;
     private final LongStat nCommitSyncs;
@@ -269,8 +183,22 @@ public class Replay {
     private final LongStat totalCommitProcessingNanos;
     private final LongStat totalCommitLagMs;
     private final LongStat latestCommitLagMs;
-
     private final Logger logger;
+    /*
+     * The entry representing the last replayed txn commit. Supports the
+     * replica's notion of consistency.
+     */
+    private volatile TxnInfo lastReplayedTxn = null;
+    /*
+     * The last replayed entry of any kind. Supports PointConsistencyPolicy.
+     */
+    private volatile VLSN lastReplayedVLSN = null;
+    /*
+     * The last replayed DTVLSN in the stream. It's used to ensure that the
+     * DTVLSNs in the stream are correctly sequenced.
+     */
+    private long lastReplayedDTVLSN = VLSN.NULL_VLSN_SEQUENCE;
+
     public Replay(RepImpl repImpl,
                   @SuppressWarnings("unused") NameIdPair nameIdPair) {
 
@@ -279,16 +207,16 @@ public class Replay {
          * ReplicatedEnvironment.setupRepConfig, but it is checked here anyway
          * as an added sanity check. [#17643]
          */
-        if (repImpl.isReadOnly()) {
+        if(repImpl.isReadOnly()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Replay created with readonly ReplicatedEnvironment");
+                    ("Replay created with readonly ReplicatedEnvironment");
         }
 
         this.repImpl = repImpl;
         final DbConfigManager configManager = repImpl.getConfigManager();
 
         ackTimeoutLogThresholdNs = MILLISECONDS.toNanos(configManager.
-            getDuration(RepParams.REPLICA_ACK_TIMEOUT));
+                getDuration(RepParams.REPLICA_ACK_TIMEOUT));
 
         /**
          * The factor of 2 below is somewhat arbitrary. It should be > 1 X so
@@ -298,7 +226,7 @@ public class Replay {
          * be blocked due to the limited queue length.
          */
         final int outputQueueSize = 2 *
-            configManager.getInt(RepParams.REPLICA_MESSAGE_QUEUE_SIZE);
+                configManager.getInt(RepParams.REPLICA_MESSAGE_QUEUE_SIZE);
         outputQueue = new ArrayBlockingQueue<Long>(outputQueueSize);
 
         /*
@@ -317,7 +245,7 @@ public class Replay {
 
         logger = LoggerUtils.getLogger(getClass());
         statistics = new StatGroup(ReplayStatDefinition.GROUP_NAME,
-                                   ReplayStatDefinition.GROUP_DESC);
+                ReplayStatDefinition.GROUP_DESC);
 
         groupCommit = new GroupCommit(configManager);
 
@@ -326,24 +254,24 @@ public class Replay {
         nCommitSyncs = new LongStat(statistics, N_COMMIT_SYNCS);
         nCommitNoSyncs = new LongStat(statistics, N_COMMIT_NO_SYNCS);
         nCommitWriteNoSyncs =
-            new LongStat(statistics, N_COMMIT_WRITE_NO_SYNCS);
+                new LongStat(statistics, N_COMMIT_WRITE_NO_SYNCS);
         nAborts = new LongStat(statistics, N_ABORTS);
         nNameLNs = new LongStat(statistics, N_NAME_LNS);
         nLNs = new LongStat(statistics, N_LNS);
         nElapsedTxnTime = new LongStat(statistics, N_ELAPSED_TXN_TIME);
         nMessageQueueOverflows =
-            new LongStat(statistics, N_MESSAGE_QUEUE_OVERFLOWS);
+                new LongStat(statistics, N_MESSAGE_QUEUE_OVERFLOWS);
         minCommitProcessingNanos =
-            new LongMinZeroStat(statistics, MIN_COMMIT_PROCESSING_NANOS);
+                new LongMinZeroStat(statistics, MIN_COMMIT_PROCESSING_NANOS);
         maxCommitProcessingNanos =
-            new LongMaxZeroStat(statistics, MAX_COMMIT_PROCESSING_NANOS);
+                new LongMaxZeroStat(statistics, MAX_COMMIT_PROCESSING_NANOS);
         totalCommitProcessingNanos =
-            new LongStat(statistics, TOTAL_COMMIT_PROCESSING_NANOS);
+                new LongStat(statistics, TOTAL_COMMIT_PROCESSING_NANOS);
         totalCommitLagMs = new LongStat(statistics, TOTAL_COMMIT_LAG_MS);
         latestCommitLagMs = new LongStat(statistics, LATEST_COMMIT_LAG_MS);
 
         replayLoggingThresholdNs = MILLISECONDS.toNanos(configManager.
-           getDuration(RepParams.REPLAY_LOGGING_THRESHOLD));
+                getDuration(RepParams.REPLAY_LOGGING_THRESHOLD));
     }
 
     public BlockingQueue<Long> getOutputQueue() {
@@ -366,7 +294,7 @@ public class Replay {
      * the environment is read/write or read/only.
      */
     public void preRecoveryCheckpointInit(RecoveryInfo recoveryInfo) {
-        for (Txn txn : recoveryInfo.replayTxns.values()) {
+        for(Txn txn : recoveryInfo.replayTxns.values()) {
 
             /*
              * ReplayTxns need to know about their owning activeTxn map,
@@ -396,20 +324,20 @@ public class Replay {
      * resolved by the abort record issued by said new master.
      */
     public void abortOldTxns()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final int masterNodeId = repImpl.getNodeId();
-        for (ReplayTxn replayTxn : copyActiveTxns().values()) {
+        for(ReplayTxn replayTxn : copyActiveTxns().values()) {
             /*
              * Use NULL for the DTVLSN since it's being written as the MASTER
              * despite being a ReplayTxn; it will be corrected when it's
              * written to the log.
              */
             replayTxn.abort(ReplicationContext.MASTER, masterNodeId,
-                            VLSN.NULL_VLSN_SEQUENCE);
+                    VLSN.NULL_VLSN_SEQUENCE);
         }
         assert activeTxns.isEmpty() : "Unexpected txns in activeTxns = " +
-            activeTxns;
+                activeTxns;
     }
 
     private void updateCommitStats(final boolean needsAck,
@@ -421,30 +349,33 @@ public class Replay {
         final long now = System.nanoTime();
         final long commitNanos = now - startTimeNanos;
 
-        if (commitNanos > ackTimeoutLogThresholdNs &&
-            logger.isLoggable(Level.INFO)) {
+        if(commitNanos > ackTimeoutLogThresholdNs &&
+                logger.isLoggable(Level.INFO)) {
             LoggerUtils.info
-                (logger, repImpl,
-                 "Replay commit time: " + (commitNanos / 1000000) +
-                 " ms exceeded log threshold: " +
-                 (ackTimeoutLogThresholdNs / 1000000));
+                    (logger, repImpl,
+                            "Replay commit time: " + (commitNanos / 1000000) +
+                                    " ms exceeded log threshold: " +
+                                    (ackTimeoutLogThresholdNs / 1000000));
         }
 
         nCommits.increment();
 
-        if (needsAck) {
+        if(needsAck) {
             nCommitAcks.increment();
         }
 
-        if (syncPolicy == SyncPolicy.SYNC) {
+        if(syncPolicy == SyncPolicy.SYNC) {
             nCommitSyncs.increment();
-        } else if (syncPolicy == SyncPolicy.NO_SYNC) {
+        }
+        else if(syncPolicy == SyncPolicy.NO_SYNC) {
             nCommitNoSyncs.increment();
-        } else if (syncPolicy == SyncPolicy.WRITE_NO_SYNC) {
+        }
+        else if(syncPolicy == SyncPolicy.WRITE_NO_SYNC) {
             nCommitWriteNoSyncs.increment();
-        } else {
+        }
+        else {
             throw EnvironmentFailureException.unexpectedState
-                ("Unknown sync policy: " + syncPolicy);
+                    ("Unknown sync policy: " + syncPolicy);
         }
 
         totalCommitProcessingNanos.add(commitNanos);
@@ -467,10 +398,10 @@ public class Replay {
      */
     public void replayEntry(long startNs,
                             Protocol.Entry entry)
-        throws DatabaseException,
-               IOException,
-               InterruptedException,
-               MasterSyncException {
+            throws DatabaseException,
+            IOException,
+            InterruptedException,
+            MasterSyncException {
 
         final InputWireRecord wireRecord = entry.getWireRecord();
         final LogEntry logEntry = wireRecord.getLogEntry();
@@ -479,16 +410,16 @@ public class Replay {
          * Sanity check that the replication stream is in sequence. We want to
          * forestall any possible corruption from replaying invalid entries.
          */
-        if (!wireRecord.getVLSN().follows(lastReplayedVLSN)) {
+        if(!wireRecord.getVLSN().follows(lastReplayedVLSN)) {
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.UNEXPECTED_STATE,
-                 "Rep stream not sequential. Current VLSN: " +
-                 lastReplayedVLSN +
-                 " next log entry VLSN: " + wireRecord.getVLSN());
+                    (repImpl,
+                            EnvironmentFailureReason.UNEXPECTED_STATE,
+                            "Rep stream not sequential. Current VLSN: " +
+                                    lastReplayedVLSN +
+                                    " next log entry VLSN: " + wireRecord.getVLSN());
         }
 
-        if (logger.isLoggable(Level.FINEST)) {
+        if(logger.isLoggable(Level.FINEST)) {
             LoggerUtils.finest(logger, repImpl, "Replaying " + wireRecord);
         }
 
@@ -501,23 +432,23 @@ public class Replay {
         try {
             final long txnId = repTxn.getId();
 
-            if (LOG_TXN_COMMIT.equalsType(entryType)) {
+            if(LOG_TXN_COMMIT.equalsType(entryType)) {
                 Protocol.Commit commitEntry = (Protocol.Commit) entry;
 
                 final boolean needsAck = commitEntry.getNeedsAck();
                 final SyncPolicy txnSyncPolicy =
-                    commitEntry.getReplicaSyncPolicy();
+                        commitEntry.getReplicaSyncPolicy();
                 final SyncPolicy implSyncPolicy =
-                    needsAck ?
-                    groupCommit.getImplSyncPolicy(txnSyncPolicy) :
-                    noAckSyncPolicy;
+                        needsAck ?
+                                groupCommit.getImplSyncPolicy(txnSyncPolicy) :
+                                noAckSyncPolicy;
 
                 logReplay(repTxn, needsAck, implSyncPolicy);
 
                 final TxnCommit commit = (TxnCommit) logEntry.getMainItem();
                 final long dtvlsn = updateDTVLSN(commit);
 
-                if (needsAck) {
+                if(needsAck) {
 
                     /*
                      * Only wait if the replica is not lagging and the
@@ -528,25 +459,25 @@ public class Replay {
                 }
 
                 repTxn.commit(implSyncPolicy,
-                              new ReplicationContext(lastReplayedVLSN),
-                              commit.getMasterNodeId(),
-                              dtvlsn);
+                        new ReplicationContext(lastReplayedVLSN),
+                        commit.getMasterNodeId(),
+                        dtvlsn);
 
                 final long masterCommitTimeMs = commit.getTime().getTime();
                 lastReplayedTxn = new TxnInfo(lastReplayedVLSN,
-                                              masterCommitTimeMs);
+                        masterCommitTimeMs);
 
                 updateCommitStats(needsAck, implSyncPolicy, startNs,
-                                  masterCommitTimeMs, repTxn.getEndTime());
+                        masterCommitTimeMs, repTxn.getEndTime());
 
                 /* Respond to the feeder. */
-                if (needsAck) {
+                if(needsAck) {
                     /*
                      * Need an ack, either buffer it, for sync group commit, or
                      * queue it.
                      */
-                    if (!groupCommit.bufferAck(startNs, repTxn,
-                                               txnSyncPolicy)) {
+                    if(!groupCommit.bufferAck(startNs, repTxn,
+                            txnSyncPolicy)) {
                         queueAck(txnId);
                     }
                 }
@@ -555,32 +486,33 @@ public class Replay {
                  * The group refresh and recalculation can be expensive, since
                  * it may require a database read. Do it after the ack.
                  */
-                if (repTxn.getRepGroupDbChange() && canRefreshGroup(repTxn)) {
+                if(repTxn.getRepGroupDbChange() && canRefreshGroup(repTxn)) {
                     repImpl.getRepNode().refreshCachedGroup();
                     repImpl.getRepNode().recalculateGlobalCBVLSN();
                 }
 
                 nElapsedTxnTime.add(repTxn.elapsedTime());
 
-            } else if (LOG_TXN_ABORT.equalsType(entryType)) {
+            }
+            else if(LOG_TXN_ABORT.equalsType(entryType)) {
 
                 nAborts.increment();
                 final TxnAbort abort = (TxnAbort) logEntry.getMainItem();
                 final ReplicationContext abortContext =
-                    new ReplicationContext(wireRecord.getVLSN());
-                if (logger.isLoggable(Level.FINEST)) {
+                        new ReplicationContext(wireRecord.getVLSN());
+                if(logger.isLoggable(Level.FINEST)) {
                     LoggerUtils.finest(logger, repImpl,
-                                       "abort called for " + txnId +
-                                       " masterId=" +
-                                       abort.getMasterNodeId() +
-                                       " repContext=" + abortContext);
+                            "abort called for " + txnId +
+                                    " masterId=" +
+                                    abort.getMasterNodeId() +
+                                    " repContext=" + abortContext);
                 }
 
                 long dtvlsn = updateDTVLSN(abort);
                 repTxn.abort(abortContext, abort.getMasterNodeId(), dtvlsn);
                 lastReplayedTxn = new TxnInfo(lastReplayedVLSN,
-                                              abort.getTime().getTime());
-                if (repTxn.getRepGroupDbChange() && canRefreshGroup(repTxn)) {
+                        abort.getTime().getTime());
+                if(repTxn.getRepGroupDbChange() && canRefreshGroup(repTxn)) {
 
                     /*
                      * Refresh is the safe thing to do on an abort, since a
@@ -591,13 +523,15 @@ public class Replay {
                 }
                 nElapsedTxnTime.add(repTxn.elapsedTime());
 
-            } else if (LOG_NAMELN_TRANSACTIONAL.equalsType(entryType)) {
+            }
+            else if(LOG_NAMELN_TRANSACTIONAL.equalsType(entryType)) {
 
                 repImpl.getRepNode().getReplica().clearDbTreeCache();
                 nNameLNs.increment();
                 applyNameLN(repTxn, wireRecord);
 
-            } else {
+            }
+            else {
                 nLNs.increment();
                 /* A data operation. */
                 assert wireRecord.getLogEntry() instanceof LNLogEntry;
@@ -607,20 +541,20 @@ public class Replay {
             /* Remember the last VLSN applied by this txn. */
             repTxn.setLastAppliedVLSN(lastReplayedVLSN);
 
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.addErrorMessage("Problem seen replaying entry " + wireRecord);
             throw e;
         } finally {
             final long elapsedNs = System.nanoTime() - startNs;
-            if (elapsedNs > replayLoggingThresholdNs) {
+            if(elapsedNs > replayLoggingThresholdNs) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Replay time for entry type:" +
-                                 LogEntryType.findType(entryType) + " " +
-                                 NANOSECONDS.toMillis(elapsedNs) + "ms " +
-                                 "exceeded threshold:" +
-                                 NANOSECONDS.
-                                     toMillis(replayLoggingThresholdNs) +
-                                 "ms");
+                        "Replay time for entry type:" +
+                                LogEntryType.findType(entryType) + " " +
+                                NANOSECONDS.toMillis(elapsedNs) + "ms " +
+                                "exceeded threshold:" +
+                                NANOSECONDS.
+                                        toMillis(replayLoggingThresholdNs) +
+                                "ms");
             }
         }
     }
@@ -628,12 +562,12 @@ public class Replay {
     /**
      * Update the replica's in-memory DTVLSN using the value in the
      * commit/abort entry.
-     *
+     * <p>
      * In the normal course of events, DTVLSNs should not decrease. However,
      * there is just one exception: if the rep stream transitions from a post
      * to a pre-dtvlsn stream, it will transition from a positive to the
      * UNINITIALIZED_VLSN_SEQUENCE.
-     *
+     * <p>
      * A transition from a pre to a post-dtvlsn transition (from zero to some
      * positive value), observes the "DTVLSNs should not decrease" rule
      * automatically.
@@ -644,16 +578,16 @@ public class Replay {
     private long updateDTVLSN(final TxnEnd txnEnd) {
         final long txnDTVLSN = txnEnd.getDTVLSN();
 
-        if (txnDTVLSN == VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
+        if(txnDTVLSN == VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
             /*
              * A pre DTVLSN format entry, simply set it as the in-memory DTVLSN
              */
             final long prevDTVLSN = repImpl.getRepNode().setDTVLSN(txnDTVLSN);
-            if (prevDTVLSN != VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
+            if(prevDTVLSN != VLSN.UNINITIALIZED_VLSN_SEQUENCE) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Transitioned to pre DTVLSN stream." +
-                                 " DTVLSN:" + prevDTVLSN +
-                                 " at VLSN:" + lastReplayedVLSN);
+                        "Transitioned to pre DTVLSN stream." +
+                                " DTVLSN:" + prevDTVLSN +
+                                " at VLSN:" + lastReplayedVLSN);
 
             }
             lastReplayedDTVLSN = txnDTVLSN;
@@ -661,20 +595,20 @@ public class Replay {
         }
 
         /* Sanity check. */
-        if (txnDTVLSN < lastReplayedDTVLSN) {
+        if(txnDTVLSN < lastReplayedDTVLSN) {
             String msg = "DTVLSNs must be in ascending order in the stream. " +
-                " prev DTVLSN:" + lastReplayedDTVLSN +
-                " next DTVLSN:" + txnDTVLSN + " at VLSN: " +
-                lastReplayedVLSN.getSequence();
-          throw EnvironmentFailureException.unexpectedState(repImpl, msg);
+                    " prev DTVLSN:" + lastReplayedDTVLSN +
+                    " next DTVLSN:" + txnDTVLSN + " at VLSN: " +
+                    lastReplayedVLSN.getSequence();
+            throw EnvironmentFailureException.unexpectedState(repImpl, msg);
         }
 
-        if ((lastReplayedDTVLSN == VLSN.UNINITIALIZED_VLSN_SEQUENCE) &&
-            (txnDTVLSN > 0)) {
+        if((lastReplayedDTVLSN == VLSN.UNINITIALIZED_VLSN_SEQUENCE) &&
+                (txnDTVLSN > 0)) {
             LoggerUtils.info(logger, repImpl,
-                             "Transitioned to post DTVLSN stream." +
-                             " DTVLSN:" + txnDTVLSN +
-                             " at VLSN:" + lastReplayedVLSN);
+                    "Transitioned to post DTVLSN stream." +
+                            " DTVLSN:" + txnDTVLSN +
+                            " at VLSN:" + lastReplayedVLSN);
         }
 
         lastReplayedDTVLSN = txnDTVLSN;
@@ -689,7 +623,7 @@ public class Replay {
     void queueAck(final long txnId) throws IOException {
         try {
             outputQueue.put(txnId);
-        } catch (InterruptedException ie) {
+        } catch(InterruptedException ie) {
             /*
              * Have the higher levels treat it like an IOE and
              * exit the thread.
@@ -705,21 +639,22 @@ public class Replay {
                            boolean needsAck,
                            SyncPolicy syncPolicy) {
 
-        if (!logger.isLoggable(Level.FINE)) {
+        if(!logger.isLoggable(Level.FINE)) {
             return;
         }
 
-        if (needsAck) {
+        if(needsAck) {
             LoggerUtils.fine(logger, repImpl,
-                             "Replay: got commit for txn=" + repTxn.getId() +
-                             ", ack needed, replica sync policy=" +
-                             syncPolicy +
-                             " vlsn=" + lastReplayedVLSN);
-        } else {
+                    "Replay: got commit for txn=" + repTxn.getId() +
+                            ", ack needed, replica sync policy=" +
+                            syncPolicy +
+                            " vlsn=" + lastReplayedVLSN);
+        }
+        else {
             LoggerUtils.fine(logger, repImpl,
-                             "Replay: got commit for txn=" + repTxn.getId() +
-                             " ack not needed" +
-                             " vlsn=" + lastReplayedVLSN);
+                    "Replay: got commit for txn=" + repTxn.getId() +
+                            " ack not needed" +
+                            " vlsn=" + lastReplayedVLSN);
         }
     }
 
@@ -730,7 +665,6 @@ public class Replay {
      * refresh operation.
      *
      * @param txn the current txn being committed or aborted
-     *
      * @return true if there are no open transactions that hold locks on the
      * membership database.
      */
@@ -740,13 +674,13 @@ public class Replay {
          * Use synchronized rather than copyActiveTxns, since this is called
          * during replay and there is no nested locking to worry about.
          */
-        synchronized (activeTxns) {
+        synchronized(activeTxns) {
             // TODO: very inefficient
-            for (ReplayTxn atxn : activeTxns.getMap().values()) {
-                if (atxn == txn) {
+            for(ReplayTxn atxn : activeTxns.getMap().values()) {
+                if(atxn == txn) {
                     continue;
                 }
-                if (atxn.getRepGroupDbChange()) {
+                if(atxn.getRepGroupDbChange()) {
                     return false;
                 }
             }
@@ -769,7 +703,7 @@ public class Replay {
         repImpl.getTxnManager().updateFromReplay(logEntry.getTransactionId());
 
         /* If it's a database operation, update the database id. */
-        if (logEntry instanceof NameLNLogEntry) {
+        if(logEntry instanceof NameLNLogEntry) {
             NameLNLogEntry nameLogEntry = (NameLNLogEntry) logEntry;
             nameLogEntry.postFetchInit(false /*isDupDb*/);
             NameLN nameLN = (NameLN) nameLogEntry.getLN();
@@ -781,29 +715,29 @@ public class Replay {
      * Obtain a ReplayTxn to represent the incoming operation.
      */
     public ReplayTxn getReplayTxn(long txnId, boolean registerTxnImmediately)
-        throws DatabaseException {
+            throws DatabaseException {
 
         ReplayTxn useTxn = null;
-        synchronized (activeTxns) {
+        synchronized(activeTxns) {
             useTxn = activeTxns.get(txnId);
-            if (useTxn == null) {
+            if(useTxn == null) {
 
                 /*
                  * Durability will be explicitly specified when
                  * ReplayTxn.commit is called, so TransactionConfig.DEFAULT is
                  * fine.
                  */
-                if (registerTxnImmediately) {
+                if(registerTxnImmediately) {
                     useTxn = new ReplayTxn(repImpl, TransactionConfig.DEFAULT,
-                                           txnId, activeTxns, logger);
-                } else {
+                            txnId, activeTxns, logger);
+                }
+                else {
                     useTxn = new ReplayTxn(repImpl, TransactionConfig.DEFAULT,
-                                           txnId, activeTxns, logger) {
-                            @Override
-                            protected
-                            boolean registerImmediately() {
-                                return false;
-                            }
+                            txnId, activeTxns, logger) {
+                        @Override
+                        protected boolean registerImmediately() {
+                            return false;
+                        }
                     };
                 }
             }
@@ -813,7 +747,7 @@ public class Replay {
 
     /**
      * Replays the NameLN.
-     *
+     * <p>
      * Note that the operations: remove, rename and truncate need to establish
      * write locks on the database. Any open handles are closed by this
      * operation by virtue of the ReplayTxn's importunate property.  The
@@ -822,7 +756,7 @@ public class Replay {
      */
     private void applyNameLN(ReplayTxn repTxn,
                              InputWireRecord wireRecord)
-        throws DatabaseException {
+            throws DatabaseException {
 
         NameLNLogEntry nameLNEntry = (NameLNLogEntry) wireRecord.getLogEntry();
         final NameLN nameLN = (NameLN) nameLNEntry.getLN();
@@ -830,35 +764,34 @@ public class Replay {
         String databaseName = StringUtils.fromUTF8(nameLNEntry.getKey());
 
         final DbOpReplicationContext repContext =
-            new DbOpReplicationContext(wireRecord.getVLSN(), nameLNEntry);
+                new DbOpReplicationContext(wireRecord.getVLSN(), nameLNEntry);
 
         DbOperationType opType = repContext.getDbOperationType();
         DatabaseImpl dbImpl = null;
         try {
-            switch (opType) {
-                case CREATE:
-                {
+            switch(opType) {
+                case CREATE: {
                     DatabaseConfig dbConfig =
-                        repContext.getCreateConfig().getReplicaConfig(repImpl);
+                            repContext.getCreateConfig().getReplicaConfig(repImpl);
 
                     dbImpl = repImpl.getDbTree().createReplicaDb
-                      (repTxn, databaseName, dbConfig, nameLN, repContext);
+                            (repTxn, databaseName, dbConfig, nameLN, repContext);
 
                     /*
                      * We rely on the RepGroupDB.DB_ID value, so make sure
                      * it's what we expect for this internal replicated
                      * database.
                      */
-                    if ((dbImpl.getId().getId() == RepGroupDB.DB_ID) &&
-                        !DbType.REP_GROUP.getInternalName().equals
-                        (databaseName)) {
+                    if((dbImpl.getId().getId() == RepGroupDB.DB_ID) &&
+                            !DbType.REP_GROUP.getInternalName().equals
+                                    (databaseName)) {
                         throw EnvironmentFailureException.unexpectedState
-                            ("Database: " +
-                             DbType.REP_GROUP.getInternalName() +
-                             " is associated with id: " +
-                             dbImpl.getId().getId() +
-                             " and not the reserved database id: " +
-                             RepGroupDB.DB_ID);
+                                ("Database: " +
+                                        DbType.REP_GROUP.getInternalName() +
+                                        " is associated with id: " +
+                                        dbImpl.getId().getId() +
+                                        " and not the reserved database id: " +
+                                        RepGroupDB.DB_ID);
                     }
 
                     TriggerManager.runOpenTriggers(repTxn, dbImpl, true);
@@ -869,30 +802,30 @@ public class Replay {
                     dbImpl = repImpl.getDbTree().getDb(nameLN.getId());
                     try {
                         repImpl.getDbTree().removeReplicaDb
-                            (repTxn, databaseName, nameLN.getId(), repContext);
+                                (repTxn, databaseName, nameLN.getId(), repContext);
                         TriggerManager.runRemoveTriggers(repTxn, dbImpl);
-                    } catch (DatabaseNotFoundException e) {
+                    } catch(DatabaseNotFoundException e) {
                         throw EnvironmentFailureException.unexpectedState
-                            ("Database: " + dbImpl.getName() +
-                             " Id: " + nameLN.getId() +
-                             " not found on the Replica.");
+                                ("Database: " + dbImpl.getName() +
+                                        " Id: " + nameLN.getId() +
+                                        " not found on the Replica.");
                     }
                     break;
                 }
 
                 case TRUNCATE: {
                     dbImpl = repImpl.getDbTree().getDb
-                        (repContext.getTruncateOldDbId());
+                            (repContext.getTruncateOldDbId());
                     try {
                         TruncateDbResult result =
-                        repImpl.getDbTree().truncateReplicaDb
-                            (repTxn, databaseName, false, nameLN, repContext);
+                                repImpl.getDbTree().truncateReplicaDb
+                                        (repTxn, databaseName, false, nameLN, repContext);
                         TriggerManager.runTruncateTriggers(repTxn, result.newDb);
-                    } catch (DatabaseNotFoundException e) {
+                    } catch(DatabaseNotFoundException e) {
                         throw EnvironmentFailureException.unexpectedState
-                            ("Database: " + dbImpl.getName() +
-                             " Id: " + nameLN.getId() +
-                             " not found on the Replica.");
+                                ("Database: " + dbImpl.getName() +
+                                        " Id: " + nameLN.getId() +
+                                        " not found on the Replica.");
                     }
 
                     break;
@@ -902,16 +835,16 @@ public class Replay {
                     dbImpl = repImpl.getDbTree().getDb(nameLN.getId());
                     try {
                         dbImpl =
-                        repImpl.getDbTree().renameReplicaDb
-                            (repTxn, dbImpl.getName(), databaseName, nameLN,
-                             repContext);
+                                repImpl.getDbTree().renameReplicaDb
+                                        (repTxn, dbImpl.getName(), databaseName, nameLN,
+                                                repContext);
                         TriggerManager.runRenameTriggers(repTxn, dbImpl,
-                                                         databaseName);
-                    } catch (DatabaseNotFoundException e) {
+                                databaseName);
+                    } catch(DatabaseNotFoundException e) {
                         throw EnvironmentFailureException.unexpectedState
-                            ("Database rename from: " + dbImpl.getName() +
-                             " to " + databaseName +
-                             " failed, name not found on the Replica.");
+                                ("Database rename from: " + dbImpl.getName() +
+                                        " to " + databaseName +
+                                        " failed, name not found on the Replica.");
                     }
                     break;
                 }
@@ -919,17 +852,17 @@ public class Replay {
                 case UPDATE_CONFIG: {
                     /* Get the replicated database configurations. */
                     DatabaseConfig dbConfig =
-                        repContext.getCreateConfig().getReplicaConfig(repImpl);
+                            repContext.getCreateConfig().getReplicaConfig(repImpl);
 
                     /* Update the NameLN and write it to the log. */
                     dbImpl = repImpl.getDbTree().getDb(nameLN.getId());
                     final String dbName = dbImpl.getName();
                     repImpl.getDbTree().updateNameLN
-                        (repTxn, dbName, repContext);
+                            (repTxn, dbName, repContext);
 
                     /* Set the new configurations to DatabaseImpl. */
                     dbImpl.setConfigProperties
-                        (repTxn, dbName, dbConfig, repImpl);
+                            (repTxn, dbName, dbConfig, repImpl);
 
                     repImpl.getDbTree().modifyDbRoot(dbImpl);
 
@@ -938,20 +871,20 @@ public class Replay {
 
                 default:
                     throw EnvironmentFailureException.unexpectedState
-                        ("Illegal database op type of " + opType.toString() +
-                         " from " + wireRecord + " database=" + databaseName);
+                            ("Illegal database op type of " + opType.toString() +
+                                    " from " + wireRecord + " database=" + databaseName);
             }
         } finally {
-            if (dbImpl != null) {
+            if(dbImpl != null) {
                 repImpl.getDbTree().releaseDb(dbImpl);
             }
         }
     }
 
     private void applyLN(
-        final ReplayTxn repTxn,
-        final InputWireRecord wireRecord)
-        throws DatabaseException {
+            final ReplayTxn repTxn,
+            final InputWireRecord wireRecord)
+            throws DatabaseException {
 
         final LNLogEntry<?> lnEntry = (LNLogEntry<?>) wireRecord.getLogEntry();
         final DatabaseId dbId = lnEntry.getDbId();
@@ -960,7 +893,7 @@ public class Replay {
          * If this is a change to the rep group db, remember at commit time,
          * and refresh this node's group metadata.
          */
-        if (dbId.getId() == RepGroupDB.DB_ID) {
+        if(dbId.getId() == RepGroupDB.DB_ID) {
             repTxn.noteRepGroupDbChange();
         }
 
@@ -971,33 +904,33 @@ public class Replay {
          * write operations.
          */
         final DatabaseImpl dbImpl =
-            repImpl.getRepNode().getReplica().getDbCache().get(dbId, repTxn);
+                repImpl.getRepNode().getReplica().getDbCache().get(dbId, repTxn);
 
         lnEntry.postFetchInit(dbImpl);
 
         final ReplicationContext repContext =
-            new ReplicationContext(wireRecord.getVLSN());
+                new ReplicationContext(wireRecord.getVLSN());
 
-        try (final Cursor cursor = DbInternal.makeCursor(
+        try(final Cursor cursor = DbInternal.makeCursor(
                 dbImpl, repTxn, null /*cursorConfig*/)) {
 
             OperationResult result;
             final LN ln = lnEntry.getLN();
 
             /* In a dup DB, do not expect embedded LNs or non-empty data. */
-            if (dbImpl.getSortedDuplicates() &&
-                (lnEntry.isEmbeddedLN() ||
-                 (ln.getData() != null && ln.getData().length > 0))) {
+            if(dbImpl.getSortedDuplicates() &&
+                    (lnEntry.isEmbeddedLN() ||
+                            (ln.getData() != null && ln.getData().length > 0))) {
 
                 throw EnvironmentFailureException.unexpectedState(
-                    dbImpl.getEnv(),
-                    "[#25288] emb=" + lnEntry.isEmbeddedLN() +
-                    " key=" + Key.getNoFormatString(lnEntry.getKey()) +
-                    " data=" + Key.getNoFormatString(ln.getData()) +
-                    " vlsn=" + ln.getVLSNSequence());
+                        dbImpl.getEnv(),
+                        "[#25288] emb=" + lnEntry.isEmbeddedLN() +
+                                " key=" + Key.getNoFormatString(lnEntry.getKey()) +
+                                " data=" + Key.getNoFormatString(ln.getData()) +
+                                " vlsn=" + ln.getVLSNSequence());
             }
 
-            if (ln.isDeleted()) {
+            if(ln.isDeleted()) {
 
                 /*
                  * Perform an exact search by key. Use a partial data entry
@@ -1006,28 +939,29 @@ public class Replay {
                 replayKeyEntry.setData(lnEntry.getKey());
 
                 result = DbInternal.searchForReplay(
-                    cursor, replayKeyEntry, delDataEntry,
-                    LockMode.RMW, SearchMode.SET);
+                        cursor, replayKeyEntry, delDataEntry,
+                        LockMode.RMW, SearchMode.SET);
 
-                if (result != null) {
+                if(result != null) {
                     result = DbInternal.deleteInternal(cursor, repContext);
                 }
-            } else {
+            }
+            else {
                 replayKeyEntry.setData(lnEntry.getKey());
                 replayDataEntry.setData(ln.getData());
 
                 result = DbInternal.putForReplay(
-                    cursor, replayKeyEntry, replayDataEntry, ln,
-                    lnEntry.getExpiration(), lnEntry.isExpirationInHours(),
-                    PutMode.OVERWRITE, repContext);
+                        cursor, replayKeyEntry, replayDataEntry, ln,
+                        lnEntry.getExpiration(), lnEntry.isExpirationInHours(),
+                        PutMode.OVERWRITE, repContext);
             }
 
-            if (result == null) {
+            if(result == null) {
                 throw new EnvironmentFailureException(
-                    repImpl,
-                    EnvironmentFailureReason.LOG_INCOMPLETE,
-                    "Replicated operation could  not be applied. " +
-                    wireRecord);
+                        repImpl,
+                        EnvironmentFailureReason.LOG_INCOMPLETE,
+                        "Replicated operation could  not be applied. " +
+                                wireRecord);
             }
         }
     }
@@ -1035,23 +969,23 @@ public class Replay {
     /**
      * Go through all active txns and rollback up to but not including the log
      * entry represented by the matchpoint VLSN.
-     *
+     * <p>
      * Effectively truncate these rolled back log entries by making them
      * invisible. Flush the log first, to make sure these log entries are out
      * of the log buffers and are on disk, so we can reliably find them through
      * the FileManager.
-     *
+     * <p>
      * Rollback steps are described in
      * https://sleepycat.oracle.com/trac/wiki/Logging#Recoverysteps. In
      * summary,
-     *
+     * <p>
      * 1. Log and fsync a new RollbackStart record
      * 2. Do the rollback in memory. There is no need to explicitly
-     *    log INs made dirty by the rollback operation.
+     * log INs made dirty by the rollback operation.
      * 3. Do invisibility masking by overwriting LNs.
      * 4. Fsync all overwritten log files at this point.
      * 5. Write a RollbackEnd record, for ease of debugging
-     *
+     * <p>
      * Note that application read txns  can continue to run during syncup.
      * Reader txns cannot access records that are being rolled back, because
      * they are in txns that are not committed, i.e, they are write locked.
@@ -1064,14 +998,14 @@ public class Replay {
 
         final Map<Long, ReplayTxn> localActiveTxns = copyActiveTxns();
         try {
-            if (localActiveTxns.size() == 0) {
+            if(localActiveTxns.size() == 0) {
                 /* no live read/write txns, nothing to do. */
                 rollbackStatus = RBSTATUS_NO_ACTIVE;
                 return;
             }
 
             VLSNRange range = repImpl.getVLSNIndex().getRange();
-            if (range.getLast().equals(matchpointVLSN)) {
+            if(range.getLast().equals(matchpointVLSN)) {
                 /* nothing to roll back. */
                 rollbackStatus = RBSTATUS_RANGE_EQUALS;
                 return;
@@ -1101,13 +1035,13 @@ public class Replay {
              */
             LogManager logManager = repImpl.getLogManager();
             LogEntry rollbackStart = SingleItemEntry.create(
-                LogEntryType.LOG_ROLLBACK_START,
-                new RollbackStart(
-                    matchpointVLSN, matchpointLsn, localActiveTxns.keySet()));
+                    LogEntryType.LOG_ROLLBACK_START,
+                    new RollbackStart(
+                            matchpointVLSN, matchpointLsn, localActiveTxns.keySet()));
             long rollbackStartLsn =
-                logManager.logForceFlush(rollbackStart,
-                                         true, // fsyncRequired,
-                                         ReplicationContext.NO_REPLICATE);
+                    logManager.logForceFlush(rollbackStart,
+                            true, // fsyncRequired,
+                            ReplicationContext.NO_REPLICATE);
             rollbackStatus = RBSTATUS_LOG_RBSTART;
 
             /*
@@ -1117,16 +1051,16 @@ public class Replay {
              * earlier that there were log entries after the matchpoint.
              */
             List<Long> rollbackLsns = new ArrayList<Long>();
-            for (ReplayTxn replayTxn : localActiveTxns.values()) {
+            for(ReplayTxn replayTxn : localActiveTxns.values()) {
                 Collection<Long> txnRollbackLsns =
-                    replayTxn.rollback(matchpointLsn);
+                        replayTxn.rollback(matchpointLsn);
 
                 /*
                  * Txns that were entirely rolled back should have been removed
                  * from the activeTxns map.
                  */
                 assert checkRemoved(replayTxn) :
-                    "Should have removed " + replayTxn;
+                        "Should have removed " + replayTxn;
 
                 rollbackLsns.addAll(txnRollbackLsns);
             }
@@ -1142,7 +1076,7 @@ public class Replay {
              * have made it out on their own.
              */
             LogFileRewriteListener listener = repImpl.getLogRewriteListener();
-            if (listener != null) {
+            if(listener != null) {
                 listener.rewriteLogFiles(getFileNames(rollbackLsns));
             }
             RollbackTracker.makeInvisible(repImpl, rollbackLsns);
@@ -1154,11 +1088,11 @@ public class Replay {
              * step of re-making LNs invisible.
              */
             logManager.logForceFlush(
-                SingleItemEntry.create(LogEntryType.LOG_ROLLBACK_END,
-                                       new RollbackEnd(matchpointLsn,
-                                                       rollbackStartLsn)),
-                 true, // fsyncRequired
-                 ReplicationContext.NO_REPLICATE);
+                    SingleItemEntry.create(LogEntryType.LOG_ROLLBACK_END,
+                            new RollbackEnd(matchpointLsn,
+                                    rollbackStartLsn)),
+                    true, // fsyncRequired
+                    ReplicationContext.NO_REPLICATE);
 
             /*
              * Restart the backup service only if all the steps of the
@@ -1172,9 +1106,9 @@ public class Replay {
             /* Reset the lastReplayedVLSN so it's correct when we resume. */
             lastReplayedVLSN = matchpointVLSN;
             LoggerUtils.info(logger, repImpl,
-                             "Rollback to matchpoint " + matchpointVLSN +
-                             " at " + DbLsn.getNoFormatString(matchpointLsn) +
-                             " status=" + rollbackStatus);
+                    "Rollback to matchpoint " + matchpointVLSN +
+                            " at " + DbLsn.getNoFormatString(matchpointLsn) +
+                            " status=" + rollbackStatus);
         }
     }
 
@@ -1183,7 +1117,7 @@ public class Replay {
         StringBuilder sb = new StringBuilder();
         sb.append("matchpointLsn=");
         sb.append(DbLsn.getNoFormatString(matchpointLsn));
-        for (ReplayTxn replayTxn : copyActiveTxns().values()) {
+        for(ReplayTxn replayTxn : copyActiveTxns().values()) {
             sb.append("txn id=").append(replayTxn.getId());
             sb.append(" locks=").append(replayTxn.getWriteLockIds());
             sb.append("lastLogged=");
@@ -1198,18 +1132,18 @@ public class Replay {
         Set<Long> fileNums = new HashSet<Long>();
         Set<File> files = new HashSet<File>();
 
-        for (long lsn : lsns) {
+        for(long lsn : lsns) {
             fileNums.add(DbLsn.getFileNumber(lsn));
         }
-        for (long fileNum : fileNums) {
+        for(long fileNum : fileNums) {
             files.add(new File(FileManager.getFileName(fileNum)));
         }
         return files;
     }
 
     private boolean checkRemoved(ReplayTxn txn) {
-        if (txn.isClosed()) {
-            if (activeTxns.get(txn.getId()) != null) {
+        if(txn.isClosed()) {
+            if(activeTxns.get(txn.getId()) != null) {
                 return false;
             }
         }
@@ -1232,18 +1166,18 @@ public class Replay {
      */
     public void close() {
 
-        for (ReplayTxn replayTxn : copyActiveTxns().values()) {
+        for(ReplayTxn replayTxn : copyActiveTxns().values()) {
             try {
-                if (logger.isLoggable(Level.FINE)) {
+                if(logger.isLoggable(Level.FINE)) {
                     LoggerUtils.fine(logger, repImpl,
-                                     "Unregistering open replay txn: " +
-                                     replayTxn.getId());
+                            "Unregistering open replay txn: " +
+                                    replayTxn.getId());
                 }
                 replayTxn.cleanup();
-            } catch (DatabaseException e) {
+            } catch(DatabaseException e) {
                 LoggerUtils.fine(logger, repImpl,
-                                 "Replay txn: " + replayTxn.getId() +
-                                 " unregistration failed: " + e.getMessage());
+                        "Replay txn: " + replayTxn.getId() +
+                                " unregistration failed: " + e.getMessage());
             }
         }
         assert activeTxns.isEmpty();
@@ -1284,7 +1218,7 @@ public class Replay {
      * @param nowNs the time at the reading of the log entry
      */
     void flushPendingAcks(long nowNs)
-        throws IOException {
+            throws IOException {
 
         groupCommit.flushPendingAcks(nowNs);
     }
@@ -1294,176 +1228,6 @@ public class Replay {
      */
     long getPollIntervalNs(long defaultNs) {
         return groupCommit.getPollIntervalNs(defaultNs);
-    }
-
-    /**
-     * Implements group commit. It's really a substructure of Replay and exists
-     * mainly for modularity reasons.
-     * <p>
-     * Since replay is single threaded, the group commit mechanism works
-     * differently in the replica than in the master. In the replica, SYNC
-     * transactions are converted into NO_SYNC transactions and executed
-     * immediately, but their acknowledgments are delayed until after either
-     * the REPLICA_GROUP_COMMIT_INTERVAL (the max amount the first transaction
-     * in the group is delayed) has expired, or the size of the group (as
-     * specified by REPLICA_MAX_GROUP_COMMIT) has been exceeded.
-     */
-    private class GroupCommit {
-
-        /* Size determines max fsync commits that can be grouped. */
-        private final long pendingCommitAcks[];
-
-        /* Number of entries currently in pendingCommitAcks */
-        private int nPendingAcks;
-
-        /*
-         * If this time limit is reached, the group will be forced to commit.
-         * Invariant: nPendingAcks > 0 ==> limitGroupCommitNs > 0
-         */
-        private long limitGroupCommitNs = 0;
-
-        /* The time interval that an open group is held back. */
-        private final long groupCommitIntervalNs;
-
-        private final LongStat nGroupCommitTimeouts;
-        private final LongStat nGroupCommitMaxExceeded;
-        private final LongStat nGroupCommits;
-        private final LongStat nGroupCommitTxns;
-
-        private GroupCommit(DbConfigManager configManager) {
-            pendingCommitAcks = new long[configManager.
-                getInt(RepParams.REPLICA_MAX_GROUP_COMMIT)];
-
-            nPendingAcks = 0;
-
-            final long groupCommitIntervalMs = configManager.
-                getDuration(RepParams.REPLICA_GROUP_COMMIT_INTERVAL);
-
-            groupCommitIntervalNs =
-                NANOSECONDS.convert(groupCommitIntervalMs, MILLISECONDS);
-            nGroupCommitTimeouts =
-                new LongStat(statistics, N_GROUP_COMMIT_TIMEOUTS);
-
-            nGroupCommitMaxExceeded =
-                new LongStat(statistics, N_GROUP_COMMIT_MAX_EXCEEDED);
-
-            nGroupCommitTxns =
-                new LongStat(statistics, N_GROUP_COMMIT_TXNS);
-
-            nGroupCommits =
-                new LongStat(statistics, N_GROUP_COMMITS);
-        }
-
-        /**
-         * Returns true if group commits are enabled at the replica.
-         */
-        private boolean isEnabled() {
-            return pendingCommitAcks.length > 0;
-        }
-
-        /**
-         * The interval used to poll for incoming log entries. The time is
-         * lowered from the defaultNs time, if there are pending
-         * acknowledgments.
-         *
-         * @param defaultNs the default poll interval
-         *
-         * @return the actual poll interval
-         */
-        private long getPollIntervalNs(long defaultNs) {
-            if (nPendingAcks == 0) {
-                return defaultNs;
-            }
-            final long now = System.nanoTime();
-
-            final long interval = limitGroupCommitNs - now;
-            return Math.min(interval, defaultNs);
-        }
-
-        /**
-         * Returns the sync policy to be implemented at the replica. If
-         * group commit is active, and SYNC is requested it will return
-         * NO_SYNC instead to delay the fsync.
-         *
-         * @param txnSyncPolicy the sync policy as stated in the txn
-         *
-         * @return the sync policy to be implemented by the replica
-         */
-        private SyncPolicy getImplSyncPolicy(SyncPolicy txnSyncPolicy) {
-            return ((txnSyncPolicy ==  SyncPolicy.SYNC) && isEnabled()) ?
-                   SyncPolicy.NO_SYNC : txnSyncPolicy;
-        }
-
-        /**
-         * Buffers the acknowledgment if the commit calls for a sync, or if
-         * there are pending acknowledgments to ensure that acks are sent
-         * in order.
-         *
-         * @param nowNs the current time
-         * @param ackTxn the txn associated with the ack
-         * @param txnSyncPolicy the sync policy as request by the committing
-         * txn
-         *
-         * @return true if the ack has been buffered
-         */
-        private final boolean bufferAck(long nowNs,
-                                        ReplayTxn ackTxn,
-                                        SyncPolicy txnSyncPolicy)
-            throws IOException {
-
-            if (!isEnabled() ||
-                !((txnSyncPolicy == SyncPolicy.SYNC) || (nPendingAcks > 0))) {
-                return false;
-            }
-
-            pendingCommitAcks[nPendingAcks++] = ackTxn.getId();
-
-            if (nPendingAcks == 1) {
-                /* First txn in group, start the clock. */
-                limitGroupCommitNs = nowNs + groupCommitIntervalNs;
-            } else {
-                flushPendingAcks(nowNs);
-            }
-            return true;
-        }
-
-        /**
-         * Flush if there are pending acks and either the buffer limit or the
-         * group interval has been reached.
-         *
-         * @param nowNs the current time (passed in to minimize system calls)
-         */
-        private final void flushPendingAcks(long nowNs)
-            throws IOException {
-
-            if ((nPendingAcks == 0) ||
-                ((nPendingAcks != pendingCommitAcks.length) &&
-                 (NanoTimeUtil.compare(nowNs, limitGroupCommitNs) < 0))) {
-
-                return;
-            }
-
-            /* Update statistics. */
-            nGroupCommits.increment();
-            nGroupCommitTxns.add(nPendingAcks);
-            if (NanoTimeUtil.compare(nowNs, limitGroupCommitNs) >= 0) {
-                nGroupCommitTimeouts.increment();
-            } else if (nPendingAcks >= pendingCommitAcks.length) {
-                nGroupCommitMaxExceeded.increment();
-            }
-
-            /* flush log buffer and fsync to disk */
-            repImpl.getLogManager().flushSync();
-
-            /* commits are on disk, send out acknowledgments on the network. */
-            for (int i=0; i < nPendingAcks; i++) {
-                queueAck(pendingCommitAcks[i]);
-                pendingCommitAcks[i] = 0;
-            }
-
-            nPendingAcks = 0;
-            limitGroupCommitNs = 0;
-        }
     }
 
     /**
@@ -1490,7 +1254,172 @@ public class Replay {
         @Override
         public String toString() {
             return " VLSN: " + txnVLSN +
-                " masterTxnEndTime=" + new Date(masterTxnEndTime);
+                    " masterTxnEndTime=" + new Date(masterTxnEndTime);
+        }
+    }
+
+    /**
+     * Implements group commit. It's really a substructure of Replay and exists
+     * mainly for modularity reasons.
+     * <p>
+     * Since replay is single threaded, the group commit mechanism works
+     * differently in the replica than in the master. In the replica, SYNC
+     * transactions are converted into NO_SYNC transactions and executed
+     * immediately, but their acknowledgments are delayed until after either
+     * the REPLICA_GROUP_COMMIT_INTERVAL (the max amount the first transaction
+     * in the group is delayed) has expired, or the size of the group (as
+     * specified by REPLICA_MAX_GROUP_COMMIT) has been exceeded.
+     */
+    private class GroupCommit {
+
+        /* Size determines max fsync commits that can be grouped. */
+        private final long pendingCommitAcks[];
+        /* The time interval that an open group is held back. */
+        private final long groupCommitIntervalNs;
+        private final LongStat nGroupCommitTimeouts;
+        private final LongStat nGroupCommitMaxExceeded;
+        private final LongStat nGroupCommits;
+        private final LongStat nGroupCommitTxns;
+        /* Number of entries currently in pendingCommitAcks */
+        private int nPendingAcks;
+        /*
+         * If this time limit is reached, the group will be forced to commit.
+         * Invariant: nPendingAcks > 0 ==> limitGroupCommitNs > 0
+         */
+        private long limitGroupCommitNs = 0;
+
+        private GroupCommit(DbConfigManager configManager) {
+            pendingCommitAcks = new long[configManager.
+                    getInt(RepParams.REPLICA_MAX_GROUP_COMMIT)];
+
+            nPendingAcks = 0;
+
+            final long groupCommitIntervalMs = configManager.
+                    getDuration(RepParams.REPLICA_GROUP_COMMIT_INTERVAL);
+
+            groupCommitIntervalNs =
+                    NANOSECONDS.convert(groupCommitIntervalMs, MILLISECONDS);
+            nGroupCommitTimeouts =
+                    new LongStat(statistics, N_GROUP_COMMIT_TIMEOUTS);
+
+            nGroupCommitMaxExceeded =
+                    new LongStat(statistics, N_GROUP_COMMIT_MAX_EXCEEDED);
+
+            nGroupCommitTxns =
+                    new LongStat(statistics, N_GROUP_COMMIT_TXNS);
+
+            nGroupCommits =
+                    new LongStat(statistics, N_GROUP_COMMITS);
+        }
+
+        /**
+         * Returns true if group commits are enabled at the replica.
+         */
+        private boolean isEnabled() {
+            return pendingCommitAcks.length > 0;
+        }
+
+        /**
+         * The interval used to poll for incoming log entries. The time is
+         * lowered from the defaultNs time, if there are pending
+         * acknowledgments.
+         *
+         * @param defaultNs the default poll interval
+         * @return the actual poll interval
+         */
+        private long getPollIntervalNs(long defaultNs) {
+            if(nPendingAcks == 0) {
+                return defaultNs;
+            }
+            final long now = System.nanoTime();
+
+            final long interval = limitGroupCommitNs - now;
+            return Math.min(interval, defaultNs);
+        }
+
+        /**
+         * Returns the sync policy to be implemented at the replica. If
+         * group commit is active, and SYNC is requested it will return
+         * NO_SYNC instead to delay the fsync.
+         *
+         * @param txnSyncPolicy the sync policy as stated in the txn
+         * @return the sync policy to be implemented by the replica
+         */
+        private SyncPolicy getImplSyncPolicy(SyncPolicy txnSyncPolicy) {
+            return ((txnSyncPolicy == SyncPolicy.SYNC) && isEnabled()) ?
+                    SyncPolicy.NO_SYNC : txnSyncPolicy;
+        }
+
+        /**
+         * Buffers the acknowledgment if the commit calls for a sync, or if
+         * there are pending acknowledgments to ensure that acks are sent
+         * in order.
+         *
+         * @param nowNs         the current time
+         * @param ackTxn        the txn associated with the ack
+         * @param txnSyncPolicy the sync policy as request by the committing
+         *                      txn
+         * @return true if the ack has been buffered
+         */
+        private final boolean bufferAck(long nowNs,
+                                        ReplayTxn ackTxn,
+                                        SyncPolicy txnSyncPolicy)
+                throws IOException {
+
+            if(!isEnabled() ||
+                    !((txnSyncPolicy == SyncPolicy.SYNC) || (nPendingAcks > 0))) {
+                return false;
+            }
+
+            pendingCommitAcks[nPendingAcks++] = ackTxn.getId();
+
+            if(nPendingAcks == 1) {
+                /* First txn in group, start the clock. */
+                limitGroupCommitNs = nowNs + groupCommitIntervalNs;
+            }
+            else {
+                flushPendingAcks(nowNs);
+            }
+            return true;
+        }
+
+        /**
+         * Flush if there are pending acks and either the buffer limit or the
+         * group interval has been reached.
+         *
+         * @param nowNs the current time (passed in to minimize system calls)
+         */
+        private final void flushPendingAcks(long nowNs)
+                throws IOException {
+
+            if((nPendingAcks == 0) ||
+                    ((nPendingAcks != pendingCommitAcks.length) &&
+                            (NanoTimeUtil.compare(nowNs, limitGroupCommitNs) < 0))) {
+
+                return;
+            }
+
+            /* Update statistics. */
+            nGroupCommits.increment();
+            nGroupCommitTxns.add(nPendingAcks);
+            if(NanoTimeUtil.compare(nowNs, limitGroupCommitNs) >= 0) {
+                nGroupCommitTimeouts.increment();
+            }
+            else if(nPendingAcks >= pendingCommitAcks.length) {
+                nGroupCommitMaxExceeded.increment();
+            }
+
+            /* flush log buffer and fsync to disk */
+            repImpl.getLogManager().flushSync();
+
+            /* commits are on disk, send out acknowledgments on the network. */
+            for(int i = 0; i < nPendingAcks; i++) {
+                queueAck(pendingCommitAcks[i]);
+                pendingCommitAcks[i] = 0;
+            }
+
+            nPendingAcks = 0;
+            limitGroupCommitNs = 0;
         }
     }
 }

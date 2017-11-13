@@ -53,7 +53,7 @@ public class StoreWriter extends Thread {
             boolean retry = true;
             int retry_count = 0;
             // while loop is used for deadlock retries
-            while (retry) {
+            while(retry) {
                 // try block used for deadlock detection and
                 // general exception handling
                 try {
@@ -90,13 +90,13 @@ public class StoreWriter extends Thread {
                     try {
                         txn.commit();
                         txn = null;
-                    } catch (DatabaseException e) {
+                    } catch(DatabaseException e) {
                         System.err.println("Error on txn commit: " +
                                 e.toString());
                     }
                     retry = false;
 
-                } catch (LockConflictException de) {
+                } catch(LockConflictException de) {
                     System.out.println("################# " + getName() +
                             " : caught deadlock");
                     // retry if necessary
@@ -111,7 +111,7 @@ public class StoreWriter extends Thread {
                                 " : out of retries. Giving up.");
                         retry = false;
                     }
-                } catch (DatabaseException e) {
+                } catch(DatabaseException e) {
                     // abort and don't retry
                     retry = false;
                     System.err.println(getName() +
@@ -123,7 +123,7 @@ public class StoreWriter extends Thread {
                     if(txn != null) {
                         try {
                             txn.abort();
-                        } catch (Exception e) {
+                        } catch(Exception e) {
                             System.err.println("Error aborting transaction: " +
                                     e.toString());
                             e.printStackTrace();

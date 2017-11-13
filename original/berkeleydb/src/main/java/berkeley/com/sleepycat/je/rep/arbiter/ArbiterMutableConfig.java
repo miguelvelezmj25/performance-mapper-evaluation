@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.rep.arbiter;
 
-import java.util.Properties;
-import java.util.logging.Level;
-
 import berkeley.com.sleepycat.je.config.ConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
+
+import java.util.Properties;
+import java.util.logging.Level;
 
 /**
  * The mutable configuration parameters for an {@link Arbiter}.
@@ -33,26 +33,11 @@ public class ArbiterMutableConfig implements Cloneable {
     boolean validateParams = true;
 
     ArbiterMutableConfig() {
-       props = new Properties();
+        props = new Properties();
     }
 
     ArbiterMutableConfig(Properties properties) {
-        props = (Properties)properties.clone();
-    }
-
-    /**
-     * Identify one or more helpers nodes by their host and port pairs in this
-     * format:
-     * <pre>
-     * hostname[:port][,hostname[:port]]*
-     * </pre>
-     *
-     * @param helperHosts the string representing the host and port pairs.
-     */
-    public ArbiterMutableConfig setHelperHosts(String helperHosts) {
-        DbConfigManager.setVal(
-            props, RepParams.HELPER_HOSTS, helperHosts, validateParams);
-        return this;
+        props = (Properties) properties.clone();
     }
 
     /**
@@ -69,11 +54,35 @@ public class ArbiterMutableConfig implements Cloneable {
     }
 
     /**
+     * Identify one or more helpers nodes by their host and port pairs in this
+     * format:
+     * <pre>
+     * hostname[:port][,hostname[:port]]*
+     * </pre>
+     *
+     * @param helperHosts the string representing the host and port pairs.
+     */
+    public ArbiterMutableConfig setHelperHosts(String helperHosts) {
+        DbConfigManager.setVal(
+                props, RepParams.HELPER_HOSTS, helperHosts, validateParams);
+        return this;
+    }
+
+    /**
+     * Gets the file logging level.
+     *
+     * @return logging level
+     */
+    public String getFileLoggingLevel() {
+        return DbConfigManager.getVal(props, EnvironmentParams.JE_FILE_LEVEL);
+    }
+
+    /**
      * Trace messages equal and above this level will be logged to the je.info
      * file, which is in the Arbiter home directory.  Value should
      * be one of the predefined java.util.logging.Level values.
      * <p>
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -83,32 +92,33 @@ public class ArbiterMutableConfig implements Cloneable {
      * <td>"INFO"</td>
      * </tr>
      * </table></p>
-     * @see <a href="{@docRoot}/../GettingStartedGuide/managelogging.html"
-     * target="_top">Chapter 12. Logging</a>
      *
      * @param val value of the logging level.
      * @return ArbiterConfig.
+     * @see <a href="{@docRoot}/../GettingStartedGuide/managelogging.html"
+     * target="_top">Chapter 12. Logging</a>
      */
     public ArbiterMutableConfig setFileLoggingLevel(String val) {
         Level.parse(val);
         DbConfigManager.setVal(
-            props, EnvironmentParams.JE_FILE_LEVEL, val, false);
+                props, EnvironmentParams.JE_FILE_LEVEL, val, false);
         return this;
     }
 
     /**
-     * Gets the file logging level.
+     * Gets the console logging level.
+     *
      * @return logging level
      */
-    public String getFileLoggingLevel() {
-        return DbConfigManager.getVal(props, EnvironmentParams.JE_FILE_LEVEL);
+    public String getConsoleLoggingLevel() {
+        return DbConfigManager.getVal(props, EnvironmentParams.JE_CONSOLE_LEVEL);
     }
 
     /**
      * Trace messages equal and above this level will be logged to the
      * console. Value should be one of the predefined
      * java.util.logging.Level values.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -118,76 +128,61 @@ public class ArbiterMutableConfig implements Cloneable {
      * <td>"OFF"</td>
      * </tr>
      * </table></p>
-     * @see <a href="{@docRoot}/../GettingStartedGuide/managelogging.html"
-     * target="_top">Chapter 12. Logging</a>
      *
      * @param val Logging level.
      * @return this.
+     * @see <a href="{@docRoot}/../GettingStartedGuide/managelogging.html"
+     * target="_top">Chapter 12. Logging</a>
      */
     public ArbiterMutableConfig setConsoleLoggingLevel(String val) {
         Level.parse(val);
         DbConfigManager.setVal(
-            props, EnvironmentParams.JE_CONSOLE_LEVEL, val, false);
+                props, EnvironmentParams.JE_CONSOLE_LEVEL, val, false);
         return this;
     }
 
     /**
-     * Gets the console logging level.
-     * @return logging level
-     */
-    public String getConsoleLoggingLevel() {
-        return DbConfigManager.getVal(props, EnvironmentParams.JE_CONSOLE_LEVEL);
-    }
-
-    /**
-     * @hidden
-     * Set this configuration parameter. First validate the value specified for
+     * @param paramName the configuration parameter name, one of the String
+     *                  constants in this class
+     * @param value     The configuration value
+     * @return this
+     * @throws IllegalArgumentException if the paramName or value is invalid.
+     * @hidden Set this configuration parameter. First validate the value specified for
      * the configuration parameter; if it is valid, the value is set in the
      * configuration. Hidden could be used to set parameters internally.
-     *
-     * @param paramName the configuration parameter name, one of the String
-     * constants in this class
-     *
-     * @param value The configuration value
-     *
-     * @return this
-     *
-     * @throws IllegalArgumentException if the paramName or value is invalid.
      */
     public ArbiterMutableConfig setConfigParam(String paramName,
-                                                   String value)
-        throws IllegalArgumentException {
+                                               String value)
+            throws IllegalArgumentException {
 
         boolean forReplication = false;
         ConfigParam param =
-            EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
-        if (param != null) {
+                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+        if(param != null) {
             forReplication = param.isForReplication();
         }
 
         DbConfigManager.setConfigParam(props,
-                                       paramName,
-                                       value,
-                                       true, /* require mutability. */
-                                       true,
-                                       forReplication, /* forReplication */
-                                       true  /* verifyForReplication */);
+                paramName,
+                value,
+                true, /* require mutability. */
+                true,
+                forReplication, /* forReplication */
+                true  /* verifyForReplication */);
         return this;
     }
 
     /**
-     * @hidden
-     * Returns the value for this configuration parameter.
-     *
      * @param paramName a valid configuration parameter, one of the String
-     * constants in this class.
+     *                  constants in this class.
      * @return the configuration value.
      * @throws IllegalArgumentException if the paramName is invalid.
+     * @hidden Returns the value for this configuration parameter.
      */
     public String getConfigParam(String paramName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-       return DbConfigManager.getConfigParam(props, paramName);
+        return DbConfigManager.getConfigParam(props, paramName);
     }
 
     protected ArbiterMutableConfig copy() {
@@ -195,8 +190,7 @@ public class ArbiterMutableConfig implements Cloneable {
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      */
     public boolean isConfigParamSet(String paramName) {
         return props.containsKey(paramName);
@@ -205,10 +199,10 @@ public class ArbiterMutableConfig implements Cloneable {
     public ArbiterMutableConfig clone() {
         try {
             ArbiterMutableConfig copy =
-                (ArbiterMutableConfig) super.clone();
+                    (ArbiterMutableConfig) super.clone();
             copy.props = (Properties) props.clone();
             return copy;
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }

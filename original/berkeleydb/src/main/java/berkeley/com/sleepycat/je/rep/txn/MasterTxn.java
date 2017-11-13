@@ -13,21 +13,8 @@
 
 package berkeley.com.sleepycat.je.rep.txn;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.CommitToken;
-import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.LockConflictException;
-import berkeley.com.sleepycat.je.LockNotAvailableException;
-import berkeley.com.sleepycat.je.ThreadInterruptedException;
-import berkeley.com.sleepycat.je.TransactionConfig;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogItem;
@@ -40,113 +27,121 @@ import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.impl.node.Replay;
 import berkeley.com.sleepycat.je.rep.impl.node.Replica;
-import berkeley.com.sleepycat.je.txn.LockResult;
-import berkeley.com.sleepycat.je.txn.LockType;
-import berkeley.com.sleepycat.je.txn.Txn;
-import berkeley.com.sleepycat.je.txn.TxnManager;
-import berkeley.com.sleepycat.je.txn.WriteLockInfo;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.txn.*;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * A MasterTxn represents:
- *  - a user initiated Txn executed on the Master node, when local-write and
- *    read-only are not configured, or
- *  - an auto-commit Txn on the Master node for a replicated DB.
- *
+ * - a user initiated Txn executed on the Master node, when local-write and
+ * read-only are not configured, or
+ * - an auto-commit Txn on the Master node for a replicated DB.
+ * <p>
  * This class uses the hooks defined by Txn to support the durability
  * requirements of a replicated transaction on the Master.
  */
 public class MasterTxn extends Txn {
 
-    /* Holds the commit VLSN after a successful commit. */
-    private VLSN commitVLSN = VLSN.NULL_VLSN;
+    /* The default factory used to create MasterTxns */
+    private static final MasterTxnFactory DEFAULT_FACTORY =
+            new MasterTxnFactory() {
+
+                @Override
+                public MasterTxn create(EnvironmentImpl envImpl,
+                                        TransactionConfig config,
+                                        NameIdPair nameIdPair) {
+                    return new MasterTxn(envImpl, config, nameIdPair);
+                }
+
+                @Override
+                public MasterTxn createNullTxn(EnvironmentImpl envImpl,
+                                               TransactionConfig config,
+                                               NameIdPair nameIdPair) {
+
+                    return new MasterTxn(envImpl, config, nameIdPair) {
+                        @Override
+                        protected boolean updateLoggedForTxn() {
+                        /*
+                         * Return true so that the commit will be logged even
+                         * though there are no changes associated with this txn
+                         */
+                            return true;
+                        }
+                    };
+                }
+            };
+    /* The current Txn Factory. */
+    private static MasterTxnFactory factory = DEFAULT_FACTORY;
     private final NameIdPair nameIdPair;
     private final UUID envUUID;
-
-    /* The number of acks required by this txn commit. */
-    private int requiredAckCount = -1;
-
-    /* If this transaction requests an Arbiter ack. */
-    private boolean needsArbiterAck;
+    /* The time the transaction was started. */
+    private final long startMs = System.currentTimeMillis();
 
     /*
      * Used to measure replicated transaction commit performance. All deltas
      * are measured relative to the start time, to minimize storage overhead.
      */
-
-    /* The time the transaction was started. */
-    private final long startMs = System.currentTimeMillis();
-
+    /* Holds the commit VLSN after a successful commit. */
+    private VLSN commitVLSN = VLSN.NULL_VLSN;
+    /* The number of acks required by this txn commit. */
+    private int requiredAckCount = -1;
+    /* If this transaction requests an Arbiter ack. */
+    private boolean needsArbiterAck;
     /* The start relative delta time when the commit pre hook exited. */
     private int preLogCommitEndDeltaMs = 0;
-
     /*
      * The start relative delta time when the commit message was written to
      * the rep stream.
      */
     private int repWriteStartDeltaMs = 0;
-
     /**
      * Flag to keep track of whether this transaction has taken the read lock
      * that protects access to the blocking latch used by Master Transfer.
      */
     private boolean locked;
-
     /**
      * Flag to prevent any change to the txn's contents. Used in
      * master->replica transition. Intentionally volatile, so it can be
      * interleaved with use of the MasterTxn mutex.
      */
     private volatile boolean freeze;
-
     /* For unit testing */
     private TestHook<Integer> convertHook;
-
-    /* The default factory used to create MasterTxns */
-    private static final MasterTxnFactory DEFAULT_FACTORY =
-        new MasterTxnFactory() {
-
-            @Override
-            public MasterTxn create(EnvironmentImpl envImpl,
-                                    TransactionConfig config,
-                                    NameIdPair nameIdPair) {
-                return new MasterTxn(envImpl, config, nameIdPair);
-            }
-
-            @Override
-            public MasterTxn createNullTxn(EnvironmentImpl envImpl,
-                                           TransactionConfig config,
-                                           NameIdPair nameIdPair) {
-
-                return new MasterTxn(envImpl, config, nameIdPair) {
-                    @Override
-                    protected boolean updateLoggedForTxn() {
-                        /*
-                         * Return true so that the commit will be logged even
-                         * though there are no changes associated with this txn
-                         */
-                        return true;
-                    }
-                };
-            }
-    };
-
-    /* The current Txn Factory. */
-    private static MasterTxnFactory factory = DEFAULT_FACTORY;
 
     public MasterTxn(EnvironmentImpl envImpl,
                      TransactionConfig config,
                      NameIdPair nameIdPair)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(envImpl, config, ReplicationContext.MASTER);
         this.nameIdPair = nameIdPair;
         this.envUUID = ((RepImpl) envImpl).getUUID();
         assert !config.getLocalWrite();
+    }
+
+    /* The method used to create user Master Txns via the factory. */
+    public static MasterTxn create(EnvironmentImpl envImpl,
+                                   TransactionConfig config,
+                                   NameIdPair nameIdPair) {
+        return factory.create(envImpl, config, nameIdPair);
+    }
+
+    public static MasterTxn createNullTxn(EnvironmentImpl envImpl,
+                                          TransactionConfig config,
+                                          NameIdPair nameIdPair) {
+        return factory.createNullTxn(envImpl, config, nameIdPair);
+    }
+
+    /**
+     * Method used for unit testing.
+     * <p>
+     * Sets the factory to the one supplied. If the argument is null it
+     * restores the factory to the original default value.
+     */
+    public static void setFactory(MasterTxnFactory factory) {
+        MasterTxn.factory = (factory == null) ? DEFAULT_FACTORY : factory;
     }
 
     @Override
@@ -161,7 +156,7 @@ public class MasterTxn extends Txn {
      */
     @Override
     public CommitToken getCommitToken() {
-        if (commitVLSN.isNull()) {
+        if(commitVLSN.isNull()) {
             return null;
         }
         return new CommitToken(envUUID, commitVLSN.getSequence());
@@ -178,7 +173,7 @@ public class MasterTxn extends Txn {
     @Override
     protected long generateId(TxnManager txnManager,
                               long ignore /* mandatedId */) {
-        assert(ignore == 0);
+        assert (ignore == 0);
         return txnManager.getNextReplicatedTxnId();
     }
 
@@ -188,25 +183,25 @@ public class MasterTxn extends Txn {
      */
     @Override
     protected void txnBeginHook(TransactionConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         RepImpl repImpl = (RepImpl) envImpl;
         try {
             repImpl.txnBeginHook(this);
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             throw new ThreadInterruptedException(envImpl, e);
         }
     }
 
     @Override
     protected void preLogCommitHook()
-        throws DatabaseException {
+            throws DatabaseException {
 
         RepImpl repImpl = (RepImpl) envImpl;
         ReplicaAckPolicy ackPolicy = getCommitDurability().getReplicaAck();
         requiredAckCount =
-            repImpl.getRepNode().getDurabilityQuorum().
-            getCurrentRequiredAckCount(ackPolicy);
+                repImpl.getRepNode().getDurabilityQuorum().
+                        getCurrentRequiredAckCount(ackPolicy);
 
         /*
          * TODO: An optimization we'd like to do is to identify transactions
@@ -220,20 +215,20 @@ public class MasterTxn extends Txn {
 
     @Override
     protected void postLogCommitHook(LogItem commitItem)
-        throws DatabaseException {
+            throws DatabaseException {
 
         commitVLSN = commitItem.header.getVLSN();
         try {
             RepImpl repImpl = (RepImpl) envImpl;
             repImpl.postLogCommitHook(this, commitItem);
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             throw new ThreadInterruptedException(envImpl, e);
         }
     }
 
     @Override
     protected void preLogAbortHook()
-        throws DatabaseException {
+            throws DatabaseException {
 
         RepImpl repImpl = (RepImpl) envImpl;
         repImpl.preLogAbortHook(this);
@@ -248,7 +243,7 @@ public class MasterTxn extends Txn {
 
     @Override
     protected void postLogAbortHook() {
-        RepImpl repImpl = (RepImpl)envImpl;
+        RepImpl repImpl = (RepImpl) envImpl;
         repImpl.postLogAbortHook(this);
     }
 
@@ -264,12 +259,12 @@ public class MasterTxn extends Txn {
                                    boolean noWait,
                                    boolean jumpAheadOfWaiters,
                                    DatabaseImpl database)
-        throws LockNotAvailableException, LockConflictException,
-               DatabaseException {
-        ReplicatedEnvironment.State nodeState = ((RepImpl)envImpl).getState();
-        if (nodeState.isMaster()) {
+            throws LockNotAvailableException, LockConflictException,
+            DatabaseException {
+        ReplicatedEnvironment.State nodeState = ((RepImpl) envImpl).getState();
+        if(nodeState.isMaster()) {
             return super.lockInternal
-                (lsn, lockType, noWait, jumpAheadOfWaiters, database);
+                    (lsn, lockType, noWait, jumpAheadOfWaiters, database);
         }
 
         throwNotMaster(nodeState);
@@ -277,14 +272,14 @@ public class MasterTxn extends Txn {
     }
 
     private void throwNotMaster(ReplicatedEnvironment.State nodeState) {
-        if (nodeState.isReplica()) {
+        if(nodeState.isReplica()) {
             throw new ReplicaWriteException
-                (this, ((RepImpl)envImpl).getStateChangeEvent());
+                    (this, ((RepImpl) envImpl).getStateChangeEvent());
         }
         throw new UnknownMasterException
-            ("Transaction " + getId() +
-             " cannot execute write operations because this node is" +
-             " no longer a master");
+                ("Transaction " + getId() +
+                        " cannot execute write operations because this node is" +
+                        " no longer a master");
     }
 
     /**
@@ -292,8 +287,8 @@ public class MasterTxn extends Txn {
      */
     @Override
     public synchronized void preLogWithoutLock(DatabaseImpl database) {
-        ReplicatedEnvironment.State nodeState = ((RepImpl)envImpl).getState();
-        if (nodeState.isMaster()) {
+        ReplicatedEnvironment.State nodeState = ((RepImpl) envImpl).getState();
+        if(nodeState.isMaster()) {
             super.preLogWithoutLock(database);
             return;
         }
@@ -335,7 +330,7 @@ public class MasterTxn extends Txn {
      * See additional javadoc at {@code RepImpl.blockLatchLock}
      */
     public boolean lockOnce() {
-        if (locked) {
+        if(locked) {
             return false;
         }
         locked = true;
@@ -348,7 +343,7 @@ public class MasterTxn extends Txn {
      * @see #lockOnce
      */
     public boolean unlockOnce() {
-        if (locked) {
+        if(locked) {
             locked = false;
             return true;
         }
@@ -363,7 +358,9 @@ public class MasterTxn extends Txn {
         requiredAckCount = 0;
     }
 
-    /** A masterTxn always writes its own id into the commit or abort. */
+    /**
+     * A masterTxn always writes its own id into the commit or abort.
+     */
     @Override
     protected int getReplicatorNodeId() {
         return nameIdPair.getId();
@@ -384,7 +381,7 @@ public class MasterTxn extends Txn {
 
     public void stampRepWriteTime() {
         this.repWriteStartDeltaMs =
-            (int)(System.currentTimeMillis() - startMs);
+                (int) (System.currentTimeMillis() - startMs);
     }
 
     /**
@@ -406,49 +403,10 @@ public class MasterTxn extends Txn {
 
     @Override
     protected boolean
-        propagatePostCommitException(DatabaseException postCommitException) {
+    propagatePostCommitException(DatabaseException postCommitException) {
         return (postCommitException instanceof InsufficientAcksException) ?
                 true :
                 super.propagatePostCommitException(postCommitException);
-    }
-
-    /* The Txn factory interface. */
-    public interface MasterTxnFactory {
-        MasterTxn create(EnvironmentImpl envImpl,
-                         TransactionConfig config,
-                         NameIdPair nameIdPair);
-
-        /**
-         * Create a special "null" txn that does not result in any changes to
-         * the environment. It's sole purpose is to persist and communicate
-         * DTVLSN values.
-         */
-        MasterTxn createNullTxn(EnvironmentImpl envImpl,
-                                TransactionConfig config,
-                                NameIdPair nameIdPair);
-    }
-
-    /* The method used to create user Master Txns via the factory. */
-    public static MasterTxn create(EnvironmentImpl envImpl,
-                                   TransactionConfig config,
-                                   NameIdPair nameIdPair) {
-        return factory.create(envImpl, config, nameIdPair);
-    }
-
-    public static MasterTxn createNullTxn(EnvironmentImpl envImpl,
-                                   TransactionConfig config,
-                                   NameIdPair nameIdPair) {
-        return factory.createNullTxn(envImpl, config, nameIdPair);
-    }
-
-    /**
-     * Method used for unit testing.
-     *
-     * Sets the factory to the one supplied. If the argument is null it
-     * restores the factory to the original default value.
-     */
-    public static void setFactory(MasterTxnFactory factory) {
-        MasterTxn.factory = (factory == null) ? DEFAULT_FACTORY : factory;
     }
 
     /**
@@ -458,20 +416,20 @@ public class MasterTxn extends Txn {
      * the application can never use a MasterTxn to obtain a lock if the node
      * is in Replica mode, but may indeed be able to use a read-lock-only
      * MasterTxn if the node cycles back into Master status.
-     *
+     * <p>
      * For converted MasterTxns, all write locks are transferred to a replay
      * transaction, read locks are released, and the txn is closed. Used when a
      * node is transitioning from master to replica mode without recovery,
      * which may happen for an explicit master transfer request, or merely for
      * a network partition/election of new
      * master.
-     *
+     * <p>
      * The newly created replay transaction will need to be in the appropriate
      * state, holding all write locks, so that the node in replica form can
      * execute the proper syncups.  Note that the resulting replay txn will
      * only be aborted, and will never be committed, because the txn originated
      * on this node, which is transitioning from master -> replica.
-     *
+     * <p>
      * We only transfer write locks. We need not transfer read locks, because
      * replays only operate on writes, and are never required to obtain read
      * locks. Read locks are released though, because (a) this txn is now only
@@ -485,11 +443,11 @@ public class MasterTxn extends Txn {
                                                 Replay replay) {
 
         /* Assertion */
-        if (!freeze) {
+        if(!freeze) {
             throw EnvironmentFailureException.unexpectedState
-                (envImpl,
-                 "Txn " + getId() +
-                 " should be frozen when converting to replay txn");
+                    (envImpl,
+                            "Txn " + getId() +
+                                    " should be frozen when converting to replay txn");
         }
 
         /*
@@ -497,19 +455,19 @@ public class MasterTxn extends Txn {
          * logging.
          */
         LoggerUtils.info(logger, envImpl,
-                         "Transforming txn " + getId() +
-                         " from MasterTxn to ReplayTxn");
+                "Transforming txn " + getId() +
+                        " from MasterTxn to ReplayTxn");
 
         int hookCount = 0;
         ReplayTxn replayTxn = null;
         boolean needToClose = true;
         try {
-            synchronized (this) {
+            synchronized(this) {
 
-                if (isClosed()) {
+                if(isClosed()) {
                     LoggerUtils.info(logger, envImpl,
-                                     "Txn " + getId() +
-                                     " is closed, no tranform needed");
+                            "Txn " + getId() +
+                                    " is closed, no tranform needed");
                     needToClose = false;
                     return null;
                 }
@@ -525,10 +483,10 @@ public class MasterTxn extends Txn {
                  * This transaction may not actually have any write locks. In
                  * that case, we permit it to live on.
                  */
-                if (lockedLSNs.size() == 0) {
+                if(lockedLSNs.size() == 0) {
                     LoggerUtils.info(logger, envImpl, "Txn " + getId() +
-                                     " had no write locks, didn't create" +
-                                     " ReplayTxn");
+                            " had no write locks, didn't create" +
+                            " ReplayTxn");
                     needToClose = false;
                     return null;
                 }
@@ -547,8 +505,8 @@ public class MasterTxn extends Txn {
                  *  t3: txn is closed
                  */
                 setOnlyAbortable(new UnknownMasterException
-                                 (envImpl.getName() +
-                                  " is no longer a master"));
+                        (envImpl.getName() +
+                                " is no longer a master"));
                 replayTxn = replay.getReplayTxn(getId(), false);
 
                 /*
@@ -559,8 +517,8 @@ public class MasterTxn extends Txn {
                 List<Long> sortedLsns = new ArrayList<>(lockedLSNs);
                 Collections.sort(sortedLsns);
                 LoggerUtils.info(logger, envImpl,
-                                 "Txn " + getId()  + " has " +
-                                 lockedLSNs.size() + " locks to transform");
+                        "Txn " + getId() + " has " +
+                                lockedLSNs.size() + " locks to transform");
 
                 /*
                  * Transfer each lock. Note that ultimately, since mastership
@@ -568,11 +526,11 @@ public class MasterTxn extends Txn {
                  * when a txn has originated on that node, the target ReplayTxn
                  * can never be committed, and will only be aborted.
                  */
-                for (Long lsn: sortedLsns) {
+                for(Long lsn : sortedLsns) {
 
                     LoggerUtils.info(logger, envImpl,
-                                     "Txn " + getId() +
-                                     " is transferring lock " + lsn);
+                            "Txn " + getId() +
+                                    " is transferring lock " + lsn);
 
                     /*
                      * Use a special method to steal the lock. Another approach
@@ -639,12 +597,12 @@ public class MasterTxn extends Txn {
              * unregister it from the transactionManager. Must be called
              * outside the synchronization block.
              */
-            if (needToClose) {
+            if(needToClose) {
                 LoggerUtils.info(logger, envImpl, "About to close txn " +
-                                 getId() + " state=" + getState());
+                        getId() + " state=" + getState());
                 close(false /*isCommit */);
-                LoggerUtils.info(logger, envImpl, "Closed txn " +  getId() +
-                                 " state=" + getState());
+                LoggerUtils.info(logger, envImpl, "Closed txn " + getId() +
+                        " state=" + getState());
             }
             assert TestHookExecute.doHookIfSet(convertHook, hookCount++);
         }
@@ -666,7 +624,7 @@ public class MasterTxn extends Txn {
      * are two parties that now have a reference to this transaction -- the
      * originating application thread, and the RepNode thread that is
      * trying to set up internal state so it can begin to act as a replica.
-     *
+     * <p>
      * The transaction will throw UnknownMasterException or
      * ReplicaWriteException if the transaction is frozen, so that the
      * application knows that the transaction is no longer viable, but it
@@ -679,17 +637,19 @@ public class MasterTxn extends Txn {
      * - application takes the block txn latch lock and attempts commit or
      * abort, but is stopped because the txn is frozen by master transfer.
      * - the application must release the block txn latch lock.
+     *
      * @see Replica#replicaTransitionCleanup
      */
     @Override
     protected void checkIfFrozen(boolean isCommit) {
-        if (freeze) {
+        if(freeze) {
             try {
                 ((RepImpl) envImpl).checkIfMaster(this);
-            } catch (DatabaseException e) {
-                if (isCommit) {
+            } catch(DatabaseException e) {
+                if(isCommit) {
                     postLogCommitAbortHook();
-                } else {
+                }
+                else {
                     postLogAbortHook();
                 }
                 throw e;
@@ -707,12 +667,28 @@ public class MasterTxn extends Txn {
         return true;
     }
 
+    public boolean getArbiterAck() {
+        return needsArbiterAck;
+    }
+
     public void setArbiterAck(boolean val) {
         needsArbiterAck = val;
     }
 
-    public boolean getArbiterAck() {
-        return needsArbiterAck;
+    /* The Txn factory interface. */
+    public interface MasterTxnFactory {
+        MasterTxn create(EnvironmentImpl envImpl,
+                         TransactionConfig config,
+                         NameIdPair nameIdPair);
+
+        /**
+         * Create a special "null" txn that does not result in any changes to
+         * the environment. It's sole purpose is to persist and communicate
+         * DTVLSN values.
+         */
+        MasterTxn createNullTxn(EnvironmentImpl envImpl,
+                                TransactionConfig config,
+                                NameIdPair nameIdPair);
     }
 
 }

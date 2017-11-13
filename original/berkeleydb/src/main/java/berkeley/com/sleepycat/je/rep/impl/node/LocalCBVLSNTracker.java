@@ -21,16 +21,16 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
 /**
  * The LocalCBVLSNTracker tracks this node's local CBVLSN. Each node has a
  * single tracker instance.
- *
+ * <p>
  * The GlobalCBVLSN must be durable for both HA and data sync reasons. Since
  * the GlobalCBVLSN is derived from the LocalCBVLSN, we need to make the
  * LocalCBVLSN durable too. [#18728]
- *
- * 1. For HA, the GlobalCbvlsn is supposed to ensure that the 
- *    replication stream is always available for replay, across failovers.
- * 2. For data sync, the GlobalCbvlsn is supposed to ensure that 
- *    exported log entries are never the subject of hard recovery.
- *
+ * <p>
+ * 1. For HA, the GlobalCbvlsn is supposed to ensure that the
+ * replication stream is always available for replay, across failovers.
+ * 2. For data sync, the GlobalCbvlsn is supposed to ensure that
+ * exported log entries are never the subject of hard recovery.
+ * <p>
  * The local CBVLSN is maintained by each node. Replicas periodically update
  * the Master with their current CBVLSN via a response to a heartbeat message
  * from the Master, where it is managed by the LocalCBVLSNUpdater and
@@ -39,10 +39,10 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * including the originating Replica, via the replication stream. For this
  * reason, the CBVLSN for the node as represented in the RepGroup database
  * will generally lag the value contained in the tracker.
- *
+ * <p>
  * Note that track() api is invoked in critical code with locks being held and
  * must be lightweight.
- *
+ * <p>
  * Local CBVLSNs are used only to contribute to the calculation of the global
  * CBVLSN. The global CBVLSN acts as the cleaner throttle. Any invariants, such
  * as the rule that the cleaner throttle cannot regress, are applied when doing
@@ -52,26 +52,21 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
 public class LocalCBVLSNTracker {
 
     private final VLSNIndex vlsnIndex;
+    private final RepImpl repImpl;
     /* Used to keep track of the last fsynced matchable VLSN. */
     private VLSN lastSyncableVLSN;
-
     /**
      * Final syncable VLSN from the penultimate log file.
      */
     private VLSN currentLocalCBVLSN;
-
     /*
      * We really only need to update the localCBVLSN once per file. currentFile
      * is used to determine if this is the first VLSN in the file.
      */
     private long currentFile;
-
     /* Test hook for disabling LocalCBVLSN changes. */
     private boolean allowUpdate = true;
-
-    private final RepImpl repImpl;
-
-    /* Present how many codes want to freeze the LocalCBVLSN changes. */  
+    /* Present how many codes want to freeze the LocalCBVLSN changes. */
     private volatile int freezeCounter = 0;
 
     LocalCBVLSNTracker(RepNode repNode) {
@@ -108,16 +103,16 @@ public class LocalCBVLSNTracker {
      * currentLocalCBVLSN value is ultimately sent via heartbeat response to
      * the master, which updates the RepGroupDb. When tracking is done on a
      * master, the update is done on this node.
-     *
+     * <p>
      * The update is only done once per file in order to decrease the cost of
      * tracking. Since we want the local cbvlsn to be durable, we use the last
      * vlsn in the penultimate log file as the local cbvlsn value. We know the
      * penultimate log file has been fsynced, and therefore the last vlsn
      * within that file has also been fsynced.
-     *
+     * <p>
      * Note that the LocalCBVLSN changes will be frozen if the freezeCounter is
      * larger than 0.
-     * 
+     * <p>
      * Tracking can be called quite often, and should be lightweight.
      *
      * @param newVLSN
@@ -125,7 +120,7 @@ public class LocalCBVLSNTracker {
      */
     public void track(VLSN newVLSN, long lsn) {
         /* Don't do updates if isAllowUpdate is false. */
-        if (!allowUpdate) {
+        if(!allowUpdate) {
             return;
         }
 
@@ -133,15 +128,15 @@ public class LocalCBVLSNTracker {
          * Freeze the LocalCBVLSN on the master if adding the first SyncDataSet
          * is not finished. Currently, we only permit data sync on master.
          */
-        if (repImpl.isMaster() && (freezeCounter > 0)) { 
+        if(repImpl.isMaster() && (freezeCounter > 0)) {
             return;
         }
 
-        synchronized (this) {
-            if (newVLSN.compareTo(lastSyncableVLSN) > 0) {
+        synchronized(this) {
+            if(newVLSN.compareTo(lastSyncableVLSN) > 0) {
                 VLSN old = lastSyncableVLSN;
                 lastSyncableVLSN = newVLSN;
-                if (DbLsn.getFileNumber(lsn) != currentFile) {
+                if(DbLsn.getFileNumber(lsn) != currentFile) {
                     currentFile = DbLsn.getFileNumber(lsn);
                     currentLocalCBVLSN = old;
                 }
@@ -153,6 +148,7 @@ public class LocalCBVLSNTracker {
      * Initialize the local CBVLSN with the syncup matchpoint, so that the
      * heartbeat responses sent before the node has replayed any log entries
      * are still valid for saving a place in the replication stream.
+     *
      * @param matchpoint
      */
     public void registerMatchpoint(VLSN matchpoint) {

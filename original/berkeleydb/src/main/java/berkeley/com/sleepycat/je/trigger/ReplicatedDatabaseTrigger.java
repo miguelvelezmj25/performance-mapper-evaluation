@@ -45,42 +45,42 @@ import berkeley.com.sleepycat.je.Transaction;
  * These trigger methods are only invoked if the partial transactions contain
  * operations associated with triggers.
  * </p>
- *
+ * <p>
  * Consider a transaction consisting of two put operations:
- *
+ * <p>
  * <pre class="code">
  * put k1
  * put k2
  * commit t
  * </pre>
- *
+ * <p>
  * In the absence of a replica or master failure this would normally result in
  * the sequence of trigger calls:
- *
+ * <p>
  * <pre class="code">
  * Trigger.put(t, k1, ...)
  * Trigger.put(t, k2,....)
  * Trigger.commit(t)
  * </pre>
- *
+ * <p>
  * If the replica failed in the midst of the transaction replay, immediately
  * after the first put operation, the sequence of trigger invocations before
  * the replica went down would be:
- *
+ * <p>
  * <pre class="code">
- *  Trigger.put(k1, ...)
+ * Trigger.put(k1, ...)
  * </pre>
- *
+ * <p>
  * followed by the trigger calls below when the replica handle was subsequently
  * reopened:
- *
+ * <p>
  * <pre class="code">
- *  ReplicatedTrigger.repeat(t)
- *  Trigger.repeatPut(t, k1, ...)
- *  Trigger.put(t, k2, ...)
- *  Trigger.commit(t)
+ * ReplicatedTrigger.repeat(t)
+ * Trigger.repeatPut(t, k1, ...)
+ * Trigger.put(t, k2, ...)
+ * Trigger.commit(t)
  * </pre>
- *
+ * <p>
  * The interface defines one "repeat" trigger method for each of the trigger
  * methods defined by Trigger. The methods are distinct from those
  * defined by Trigger to highlight the fact that the trigger method is

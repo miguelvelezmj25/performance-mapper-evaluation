@@ -15,63 +15,63 @@ package berkeley.com.sleepycat.persist.evolve;
 
 /**
  * A mutation for deleting an entity class or field.
- *
+ * <p>
  * <p><strong>WARNING:</strong> The data for the deleted class or field will be
  * destroyed and will be recoverable only by restoring from backup.  If you
  * wish to convert the instance data to a different type or format, use a
  * {@link Conversion} mutation instead.</p>
- *
+ * <p>
  * <p>For example, to delete a field:</p>
- *
+ * <p>
  * <pre class="code">
- *  package my.package;
- *
- *  // The old class.  Version 0 is implied.
- *  //
- *  {@literal @Entity}
- *  class Person {
- *      String name;
- *      String favoriteColors;
- *  }
- *
- *  // The new class.  A new version number must be assigned.
- *  //
- *  {@literal @Entity(version=1)}
- *  class Person {
- *      String name;
- *  }
- *
- *  // Add the mutation for deleting a field.
- *  //
- *  Mutations mutations = new Mutations();
- *
- *  mutations.addDeleter(new Deleter(Person.class.getName(), 0,
- *                                   "favoriteColors");
- *
- *  // Configure the mutations as described {@link Mutations here}.</pre>
- *
+ * package my.package;
+ * <p>
+ * // The old class.  Version 0 is implied.
+ * //
+ * {@literal @Entity}
+ * class Person {
+ * String name;
+ * String favoriteColors;
+ * }
+ * <p>
+ * // The new class.  A new version number must be assigned.
+ * //
+ * {@literal @Entity(version=1)}
+ * class Person {
+ * String name;
+ * }
+ * <p>
+ * // Add the mutation for deleting a field.
+ * //
+ * Mutations mutations = new Mutations();
+ * <p>
+ * mutations.addDeleter(new Deleter(Person.class.getName(), 0,
+ * "favoriteColors");
+ * <p>
+ * // Configure the mutations as described {@link Mutations here}.</pre>
+ * <p>
  * <p>To delete an entity class:</p>
- *
+ * <p>
  * <pre class="code">
- *  package my.package;
+ * package my.package;
+ * <p>
+ * // The old class.  Version 0 is implied.
+ * //
+ * {@literal @Entity}
+ * class Statistics {
+ * ...
+ * }
+ * <p>
+ * // Add the mutation for deleting a class.
+ * //
+ * Mutations mutations = new Mutations();
+ * <p>
+ * mutations.addDeleter(new Deleter("my.package.Statistics", 0));
+ * <p>
+ * // Configure the mutations as described {@link Mutations here}.</pre>
  *
- *  // The old class.  Version 0 is implied.
- *  //
- *  {@literal @Entity}
- *  class Statistics {
- *      ...
- *  }
- *
- *  // Add the mutation for deleting a class.
- *  //
- *  Mutations mutations = new Mutations();
- *
- *  mutations.addDeleter(new Deleter("my.package.Statistics", 0));
- *
- *  // Configure the mutations as described {@link Mutations here}.</pre>
- *
- * @see com.sleepycat.persist.evolve Class Evolution
  * @author Mark Hayes
+ * @see com.sleepycat.persist.evolve Class Evolution
  */
 public class Deleter extends Mutation {
 
@@ -80,7 +80,7 @@ public class Deleter extends Mutation {
     /**
      * Creates a mutation for deleting an entity class.
      *
-     * @param className the class to which this mutation applies.
+     * @param className    the class to which this mutation applies.
      * @param classVersion the class version to which this mutation applies.
      */
     public Deleter(String className, int classVersion) {
@@ -91,10 +91,10 @@ public class Deleter extends Mutation {
      * Creates a mutation for deleting the given field from all instances of
      * the given class version.
      *
-     * @param declaringClass the class to which this mutation applies.
+     * @param declaringClass        the class to which this mutation applies.
      * @param declaringClassVersion the class version to which this mutation
-     * applies.
-     * @param fieldName field name to which this mutation applies.
+     *                              applies.
+     * @param fieldName             field name to which this mutation applies.
      */
     public Deleter(String declaringClass, int declaringClassVersion,
                    String fieldName) {

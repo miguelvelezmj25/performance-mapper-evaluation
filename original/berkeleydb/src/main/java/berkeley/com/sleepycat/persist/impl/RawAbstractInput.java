@@ -13,18 +13,18 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.persist.raw.RawObject;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.IdentityHashMap;
-
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
  * Base class for EntityInput implementations that type-check RawObject
  * instances and convert them to regular persistent objects, via the
  * Format.convertRawObject method.
- *
+ * <p>
  * The subclass implements readNext which should call checkAndConvert before
  * returning the final value.
  *
@@ -41,27 +41,67 @@ abstract class RawAbstractInput extends AbstractInput {
         this.converted = converted;
     }
 
+    static Format checkRawType(Catalog catalog,
+                               Object o,
+                               Format declaredFormat)
+            throws RefreshException {
+
+        assert declaredFormat != null;
+        Format format;
+        if(o instanceof RawObject) {
+            format = (Format) ((RawObject) o).getType();
+            /* Ensure a fresh format is used, in case of Replica refresh. */
+            format = catalog.getFormat(format.getId(), false /*expectStored*/);
+        }
+        else {
+            format = catalog.getFormat(o.getClass(),
+                    false /*checkEntitySubclassIndexes*/);
+            if(!format.isSimple() || format.isEnum()) {
+                throw new IllegalArgumentException
+                        ("Not a RawObject or a non-enum simple type: " +
+                                format.getClassName());
+            }
+        }
+        if(!format.isAssignableTo(declaredFormat)) {
+            throw new IllegalArgumentException
+                    ("Not a subtype of the field's declared class " +
+                            declaredFormat.getClassName() + ": " +
+                            format.getClassName());
+        }
+        if(!format.isCurrentVersion()) {
+            throw new IllegalArgumentException
+                    ("Raw type version is not current.  Class: " +
+                            format.getClassName() + " Version: " +
+                            format.getVersion());
+        }
+        Format proxiedFormat = format.getProxiedFormat();
+        if(proxiedFormat != null) {
+            format = proxiedFormat;
+        }
+        return format;
+    }
+
     public Object readObject()
-        throws RefreshException {
+            throws RefreshException {
 
         return readNext();
     }
 
     public Object readKeyObject(Format format)
-        throws RefreshException {
+            throws RefreshException {
 
         return readNext();
     }
 
     public Object readStringObject()
-        throws RefreshException {
+            throws RefreshException {
 
         return readNext();
     }
 
     public void registerPriKeyObject(Object o) {
     }
-    
+
     public void registerPriStringKeyObject(Object o) {
     }
 
@@ -77,175 +117,143 @@ abstract class RawAbstractInput extends AbstractInput {
     }
 
     abstract Object readNext()
-        throws RefreshException;
+            throws RefreshException;
 
     Object checkAndConvert(Object o, Format declaredFormat)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (o == null) {
-            if (declaredFormat.isPrimitive()) {
+        if(o == null) {
+            if(declaredFormat.isPrimitive()) {
                 throw new IllegalArgumentException
-                    ("A primitive type may not be null or missing: " +
-                     declaredFormat.getClassName());
+                        ("A primitive type may not be null or missing: " +
+                                declaredFormat.getClassName());
             }
-        } else if (declaredFormat.isSimple()) {
-            if (declaredFormat.isPrimitive()) {
-                if (o.getClass() !=
-                    declaredFormat.getWrapperFormat().getType()) {
+        }
+        else if(declaredFormat.isSimple()) {
+            if(declaredFormat.isPrimitive()) {
+                if(o.getClass() !=
+                        declaredFormat.getWrapperFormat().getType()) {
                     throw new IllegalArgumentException
-                        ("Raw value class: " + o.getClass().getName() +
-                         " must be the wrapper class for a primitive type: " +
-                         declaredFormat.getClassName());
-                }
-            } else {
-                if (o.getClass() != declaredFormat.getType()) {
-                    throw new IllegalArgumentException
-                        ("Raw value class: " + o.getClass().getName() +
-                         " must be the declared class for a simple type: " +
-                         declaredFormat.getClassName());
+                            ("Raw value class: " + o.getClass().getName() +
+                                    " must be the wrapper class for a primitive type: " +
+                                    declaredFormat.getClassName());
                 }
             }
-        } else {
-            if (o instanceof RawObject) {
+            else {
+                if(o.getClass() != declaredFormat.getType()) {
+                    throw new IllegalArgumentException
+                            ("Raw value class: " + o.getClass().getName() +
+                                    " must be the declared class for a simple type: " +
+                                    declaredFormat.getClassName());
+                }
+            }
+        }
+        else {
+            if(o instanceof RawObject) {
                 Object o2 = null;
-                if (!rawAccess) {
-                    if (converted != null) {
+                if(!rawAccess) {
+                    if(converted != null) {
                         o2 = converted.get(o);
-                    } else {
+                    }
+                    else {
                         converted = new IdentityHashMap();
                     }
                 }
-                if (o2 != null) {
+                if(o2 != null) {
                     o = o2;
-                } else {
-                    if (!rawAccess) {
+                }
+                else {
+                    if(!rawAccess) {
                         o = catalog.convertRawObject((RawObject) o, converted);
                     }
                 }
-            } else {
-                if (!SimpleCatalog.isSimpleType(o.getClass())) {
+            }
+            else {
+                if(!SimpleCatalog.isSimpleType(o.getClass())) {
                     throw new IllegalArgumentException
-                        ("Raw value class: " + o.getClass().getName() +
-                         " must be RawObject a simple type");
+                            ("Raw value class: " + o.getClass().getName() +
+                                    " must be RawObject a simple type");
                 }
             }
-            if (rawAccess) {
+            if(rawAccess) {
                 checkRawType(catalog, o, declaredFormat);
-            } else {
-                if (!declaredFormat.getType().isAssignableFrom(o.getClass())) {
+            }
+            else {
+                if(!declaredFormat.getType().isAssignableFrom(o.getClass())) {
                     throw new IllegalArgumentException
-                        ("Raw value class: " + o.getClass().getName() +
-                         " is not assignable to type: " +
-                         declaredFormat.getClassName());
+                            ("Raw value class: " + o.getClass().getName() +
+                                    " is not assignable to type: " +
+                                    declaredFormat.getClassName());
                 }
             }
         }
         return o;
     }
 
-    static Format checkRawType(Catalog catalog,
-                               Object o,
-                               Format declaredFormat)
-        throws RefreshException {
-
-        assert declaredFormat != null;
-        Format format;
-        if (o instanceof RawObject) {
-            format = (Format) ((RawObject) o).getType();
-            /* Ensure a fresh format is used, in case of Replica refresh. */
-            format = catalog.getFormat(format.getId(), false /*expectStored*/);
-        } else {
-            format = catalog.getFormat(o.getClass(),
-                                       false /*checkEntitySubclassIndexes*/);
-            if (!format.isSimple() || format.isEnum()) {
-                throw new IllegalArgumentException
-                    ("Not a RawObject or a non-enum simple type: " +
-                     format.getClassName());
-            }
-        }
-        if (!format.isAssignableTo(declaredFormat)) {
-            throw new IllegalArgumentException
-                ("Not a subtype of the field's declared class " +
-                 declaredFormat.getClassName() + ": " +
-                 format.getClassName());
-        }
-        if (!format.isCurrentVersion()) {
-            throw new IllegalArgumentException
-                ("Raw type version is not current.  Class: " +
-                 format.getClassName() + " Version: " +
-                 format.getVersion());
-        }
-        Format proxiedFormat = format.getProxiedFormat();
-        if (proxiedFormat != null) {
-            format = proxiedFormat;
-        }
-        return format;
-    }
-
     /* The following methods are a subset of the methods in TupleInput. */
 
     public String readString()
-        throws RefreshException {
+            throws RefreshException {
 
         return (String) readNext();
     }
 
     public char readChar()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Character) readNext()).charValue();
     }
 
     public boolean readBoolean()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Boolean) readNext()).booleanValue();
     }
 
     public byte readByte()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Byte) readNext()).byteValue();
     }
 
     public short readShort()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Short) readNext()).shortValue();
     }
 
     public int readInt()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Integer) readNext()).intValue();
     }
 
     public long readLong()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Long) readNext()).longValue();
     }
 
     public float readSortedFloat()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Float) readNext()).floatValue();
     }
 
     public double readSortedDouble()
-        throws RefreshException {
+            throws RefreshException {
 
         return ((Double) readNext()).doubleValue();
     }
-    
-    public BigDecimal readSortedBigDecimal() 
-        throws RefreshException {
-        
+
+    public BigDecimal readSortedBigDecimal()
+            throws RefreshException {
+
         return (BigDecimal) readNext();
     }
 
     public BigInteger readBigInteger()
-        throws RefreshException {
+            throws RefreshException {
 
         return (BigInteger) readNext();
     }

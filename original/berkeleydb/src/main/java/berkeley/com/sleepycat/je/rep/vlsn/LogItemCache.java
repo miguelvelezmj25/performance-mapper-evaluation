@@ -12,20 +12,20 @@
  */
 package berkeley.com.sleepycat.je.rep.vlsn;
 
-import java.lang.ref.SoftReference;
-import java.util.concurrent.atomic.AtomicReference;
-
 import berkeley.com.sleepycat.je.log.LogItem;
 import berkeley.com.sleepycat.je.utilint.LongStat;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.lang.ref.SoftReference;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A no-wait cache used to retain the most recent VLSNs. The Feeders check this
  * cache first for log entries to send out to the Replicas. Feeders that are
  * feeding at the most up to date portion of the replication stream will likely
  * hit in the cache, preventing a lookup in the log buffers or log files.
- *
+ * <p>
  * The log item cache is made up of weak references so there is never any
  * guarantee that even the most recent 32 entries are in there.
  */
@@ -37,17 +37,15 @@ class LogItemCache {
      */
     private final int cacheSize;
     private final int sizeMask;
-
+    private final LongStat nHits;
+    private final LongStat nMisses;
     /*
      * Soft reference to array, so that the LogItems can be released when
      * under GC pressure.
      */
     private volatile SoftReference<AtomicReference<LogItem>[]>
-        cacheReference =
-        new SoftReference<AtomicReference<LogItem>[]>(null);
-
-    private final LongStat nHits;
-    private final LongStat nMisses;
+            cacheReference =
+            new SoftReference<AtomicReference<LogItem>[]>(null);
 
     /**
      * Creates a log item size of the specified size.
@@ -57,9 +55,9 @@ class LogItemCache {
      * @throws IllegalArgumentException via ReplicatedEnvironment ctor.
      */
     LogItemCache(int cacheSize, StatGroup statGroup) {
-        if (Integer.bitCount(cacheSize) != 1) {
+        if(Integer.bitCount(cacheSize) != 1) {
             throw new IllegalArgumentException
-                ("Bad cache size: " + cacheSize + "; it must be a power of 2");
+                    ("Bad cache size: " + cacheSize + "; it must be a power of 2");
         }
         this.cacheSize = cacheSize;
         sizeMask = cacheSize - 1;
@@ -68,13 +66,13 @@ class LogItemCache {
     }
 
     void put(VLSN vlsn, LogItem logItem) {
-        getArray()[(int)vlsn.getSequence() & sizeMask].set(logItem);
+        getArray()[(int) vlsn.getSequence() & sizeMask].set(logItem);
     }
 
     LogItem get(VLSN vlsn) {
         final LogItem item =
-            getArray()[(int)vlsn.getSequence() & sizeMask].get();
-        if ((item != null) && item.header.getVLSN().equals(vlsn)) {
+                getArray()[(int) vlsn.getSequence() & sizeMask].get();
+        if((item != null) && item.header.getVLSN().equals(vlsn)) {
             nHits.increment();
             return item;
         }
@@ -87,7 +85,7 @@ class LogItemCache {
      * For explicit release of references.
      */
     void clear() {
-        for (AtomicReference<LogItem> element : getArray()) {
+        for(AtomicReference<LogItem> element : getArray()) {
             element.set(null);
         }
     }
@@ -96,7 +94,7 @@ class LogItemCache {
      * Returns the cache array, creating a new one, if the GC had cleared the
      * reference to the earlier one.
      * <p>
-     *
+     * <p>
      * Note that there may be a slight inefficiency if getArray is called
      * concurrently, and it had been cleared earlier, since it would be
      * allocated twice and introduce a cache miss. This occurrence is
@@ -108,13 +106,13 @@ class LogItemCache {
     @SuppressWarnings("unchecked")
     private final AtomicReference<LogItem>[] getArray() {
         AtomicReference<LogItem>[] array = cacheReference.get();
-        if (array == null) {
+        if(array == null) {
             array = new AtomicReference[cacheSize];
-            for (int i=0; i < array.length; i++) {
+            for(int i = 0; i < array.length; i++) {
                 array[i] = new AtomicReference<LogItem>();
             }
             cacheReference =
-                new SoftReference<AtomicReference<LogItem>[]>(array);
+                    new SoftReference<AtomicReference<LogItem>[]>(array);
         }
         return array;
     }

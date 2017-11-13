@@ -13,26 +13,22 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.rep.impl.RepGroupDB;
+import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.rep.impl.RepGroupDB;
-import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
-
 /**
  * @hidden Dumps the contents of the replication group database. Reads the
  * database directly, using a read only Environment.
- *
+ * <p>
  * For internal use only. JE users should now use
  * com.sleepycat.je.rep.DbGroupAdmin to display group information.
- *
+ * <p>
  * <pre>
  *   DbDumpGroup -h &lt;envHome&gt;
  * </pre>
@@ -51,7 +47,7 @@ public class DbDumpGroup {
         dumper.parseArgs(args);
         try {
             dumper.run();
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             e.printStackTrace(System.err);
             System.exit(1);
         }
@@ -59,11 +55,11 @@ public class DbDumpGroup {
 
     public void run() {
         out.println("For internal use only. Consider using the public " +
-                    "utility com.sleepycat.je.rep.DbGroupAdmin when " +
-                    "displaying group information.");
-                    
+                "utility com.sleepycat.je.rep.DbGroupAdmin when " +
+                "displaying group information.");
+
         out.println("Environment: " + envHome);
-        if (dumpCount) {
+        if(dumpCount) {
             dumpCount();
         }
         dumpGroup();
@@ -84,7 +80,7 @@ public class DbDumpGroup {
 
         List<String> databaseNames = new LinkedList<String>();
         databaseNames.addAll(env.getDatabaseNames());
-        for (String dbName : databaseNames) {
+        for(String dbName : databaseNames) {
 
             DatabaseConfig dbCfg = new DatabaseConfig();
             dbCfg.setAllowCreate(false);
@@ -117,27 +113,30 @@ public class DbDumpGroup {
         int argc = 0;
         int nArgs = argv.length;
 
-        if (nArgs == 0) {
+        if(nArgs == 0) {
             printUsage(null);
             System.exit(0);
         }
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
-            if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(argv[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else if (thisArg.equals("-dumpCount")) {
+            }
+            else if(thisArg.equals("-dumpCount")) {
                 dumpCount = true;
-            } else {
+            }
+            else {
                 printUsage(thisArg + " is not a valid argument");
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage("-h is a required argument");
         }
     }
@@ -148,14 +147,14 @@ public class DbDumpGroup {
      * @param message
      */
     private void printUsage(String msg) {
-        if (msg != null) {
+        if(msg != null) {
             out.println(msg);
         }
 
         out.println("Usage: " + DbDumpGroup.class.getName());
         out.println("       -h <dir>   # environment home directory");
         out.println("       -dumpCount # dump all databases' count in\n" +
-                    "                    this Environment");
+                "                    this Environment");
         System.exit(-1);
     }
 }

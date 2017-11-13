@@ -29,6 +29,7 @@ public class ReplicationBasicConfig extends ReplicationNetworkConfig {
 
     /* The set of Replication properties specific to this class */
     private static Set<String> repBasicProperties;
+
     static {
         repBasicProperties = new HashSet<String>();
         /* Nail the set down */
@@ -45,11 +46,21 @@ public class ReplicationBasicConfig extends ReplicationNetworkConfig {
     /**
      * Constructs a ReplicationBasicConfig initialized with the
      * provided propeties.
+     *
      * @param properties a set of properties which which to initialize the
-     * instance properties
+     *                   instance properties
      */
     public ReplicationBasicConfig(Properties properties) {
         super(properties);
+    }
+
+    /**
+     * @hidden Enumerate the subset of configuration properties that are intended to
+     * control network access.
+     */
+    static Set<String> getRepBasicPropertySet() {
+
+        return repBasicProperties;
     }
 
     /**
@@ -69,15 +80,5 @@ public class ReplicationBasicConfig extends ReplicationNetworkConfig {
     @Override
     public ReplicationBasicConfig clone() {
         return (ReplicationBasicConfig) super.clone();
-    }
-
-    /**
-     * @hidden
-     * Enumerate the subset of configuration properties that are intended to
-     * control network access.
-     */
-    static Set<String> getRepBasicPropertySet() {
-
-        return repBasicProperties;
     }
 }

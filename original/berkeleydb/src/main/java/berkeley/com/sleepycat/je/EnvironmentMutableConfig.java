@@ -13,67 +13,67 @@
 
 package berkeley.com.sleepycat.je;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Properties;
-
 import berkeley.com.sleepycat.je.config.ConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Properties;
 
 /**
  * Specifies the environment attributes that may be changed after the
  * environment has been opened.  EnvironmentMutableConfig is a parameter to
  * {@link Environment#setMutableConfig} and is returned by {@link
  * Environment#getMutableConfig}.
- *
+ * <p>
  * <p>There are two types of mutable environment properties: per-environment
  * handle properties, and environment wide properties.</p>
- *
+ * <p>
  * <h4>Per-Environment Handle Properties</h4>
- *
+ * <p>
  * <p>Per-environment handle properties apply only to a single Environment
  * instance.  For example, to change the default transaction commit behavior
  * for a single environment handle, do this:</p>
- *
+ * <p>
  * <blockquote><pre>
  *     // Specify no-sync behavior for a given handle.
  *     EnvironmentMutableConfig mutableConfig = env.getMutableConfig();
  *     mutableConfig.setDurability(Durability.COMMIT_NO_SYNC);
  *     env.setMutableConfig(mutableConfig);
  * </pre></blockquote>
- *
+ * <p>
  * <p>The per-environment handle properties are listed below.  These properties
  * are accessed using the setter and getter methods listed, as shown in the
  * example above.</p>
- *
+ * <p>
  * <ul>
  * <li>{@link #setDurability}, {@link #getDurability}</li>
  * <li>{@link #setTxnNoSync}, {@link #getTxnNoSync} <em>deprecated</em></li>
  * <li>{@link #setTxnWriteNoSync}, {@link #getTxnWriteNoSync} <em>deprecated</em></li>
  * </ul>
- *
+ * <p>
  * <h4>Environment-Wide Mutable Properties</h4>
- *
+ * <p>
  * <p>Environment-wide mutable properties are those that can be changed for an
  * environment as a whole, irrespective of which environment instance (for the
  * same physical environment) is used.  For example, to stop the cleaner daemon
  * thread, do this:</p>
- *
+ * <p>
  * <blockquote><pre>
  *     // Stop the cleaner daemon threads for the environment.
  *     EnvironmentMutableConfig mutableConfig = env.getMutableConfig();
  *     mutableConfig.setConfigParam(EnvironmentConfig.ENV_RUN_CLEANER, "false");
  *     env.setMutableConfig(mutableConfig);
  * </pre></blockquote>
- *
+ * <p>
  * <p>The environment-wide mutable properties are documented as such for each
  * EnvironmentConfig String constant.</p>
- *
+ * <p>
  * <h4>Getting the Current Environment Properties</h4>
- *
+ * <p>
  * To get the current "live" properties of an environment after constructing it
  * or changing its properties, you must call {@link Environment#getConfig} or
  * {@link Environment#getMutableConfig}.  The original EnvironmentConfig or
@@ -85,35 +85,11 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  */
 public class EnvironmentMutableConfig implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
-
-    /*
-     * Change copyHandlePropsTo and Environment.copyToHandleConfig when adding
-     * fields here.
-     */
-    private boolean txnNoSync = false;
-    private boolean txnWriteNoSync = false;
-
-    /**
-     * Cache size is a category of property that is calculated within the
-     * environment.  It is only supplied when returning the cache size to the
-     * application and never used internally; internal code directly checks
-     * with the MemoryBudget class;
-     */
-    private long cacheSize;
-
-    private long offHeapCacheSize;
-
     /**
      * Note that in the implementation we choose not to extend Properties in
      * order to keep the configuration type safe.
      */
     Properties props;
-
-    /**
-     * For unit testing, to prevent loading of je.properties.
-     */
-    private transient boolean loadPropertyFile = true;
-
     /**
      * Internal boolean that says whether or not to validate params.  Setting
      * it to false means that parameter value validatation won't be performed
@@ -121,7 +97,24 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      * DbInternal.
      */
     transient boolean validateParams = true;
-
+    /*
+     * Change copyHandlePropsTo and Environment.copyToHandleConfig when adding
+     * fields here.
+     */
+    private boolean txnNoSync = false;
+    private boolean txnWriteNoSync = false;
+    /**
+     * Cache size is a category of property that is calculated within the
+     * environment.  It is only supplied when returning the cache size to the
+     * application and never used internally; internal code directly checks
+     * with the MemoryBudget class;
+     */
+    private long cacheSize;
+    private long offHeapCacheSize;
+    /**
+     * For unit testing, to prevent loading of je.properties.
+     */
+    private transient boolean loadPropertyFile = true;
     private transient ExceptionListener exceptionListener = null;
     private CacheMode cacheMode;
 
@@ -137,46 +130,22 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      * Used by EnvironmentConfig to construct from properties.
      */
     EnvironmentMutableConfig(Properties properties)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.validateProperties(properties,
-                                           false,  // isRepConfigInstance
-                                           getClass().getName());
+                false,  // isRepConfigInstance
+                getClass().getName());
         /* For safety, copy the passed in properties. */
         props = new Properties();
         props.putAll(properties);
     }
 
     /**
-     * Configures the database environment for asynchronous transactions.
-     *
-     * @param noSync If true, do not write or synchronously flush the log on
-     * transaction commit. This means that transactions exhibit the ACI
-     * (Atomicity, Consistency, and Isolation) properties, but not D
-     * (Durability); that is, database integrity is maintained, but if the JVM
-     * or operating system fails, it is possible some number of the most
-     * recently committed transactions may be undone during recovery. The
-     * number of transactions at risk is governed by how many updates fit into
-     * a log buffer, how often the operating system flushes dirty buffers to
-     * disk, and how often the database environment is checkpointed.
-     *
-     * <p>This attribute is false by default for this class and for the
-     * database environment.</p>
-     *
-     * @deprecated replaced by {@link #setDurability}
-     */
-    public EnvironmentMutableConfig setTxnNoSync(boolean noSync) {
-        setTxnNoSyncVoid(noSync);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setTxnNoSyncVoid(boolean noSync) {
         TransactionConfig.checkMixedMode
-            (false, noSync, txnWriteNoSync, getDurability());
+                (false, noSync, txnWriteNoSync, getDurability());
         txnNoSync = noSync;
     }
 
@@ -186,7 +155,6 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      *
      * @return true if the database environment is configured for asynchronous
      * transactions.
-     *
      * @deprecated replaced by {@link #getDurability}
      */
     public boolean getTxnNoSync() {
@@ -194,40 +162,33 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * Configures the database environment for transactions which write but do
-     * not flush the log.
+     * Configures the database environment for asynchronous transactions.
      *
-     * @param writeNoSync If true, write but do not synchronously flush the log
-     * on transaction commit. This means that transactions exhibit the ACI
-     * (Atomicity, Consistency, and Isolation) properties, but not D
-     * (Durability); that is, database integrity is maintained, but if the
-     * operating system fails, it is possible some number of the most recently
-     * committed transactions may be undone during recovery. The number of
-     * transactions at risk is governed by how often the operating system
-     * flushes dirty buffers to disk, and how often the database environment is
-     * checkpointed.
-     *
-     * <p>The motivation for this attribute is to provide a transaction that
-     * has more durability than asynchronous (nosync) transactions, but has
-     * higher performance than synchronous transactions.</p>
-     *
-     * <p>This attribute is false by default for this class and for the
-     * database environment.</p>
-     *
+     * @param noSync If true, do not write or synchronously flush the log on
+     *               transaction commit. This means that transactions exhibit the ACI
+     *               (Atomicity, Consistency, and Isolation) properties, but not D
+     *               (Durability); that is, database integrity is maintained, but if the JVM
+     *               or operating system fails, it is possible some number of the most
+     *               recently committed transactions may be undone during recovery. The
+     *               number of transactions at risk is governed by how many updates fit into
+     *               a log buffer, how often the operating system flushes dirty buffers to
+     *               disk, and how often the database environment is checkpointed.
+     *               <p>
+     *               <p>This attribute is false by default for this class and for the
+     *               database environment.</p>
      * @deprecated replaced by {@link #setDurability}
      */
-    public EnvironmentMutableConfig setTxnWriteNoSync(boolean writeNoSync) {
-        setTxnWriteNoSyncVoid(writeNoSync);
+    public EnvironmentMutableConfig setTxnNoSync(boolean noSync) {
+        setTxnNoSyncVoid(noSync);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setTxnWriteNoSyncVoid(boolean writeNoSync) {
         TransactionConfig.checkMixedMode
-            (false, txnNoSync, writeNoSync, getDurability());
+                (false, txnNoSync, writeNoSync, getDurability());
         txnWriteNoSync = writeNoSync;
     }
 
@@ -237,7 +198,6 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      *
      * @return true if the database environment is configured for transactions
      * which write but do not flush the log.
-     *
      * @deprecated replaced by {@link #getDurability}
      */
     public boolean getTxnWriteNoSync() {
@@ -245,33 +205,46 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * Convenience method for setting {@link EnvironmentConfig#TXN_DURABILITY}.
+     * Configures the database environment for transactions which write but do
+     * not flush the log.
      *
-     * @param durability the new durability definition
-     *
-     * @return this
-     *
-     * @see Durability
+     * @param writeNoSync If true, write but do not synchronously flush the log
+     *                    on transaction commit. This means that transactions exhibit the ACI
+     *                    (Atomicity, Consistency, and Isolation) properties, but not D
+     *                    (Durability); that is, database integrity is maintained, but if the
+     *                    operating system fails, it is possible some number of the most recently
+     *                    committed transactions may be undone during recovery. The number of
+     *                    transactions at risk is governed by how often the operating system
+     *                    flushes dirty buffers to disk, and how often the database environment is
+     *                    checkpointed.
+     *                    <p>
+     *                    <p>The motivation for this attribute is to provide a transaction that
+     *                    has more durability than asynchronous (nosync) transactions, but has
+     *                    higher performance than synchronous transactions.</p>
+     *                    <p>
+     *                    <p>This attribute is false by default for this class and for the
+     *                    database environment.</p>
+     * @deprecated replaced by {@link #setDurability}
      */
-    public EnvironmentMutableConfig setDurability(Durability durability) {
-        setDurabilityVoid(durability);
+    public EnvironmentMutableConfig setTxnWriteNoSync(boolean writeNoSync) {
+        setTxnWriteNoSyncVoid(writeNoSync);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setDurabilityVoid(Durability durability) {
         TransactionConfig.checkMixedMode
-            (false, txnNoSync, txnWriteNoSync, durability);
+                (false, txnNoSync, txnWriteNoSync, durability);
 
-        if (durability == null) {
+        if(durability == null) {
             props.remove(EnvironmentParams.JE_DURABILITY);
-        } else {
+        }
+        else {
             DbConfigManager.setVal(props, EnvironmentParams.JE_DURABILITY,
-                                   durability.toString(),
-                                   validateParams);
+                    durability.toString(),
+                    validateParams);
         }
     }
 
@@ -282,37 +255,30 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      */
     public Durability getDurability() {
         String value = DbConfigManager.getVal(props,
-                                              EnvironmentParams.JE_DURABILITY);
+                EnvironmentParams.JE_DURABILITY);
         return Durability.parse(value);
     }
 
     /**
-     * A convenience method for setting {@link EnvironmentConfig#MAX_MEMORY}.
+     * Convenience method for setting {@link EnvironmentConfig#TXN_DURABILITY}.
      *
-     * @param totalBytes The memory available to the database system, in bytes.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
-     *
+     * @param durability the new durability definition
      * @return this
-     *
-     * @see EnvironmentConfig#MAX_MEMORY
+     * @see Durability
      */
-    public EnvironmentMutableConfig setCacheSize(long totalBytes)
-        throws IllegalArgumentException {
-
-        setCacheSizeVoid(totalBytes);
+    public EnvironmentMutableConfig setDurability(Durability durability) {
+        setDurabilityVoid(durability);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setCacheSizeVoid(long totalBytes)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, EnvironmentParams.MAX_MEMORY,
-            Long.toString(totalBytes), validateParams);
+                Long.toString(totalBytes), validateParams);
     }
 
     /**
@@ -332,33 +298,28 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * A convenience method for setting {@link
-     * EnvironmentConfig#MAX_MEMORY_PERCENT}.
+     * A convenience method for setting {@link EnvironmentConfig#MAX_MEMORY}.
      *
-     * @param percent The percent of JVM memory to allocate to the JE cache.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified.
-     *
+     * @param totalBytes The memory available to the database system, in bytes.
      * @return this
-     *
-     * @see EnvironmentConfig#MAX_MEMORY_PERCENT
+     * @throws IllegalArgumentException if an invalid parameter is specified.
+     * @see EnvironmentConfig#MAX_MEMORY
      */
-    public EnvironmentMutableConfig setCachePercent(int percent)
-        throws IllegalArgumentException {
+    public EnvironmentMutableConfig setCacheSize(long totalBytes)
+            throws IllegalArgumentException {
 
-        setCachePercentVoid(percent);
+        setCacheSizeVoid(totalBytes);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setCachePercentVoid(int percent)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setIntVal(props, EnvironmentParams.MAX_MEMORY_PERCENT,
-            percent, validateParams);
+                percent, validateParams);
     }
 
     /**
@@ -370,29 +331,33 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     public int getCachePercent() {
 
         return DbConfigManager.getIntVal(props,
-                                         EnvironmentParams.MAX_MEMORY_PERCENT);
+                EnvironmentParams.MAX_MEMORY_PERCENT);
     }
 
     /**
-     * A convenience method for setting
-     * {@link EnvironmentConfig#MAX_OFF_HEAP_MEMORY}.
+     * A convenience method for setting {@link
+     * EnvironmentConfig#MAX_MEMORY_PERCENT}.
+     *
+     * @param percent The percent of JVM memory to allocate to the JE cache.
+     * @return this
+     * @throws IllegalArgumentException if an invalid parameter is specified.
+     * @see EnvironmentConfig#MAX_MEMORY_PERCENT
      */
-    public EnvironmentMutableConfig setOffHeapCacheSize(long totalBytes)
-        throws IllegalArgumentException {
+    public EnvironmentMutableConfig setCachePercent(int percent)
+            throws IllegalArgumentException {
 
-        setOffHeapCacheSizeVoid(totalBytes);
+        setCachePercentVoid(percent);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setOffHeapCacheSizeVoid(long totalBytes)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, EnvironmentParams.MAX_OFF_HEAP_MEMORY,
-            Long.toString(totalBytes), validateParams);
+                Long.toString(totalBytes), validateParams);
     }
 
     /**
@@ -409,33 +374,18 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the exception listener for an Environment.  The listener is called
-     * when a daemon thread throws an exception, in order to provide a
-     * notification mechanism for these otherwise asynchronous exceptions.
-     * Daemon thread exceptions are also printed through stderr.
-     * <p>
-     * Not all daemon exceptions are fatal, and the application bears
-     * responsibility for choosing how to respond to the notification. Since
-     * exceptions may repeat, the application should also choose how to handle
-     * a spate of exceptions. For example, the application may choose to act
-     * upon each notification, or it may choose to batch up its responses
-     * by implementing the listener so it stores exceptions, and only acts
-     * when a certain number have been received.
-     * @param exceptionListener the callback to be executed when an exception
-     * occurs.
-     *
-     * @return this
+     * A convenience method for setting
+     * {@link EnvironmentConfig#MAX_OFF_HEAP_MEMORY}.
      */
-    public EnvironmentMutableConfig
-        setExceptionListener(ExceptionListener exceptionListener) {
+    public EnvironmentMutableConfig setOffHeapCacheSize(long totalBytes)
+            throws IllegalArgumentException {
 
-        setExceptionListenerVoid(exceptionListener);
+        setOffHeapCacheSizeVoid(totalBytes);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setExceptionListenerVoid(ExceptionListener exceptionListener) {
         this.exceptionListener = exceptionListener;
@@ -449,29 +399,32 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * Sets the default {@code CacheMode} used for operations performed in this
-     * environment.  The default cache mode may be overridden on a per-database
-     * basis using {@link DatabaseConfig#setCacheMode}, and on a per-record or
-     * per-operation basis using {@link Cursor#setCacheMode}, {@link
-     * ReadOptions#setCacheMode(CacheMode)} or {@link
-     * WriteOptions#setCacheMode(CacheMode)}.
+     * Sets the exception listener for an Environment.  The listener is called
+     * when a daemon thread throws an exception, in order to provide a
+     * notification mechanism for these otherwise asynchronous exceptions.
+     * Daemon thread exceptions are also printed through stderr.
+     * <p>
+     * Not all daemon exceptions are fatal, and the application bears
+     * responsibility for choosing how to respond to the notification. Since
+     * exceptions may repeat, the application should also choose how to handle
+     * a spate of exceptions. For example, the application may choose to act
+     * upon each notification, or it may choose to batch up its responses
+     * by implementing the listener so it stores exceptions, and only acts
+     * when a certain number have been received.
      *
-     * @param cacheMode is the default {@code CacheMode} used for operations
-     * performed in this environment.  If {@code null} is specified, {@link
-     * CacheMode#DEFAULT} will be used.
-     *
-     * @see CacheMode for further details.
-     *
-     * @since 4.0.97
+     * @param exceptionListener the callback to be executed when an exception
+     *                          occurs.
+     * @return this
      */
-    public EnvironmentMutableConfig setCacheMode(final CacheMode cacheMode) {
-        setCacheModeVoid(cacheMode);
+    public EnvironmentMutableConfig
+    setExceptionListener(ExceptionListener exceptionListener) {
+
+        setExceptionListenerVoid(exceptionListener);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setCacheModeVoid(final CacheMode cacheMode) {
         this.cacheMode = cacheMode;
@@ -483,13 +436,30 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      *
      * @return the default {@code CacheMode} used for operations performed on
      * this database, or null if {@link CacheMode#DEFAULT} is used.
-     *
      * @see #setCacheMode
-     *
      * @since 4.0.97
      */
     public CacheMode getCacheMode() {
         return cacheMode;
+    }
+
+    /**
+     * Sets the default {@code CacheMode} used for operations performed in this
+     * environment.  The default cache mode may be overridden on a per-database
+     * basis using {@link DatabaseConfig#setCacheMode}, and on a per-record or
+     * per-operation basis using {@link Cursor#setCacheMode}, {@link
+     * ReadOptions#setCacheMode(CacheMode)} or {@link
+     * WriteOptions#setCacheMode(CacheMode)}.
+     *
+     * @param cacheMode is the default {@code CacheMode} used for operations
+     *                  performed in this environment.  If {@code null} is specified, {@link
+     *                  CacheMode#DEFAULT} will be used.
+     * @see CacheMode for further details.
+     * @since 4.0.97
+     */
+    public EnvironmentMutableConfig setCacheMode(final CacheMode cacheMode) {
+        setCacheModeVoid(cacheMode);
+        return this;
     }
 
     /**
@@ -498,25 +468,22 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      * configuration.
      *
      * @param paramName the configuration parameter name, one of the String
-     * constants in this class
-     *
-     * @param value The configuration value
-     *
+     *                  constants in this class
+     * @param value     The configuration value
      * @return this
-     *
      * @throws IllegalArgumentException if the paramName or value is invalid.
      */
     public EnvironmentMutableConfig setConfigParam(String paramName,
                                                    String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setConfigParam(props,
-                                       paramName,
-                                       value,
-                                       true, /* require mutability. */
-                                       validateParams,
-                                       false /* forReplication */,
-                                       true  /* verifyForReplication */);
+                paramName,
+                value,
+                true, /* require mutability. */
+                validateParams,
+                false /* forReplication */,
+                true  /* verifyForReplication */);
         return this;
     }
 
@@ -524,22 +491,28 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
      * Returns the value for this configuration parameter.
      *
      * @param paramName a valid configuration parameter, one of the String
-     * constants in this class.
+     *                  constants in this class.
      * @return the configuration value.
      * @throws IllegalArgumentException if the paramName is invalid.
      */
     public String getConfigParam(String paramName)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-       return DbConfigManager.getConfigParam(props, paramName);
+        return DbConfigManager.getConfigParam(props, paramName);
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      */
     public boolean isConfigParamSet(String paramName) {
         return props.containsKey(paramName);
+    }
+
+    /**
+     * @hidden Used by unit tests.
+     */
+    boolean getValidateParams() {
+        return validateParams;
     }
 
     /*
@@ -550,52 +523,44 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     }
 
     /**
-     * @hidden
-     * Used by unit tests.
-     */
-    boolean getValidateParams() {
-        return validateParams;
-    }
-
-    /**
      * Checks that the immutable values in the environment config used to open
      * an environment match those in the config object saved by the underlying
      * shared EnvironmentImpl.
+     *
      * @param handleConfigProps are the config property values that were
-     * specified by configuration object from the Environment.
+     *                          specified by configuration object from the Environment.
      */
     void checkImmutablePropsForEquality(Properties handleConfigProps)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         Iterator<String> iter =
-            EnvironmentParams.SUPPORTED_PARAMS.keySet().iterator();
-        while (iter.hasNext()) {
+                EnvironmentParams.SUPPORTED_PARAMS.keySet().iterator();
+        while(iter.hasNext()) {
             String paramName = iter.next();
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
             assert param != null;
-            if (!param.isMutable() && !param.isForReplication()) {
+            if(!param.isMutable() && !param.isForReplication()) {
                 String paramVal = props.getProperty(paramName);
                 String useParamVal = handleConfigProps.getProperty(paramName);
-                if ((paramVal != null) ?
-                    (!paramVal.equals(useParamVal)) :
-                    (useParamVal != null)) {
+                if((paramVal != null) ?
+                        (!paramVal.equals(useParamVal)) :
+                        (useParamVal != null)) {
                     throw new IllegalArgumentException
-                        (paramName + " is set to " +
-                         useParamVal +
-                         " in the config parameter" +
-                         " which is incompatible" +
-                         " with the value of " +
-                         paramVal + " in the" +
-                         " underlying environment");
+                            (paramName + " is set to " +
+                                    useParamVal +
+                                    " in the config parameter" +
+                                    " which is incompatible" +
+                                    " with the value of " +
+                                    paramVal + " in the" +
+                                    " underlying environment");
                 }
             }
         }
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      * Overrides Object.clone() to clone all properties, used by this class and
      * EnvironmentConfig.
      */
@@ -604,10 +569,10 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
 
         try {
             EnvironmentMutableConfig copy =
-                (EnvironmentMutableConfig) super.clone();
+                    (EnvironmentMutableConfig) super.clone();
             copy.props = (Properties) props.clone();
             return copy;
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -643,12 +608,12 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
 
         Properties toProps = toConfig.props;
         Enumeration propNames = props.propertyNames();
-        while (propNames.hasMoreElements()) {
+        while(propNames.hasMoreElements()) {
             String paramName = (String) propNames.nextElement();
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
             assert param != null;
-            if (param.isMutable()) {
+            if(param.isMutable()) {
                 String newVal = props.getProperty(paramName);
                 toProps.setProperty(paramName, newVal);
             }
@@ -666,20 +631,20 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
         offHeapCacheSize = envImpl.getOffHeapCache().getMaxMemory();
     }
 
-   /**
-    * Removes all immutable props.
-    * Unchecked suppress here because Properties don't play well with
-    * generics in Java 1.5
-    */
+    /**
+     * Removes all immutable props.
+     * Unchecked suppress here because Properties don't play well with
+     * generics in Java 1.5
+     */
     @SuppressWarnings("unchecked")
     private void clearImmutableProps() {
         Enumeration propNames = props.propertyNames();
-        while (propNames.hasMoreElements()) {
+        while(propNames.hasMoreElements()) {
             String paramName = (String) propNames.nextElement();
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(paramName);
             assert param != null;
-            if (!param.isMutable()) {
+            if(!param.isMutable()) {
                 props.remove(paramName);
             }
         }
@@ -692,19 +657,20 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     /**
      * For unit testing, to prevent loading of je.properties.
      */
-    void setLoadPropertyFile(boolean loadPropertyFile) {
-        this.loadPropertyFile = loadPropertyFile;
-    }
-
-    /**
-     * For unit testing, to prevent loading of je.properties.
-     */
     boolean getLoadPropertyFile() {
         return loadPropertyFile;
     }
 
     /**
+     * For unit testing, to prevent loading of je.properties.
+     */
+    void setLoadPropertyFile(boolean loadPropertyFile) {
+        this.loadPropertyFile = loadPropertyFile;
+    }
+
+    /**
      * Testing support
+     *
      * @hidden
      */
     public int getNumExplicitlySetParams() {
@@ -717,11 +683,11 @@ public class EnvironmentMutableConfig implements Cloneable, Serializable {
     @Override
     public String toString() {
         return " cacheSize=" + cacheSize +
-            " offHeapCacheSize=" + offHeapCacheSize +
-            " cacheMode=" + cacheMode +
-            " txnNoSync=" + txnNoSync +
-            " txnWriteNoSync=" + txnWriteNoSync +
-            " exceptionListener=" + (exceptionListener != null) +
-            " map=" + props.toString();
+                " offHeapCacheSize=" + offHeapCacheSize +
+                " cacheMode=" + cacheMode +
+                " txnNoSync=" + txnNoSync +
+                " txnWriteNoSync=" + txnWriteNoSync +
+                " exceptionListener=" + (exceptionListener != null) +
+                " map=" + props.toString();
     }
 }

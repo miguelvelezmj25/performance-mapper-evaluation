@@ -23,11 +23,11 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * while it is open.  The HandleLocker and the Locker used to open the database
  * both hold a NameLN lock at the same time, so they must share locks to avoid
  * conflicts.
- *
+ * <p>
  * Accounts for the fact that the Txn may end before this locker ends by only
  * keeping the Txn ID rather than a reference to the Txn object.  A reference
  * to a non-tnxl Locker is OK, OTOH, because it is short lived.
- *
+ * <p>
  * Handle Locking Overview
  * ------------------------
  * Environment.openDatabase calls Environment.setupDatabase, which calls
@@ -35,24 +35,24 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * that the HandleLocker is passed to DbTree.getDb and createDb.  These latter
  * methods acquire a read lock on the NameLN for the HandleLocker, in addition
  * to acquiring a read or write lock for the openDatabase locker.
- *
+ * <p>
  * If setupDatabase is not successful, it ensures that locks are released via
  * HandleLocker.endOperation.  If setupDatabase is successful, the handle is
  * returned by openDatabase, and Database.close must be called to release the
  * lock.  The handle lock is released by calling HandleLocker.endOperation.
- *
+ * <p>
  * A special case is when a user txn is passed to openDatabase.  If the txn
  * aborts, the Database handle must be invalidated.  When setupDatabase
  * succeeds it passes the handle to Txn.addOpenedDatabase, which remembers the
  * handle.  Txn.abort invalidates the handle.
- * 
+ * <p>
  * NameLN Migration and LSN Changes [#20617]
  * -----------------------------------------
  * When the log cleaner migrates a NameLN, its LSN changes and the new LSN is
  * locked on behalf of all existing lockers by CursorImpl.lockAfterLsnChange.
  * lockAfterLsnChange is also used when a dirty deferred-write LN is logged by
  * BIN.logDirtyLN, as part of flushing a BIN during a checkpoint or eviction.
- *
+ * <p>
  * Because handle lockers are legitimately very long lived, it is important
  * that lockAfterLsnChange releases the locks on the old LSN, to avoid a steady
  * accumulation of locks in a HandleLocker.  Therefore, lockAfterLsnChange will
@@ -60,7 +60,7 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * desirable to release the old LSN lock on other long lived lockers, it is too
  * risky.  In an experiment, this caused problems with demotion and upgrade,
  * when a lock being demoted or upgraded was released.
- *
+ * <p>
  * Because LSNs can change, it is also important that we don't rely on a single
  * NameLN locker ID (LSN) as a data structure key for handle locks.  This was
  * acceptable when a stable Node ID was used as a lock ID, but is no longer
@@ -77,14 +77,14 @@ public class HandleLocker extends BasicLocker {
     protected HandleLocker(EnvironmentImpl env, Locker buddy) {
         super(env);
         shareWithTxnId =
-            buddy.isTransactional() ? buddy.getId() : TxnManager.NULL_TXN_ID;
-        shareWithNonTxnlLocker = 
-            buddy.isTransactional() ? null : buddy;
+                buddy.isTransactional() ? buddy.getId() : TxnManager.NULL_TXN_ID;
+        shareWithNonTxnlLocker =
+                buddy.isTransactional() ? null : buddy;
     }
 
     public static HandleLocker createHandleLocker(EnvironmentImpl env,
                                                   Locker buddy)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return new HandleLocker(env, buddy);
     }
@@ -95,15 +95,15 @@ public class HandleLocker extends BasicLocker {
     @Override
     public boolean sharesLocksWith(Locker other) {
 
-        if (super.sharesLocksWith(other)) {
+        if(super.sharesLocksWith(other)) {
             return true;
         }
-        if (shareWithTxnId != TxnManager.NULL_TXN_ID &&
-            shareWithTxnId == other.getId()) {
+        if(shareWithTxnId != TxnManager.NULL_TXN_ID &&
+                shareWithTxnId == other.getId()) {
             return true;
         }
-        if (shareWithNonTxnlLocker != null &&
-            shareWithNonTxnlLocker == other) {
+        if(shareWithNonTxnlLocker != null &&
+                shareWithNonTxnlLocker == other) {
             return true;
         }
         return false;

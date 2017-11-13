@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.persist.raw.RawObject;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
  * Implements Accessor for RawObject access.
@@ -56,13 +56,14 @@ class RawAccessor implements Accessor {
 
     public Object newInstance() {
         RawObject superObject;
-        if (superAccessor != null) {
+        if(superAccessor != null) {
             superObject = ((RawObject) superAccessor.newInstance());
-        } else {
+        }
+        else {
             superObject = null;
         }
         return new RawObject
-            (parentFormat, new HashMap<String, Object>(), superObject);
+                (parentFormat, new HashMap<String, Object>(), superObject);
     }
 
     public Object newArray(int len) {
@@ -70,61 +71,68 @@ class RawAccessor implements Accessor {
     }
 
     public boolean isPriKeyFieldNullOrZero(Object o) {
-        if (priKeyField != null) {
+        if(priKeyField != null) {
             Object val = getValue(o, priKeyField);
             Format format = priKeyField.getType();
-            if (format.isPrimitive()) {
+            if(format.isPrimitive()) {
                 return ((Number) val).longValue() == 0L;
-            } else {
+            }
+            else {
                 return val == null;
             }
-        } else if (superAccessor != null) {
+        }
+        else if(superAccessor != null) {
             return superAccessor.isPriKeyFieldNullOrZero(getSuper(o));
-        } else {
+        }
+        else {
             throw DbCompat.unexpectedState("No primary key field");
         }
     }
 
     public void writePriKeyField(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyField != null) {
+        if(priKeyField != null) {
             Object val = getValue(o, priKeyField);
             Format format = priKeyField.getType();
             output.writeKeyObject(val, format);
-        } else if (superAccessor != null) {
+        }
+        else if(superAccessor != null) {
             superAccessor.writePriKeyField(getSuper(o), output);
-        } else {
+        }
+        else {
             throw DbCompat.unexpectedState("No primary key field");
         }
     }
 
     public void readPriKeyField(Object o, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyField != null) {
+        if(priKeyField != null) {
             Format format = priKeyField.getType();
             Object val = input.readKeyObject(format);
             setValue(o, priKeyField, val);
-        } else if (superAccessor != null) {
+        }
+        else if(superAccessor != null) {
             superAccessor.readPriKeyField(getSuper(o), input);
-        } else {
+        }
+        else {
             throw DbCompat.unexpectedState("No primary key field");
         }
     }
 
     public void writeSecKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyField != null && 
-            !priKeyField.getType().isPrimitive() && 
-            priKeyField.getType().getId() != Format.ID_STRING) {
+        if(priKeyField != null &&
+                !priKeyField.getType().isPrimitive() &&
+                priKeyField.getType().getId() != Format.ID_STRING) {
             output.registerPriKeyObject(getValue(o, priKeyField));
         }
-        if (superAccessor != null) {
+        if(superAccessor != null) {
             superAccessor.writeSecKeyFields(getSuper(o), output);
         }
-        for (int i = 0; i < secKeyFields.size(); i += 1) {
+        for(int i = 0; i < secKeyFields.size(); i += 1) {
             writeField(o, secKeyFields.get(i), output);
         }
     }
@@ -134,40 +142,42 @@ class RawAccessor implements Accessor {
                                  int startField,
                                  int endField,
                                  int superLevel)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyField != null && 
-            !priKeyField.getType().isPrimitive() &&
-            priKeyField.getType().getId() != Format.ID_STRING) {
+        if(priKeyField != null &&
+                !priKeyField.getType().isPrimitive() &&
+                priKeyField.getType().getId() != Format.ID_STRING) {
             input.registerPriKeyObject(getValue(o, priKeyField));
-        } else if (priKeyField != null && 
-                   priKeyField.getType().getId() == Format.ID_STRING) {
+        }
+        else if(priKeyField != null &&
+                priKeyField.getType().getId() == Format.ID_STRING) {
             input.registerPriStringKeyObject(getValue(o, priKeyField));
         }
-        if (superLevel != 0 && superAccessor != null) {
+        if(superLevel != 0 && superAccessor != null) {
             superAccessor.readSecKeyFields
-                (getSuper(o), input, startField, endField, superLevel - 1);
-        } else {
-            if (superLevel > 0) {
+                    (getSuper(o), input, startField, endField, superLevel - 1);
+        }
+        else {
+            if(superLevel > 0) {
                 throw DbCompat.unexpectedState("Super class does not exist");
             }
         }
-        if (superLevel <= 0) {
-            for (int i = startField;
-                 i <= endField && i < secKeyFields.size();
-                 i += 1) {
+        if(superLevel <= 0) {
+            for(int i = startField;
+                i <= endField && i < secKeyFields.size();
+                i += 1) {
                 readField(o, secKeyFields.get(i), input);
             }
         }
     }
 
     public void writeNonKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (superAccessor != null) {
+        if(superAccessor != null) {
             superAccessor.writeNonKeyFields(getSuper(o), output);
         }
-        for (int i = 0; i < nonKeyFields.size(); i += 1) {
+        for(int i = 0; i < nonKeyFields.size(); i += 1) {
             writeField(o, nonKeyFields.get(i), output);
         }
     }
@@ -177,37 +187,38 @@ class RawAccessor implements Accessor {
                                  int startField,
                                  int endField,
                                  int superLevel)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (superLevel != 0 && superAccessor != null) {
+        if(superLevel != 0 && superAccessor != null) {
             superAccessor.readNonKeyFields
-                (getSuper(o), input, startField, endField, superLevel - 1);
-        } else {
-            if (superLevel > 0) {
+                    (getSuper(o), input, startField, endField, superLevel - 1);
+        }
+        else {
+            if(superLevel > 0) {
                 throw DbCompat.unexpectedState("Super class does not exist");
             }
         }
-        if (superLevel <= 0) {
-            for (int i = startField;
-                 i <= endField && i < nonKeyFields.size();
-                 i += 1) {
+        if(superLevel <= 0) {
+            for(int i = startField;
+                i <= endField && i < nonKeyFields.size();
+                i += 1) {
                 readField(o, nonKeyFields.get(i), input);
             }
         }
     }
 
     public void writeCompositeKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
-        for (int i = 0; i < nonKeyFields.size(); i += 1) {
+        for(int i = 0; i < nonKeyFields.size(); i += 1) {
             writeField(o, nonKeyFields.get(i), output);
         }
     }
 
     public void readCompositeKeyFields(Object o, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
-        for (int i = 0; i < nonKeyFields.size(); i += 1) {
+        for(int i = 0; i < nonKeyFields.size(); i += 1) {
             readField(o, nonKeyFields.get(i), input);
         }
     }
@@ -216,12 +227,12 @@ class RawAccessor implements Accessor {
                            int field,
                            int superLevel,
                            boolean isSecField) {
-        if (superLevel > 0) {
+        if(superLevel > 0) {
             return superAccessor.getField
-                (getSuper(o), field, superLevel - 1, isSecField);
+                    (getSuper(o), field, superLevel - 1, isSecField);
         }
         FieldInfo fld =
-            isSecField ? secKeyFields.get(field) : nonKeyFields.get(field);
+                isSecField ? secKeyFields.get(field) : nonKeyFields.get(field);
         return getValue(o, fld);
     }
 
@@ -230,22 +241,24 @@ class RawAccessor implements Accessor {
                          int superLevel,
                          boolean isSecField,
                          Object value) {
-        if (superLevel > 0) {
+        if(superLevel > 0) {
             superAccessor.setField
-                (getSuper(o), field, superLevel - 1, isSecField, value);
+                    (getSuper(o), field, superLevel - 1, isSecField, value);
             return;
         }
         FieldInfo fld =
-            isSecField ? secKeyFields.get(field) : nonKeyFields.get(field);
+                isSecField ? secKeyFields.get(field) : nonKeyFields.get(field);
         setValue(o, fld, value);
     }
-    
+
     public void setPriField(Object o, Object value) {
-        if (priKeyField != null) {
+        if(priKeyField != null) {
             setValue(o, priKeyField, value);
-        } else if (superAccessor != null) {
+        }
+        else if(superAccessor != null) {
             superAccessor.setPriField(getSuper(o), value);
-        } else {
+        }
+        else {
             throw DbCompat.unexpectedState("No primary key field");
         }
     }
@@ -263,34 +276,38 @@ class RawAccessor implements Accessor {
     }
 
     private void writeField(Object o, FieldInfo field, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
         Object val = getValue(o, field);
         Format format = field.getType();
-        if (isCompositeKey || format.isPrimitive()) {
+        if(isCompositeKey || format.isPrimitive()) {
             output.writeKeyObject(val, format);
-        } else if (format.getId() == Format.ID_STRING) {
+        }
+        else if(format.getId() == Format.ID_STRING) {
             output.writeString((String) val);
-        } else {
+        }
+        else {
             output.writeObject(val, format);
         }
     }
 
     private void readField(Object o, FieldInfo field, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
         Format format = field.getType();
         Object val;
-        if (isCompositeKey || format.isPrimitive()) {
+        if(isCompositeKey || format.isPrimitive()) {
             val = input.readKeyObject(format);
-        } else if (format.getId() == Format.ID_STRING) {
+        }
+        else if(format.getId() == Format.ID_STRING) {
             val = input.readStringObject();
-        } else {
+        }
+        else {
             val = input.readObject();
         }
         setValue(o, field, val);
     }
-    
+
     public FieldInfo getPriKeyField() {
         return priKeyField;
     }

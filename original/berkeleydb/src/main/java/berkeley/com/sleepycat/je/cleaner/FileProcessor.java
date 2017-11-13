@@ -13,57 +13,28 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.logging.Level;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbTree;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
-import berkeley.com.sleepycat.je.dbi.TTL;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.log.ChecksumException;
 import berkeley.com.sleepycat.je.log.CleanerFileReader;
 import berkeley.com.sleepycat.je.log.LogItem;
 import berkeley.com.sleepycat.je.log.Trace;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
-import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.ChildReference;
-import berkeley.com.sleepycat.je.tree.IN;
-import berkeley.com.sleepycat.je.tree.LN;
-import berkeley.com.sleepycat.je.tree.MapLN;
-import berkeley.com.sleepycat.je.tree.OldBINDelta;
-import berkeley.com.sleepycat.je.tree.SearchResult;
-import berkeley.com.sleepycat.je.tree.Tree;
-import berkeley.com.sleepycat.je.tree.TreeLocation;
-import berkeley.com.sleepycat.je.tree.WithRootLatched;
-import berkeley.com.sleepycat.je.txn.BasicLocker;
-import berkeley.com.sleepycat.je.txn.LockGrantType;
-import berkeley.com.sleepycat.je.txn.LockManager;
-import berkeley.com.sleepycat.je.txn.LockResult;
-import berkeley.com.sleepycat.je.txn.LockType;
-import berkeley.com.sleepycat.je.utilint.DaemonThread;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.Pair;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
+import berkeley.com.sleepycat.je.tree.*;
+import berkeley.com.sleepycat.je.txn.*;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Reads all entries in a log file and either determines them to be obsolete or
  * active. Active LNs are migrated immediately (by logging them). Active INs
  * are marked for migration by setting the dirty flag.
- *
+ * <p>
  * May be invoked explicitly by calling doClean, or woken up if used as a
  * daemon thread.
  */
@@ -81,17 +52,16 @@ public class FileProcessor extends DaemonThread {
     private final FileSelector fileSelector;
     private final UtilizationProfile profile;
     private final UtilizationCalculator calculator;
-
-    /** @see #onWakeup() */
-    private volatile boolean activate = false;
-    private long lastWakeupLsn = 0;
-
     /*
      * The first thread (out of N cleaner threads) does certain housekeeping
      * duties that don't need to be done by all threads.
      */
     private final boolean firstThread;
-
+    /**
+     * @see #onWakeup()
+     */
+    private volatile boolean activate = false;
+    private long lastWakeupLsn = 0;
     /* Log version for the target file. */
     private int fileLogVersion;
 
@@ -243,12 +213,12 @@ public class FileProcessor extends DaemonThread {
     /**
      * The thread is woken, either by an explicit notify (call to {@link
      * Cleaner#wakeupActivate()}, or when the timed wakeup interval elapses.
-     *
+     * <p>
      * In the former case (a call to wakeupActivate), the 'activate' field will
      * be true and the doClean method is called here. This happens when the
      * number of bytes written exceeds the cleanerBytesInterval, a config
      * change is made that could impact cleaning, etc.
-     *
+     * <p>
      * In the latter case (the wakeup interval elapsed), 'activate' will be
      * false. In this case, when there has been no writing since the last
      * wakeup, we perform cleaning and checkpointing, if needed to reclaim
@@ -259,12 +229,12 @@ public class FileProcessor extends DaemonThread {
     @Override
     protected synchronized void onWakeup() {
 
-        if (!activate) {
+        if(!activate) {
             /*
              * This is a timed wakeup.
              */
             final long nextLsn = envImpl.getFileManager().getNextLsn();
-            if (lastWakeupLsn != nextLsn) {
+            if(lastWakeupLsn != nextLsn) {
                 /*
                  * If the last LSN in the log has changed since the last timed
                  * wakeup, do nothing, because writing has not stopped. As long
@@ -284,9 +254,9 @@ public class FileProcessor extends DaemonThread {
         }
 
         doClean(
-            true /*invokedFromDaemon*/,
-            true /*cleanMultipleFiles*/,
-            false /*forceCleaning*/);
+                true /*invokedFromDaemon*/,
+                true /*cleanMultipleFiles*/,
+                false /*forceCleaning*/);
 
         activate = false;
     }
@@ -296,23 +266,20 @@ public class FileProcessor extends DaemonThread {
      * successfully cleaned files. May be called by the daemon thread or
      * programatically.
      *
-     * @param invokedFromDaemon currently has no effect.
-     *
+     * @param invokedFromDaemon  currently has no effect.
      * @param cleanMultipleFiles is true to clean until we're under budget,
-     * or false to clean at most one file.
-     *
-     * @param forceCleaning is true to clean even if we're not under the
-     * utilization threshold.
-     *
+     *                           or false to clean at most one file.
+     * @param forceCleaning      is true to clean even if we're not under the
+     *                           utilization threshold.
      * @return the number of files cleaned, not including files cleaned
      * unsuccessfully.
      */
     synchronized int doClean(
-        boolean invokedFromDaemon,
-        boolean cleanMultipleFiles,
-        boolean forceCleaning) {
+            boolean invokedFromDaemon,
+            boolean cleanMultipleFiles,
+            boolean forceCleaning) {
 
-        if (envImpl.isClosed()) {
+        if(envImpl.isClosed()) {
             return 0;
         }
 
@@ -322,16 +289,16 @@ public class FileProcessor extends DaemonThread {
          * not yet been flushed and do not yet appear in the profile map.
          */
         SortedMap<Long, FileSummary> fileSummaryMap =
-            profile.getFileSummaryMap(true /*includeTrackedFiles*/);
+                profile.getFileSummaryMap(true /*includeTrackedFiles*/);
 
         /* Clean until no more files are selected.  */
         final int nOriginalLogFiles = fileSummaryMap.size();
         int nFilesCleaned = 0;
 
-        while (true) {
+        while(true) {
 
             /* Stop if the daemon is paused or the environment is closing. */
-            if ((invokedFromDaemon && isPaused()) || envImpl.isClosing()) {
+            if((invokedFromDaemon && isPaused()) || envImpl.isClosing()) {
                 break;
             }
 
@@ -360,21 +327,21 @@ public class FileProcessor extends DaemonThread {
              */
             cleaner.deleteSafeToDeleteFiles();
 
-            if (nFilesCleaned > 0) {
+            if(nFilesCleaned > 0) {
 
                 /* If we should only clean one file, stop now. */
-                if (!cleanMultipleFiles) {
+                if(!cleanMultipleFiles) {
                     break;
                 }
 
                 /* Don't clean forever. */
-                if (nFilesCleaned >= nOriginalLogFiles) {
+                if(nFilesCleaned >= nOriginalLogFiles) {
                     break;
                 }
 
                 /* Refresh file summary info for next file selection. */
                 fileSummaryMap =
-                    profile.getFileSummaryMap(true /*includeTrackedFiles*/);
+                        profile.getFileSummaryMap(true /*includeTrackedFiles*/);
             }
 
             /*
@@ -382,10 +349,10 @@ public class FileProcessor extends DaemonThread {
              * read-only file collections.
              */
             Pair<Long, Integer> result = fileSelector.selectFileForCleaning(
-                calculator, fileSummaryMap, forceCleaning);
+                    calculator, fileSummaryMap, forceCleaning);
 
             /* Stop if no file is selected for cleaning. */
-            if (result == null) {
+            if(result == null) {
                 break;
             }
 
@@ -406,40 +373,40 @@ public class FileProcessor extends DaemonThread {
 
                 /* Perform 1st pass of 2-pass cleaning. */
                 String passOneMsg = "";
-                if (twoPass) {
+                if(twoPass) {
 
                     final FileSummary recalcSummary = new FileSummary();
 
                     final ExpirationTracker expTracker =
-                        new ExpirationTracker(fileNumValue);
+                            new ExpirationTracker(fileNumValue);
 
                     processFile(
-                        fileNum, recalcSummary, new INSummary(), expTracker);
+                            fileNum, recalcSummary, new INSummary(), expTracker);
 
                     final int expiredSize =
-                        expTracker.getExpiredBytes(TTL.currentSystemTime());
+                            expTracker.getExpiredBytes(TTL.currentSystemTime());
 
                     final int obsoleteSize = recalcSummary.getObsoleteSize();
 
                     final int recalcUtil = FileSummary.utilization(
-                        obsoleteSize + expiredSize, recalcSummary.totalSize);
+                            obsoleteSize + expiredSize, recalcSummary.totalSize);
 
                     passOneMsg =
-                        " pass1RecalcObsolete=" + obsoleteSize +
-                        " pass1RecalcExpired=" + expiredSize +
-                        " pass1RecalcUtil=" + recalcUtil +
-                        " pass1RequiredUtil=" + requiredUtil;
+                            " pass1RecalcObsolete=" + obsoleteSize +
+                                    " pass1RecalcExpired=" + expiredSize +
+                                    " pass1RecalcUtil=" + recalcUtil +
+                                    " pass1RequiredUtil=" + requiredUtil;
 
-                    if (recalcUtil > requiredUtil) {
+                    if(recalcUtil > requiredUtil) {
 
                         cleaner.nRevisalRuns.increment();
 
                         cleaner.getExpirationProfile().putFile(
-                            expTracker, expiredSize);
+                                expTracker, expiredSize);
 
                         final String logMsg = "CleanerRevisalRun " + runId +
-                            " on file 0x" + Long.toHexString(fileNumValue) +
-                            " ends:" + passOneMsg;
+                                " on file 0x" + Long.toHexString(fileNumValue) +
+                                " ends:" + passOneMsg;
 
                         LoggerUtils.logMsg(logger, envImpl, Level.INFO, logMsg);
 
@@ -453,21 +420,21 @@ public class FileProcessor extends DaemonThread {
                 resetPerRunCounters();
                 cleaner.nCleanerRuns.increment();
 
-                if (twoPass) {
+                if(twoPass) {
                     cleaner.nTwoPassRuns.increment();
                 }
 
                 /* Keep track of estimated and true utilization. */
                 final FileSummary estimatedFileSummary =
-                    fileSummaryMap.containsKey(fileNum) ?
-                    fileSummaryMap.get(fileNum).clone() : null;
+                        fileSummaryMap.containsKey(fileNum) ?
+                                fileSummaryMap.get(fileNum).clone() : null;
 
                 final FileSummary recalculatedFileSummary = new FileSummary();
                 final INSummary inSummary = new INSummary();
 
                 final String msgHeader =
-                    (twoPass ? "CleanerTwoPassRun " : "CleanerRun ") +
-                    runId + " on file 0x" + Long.toHexString(fileNumValue);
+                        (twoPass ? "CleanerTwoPassRun " : "CleanerRun ") +
+                                runId + " on file 0x" + Long.toHexString(fileNumValue);
 
                 final String beginMsg = msgHeader + " begins:";
 
@@ -475,8 +442,8 @@ public class FileProcessor extends DaemonThread {
                 LoggerUtils.traceAndLog(logger, envImpl, Level.FINE, beginMsg);
 
                 /* Process all log entries in the file. */
-                if (!processFile(
-                    fileNum, recalculatedFileSummary, inSummary, null)) {
+                if(!processFile(
+                        fileNum, recalculatedFileSummary, inSummary, null)) {
                     return nFilesCleaned;
                 }
 
@@ -486,49 +453,49 @@ public class FileProcessor extends DaemonThread {
 
                 /* Trace is unconditional for log-based debugging. */
                 final String endMsg = msgHeader + " ends:" +
-                    " invokedFromDaemon=" + invokedFromDaemon +
-                    " finished=" + finished +
-                    " fileDeleted=" + fileDeleted +
-                    " nEntriesRead=" + nEntriesReadThisRun +
-                    " nINsObsolete=" + nINsObsoleteThisRun +
-                    " nINsCleaned=" + nINsCleanedThisRun +
-                    " nINsDead=" + nINsDeadThisRun +
-                    " nINsMigrated=" + nINsMigratedThisRun +
-                    " nBINDeltasObsolete=" + nBINDeltasObsoleteThisRun +
-                    " nBINDeltasCleaned=" + nBINDeltasCleanedThisRun +
-                    " nBINDeltasDead=" + nBINDeltasDeadThisRun +
-                    " nBINDeltasMigrated=" + nBINDeltasMigratedThisRun +
-                    " nLNsObsolete=" + nLNsObsoleteThisRun +
-                    " nLNsCleaned=" + nLNsCleanedThisRun +
-                    " nLNsDead=" + nLNsDeadThisRun +
-                    " nLNsExpired=" + nLNsExpiredThisRun +
-                    " nLNsMigrated=" + nLNsMigratedThisRun +
-                    " nLNsMarked=" + nLNsMarkedThisRun +
-                    " nLNQueueHits=" + nLNQueueHitsThisRun +
-                    " nLNsLocked=" + nLNsLockedThisRun;
+                        " invokedFromDaemon=" + invokedFromDaemon +
+                        " finished=" + finished +
+                        " fileDeleted=" + fileDeleted +
+                        " nEntriesRead=" + nEntriesReadThisRun +
+                        " nINsObsolete=" + nINsObsoleteThisRun +
+                        " nINsCleaned=" + nINsCleanedThisRun +
+                        " nINsDead=" + nINsDeadThisRun +
+                        " nINsMigrated=" + nINsMigratedThisRun +
+                        " nBINDeltasObsolete=" + nBINDeltasObsoleteThisRun +
+                        " nBINDeltasCleaned=" + nBINDeltasCleanedThisRun +
+                        " nBINDeltasDead=" + nBINDeltasDeadThisRun +
+                        " nBINDeltasMigrated=" + nBINDeltasMigratedThisRun +
+                        " nLNsObsolete=" + nLNsObsoleteThisRun +
+                        " nLNsCleaned=" + nLNsCleanedThisRun +
+                        " nLNsDead=" + nLNsDeadThisRun +
+                        " nLNsExpired=" + nLNsExpiredThisRun +
+                        " nLNsMigrated=" + nLNsMigratedThisRun +
+                        " nLNsMarked=" + nLNsMarkedThisRun +
+                        " nLNQueueHits=" + nLNQueueHitsThisRun +
+                        " nLNsLocked=" + nLNsLockedThisRun;
 
                 Trace.trace(envImpl, endMsg);
 
                 /* Only construct INFO level message if needed. */
-                if (logger.isLoggable(Level.INFO)) {
+                if(logger.isLoggable(Level.INFO)) {
 
                     final int estUtil = (estimatedFileSummary != null) ?
-                        estimatedFileSummary.utilization() : -1;
+                            estimatedFileSummary.utilization() : -1;
 
                     final int recalcUtil =
-                        recalculatedFileSummary.utilization();
+                            recalculatedFileSummary.utilization();
 
                     LoggerUtils.logMsg(
-                        logger, envImpl, Level.INFO,
-                        endMsg +
-                        " inSummary=" + inSummary +
-                        " estSummary=" + estimatedFileSummary +
-                        " recalcSummary=" + recalculatedFileSummary +
-                        " estimatedUtil=" + estUtil +
-                        " recalcUtil=" + recalcUtil +
-                        passOneMsg);
+                            logger, envImpl, Level.INFO,
+                            endMsg +
+                                    " inSummary=" + inSummary +
+                                    " estSummary=" + estimatedFileSummary +
+                                    " recalcSummary=" + recalculatedFileSummary +
+                                    " estimatedUtil=" + estUtil +
+                                    " recalcUtil=" + recalcUtil +
+                                    passOneMsg);
                 }
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
 
                 /*
                  * File was deleted.  Although it is possible that the file was
@@ -547,27 +514,27 @@ public class FileProcessor extends DaemonThread {
                 fileSelector.removeAllFileReferences(fileNum, budget);
 
                 LoggerUtils.logMsg(
-                    logger, envImpl, Level.INFO,
-                    "Missing file 0x" + Long.toHexString(fileNum) +
-                        " ignored by cleaner");
+                        logger, envImpl, Level.INFO,
+                        "Missing file 0x" + Long.toHexString(fileNum) +
+                                " ignored by cleaner");
 
-            } catch (IOException e) {
+            } catch(IOException e) {
 
                 LoggerUtils.traceAndLogException(
-                    envImpl, "Cleaner", "doClean", "", e);
+                        envImpl, "Cleaner", "doClean", "", e);
 
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
+                        envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
 
-            } catch (RuntimeException e) {
+            } catch(RuntimeException e) {
 
                 LoggerUtils.traceAndLogException(
-                    envImpl, "Cleaner", "doClean", "", e);
+                        envImpl, "Cleaner", "doClean", "", e);
 
                 throw e;
 
             } finally {
-                if (!finished && !fileDeleted) {
+                if(!finished && !fileDeleted) {
                     fileSelector.putBackFileForCleaning(fileNum);
                 }
             }
@@ -582,7 +549,6 @@ public class FileProcessor extends DaemonThread {
      * expired sizes are accumulated only for non-obsolete entries.
      *
      * @param fileNum file to read.
-     *
      * @return the expiration tracker.
      */
     public ExpirationTracker countExpiration(long fileNum) {
@@ -591,17 +557,17 @@ public class FileProcessor extends DaemonThread {
 
         try {
             final boolean result = processFile(
-                fileNum, new FileSummary(), new INSummary(), tracker);
+                    fileNum, new FileSummary(), new INSummary(), tracker);
 
             assert result;
 
-        } catch (IOException e) {
+        } catch(IOException e) {
 
             LoggerUtils.traceAndLogException(
-                envImpl, "Cleaner", "countExpiration", "", e);
+                    envImpl, "Cleaner", "countExpiration", "", e);
 
             throw new EnvironmentFailureException(
-                envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
+                    envImpl, EnvironmentFailureReason.LOG_INTEGRITY, e);
         }
 
         return tracker;
@@ -609,7 +575,7 @@ public class FileProcessor extends DaemonThread {
 
     /**
      * Process all log entries in the given file.
-     *
+     * <p>
      * Note that we gather obsolete offsets at the beginning of the method and
      * do not check for obsolete offsets of entries that become obsolete while
      * the file is being processed.  An entry in this file can become obsolete
@@ -625,17 +591,13 @@ public class FileProcessor extends DaemonThread {
      * especially when processing large log files, we do not check the TFS.
      * [#19626]
      *
-     * @param fileNum the file being cleaned.
-     *
+     * @param fileNum     the file being cleaned.
      * @param fileSummary used to return the true utilization.
-     *
-     * @param inSummary used to return IN utilization info for debugging.
-     *
-     * @param expTracker if non-null, enables countOnly mode, in which
-     * expiration info is returned via this param, obsolete info returned via
-     * fileSummary does not include expired data, and no migration is
-     * performed, i.e., there are no side effects.
-     *
+     * @param inSummary   used to return IN utilization info for debugging.
+     * @param expTracker  if non-null, enables countOnly mode, in which
+     *                    expiration info is returned via this param, obsolete info returned via
+     *                    fileSummary does not include expired data, and no migration is
+     *                    performed, i.e., there are no side effects.
      * @return false if we aborted file processing because the environment is
      * being closed.
      */
@@ -643,14 +605,14 @@ public class FileProcessor extends DaemonThread {
                                 FileSummary fileSummary,
                                 INSummary inSummary,
                                 ExpirationTracker expTracker)
-        throws IOException {
+            throws IOException {
 
         final boolean countOnly = (expTracker != null);
         final LockManager lockManager = envImpl.getTxnManager().getLockManager();
 
         /* Get the current obsolete offsets for this file. */
         final PackedOffsets obsoleteOffsets =
-            profile.getObsoleteDetail(fileNum, !countOnly /*logUpdate*/);
+                profile.getObsoleteDetail(fileNum, !countOnly /*logUpdate*/);
 
         final PackedOffsets.Iterator obsoleteIter = obsoleteOffsets.iterator();
         long nextObsolete = -1;
@@ -658,7 +620,7 @@ public class FileProcessor extends DaemonThread {
         /* Copy to local variables because they are mutable properties. */
         final int readBufferSize = cleaner.readBufferSize;
         final int lookAheadCacheSize =
-            countOnly ? 0 : cleaner.lookAheadCacheSize;
+                countOnly ? 0 : cleaner.lookAheadCacheSize;
 
         /*
          * Add the overhead of this method to the budget.  Two read buffers are
@@ -666,13 +628,13 @@ public class FileProcessor extends DaemonThread {
          * be the same as the memory overhead.
          */
         final int adjustMem = (2 * readBufferSize) +
-                               obsoleteOffsets.getLogSize() +
-                               lookAheadCacheSize;
+                obsoleteOffsets.getLogSize() +
+                lookAheadCacheSize;
         final MemoryBudget budget = envImpl.getMemoryBudget();
         budget.updateAdminMemoryUsage(adjustMem);
 
         /* Evict after updating the budget. */
-        if (Cleaner.DO_CRITICAL_EVICTION) {
+        if(Cleaner.DO_CRITICAL_EVICTION) {
             envImpl.daemonEviction(true /*backgroundIO*/);
         }
 
@@ -682,7 +644,7 @@ public class FileProcessor extends DaemonThread {
          * in the cache.  This can reduce the number of tree lookups.
          */
         final LookAheadCache lookAheadCache =
-            countOnly ? null : new LookAheadCache(lookAheadCacheSize);
+                countOnly ? null : new LookAheadCache(lookAheadCacheSize);
 
         /*
          * For obsolete entries we must check for pending deleted DBs.  To
@@ -690,7 +652,7 @@ public class FileProcessor extends DaemonThread {
          * all DB IDs encountered and do the check once per DB at the end.
          */
         final Set<DatabaseId> checkPendingDbSet =
-            countOnly ? null : new HashSet<DatabaseId>();
+                countOnly ? null : new HashSet<DatabaseId>();
 
         /*
          * Use local caching to reduce DbTree.getDb overhead.  Do not call
@@ -706,15 +668,15 @@ public class FileProcessor extends DaemonThread {
          * a single call under the log write latch.
          */
         final LocalUtilizationTracker localTracker =
-            countOnly ? null : new LocalUtilizationTracker(envImpl);
+                countOnly ? null : new LocalUtilizationTracker(envImpl);
 
         /* Keep track of all database IDs encountered. */
         final Set<DatabaseId> databases = new HashSet<>();
 
         /* Create the file reader. */
         final CleanerFileReader reader = new CleanerFileReader(
-            envImpl, readBufferSize, DbLsn.makeLsn(fileNum, 0), fileNum,
-            fileSummary, inSummary, expTracker);
+                envImpl, readBufferSize, DbLsn.makeLsn(fileNum, 0), fileNum,
+                fileSummary, inSummary, expTracker);
 
         /* Validate all entries before ever deleting a file. */
         reader.setAlwaysValidateChecksum(true);
@@ -725,13 +687,13 @@ public class FileProcessor extends DaemonThread {
             int nProcessedLNs = 0;
             int nProcessedEntries = 0;
 
-            while (reader.readNextEntryAllowExceptions()) {
+            while(reader.readNextEntryAllowExceptions()) {
 
                 nProcessedEntries += 1;
                 cleaner.nEntriesRead.increment();
 
                 int nReads = reader.getAndResetNReads();
-                if (nReads > 0) {
+                if(nReads > 0) {
                     cleaner.nDiskReads.add(nReads);
                 }
 
@@ -746,21 +708,21 @@ public class FileProcessor extends DaemonThread {
                 long expirationTime = 0;
 
                 /* Remember the version of the log file. */
-                if (reader.isFileHeader()) {
+                if(reader.isFileHeader()) {
                     fileLogVersion = reader.getFileHeader().getLogVersion();
                     /* No expiration info exists before version 12. */
-                    if (countOnly && fileLogVersion < 12) {
+                    if(countOnly && fileLogVersion < 12) {
                         return true; // TODO caller must abort also
                     }
                 }
 
                 /* Stop if the daemon is shut down. */
-                if (!countOnly && envImpl.isClosing()) {
+                if(!countOnly && envImpl.isClosing()) {
                     return false;
                 }
 
                 /* Update background reads. */
-                if (nReads > 0) {
+                if(nReads > 0) {
                     envImpl.updateBackgroundReads(nReads);
                 }
 
@@ -768,20 +730,20 @@ public class FileProcessor extends DaemonThread {
                 envImpl.sleepAfterBackgroundIO();
 
                 /* Check for a known obsolete node. */
-                while (nextObsolete < fileOffset && obsoleteIter.hasNext()) {
+                while(nextObsolete < fileOffset && obsoleteIter.hasNext()) {
                     nextObsolete = obsoleteIter.next();
                 }
-                if (nextObsolete == fileOffset) {
+                if(nextObsolete == fileOffset) {
                     isObsolete = true;
                 }
 
                 /* Check for the entry type next because it is very cheap. */
-                if (!isObsolete &&
-                    !isLN &&
-                    !isIN &&
-                    !isBINDelta &&
-                    !isOldBINDelta &&
-                    !isDbTree) {
+                if(!isObsolete &&
+                        !isLN &&
+                        !isIN &&
+                        !isBINDelta &&
+                        !isOldBINDelta &&
+                        !isDbTree) {
                     /* Consider all entries we do not process as obsolete. */
                     isObsolete = true;
                 }
@@ -795,9 +757,9 @@ public class FileProcessor extends DaemonThread {
                  * could cause an exception due to the key format change.
                  * [#21405]
                  */
-                if (!isObsolete &&
-                    isOldBINDelta &&
-                    fileLogVersion < 8) {
+                if(!isObsolete &&
+                        isOldBINDelta &&
+                        fileLogVersion < 8) {
                     isObsolete = true;
                 }
 
@@ -807,7 +769,7 @@ public class FileProcessor extends DaemonThread {
                  */
                 final DatabaseId dbId = reader.getDatabaseId();
                 final DatabaseImpl db;
-                if (!isObsolete && dbId != null) {
+                if(!isObsolete && dbId != null) {
 
                     /* Maintain a set of all databases encountered. */
                     databases.add(dbId);
@@ -818,7 +780,7 @@ public class FileProcessor extends DaemonThread {
                      * access to the MapLN (for example, DbTree.deleteMapLN).
                      * [#21015]
                      */
-                    if ((nProcessedEntries % cleaner.dbCacheClearCount) == 0) {
+                    if((nProcessedEntries % cleaner.dbCacheClearCount) == 0) {
                         dbMapTree.releaseDbs(dbCache);
                         dbCache.clear();
                     }
@@ -831,10 +793,11 @@ public class FileProcessor extends DaemonThread {
                      * pending set further below.  This entry will be declared
                      * deleted after the delete cleanup is finished.
                      */
-                    if (db == null || db.isDeleted()) {
+                    if(db == null || db.isDeleted()) {
                         isObsolete = true;
                     }
-                } else {
+                }
+                else {
                     db = null;
                 }
 
@@ -844,14 +807,14 @@ public class FileProcessor extends DaemonThread {
                  * are also ignored here) after dup DB conversion.  Also, the
                  * old format IN key cannot be used for lookups. [#21405]
                  */
-                if (!isObsolete &&
-                    isIN &&
-                    db.getSortedDuplicates() &&
-                    fileLogVersion < 8) {
+                if(!isObsolete &&
+                        isIN &&
+                        db.getSortedDuplicates() &&
+                        fileLogVersion < 8) {
                     isObsolete = true;
                 }
 
-                if (!isObsolete && isLN) {
+                if(!isObsolete && isLN) {
 
                     final LNLogEntry<?> lnEntry = reader.getLNLogEntry();
 
@@ -864,35 +827,35 @@ public class FileProcessor extends DaemonThread {
                      * tree lookup because deleted LNs may still be reachable
                      * through their BIN parents.
                      */
-                    if (lnEntry.isDeleted() && fileLogVersion > 2) {
+                    if(lnEntry.isDeleted() && fileLogVersion > 2) {
                         isObsolete = true;
                     }
 
                     /* "Immediately obsolete" LNs can be discarded. */
-                    if (!isObsolete && 
-                        (db.isLNImmediatelyObsolete() ||
-                         lnEntry.isEmbeddedLN())) {
+                    if(!isObsolete &&
+                            (db.isLNImmediatelyObsolete() ||
+                                    lnEntry.isEmbeddedLN())) {
                         isObsolete = true;
                     }
 
                     /*
                      * Check for expired LN. If locked, add to pending queue.
                      */
-                    if (!isObsolete && !countOnly) {
+                    if(!isObsolete && !countOnly) {
 
                         expirationTime = TTL.expirationToSystemTime(
-                            lnEntry.getExpiration(),
-                            lnEntry.isExpirationInHours());
+                                lnEntry.getExpiration(),
+                                lnEntry.isExpirationInHours());
 
-                        if (envImpl.expiresWithin(
-                            expirationTime,
-                            0 - envImpl.getTtlLnPurgeDelay())) {
+                        if(envImpl.expiresWithin(
+                                expirationTime,
+                                0 - envImpl.getTtlLnPurgeDelay())) {
 
-                            if (!lockManager.isLockUncontended(logLsn)) {
+                            if(!lockManager.isLockUncontended(logLsn)) {
                                 fileSelector.addPendingLN(
-                                    logLsn,
-                                    new LNInfo(null /*LN*/, dbId,
-                                        lnEntry.getKey(), expirationTime));
+                                        logLsn,
+                                        new LNInfo(null /*LN*/, dbId,
+                                                lnEntry.getKey(), expirationTime));
                                 nLNsLockedThisRun++;
                                 continue;
                             }
@@ -905,26 +868,28 @@ public class FileProcessor extends DaemonThread {
                              * adding obsolete offset.
                              */
                             localTracker.countObsoleteNodeInexact(
-                                logLsn, null /*type*/,
-                                reader.getLastEntrySize(), db);
+                                    logLsn, null /*type*/,
+                                    reader.getLastEntrySize(), db);
                         }
                     }
                 }
 
                 /* Skip known obsolete nodes. */
-                if (isObsolete) {
+                if(isObsolete) {
                     /* Count obsolete stats. */
-                    if (!countOnly) {
-                        if (isLN) {
+                    if(!countOnly) {
+                        if(isLN) {
                             nLNsObsoleteThisRun++;
-                        } else if (isBINDelta || isOldBINDelta) {
+                        }
+                        else if(isBINDelta || isOldBINDelta) {
                             nBINDeltasObsoleteThisRun++;
-                        } else if (isIN) {
+                        }
+                        else if(isIN) {
                             nINsObsoleteThisRun++;
                         }
                     }
                     /* Update the pending DB set for obsolete entries. */
-                    if (checkPendingDbSet != null && dbId != null) {
+                    if(checkPendingDbSet != null && dbId != null) {
                         checkPendingDbSet.add(dbId);
                     }
                     /* Count utilization for obsolete entry. */
@@ -936,12 +901,12 @@ public class FileProcessor extends DaemonThread {
                 reader.countExpired();
 
                 /* Don't process further if we are only calculating. */
-                if (countOnly) {
+                if(countOnly) {
                     continue;
                 }
 
                 /* Evict before processing each entry. */
-                if (Cleaner.DO_CRITICAL_EVICTION) {
+                if(Cleaner.DO_CRITICAL_EVICTION) {
                     envImpl.daemonEviction(true /*backgroundIO*/);
                 }
 
@@ -949,7 +914,7 @@ public class FileProcessor extends DaemonThread {
                 assert lookAheadCache != null;
                 assert checkPendingDbSet != null;
 
-                if (isLN) {
+                if(isLN) {
 
                     final LNLogEntry<?> lnEntry = reader.getLNLogEntry();
                     lnEntry.postFetchInit(db);
@@ -958,12 +923,12 @@ public class FileProcessor extends DaemonThread {
                     final byte[] key = lnEntry.getKey();
 
                     lookAheadCache.add(
-                        DbLsn.getFileOffset(logLsn),
-                        new LNInfo(targetLN, dbId, key, expirationTime));
+                            DbLsn.getFileOffset(logLsn),
+                            new LNInfo(targetLN, dbId, key, expirationTime));
 
-                    if (lookAheadCache.isFull()) {
+                    if(lookAheadCache.isFull()) {
                         processLN(fileNum, location, lookAheadCache, dbCache,
-                                  checkPendingDbSet);
+                                checkPendingDbSet);
                     }
 
                     /*
@@ -971,55 +936,60 @@ public class FileProcessor extends DaemonThread {
                      * prevent the pending list from growing too large.
                      */
                     nProcessedLNs += 1;
-                    if (nProcessedLNs % PROCESS_PENDING_EVERY_N_LNS == 0) {
+                    if(nProcessedLNs % PROCESS_PENDING_EVERY_N_LNS == 0) {
                         cleaner.processPending();
                     }
 
-                } else if (isIN) {
+                }
+                else if(isIN) {
 
                     final IN targetIN = reader.getIN(db);
                     targetIN.setDatabase(db);
 
                     processIN(targetIN, db, logLsn);
 
-                } else if (isOldBINDelta) {
+                }
+                else if(isOldBINDelta) {
 
                     final OldBINDelta delta = reader.getOldBINDelta();
                     processOldBINDelta(delta, db, logLsn);
 
-                } else if (isBINDelta) {
+                }
+                else if(isBINDelta) {
 
                     final BIN delta = reader.getBINDelta();
                     processBINDelta(delta, db, logLsn);
 
-                } else if (isDbTree) {
+                }
+                else if(isDbTree) {
 
                     envImpl.rewriteMapTreeRoot(logLsn);
-                } else {
+                }
+                else {
                     assert false;
                 }
             }
 
             /* Don't process further if we are only calculating. */
-            if (countOnly) {
+            if(countOnly) {
                 return true;
             }
 
             /* Process remaining queued LNs. */
-            while (!lookAheadCache.isEmpty()) {
-                if (Cleaner.DO_CRITICAL_EVICTION) {
+            while(!lookAheadCache.isEmpty()) {
+                if(Cleaner.DO_CRITICAL_EVICTION) {
                     envImpl.daemonEviction(true /*backgroundIO*/);
                 }
                 processLN(fileNum, location, lookAheadCache, dbCache,
-                          checkPendingDbSet);
+                        checkPendingDbSet);
                 /* Sleep if background read/write limit was exceeded. */
                 envImpl.sleepAfterBackgroundIO();
             }
 
             /* Update the pending DB set. */
-            for (final DatabaseId pendingDbId : checkPendingDbSet) {
+            for(final DatabaseId pendingDbId : checkPendingDbSet) {
                 final DatabaseImpl db = dbMapTree.getDb
-                    (pendingDbId, cleaner.lockTimeout, dbCache);
+                        (pendingDbId, cleaner.lockTimeout, dbCache);
                 cleaner.addPendingDB(db);
             }
 
@@ -1029,9 +999,9 @@ public class FileProcessor extends DaemonThread {
 
             envImpl.getUtilizationProfile().flushLocalTracker(localTracker);
 
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
+                    (envImpl, EnvironmentFailureReason.LOG_CHECKSUM, e);
         } finally {
             /* Subtract the overhead of this method from the budget. */
             budget.updateAdminMemoryUsage(0 - adjustMem);
@@ -1042,8 +1012,8 @@ public class FileProcessor extends DaemonThread {
 
         /* File is fully processed, update status information. */
         fileSelector.addCleanedFile(
-            fileNum, databases, reader.getFirstVLSN(), reader.getLastVLSN(),
-            budget);
+                fileNum, databases, reader.getFirstVLSN(), reader.getLastVLSN(),
+                budget);
 
         return true;
     }
@@ -1054,11 +1024,11 @@ public class FileProcessor extends DaemonThread {
      * the cache; if any match, process them to avoid a tree search later.
      */
     private void processLN(
-        final Long fileNum,
-        final TreeLocation location,
-        final LookAheadCache lookAheadCache,
-        final Map<DatabaseId, DatabaseImpl> dbCache,
-        final Set<DatabaseId> checkPendingDbSet) {
+            final Long fileNum,
+            final TreeLocation location,
+            final LookAheadCache lookAheadCache,
+            final Map<DatabaseId, DatabaseImpl> dbCache,
+            final Set<DatabaseId> checkPendingDbSet) {
 
         /* Get the first LN from the queue. */
         final Long offset = lookAheadCache.nextOffset();
@@ -1068,7 +1038,7 @@ public class FileProcessor extends DaemonThread {
         final byte[] keyFromLog = info.getKey();
 
         final long logLsn =
-            DbLsn.makeLsn(fileNum.longValue(), offset.longValue());
+                DbLsn.makeLsn(fileNum.longValue(), offset.longValue());
 
         /*
          * Refresh the DB before processing an LN, in case the DB has been
@@ -1084,11 +1054,11 @@ public class FileProcessor extends DaemonThread {
         final DatabaseId dbId = info.getDbId();
 
         final DatabaseImpl db = envImpl.getDbTree().getDb(
-            dbId, cleaner.lockTimeout, dbCache);
+                dbId, cleaner.lockTimeout, dbCache);
 
-        if (db == null || db.isDeleted()) {
+        if(db == null || db.isDeleted()) {
             nLNsObsoleteThisRun++;
-            if (checkPendingDbSet != null) {
+            if(checkPendingDbSet != null) {
                 checkPendingDbSet.add(dbId);
             }
             return;
@@ -1110,13 +1080,13 @@ public class FileProcessor extends DaemonThread {
 
             /* Find parent of this LN. */
             final boolean parentFound = tree.getParentBINForChildLN(
-                location, keyFromLog, false /*splitsAllowed*/,
-                false /*blindDeltaOps*/, Cleaner.UPDATE_GENERATION);
+                    location, keyFromLog, false /*splitsAllowed*/,
+                    false /*blindDeltaOps*/, Cleaner.UPDATE_GENERATION);
 
             bin = location.bin;
             final int index = location.index;
 
-            if (!parentFound) {
+            if(!parentFound) {
 
                 nLNsDeadThisRun++;
                 obsolete = true;
@@ -1128,7 +1098,7 @@ public class FileProcessor extends DaemonThread {
              * Now we're at the BIN parent for this LN.  If knownDeleted, LN is
              * deleted and can be purged.
              */
-            if (bin.isEntryKnownDeleted(index)) {
+            if(bin.isEntryKnownDeleted(index)) {
                 nLNsDeadThisRun++;
                 obsolete = true;
                 completed = true;
@@ -1139,9 +1109,9 @@ public class FileProcessor extends DaemonThread {
             processedHere = false;
 
             LNInfo pendingLN =
-                processFoundLN(info, logLsn, bin.getLsn(index), bin, index);
+                    processFoundLN(info, logLsn, bin.getLsn(index), bin, index);
 
-            if (pendingLN != null) {
+            if(pendingLN != null) {
                 pendingLNs = new HashMap<>();
                 pendingLNs.put(logLsn, pendingLN);
             }
@@ -1152,28 +1122,28 @@ public class FileProcessor extends DaemonThread {
              * For all other non-deleted LNs in this BIN, lookup their LSN
              * in the LN queue and process any matches.
              */
-            for (int i = 0; i < bin.getNEntries(); i += 1) {
+            for(int i = 0; i < bin.getNEntries(); i += 1) {
 
                 final long binLsn = bin.getLsn(i);
 
-                if (i != index &&
-                    !bin.isEntryKnownDeleted(i) &&
-                    !bin.isEntryPendingDeleted(i) &&
-                    DbLsn.getFileNumber(binLsn) == fileNum) {
+                if(i != index &&
+                        !bin.isEntryKnownDeleted(i) &&
+                        !bin.isEntryPendingDeleted(i) &&
+                        DbLsn.getFileNumber(binLsn) == fileNum) {
 
                     final Long myOffset = DbLsn.getFileOffset(binLsn);
                     final LNInfo myInfo = lookAheadCache.remove(myOffset);
 
                     /* If the offset is in the cache, it's a match. */
-                    if (myInfo != null) {
+                    if(myInfo != null) {
                         nLNQueueHitsThisRun++;
                         nLNsCleanedThisRun++;
 
                         pendingLN =
-                            processFoundLN(myInfo, binLsn, binLsn, bin, i);
+                                processFoundLN(myInfo, binLsn, binLsn, bin, i);
 
-                        if (pendingLN != null) {
-                            if (pendingLNs == null) {
+                        if(pendingLN != null) {
+                            if(pendingLNs == null) {
                                 pendingLNs = new HashMap<>();
                             }
                             pendingLNs.put(binLsn, pendingLN);
@@ -1182,21 +1152,21 @@ public class FileProcessor extends DaemonThread {
                 }
             }
         } finally {
-            if (bin != null) {
+            if(bin != null) {
                 bin.releaseLatch();
             }
 
             /* BIN must not be latched when synchronizing on FileSelector. */
-            if (pendingLNs != null) {
-                for (Map.Entry<Long, LNInfo> entry : pendingLNs.entrySet()) {
+            if(pendingLNs != null) {
+                for(Map.Entry<Long, LNInfo> entry : pendingLNs.entrySet()) {
                     fileSelector.addPendingLN(
-                        entry.getKey(), entry.getValue());
+                            entry.getKey(), entry.getValue());
                 }
             }
 
-            if (processedHere) {
+            if(processedHere) {
                 cleaner.logFine(Cleaner.CLEAN_LN, lnFromLog, logLsn,
-                    completed, obsolete, false /*migrated*/);
+                        completed, obsolete, false /*migrated*/);
             }
         }
     }
@@ -1206,26 +1176,21 @@ public class FileProcessor extends DaemonThread {
      * then migrates the LN, if the LSN of the LN log entry is the active LSN
      * in the tree.
      *
-     * @param info identifies the LN log entry.
-     *
-     * @param logLsn is the LSN of the log entry.
-     *
+     * @param info    identifies the LN log entry.
+     * @param logLsn  is the LSN of the log entry.
      * @param treeLsn is the LSN found in the tree.
-     *
-     * @param bin is the BIN found in the tree; is latched on method entry and
-     * exit.
-     *
-     * @param index is the BIN index found in the tree.
-     *
+     * @param bin     is the BIN found in the tree; is latched on method entry and
+     *                exit.
+     * @param index   is the BIN index found in the tree.
      * @return a non-null LNInfo if it should be added to the pending LN list,
      * after releasing the BIN latch.
      */
     private LNInfo processFoundLN(
-        final LNInfo info,
-        final long logLsn,
-        final long treeLsn,
-        final BIN bin,
-        final int index) {
+            final LNInfo info,
+            final long logLsn,
+            final long treeLsn,
+            final BIN bin,
+            final int index) {
 
         final LN lnFromLog = info.getLN();
         final byte[] key = info.getKey();
@@ -1264,9 +1229,9 @@ public class FileProcessor extends DaemonThread {
              * in that case the log entry must be for a past, deleted version
              * of that record.
              */
-            if (lnFromLog.isDeleted() &&
-                treeLsn == logLsn &&
-                fileLogVersion <= 2) {
+            if(lnFromLog.isDeleted() &&
+                    treeLsn == logLsn &&
+                    fileLogVersion <= 2) {
 
                 /*
                  * SR 14583: After JE 2.0, deleted LNs are never found in the
@@ -1282,7 +1247,7 @@ public class FileProcessor extends DaemonThread {
                 return null;
             }
 
-            if (treeLsn == DbLsn.NULL_LSN) {
+            if(treeLsn == DbLsn.NULL_LSN) {
 
                 /*
                  * Case 4: The LN in the tree is a never-written LN for a
@@ -1294,7 +1259,7 @@ public class FileProcessor extends DaemonThread {
                 return null;
             }
 
-            if (treeLsn != logLsn && isTemporary) {
+            if(treeLsn != logLsn && isTemporary) {
 
                 /*
                  * Temporary databases are always non-transactional.  If the
@@ -1310,7 +1275,7 @@ public class FileProcessor extends DaemonThread {
                 return null;
             }
 
-            if (!isTemporary) {
+            if(!isTemporary) {
 
                 /*
                  * Get a lock on the LN if we will migrate it now. (Temporary
@@ -1323,9 +1288,9 @@ public class FileProcessor extends DaemonThread {
                 /* Don't allow this short-lived lock to be preempted/stolen. */
                 locker.setPreemptable(false);
                 final LockResult lockRet = locker.nonBlockingLock(
-                    treeLsn, LockType.READ, false /*jumpAheadOfWaiters*/, db);
+                        treeLsn, LockType.READ, false /*jumpAheadOfWaiters*/, db);
 
-                if (lockRet.getLockGrant() == LockGrantType.DENIED) {
+                if(lockRet.getLockGrant() == LockGrantType.DENIED) {
 
                     /*
                      * LN is currently locked by another Locker, so we can't
@@ -1335,11 +1300,11 @@ public class FileProcessor extends DaemonThread {
                     completed = true;
 
                     return new LNInfo(
-                        null /*LN*/, db.getId(), key,
-                        info.getExpirationTime());
+                            null /*LN*/, db.getId(), key,
+                            info.getExpirationTime());
                 }
 
-                if (treeLsn != logLsn) {
+                if(treeLsn != logLsn) {
                     /* The LN is obsolete and can be purged. */
                     nLNsDeadThisRun++;
                     obsolete = true;
@@ -1355,11 +1320,11 @@ public class FileProcessor extends DaemonThread {
             assert !obsolete;
             assert treeLsn == logLsn;
 
-            if (bin.isEmbeddedLN(index)) {
+            if(bin.isEmbeddedLN(index)) {
                 throw EnvironmentFailureException.unexpectedState(
-                    envImpl,
-                    "LN is embedded although its associated logrec (at " +
-                    logLsn + " does not have the embedded flag on");
+                        envImpl,
+                        "LN is embedded although its associated logrec (at " +
+                                logLsn + " does not have the embedded flag on");
             }
 
             /*
@@ -1397,47 +1362,49 @@ public class FileProcessor extends DaemonThread {
              * evicted in the future, it will be written to disk without
              * flushing its dirty, migrated LNs.  [#18227]
              */
-            if (bin.getTarget(index) == null) {
+            if(bin.getTarget(index) == null) {
                 lnFromLog.postFetchInit(db, logLsn);
                 /* Ensure keys are transactionally correct. [#15704] */
                 bin.attachNode(index, lnFromLog, key /*lnSlotKey*/);
             }
 
-            if (db.getId().equals(DbTree.ID_DB_ID)) {
+            if(db.getId().equals(DbTree.ID_DB_ID)) {
                 final MapLN targetLn = (MapLN) bin.getTarget(index);
                 assert targetLn != null;
                 targetLn.getDatabase().setDirty();
 
-            } else if (isTemporary) {
+            }
+            else if(isTemporary) {
                 ((LN) bin.getTarget(index)).setDirty();
                 bin.setDirty(true);
                 nLNsMarkedThisRun++;
 
-            } else {
+            }
+            else {
                 final LN targetLn = (LN) bin.getTarget(index);
                 assert targetLn != null;
 
                 final LogItem logItem = targetLn.log(
-                    envImpl, db, null /*locker*/, null /*writeLockInfo*/,
-                    false /*newEmbeddedLN*/, bin.getKey(index),
-                    bin.getExpiration(index), bin.isExpirationInHours(),
-                    false /*newEmbeddedLN*/, logLsn,
-                    bin.getLastLoggedSize(index),
-                    false/*isInsertion*/, true /*backgroundIO*/,
-                    Cleaner.getMigrationRepContext(targetLn));
+                        envImpl, db, null /*locker*/, null /*writeLockInfo*/,
+                        false /*newEmbeddedLN*/, bin.getKey(index),
+                        bin.getExpiration(index), bin.isExpirationInHours(),
+                        false /*newEmbeddedLN*/, logLsn,
+                        bin.getLastLoggedSize(index),
+                        false/*isInsertion*/, true /*backgroundIO*/,
+                        Cleaner.getMigrationRepContext(targetLn));
 
                 bin.updateEntry(
-                    index, logItem.lsn, targetLn.getVLSNSequence(),
-                    logItem.size);
+                        index, logItem.lsn, targetLn.getVLSNSequence(),
+                        logItem.size);
 
                 /* Evict LN if we populated it with the log LN. */
-                if (lnFromLog == targetLn) {
+                if(lnFromLog == targetLn) {
                     bin.evictLN(index);
                 }
 
                 /* Lock new LSN on behalf of existing lockers. */
                 CursorImpl.lockAfterLsnChange(
-                    db, logLsn, logItem.lsn, locker /*excludeLocker*/);
+                        db, logLsn, logItem.lsn, locker /*excludeLocker*/);
 
                 nLNsMigratedThisRun++;
             }
@@ -1447,12 +1414,12 @@ public class FileProcessor extends DaemonThread {
             return null;
 
         } finally {
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd();
             }
 
             cleaner.logFine(Cleaner.CLEAN_LN, lnFromLog, logLsn, completed,
-                obsolete, migrated);
+                    obsolete, migrated);
         }
     }
 
@@ -1460,14 +1427,14 @@ public class FileProcessor extends DaemonThread {
      * If this OldBINDelta is still in use in the in-memory tree, dirty the
      * associated BIN. The next checkpoint will log a new delta or a full
      * version, which will make this delta obsolete.
-     *
+     * <p>
      * For OldBINDeltas, we do not optimize and must fetch the BIN if it is not
      * resident.
      */
     private void processOldBINDelta(
-        OldBINDelta deltaClone,
-        DatabaseImpl db,
-        long logLsn) {
+            OldBINDelta deltaClone,
+            DatabaseImpl db,
+            long logLsn) {
 
         nBINDeltasCleanedThisRun++;
 
@@ -1477,9 +1444,9 @@ public class FileProcessor extends DaemonThread {
         final byte[] searchKey = deltaClone.getSearchKey();
 
         final BIN treeBin = db.getTree().search(
-            searchKey, Cleaner.UPDATE_GENERATION);
+                searchKey, Cleaner.UPDATE_GENERATION);
 
-        if (treeBin == null) {
+        if(treeBin == null) {
             /* BIN for this delta is no longer in the tree. */
             nBINDeltasDeadThisRun++;
             return;
@@ -1489,7 +1456,7 @@ public class FileProcessor extends DaemonThread {
         try {
             final long treeLsn = treeBin.getLastLoggedLsn();
 
-            if (treeLsn == DbLsn.NULL_LSN) {
+            if(treeLsn == DbLsn.NULL_LSN) {
                 /* Current version was never logged. */
                 nBINDeltasDeadThisRun++;
                 return;
@@ -1497,7 +1464,7 @@ public class FileProcessor extends DaemonThread {
 
             final int cmp = DbLsn.compareTo(treeLsn, logLsn);
 
-            if (cmp > 0) {
+            if(cmp > 0) {
                 /* Log entry is obsolete. */
                 nBINDeltasDeadThisRun++;
                 return;
@@ -1522,14 +1489,14 @@ public class FileProcessor extends DaemonThread {
      * If this BIN-delta is still in use in the in-memory tree, dirty the
      * associated BIN. The next checkpoint will log a new delta or a full
      * version, which will make this delta obsolete.
-     *
+     * <p>
      * We optimize by placing the delta from the log into the tree when the
      * BIN is not resident.
      */
     private void processBINDelta(
-        BIN deltaClone,
-        DatabaseImpl db,
-        long logLsn) {
+            BIN deltaClone,
+            DatabaseImpl db,
+            long logLsn) {
 
         nBINDeltasCleanedThisRun++;
 
@@ -1538,18 +1505,18 @@ public class FileProcessor extends DaemonThread {
         deltaClone.latch(CacheMode.UNCHANGED);
 
         final SearchResult result = db.getTree().getParentINForChildIN(
-            deltaClone, true /*useTargetLevel*/,
-            true /*doFetch*/, CacheMode.UNCHANGED);
+                deltaClone, true /*useTargetLevel*/,
+                true /*doFetch*/, CacheMode.UNCHANGED);
 
         try {
-            if (!result.exactParentFound) {
+            if(!result.exactParentFound) {
                 /* BIN for this delta is no longer in the tree. */
                 nBINDeltasDeadThisRun++;
                 return;
             }
 
             final long treeLsn = result.parent.getLsn(result.index);
-            if (treeLsn == DbLsn.NULL_LSN) {
+            if(treeLsn == DbLsn.NULL_LSN) {
                 /* Current version was never logged. */
                 nBINDeltasDeadThisRun++;
                 return;
@@ -1564,7 +1531,7 @@ public class FileProcessor extends DaemonThread {
              * different IN due to the by-level search above.
              */
             final int cmp = DbLsn.compareTo(treeLsn, logLsn);
-            if (cmp != 0) {
+            if(cmp != 0) {
                 /* Log entry is obsolete. */
                 nBINDeltasDeadThisRun++;
                 return;
@@ -1577,9 +1544,9 @@ public class FileProcessor extends DaemonThread {
              * full BINs) because logging a new delta will obsolete this delta.
              */
             BIN treeBin = (BIN) result.parent.loadIN(
-                result.index, CacheMode.UNCHANGED);
+                    result.index, CacheMode.UNCHANGED);
 
-            if (treeBin == null) {
+            if(treeBin == null) {
                 /* Place delta from log into tree to avoid fetching. */
                 treeBin = deltaClone;
                 treeBin.latchNoUpdateLRU(db);
@@ -1587,8 +1554,9 @@ public class FileProcessor extends DaemonThread {
                 treeBin.postFetchInit(db, logLsn);
 
                 result.parent.attachNode(
-                    result.index, treeBin, null /*lnSlotKey*/);
-            } else {
+                        result.index, treeBin, null /*lnSlotKey*/);
+            }
+            else {
                 treeBin.latch(CacheMode.UNCHANGED);
             }
 
@@ -1604,7 +1572,7 @@ public class FileProcessor extends DaemonThread {
             nBINDeltasMigratedThisRun++;
 
         } finally {
-            if (result.parent != null) {
+            if(result.parent != null) {
                 result.parent.releaseLatch();
             }
         }
@@ -1615,9 +1583,9 @@ public class FileProcessor extends DaemonThread {
      * invoked at the end of the cleaning run will end up rewriting it.
      */
     private void processIN(
-        IN inClone,
-        DatabaseImpl db,
-        long logLsn) {
+            IN inClone,
+            DatabaseImpl db,
+            long logLsn) {
 
         boolean obsolete = false;
         boolean dirtied = false;
@@ -1631,11 +1599,12 @@ public class FileProcessor extends DaemonThread {
 
             IN inInTree = findINInTree(tree, db, inClone, logLsn);
 
-            if (inInTree == null) {
+            if(inInTree == null) {
                 /* IN is no longer in the tree.  Do nothing. */
                 nINsDeadThisRun++;
                 obsolete = true;
-            } else {
+            }
+            else {
 
                 /*
                  * IN is still in the tree.  Dirty it.  Checkpoint or eviction
@@ -1658,7 +1627,7 @@ public class FileProcessor extends DaemonThread {
             completed = true;
         } finally {
             cleaner.logFine(Cleaner.CLEAN_IN, inClone, logLsn, completed,
-                            obsolete, dirtied);
+                    obsolete, dirtied);
         }
     }
 
@@ -1671,15 +1640,15 @@ public class FileProcessor extends DaemonThread {
      * IN.
      */
     private IN findINInTree(
-        Tree tree,
-        DatabaseImpl db,
-        IN inClone,
-        long logLsn) {
+            Tree tree,
+            DatabaseImpl db,
+            IN inClone,
+            long logLsn) {
 
         /* Check if inClone is the root. */
-        if (inClone.isRoot()) {
+        if(inClone.isRoot()) {
             IN rootIN = isRoot(tree, db, inClone, logLsn);
-            if (rootIN == null) {
+            if(rootIN == null) {
 
                 /*
                  * inClone is a root, but no longer in use. Return now, because
@@ -1687,7 +1656,8 @@ public class FileProcessor extends DaemonThread {
                  * unexpected since it will try to find a parent.
                  */
                 return null;
-            } else {
+            }
+            else {
                 return rootIN;
             }
         }
@@ -1697,10 +1667,10 @@ public class FileProcessor extends DaemonThread {
         SearchResult result = null;
         try {
             result = tree.getParentINForChildIN(
-                inClone, true /*useTargetLevel*/,
-                true /*doFetch*/, Cleaner.UPDATE_GENERATION);
+                    inClone, true /*useTargetLevel*/,
+                    true /*doFetch*/, Cleaner.UPDATE_GENERATION);
 
-            if (!result.exactParentFound) {
+            if(!result.exactParentFound) {
                 return null;
             }
 
@@ -1712,7 +1682,7 @@ public class FileProcessor extends DaemonThread {
              * The IN in the tree is a never-written IN for a DW db so the IN
              * in the file is obsolete. [#15588]
              */
-            if (treeLsn == DbLsn.NULL_LSN) {
+            if(treeLsn == DbLsn.NULL_LSN) {
                 return null;
             }
 
@@ -1724,14 +1694,14 @@ public class FileProcessor extends DaemonThread {
              * it is not already resident, or use the inClone to mutate the
              * delta in the tree to a full BIN.
              */
-            if (treeLsn == logLsn) {
+            if(treeLsn == logLsn) {
                 IN in = parent.loadIN(result.index, Cleaner.UPDATE_GENERATION);
 
-                if (in != null) {
+                if(in != null) {
 
                     in.latch(Cleaner.UPDATE_GENERATION);
 
-                    if (in.isBINDelta()) {
+                    if(in.isBINDelta()) {
                         /*
                          * The BIN should be dirty here because the most
                          * recently written logrec for it is a full-version
@@ -1739,7 +1709,7 @@ public class FileProcessor extends DaemonThread {
                          * was dirtied again, and then mutated to a delta.
                          * So this delta should still be dirty.
                          */
-                        assert(in.getDirty());
+                        assert (in.getDirty());
 
                         /*
                          * Since we want to clean the inClone full version of
@@ -1749,9 +1719,10 @@ public class FileProcessor extends DaemonThread {
                          */
                         final BIN bin = (BIN) in;
                         bin.mutateToFullBIN(
-                            (BIN) inClone, false /*leaveFreeSlot*/);
+                                (BIN) inClone, false /*leaveFreeSlot*/);
                     }
-                } else {
+                }
+                else {
                     in = inClone;
 
                     /*
@@ -1767,7 +1738,7 @@ public class FileProcessor extends DaemonThread {
                 return in;
             }
 
-            if (inClone.isUpperIN()) {
+            if(inClone.isUpperIN()) {
                 /* No need to deal with BIN-deltas. */
                 return null;
             }
@@ -1779,7 +1750,7 @@ public class FileProcessor extends DaemonThread {
              * we only need the delta not the full BIN.
              */
             final BIN bin =
-                (BIN) parent.fetchIN(result.index, Cleaner.UPDATE_GENERATION);
+                    (BIN) parent.fetchIN(result.index, Cleaner.UPDATE_GENERATION);
 
             treeLsn = bin.getLastFullLsn();
 
@@ -1794,7 +1765,7 @@ public class FileProcessor extends DaemonThread {
              * parent slot was deleted and we're now looking at a completely
              * different IN due to the by-level search above.
              */
-            if (compareVal != 0) {
+            if(compareVal != 0) {
                 return null;
             }
 
@@ -1804,55 +1775,15 @@ public class FileProcessor extends DaemonThread {
              * mutate the delta in the tree to a full BIN.
              */
             bin.latch(Cleaner.UPDATE_GENERATION);
-            if (bin.isBINDelta()) {
+            if(bin.isBINDelta()) {
                 bin.mutateToFullBIN((BIN) inClone, false /*leaveFreeSlot*/);
             }
 
             return bin;
 
         } finally {
-            if (result != null && result.exactParentFound) {
+            if(result != null && result.exactParentFound) {
                 result.parent.releaseLatch();
-            }
-        }
-    }
-
-    /**
-     * Get the current root in the tree, or null if the inClone is not the
-     * current root.
-     */
-    private static class RootDoWork implements WithRootLatched {
-        private final DatabaseImpl db;
-        private final IN inClone;
-        private final long logLsn;
-
-        RootDoWork(DatabaseImpl db, IN inClone, long logLsn) {
-            this.db = db;
-            this.inClone = inClone;
-            this.logLsn = logLsn;
-        }
-
-        public IN doWork(ChildReference root) {
-
-            if (root == null ||
-                (root.getLsn() == DbLsn.NULL_LSN) || // deferred write root
-                (((IN) root.fetchTarget(db, null)).getNodeId() !=
-                 inClone.getNodeId())) {
-                return null;
-            }
-
-            /*
-             * A root LSN less than the log LSN must be an artifact of when we
-             * didn't properly propagate the logging of the rootIN up to the
-             * root ChildReference.  We still do this for compatibility with
-             * old log versions but may be able to remove it in the future.
-             */
-            if (DbLsn.compareTo(root.getLsn(), logLsn) <= 0) {
-                IN rootIN = (IN) root.fetchTarget(db, null);
-                rootIN.latch(Cleaner.UPDATE_GENERATION);
-                return rootIN;
-            } else {
-                return null;
             }
         }
     }
@@ -1916,13 +1847,54 @@ public class FileProcessor extends DaemonThread {
     }
 
     /**
+     * Get the current root in the tree, or null if the inClone is not the
+     * current root.
+     */
+    private static class RootDoWork implements WithRootLatched {
+        private final DatabaseImpl db;
+        private final IN inClone;
+        private final long logLsn;
+
+        RootDoWork(DatabaseImpl db, IN inClone, long logLsn) {
+            this.db = db;
+            this.inClone = inClone;
+            this.logLsn = logLsn;
+        }
+
+        public IN doWork(ChildReference root) {
+
+            if(root == null ||
+                    (root.getLsn() == DbLsn.NULL_LSN) || // deferred write root
+                    (((IN) root.fetchTarget(db, null)).getNodeId() !=
+                            inClone.getNodeId())) {
+                return null;
+            }
+
+            /*
+             * A root LSN less than the log LSN must be an artifact of when we
+             * didn't properly propagate the logging of the rootIN up to the
+             * root ChildReference.  We still do this for compatibility with
+             * old log versions but may be able to remove it in the future.
+             */
+            if(DbLsn.compareTo(root.getLsn(), logLsn) <= 0) {
+                IN rootIN = (IN) root.fetchTarget(db, null);
+                rootIN.latch(Cleaner.UPDATE_GENERATION);
+                return rootIN;
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
+    /**
      * A cache of LNInfo by LSN offset.  Used to hold a set of LNs that are
      * to be processed.  Keeps track of memory used, and when full (over
      * budget) the next offset should be queried and removed.
      */
     private static class LookAheadCache {
 
-        private final SortedMap<Long,LNInfo> map;
+        private final SortedMap<Long, LNInfo> map;
         private final int maxMem;
         private int usedMem;
 
@@ -1952,7 +1924,7 @@ public class FileProcessor extends DaemonThread {
 
         LNInfo remove(Long offset) {
             LNInfo info = map.remove(offset);
-            if (info != null) {
+            if(info != null) {
                 usedMem -= info.getMemorySize();
                 usedMem -= MemoryBudget.TREEMAP_ENTRY_OVERHEAD;
             }

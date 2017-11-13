@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.rep.monitor;
 
-import java.net.InetSocketAddress;
-
 import berkeley.com.sleepycat.je.rep.elections.MasterValue;
+
+import java.net.InetSocketAddress;
 
 /**
  * The event generated upon detecting a new Master. A new instance of this
@@ -35,9 +35,9 @@ public class NewMasterEvent extends MemberChangeEvent {
      */
     public InetSocketAddress getSocketAddress() {
         return new InetSocketAddress(masterValue.getHostName(),
-                                     masterValue.getPort());
+                masterValue.getPort());
     }
-    
+
     @Override
     public String toString() {
         return getNodeName() + " is new master";

@@ -4,7 +4,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 /**
- *  Removing regions. 3 regions are left
+ *  Removing regions. 2 regions are left
  */
 public class Regions0 {
 
@@ -18,20 +18,20 @@ public class Regions0 {
 
         int i = 0;
 
-        if(A) { // A
+        if(A) { // A -> AB
             i++;
 
-            if(B) { // AB
+            if(B) { // AB ->
                 i++;
             }
 
-            if(B) { // AB
+            if(B) { // AB ->
                 i++;
             }
 
-            if(C) { // AC
+            if(C) { // AC -> ACD
                 i++;
-                if(D) { // ACD
+                if(D) { // ACD ->
                     i++;
                 }
             }

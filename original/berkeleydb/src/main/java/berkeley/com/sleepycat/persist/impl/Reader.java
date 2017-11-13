@@ -13,17 +13,18 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.io.Serializable;
-
 import berkeley.com.sleepycat.persist.model.EntityModel;
+
+import java.io.Serializable;
 
 /**
  * Interface to the "read object" methods of the Format class.  For the
  * latest version format, the Format object provides the implementation of
  * these methods.  For an older version format, an evolver object implements
  * this interface to convert from the old to new format.
- *
+ * <p>
  * See {@link Format} for a description of each method.
+ *
  * @author Mark Hayes
  */
 interface Reader extends Serializable {
@@ -34,13 +35,13 @@ interface Reader extends Serializable {
                           Format oldFormat);
 
     Object newInstance(EntityInput input, boolean rawAccess)
-        throws RefreshException;
+            throws RefreshException;
 
     void readPriKey(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException;
+            throws RefreshException;
 
     Object readObject(Object o, EntityInput input, boolean rawAccess)
-        throws RefreshException;
-        
+            throws RefreshException;
+
     Accessor getAccessor(boolean rawAccess);
 }

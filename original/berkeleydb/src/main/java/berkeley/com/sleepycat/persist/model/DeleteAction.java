@@ -25,10 +25,10 @@ package berkeley.com.sleepycat.persist.model;
 public enum DeleteAction {
 
     /**
-     * The default action, {@code ABORT}, means that an exception is thrown in 
-     * order to abort the current transaction. 
+     * The default action, {@code ABORT}, means that an exception is thrown in
+     * order to abort the current transaction.
      * <!-- begin JE only -->
-     * On BDB JE, a {@link com.sleepycat.je.DeleteConstraintException} is 
+     * On BDB JE, a {@link com.sleepycat.je.DeleteConstraintException} is
      * thrown.
      * <!-- end JE only -->
      */

@@ -48,13 +48,13 @@ public class ActiveTxnArrayStat extends Stat<Active[]> {
     @Override
     public void add(Stat<Active[]> other) {
         throw EnvironmentFailureException.unexpectedState
-            ("ActiveTxnArrayStat doesn't support the add operation.");
+                ("ActiveTxnArrayStat doesn't support the add operation.");
     }
 
     @Override
     public void clear() {
-        if (array != null && array.length > 0) {
-            for (int i = 0; i < array.length; i++) {
+        if(array != null && array.length > 0) {
+            for(int i = 0; i < array.length; i++) {
                 array[i] = new Active(array[i].getName(), 0, 0);
             }
         }
@@ -68,22 +68,22 @@ public class ActiveTxnArrayStat extends Stat<Active[]> {
     @Override
     public void negate() {
         throw EnvironmentFailureException.unexpectedState
-            ("ActiveTxnArrayStat doesn't support the negate operation.");
+                ("ActiveTxnArrayStat doesn't support the negate operation.");
     }
 
     @Override
     public ActiveTxnArrayStat copy() {
         try {
             ActiveTxnArrayStat ret = (ActiveTxnArrayStat) super.clone();
-            if (array != null && array.length > 0) {
+            if(array != null && array.length > 0) {
                 Active[] newArray = new Active[array.length];
                 System.arraycopy
-                    (array, 0, newArray, 0, array.length);
+                        (array, 0, newArray, 0, array.length);
                 ret.set(newArray);
             }
 
             return ret;
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             throw EnvironmentFailureException.unexpectedException(e);
         }
     }
@@ -92,10 +92,10 @@ public class ActiveTxnArrayStat extends Stat<Active[]> {
     protected String getFormattedValue() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        if (array != null && array.length > 0) {
-            for (Active active : array) {
+        if(array != null && array.length > 0) {
+            for(Active active : array) {
                 sb.append(" txnId = " + Stat.FORMAT.format(active.getId()) +
-                          " txnName = " + active.getName() + "\n");
+                        " txnName = " + active.getName() + "\n");
             }
         }
         sb.append("]");
@@ -105,11 +105,11 @@ public class ActiveTxnArrayStat extends Stat<Active[]> {
 
     @Override
     public boolean isNotSet() {
-        if ( array == null) {
+        if(array == null) {
             return true;
         }
 
-        if (array.length == 0) {
+        if(array.length == 0) {
             return true;
         }
 

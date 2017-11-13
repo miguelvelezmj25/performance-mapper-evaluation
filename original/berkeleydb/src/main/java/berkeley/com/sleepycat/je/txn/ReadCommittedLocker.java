@@ -27,8 +27,9 @@ public class ReadCommittedLocker extends BuddyLocker {
 
     /**
      * Creates a ReadCommittedLocker.
+     *
      * @param buddy is a transactional locker that will be used for acquiring
-     * write locks.
+     *              write locks.
      */
     private ReadCommittedLocker(EnvironmentImpl env, Locker buddy) {
 
@@ -37,16 +38,16 @@ public class ReadCommittedLocker extends BuddyLocker {
          * transactional buddy locker.
          */
         super(env,
-              (buddy instanceof ReadCommittedLocker) ?
-              ((ReadCommittedLocker) buddy).getBuddy() : buddy);
+                (buddy instanceof ReadCommittedLocker) ?
+                        ((ReadCommittedLocker) buddy).getBuddy() : buddy);
 
-        assert(getBuddy() instanceof Txn);
+        assert (getBuddy() instanceof Txn);
     }
 
     public static ReadCommittedLocker createReadCommittedLocker(
-        EnvironmentImpl env,
-        Locker buddy)
-        throws DatabaseException {
+            EnvironmentImpl env,
+            Locker buddy)
+            throws DatabaseException {
 
         return new ReadCommittedLocker(env, buddy);
     }
@@ -59,7 +60,7 @@ public class ReadCommittedLocker extends BuddyLocker {
      */
     @Override
     public Locker newNonTxnLocker()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * getBuddy().newNonTxnLocker() will return the transactional buddy
@@ -67,7 +68,7 @@ public class ReadCommittedLocker extends BuddyLocker {
          * consistency.
          */
         return ReadCommittedLocker.createReadCommittedLocker
-            (envImpl, getBuddy().newNonTxnLocker());
+                (envImpl, getBuddy().newNonTxnLocker());
     }
 
     /**
@@ -81,14 +82,15 @@ public class ReadCommittedLocker extends BuddyLocker {
                                       boolean noWait,
                                       boolean jumpAheadOfWaiters,
                                       DatabaseImpl database)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (lockType.isWriteLock()) {
+        if(lockType.isWriteLock()) {
             return getBuddy().lockInternal
-                (lsn, lockType, noWait, jumpAheadOfWaiters, database);
-        } else {
+                    (lsn, lockType, noWait, jumpAheadOfWaiters, database);
+        }
+        else {
             return super.lockInternal
-                (lsn, lockType, noWait, jumpAheadOfWaiters, database);
+                    (lsn, lockType, noWait, jumpAheadOfWaiters, database);
         }
     }
 
@@ -98,10 +100,10 @@ public class ReadCommittedLocker extends BuddyLocker {
      */
     @Override
     public boolean releaseLock(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         boolean ret = true;
-        if (!lockManager.release(lsn, this)) {
+        if(!lockManager.release(lsn, this)) {
             ret = lockManager.release(lsn, getBuddy());
         }
         removeLock(lsn);

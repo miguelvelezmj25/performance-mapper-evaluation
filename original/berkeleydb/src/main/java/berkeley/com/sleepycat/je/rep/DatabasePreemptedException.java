@@ -22,14 +22,14 @@ import berkeley.com.sleepycat.je.OperationFailureException;
  * normally only occurs on a Replica node.  In the case of a DPL schema upgrade
  * where an entity class or secondary key is renamed, it may also occur on a
  * Master node, as described below.
- *
+ * <p>
  * <p>This exception occurs when accessing a database or store and one of the
  * following methods was recently executed on the master node and then replayed
  * on a replica node:
  * {@link com.sleepycat.je.Environment#truncateDatabase truncateDatabase},
  * {@link com.sleepycat.je.Environment#removeDatabase removeDatabase} and
  * {@link com.sleepycat.je.Environment#renameDatabase renameDatabase}.</p>
- *
+ * <p>
  * <p>When using the {@link com.sleepycat.persist DPL}, this occurs only in two
  * circumstances:</p>
  * <ol>
@@ -42,19 +42,19 @@ import berkeley.com.sleepycat.je.OperationFailureException;
  * <a href="../../persist/evolve/package-summary.html#repUpgrade">Upgrading
  * a Replication Group</a>.</li>
  * </ol>
- *
+ * <p>
  * <p>When this exception occurs, the application must close any open cursors
  * and abort any open transactions that are using the database or store, and
  * then close the database or store handle.  If the application wishes, it may
  * then reopen the database (if it still exists) or store.</p>
- *
+ * <p>
  * <p>Some applications may wish to coordinate the Master and Replica sites to
  * prevent a Replica from accessing a database that is being truncated, removed
  * or renamed, and thereby prevent this exception.  Such coordination is not
  * directly supported by JE.  The DatabasePreemptedException is provided to
  * allow an application to handle database truncation, removal and renaming
  * without such coordination between nodes.</p>
- *
+ * <p>
  * <p>The {@link com.sleepycat.je.Transaction} handle is <em>not</em>
  * invalidated as a result of this exception.</p>
  *
@@ -67,9 +67,10 @@ public class DatabasePreemptedException extends OperationFailureException {
     private final String dbName;
     private final Database dbHandle;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public DatabasePreemptedException(final String message,
                                       final String dbName,
@@ -79,9 +80,10 @@ public class DatabasePreemptedException extends OperationFailureException {
         this.dbHandle = dbHandle;
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private DatabasePreemptedException(String message,
                                        DatabasePreemptedException cause) {
@@ -104,9 +106,10 @@ public class DatabasePreemptedException extends OperationFailureException {
         return dbName;
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

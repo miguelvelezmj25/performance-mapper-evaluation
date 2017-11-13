@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.persist.model;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Identifies a persistent class that is not an {@link Entity} class or a
@@ -26,7 +26,9 @@ import java.lang.annotation.Target;
  *
  * @author Mark Hayes
  */
-@Documented @Retention(RUNTIME) @Target(TYPE)
+@Documented
+@Retention(RUNTIME)
+@Target(TYPE)
 public @interface Persistent {
 
     /**
@@ -34,7 +36,6 @@ public @interface Persistent {
      * has been made.
      *
      * @return the version.
-     *
      * @see Entity#version
      */
     int version() default 0;
@@ -44,7 +45,6 @@ public @interface Persistent {
      * instance.
      *
      * @return the Class.
-     *
      * @see PersistentProxy
      */
     Class proxyFor() default void.class;

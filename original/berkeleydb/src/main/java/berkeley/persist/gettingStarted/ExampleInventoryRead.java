@@ -47,7 +47,7 @@ public class ExampleInventoryRead {
         ExampleInventoryRead eir = new ExampleInventoryRead();
         try {
             eir.run(args);
-        } catch (DatabaseException dbe) {
+        } catch(DatabaseException dbe) {
             System.err.println("ExampleInventoryRead: " + dbe.toString());
             dbe.printStackTrace();
         } finally {
@@ -59,7 +59,7 @@ public class ExampleInventoryRead {
     private static void parseArgs(String args[]) {
         for(int i = 0; i < args.length; ++i) {
             if(args[i].startsWith("-")) {
-                switch (args[i].charAt(1)) {
+                switch(args[i].charAt(1)) {
                     case 'h':
                         myDbEnvPath = new File(args[++i]);
                         break;

@@ -12,44 +12,22 @@
  */
 package berkeley.com.sleepycat.je.rep.util;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Formatter;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.rep.MasterStateException;
-import berkeley.com.sleepycat.je.rep.MasterTransferFailureException;
-import berkeley.com.sleepycat.je.rep.MemberActiveException;
-import berkeley.com.sleepycat.je.rep.MemberNotFoundException;
-import berkeley.com.sleepycat.je.rep.NodeState;
-import berkeley.com.sleepycat.je.rep.NodeType;
-import berkeley.com.sleepycat.je.rep.ReplicaStateException;
-import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
-import berkeley.com.sleepycat.je.rep.ReplicationGroup;
-import berkeley.com.sleepycat.je.rep.ReplicationNetworkConfig;
-import berkeley.com.sleepycat.je.rep.ReplicationNode;
-import berkeley.com.sleepycat.je.rep.UnknownMasterException;
+import berkeley.com.sleepycat.je.rep.*;
 import berkeley.com.sleepycat.je.rep.elections.Learner;
 import berkeley.com.sleepycat.je.rep.elections.MasterValue;
 import berkeley.com.sleepycat.je.rep.elections.Protocol;
 import berkeley.com.sleepycat.je.rep.elections.TimebasedProposalGenerator;
 import berkeley.com.sleepycat.je.rep.impl.GroupService;
+import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupProtocol;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupProtocol.EnsureOK;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupProtocol.Fail;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupProtocol.GroupResponse;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupProtocol.TransferOK;
-import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepNodeImpl;
-import berkeley.com.sleepycat.je.rep.impl.TextProtocol.MessageExchange;
-import berkeley.com.sleepycat.je.rep.impl.TextProtocol.OK;
-import berkeley.com.sleepycat.je.rep.impl.TextProtocol.ProtocolError;
-import berkeley.com.sleepycat.je.rep.impl.TextProtocol.RequestMessage;
-import berkeley.com.sleepycat.je.rep.impl.TextProtocol.ResponseMessage;
+import berkeley.com.sleepycat.je.rep.impl.TextProtocol.*;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
 import berkeley.com.sleepycat.je.rep.utilint.ReplicationFormatter;
@@ -57,12 +35,19 @@ import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFai
 import berkeley.com.sleepycat.je.rep.utilint.net.DataChannelFactoryBuilder;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Formatter;
+import java.util.logging.Logger;
+
 /**
  * Administrative APIs for use by applications which do not have direct access
  * to a replicated environment. The class supplies methods that can be
  * used to list group members, remove members, update network addresses, and
  * find the current master.
- *
+ * <p>
  * Information is found and updated by querying nodes in the group. Because of
  * that, ReplicationGroupAdmin can only obtain information when there is at
  * least one node alive in the replication group.
@@ -70,50 +55,48 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 public class ReplicationGroupAdmin {
 
     private final String groupName;
-    private Set<InetSocketAddress> helperSockets;
     private final Protocol electionsProtocol;
     private final RepGroupProtocol groupProtocol;
     private final Logger logger;
     private final Formatter formatter;
     private final DataChannelFactory channelFactory;
+    private Set<InetSocketAddress> helperSockets;
 
     /**
      * Constructs a group admin object.
      *
-     * @param groupName the name of the group to be administered
+     * @param groupName     the name of the group to be administered
      * @param helperSockets the sockets on which it can contact helper nodes
-     * in the replication group to carry out admin services.
+     *                      in the replication group to carry out admin services.
      */
     public ReplicationGroupAdmin(String groupName,
                                  Set<InetSocketAddress> helperSockets) {
         this(groupName, helperSockets,
-             ReplicationNetworkConfig.createDefault());
+                ReplicationNetworkConfig.createDefault());
     }
 
     /**
+     * @param groupName     the name of the group to be administered
+     * @param helperSockets the sockets on which it can contact helper nodes
+     *                      in the replication group to carry out admin services.
+     * @param repNetConfig  a network configuration to use
      * @hidden SSL deferred
      * Constructs a group admin object.
-     *
-     * @param groupName the name of the group to be administered
-     * @param helperSockets the sockets on which it can contact helper nodes
-     * in the replication group to carry out admin services.
-     * @param repNetConfig a network configuration to use
      */
     public ReplicationGroupAdmin(String groupName,
                                  Set<InetSocketAddress> helperSockets,
                                  ReplicationNetworkConfig repNetConfig) {
         this(groupName, helperSockets,
-             initializeFactory(repNetConfig, groupName));
+                initializeFactory(repNetConfig, groupName));
     }
 
     /**
+     * @param groupName      the name of the group to be administered
+     * @param helperSockets  the sockets on which it can contact helper nodes
+     *                       in the replication group to carry out admin services.
+     * @param channelFactory the factory for channel creation
      * @hidden SSL deferred
      * Constructs a group admin object.
-     *
-     * @param groupName the name of the group to be administered
-     * @param helperSockets the sockets on which it can contact helper nodes
-     * in the replication group to carry out admin services.
-     * @param channelFactory the factory for channel creation
      */
     public ReplicationGroupAdmin(String groupName,
                                  Set<InetSocketAddress> helperSockets,
@@ -123,18 +106,25 @@ public class ReplicationGroupAdmin {
         this.channelFactory = channelFactory;
 
         electionsProtocol =
-            new Protocol(TimebasedProposalGenerator.getParser(),
-                         MasterValue.getParser(),
-                         groupName,
-                         NameIdPair.NOCHECK,
-                         null /* repImpl */,
-                         channelFactory);
+                new Protocol(TimebasedProposalGenerator.getParser(),
+                        MasterValue.getParser(),
+                        groupName,
+                        NameIdPair.NOCHECK,
+                        null /* repImpl */,
+                        channelFactory);
         groupProtocol =
-            new RepGroupProtocol(groupName, NameIdPair.NOCHECK, null,
-                                 channelFactory);
+                new RepGroupProtocol(groupName, NameIdPair.NOCHECK, null,
+                        channelFactory);
         logger = LoggerUtils.getLoggerFixedPrefix
-            (getClass(), NameIdPair.NOCHECK.toString());
+                (getClass(), NameIdPair.NOCHECK.toString());
         formatter = new ReplicationFormatter(NameIdPair.NOCHECK);
+    }
+
+    private static DataChannelFactory initializeFactory(
+            ReplicationNetworkConfig repNetConfig,
+            String logContext) {
+
+        return DataChannelFactoryBuilder.construct(repNetConfig, logContext);
     }
 
     /**
@@ -152,7 +142,7 @@ public class ReplicationGroupAdmin {
      * member, in order to query for the information.
      *
      * @param helperSockets the sockets on which it can contact helper nodes
-     * in the replication group to carry out admin services.
+     *                      in the replication group to carry out admin services.
      */
     public void setHelperSockets(Set<InetSocketAddress> helperSockets) {
         this.helperSockets = helperSockets;
@@ -172,86 +162,77 @@ public class ReplicationGroupAdmin {
      * the master.
      *
      * @return the socket address associated with the master
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
+     * @throws UnknownMasterException      if the master was not found
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      */
     private InetSocketAddress getMasterSocket()
-        throws UnknownMasterException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            EnvironmentFailureException {
 
         MasterValue masterValue = Learner.findMaster(electionsProtocol,
-                                                     helperSockets,
-                                                     logger,
-                                                     null,
-                                                     formatter);
+                helperSockets,
+                logger,
+                null,
+                formatter);
         return new InetSocketAddress(masterValue.getHostName(),
-                                     masterValue.getPort());
+                masterValue.getPort());
     }
 
     /**
      * Returns the node name associated with the master
      *
      * @return the master node ID
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
+     * @throws UnknownMasterException      if the master was not found
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      */
     public String getMasterNodeName()
-        throws UnknownMasterException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            EnvironmentFailureException {
         MasterValue masterValue = Learner.findMaster(electionsProtocol,
-                                                     helperSockets,
-                                                     logger,
-                                                     null,
-                                                     formatter);
+                helperSockets,
+                logger,
+                null,
+                formatter);
         return masterValue.getNodeName();
     }
 
     /**
-     * @hidden
-     * Internal implementation class.
-     *
+     * @param monitor the monitor node
+     * @return the master node that was contacted to ensure the monitor
+     * @throws UnknownMasterException      if the master was not found
+     * @throws EnvironmentFailureException if an unexpected, internal or
+     *                                     environment-wide failure occurs.
+     * @hidden Internal implementation class.
+     * <p>
      * Ensures that this monitor node is a member of the replication group,
      * adding it to the group if it isn't already.
-     *
-     * @param monitor the monitor node
-     *
-     * @return the master node that was contacted to ensure the monitor
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
      */
     public ReplicationNode ensureMonitor(RepNodeImpl monitor)
-        throws UnknownMasterException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            EnvironmentFailureException {
 
-        if (!monitor.getType().isMonitor()) {
+        if(!monitor.getType().isMonitor()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Node type must be Monitor not: " + monitor.getType());
+                    ("Node type must be Monitor not: " + monitor.getType());
         }
 
         MasterValue masterValue = Learner.findMaster(electionsProtocol,
-                                                     helperSockets,
-                                                     logger,
-                                                     null,
-                                                     formatter);
+                helperSockets,
+                logger,
+                null,
+                formatter);
         EnsureOK okResp = (EnsureOK) doMessageExchange
-            (groupProtocol.new EnsureNode(monitor), EnsureOK.class);
+                (groupProtocol.new EnsureNode(monitor), EnsureOK.class);
 
         monitor.getNameIdPair().update(okResp.getNameIdPair());
         return new RepNodeImpl(new NameIdPair(masterValue.getNodeName()),
-                               NodeType.ELECTABLE,
-                               masterValue.getHostName(),
-                               masterValue.getPort(),
+                NodeType.ELECTABLE,
+                masterValue.getHostName(),
+                masterValue.getPort(),
                                /* JE version on monitor is not known */
-                               null);
+                null);
     }
 
     /**
@@ -279,20 +260,15 @@ public class ReplicationGroupAdmin {
      * disconnected from the master.
      *
      * @param nodeName identifies the node being removed from the group
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
-     * @throws IllegalArgumentException if the type of the node is {@code
-     * SECONDARY}
-     *
-     * @throws MemberNotFoundException if the node denoted by
-     * <code>nodeName</code> is not a member of the replication group
-     *
-     * @throws MasterStateException if the member being removed is currently
-     * the Master
-     *
+     * @throws UnknownMasterException      if the master was not found
+     * @throws IllegalArgumentException    if the type of the node is {@code
+     *                                     SECONDARY}
+     * @throws MemberNotFoundException     if the node denoted by
+     *                                     <code>nodeName</code> is not a member of the replication group
+     * @throws MasterStateException        if the member being removed is currently
+     *                                     the Master
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
+     *                                     environment-wide failure occurs.
      * @see <a
      * href="{@docRoot}/../ReplicationGuide/utilities.html#node-addremove"
      * target="_top">Adding and Removing Nodes From the Group</a>
@@ -302,28 +278,38 @@ public class ReplicationGroupAdmin {
      * EXTERNAL when it becomes public.
      */
     public void removeMember(String nodeName)
-        throws UnknownMasterException,
-               MemberNotFoundException,
-               MasterStateException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            MemberNotFoundException,
+            MasterStateException,
+            EnvironmentFailureException {
 
         final String masterErrorMessage = "Cannot remove an active master";
         final RequestMessage request =
-            groupProtocol.new RemoveMember(nodeName);
+                groupProtocol.new RemoveMember(nodeName);
 
         final RepNodeImpl node = checkMember(
-            nodeName, masterErrorMessage, /* electableOnly */ false);
-        if (node.getType().hasTransientId()) {
+                nodeName, masterErrorMessage, /* electableOnly */ false);
+        if(node.getType().hasTransientId()) {
             throw new IllegalArgumentException(
-                "Cannot remove node with transient ID: " + nodeName);
+                    "Cannot remove node with transient ID: " + nodeName);
         }
 
         doMessageExchange(request, OK.class);
     }
 
     /**
+     * @param nodeName identifies the node being deleted from the group
+     * @throws UnknownMasterException      if the master was not found
+     * @throws MemberActiveException       if the type of the node is {@code
+     *                                     SECONDARY} or {@code EXTERNAL}, or if the node is active
+     * @throws MemberNotFoundException     if the node denoted by
+     *                                     <code>nodeName</code> is not a member of the replication group
+     * @throws MasterStateException        if the member being deleted is currently
+     *                                     the Master
+     * @throws EnvironmentFailureException if an unexpected, internal or
+     *                                     environment-wide failure occurs.
      * @hidden internal, for use in disaster recovery [#23447]
-     *
+     * <p>
      * Deletes this node from the group, so that it is no longer a member of
      * the group. When deleted, it will not connect to a master, or participate
      * in elections until the environment is reopened. If the node is a {@link
@@ -345,39 +331,23 @@ public class ReplicationGroupAdmin {
      * {@link NodeType#EXTERNAL External} nodes cannot be deleted; they
      * automatically leave the group when they are shut down or become
      * disconnected from the master.
-     *
-     * @param nodeName identifies the node being deleted from the group
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
-     * @throws MemberActiveException if the type of the node is {@code
-     * SECONDARY} or {@code EXTERNAL}, or if the node is active
-     *
-     * @throws MemberNotFoundException if the node denoted by
-     * <code>nodeName</code> is not a member of the replication group
-     *
-     * @throws MasterStateException if the member being deleted is currently
-     * the Master
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
      */
     public void deleteMember(String nodeName)
-        throws UnknownMasterException,
-               MemberActiveException,
-               MemberNotFoundException,
-               MasterStateException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            MemberActiveException,
+            MemberNotFoundException,
+            MasterStateException,
+            EnvironmentFailureException {
 
         final String masterErrorMessage = "Cannot delete an active master";
         final RequestMessage request =
-            groupProtocol.new DeleteMember(nodeName);
+                groupProtocol.new DeleteMember(nodeName);
 
         final RepNodeImpl node = checkMember(
-            nodeName, masterErrorMessage, /* electableOnly */ false);
-        if (node.getType().hasTransientId()) {
+                nodeName, masterErrorMessage, /* electableOnly */ false);
+        if(node.getType().hasTransientId()) {
             throw new IllegalArgumentException(
-                "Cannot delete node with transient ID: " + nodeName);
+                    "Cannot delete node with transient ID: " + nodeName);
         }
 
         doMessageExchange(request, OK.class);
@@ -387,18 +357,16 @@ public class ReplicationGroupAdmin {
      * Returns the current composition of the group from the Master.
      *
      * @return the group description
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
+     * @throws UnknownMasterException      if the master was not found
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
+     *                                     environment-wide failure occurs
      */
     public ReplicationGroup getGroup()
-        throws UnknownMasterException,
-               EnvironmentFailureException {
+            throws UnknownMasterException,
+            EnvironmentFailureException {
 
         GroupResponse resp = (GroupResponse) doMessageExchange
-            (groupProtocol.new GroupRequest(), GroupResponse.class);
+                (groupProtocol.new GroupRequest(), GroupResponse.class);
 
         return new ReplicationGroup(resp.getGroup());
     }
@@ -408,24 +376,21 @@ public class ReplicationGroupAdmin {
      * node and <code>state</code> of the application where the node is
      * running in.
      *
-     * @param repNode a ReplicationNode includes those information which are
-     * needed to connect to the node
+     * @param repNode              a ReplicationNode includes those information which are
+     *                             needed to connect to the node
      * @param socketConnectTimeout the timeout value for creating a socket
-     * connection with the replicated node
-     *
+     *                             connection with the replicated node
      * @return the state of the replicated node
-     *
-     * @throws IOException if the machine is down or no response is returned
-     *
+     * @throws IOException                   if the machine is down or no response is returned
      * @throws ServiceConnectFailedException if can't connect to the service
-     * running on the replicated node
+     *                                       running on the replicated node
      */
     public NodeState getNodeState(ReplicationNode repNode,
                                   int socketConnectTimeout)
-        throws IOException, ServiceConnectFailedException {
+            throws IOException, ServiceConnectFailedException {
 
         DbPing ping = new DbPing(
-            repNode, groupName, socketConnectTimeout, channelFactory);
+                repNode, groupName, socketConnectTimeout, channelFactory);
 
         return ping.getNodeState();
     }
@@ -441,10 +406,10 @@ public class ReplicationGroupAdmin {
      * <li> Shutdown the node that is being updated.
      * <li> Use this method to change the hostname and port of the node.
      * <li> Start the node on the new machine, or at its new port, using the new
-     *    hostname/port. If the log files are available at the node, they will
-     *    be reused. A network restore operation may need to be initiated by
-     *    the application to copy over any needed log files if no log files are
-     *    available, or if they have become obsolete.
+     * hostname/port. If the log files are available at the node, they will
+     * be reused. A network restore operation may need to be initiated by
+     * the application to copy over any needed log files if no log files are
+     * available, or if they have become obsolete.
      * </ol>
      * <p>
      * The address of a {@link NodeType#SECONDARY} node cannot be updated with
@@ -453,24 +418,18 @@ public class ReplicationGroupAdmin {
      * the address of a secondary node, restart the node with the updated
      * address.
      *
-     * @param nodeName the name of the node whose address will be updated.
+     * @param nodeName    the name of the node whose address will be updated.
      * @param newHostName the new host name of the node
-     * @param newPort the new port number of the node
-     *
+     * @param newPort     the new port number of the node
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
-     *
-     * @throws MasterStateException if the member being updated is currently
-     * the master
-     *
-     * @throws MemberNotFoundException if the node denoted by
-     * <code>nodeName</code> is not a member of the replication group
-     *
-     * @throws ReplicaStateException if the member being updated is currently
-     * alive
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
+     *                                     environment-wide failure occurs
+     * @throws MasterStateException        if the member being updated is currently
+     *                                     the master
+     * @throws MemberNotFoundException     if the node denoted by
+     *                                     <code>nodeName</code> is not a member of the replication group
+     * @throws ReplicaStateException       if the member being updated is currently
+     *                                     alive
+     * @throws UnknownMasterException      if the master was not found
      * @see DbResetRepGroup DbResetRepGroup, which can be used in a
      * related but different use case to copy and move a group.
      */
@@ -479,16 +438,16 @@ public class ReplicationGroupAdmin {
      * EXTERNAL when it becomes public.
      */
     public void updateAddress(String nodeName, String newHostName, int newPort)
-        throws EnvironmentFailureException,
-               MasterStateException,
-               MemberNotFoundException,
-               ReplicaStateException,
-               UnknownMasterException {
+            throws EnvironmentFailureException,
+            MasterStateException,
+            MemberNotFoundException,
+            ReplicaStateException,
+            UnknownMasterException {
 
         final String masterErrorMessage =
-            "Can't update address for the current master.";
+                "Can't update address for the current master.";
         RequestMessage request =
-            groupProtocol.new UpdateAddress(nodeName, newHostName, newPort);
+                groupProtocol.new UpdateAddress(nodeName, newHostName, newPort);
 
         checkMember(nodeName, masterErrorMessage, /* electableOnly */ false);
         doMessageExchange(request, OK.class);
@@ -500,40 +459,37 @@ public class ReplicationGroupAdmin {
      * request to the original master to perform the operation.
      *
      * @throws MasterTransferFailureException if the master transfer operation
-     * fails
-     *
-     * @throws UnknownMasterException if the master was not found
-     *
-     * @throws IllegalArgumentException if {@code nodeNames} contains the name
-     * of a node that is not electable
-     *
+     *                                        fails
+     * @throws UnknownMasterException         if the master was not found
+     * @throws IllegalArgumentException       if {@code nodeNames} contains the name
+     *                                        of a node that is not electable
      * @see ReplicatedEnvironment#transferMaster
      */
     public String transferMaster(Set<String> nodeNames,
                                  int timeout,
                                  TimeUnit timeUnit,
                                  boolean force)
-        throws MasterTransferFailureException,
-               UnknownMasterException {
+            throws MasterTransferFailureException,
+            UnknownMasterException {
 
-        for (String node : nodeNames) {
+        for(String node : nodeNames) {
             checkMember(node, null, /* electableOnly */ true);
         }
         final String nodeNameList = commaJoin(nodeNames);
         final long timeoutMillis = timeUnit.toMillis(timeout);
         final RequestMessage transferMaster =
-            groupProtocol.new TransferMaster(nodeNameList,
-                                             timeoutMillis, force);
+                groupProtocol.new TransferMaster(nodeNameList,
+                        timeoutMillis, force);
         TransferOK result =
-            (TransferOK)doMessageExchange(transferMaster, TransferOK.class);
+                (TransferOK) doMessageExchange(transferMaster, TransferOK.class);
         return result.getWinner();
     }
 
     private String commaJoin(Set<String> words) {
         boolean first = true;
         StringBuilder sb = new StringBuilder();
-        for (String w : words) {
-            if (!first) {
+        for(String w : words) {
+            if(!first) {
                 sb.append(',');
             }
             sb.append(w);
@@ -550,39 +506,39 @@ public class ReplicationGroupAdmin {
     private RepNodeImpl checkMember(String nodeName,
                                     String masterErrorMessage,
                                     boolean electableOnly)
-        throws MasterStateException,
-               MemberNotFoundException {
+            throws MasterStateException,
+            MemberNotFoundException {
 
         final RepGroupImpl group = getGroup().getRepGroupImpl();
         final RepNodeImpl node = group.getNode(nodeName);
 
         /* Check the membership. */
-        if (node == null ||
+        if(node == null ||
             /* Creation is not yet acknowledged */
-            (!node.isRemoved() && !node.isQuorumAck())) {
+                (!node.isRemoved() && !node.isQuorumAck())) {
             throw new MemberNotFoundException("Node: " + nodeName +
-                                              " is not a member of the " +
-                                              "group: " + groupName);
+                    " is not a member of the " +
+                    "group: " + groupName);
         }
 
-        if (electableOnly && !node.getType().isElectable()) {
+        if(electableOnly && !node.getType().isElectable()) {
             throw new IllegalArgumentException("Node: " + nodeName +
-                                               " must have node type" +
-                                               " ELECTABLE, was " +
-                                               node.getType());
+                    " must have node type" +
+                    " ELECTABLE, was " +
+                    node.getType());
         }
 
-        if (node.isRemoved() && node.isQuorumAck()) {
+        if(node.isRemoved() && node.isQuorumAck()) {
             throw new MemberNotFoundException("Node: " + nodeName +
-                                              " is not currently a member " +
-                                              "of the group: " + groupName +
-                                              ", it has been removed.");
+                    " is not currently a member " +
+                    "of the group: " + groupName +
+                    ", it has been removed.");
         }
 
         /* Check if the node itself is the master. */
-        if (masterErrorMessage != null) {
+        if(masterErrorMessage != null) {
             final InetSocketAddress masterAddress = getMasterSocket();
-            if (masterAddress.equals(node.getSocketAddress())) {
+            if(masterAddress.equals(node.getSocketAddress())) {
                 throw new MasterStateException(masterErrorMessage);
             }
         }
@@ -593,23 +549,23 @@ public class ReplicationGroupAdmin {
     /* Do a message exchange with the targeted master. */
     private ResponseMessage doMessageExchange(RequestMessage request,
                                               Class<?> respClass)
-        throws EnvironmentFailureException,
-               MasterStateException,
-               MemberNotFoundException,
-               UnknownMasterException {
+            throws EnvironmentFailureException,
+            MasterStateException,
+            MemberNotFoundException,
+            UnknownMasterException {
 
         /* Do the communication. */
         final InetSocketAddress masterAddress = getMasterSocket();
         final MessageExchange me = groupProtocol.new MessageExchange
-            (masterAddress, GroupService.SERVICE_NAME, request);
+                (masterAddress, GroupService.SERVICE_NAME, request);
         me.run();
 
         ResponseMessage resp = me.getResponseMessage();
 
-        if (resp == null) {
-            if (me.getException() != null) {
+        if(resp == null) {
+            if(me.getException() != null) {
                 throw new UnknownMasterException
-                    ("Problem communicating with master.", me.getException());
+                        ("Problem communicating with master.", me.getException());
             }
 
             /*
@@ -619,12 +575,12 @@ public class ReplicationGroupAdmin {
             return null;
         }
 
-        if (respClass == null && resp instanceof Fail) {
+        if(respClass == null && resp instanceof Fail) {
             throw getException(resp);
         }
 
-        if (respClass != null &&
-            !(resp.getClass().getName().equals(respClass.getName()))) {
+        if(respClass != null &&
+                !(resp.getClass().getName().equals(respClass.getName()))) {
             throw getException(resp);
         }
 
@@ -635,14 +591,14 @@ public class ReplicationGroupAdmin {
      * Examines the response and generates a meaningful error exception.
      */
     private DatabaseException getException(ResponseMessage resp) {
-        if (resp == null) {
+        if(resp == null) {
             return EnvironmentFailureException.unexpectedState
-                ("No response to request");
+                    ("No response to request");
         }
 
-        if (resp instanceof Fail) {
+        if(resp instanceof Fail) {
             Fail fail = (Fail) resp;
-            switch (fail.getReason()) {
+            switch(fail.getReason()) {
                 case MEMBER_NOT_FOUND:
                     return new MemberNotFoundException(fail.getMessage());
                 case IS_MASTER:
@@ -653,26 +609,19 @@ public class ReplicationGroupAdmin {
                     // TODO: not worth it for now, but it wouldn't be hard to
                     // distinguish IllegalArg. cases here
                     return new MasterTransferFailureException
-                        (fail.getMessage());
+                            (fail.getMessage());
                 default:
                     return EnvironmentFailureException.
-                        unexpectedState(fail.getMessage());
+                            unexpectedState(fail.getMessage());
             }
         }
 
-        if (resp instanceof ProtocolError) {
+        if(resp instanceof ProtocolError) {
             return EnvironmentFailureException.unexpectedState
-                (((ProtocolError)resp).getMessage());
+                    (((ProtocolError) resp).getMessage());
         }
 
         return EnvironmentFailureException.unexpectedState
-            ("Response not recognized: " + resp);
-    }
-
-    private static DataChannelFactory initializeFactory(
-        ReplicationNetworkConfig repNetConfig,
-        String logContext) {
-
-        return DataChannelFactoryBuilder.construct(repNetConfig, logContext);
+                ("Response not recognized: " + resp);
     }
 }

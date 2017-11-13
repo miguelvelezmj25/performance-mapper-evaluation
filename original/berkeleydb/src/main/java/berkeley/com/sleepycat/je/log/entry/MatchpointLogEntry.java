@@ -30,12 +30,16 @@ public class MatchpointLogEntry extends SingleItemReplicableEntry<Matchpoint> {
      */
     private static final int LAST_FORMAT_CHANGE = 8;
 
-    /** Construct a log entry for reading a {@link Matchpoint} object. */
+    /**
+     * Construct a log entry for reading a {@link Matchpoint} object.
+     */
     public MatchpointLogEntry() {
         super(Matchpoint.class);
     }
 
-    /** Construct a log entry for writing a {@link Matchpoint} object. */
+    /**
+     * Construct a log entry for writing a {@link Matchpoint} object.
+     */
     public MatchpointLogEntry(final Matchpoint matchpoint) {
         super(LogEntryType.LOG_MATCHPOINT, matchpoint);
     }

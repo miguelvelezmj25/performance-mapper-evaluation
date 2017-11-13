@@ -14,14 +14,15 @@
 package berkeley.com.sleepycat.persist;
 
 import berkeley.com.sleepycat.je.DatabaseException;
-/* <!-- begin JE only --> */
 import berkeley.com.sleepycat.je.Get;
-/* <!-- end JE only --> */
 import berkeley.com.sleepycat.je.LockMode;
-/* <!-- begin JE only --> */
 import berkeley.com.sleepycat.je.ReadOptions;
-/* <!-- end JE only --> */
 import berkeley.com.sleepycat.util.keyrange.RangeCursor;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
 
 /**
  * The cursor for a SubIndex treats Dup and NoDup operations specially because
@@ -39,7 +40,7 @@ class SubIndexCursor<V> extends BasicCursor<V> {
 
     @Override
     public EntityCursor<V> dup()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return new SubIndexCursor<V>(cursor.dup(true), adapter);
     }
@@ -52,7 +53,7 @@ class SubIndexCursor<V> extends BasicCursor<V> {
 
     @Override
     public V nextNoDup(LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return next(lockMode);
     }
@@ -65,26 +66,26 @@ class SubIndexCursor<V> extends BasicCursor<V> {
 
     @Override
     public V prevNoDup(LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return prev(lockMode);
     }
 
     /* <!-- begin JE only --> */
     public EntityResult<V> get(Get getType, ReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        switch (getType) {
-        case NEXT_DUP:
-            return null;
-        case NEXT_NO_DUP:
-            return super.get(Get.NEXT, options);
-        case PREV_DUP:
-            return null;
-        case PREV_NO_DUP:
-            return super.get(Get.PREV, options);
-        default:
-            return super.get(getType, options);
+        switch(getType) {
+            case NEXT_DUP:
+                return null;
+            case NEXT_NO_DUP:
+                return super.get(Get.NEXT, options);
+            case PREV_DUP:
+                return null;
+            case PREV_NO_DUP:
+                return super.get(Get.PREV, options);
+            default:
+                return super.get(getType, options);
         }
     }
     /* <!-- end JE only --> */

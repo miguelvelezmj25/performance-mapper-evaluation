@@ -19,15 +19,15 @@ import berkeley.com.sleepycat.je.txn.Locker;
 /**
  * Thrown when a lock has been "stolen", or preempted, from a transaction in a
  * replicated environment.
- *
+ * <p>
  * <p>The {@link com.sleepycat.je.Transaction} handle is invalidated as a
  * result of this exception.</p>
- * 
+ * <p>
  * <p>Locks may be preempted in a JE HA environment on a Replica system when
  * the HA write operation needs a lock that an application reader transaction
  * or cursor holds.  This exception is thrown by a reader transaction or cursor
  * method that is called after a lock has been preempted.</p>
- *
+ * <p>
  * <p>Normally, applications should catch the base class {@link
  * LockConflictException} rather than catching one of its subclasses.  All lock
  * conflicts are typically handled in the same way, which is normally to abort
@@ -40,27 +40,30 @@ public class LockPreemptedException extends LockConflictException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public LockPreemptedException(Locker locker, Throwable cause) {
         super(locker, "Lock was preempted by a replication stream replay " +
-              "write operation", cause);
+                "write operation", cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private LockPreemptedException(String message,
                                    LockPreemptedException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public LockPreemptedException wrapSelf(String msg) {

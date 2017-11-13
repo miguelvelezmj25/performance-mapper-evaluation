@@ -23,7 +23,7 @@ public class TxnCommit extends VersionedWriteTxnEnd {
 
     public TxnCommit(long id, long lastLsn, int masterId, long dtvlsn) {
         super(id, lastLsn, masterId, dtvlsn);
-        if ((masterId > 0) && (dtvlsn < VLSN.NULL_VLSN_SEQUENCE)) {
+        if((masterId > 0) && (dtvlsn < VLSN.NULL_VLSN_SEQUENCE)) {
             /*
              * Note that the dtvln will be NULL when a Txn is created on a
              * master, so allow for it.
@@ -46,7 +46,7 @@ public class TxnCommit extends VersionedWriteTxnEnd {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof TxnCommit)) {
+        if(!(other instanceof TxnCommit)) {
             return false;
         }
 

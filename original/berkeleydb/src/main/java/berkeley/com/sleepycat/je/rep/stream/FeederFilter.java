@@ -32,9 +32,8 @@ public interface FeederFilter {
      * to the replica. It can for example be used to filter out tables that
      * are not of interest to the replica.
      *
-     * @param record the record to be filtered
+     * @param record  the record to be filtered
      * @param repImpl repImpl of the RN where the filter is executed
-     *
      * @return the original input record if it is to be sent to the replica.
      * null if it's to be skipped.
      */

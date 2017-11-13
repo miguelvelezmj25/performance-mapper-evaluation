@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.Set;
-
+import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
 import berkeley.com.sleepycat.je.txn.Locker;
+
+import java.util.Set;
 
 /**
  * Thrown by {@link Environment#beginTransaction} and {@link
@@ -37,8 +37,8 @@ public class InsufficientReplicasException extends OperationFailureException {
     /**
      * Creates a Commit exception.
      *
-     * @param ackPolicy the ack policy that could not be implemented
-     * @param requiredAckCount the replica acks required to satisfy the policy
+     * @param ackPolicy         the ack policy that could not be implemented
+     * @param requiredAckCount  the replica acks required to satisfy the policy
      * @param availableReplicas the set of available Replicas
      */
     public InsufficientReplicasException(Locker locker,
@@ -46,8 +46,8 @@ public class InsufficientReplicasException extends OperationFailureException {
                                          int requiredAckCount,
                                          Set<String> availableReplicas) {
         super(locker, true /*abortOnly*/,
-              makeMsg(ackPolicy, requiredAckCount, availableReplicas),
-              null /*cause*/);
+                makeMsg(ackPolicy, requiredAckCount, availableReplicas),
+                null /*cause*/);
         this.commitPolicy = ackPolicy;
         this.requiredAckCount = requiredAckCount;
         this.availableReplicas = availableReplicas;
@@ -55,19 +55,45 @@ public class InsufficientReplicasException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private InsufficientReplicasException(String message,
                                           InsufficientReplicasException
-                                          cause) {
+                                                  cause) {
         super(message, cause);
         this.commitPolicy = cause.commitPolicy;
         this.requiredAckCount = cause.requiredAckCount;
         this.availableReplicas = cause.availableReplicas;
     }
 
+    private static String makeMsg(ReplicaAckPolicy commitPolicy,
+                                  int requiredAckCount,
+                                  Set<String> availableReplicas) {
+
+        String errorPrefix = "Commit policy: " + commitPolicy.name() +
+                " required " + requiredAckCount + " replica" +
+                (requiredAckCount > 1 ? "s. " : ". ");
+
+        switch(availableReplicas.size()) {
+            case 0:
+                return errorPrefix + "But none were active with this master.";
+
+            case 1:
+                return errorPrefix + "Only replica: " + availableReplicas +
+                        " was available.";
+
+            default:
+                return errorPrefix + " Only the following " +
+                        availableReplicas.size() +
+                        " replicas listed here were available: " +
+                        availableReplicas;
+        }
+    }
+
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override
@@ -103,29 +129,5 @@ public class InsufficientReplicasException extends OperationFailureException {
      */
     public Set<String> getAvailableReplicas() {
         return availableReplicas;
-    }
-
-    private static String makeMsg(ReplicaAckPolicy commitPolicy,
-                                  int requiredAckCount,
-                                  Set<String> availableReplicas) {
-
-        String errorPrefix = "Commit policy: " + commitPolicy.name() +
-            " required " + requiredAckCount + " replica" +
-            (requiredAckCount > 1 ? "s. " : ". ");
-
-        switch (availableReplicas.size()) {
-        case 0:
-            return errorPrefix + "But none were active with this master.";
-
-        case 1:
-            return errorPrefix + "Only replica: " + availableReplicas +
-                " was available.";
-
-        default:
-            return errorPrefix + " Only the following " +
-                availableReplicas.size() +
-                " replicas listed here were available: " +
-                availableReplicas;
-        }
     }
 }

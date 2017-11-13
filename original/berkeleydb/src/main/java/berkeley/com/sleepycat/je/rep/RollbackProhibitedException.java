@@ -49,7 +49,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * {@link RollbackException}. The application only needs to reinstantiate the
  * ReplicatedEnvironment and proceed on. If the limit specified by {@link
  * ReplicationConfig#TXN_ROLLBACK_LIMIT} is exceeded, the application will
- * receive a RollbackProhibitedException to indicate that manual intervention 
+ * receive a RollbackProhibitedException to indicate that manual intervention
  * is required.
  * <p>
  * The RollbackProhibitedException lets the user interject application specific
@@ -62,7 +62,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * <p>
  * Note that any CommitTokens obtained before restarting this
  * <code>Replica</code> shouldn't be used after
- * {@link RollbackProhibitedException} is thrown because the token may no 
+ * {@link RollbackProhibitedException} is thrown because the token may no
  * longer exist on the current <code>Master</code> node.
  */
 public class RollbackProhibitedException extends RestartRequiredException {
@@ -76,6 +76,7 @@ public class RollbackProhibitedException extends RestartRequiredException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public RollbackProhibitedException(RepImpl repImpl,
@@ -84,9 +85,20 @@ public class RollbackProhibitedException extends RestartRequiredException {
                                        MatchpointSearchResults searchResults) {
 
         super(repImpl, EnvironmentFailureReason.ROLLBACK_PROHIBITED,
-              makeMessage(repImpl.getName(), searchResults, matchpointVLSN,
-                          rollbackTxnLimit));
+                makeMessage(repImpl.getName(), searchResults, matchpointVLSN,
+                        rollbackTxnLimit));
         this.searchResults = searchResults;
+    }
+
+    /**
+     * For internal use only.
+     *
+     * @hidden
+     */
+    public RollbackProhibitedException(String message,
+                                       RollbackProhibitedException cause) {
+        super(message + " " + cause.getMessage(), cause);
+        this.searchResults = cause.searchResults;
     }
 
     private static String makeMessage(String nodeName,
@@ -97,33 +109,24 @@ public class RollbackProhibitedException extends RestartRequiredException {
         long fileNumber = DbLsn.getFileNumber(matchpointLSN);
         long fileOffset = DbLsn.getFileOffset(matchpointLSN);
         return
-            "Node " + nodeName + " must rollback" +
-            searchResults.getRollbackMsg() + 
-            " in order to rejoin the replication group, but the transaction " +
-            "rollback limit of " + rollbackTxnLimit + " prohibits this. " + 
-            "Either increase the property je.rep.txnRollbackLimit to a value " +
-            "larger than " + rollbackTxnLimit + " to permit automatic " + 
-            "rollback, or manually remove the problematic transactions. " + 
-            "To do a manual removal, truncate the log to file " + 
-            FileManager.getFileName(fileNumber) + 
-            ", offset 0x" + 
-            Long.toHexString(fileOffset) + ", vlsn " + 
-            matchpointVLSN + 
-            " using the directions in com.sleepycat.je.util.DbTruncateLog.";
+                "Node " + nodeName + " must rollback" +
+                        searchResults.getRollbackMsg() +
+                        " in order to rejoin the replication group, but the transaction " +
+                        "rollback limit of " + rollbackTxnLimit + " prohibits this. " +
+                        "Either increase the property je.rep.txnRollbackLimit to a value " +
+                        "larger than " + rollbackTxnLimit + " to permit automatic " +
+                        "rollback, or manually remove the problematic transactions. " +
+                        "To do a manual removal, truncate the log to file " +
+                        FileManager.getFileName(fileNumber) +
+                        ", offset 0x" +
+                        Long.toHexString(fileOffset) + ", vlsn " +
+                        matchpointVLSN +
+                        " using the directions in com.sleepycat.je.util.DbTruncateLog.";
     }
 
     /**
      * For internal use only.
-     * @hidden
-     */
-    public RollbackProhibitedException(String message,
-                                       RollbackProhibitedException cause) {
-        super(message + " " + cause.getMessage(), cause);
-        this.searchResults = cause.searchResults;
-    }
-
-    /**
-     * For internal use only.
+     *
      * @hidden
      */
     @Override
@@ -148,7 +151,7 @@ public class RollbackProhibitedException extends RestartRequiredException {
     }
 
     /**
-     * Return the time in milliseconds of the earliest transaction commit that 
+     * Return the time in milliseconds of the earliest transaction commit that
      * will be rolled back if the log is truncated to the location specified by
      * {@link #getTruncationFileNumber} and {@link #getTruncationFileOffset}
      */

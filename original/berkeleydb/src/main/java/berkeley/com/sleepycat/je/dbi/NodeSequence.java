@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * NodeSequence encapsulates the generation and maintenance of a sequence for
@@ -26,7 +26,15 @@ public class NodeSequence {
 
     public static final int FIRST_LOCAL_NODE_ID = 1;
     public static final int FIRST_REPLICATED_NODE_ID = -10;
-
+    public final EnvironmentImpl envImpl;
+    /*
+     * Transient LSNs are used for not-yet-logged DeferredWrite records and
+     * for the EOF record used for Serializable isolation. Transient LSNs are
+     * used to provide unique locks, and are only used during the life of an
+     * environment, for non-persistent objects.
+     */
+    private final AtomicLong lastAllocatedTransientLsnOffset =
+            new AtomicLong(0L);
     /*
      * Node IDs: We need to ensure that local and replicated nodes use
      * different number spaces for their ids, so there can't be any possible
@@ -44,17 +52,6 @@ public class NodeSequence {
     private AtomicLong lastAllocatedLocalNodeId = null;
     private AtomicLong lastAllocatedReplicatedNodeId = null;
 
-    /*
-     * Transient LSNs are used for not-yet-logged DeferredWrite records and
-     * for the EOF record used for Serializable isolation. Transient LSNs are
-     * used to provide unique locks, and are only used during the life of an
-     * environment, for non-persistent objects.
-     */
-    private final AtomicLong lastAllocatedTransientLsnOffset =
-        new AtomicLong(0L);
-
-    public final EnvironmentImpl envImpl;
-
     public NodeSequence(EnvironmentImpl envImpl) {
         this.envImpl = envImpl;
     }
@@ -66,7 +63,7 @@ public class NodeSequence {
     void initRealNodeId() {
         lastAllocatedLocalNodeId = new AtomicLong(FIRST_LOCAL_NODE_ID - 1);
         lastAllocatedReplicatedNodeId =
-            new AtomicLong(FIRST_REPLICATED_NODE_ID + 1);
+                new AtomicLong(FIRST_REPLICATED_NODE_ID + 1);
     }
 
     /**
@@ -109,12 +106,12 @@ public class NodeSequence {
      */
     public void updateFromReplay(long replayNodeId) {
         assert !envImpl.isMaster();
-        if (replayNodeId > 0 && !envImpl.isRepConverted()) {
-           throw EnvironmentFailureException.unexpectedState
-               ("replay node id is unexpectedly positive " + replayNodeId);
+        if(replayNodeId > 0 && !envImpl.isRepConverted()) {
+            throw EnvironmentFailureException.unexpectedState
+                    ("replay node id is unexpectedly positive " + replayNodeId);
         }
 
-        if (replayNodeId < lastAllocatedReplicatedNodeId.get()) {
+        if(replayNodeId < lastAllocatedReplicatedNodeId.get()) {
             lastAllocatedReplicatedNodeId.set(replayNodeId);
         }
     }
@@ -124,6 +121,6 @@ public class NodeSequence {
      */
     public long getNextTransientLsn() {
         return DbLsn.makeTransientLsn
-            (lastAllocatedTransientLsnOffset.getAndIncrement());
+                (lastAllocatedTransientLsnOffset.getAndIncrement());
     }
 }

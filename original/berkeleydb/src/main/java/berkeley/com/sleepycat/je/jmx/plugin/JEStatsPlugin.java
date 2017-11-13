@@ -13,33 +13,33 @@
 
 package berkeley.com.sleepycat.je.jmx.plugin;
 
+import javax.management.ObjectName;
+import javax.swing.*;
 import java.util.LinkedHashMap;
 
-import javax.management.ObjectName;
-import javax.swing.JPanel;
-
 public class JEStatsPlugin extends StatsPlugin {
-    public static String mBeanNamePrefix = 
-        "com.sleepycat.je.jmx:name=*JEMonitor(*";
+    public static String mBeanNamePrefix =
+            "com.sleepycat.je.jmx:name=*JEMonitor(*";
 
     @Override
     protected void initTabs() {
-        if (tabs == null) {
+        if(tabs == null) {
             tabs = new LinkedHashMap<String, JPanel>();
             try {
                 ObjectName name = new ObjectName(mBeanNamePrefix);
                 int count = getContext().getMBeanServerConnection().
-                    queryNames(name, null).size();
+                        queryNames(name, null).size();
 
-                if (count > 0) {
+                if(count > 0) {
                     Stats status =
-                        new JEStats(getContext().getMBeanServerConnection());
+                            new JEStats(getContext().getMBeanServerConnection());
                     tabs.put("JE Statistics", status);
                     stats.add(status);
-                } else {
+                }
+                else {
                     tabs.put("JE Statistics", new JPanel());
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }

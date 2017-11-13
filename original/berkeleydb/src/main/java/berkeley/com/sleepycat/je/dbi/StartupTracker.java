@@ -13,14 +13,6 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.EnumMap;
-import java.util.Formatter;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.ProgressListener;
 import berkeley.com.sleepycat.je.RecoveryProgress;
@@ -31,6 +23,14 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.EnumMap;
+import java.util.Formatter;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Store and calculate elapsed time, counts, and other statistics about
  * environment open. No synchronization is used, which generally works because
@@ -40,104 +40,6 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  */
 public class StartupTracker {
 
-    /* 
-     * Statistics are kept about startup phases, defined below. Phases can
-     * be nested, so the child and root fields are used to express this
-     * relationship. For example:
-     *  TotalEnvOpen
-     *      TotalRecovery
-     *         FindEndOfLog
-     *          ..
-     *         BuildTree
-     *             ReadMapIN 
-     *             ..
-     *         Ckpt
-     *  TotalJoinGroup encompasses the following two phases. 
-     *      FindMaster
-     *      BecomeConsistent
-     * Keep these enums in order of execution, so that the display is easier to
-     * comprehend. Of course, some phases subsume other phases, but in general,
-     * this enum order follows the order of execution.
-     */
-    public enum Phase {
-            TOTAL_ENV_OPEN("Environment Open"),
-            TOTAL_RECOVERY,
-            FIND_END_OF_LOG,
-            FIND_LAST_CKPT, 
-            BUILD_TREE,
-            READ_MAP_INS,
-            REDO_MAP_INS,
-            UNDO_MAP_LNS,
-            REDO_MAP_LNS,
-            READ_INS,
-            REDO_INS,
-            UNDO_LNS,
-            REDO_LNS,
-            POPULATE_UP, 
-            POPULATE_EP,
-            REMOVE_TEMP_DBS,
-            CKPT,
-            TOTAL_JOIN_GROUP("Replication Join Group"),
-            FIND_MASTER,
-            BECOME_CONSISTENT;
-
-        private Phase[] children;
-        private Phase root;
-        private String reportLabel;
-
-        private Phase() {
-        }
-
-        private Phase(String reportLabel) {
-            this.reportLabel = reportLabel;
-        }
-
-        static {
-            TOTAL_ENV_OPEN.children = new Phase[] 
-                {TOTAL_RECOVERY};
-            TOTAL_RECOVERY.children = new Phase[] 
-                {FIND_END_OF_LOG,
-                 FIND_LAST_CKPT,
-                 BUILD_TREE,
-                 POPULATE_UP,
-                 POPULATE_EP,
-                 REMOVE_TEMP_DBS,
-                 CKPT};
-            BUILD_TREE.children = new Phase[] 
-                {READ_MAP_INS,
-                 REDO_MAP_INS,
-                 UNDO_MAP_LNS,
-                 REDO_MAP_LNS,
-                 READ_INS,
-                 REDO_INS,
-                 UNDO_LNS,
-                 REDO_LNS};
-            TOTAL_JOIN_GROUP.children = new Phase[] 
-                {FIND_MASTER, 
-                 BECOME_CONSISTENT};
-
-            TOTAL_RECOVERY.root = TOTAL_ENV_OPEN;
-            FIND_END_OF_LOG.root = TOTAL_ENV_OPEN;
-            FIND_LAST_CKPT.root = TOTAL_ENV_OPEN; 
-            BUILD_TREE.root = TOTAL_ENV_OPEN;
-            READ_MAP_INS.root = TOTAL_ENV_OPEN;
-            REDO_MAP_INS.root = TOTAL_ENV_OPEN;
-            UNDO_MAP_LNS.root = TOTAL_ENV_OPEN;
-            REDO_MAP_LNS.root = TOTAL_ENV_OPEN;
-            READ_INS.root = TOTAL_ENV_OPEN;
-            REDO_INS.root = TOTAL_ENV_OPEN;
-            UNDO_LNS.root = TOTAL_ENV_OPEN;
-            REDO_LNS.root = TOTAL_ENV_OPEN;
-            POPULATE_UP.root = TOTAL_ENV_OPEN; 
-            POPULATE_EP.root = TOTAL_ENV_OPEN;
-            REMOVE_TEMP_DBS.root = TOTAL_ENV_OPEN;
-            CKPT.root = TOTAL_ENV_OPEN;
-
-            FIND_MASTER.root = TOTAL_JOIN_GROUP;
-            BECOME_CONSISTENT.root = TOTAL_JOIN_GROUP;
-        }
-    }
-
     private final Map<Phase, Elapsed> elapsed;
     private final Map<Phase, Counter> counters;
     private final Map<Phase, StatGroup> stats;
@@ -145,13 +47,12 @@ public class StartupTracker {
     private final EnvironmentImpl envImpl;
     private RecoveryInfo info;
     private long lastDumpMillis;
-
     public StartupTracker(EnvironmentImpl envImpl) {
 
         elapsed = new EnumMap<Phase, Elapsed>(Phase.class);
         counters = new EnumMap<Phase, Counter>(Phase.class);
         stats = new EnumMap<Phase, StatGroup>(Phase.class);
-        for (Phase p : Phase.values()){
+        for(Phase p : Phase.values()) {
             elapsed.put(p, new Elapsed());
         }
 
@@ -166,29 +67,29 @@ public class StartupTracker {
     }
 
     /**
-     * Note that a particular phase is starting. 
+     * Note that a particular phase is starting.
      */
     public void start(Phase phase) {
         String msg = "Starting " + phase;
-        if (info != null) {
+        if(info != null) {
             msg += " " + info;
         }
         LoggerUtils.logMsg(logger, envImpl, Level.CONFIG, msg);
 
         elapsed.get(phase).start();
         Counter c = new Counter();
-        counters.put(phase, c);       
-        if (!phase.equals(Phase.TOTAL_ENV_OPEN)) {
+        counters.put(phase, c);
+        if(!phase.equals(Phase.TOTAL_ENV_OPEN)) {
 
-            /* 
+            /*
              * LogManager does not exist yet so we can't reference it. Anyway,
-             * cache misses are 0 to start with, so TOTAL_ENV_OPEN does not 
+             * cache misses are 0 to start with, so TOTAL_ENV_OPEN does not
              * have to set the starting cache miss count.
              */
             c.setCacheMissStart(envImpl.getLogManager().getNCacheMiss());
         }
     }
-    
+
     /**
      * Note that a particular phase is ending.
      */
@@ -200,13 +101,13 @@ public class StartupTracker {
 
         /* Log this phase to the je.info file. */
         String msg = "Stopping " + phase;
-        if (info != null) {
+        if(info != null) {
             msg += " " + info;
         }
         LoggerUtils.logMsg(logger, envImpl, Level.CONFIG, msg);
 
         /*
-         * Conditionally log the whole report to the je.info file, either 
+         * Conditionally log the whole report to the je.info file, either
          * because this family of phases has ended, or because this startup
          * is taking a very long time.
          *
@@ -216,30 +117,30 @@ public class StartupTracker {
          * STARTUP_DUMP_THRESHOLD param cannot be read.
          */
         int dumpThreshold = envImpl.getConfigManager().getDuration
-            (EnvironmentParams.STARTUP_DUMP_THRESHOLD);
+                (EnvironmentParams.STARTUP_DUMP_THRESHOLD);
 
         /* We're at the end of a family of phases. */
-        if (phase.root == null) {
-            if ((e.getEnd() - e.getStart()) > dumpThreshold) {
+        if(phase.root == null) {
+            if((e.getEnd() - e.getStart()) > dumpThreshold) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 PrintStream p = new PrintStream(baos);
                 displayStats(p, phase);
                 LoggerUtils.logMsg(logger, envImpl, Level.INFO,
-                                   baos.toString());
+                        baos.toString());
                 return;
             }
         }
-         
-        /* 
+
+        /*
          * It's not the ending phase, but this has been taking a very long
          * time, so dump some information.
          */
-         if ((System.currentTimeMillis() - lastDumpMillis) > dumpThreshold) {
-             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             PrintStream p = new PrintStream(baos);
-             displayInterim(p, phase);
-             LoggerUtils.logMsg(logger, envImpl, Level.INFO, baos.toString());
-         }
+        if((System.currentTimeMillis() - lastDumpMillis) > dumpThreshold) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream p = new PrintStream(baos);
+            displayInterim(p, phase);
+            LoggerUtils.logMsg(logger, envImpl, Level.INFO, baos.toString());
+        }
     }
 
     /**
@@ -247,16 +148,16 @@ public class StartupTracker {
      * listener.
      */
     public void setProgress(RecoveryProgress progress) {
-        ProgressListener<RecoveryProgress> progressListener = 
-            envImpl.getRecoveryProgressListener();
+        ProgressListener<RecoveryProgress> progressListener =
+                envImpl.getRecoveryProgressListener();
 
-        if (progressListener == null) {
+        if(progressListener == null) {
             return;
         }
-        if (!progressListener.progress(progress, -1, -1)) {
+        if(!progressListener.progress(progress, -1, -1)) {
             throw new EnvironmentFailureException
-              (envImpl, EnvironmentFailureReason.PROGRESS_LISTENER_HALT,
-              "EnvironmentConfig.recoveryProgressListener: ");      
+                    (envImpl, EnvironmentFailureReason.PROGRESS_LISTENER_HALT,
+                            "EnvironmentConfig.recoveryProgressListener: ");
         }
     }
 
@@ -268,14 +169,14 @@ public class StartupTracker {
         return counters.get(phase);
     }
 
-    /** 
-     * Save stats for a given phase. 
+    /**
+     * Save stats for a given phase.
      */
     public void setStats(Phase phase, StatGroup sg) {
         stats.put(phase, sg);
     }
 
-    /** 
+    /**
      * Generate a description of the four recovery locations (firstActive,
      * ckptStart, ckptend, end of Log) and the distance inbetween.
      */
@@ -283,68 +184,69 @@ public class StartupTracker {
         StringBuilder returnInfo = new StringBuilder();
 
         CheckpointEnd cEnd = info.checkpointEnd;
-        if (cEnd != null) {
+        if(cEnd != null) {
             returnInfo.append("checkpointId = ");
             returnInfo.append(cEnd.getId());
-            if (cEnd.getInvoker() == null) {
+            if(cEnd.getInvoker() == null) {
                 returnInfo.append(" ");
-            } else {
+            }
+            else {
                 returnInfo.append("[").append(cEnd.getInvoker());
                 returnInfo.append("] ");
             }
         }
 
         long fileMax =
-            envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
+                envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
 
         long useStart = info.checkpointStartLsn == DbLsn.NULL_LSN ?
-            0 : info.checkpointStartLsn;
+                0 : info.checkpointStartLsn;
         long head = DbLsn.getNoCleaningDistance(useStart,
-                                                info.firstActiveLsn,
-                                                fileMax);
+                info.firstActiveLsn,
+                fileMax);
 
         long useEnd = info.checkpointEndLsn == DbLsn.NULL_LSN ?
-            0 : info.checkpointEndLsn;
+                0 : info.checkpointEndLsn;
         long ckpt = DbLsn.getNoCleaningDistance(useEnd,
-                                                info.checkpointStartLsn,
-                                                fileMax);
+                info.checkpointStartLsn,
+                fileMax);
 
         long useLast = info.lastUsedLsn == DbLsn.NULL_LSN ?
-            0 : info.lastUsedLsn;
+                0 : info.lastUsedLsn;
         long tail = DbLsn.getNoCleaningDistance(useLast,
-                                                info.checkpointEndLsn,
-                                                fileMax);
+                info.checkpointEndLsn,
+                fileMax);
         returnInfo.append(
-            "firstActive[" + 
-            DbLsn.getNoFormatString(info.firstActiveLsn) +
-            "], ckptStart[" +
-            DbLsn.getNoFormatString(info.checkpointStartLsn) +
-            "], ckptEnd[" +
-            DbLsn.getNoFormatString(info.checkpointEndLsn) +
-            "], lastUsed[" +
-            DbLsn.getNoFormatString(info.lastUsedLsn) +
-            "]\n");
+                "firstActive[" +
+                        DbLsn.getNoFormatString(info.firstActiveLsn) +
+                        "], ckptStart[" +
+                        DbLsn.getNoFormatString(info.checkpointStartLsn) +
+                        "], ckptEnd[" +
+                        DbLsn.getNoFormatString(info.checkpointEndLsn) +
+                        "], lastUsed[" +
+                        DbLsn.getNoFormatString(info.lastUsedLsn) +
+                        "]\n");
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
         f.format("%24s bytes = %,d\n%24s bytes = %,d\n%24s bytes = %,d",
-                 "firstActive->ckptStart", head,
-                 "ckptStart->ckptEnd", ckpt,
-                 "ckptEnd->end bytes", tail);
-        
-        return returnInfo.toString() + "\nApproximate distances:\n" + 
-            sb.toString();
+                "firstActive->ckptStart", head,
+                "ckptStart->ckptEnd", ckpt,
+                "ckptEnd->end bytes", tail);
+
+        return returnInfo.toString() + "\nApproximate distances:\n" +
+                sb.toString();
     }
 
     private String displayTimestamp(Long time) {
         StringBuilder sb = new StringBuilder();
         Formatter timestampFormatter = new Formatter(sb);
-        timestampFormatter.format("%tD,%tH:%tM:%tS:%tL", 
-                                  time, time, time, time, time);
+        timestampFormatter.format("%tD,%tH:%tM:%tS:%tL",
+                time, time, time, time, time);
         return sb.toString();
     }
 
     /**
-     * Display a phase and its children, showing elapsed time as a  
+     * Display a phase and its children, showing elapsed time as a
      * percentage of the phases' root.
      */
     private void displayPhaseSubtree(PrintStream stream,
@@ -354,94 +256,95 @@ public class StartupTracker {
 
         String headerFormat = "%24s  %% of total  %s\n";
         String parentFormat = "%20s             %3d %s\n";
-        String dataFormat   = "%24s         %3d %s\n";
-        String divider = "                         "+
-            "-------------------------";
+        String dataFormat = "%24s         %3d %s\n";
+        String divider = "                         " +
+                "-------------------------";
 
-        if (parent.children == null) {
+        if(parent.children == null) {
             return;
         }
 
-        if ((parentTime.getEnd() - parentTime.getStart()) ==0) {
+        if((parentTime.getEnd() - parentTime.getStart()) == 0) {
             return;
         }
 
         stream.println("\n");
         stream.printf(headerFormat, " ", Elapsed.DISPLAY_COLUMNS);
-        stream.printf(parentFormat, parent, 
-                      parentTime.getPercentage(rootElapsed), parentTime);
+        stream.printf(parentFormat, parent,
+                parentTime.getPercentage(rootElapsed), parentTime);
         stream.println(divider);
 
-        for (Phase child : parent.children) {
+        for(Phase child : parent.children) {
             Elapsed time = elapsed.get(child);
-            if (time.getStart() == 0) {
+            if(time.getStart() == 0) {
                 continue;
             }
-            stream.printf(dataFormat, 
-                          child,
-                          time.getPercentage(rootElapsed),
-                          time);
+            stream.printf(dataFormat,
+                    child,
+                    time.getPercentage(rootElapsed),
+                    time);
         }
     }
 
     private void displayCounters(PrintStream stream, Phase root) {
         String basicFormat = "%20s   %s\n";
         boolean headerNotPrinted = true;
-        for (Map.Entry<Phase, Counter> c : counters.entrySet()) {
+        for(Map.Entry<Phase, Counter> c : counters.entrySet()) {
             Phase p = c.getKey();
-            if (p.root != root) {
+            if(p.root != root) {
                 continue;
             }
             Counter counter = c.getValue();
-            if (counter.isEmpty()) {
+            if(counter.isEmpty()) {
                 continue;
             }
 
-            if (headerNotPrinted) {
+            if(headerNotPrinted) {
                 stream.println();
-                stream.printf(basicFormat, " " , Counter.DISPLAY_COLUMNS);
+                stream.printf(basicFormat, " ", Counter.DISPLAY_COLUMNS);
                 headerNotPrinted = false;
             }
             stream.printf(basicFormat, c.getKey(), counter);
         }
     }
-    
+
     /**
      * Display all information that has been tracked for this family of
      * phases.
      */
-    public void displayStats(PrintStream stream, Phase root ) {
+    public void displayStats(PrintStream stream, Phase root) {
         lastDumpMillis = System.currentTimeMillis();
         Elapsed rootTime = elapsed.get(root);
 
         stream.println("\n=== " + root.reportLabel + " Report  ===");
         stream.println("start = " + displayTimestamp(rootTime.getStart()));
         stream.println("end   = " + displayTimestamp(rootTime.getEnd()));
-        if (root == Phase.TOTAL_ENV_OPEN) {
+        if(root == Phase.TOTAL_ENV_OPEN) {
             stream.print(displayRecoveryInterval());
         }
 
         /* Elapsed time. */
-        for (Map.Entry<Phase, Elapsed> x : elapsed.entrySet()) {
+        for(Map.Entry<Phase, Elapsed> x : elapsed.entrySet()) {
             Phase p = x.getKey();
-            if (p.root == null) {
-               if (p != root) {
-                   continue;
-               }
-            } else if (p.root != root) {
-               continue;
+            if(p.root == null) {
+                if(p != root) {
+                    continue;
+                }
             }
-            
-            displayPhaseSubtree(stream, x.getKey(),x.getValue(), rootTime);
+            else if(p.root != root) {
+                continue;
+            }
+
+            displayPhaseSubtree(stream, x.getKey(), x.getValue(), rootTime);
         }
 
         /* Counters */
         displayCounters(stream, root);
 
         /* Stats */
-        for (Map.Entry<Phase, StatGroup> s : stats.entrySet()) {
+        for(Map.Entry<Phase, StatGroup> s : stats.entrySet()) {
             Phase p = s.getKey();
-            if (p.root != root) {
+            if(p.root != root) {
                 continue;
             }
             stream.println(s.getKey() + " stats:");
@@ -452,7 +355,7 @@ public class StartupTracker {
     /**
      * Display all information available so far.
      */
-    private void displayInterim(PrintStream stream, Phase phase ) {
+    private void displayInterim(PrintStream stream, Phase phase) {
         lastDumpMillis = System.currentTimeMillis();
 
         stream.println("\n=== Interim " + phase + " Report  ===");
@@ -461,13 +364,13 @@ public class StartupTracker {
 
         /* Elapsed time. */
         boolean headerNotPrinted = true;
-        for (Map.Entry<Phase, Elapsed> x : elapsed.entrySet()) {
+        for(Map.Entry<Phase, Elapsed> x : elapsed.entrySet()) {
             Phase p = x.getKey();
             Elapsed e = x.getValue();
-            if (e.start == 0) {
+            if(e.start == 0) {
                 continue;
             }
-            if (headerNotPrinted) {
+            if(headerNotPrinted) {
                 stream.println("                             Elapsed(ms)");
                 headerNotPrinted = false;
             }
@@ -478,13 +381,113 @@ public class StartupTracker {
         displayCounters(stream, phase.root);
 
         /* Stats */
-        for (Map.Entry<Phase, StatGroup> s : stats.entrySet()) {
+        for(Map.Entry<Phase, StatGroup> s : stats.entrySet()) {
             stream.println(s.getKey() + " stats:");
             stream.println(s.getValue());
         }
     }
 
-    /** Measures elapsed time in millisecond granularity. */
+    /*
+     * Statistics are kept about startup phases, defined below. Phases can
+     * be nested, so the child and root fields are used to express this
+     * relationship. For example:
+     *  TotalEnvOpen
+     *      TotalRecovery
+     *         FindEndOfLog
+     *          ..
+     *         BuildTree
+     *             ReadMapIN
+     *             ..
+     *         Ckpt
+     *  TotalJoinGroup encompasses the following two phases.
+     *      FindMaster
+     *      BecomeConsistent
+     * Keep these enums in order of execution, so that the display is easier to
+     * comprehend. Of course, some phases subsume other phases, but in general,
+     * this enum order follows the order of execution.
+     */
+    public enum Phase {
+        TOTAL_ENV_OPEN("Environment Open"),
+        TOTAL_RECOVERY,
+        FIND_END_OF_LOG,
+        FIND_LAST_CKPT,
+        BUILD_TREE,
+        READ_MAP_INS,
+        REDO_MAP_INS,
+        UNDO_MAP_LNS,
+        REDO_MAP_LNS,
+        READ_INS,
+        REDO_INS,
+        UNDO_LNS,
+        REDO_LNS,
+        POPULATE_UP,
+        POPULATE_EP,
+        REMOVE_TEMP_DBS,
+        CKPT,
+        TOTAL_JOIN_GROUP("Replication Join Group"),
+        FIND_MASTER,
+        BECOME_CONSISTENT;
+
+        static {
+            TOTAL_ENV_OPEN.children = new Phase[]
+                    {TOTAL_RECOVERY};
+            TOTAL_RECOVERY.children = new Phase[]
+                    {FIND_END_OF_LOG,
+                            FIND_LAST_CKPT,
+                            BUILD_TREE,
+                            POPULATE_UP,
+                            POPULATE_EP,
+                            REMOVE_TEMP_DBS,
+                            CKPT};
+            BUILD_TREE.children = new Phase[]
+                    {READ_MAP_INS,
+                            REDO_MAP_INS,
+                            UNDO_MAP_LNS,
+                            REDO_MAP_LNS,
+                            READ_INS,
+                            REDO_INS,
+                            UNDO_LNS,
+                            REDO_LNS};
+            TOTAL_JOIN_GROUP.children = new Phase[]
+                    {FIND_MASTER,
+                            BECOME_CONSISTENT};
+
+            TOTAL_RECOVERY.root = TOTAL_ENV_OPEN;
+            FIND_END_OF_LOG.root = TOTAL_ENV_OPEN;
+            FIND_LAST_CKPT.root = TOTAL_ENV_OPEN;
+            BUILD_TREE.root = TOTAL_ENV_OPEN;
+            READ_MAP_INS.root = TOTAL_ENV_OPEN;
+            REDO_MAP_INS.root = TOTAL_ENV_OPEN;
+            UNDO_MAP_LNS.root = TOTAL_ENV_OPEN;
+            REDO_MAP_LNS.root = TOTAL_ENV_OPEN;
+            READ_INS.root = TOTAL_ENV_OPEN;
+            REDO_INS.root = TOTAL_ENV_OPEN;
+            UNDO_LNS.root = TOTAL_ENV_OPEN;
+            REDO_LNS.root = TOTAL_ENV_OPEN;
+            POPULATE_UP.root = TOTAL_ENV_OPEN;
+            POPULATE_EP.root = TOTAL_ENV_OPEN;
+            REMOVE_TEMP_DBS.root = TOTAL_ENV_OPEN;
+            CKPT.root = TOTAL_ENV_OPEN;
+
+            FIND_MASTER.root = TOTAL_JOIN_GROUP;
+            BECOME_CONSISTENT.root = TOTAL_JOIN_GROUP;
+        }
+
+        private Phase[] children;
+        private Phase root;
+        private String reportLabel;
+
+        private Phase() {
+        }
+
+        private Phase(String reportLabel) {
+            this.reportLabel = reportLabel;
+        }
+    }
+
+    /**
+     * Measures elapsed time in millisecond granularity.
+     */
     static private class Elapsed {
 
         /* For dumping elapsed values in a column */
@@ -512,36 +515,38 @@ public class StartupTracker {
         }
 
         private int getPercentage(Elapsed rootTime) {
-            if (rootTime == null) {
-                return 0;
-            } 
-
-            long rootTotal = rootTime.end-rootTime.start;
-            if (rootTotal <= 0) {
+            if(rootTime == null) {
                 return 0;
             }
 
-            if (end == 0) {
+            long rootTotal = rootTime.end - rootTime.start;
+            if(rootTotal <= 0) {
                 return 0;
             }
-            return (int)(((float) (end-start)/ rootTotal) * 100);
+
+            if(end == 0) {
+                return 0;
+            }
+            return (int) (((float) (end - start) / rootTotal) * 100);
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             Formatter f = new Formatter(sb);
-            if (end != 0) {
-                f.format("%,13d", (end-start));
-            } else {
-                if (start != 0) {
+            if(end != 0) {
+                f.format("%,13d", (end - start));
+            }
+            else {
+                if(start != 0) {
                     f.format("%13s  %tD,%tH:%tM:%tS:%tL",
-                             "started at", start, start, start, start, start);
-                } else {
+                            "started at", start, start, start, start, start);
+                }
+                else {
                     f.format("%13s", "none");
                 }
             }
-            return sb.toString(); 
+            return sb.toString();
         }
     }
 
@@ -549,6 +554,8 @@ public class StartupTracker {
      * Record number of log entries processed during a given recovery phase.
      */
     static public class Counter {
+        static String DISPLAY_COLUMNS =
+                "      nRead nProcessed   nDeleted       nAux  nRepeatRd nCacheMiss";
         private int numRead;
         private int numProcessed;
         private int numDeleted;
@@ -559,12 +566,12 @@ public class StartupTracker {
 
         /* If nothing is set, don't print this one. */
         private boolean isEmpty() {
-            return((numRead==0) &&
-                   (numProcessed==0) &&
-                   (numDeleted==0) &&
-                   (numAux==0) &&
-                   (numRepeatIteratorReads==0) &&
-                   ((endCacheMiss-startCacheMiss)==0));
+            return ((numRead == 0) &&
+                    (numProcessed == 0) &&
+                    (numDeleted == 0) &&
+                    (numAux == 0) &&
+                    (numRepeatIteratorReads == 0) &&
+                    ((endCacheMiss - startCacheMiss) == 0));
         }
 
         public void incNumRead() {
@@ -580,7 +587,7 @@ public class StartupTracker {
         }
 
         /**
-         * Keep track of auxiliary log entries processed during this pass. 
+         * Keep track of auxiliary log entries processed during this pass.
          * For example, LNs are the main target of the undoLN pass, but we
          * also read aborts and commits.
          */
@@ -600,16 +607,13 @@ public class StartupTracker {
             endCacheMiss = miss;
         }
 
-        static String DISPLAY_COLUMNS =
-"      nRead nProcessed   nDeleted       nAux  nRepeatRd nCacheMiss";
- 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             Formatter f = new Formatter(sb);
             f.format("%,11d%,11d%,11d%,11d%,11d%,11d",
-                     numRead, numProcessed, numDeleted, numAux, 
-                     numRepeatIteratorReads, (endCacheMiss - startCacheMiss));
+                    numRead, numProcessed, numDeleted, numAux,
+                    numRepeatIteratorReads, (endCacheMiss - startCacheMiss));
             return sb.toString();
         }
 

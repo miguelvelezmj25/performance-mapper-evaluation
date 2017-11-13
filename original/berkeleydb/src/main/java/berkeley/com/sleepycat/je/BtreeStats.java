@@ -13,20 +13,9 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_BINS_BYLEVEL;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_BIN_COUNT;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_DELETED_LN_COUNT;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.GROUP_NAME;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.GROUP_DESC;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_INS_BYLEVEL;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_IN_COUNT;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_LN_COUNT;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_MAINTREE_MAXDEPTH;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_RELATCHES_REQUIRED;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_ROOT_SPLITS;
-import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.BTREE_BIN_ENTRIES_HISTOGRAM;
-
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import static berkeley.com.sleepycat.je.dbi.BTreeStatDefinition.*;
 
 /**
  * The BtreeStats object is used to return Btree database statistics.
@@ -44,16 +33,14 @@ public class BtreeStats extends DatabaseStats {
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setDbImplStats(StatGroup stats) {
         dbImplStats = stats;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setTreeStats(StatGroup tStats) {
         this.treeStats = tStats;
@@ -61,7 +48,7 @@ public class BtreeStats extends DatabaseStats {
 
     /**
      * Returns the number of Bottom Internal Nodes in the database tree.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -83,7 +70,7 @@ public class BtreeStats extends DatabaseStats {
     /**
      * Returns the number of deleted data records in the database tree that
      * are pending removal by the compressor.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -105,7 +92,7 @@ public class BtreeStats extends DatabaseStats {
 
     /**
      * Returns the number of Internal Nodes in the database tree.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -129,7 +116,7 @@ public class BtreeStats extends DatabaseStats {
      * the number of records. This is calculated without locks or transactions,
      * and therefore is only an accurate count of the current number of records
      * when the database is quiescent.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -146,7 +133,7 @@ public class BtreeStats extends DatabaseStats {
 
     /**
      * Returns the maximum depth of the main database tree.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -167,7 +154,7 @@ public class BtreeStats extends DatabaseStats {
 
     /**
      * Returns the count of Internal Nodes per level, indexed by level.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -181,7 +168,7 @@ public class BtreeStats extends DatabaseStats {
 
     /**
      * Returns the count of Bottom Internal Nodes per level, indexed by level.
-     *
+     * <p>
      * <p>The information is included only if the {@link
      * com.sleepycat.je.Database#getStats Database.getStats} call was not
      * configured by the {@link com.sleepycat.je.StatsConfig#setFast
@@ -197,7 +184,7 @@ public class BtreeStats extends DatabaseStats {
      * Returns an array representing a histogram of the number of Bottom
      * Internal Nodes with various percentages of non-deleted entry counts.
      * The array is 10 elements and each element represents a range of 10%.
-     *
+     * <p>
      * <pre>
      * element [0]: # BINs with 0% to 9% entries used by non-deleted values
      * element [1]: # BINs with 10% to 19% entries used by non-deleted values
@@ -260,6 +247,6 @@ public class BtreeStats extends DatabaseStats {
 
     public String toStringVerbose() {
         return
-            dbImplStats.toStringVerbose() + "\n" + treeStats.toStringVerbose();
+                dbImplStats.toStringVerbose() + "\n" + treeStats.toStringVerbose();
     }
 }

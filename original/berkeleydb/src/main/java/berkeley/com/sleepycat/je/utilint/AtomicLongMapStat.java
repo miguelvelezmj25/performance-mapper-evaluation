@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
-
-import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
 
 /**
  * A JE stat that maintains a map of individual values based on AtomicLong
@@ -31,7 +31,7 @@ public final class AtomicLongMapStat
     /**
      * Creates an instance of this class.
      *
-     * @param group the owning group
+     * @param group      the owning group
      * @param definition the associated definition
      */
     public AtomicLongMapStat(StatGroup group, StatDefinition definition) {
@@ -60,24 +60,26 @@ public final class AtomicLongMapStat
         return new AtomicLongMapStat(this);
     }
 
-    /** The base argument must be an instance of AtomicLongMapStat. */
+    /**
+     * The base argument must be an instance of AtomicLongMapStat.
+     */
     @Override
     public AtomicLongMapStat computeInterval(Stat<String> base) {
         assert base instanceof AtomicLongMapStat;
         final AtomicLongMapStat copy = copy();
-        if (definition.getType() != StatType.INCREMENTAL) {
+        if(definition.getType() != StatType.INCREMENTAL) {
             return copy;
         }
         final AtomicLongMapStat baseMapStat = (AtomicLongMapStat) base;
-        synchronized (copy) {
-            for (final Entry<String, AtomicLongComponent> entry :
-                     copy.statMap.entrySet()) {
+        synchronized(copy) {
+            for(final Entry<String, AtomicLongComponent> entry :
+                    copy.statMap.entrySet()) {
 
                 final AtomicLongComponent baseValue;
-                synchronized (baseMapStat) {
+                synchronized(baseMapStat) {
                     baseValue = baseMapStat.statMap.get(entry.getKey());
                 }
-                if (baseValue != null) {
+                if(baseValue != null) {
                     final AtomicLongComponent entryValue = entry.getValue();
                     entryValue.val.getAndAdd(-baseValue.get());
                 }
@@ -88,8 +90,8 @@ public final class AtomicLongMapStat
 
     @Override
     public synchronized void negate() {
-        if (definition.getType() == StatType.INCREMENTAL) {
-            for (final AtomicLongComponent stat : statMap.values()) {
+        if(definition.getType() == StatType.INCREMENTAL) {
+            for(final AtomicLongComponent stat : statMap.values()) {
                 final AtomicLong atomicVal = stat.val;
 
                 /*
@@ -97,9 +99,9 @@ public final class AtomicLongMapStat
                  * intervenes.  This loop emulates the behavior of
                  * AtomicLong.getAndIncrement.
                  */
-                while (true) {
+                while(true) {
                     final long val = atomicVal.get();
-                    if (atomicVal.compareAndSet(val, -val)) {
+                    if(atomicVal.compareAndSet(val, -val)) {
                         break;
                     }
                 }

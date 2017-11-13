@@ -20,18 +20,18 @@ public class IntegralLongAvg extends Number {
     private long denominator;
     private long factor = 1;
 
-    public IntegralLongAvg (long numerator, long denominator, long factor) {
+    public IntegralLongAvg(long numerator, long denominator, long factor) {
         this.numerator = numerator;
         this.denominator = denominator;
         this.factor = factor;
     }
 
-    public IntegralLongAvg (long numerator, long denominator) {
+    public IntegralLongAvg(long numerator, long denominator) {
         this.numerator = numerator;
         this.denominator = denominator;
     }
 
-    public IntegralLongAvg (IntegralLongAvg val) {
+    public IntegralLongAvg(IntegralLongAvg val) {
         this.numerator = val.numerator;
         this.denominator = val.denominator;
         this.factor = val.factor;
@@ -71,7 +71,7 @@ public class IntegralLongAvg extends Number {
 
     @Override
     public int intValue() {
-        return (int)compute();
+        return (int) compute();
     }
 
     @Override

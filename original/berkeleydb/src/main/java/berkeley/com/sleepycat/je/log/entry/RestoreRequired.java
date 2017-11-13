@@ -12,15 +12,15 @@
  */
 package berkeley.com.sleepycat.je.log.entry;
 
+import berkeley.com.sleepycat.je.log.LogUtils;
+import berkeley.com.sleepycat.je.log.Loggable;
+import berkeley.com.sleepycat.je.utilint.Timestamp;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.Properties;
-
-import berkeley.com.sleepycat.je.log.LogUtils;
-import berkeley.com.sleepycat.je.log.Loggable;
-import berkeley.com.sleepycat.je.utilint.Timestamp;
 
 /**
  * This log entry is used to indicate that the environment's log files are not
@@ -29,14 +29,11 @@ import berkeley.com.sleepycat.je.utilint.Timestamp;
  */
 public class RestoreRequired implements Loggable {
 
-    /* The failure type is used to decide on the course of action. */
-    public enum FailureType {NETWORK_RESTORE};
-
     private FailureType failureType;
 
+    ;
     /* For debugging, information */
     private Timestamp time;
-
     /*
      * PropVals is a general purpose, serialized property list, to hold
      * whatever each failure type needs, in order to fix the environment.
@@ -69,8 +66,8 @@ public class RestoreRequired implements Loggable {
     @Override
     public int getLogSize() {
         return LogUtils.getStringLogSize(failureType.name()) +
-            LogUtils.getTimestampLogSize(time) +
-            LogUtils.getStringLogSize(propVals);
+                LogUtils.getTimestampLogSize(time) +
+                LogUtils.getStringLogSize(propVals);
     }
 
     @Override
@@ -104,16 +101,16 @@ public class RestoreRequired implements Loggable {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof RestoreRequired)) {
+        if(!(other instanceof RestoreRequired)) {
             return false;
         }
 
         RestoreRequired otherEntry = (RestoreRequired) other;
-        if (!time.equals(otherEntry.time)) {
+        if(!time.equals(otherEntry.time)) {
             return false;
         }
 
-        if (!propVals.equals(otherEntry.propVals)) {
+        if(!propVals.equals(otherEntry.propVals)) {
             return false;
         }
         return true;
@@ -124,5 +121,10 @@ public class RestoreRequired implements Loggable {
         StringBuilder sb = new StringBuilder();
         dumpLog(sb, true);
         return sb.toString();
+    }
+
+    /* The failure type is used to decide on the course of action. */
+    public enum FailureType {
+        NETWORK_RESTORE
     }
 }

@@ -13,29 +13,24 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackup;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStats;
 import berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackup.InsufficientVLSNRangeException;
 import berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackup.LoadThresholdExceededException;
+import berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStats;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.TestHook;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Obtains log files for a Replica from other members of the replication
@@ -61,25 +56,26 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * files from a member of the group who owns the files and seems to be the
  * least busy. For example:
  * <pre class=code>
- *  try {
- *     node = new ReplicatedEnvironment(envDir, envConfig, repConfig);
+ * try {
+ * node = new ReplicatedEnvironment(envDir, envConfig, repConfig);
  * } catch (InsufficientLogException insufficientLogEx) {
- *
- *     NetworkRestore restore = new NetworkRestore();
- *     NetworkRestoreConfig config = new NetworkRestoreConfig();
- *     config.setRetainLogFiles(false); // delete obsolete log files.
- *
- *     // Use the members returned by insufficientLogEx.getLogProviders() to
- *     // select the desired subset of members and pass the resulting list
- *     // as the argument to config.setLogProviders(), if the default selection
- *     // of providers is not suitable.
- *
- *     restore.execute(insufficientLogEx, config);
- *
- *     // retry
- *     node = new ReplicatedEnvironment(envDir, envConfig, repConfig);
+ * <p>
+ * NetworkRestore restore = new NetworkRestore();
+ * NetworkRestoreConfig config = new NetworkRestoreConfig();
+ * config.setRetainLogFiles(false); // delete obsolete log files.
+ * <p>
+ * // Use the members returned by insufficientLogEx.getLogProviders() to
+ * // select the desired subset of members and pass the resulting list
+ * // as the argument to config.setLogProviders(), if the default selection
+ * // of providers is not suitable.
+ * <p>
+ * restore.execute(insufficientLogEx, config);
+ * <p>
+ * // retry
+ * node = new ReplicatedEnvironment(envDir, envConfig, repConfig);
  * }
  * </pre>
+ *
  * @see <a href="{@docRoot}/../ReplicationGuide/logfile-restore.html">
  * Restoring Log Files</a>
  */
@@ -121,15 +117,15 @@ public class NetworkRestore {
      * Initializes this instance for an impending execute() operation.
      *
      * @param logException the exception packing information driving the
-     * restore operation.
-     * @param config may contain an explicit list of members.
+     *                     restore operation.
+     * @param config       may contain an explicit list of members.
      * @return the list of candidate Server instances
      * @throws IllegalArgumentException if the configured log providers are
-     * invalid
+     *                                  invalid
      */
     private List<Server> init(InsufficientLogException logException,
                               NetworkRestoreConfig config)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         repImpl = logException.getRepImpl();
 
@@ -138,20 +134,20 @@ public class NetworkRestore {
         minVLSN = logException.getRefreshVLSN();
 
         int loadThreshold = 0;
-        if ((config.getLogProviders() != null) &&
-            (config.getLogProviders().size() > 0)) {
+        if((config.getLogProviders() != null) &&
+                (config.getLogProviders().size() > 0)) {
             final Set<String> memberNames = new HashSet<String>();
-            for (ReplicationNode node : logException.getLogProviders()) {
+            for(ReplicationNode node : logException.getLogProviders()) {
                 memberNames.add(node.getName());
             }
-            for (ReplicationNode node : config.getLogProviders()) {
-                if (!memberNames.contains(node.getName())) {
-                    throw new  IllegalArgumentException
-                        ("Node:" + node.getName() +
-                         " is not a suitable member for NetworkRestore." +
-                         " It's not a member of logException." +
-                         "getLogProviders(): " +
-                         Arrays.toString(memberNames.toArray()));
+            for(ReplicationNode node : config.getLogProviders()) {
+                if(!memberNames.contains(node.getName())) {
+                    throw new IllegalArgumentException
+                            ("Node:" + node.getName() +
+                                    " is not a suitable member for NetworkRestore." +
+                                    " It's not a member of logException." +
+                                    "getLogProviders(): " +
+                                    Arrays.toString(memberNames.toArray()));
                 }
             }
 
@@ -161,9 +157,10 @@ public class NetworkRestore {
              */
             loadThreshold = Integer.MAX_VALUE;
             logProviders = config.getLogProviders();
-        } else {
+        }
+        else {
             logProviders = new LinkedList<ReplicationNode>
-                (logException.getLogProviders());
+                    (logException.getLogProviders());
         }
 
         LoggerUtils.info(logger, repImpl, "Started network restore");
@@ -175,7 +172,7 @@ public class NetworkRestore {
          * Start with an initial threshold of zero to find an idle server. The
          * thresholds will change as the servers are contacted.
          */
-        for (ReplicationNode node : logProviders) {
+        for(ReplicationNode node : logProviders) {
             serverList.add(new Server(node, loadThreshold));
         }
         return serverList;
@@ -201,21 +198,17 @@ public class NetworkRestore {
      * <code>config.getRetainLogFiles()</code>.
      *
      * @param logException the exception thrown by {@code
-     * ReplicatedEnvironment()} that necessitated this log refresh operation
-     *
-     * @param config configures the execution of the network restore operation
-     *
+     *                     ReplicatedEnvironment()} that necessitated this log refresh operation
+     * @param config       configures the execution of the network restore operation
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalArgumentException if the <code>config</code> is invalid
-     *
+     *                                     environment-wide failure occurs.
+     * @throws IllegalArgumentException    if the <code>config</code> is invalid
      * @see NetworkRestoreConfig
      */
     public synchronized void execute(InsufficientLogException logException,
                                      NetworkRestoreConfig config)
-        throws EnvironmentFailureException,
-               IllegalArgumentException {
+            throws EnvironmentFailureException,
+            IllegalArgumentException {
 
         try {
             List<Server> serverList = init(logException, config);
@@ -227,117 +220,113 @@ public class NetworkRestore {
              * be contacted multiple times, since it may become busier between
              * the time it was first contacted and a subsequent attempt.
              */
-            while (!serverList.isEmpty()) {
+            while(!serverList.isEmpty()) {
                 // Sort by load
                 Collections.sort(serverList);
                 final List<Server> newServerList = new LinkedList<Server>();
                 File envHome = repImpl.getEnvironmentHome();
 
-                for (Server server : serverList) {
+                for(Server server : serverList) {
                     InetSocketAddress serverSocket =
-                        server.node.getSocketAddress();
-                    if (serverSocket.equals(repImpl.getSocket())) {
+                            server.node.getSocketAddress();
+                    if(serverSocket.equals(repImpl.getSocket())) {
                         /* Cannot restore from yourself. */
                         continue;
                     }
                     LoggerUtils.info(logger, repImpl,
-                                     "Network restore candidate server: " +
-                                     server.node);
+                            "Network restore candidate server: " +
+                                    server.node);
                     logProvider = server.node;
                     final long startTime = System.currentTimeMillis();
                     try {
                         backup = new NetworkBackup
-                            (serverSocket,
-                             config.getReceiveBufferSize(),
-                             envHome,
-                             repImpl.getNameIdPair(),
-                             config.getRetainLogFiles(),
-                             server.load,
-                             minVLSN,
-                             repImpl, 
-                             repImpl.getFileManager(),
-                             repImpl.getLogManager(),
-                             repImpl.getChannelFactory(),
-                             logException.getProperties());
+                                (serverSocket,
+                                        config.getReceiveBufferSize(),
+                                        envHome,
+                                        repImpl.getNameIdPair(),
+                                        config.getRetainLogFiles(),
+                                        server.load,
+                                        minVLSN,
+                                        repImpl,
+                                        repImpl.getFileManager(),
+                                        repImpl.getLogManager(),
+                                        repImpl.getChannelFactory(),
+                                        logException.getProperties());
 
                         backup.setInterruptHook(interruptHook);
                         backup.execute();
                         LoggerUtils.info
-                            (logger, repImpl,
-                             String.format
-                             ("Network restore completed from: %s. " +
-                              "Elapsed time: %,d s.",
-                              server.node,
-                              ((System.currentTimeMillis() - startTime) /
-                               1000)));
+                                (logger, repImpl,
+                                        String.format
+                                                ("Network restore completed from: %s. " +
+                                                                "Elapsed time: %,d s.",
+                                                        server.node,
+                                                        ((System.currentTimeMillis() - startTime) /
+                                                                1000)));
                         return;
-                    } catch (DatabaseException e) {
+                    } catch(DatabaseException e) {
                         /* Likely A malfunctioning server. */
                         LoggerUtils.warning(logger, repImpl,
-                                            "Backup failed from node: " +
-                                            server.node + "\n" +
-                                            e.getMessage());
-                    } catch (ConnectException e) {
+                                "Backup failed from node: " +
+                                        server.node + "\n" +
+                                        e.getMessage());
+                    } catch(ConnectException e) {
                         /* Move on if the network connection is troublesome. */
                         LoggerUtils.info(logger, repImpl,
-                                         "Backup server node: " + server.node +
-                                         " is not available: " +
-                                         e.getMessage());
+                                "Backup server node: " + server.node +
+                                        " is not available: " +
+                                        e.getMessage());
 
-                    } catch (IOException e) {
+                    } catch(IOException e) {
                         /* Move on if the network connection is troublesome. */
                         LoggerUtils.warning(logger, repImpl,
-                                            "Backup failed from node: " +
-                                            server.node + "\n" +
-                                            e.getMessage());
-                    } catch (ServiceConnectFailedException e) {
+                                "Backup failed from node: " +
+                                        server.node + "\n" +
+                                        e.getMessage());
+                    } catch(ServiceConnectFailedException e) {
                         LoggerUtils.warning(logger, repImpl,
-                                            "Backup failed from node: " +
-                                            server.node + "\n" +
-                                            e.getMessage());
-                    } catch (LoadThresholdExceededException e) {
+                                "Backup failed from node: " +
+                                        server.node + "\n" +
+                                        e.getMessage());
+                    } catch(LoadThresholdExceededException e) {
                         LoggerUtils.info
-                            (logger, repImpl, e.getMessage());
+                                (logger, repImpl, e.getMessage());
                         /*
                          * Server busier than current load threshold, retain it
                          * so that it can be retried if a less busy server is
                          * not found.
                          */
                         newServerList.add(new Server(server.node,
-                                                     e.getActiveServers()));
-                    } catch (InsufficientVLSNRangeException e) {
+                                e.getActiveServers()));
+                    } catch(InsufficientVLSNRangeException e) {
                         /* Ignore it in the next round. */
                         LoggerUtils.info(logger, repImpl,
-                                         "Backup failed from node: " +
-                                         server.node + " Error: " +
-                                         e.getMessage());
-                    } catch (IllegalArgumentException e) {
+                                "Backup failed from node: " +
+                                        server.node + " Error: " +
+                                        e.getMessage());
+                    } catch(IllegalArgumentException e) {
                         throw EnvironmentFailureException.unexpectedException(e);
                     }
                 }
                 serverList = newServerList; /* New list for the next round. */
             }
             throw EnvironmentFailureException.unexpectedState
-                ("Tried and failed with every node");
+                    ("Tried and failed with every node");
         } finally {
             logException.releaseRepImpl();
         }
     }
 
     /**
-     * @hidden
-     *
-     * for testing use only
+     * @hidden for testing use only
      */
     public NetworkBackup getBackup() {
         return backup;
     }
 
     /**
-     * @hidden
-     *
-     * for testing use only
-     *
+     * @hidden for testing use only
+     * <p>
      * Returns the member that was used to provide the log files.
      */
     public ReplicationNode getLogProvider() {
@@ -345,16 +334,21 @@ public class NetworkRestore {
     }
 
     /**
-     * @hidden
-     *
-     * Returns the network backup statistics for the current network restore
-     * attempt, or {@code null} if a network backup is not currently underway.
-     *
      * @return the statistics or {@code null}
+     * @hidden Returns the network backup statistics for the current network restore
+     * attempt, or {@code null} if a network backup is not currently underway.
      */
     public NetworkBackupStats getNetworkBackupStats() {
         final NetworkBackup currentBackup = backup;
         return (currentBackup != null) ? backup.getStats() : null;
+    }
+
+    /**
+     * @param hook
+     * @hidden For unit testing
+     */
+    public void setInterruptHook(TestHook<File> hook) {
+        interruptHook = hook;
     }
 
     /**
@@ -382,15 +376,5 @@ public class NetworkRestore {
         public String toString() {
             return node.getName();
         }
-    }
-
-    /**
-     * @hidden
-     * For unit testing
-     * 
-     * @param hook
-     */
-    public void setInterruptHook(TestHook<File> hook) {
-        interruptHook = hook;
     }
 }

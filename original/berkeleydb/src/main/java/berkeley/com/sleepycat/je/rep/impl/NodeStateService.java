@@ -13,18 +13,18 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.rep.impl.NodeStateProtocol.NodeStateRequest;
 import berkeley.com.sleepycat.je.rep.impl.TextProtocol.RequestMessage;
 import berkeley.com.sleepycat.je.rep.impl.TextProtocol.ResponseMessage;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingService;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingRunnable;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingService;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * The service registered by a RepNode to answer the state request from
@@ -32,22 +32,21 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  */
 public class NodeStateService extends ExecutingService {
 
+    /* Identifies the Node State querying Service. */
+    public static final String SERVICE_NAME = "NodeState";
     private final RepNode repNode;
     private final NodeStateProtocol protocol;
     private final Logger logger;
-
-    /* Identifies the Node State querying Service. */
-    public static final String SERVICE_NAME = "NodeState";
 
     public NodeStateService(ServiceDispatcher dispatcher, RepNode repNode) {
         super(SERVICE_NAME, dispatcher);
         this.repNode = repNode;
 
         String groupName =
-            repNode.getRepImpl().cloneRepConfig().getGroupName();
+                repNode.getRepImpl().cloneRepConfig().getGroupName();
         protocol = new NodeStateProtocol
-            (groupName, repNode.getNameIdPair(), repNode.getRepImpl(),
-             dispatcher.getChannelFactory());
+                (groupName, repNode.getNameIdPair(), repNode.getRepImpl(),
+                        dispatcher.getChannelFactory());
         logger = LoggerUtils.getLogger(getClass());
     }
 
@@ -58,9 +57,9 @@ public class NodeStateService extends ExecutingService {
     public ResponseMessage process(NodeStateRequest stateRequest) {
         long joinTime = repNode.getMonitorEventManager().getJoinTime();
         return protocol.new NodeStateResponse(repNode.getNodeName(),
-                                              repNode.getMasterName(),
-                                              joinTime,
-                                              repNode.getRepImpl().getState());
+                repNode.getMasterName(),
+                joinTime,
+                repNode.getRepImpl().getState());
     }
 
     @Override
@@ -76,7 +75,7 @@ public class NodeStateService extends ExecutingService {
 
         @Override
         protected ResponseMessage getResponse(RequestMessage request)
-            throws IOException {
+                throws IOException {
 
             return protocol.process(NodeStateService.this, request);
         }

@@ -25,32 +25,22 @@ import java.nio.file.Files;
  */
 class Java7FileStoreInfo extends FileStoreInfo {
 
-    /** The underlying Java 7 file store. */
+    /**
+     * The underlying Java 7 file store.
+     */
     private final FileStore fileStore;
-
-    /** The associated Factory. */
-    static class Java7Factory implements Factory {
-        @Override
-        public void factoryCheckSupported() { }
-        @Override
-        public FileStoreInfo factoryGetInfo(final String file)
-            throws IOException {
-
-            return new Java7FileStoreInfo(file);
-        }
-    }
 
     /**
      * Creates an instance for the specified file.
      *
      * @param file the file
      * @throws IllegalArgumentException if the argument is {@code null}
-     * @throws IOException if there is an I/O error
+     * @throws IOException              if there is an I/O error
      */
     Java7FileStoreInfo(final String file)
-        throws IOException {
+            throws IOException {
 
-        if (file == null) {
+        if(file == null) {
             throw new IllegalArgumentException("The file must not be null");
         }
         fileStore = Files.getFileStore(FileSystems.getDefault().getPath(file));
@@ -58,25 +48,27 @@ class Java7FileStoreInfo extends FileStoreInfo {
 
     @Override
     public long getTotalSpace()
-        throws IOException {
+            throws IOException {
 
         return fileStore.getTotalSpace();
     }
 
     @Override
     public long getUsableSpace()
-        throws IOException {
+            throws IOException {
 
         return fileStore.getUsableSpace();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
-        } else if (!(obj instanceof Java7FileStoreInfo)) {
+        }
+        else if(!(obj instanceof Java7FileStoreInfo)) {
             return false;
-        } else {
+        }
+        else {
             return fileStore.equals(((Java7FileStoreInfo) obj).fileStore);
         }
     }
@@ -89,5 +81,21 @@ class Java7FileStoreInfo extends FileStoreInfo {
     @Override
     public String toString() {
         return fileStore.toString();
+    }
+
+    /**
+     * The associated Factory.
+     */
+    static class Java7Factory implements Factory {
+        @Override
+        public void factoryCheckSupported() {
+        }
+
+        @Override
+        public FileStoreInfo factoryGetInfo(final String file)
+                throws IOException {
+
+            return new Java7FileStoreInfo(file);
+        }
     }
 }

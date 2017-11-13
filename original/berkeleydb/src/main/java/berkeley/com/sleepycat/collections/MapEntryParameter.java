@@ -21,7 +21,7 @@ import java.util.Map;
  * from a map, it is not attached to any map in particular.  To emphasize that
  * changing this object does not change the map, the {@link #setValue} method
  * always throws <code>UnsupportedOperationException</code>.
- *
+ * <p>
  * <p><b>Warning:</b> Use of this interface violates the Java Collections
  * interface contract since these state that <code>Map.Entry</code> objects
  * should only be obtained from <code>Map.entrySet()</code> sets, while this
@@ -39,8 +39,7 @@ public class MapEntryParameter<K, V> implements Map.Entry<K, V> {
     /**
      * Creates a map entry with a given key and value.
      *
-     * @param key is the key to use.
-     *
+     * @param key   is the key to use.
      * @param value is the value to use.
      */
     public MapEntryParameter(K key, V value) {
@@ -57,8 +56,8 @@ public class MapEntryParameter<K, V> implements Map.Entry<K, V> {
      */
     public int hashCode() {
 
-        return ((key == null)    ? 0 : key.hashCode()) ^
-               ((value == null)  ? 0 : value.hashCode());
+        return ((key == null) ? 0 : key.hashCode()) ^
+                ((value == null) ? 0 : value.hashCode());
     }
 
     /**
@@ -69,16 +68,16 @@ public class MapEntryParameter<K, V> implements Map.Entry<K, V> {
      */
     public boolean equals(Object other) {
 
-        if (!(other instanceof Map.Entry)) {
+        if(!(other instanceof Map.Entry)) {
             return false;
         }
 
         Map.Entry e = (Map.Entry) other;
 
         return ((key == null) ? (e.getKey() == null)
-                              : key.equals(e.getKey())) &&
-               ((value == null) ? (e.getValue() == null)
-                                : value.equals(e.getValue()));
+                : key.equals(e.getKey())) &&
+                ((value == null) ? (e.getValue() == null)
+                        : value.equals(e.getValue()));
     }
 
     /**

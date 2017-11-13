@@ -12,9 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.net.InetSocketAddress;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.rep.elections.Learner;
 import berkeley.com.sleepycat.je.rep.elections.MasterValue;
 import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
@@ -22,16 +19,17 @@ import berkeley.com.sleepycat.je.rep.elections.Protocol.Value;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.util.logging.Logger;
+
 /**
  * The Listener registered with Elections to learn about new Masters
  */
 public class MasterChangeListener implements Learner.Listener {
 
-    /* The Value that is "current" for this Node. */
-    private Value currentValue = null;
-
     private final RepNode repNode;
     private final Logger logger;
+    /* The Value that is "current" for this Node. */
+    private Value currentValue = null;
 
     public MasterChangeListener(RepNode repNode) {
         this.repNode = repNode;
@@ -48,10 +46,10 @@ public class MasterChangeListener implements Learner.Listener {
         try {
             repNode.getVLSNFreezeLatch().vlsnEvent(proposal);
             /* We have a new proposal, is it truly different? */
-            if (value.equals(currentValue)) {
+            if(value.equals(currentValue)) {
                 LoggerUtils.fine(logger, repNode.getRepImpl(),
-                                 "Master change listener -- no value change." +
-                                 "Proposal: " + proposal + " Value: " + value);
+                        "Master change listener -- no value change." +
+                                "Proposal: " + proposal + " Value: " + value);
                 return;
             }
 
@@ -59,15 +57,15 @@ public class MasterChangeListener implements Learner.Listener {
 
             LoggerUtils.fine(logger, repNode.getRepImpl(),
                     "Master change listener notified. Proposal:" +
-                    proposal + " Value: " + value);
+                            proposal + " Value: " + value);
             LoggerUtils.info(logger, repNode.getRepImpl(),
                     "Master changed to " +
-                     masterValue.getNameId().getName());
+                            masterValue.getNameId().getName());
 
             repNode.getMasterStatus().setGroupMaster
-                (masterValue.getHostName(),
-                 masterValue.getPort(),
-                 masterValue.getNameId());
+                    (masterValue.getHostName(),
+                            masterValue.getPort(),
+                            masterValue.getNameId());
 
             /* Propagate the information to any monitors. */
             repNode.getElections().asyncInformMonitors(proposal, value);

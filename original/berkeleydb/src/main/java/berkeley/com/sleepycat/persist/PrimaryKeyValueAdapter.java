@@ -56,6 +56,6 @@ class PrimaryKeyValueAdapter<V> implements ValueAdapter<V> {
 
     public void valueToData(V value, DatabaseEntry data) {
         throw new UnsupportedOperationException
-            ("Cannot change the data in a key-only index");
+                ("Cannot change the data in a key-only index");
     }
 }

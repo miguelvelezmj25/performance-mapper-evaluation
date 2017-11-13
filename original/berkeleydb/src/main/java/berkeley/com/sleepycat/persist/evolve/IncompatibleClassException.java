@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.OperationFailureException;
 /**
  * A class has been changed incompatibly and no mutation has been configured to
  * handle the change or a new class version number has not been assigned.
- *
+ * <p>
  * <!-- begin JE only -->
  * <p>In a replicated environment, this exception is also thrown when upgrading
  * an application (persistent classes have been changed) and an upgraded node
@@ -27,12 +27,11 @@ import berkeley.com.sleepycat.je.OperationFailureException;
  * for more information.</p>
  * <!-- end JE only -->
  *
+ * @author Mark Hayes
  * @see com.sleepycat.persist.EntityStore#EntityStore EntityStore.EntityStore
  * @see com.sleepycat.persist.model.Entity#version
  * @see com.sleepycat.persist.model.Persistent#version
- *
  * @see com.sleepycat.persist.evolve Class Evolution
- * @author Mark Hayes
  */
 public class IncompatibleClassException extends OperationFailureException {
 
@@ -44,18 +43,20 @@ public class IncompatibleClassException extends OperationFailureException {
 
     /* <!-- begin JE only --> */
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private IncompatibleClassException(String message,
                                        OperationFailureException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

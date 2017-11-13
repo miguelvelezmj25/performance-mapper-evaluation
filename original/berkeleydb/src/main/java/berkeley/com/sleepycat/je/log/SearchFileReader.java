@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.nio.ByteBuffer;
 
 /**
  * SearchFileReader searches for the a given entry type.
@@ -37,10 +37,10 @@ public class SearchFileReader extends FileReader {
                             long startLsn,
                             long endOfFileLsn,
                             LogEntryType targetType)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env, readBufferSize, forward, startLsn, null,
-              endOfFileLsn, DbLsn.NULL_LSN);
+                endOfFileLsn, DbLsn.NULL_LSN);
 
         this.targetType = targetType;
         logEntry = targetType.getNewLogEntry();
@@ -58,7 +58,7 @@ public class SearchFileReader extends FileReader {
      * This reader instantiate the first object of a given log entry.
      */
     protected boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         logEntry.readEntry(envImpl, currentEntryHeader, entryBuffer);
         return true;

@@ -13,20 +13,20 @@
 
 package berkeley.com.sleepycat.je.txn;
 
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.dbi.MemoryBudget;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 
 /**
  * Implements a lightweight Lock with no waiters and only a single Owner.  If,
  * during an operation (lock) more than one owner or waiter is required, then
  * this will mutate to a LockImpl, perform the requested operation, and return
  * the new LockImpl to the caller.
- *
+ * <p>
  * public for Sizeof.
  */
 public class ThinLockImpl extends LockInfo implements Lock {
@@ -58,7 +58,7 @@ public class ThinLockImpl extends LockInfo implements Lock {
     public Set<LockInfo> getOwnersClone() {
 
         Set<LockInfo> ret = new HashSet<LockInfo>();
-        if (locker != null) {
+        if(locker != null) {
             ret.add(this);
         }
         return ret;
@@ -70,19 +70,20 @@ public class ThinLockImpl extends LockInfo implements Lock {
 
     public boolean isOwnedWriteLock(Locker locker) {
 
-        if (locker != this.locker) {
+        if(locker != this.locker) {
             return false;
         }
 
-        if (this.lockType != null) {
+        if(this.lockType != null) {
             return this.lockType.isWriteLock();
-        } else {
+        }
+        else {
             return false;
         }
     }
 
     public LockType getOwnedLockType(Locker locker) {
-        if (locker != this.locker) {
+        if(locker != this.locker) {
             return null;
         }
         return this.lockType;
@@ -108,34 +109,36 @@ public class ThinLockImpl extends LockInfo implements Lock {
                                   boolean jumpAheadOfWaiters,
                                   MemoryBudget mb,
                                   int lockTableIndex)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (this.locker != null &&
-            this.locker != locker) {
+        if(this.locker != null &&
+                this.locker != locker) {
             /* Lock is already held by someone else so mutate. */
             Lock newLock = new LockImpl(new LockInfo(this));
             return newLock.lock(requestType, locker, nonBlockingRequest,
-                                jumpAheadOfWaiters, mb, lockTableIndex);
+                    jumpAheadOfWaiters, mb, lockTableIndex);
         }
 
         LockGrantType grant = null;
-        if (this.locker == null) {
+        if(this.locker == null) {
             this.locker = locker;
             this.lockType = requestType;
             grant = LockGrantType.NEW;
-        } else {
+        }
+        else {
 
             /* The requestor holds this lock.  Check for upgrades. */
             LockUpgrade upgrade = lockType.getUpgrade(requestType);
-            if (upgrade.getUpgrade() == null) {
+            if(upgrade.getUpgrade() == null) {
                 grant = LockGrantType.EXISTING;
-            } else {
+            }
+            else {
                 LockType upgradeType = upgrade.getUpgrade();
                 assert upgradeType != null;
                 this.lockType = upgradeType;
                 grant = (upgrade.getPromotion() ?
-                         LockGrantType.PROMOTION :
-                         LockGrantType.EXISTING);
+                        LockGrantType.PROMOTION :
+                        LockGrantType.EXISTING);
             }
         }
         return new LockAttemptResult(this, grant, false);
@@ -145,18 +148,19 @@ public class ThinLockImpl extends LockInfo implements Lock {
                                MemoryBudget mb,
                                int lockTableIndex) {
 
-        if (locker == this.locker) {
+        if(locker == this.locker) {
             this.locker = null;
             this.lockType = null;
             return Collections.emptySet();
-        } else {
+        }
+        else {
             return null;
         }
     }
 
     public void stealLock(Locker locker, MemoryBudget mb, int lockTableIndex) {
-        if (this.locker != locker &&
-            this.locker.getPreemptable()) {
+        if(this.locker != locker &&
+                this.locker.getPreemptable()) {
             this.locker.setPreempted();
             this.locker = null;
         }
@@ -164,18 +168,19 @@ public class ThinLockImpl extends LockInfo implements Lock {
 
     public void demote(Locker locker) {
 
-        if (this.lockType.isWriteLock()) {
+        if(this.lockType.isWriteLock()) {
             this.lockType = (lockType == LockType.RANGE_WRITE) ?
-                LockType.RANGE_READ : LockType.READ;
+                    LockType.RANGE_READ : LockType.READ;
         }
     }
 
     public Locker getWriteOwnerLocker() {
 
-        if (lockType != null &&
-            lockType.isWriteLock()) {
+        if(lockType != null &&
+                lockType.isWriteLock()) {
             return locker;
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -190,9 +195,10 @@ public class ThinLockImpl extends LockInfo implements Lock {
         StringBuilder sb = new StringBuilder();
         sb.append(" ThinLockAddr:").append(System.identityHashCode(this));
         sb.append(" Owner:");
-        if (nOwners() == 0) {
+        if(nOwners() == 0) {
             sb.append(" (none)");
-        } else {
+        }
+        else {
             sb.append(locker);
         }
 

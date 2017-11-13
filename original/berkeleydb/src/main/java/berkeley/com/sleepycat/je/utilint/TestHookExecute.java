@@ -21,21 +21,21 @@ package berkeley.com.sleepycat.je.utilint;
 public class TestHookExecute {
 
     public static boolean doHookSetupIfSet(TestHook<?> testHook) {
-        if (testHook != null) {
+        if(testHook != null) {
             testHook.hookSetup();
         }
         return true;
     }
 
     public static boolean doHookIfSet(TestHook<?> testHook) {
-        if (testHook != null) {
+        if(testHook != null) {
             testHook.doHook();
         }
         return true;
     }
 
     public static <T> boolean doHookIfSet(TestHook<T> testHook, T obj) {
-        if (testHook != null) {
+        if(testHook != null) {
             testHook.doHook(obj);
         }
         return true;

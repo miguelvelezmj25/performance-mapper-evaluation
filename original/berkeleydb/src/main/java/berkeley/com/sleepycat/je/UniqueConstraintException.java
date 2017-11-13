@@ -19,32 +19,32 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * Thrown when an attempt to write a primary database record would insert a
  * secondary record with a duplicate key, for secondaries that represent
  * one-to-one and one-to-many relationships.
- *
+ * <p>
  * <p>When using the base API ({@code com.sleepycat.je}), this can occur when a
  * {@link SecondaryDatabase} is not configured to allow duplicate keys (which
  * is the default, see {@link DatabaseConfig#setSortedDuplicates}). This
  * implies the use of a one-to-one or one-to-many relationship.</p>
- *
+ * <p>
  * <p>When using the DPL ({@code com.sleepycat.persist}), this can occur when a
  * {@link com.sleepycat.persist.model.SecondaryKey} is defined with a {@link
  * com.sleepycat.persist.model.Relationship#ONE_TO_ONE} or {@link
  * com.sleepycat.persist.model.Relationship#ONE_TO_MANY} relationship.</p>
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  *
  * @see <a href="SecondaryDatabase.html#transactions">Special considerations
  * for using Secondary Databases with and without Transactions</a>
- *
  * @since 4.0
  */
 public class UniqueConstraintException extends SecondaryConstraintException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public UniqueConstraintException(Locker locker,
                                      String message,
@@ -55,18 +55,20 @@ public class UniqueConstraintException extends SecondaryConstraintException {
         super(locker, message, secDbName, secKey, priKey, expirationTime);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private UniqueConstraintException(String message,
                                       UniqueConstraintException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

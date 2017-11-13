@@ -22,7 +22,7 @@ import java.util.List;
 public class JVMSystemUtils {
 
     public static final boolean ZING_JVM =
-        "Azul Systems, Inc.".equals(System.getProperty("java.vendor"));
+            "Azul Systems, Inc.".equals(System.getProperty("java.vendor"));
 
     /**
      * Zing will bump the heap up to 1 GB if -Xmx is smaller.
@@ -30,17 +30,15 @@ public class JVMSystemUtils {
     public static final int MIN_HEAP_MB = ZING_JVM ? 1024 : 0;
 
     private static final String ZING_MANAGEMENT_FACTORY_CLASS =
-        "com.azul.zing.management.ManagementFactory";
+            "com.azul.zing.management.ManagementFactory";
 
     private static final String ZING_ACCESS_ERROR =
-        "Could not access Zing management bean." +
-            " Make sure -XX:+UseZingMXBeans was specified.";
-
-    private static OperatingSystemMXBean osBean =
-        ManagementFactory.getOperatingSystemMXBean();
-
+            "Could not access Zing management bean." +
+                    " Make sure -XX:+UseZingMXBeans was specified.";
     private static final String MATCH_FILE_SEPARATOR =
-        "\\" + File.separatorChar;
+            "\\" + File.separatorChar;
+    private static OperatingSystemMXBean osBean =
+            ManagementFactory.getOperatingSystemMXBean();
 
     /*
      * Get the system load average for the last minute.
@@ -58,15 +56,15 @@ public class JVMSystemUtils {
     /**
      * Returns the max amount of memory in the heap available, using an
      * approach that depends on the JVM vendor, OS, etc.
-     *
+     * <p>
      * May return Long.MAX_VALUE if there is no inherent limit.
      */
     public static long getRuntimeMaxMemory() {
 
         /* Runtime.maxMemory is unreliable on MacOS Java 1.4.2. */
-        if ("Mac OS X".equals(System.getProperty("os.name"))) {
+        if("Mac OS X".equals(System.getProperty("os.name"))) {
             final String jvmVersion = System.getProperty("java.version");
-            if (jvmVersion != null && jvmVersion.startsWith("1.4.2")) {
+            if(jvmVersion != null && jvmVersion.startsWith("1.4.2")) {
                 return Long.MAX_VALUE; /* Undetermined heap size. */
             }
         }
@@ -75,23 +73,23 @@ public class JVMSystemUtils {
          * Runtime.maxMemory is unreliable on Zing. Call
          * MemoryMXBean.getApplicationObjectHeapUsableMemory instead.
          */
-        if (ZING_JVM) {
+        if(ZING_JVM) {
             try {
                 final Class<?> factoryClass =
-                    Class.forName(ZING_MANAGEMENT_FACTORY_CLASS);
+                        Class.forName(ZING_MANAGEMENT_FACTORY_CLASS);
 
                 final Method getBeanMethod =
-                    factoryClass.getMethod("getMemoryMXBean");
+                        factoryClass.getMethod("getMemoryMXBean");
 
                 final Object memoryBean = getBeanMethod.invoke(null);
                 final Class<?> beanClass = memoryBean.getClass();
 
                 final Method getMaxMemoryMethod = beanClass.getMethod(
-                    "getApplicationObjectHeapUsableMemory");
+                        "getApplicationObjectHeapUsableMemory");
 
                 return (Long) getMaxMemoryMethod.invoke(memoryBean);
 
-            } catch (Exception e) {
+            } catch(Exception e) {
                 throw new IllegalStateException(ZING_ACCESS_ERROR, e);
             }
         }
@@ -106,33 +104,33 @@ public class JVMSystemUtils {
      */
     public static long getSystemZingMemorySize() {
         try {
-            if (!ZING_JVM) {
+            if(!ZING_JVM) {
                 throw new IllegalStateException("Only allowed under Zing");
             }
 
             final Class<?> factoryClass =
-                Class.forName(ZING_MANAGEMENT_FACTORY_CLASS);
+                    Class.forName(ZING_MANAGEMENT_FACTORY_CLASS);
 
             final Method getPoolsMethod =
-                factoryClass.getMethod("getMemoryPoolMXBeans");
+                    factoryClass.getMethod("getMemoryPoolMXBeans");
 
             final java.util.List<?> pools =
-                (java.util.List<?>) getPoolsMethod.invoke(null);
+                    (java.util.List<?>) getPoolsMethod.invoke(null);
 
             final Class<?> poolClass = pools.get(0).getClass();
             final Method getNameMethod = poolClass.getMethod("getName");
             final Method getSizeMethod = poolClass.getMethod("getCurrentSize");
 
-            for (Object pool : pools) {
-                if ("System Zing Memory".equals(getNameMethod.invoke(pool))) {
+            for(Object pool : pools) {
+                if("System Zing Memory".equals(getNameMethod.invoke(pool))) {
                     return (Long) getSizeMethod.invoke(pool);
                 }
             }
 
             throw new IllegalStateException(
-                "System Zing Memory pool not found");
+                    "System Zing Memory pool not found");
 
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new IllegalStateException(ZING_ACCESS_ERROR, e);
         }
     }
@@ -150,11 +148,11 @@ public class JVMSystemUtils {
      * the 0th element.
      */
     public static void insertZingJVMArgs(List<String> command) {
-        if (!JVMSystemUtils.ZING_JVM) {
+        if(!JVMSystemUtils.ZING_JVM) {
             return;
         }
         String[] prog = command.get(0).split(MATCH_FILE_SEPARATOR);
-        if (prog[prog.length - 1].equals("java")) {
+        if(prog[prog.length - 1].equals("java")) {
             insertZingJVMArgs(command, 1);
         }
     }
@@ -163,7 +161,7 @@ public class JVMSystemUtils {
      * -XX:+UseZingMXBeans must be specified when running under Zing.
      */
     private static void insertZingJVMArgs(List<String> command, int insertAt) {
-        if (!JVMSystemUtils.ZING_JVM) {
+        if(!JVMSystemUtils.ZING_JVM) {
             return;
         }
         command.add(insertAt, "-XX:+UseZingMXBeans");

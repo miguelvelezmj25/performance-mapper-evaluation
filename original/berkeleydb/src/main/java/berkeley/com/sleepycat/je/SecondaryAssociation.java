@@ -16,9 +16,8 @@ package berkeley.com.sleepycat.je;
 import java.util.Collection;
 
 /**
- * @hidden
- * For internal use only.
- *
+ * @hidden For internal use only.
+ * <p>
  * Provides a way to create an association between primary and secondary
  * databases that is not limited to a one-to-many association.
  * <p>
@@ -79,9 +78,9 @@ import java.util.Collection;
  * and writes do not occur concurrently with changes to the association, no
  * special rules are needed.  For example:
  * <ol>
- *     <li>Open the databases.</li>
- *     <li>Add databases to the association.</li>
- *     <li>Begin writing and reading.</li>
+ * <li>Open the databases.</li>
+ * <li>Add databases to the association.</li>
+ * <li>Begin writing and reading.</li>
  * </ol>
  * <p>
  * In other cases, primary and secondary databases may be added to an already
@@ -92,12 +91,12 @@ import java.util.Collection;
  * the simple case above, assuming that writes to the primary database do not
  * proceed until after it has been added to the association.
  * <ol>
- *     <li>Open the new primary database.</li>
- *     <li>Add the primary database to the association such that {@link
- *     #getSecondaries} returns the appropriate list when passed a key in the
- *     new primary database, and {@link #getPrimary} returns the new database
- *     when passed a key it contains.</li>
- *     <li>Begin writing to the new primary database.</li>
+ * <li>Open the new primary database.</li>
+ * <li>Add the primary database to the association such that {@link
+ * #getSecondaries} returns the appropriate list when passed a key in the
+ * new primary database, and {@link #getPrimary} returns the new database
+ * when passed a key it contains.</li>
+ * <li>Begin writing to the new primary database.</li>
  * </ol>
  * <p>
  * Using the procedure above for adding a primary database, records will be
@@ -109,58 +108,58 @@ import java.util.Collection;
  * procedure.  Records will be indexed in secondary databases as they are added
  * but will not be returned by secondary queries until after the last step.
  * <ol>
- *     <li>Open the new primary database.</li>
- *     <li>Modify the association such that {@link #getSecondaries} returns the
- *     appropriate list when passed a key in the new primary database, but
- *     {@link #getPrimary} returns null when passed a key it contains.</li>
- *     <li>Write records in the new primary database.</li>
- *     <li>Modify the association such that {@link #getPrimary} returns the new
- *     database when passed a key it contains.</li>
+ * <li>Open the new primary database.</li>
+ * <li>Modify the association such that {@link #getSecondaries} returns the
+ * appropriate list when passed a key in the new primary database, but
+ * {@link #getPrimary} returns null when passed a key it contains.</li>
+ * <li>Write records in the new primary database.</li>
+ * <li>Modify the association such that {@link #getPrimary} returns the new
+ * database when passed a key it contains.</li>
  * </ol>
  * <p>
  * The following procedure should be used for removing an existing (non-empty)
  * primary database from an association.
  * <ol>
- *     <li>Remove the primary database from the association, such that {@link
- *     #getPrimary} returns null for all keys in the primary.</li>
- *     <li>Disable read and write operations on the database and ensure that
- *     all in-progress operations have completed.</li>
- *     <li>At this point the primary database may be closed and removed
- *     (e.g., with {@link Environment#removeDatabase}), if desired.</li>
- *     <li>For each secondary database associated with the removed primary
- *     database, {@link SecondaryDatabase#deleteObsoletePrimaryKeys} should be
- *     called to process all secondary records.</li>
- *     <li>At this point {@link #getPrimary} may throw an exception (rather
- *     than return null) when called for a primary key in the removed database,
- *     if desired.</li>
+ * <li>Remove the primary database from the association, such that {@link
+ * #getPrimary} returns null for all keys in the primary.</li>
+ * <li>Disable read and write operations on the database and ensure that
+ * all in-progress operations have completed.</li>
+ * <li>At this point the primary database may be closed and removed
+ * (e.g., with {@link Environment#removeDatabase}), if desired.</li>
+ * <li>For each secondary database associated with the removed primary
+ * database, {@link SecondaryDatabase#deleteObsoletePrimaryKeys} should be
+ * called to process all secondary records.</li>
+ * <li>At this point {@link #getPrimary} may throw an exception (rather
+ * than return null) when called for a primary key in the removed database,
+ * if desired.</li>
  * </ol>
  * <p>
  * The following procedure should be used for adding a new (empty) secondary
  * database to an association, and to populate the secondary incrementally
  * from its associated primary database(s).
  * <ol>
- *     <li>Open the secondary database and call {@link
- *     SecondaryDatabase#startIncrementalPopulation}.  The secondary may not be
- *     used (yet) for read operations.</li>
- *     <li>Add the secondary database to the association, such that the
- *     collection returned by {@link #getSecondaries} includes the new
- *     database, for all primary keys that should be indexed.</li>
- *     <li>For each primary database associated with the new secondary
- *     database, {@link Database#populateSecondaries} should be called to
- *     process all primary records.</li>
- *     <li>Call {@link SecondaryDatabase#endIncrementalPopulation}. The
- *     secondary database may now be used for read operations.</li>
+ * <li>Open the secondary database and call {@link
+ * SecondaryDatabase#startIncrementalPopulation}.  The secondary may not be
+ * used (yet) for read operations.</li>
+ * <li>Add the secondary database to the association, such that the
+ * collection returned by {@link #getSecondaries} includes the new
+ * database, for all primary keys that should be indexed.</li>
+ * <li>For each primary database associated with the new secondary
+ * database, {@link Database#populateSecondaries} should be called to
+ * process all primary records.</li>
+ * <li>Call {@link SecondaryDatabase#endIncrementalPopulation}. The
+ * secondary database may now be used for read operations.</li>
  * </ol>
  * <p>
  * The following procedure should be used for removing an existing (non-empty)
  * secondary database from an association.
  * <ol>
- *     <li>Remove the secondary database from the association, such that it is
- *     not included in the collection returned by {@link #getSecondaries}.</li>
- *     <li>Disable read and write operations on the database and ensure that
- *     all in-progress operations have completed.</li>
- *     <li>The secondary database may now be closed and removed, if
- *     desired.</li>
+ * <li>Remove the secondary database from the association, such that it is
+ * not included in the collection returned by {@link #getSecondaries}.</li>
+ * <li>Disable read and write operations on the database and ensure that
+ * all in-progress operations have completed.</li>
+ * <li>The secondary database may now be closed and removed, if
+ * desired.</li>
  * </ol>
  * <p>
  * <b>Other Implementation Requirements</b>
@@ -240,7 +239,7 @@ public interface SecondaryAssociation {
 
     /**
      * Returns true if there are no secondary databases in the association.
-     *
+     * <p>
      * This method is used by JE to optimize for the case where a primary
      * has no secondary databases.  This allows a {@code SecondaryAssociation}
      * to be configured on a primary database even when it has no associated
@@ -253,8 +252,8 @@ public interface SecondaryAssociation {
      * write operation.
      *
      * @throws RuntimeException if an unexpected problem occurs.  The exception
-     * will be thrown to the application, which should then take appropriate
-     * action.
+     *                          will be thrown to the application, which should then take appropriate
+     *                          action.
      */
     boolean isEmpty();
 
@@ -262,7 +261,7 @@ public interface SecondaryAssociation {
      * Returns the primary database for the given primary key.  This method
      * is called during read operations on secondary databases that are
      * configured with this {@code SecondaryAssociation}.
-     *
+     * <p>
      * This method should return null when the primary database has been
      * removed from the association, or when it should not be included in the
      * results for secondary queries.  In this case, the current operation will
@@ -270,8 +269,8 @@ public interface SecondaryAssociation {
      * skipped over.
      *
      * @throws RuntimeException if an unexpected problem occurs.  The exception
-     * will be thrown to the application, which should then take appropriate
-     * action.
+     *                          will be thrown to the application, which should then take appropriate
+     *                          action.
      */
     Database getPrimary(DatabaseEntry primaryKey);
 
@@ -281,8 +280,8 @@ public interface SecondaryAssociation {
      * are configured with this {@code SecondaryAssociation}.
      *
      * @throws RuntimeException if an unexpected problem occurs.  The exception
-     * will be thrown to the application, which should then take appropriate
-     * action.
+     *                          will be thrown to the application, which should then take appropriate
+     *                          action.
      */
     Collection<SecondaryDatabase> getSecondaries(DatabaseEntry primaryKey);
 }

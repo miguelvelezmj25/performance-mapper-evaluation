@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A consistency policy that lets a transaction on a replica using this policy
@@ -44,7 +44,7 @@ public class NoConsistencyRequiredPolicy implements ReplicaConsistencyPolicy {
      * Convenience instance.
      */
     public final static NoConsistencyRequiredPolicy NO_CONSISTENCY =
-        new NoConsistencyRequiredPolicy();
+            new NoConsistencyRequiredPolicy();
 
     /**
      * Create a NoConsistencyRequiredPolicy.
@@ -54,6 +54,7 @@ public class NoConsistencyRequiredPolicy implements ReplicaConsistencyPolicy {
 
     /**
      * Returns the name:{@value #NAME}, associated with this policy.
+     *
      * @see #NAME
      */
     @Override
@@ -82,13 +83,13 @@ public class NoConsistencyRequiredPolicy implements ReplicaConsistencyPolicy {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (!(obj instanceof NoConsistencyRequiredPolicy)) {
+        if(!(obj instanceof NoConsistencyRequiredPolicy)) {
             return false;
         }
         return true;

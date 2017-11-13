@@ -20,15 +20,15 @@ public class Regions12 {
         boolean b = false;
         boolean c = false;
 
-        if(A) {
+        if(A) { // A
             a = true;
         }
 
-        if(B) {
+        if(B) { // B
             b = true;
         }
 
-        if(C) {
+        if(C) { // AC
             c = true;
         }
 
@@ -51,7 +51,7 @@ public class Regions12 {
     }
 
     public static void boo(boolean decision) throws InterruptedException {
-        if(decision) {
+        if(decision) { //AB
             Thread.sleep(3000);
             System.out.println();
         }

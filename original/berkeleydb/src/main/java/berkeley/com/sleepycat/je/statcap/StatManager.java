@@ -13,20 +13,16 @@
 
 package berkeley.com.sleepycat.je.statcap;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.EnvironmentStats;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.utilint.LongMaxStat;
-import berkeley.com.sleepycat.je.utilint.LongMinStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatDefinition;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * The StatManager provides functionality to acquire incremental statistics.
@@ -36,7 +32,7 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
  * statistics. Incremental statistics are computed interval by subtracting
  * the base from the current set of values. The base values for the
  * registered contexts are updated when statistics are cleared.
- *
+ * <p>
  * For instance if you have a counter named X. The initial value is zero.
  * Suppose there are two statistic contexts registered S1
  * (say for statcapture)and S2 (for the public api loadStats).   The counter
@@ -53,13 +49,11 @@ public class StatManager {
 
     /* Registered statistics base contexts */
     protected final Map<Integer, StatContext> statContextMap =
-        new HashMap<Integer, StatContext>();
-
-    private final UpdateMinMax updateMinMaxStat =
-        new UpdateMinMax(StatCaptureDefinitions.minStats,
-                         StatCaptureDefinitions.maxStats);
-
+            new HashMap<Integer, StatContext>();
     protected final EnvironmentImpl env;
+    private final UpdateMinMax updateMinMaxStat =
+            new UpdateMinMax(StatCaptureDefinitions.minStats,
+                    StatCaptureDefinitions.maxStats);
 
     public StatManager(EnvironmentImpl env) {
         this.env = env;
@@ -68,8 +62,8 @@ public class StatManager {
     public synchronized Integer registerStatContext() {
         StatContext sctx = new StatContext(null);
         int max = 0;
-        for (Integer key : statContextMap.keySet()) {
-            if (key > max) {
+        for(Integer key : statContextMap.keySet()) {
+            if(key > max) {
                 max = key;
             }
         }
@@ -81,9 +75,9 @@ public class StatManager {
     public synchronized EnvironmentStats loadStats(StatsConfig config,
                                                    Integer contextKey) {
         StatContext sc = statContextMap.get(contextKey);
-        if (sc == null) {
+        if(sc == null) {
             throw EnvironmentFailureException.unexpectedState(
-                "Internal error stat context is not registered");
+                    "Internal error stat context is not registered");
         }
         /* load current statistics */
         EnvironmentStats curstats = env.loadStatsInternal(config);
@@ -92,35 +86,38 @@ public class StatManager {
         /* compute statistics by using the base values from the context */
         Map<String, StatGroup> base = sc.getBase();
         EnvironmentStats intervalStats;
-        if (base != null) {
+        if(base != null) {
             intervalStats = computeIntervalStats(cur, base);
-        } else {
+        }
+        else {
             intervalStats = curstats;
         }
 
-        if (config.getClear()) {
+        if(config.getClear()) {
 
             /* The underlying statistics were cleared so the base values
              * for the registered contexts are updated to reflect the
              * current statistic values.
              */
-            for (StatContext context : statContextMap.values()) {
-                if (context.getBase() != null) {
+            for(StatContext context : statContextMap.values()) {
+                if(context.getBase() != null) {
                     updateMinMaxStat.updateBase(context.getBase(), cur);
                 }
             }
 
-            for (StatContext context : statContextMap.values()) {
-                if (context == sc) {
+            for(StatContext context : statContextMap.values()) {
+                if(context == sc) {
                     context.setBase(null);
-                } else {
-                    if (context.getBase() == null) {
+                }
+                else {
+                    if(context.getBase() == null) {
                         context.setBase(cloneAndNegate(cur));
-                    } else {
+                    }
+                    else {
                         // reset base
                         context.setBase(
-                            computeIntervalStats(
-                                context.getBase(), cur).getStatGroupsMap());
+                                computeIntervalStats(
+                                        context.getBase(), cur).getStatGroupsMap());
                     }
                 }
             }
@@ -129,12 +126,12 @@ public class StatManager {
     }
 
     private EnvironmentStats computeIntervalStats(
-        Map<String, StatGroup> current,
-        Map<String, StatGroup> base) {
+            Map<String, StatGroup> current,
+            Map<String, StatGroup> base) {
 
         EnvironmentStats envStats = new EnvironmentStats();
 
-        for (StatGroup cg : current.values()) {
+        for(StatGroup cg : current.values()) {
             StatGroup bg = base.get(cg.getName());
             envStats.setStatGroup(cg.computeInterval(bg));
         }
@@ -143,37 +140,12 @@ public class StatManager {
 
     protected Map<String, StatGroup> cloneAndNegate(Map<String, StatGroup> in) {
         HashMap<String, StatGroup> retval = new HashMap<String, StatGroup>();
-        for (Entry<String, StatGroup>e : in.entrySet()) {
+        for(Entry<String, StatGroup> e : in.entrySet()) {
             StatGroup negatedGroup = e.getValue().cloneGroup(false);
             negatedGroup.negate();
             retval.put(e.getKey(), negatedGroup);
         }
         return retval;
-    }
-
-    protected class StatContext {
-        private Map<String, StatGroup> base;
-        private Map<String, StatGroup> repbase = null;
-
-        StatContext(Map<String, StatGroup> base) {
-            this.base = base;
-        }
-
-        void setBase(Map<String, StatGroup> base) {
-            this.base = base;
-        }
-
-        Map<String, StatGroup> getBase() {
-            return base;
-        }
-
-        public void setRepBase(Map<String, StatGroup> base) {
-            this.repbase = base;
-        }
-
-        public Map<String, StatGroup> getRepBase() {
-            return repbase;
-        }
     }
 
     public static class SDef {
@@ -194,30 +166,55 @@ public class StatManager {
         }
     }
 
+    protected class StatContext {
+        private Map<String, StatGroup> base;
+        private Map<String, StatGroup> repbase = null;
+
+        StatContext(Map<String, StatGroup> base) {
+            this.base = base;
+        }
+
+        Map<String, StatGroup> getBase() {
+            return base;
+        }
+
+        void setBase(Map<String, StatGroup> base) {
+            this.base = base;
+        }
+
+        public Map<String, StatGroup> getRepBase() {
+            return repbase;
+        }
+
+        public void setRepBase(Map<String, StatGroup> base) {
+            this.repbase = base;
+        }
+    }
+
     public class UpdateMinMax {
         private final ArrayList<SDef> minStats = new ArrayList<SDef>();
         private final ArrayList<SDef> maxStats = new ArrayList<SDef>();
 
         public UpdateMinMax(SDef[] minStatistics, SDef[] maxStatistics) {
-            for (SDef min : minStatistics) {
+            for(SDef min : minStatistics) {
                 minStats.add(min);
             }
 
-            for (SDef max : maxStatistics) {
+            for(SDef max : maxStatistics) {
                 maxStats.add(max);
             }
         }
 
         public void updateBase(Map<String, StatGroup> base,
                                Map<String, StatGroup> other) {
-            for (SDef sd : minStats) {
+            for(SDef sd : minStats) {
                 StatGroup group = other.get(sd.groupName);
-                if (group == null) {
+                if(group == null) {
                     continue;
                 }
                 LongStat otherValue =
-                    group.getLongStat(sd.definition);
-                if (otherValue == null) {
+                        group.getLongStat(sd.definition);
+                if(otherValue == null) {
                     continue;
                 }
 
@@ -225,30 +222,30 @@ public class StatManager {
                         base.get(sd.groupName).getLongMinStat(sd.definition);
 
                 /* Check is stat is not yet in the base */
-                if (baseStat == null) {
+                if(baseStat == null) {
                     StatGroup sg = base.get(sd.groupName);
-                    baseStat = (LongMinStat)otherValue.copyAndAdd(sg);
+                    baseStat = (LongMinStat) otherValue.copyAndAdd(sg);
                 }
 
                 baseStat.setMin(otherValue.get());
             }
-            for (SDef sd : maxStats) {
+            for(SDef sd : maxStats) {
                 StatGroup group = other.get(sd.groupName);
-                if (group == null) {
+                if(group == null) {
                     continue;
                 }
                 LongStat otherValue =
-                    group.getLongStat(sd.definition);
-                if (otherValue == null) {
+                        group.getLongStat(sd.definition);
+                if(otherValue == null) {
                     continue;
                 }
                 LongMaxStat baseStat =
                         base.get(sd.groupName).getLongMaxStat(sd.definition);
 
                 /* Check is stat is not yet in the base */
-                if (baseStat == null) {
+                if(baseStat == null) {
                     StatGroup sg = base.get(sd.groupName);
-                    baseStat = (LongMaxStat)otherValue.copyAndAdd(sg);
+                    baseStat = (LongMaxStat) otherValue.copyAndAdd(sg);
                 }
 
                 baseStat.setMax(otherValue.get());

@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.IOException;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
 
 /**
  * Provides the next log record, blocking if one is not available. It
@@ -26,11 +26,11 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  */
 public interface FeederSource {
 
-    public void init(VLSN startVLSN) 
-        throws DatabaseException, IOException, InterruptedException;
+    public void init(VLSN startVLSN)
+            throws DatabaseException, IOException, InterruptedException;
 
     public OutputWireRecord getWireRecord(VLSN vlsn, int waitTime)
-        throws DatabaseException, InterruptedException, IOException;
+            throws DatabaseException, InterruptedException, IOException;
 
     public String dumpState();
 }

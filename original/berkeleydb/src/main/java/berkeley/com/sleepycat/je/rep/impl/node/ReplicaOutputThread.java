@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.io.IOException;
-
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
 
 public class ReplicaOutputThread extends ReplicaOutputThreadBase {
     private final RepNode repNode;
@@ -26,19 +26,19 @@ public class ReplicaOutputThread extends ReplicaOutputThreadBase {
         repNode = repImpl.getRepNode();
     }
 
-   public void writeHeartbeat(Long txnId)
+    public void writeHeartbeat(Long txnId)
             throws IOException {
-        if ((txnId == null) &&
-            (repNode.getReplica().getTestDelayMs() > 0)) {
-                return;
-            }
-
-            final VLSN broadcastCBVLSN =
-                repNode.getCBVLSNTracker().getBroadcastCBVLSN();
-            protocol.write(protocol.new HeartbeatResponse
-                           (broadcastCBVLSN,
-                            repNode.getReplica().getTxnEndVLSN()),
-                            replicaFeederChannel);
+        if((txnId == null) &&
+                (repNode.getReplica().getTestDelayMs() > 0)) {
+            return;
         }
+
+        final VLSN broadcastCBVLSN =
+                repNode.getCBVLSNTracker().getBroadcastCBVLSN();
+        protocol.write(protocol.new HeartbeatResponse
+                        (broadcastCBVLSN,
+                                repNode.getReplica().getTxnEndVLSN()),
+                replicaFeederChannel);
+    }
 }
 

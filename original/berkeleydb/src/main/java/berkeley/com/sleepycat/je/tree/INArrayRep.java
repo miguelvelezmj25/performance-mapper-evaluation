@@ -41,7 +41,7 @@ import berkeley.com.sleepycat.je.evictor.Evictor;
  * operations, since it could represent the new mutated object.
  */
 public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
-                                 ELEMENT_TYPE> {
+        ELEMENT_TYPE> {
 
     public INArrayRep() {
     }
@@ -54,8 +54,7 @@ public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
      * can change as a result of the set operation.
      *
      * @param idx the index to be set
-     * @param e the array elelement at the idx
-     *
+     * @param e   the array elelement at the idx
      * @return either this, or the new representation if there was a mutation.
      */
     public abstract ARRAY_BASE_TYPE set(int idx, ELEMENT_TYPE e, IN parent);
@@ -71,9 +70,8 @@ public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
      * representation may mutate as a result of the copy.
      *
      * @param from the source (inclusive) of the copy
-     * @param to the target (inclusive) of the copy
-     * @param n the number of elements to be copied.
-     *
+     * @param to   the target (inclusive) of the copy
+     * @param n    the number of elements to be copied.
      * @return either this, or the new representation if there was a mutation.
      */
     public abstract ARRAY_BASE_TYPE copy(int from, int to, int n, IN parent);
@@ -112,8 +110,8 @@ public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
      * Update the cache statistics for this representation.
      *
      * @param increment true the stat should be incremented, false if it must
-     * be decremented
-     * @param evictor the evictor that shoulds ths stat counters
+     *                  be decremented
+     * @param evictor   the evictor that shoulds ths stat counters
      */
     abstract void updateCacheStats(boolean increment, Evictor evictor);
 
@@ -123,11 +121,11 @@ public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
      * the IN node is decached.
      *
      * @param increment true if the stat is to be incremented, false if it is
-     * to be decremented
+     *                  to be decremented
      */
     final void updateCacheStats(boolean increment, IN parent) {
 
-        if (!parent.getInListResident()) {
+        if(!parent.getInListResident()) {
             /* If the IN is not in the cache don't accumulate stats for it. */
             return;
         }
@@ -142,16 +140,16 @@ public abstract class INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE,
      * @param newRep the new representation that is replacing this one.
      */
     final void noteRepChange(
-        INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE, ELEMENT_TYPE> newRep,
-        IN parent) {
+            INArrayRep<ARRAY_BASE_TYPE, REP_ENUM_TYPE, ELEMENT_TYPE> newRep,
+            IN parent) {
 
-        if (parent == null) {
+        if(parent == null) {
             /* Only true in unit tests. */
             return;
         }
 
         parent.updateMemorySize(newRep.calculateMemorySize() -
-                                calculateMemorySize());
+                calculateMemorySize());
         updateCacheStats(false, parent);
         newRep.updateCacheStats(true, parent);
     }

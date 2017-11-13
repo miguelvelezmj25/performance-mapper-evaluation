@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a sorted <code>Double</code>
  * primitive wrapper or a sorted <code>double</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -31,6 +31,29 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
  * @see <a href="package-summary.html#floatFormats">Floating Point Formats</a>
  */
 public class SortedDoubleBinding extends TupleBinding<Double> {
+
+    /**
+     * Converts an entry buffer into a simple <code>double</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static double entryToDouble(DatabaseEntry entry) {
+
+        return entryToInput(entry).readSortedDouble();
+    }
+
+    /**
+     * Converts a simple <code>double</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void doubleToEntry(double val, DatabaseEntry entry) {
+
+        outputToEntry(DoubleBinding.sizedOutput().writeSortedDouble(val),
+                entry);
+    }
 
     /* javadoc is inherited */
     public Double entryToObject(TupleInput input) {
@@ -48,30 +71,5 @@ public class SortedDoubleBinding extends TupleBinding<Double> {
     protected TupleOutput getTupleOutput(Double object) {
 
         return DoubleBinding.sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>double</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static double entryToDouble(DatabaseEntry entry) {
-
-        return entryToInput(entry).readSortedDouble();
-    }
-
-    /**
-     * Converts a simple <code>double</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void doubleToEntry(double val, DatabaseEntry entry) {
-
-        outputToEntry(DoubleBinding.sizedOutput().writeSortedDouble(val),
-                      entry);
     }
 }

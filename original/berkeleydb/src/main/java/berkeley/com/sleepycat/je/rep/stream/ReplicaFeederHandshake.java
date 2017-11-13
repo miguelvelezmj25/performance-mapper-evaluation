@@ -13,14 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import static berkeley.com.sleepycat.je.log.LogEntryType.LOG_VERSION_EXPIRE_INFO;
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.GROUP_NAME;
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.MAX_CLOCK_DELTA;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
@@ -30,18 +22,20 @@ import berkeley.com.sleepycat.je.rep.NodeType;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.DuplicateNodeReject;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.FeederJEVersions;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.FeederProtocolVersion;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.JEVersionsReject;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.NodeGroupInfoOK;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.NodeGroupInfoReject;
-import berkeley.com.sleepycat.je.rep.stream.Protocol.SNTPResponse;
+import berkeley.com.sleepycat.je.rep.stream.Protocol.*;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.Message;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
 import berkeley.com.sleepycat.je.rep.utilint.NamedChannel;
 import berkeley.com.sleepycat.je.rep.utilint.RepUtils.Clock;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.log.LogEntryType.LOG_VERSION_EXPIRE_INFO;
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.GROUP_NAME;
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.MAX_CLOCK_DELTA;
 
 /**
  * Implements the Replica side of the handshake protocol between the Replica
@@ -52,6 +46,22 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  */
 public class ReplicaFeederHandshake {
 
+    /*
+     * The time to wait between retries to establish node info in the master.
+     */
+    static final int MEMBERSHIP_RETRY_SLEEP_MS = 60 * 1000;
+    static final int MEMBERSHIP_RETRIES = 0;
+    private static final long CLOCK_SKEW_MIN_DELAY_MS = 2;
+    /*
+     * Used during testing: A non-zero value overrides the actual log version.
+     */
+    private static volatile int testCurrentLogVersion = 0;
+    /**
+     * Used during testing: A non-zero value overrides the actual protocol
+     * version.
+     */
+    private static volatile int testCurrentProtocolVersion = 0;
+    private static int CLOCK_SKEW_MAX_SAMPLE_SIZE = 5;
     /* The rep node (server or replica) */
     private final RepImpl repImpl;
     private final Clock clock;
@@ -59,51 +69,27 @@ public class ReplicaFeederHandshake {
     private final NamedChannel namedChannel;
     private final NameIdPair replicaNameIdPair;
     private final NodeType nodeType;
-    private NameIdPair feederNameIdPair;
     private final RepGroupImpl repGroup;
-
-    private Protocol protocol = null;
-
-    /* The JE software versions in use by the Feeder */
-    private FeederJEVersions feederJEVersions;
-
-    /*
-     * The time to wait between retries to establish node info in the master.
-     */
-    static final int MEMBERSHIP_RETRY_SLEEP_MS = 60 * 1000;
-    static final int MEMBERSHIP_RETRIES = 0;
-
-    /*
-     * Used during testing: A non-zero value overrides the actual log version.
-     */
-    private static volatile int testCurrentLogVersion = 0;
-
-    /**
-     * Used during testing: A non-zero value overrides the actual protocol
-     * version.
-     */
-    private static volatile int testCurrentProtocolVersion = 0;
-
-    /* Fields used to track clock skew wrt the feeder. */
-    private long clockDelay = Long.MAX_VALUE;
-    private long clockDelta = Long.MAX_VALUE;
-    private static int CLOCK_SKEW_MAX_SAMPLE_SIZE = 5;
-    private static final long CLOCK_SKEW_MIN_DELAY_MS = 2;
     private final int maxClockDelta;
-
     /**
      * If the nodeType is an Arbiter, the SNTPRequest message
      * is sent but the clock skew is not checked.
      */
     private final boolean checkClockSkew;
-
     private final Logger logger;
+    private NameIdPair feederNameIdPair;
+    private Protocol protocol = null;
+    /* The JE software versions in use by the Feeder */
+    private FeederJEVersions feederJEVersions;
+    /* Fields used to track clock skew wrt the feeder. */
+    private long clockDelay = Long.MAX_VALUE;
+    private long clockDelta = Long.MAX_VALUE;
 
     /**
      * An instance of this class is created with each new handshake preceding
      * the setting up of a connection.
      *
-     * @param conf  handshake configuration with feeder
+     * @param conf handshake configuration with feeder
      */
     public ReplicaFeederHandshake(ReplicaFeederHandshakeConfig conf) {
         this.repImpl = conf.getRepImpl();
@@ -114,22 +100,25 @@ public class ReplicaFeederHandshake {
 
         replicaNameIdPair = conf.getNameIdPair();
         this.clock = conf.getClock();
-        if (nodeType.isArbiter()) {
+        if(nodeType.isArbiter()) {
             maxClockDelta = Integer.MAX_VALUE;
             checkClockSkew = false;
-        } else {
+        }
+        else {
             maxClockDelta =
-                repImpl.getConfigManager().getDuration(MAX_CLOCK_DELTA);
+                    repImpl.getConfigManager().getDuration(MAX_CLOCK_DELTA);
             checkClockSkew = true;
         }
         logger = LoggerUtils.getLogger(getClass());
     }
 
-    /** Get the current log version, supporting a test override. */
+    /**
+     * Get the current log version, supporting a test override.
+     */
     private static int getCurrentLogVersion() {
         return (testCurrentLogVersion != 0) ?
-            testCurrentLogVersion :
-            LogEntryType.LOG_VERSION;
+                testCurrentLogVersion :
+                LogEntryType.LOG_VERSION;
     }
 
     /**
@@ -142,19 +131,6 @@ public class ReplicaFeederHandshake {
         testCurrentLogVersion = testLogVersion;
     }
 
-    /** Get the current JE version, supporting a test override. */
-    private JEVersion getCurrentJEVersion() {
-        return repImpl.getCurrentJEVersion();
-    }
-
-    /** Get the current protocol version, supporting a test override. */
-    private int getCurrentProtocolVersion() {
-        if (testCurrentProtocolVersion != 0) {
-            return testCurrentProtocolVersion;
-        }
-        return Protocol.getJEVersionProtocolVersion(getCurrentJEVersion());
-    }
-
     /**
      * Set the current protocol version to a different value, for testing.
      * Specifying {@code 0} reverts to the standard value.
@@ -164,79 +140,96 @@ public class ReplicaFeederHandshake {
     }
 
     /**
+     * Get the current JE version, supporting a test override.
+     */
+    private JEVersion getCurrentJEVersion() {
+        return repImpl.getCurrentJEVersion();
+    }
+
+    /**
+     * Get the current protocol version, supporting a test override.
+     */
+    private int getCurrentProtocolVersion() {
+        if(testCurrentProtocolVersion != 0) {
+            return testCurrentProtocolVersion;
+        }
+        return Protocol.getJEVersionProtocolVersion(getCurrentJEVersion());
+    }
+
+    /**
      * Negotiates a protocol that both the replica and feeder can support.
      *
      * @return the common protocol
-     *
      * @throws IOException
      */
     private Protocol negotiateProtocol()
-        throws IOException {
+            throws IOException {
 
         final Protocol defaultProtocol =
-            Protocol.getProtocol(repImpl, replicaNameIdPair, clock,
-                                 getCurrentProtocolVersion(),
-                                 groupFormatVersion);
+                Protocol.getProtocol(repImpl, replicaNameIdPair, clock,
+                        getCurrentProtocolVersion(),
+                        groupFormatVersion);
         /* Send over the latest version protocol this replica can support. */
         defaultProtocol.write(defaultProtocol.new ReplicaProtocolVersion(),
-                              namedChannel);
+                namedChannel);
 
         /*
          * Returns the highest level the feeder can support, or the version we
          * just sent, if it can support that version
          */
         Message message = defaultProtocol.read(namedChannel);
-        if (message instanceof DuplicateNodeReject) {
+        if(message instanceof DuplicateNodeReject) {
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.HANDSHAKE_ERROR,
-                 "A replica with the name: " +  replicaNameIdPair +
-                 " is already active with the Feeder:" + feederNameIdPair);
+                    (repImpl,
+                            EnvironmentFailureReason.HANDSHAKE_ERROR,
+                            "A replica with the name: " + replicaNameIdPair +
+                                    " is already active with the Feeder:" + feederNameIdPair);
         }
 
         FeederProtocolVersion feederVersion =
-            ((FeederProtocolVersion) message);
+                ((FeederProtocolVersion) message);
         feederNameIdPair = feederVersion.getNameIdPair();
         Protocol configuredProtocol =
-            Protocol.get(repImpl, replicaNameIdPair,
-                         clock, feederVersion.getVersion(),
-                         getCurrentProtocolVersion(), groupFormatVersion);
+                Protocol.get(repImpl, replicaNameIdPair,
+                        clock, feederVersion.getVersion(),
+                        getCurrentProtocolVersion(), groupFormatVersion);
         LoggerUtils.fine(logger, repImpl,
-                         "Feeder id: " + feederVersion.getNameIdPair() +
-                         "Response message: " + feederVersion.getVersion());
+                "Feeder id: " + feederVersion.getNameIdPair() +
+                        "Response message: " + feederVersion.getVersion());
         namedChannel.setNameIdPair(feederNameIdPair);
         LoggerUtils.fine(logger, repImpl,
-                         "Channel Mapping: " + feederNameIdPair + " is at " +
-                         namedChannel.getChannel());
+                "Channel Mapping: " + feederNameIdPair + " is at " +
+                        namedChannel.getChannel());
 
-        if (configuredProtocol == null) {
+        if(configuredProtocol == null) {
             /* Include JE version information [#22541] */
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.PROTOCOL_VERSION_MISMATCH,
-                 "Incompatible protocol versions. " +
-                 "Protocol version: " + feederVersion.getVersion() +
-                 " introduced in JE version: " +
-                 Protocol.getProtocolJEVersion(feederVersion.getVersion()) +
-                 " requested by the Feeder: " + feederNameIdPair +
-                 " is not supported by this Replica: " + replicaNameIdPair +
-                 " with protocol version: " + defaultProtocol.getVersion() +
-                 " introduced in JE version: " +
-                 Protocol.getProtocolJEVersion(defaultProtocol.getVersion()));
+                    (repImpl,
+                            EnvironmentFailureReason.PROTOCOL_VERSION_MISMATCH,
+                            "Incompatible protocol versions. " +
+                                    "Protocol version: " + feederVersion.getVersion() +
+                                    " introduced in JE version: " +
+                                    Protocol.getProtocolJEVersion(feederVersion.getVersion()) +
+                                    " requested by the Feeder: " + feederNameIdPair +
+                                    " is not supported by this Replica: " + replicaNameIdPair +
+                                    " with protocol version: " + defaultProtocol.getVersion() +
+                                    " introduced in JE version: " +
+                                    Protocol.getProtocolJEVersion(defaultProtocol.getVersion()));
         }
         return configuredProtocol;
     }
 
     /**
      * Executes the replica side of the handshake.
+     *
      * @throws ProtocolException
      */
     public Protocol execute()
-        throws IOException,
-               ProtocolException {
+            throws IOException,
+            ProtocolException {
 
         LoggerUtils.info(logger, repImpl,
-                         "Replica-feeder handshake start");
+                "Replica-feeder handshake start");
 
         /* First negotiate the protocol, then use it. */
         protocol = negotiateProtocol();
@@ -248,7 +241,7 @@ public class ReplicaFeederHandshake {
          * Note whether log entries with later log versions need to be
          * converted to log version 12 to work around [#25222].
          */
-        if (feederJEVersions.getLogVersion() == LOG_VERSION_EXPIRE_INFO) {
+        if(feederJEVersions.getLogVersion() == LOG_VERSION_EXPIRE_INFO) {
             protocol.setFixLogVersion12Entries(true);
         }
 
@@ -261,8 +254,8 @@ public class ReplicaFeederHandshake {
         checkClockSkew();
 
         LoggerUtils.info(logger, repImpl,
-                         "Replica-feeder " + feederNameIdPair.getName() +
-                         " handshake completed.");
+                "Replica-feeder " + feederNameIdPair.getName() +
+                        " handshake completed.");
         return protocol;
     }
 
@@ -270,20 +263,20 @@ public class ReplicaFeederHandshake {
      * Checks software and log version compatibility.
      */
     private void verifyVersions()
-        throws IOException {
+            throws IOException {
 
         protocol.write(protocol.new
-                       ReplicaJEVersions(getCurrentJEVersion(),
-                                         getCurrentLogVersion()),
-                       namedChannel);
+                        ReplicaJEVersions(getCurrentJEVersion(),
+                        getCurrentLogVersion()),
+                namedChannel);
         Message message = protocol.read(namedChannel);
-        if (message instanceof JEVersionsReject) {
+        if(message instanceof JEVersionsReject) {
             /* The software version is not compatible with the Feeder. */
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.HANDSHAKE_ERROR,
-                 " Feeder: " + feederNameIdPair + ". " +
-                 ((JEVersionsReject) message).getErrorMessage());
+                    (repImpl,
+                            EnvironmentFailureReason.HANDSHAKE_ERROR,
+                            " Feeder: " + feederNameIdPair + ". " +
+                                    ((JEVersionsReject) message).getErrorMessage());
         }
 
         /*
@@ -292,14 +285,14 @@ public class ReplicaFeederHandshake {
          */
         feederJEVersions = (FeederJEVersions) message;
 
-        if (feederJEVersions.getLogVersion() > getCurrentLogVersion()) {
+        if(feederJEVersions.getLogVersion() > getCurrentLogVersion()) {
             throw new EnvironmentFailureException(
-                repImpl,
-                EnvironmentFailureReason.HANDSHAKE_ERROR,
-                " Feeder: " + feederNameIdPair + ". " +
-                "Feeder log version " + feederJEVersions.getLogVersion() +
-                " is not known to the replica, whose current log version is " +
-                getCurrentLogVersion());
+                    repImpl,
+                    EnvironmentFailureReason.HANDSHAKE_ERROR,
+                    " Feeder: " + feederNameIdPair + ". " +
+                            "Feeder log version " + feederJEVersions.getLogVersion() +
+                            " is not known to the replica, whose current log version is " +
+                            getCurrentLogVersion());
         }
     }
 
@@ -307,46 +300,46 @@ public class ReplicaFeederHandshake {
      * Exchange membership information messages.
      */
     private void verifyMembership()
-        throws IOException {
+            throws IOException {
 
         DbConfigManager configManager = repImpl.getConfigManager();
         String groupName = configManager.get(GROUP_NAME);
 
         Message message = protocol.new
-            NodeGroupInfo(groupName,
-                          repGroup.getUUID(),
-                          replicaNameIdPair,
-                          repImpl.getHostName(),
-                          repImpl.getPort(),
-                          nodeType,
-                          repImpl.isDesignatedPrimary(),
-                          getCurrentJEVersion());
+                NodeGroupInfo(groupName,
+                repGroup.getUUID(),
+                replicaNameIdPair,
+                repImpl.getHostName(),
+                repImpl.getPort(),
+                nodeType,
+                repImpl.isDesignatedPrimary(),
+                getCurrentJEVersion());
         protocol.write(message, namedChannel);
 
         message = protocol.read(namedChannel);
 
-        if (message instanceof NodeGroupInfoReject) {
+        if(message instanceof NodeGroupInfoReject) {
             NodeGroupInfoReject reject = (NodeGroupInfoReject) message;
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.HANDSHAKE_ERROR,
-                 " Feeder: " + feederNameIdPair + ". " +
-                 reject.getErrorMessage());
+                    (repImpl,
+                            EnvironmentFailureReason.HANDSHAKE_ERROR,
+                            " Feeder: " + feederNameIdPair + ". " +
+                                    reject.getErrorMessage());
         }
 
-        if (!(message instanceof NodeGroupInfoOK)) {
+        if(!(message instanceof NodeGroupInfoOK)) {
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.HANDSHAKE_ERROR,
-                 " Feeder: " + feederNameIdPair + ". " +
-                 "Protocol error. Unexpected response " + message);
+                    (repImpl,
+                            EnvironmentFailureReason.HANDSHAKE_ERROR,
+                            " Feeder: " + feederNameIdPair + ". " +
+                                    "Protocol error. Unexpected response " + message);
         }
         final NodeGroupInfoOK nodeGroupInfoOK = (NodeGroupInfoOK) message;
-        if (repGroup.hasUnknownUUID()) {
+        if(repGroup.hasUnknownUUID()) {
             /* Correct the initial UUID */
             repGroup.setUUID(nodeGroupInfoOK.getUUID());
         }
-        if (nodeType.hasTransientId()) {
+        if(nodeType.hasTransientId()) {
             /* Update the transient node's ID */
             replicaNameIdPair.update(nodeGroupInfoOK.getNameIdPair());
         }
@@ -380,50 +373,51 @@ public class ReplicaFeederHandshake {
      * @throws ProtocolException
      */
     private void checkClockSkew()
-        throws IOException,
-               ProtocolException {
+            throws IOException,
+            ProtocolException {
 
         boolean isLast = false;
         int sampleCount = 0;
         do {
-            if (checkClockSkew) {
+            if(checkClockSkew) {
                 /* Iterate until we have a value that's good enough. */
                 isLast = (++sampleCount >= CLOCK_SKEW_MAX_SAMPLE_SIZE) ||
-                         (clockDelay <= CLOCK_SKEW_MIN_DELAY_MS);
-            } else {
+                        (clockDelay <= CLOCK_SKEW_MIN_DELAY_MS);
+            }
+            else {
                 isLast = true;
             }
 
             protocol.write(protocol.new SNTPRequest(isLast), namedChannel);
             SNTPResponse response = protocol.read(namedChannel,
-                                                  SNTPResponse.class);
-            if (response.getDelay() < clockDelay) {
+                    SNTPResponse.class);
+            if(response.getDelay() < clockDelay) {
                 clockDelay = response.getDelay();
                 clockDelta = response.getDelta();
             }
 
-        } while (!isLast);
+        } while(!isLast);
 
-        if (!checkClockSkew) {
+        if(!checkClockSkew) {
             return;
         }
 
         LoggerUtils.logMsg
-            (logger, repImpl,
-             (Math.abs(clockDelta) >= maxClockDelta) ?
-             Level.SEVERE : Level.FINE,
-             "Round trip delay: " + clockDelay + " ms. " + "Clock delta: " +
-             clockDelta + " ms. " + "Max permissible delta: " +
-             maxClockDelta + " ms.");
+                (logger, repImpl,
+                        (Math.abs(clockDelta) >= maxClockDelta) ?
+                                Level.SEVERE : Level.FINE,
+                        "Round trip delay: " + clockDelay + " ms. " + "Clock delta: " +
+                                clockDelta + " ms. " + "Max permissible delta: " +
+                                maxClockDelta + " ms.");
 
-        if (Math.abs(clockDelta) >= maxClockDelta) {
+        if(Math.abs(clockDelta) >= maxClockDelta) {
             throw new EnvironmentFailureException
-                (repImpl,
-                 EnvironmentFailureReason.HANDSHAKE_ERROR,
-                 "Clock delta: " + clockDelta + " ms. " +
-                 "between Feeder: " + feederNameIdPair.getName() +
-                 " and this Replica exceeds max permissible delta: " +
-                 maxClockDelta + " ms.");
+                    (repImpl,
+                            EnvironmentFailureReason.HANDSHAKE_ERROR,
+                            "Clock delta: " + clockDelta + " ms. " +
+                                    "between Feeder: " + feederNameIdPair.getName() +
+                                    " and this Replica exceeds max permissible delta: " +
+                                    maxClockDelta + " ms.");
         }
     }
 }

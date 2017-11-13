@@ -29,7 +29,7 @@ public class FreePortLocator {
      * not closing ports.
      */
     private static final boolean debug =
-        Boolean.getBoolean("test.debugFreePortLocator");
+            Boolean.getBoolean("test.debugFreePortLocator");
 
     private final String hostname;
     private final int portStart;
@@ -50,12 +50,12 @@ public class FreePortLocator {
         super();
         assert portStart < portEnd;
 
-        if ((portStart > 0x7fff) || (portEnd > 0x7fff)) {
+        if((portStart > 0x7fff) || (portEnd > 0x7fff)) {
             throw new IllegalArgumentException
-                ("Invalid port range:" + portStart + " - " + portEnd + ". " +
-                 "The port range must not extend past:" + 0x7fff +
-                 " since the allocated ports could then overlap with " +
-                 "dynamically assigned ports used by other services. ");
+                    ("Invalid port range:" + portStart + " - " + portEnd + ". " +
+                            "The port range must not extend past:" + 0x7fff +
+                            " since the allocated ports could then overlap with " +
+                            "dynamically assigned ports used by other services. ");
         }
 
         this.hostname = hostname;
@@ -76,45 +76,45 @@ public class FreePortLocator {
      * Returns the next free port. Note that it's possible that on a busy
      * machine another process may grab the "free" port before it's actually
      * used.
-     *
+     * <p>
      * There is somewhat AIsh aspect to the code below. In general it tries to
      * be very conservative, using different techniques so that it works
      * reasonably well on Linux, Mac OS and Windows.
-     *
+     * <p>
      * Note: The use of setReuseAddress after a bind operation may look
      * dubious, since it runs counter to the API doc, but it helps based on
      * actual tests. It's also the idiom used by Apache Camel to find a
      * free port. It, at least, can't hurt.
      */
     public int next() {
-        while (++currPort < portEnd) {
+        while(++currPort < portEnd) {
 
             /* Try connecting to the port to see if somebody is listening. */
             Socket s = null;
             try {
                 s = new Socket(hostname, currPort);
                 /* Somebody is listening on the port. */
-                if (debug) {
+                if(debug) {
                     System.err.println(
-                        "FreePortLocator: " + currPort + " busy - socket");
+                            "FreePortLocator: " + currPort + " busy - socket");
                     Thread.dumpStack();
                 }
                 continue;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 /* Nobody is listening, continue with other tests. */
             } finally {
-                if (s != null){
+                if(s != null) {
                     try {
                         s.close();
-                    } catch (IOException e) {
+                    } catch(IOException e) {
                         /* Unexpected, something's wrong, ignore the port. */
-                        if (debug) {
+                        if(debug) {
                             System.err.println(
-                                "FreePortLocator: " + currPort +
-                                " busy - socket close: " + e);
+                                    "FreePortLocator: " + currPort +
+                                            " busy - socket close: " + e);
                             e.printStackTrace();
                         }
-                       continue;
+                        continue;
                     }
                 }
             }
@@ -127,27 +127,27 @@ public class FreePortLocator {
                 ss.setReuseAddress(true);
                 ds = new DatagramSocket(currPort);
                 ds.setReuseAddress(true);
-            } catch (IOException e) {
-                if (debug) {
+            } catch(IOException e) {
+                if(debug) {
                     System.err.println(
-                        "FreePortLocator: " + currPort +
-                        " busy - server, datagram: " + e);
+                            "FreePortLocator: " + currPort +
+                                    " busy - server, datagram: " + e);
                     e.printStackTrace();
                 }
                 continue;
             } finally {
-                if (ds != null) {
+                if(ds != null) {
                     ds.close();
                 }
 
-                if (ss != null) {
+                if(ss != null) {
                     try {
                         ss.close();
-                    } catch (IOException e) {
-                        if (debug) {
+                    } catch(IOException e) {
+                        if(debug) {
                             System.err.println(
-                                "FreePortLocator: " + currPort +
-                                " busy - server close: " + e);
+                                    "FreePortLocator: " + currPort +
+                                            " busy - server close: " + e);
                             e.printStackTrace();
                         }
                         continue;
@@ -159,8 +159,8 @@ public class FreePortLocator {
             ds = null;
 
             /* try with a hostname */
-           final InetSocketAddress sa =
-               new InetSocketAddress(hostname, currPort);
+            final InetSocketAddress sa =
+                    new InetSocketAddress(hostname, currPort);
             try {
                 ss = new ServerSocket();
                 ss.setReuseAddress(true);
@@ -168,27 +168,27 @@ public class FreePortLocator {
 
                 ds = new DatagramSocket(sa);
                 ds.setReuseAddress(true);
-            } catch (IOException e) {
-                if (debug) {
+            } catch(IOException e) {
+                if(debug) {
                     System.err.println(
-                        "FreePortLocator: " + currPort +
-                        " busy - server, datagram hostname: " + e);
+                            "FreePortLocator: " + currPort +
+                                    " busy - server, datagram hostname: " + e);
                     e.printStackTrace();
                 }
                 continue;
             } finally {
-                if (ds != null) {
+                if(ds != null) {
                     ds.close();
                 }
 
-                if (ss != null) {
+                if(ss != null) {
                     try {
                         ss.close();
-                    } catch (IOException e) {
-                        if (debug) {
+                    } catch(IOException e) {
+                        if(debug) {
                             System.err.println(
-                                "FreePortLocator: " + currPort +
-                                " busy - server hostname close: " + e);
+                                    "FreePortLocator: " + currPort +
+                                            " busy - server hostname close: " + e);
                             e.printStackTrace();
                         }
                         continue;
@@ -197,16 +197,16 @@ public class FreePortLocator {
             }
 
             /* Survived port test gauntlet, return it. */
-            if (debug) {
+            if(debug) {
                 System.err.println(
-                    "FreePortLocator: " + currPort + " free");
+                        "FreePortLocator: " + currPort + " free");
             }
             return currPort;
         }
 
         throw new IllegalStateException
-            ("No more ports available in the range: " +
-             portStart + " - " + portEnd);
+                ("No more ports available in the range: " +
+                        portStart + " - " + portEnd);
     }
 
     /**

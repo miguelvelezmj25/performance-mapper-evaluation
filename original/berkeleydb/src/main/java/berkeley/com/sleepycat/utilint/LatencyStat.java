@@ -30,47 +30,6 @@ public class LatencyStat implements Cloneable {
      * configurable array which is used to save latencies.
      */
     private final int maxTrackedLatencyMillis;
-
-    private static class Values {
-
-        /* The number of total operations that have been tracked. */
-        final AtomicInteger numOps;
-
-        /* The number of total requests that have been tracked. */
-        final AtomicInteger numRequests;
-
-        /* The number of total nanoseconds that have been tracked. */
-        final AtomicLong totalNanos;
-
-        /*
-         * Array is indexed by latency in millis and elements contain the
-         * number of ops for that latency.
-         */
-        final AtomicIntegerArray histogram;
-
-        /*
-         * Min and max latency. They may both exceed maxTrackedLatencyMillis.
-         * A volatile int rather than an AtomicInteger is used because
-         * AtomicInteger has no min() or max() method, so there is no advantage
-         * to using it.
-         */
-        volatile int minIncludingOverflow;
-        volatile int maxIncludingOverflow;
-
-        /* Number of requests whose latency exceed maxTrackedLatencyMillis. */
-        final AtomicInteger requestsOverflow;
-
-        Values(final int maxTrackedLatencyMillis) {
-            histogram = new AtomicIntegerArray(maxTrackedLatencyMillis);
-            numOps = new AtomicInteger();
-            numRequests = new AtomicInteger();
-            requestsOverflow = new AtomicInteger();
-            totalNanos = new AtomicLong();
-            minIncludingOverflow = Integer.MAX_VALUE;
-            maxIncludingOverflow = 0;
-        }
-    }
-
     /*
      * Contains the values tracked by set() and reported by calculate().
      *
@@ -91,7 +50,6 @@ public class LatencyStat implements Cloneable {
      * might introduce contention during CRUD operations.
      */
     private volatile Values trackedValues;
-
     private int saveMin;
     private int saveMax;
     private float saveAvg;
@@ -100,7 +58,6 @@ public class LatencyStat implements Cloneable {
     private int save95;
     private int save99;
     private int saveRequestsOverflow;
-
     public LatencyStat(long maxTrackedLatencyMillis) {
         this.maxTrackedLatencyMillis = (int) maxTrackedLatencyMillis;
         clear();
@@ -164,7 +121,7 @@ public class LatencyStat implements Cloneable {
          */
         final int totalOps = values.numOps.get();
         final int totalRequests = values.numRequests.get();
-        if (totalOps == 0 || totalRequests == 0) {
+        if(totalOps == 0 || totalRequests == 0) {
             return new Latency(maxTrackedLatencyMillis);
         }
 
@@ -194,11 +151,12 @@ public class LatencyStat implements Cloneable {
         final int percent95Count;
         final int percent99Count;
         final int nTrackedRequests = totalRequests - nOverflow;
-        if (nTrackedRequests == 1) {
+        if(nTrackedRequests == 1) {
             /* For one request, always include it in the 95% and 99%. */
             percent95Count = 1;
             percent99Count = 1;
-        } else {
+        }
+        else {
             /* Otherwise truncate: never include the last/highest request. */
             percent95Count = (int) (nTrackedRequests * .95);
             percent99Count = (int) (nTrackedRequests * .99);
@@ -206,27 +164,27 @@ public class LatencyStat implements Cloneable {
 
         final int histogramLength = values.histogram.length();
         int numRequestsSeen = 0;
-        for (int latency = 0; latency < histogramLength; latency++) {
+        for(int latency = 0; latency < histogramLength; latency++) {
 
             final int count = values.histogram.get(latency);
 
-            if (count == 0) {
+            if(count == 0) {
                 continue;
             }
 
-            if (min > latency) {
+            if(min > latency) {
                 min = latency;
             }
 
-            if (max < latency) {
+            if(max < latency) {
                 max = latency;
             }
 
-            if (numRequestsSeen < percent95Count) {
+            if(numRequestsSeen < percent95Count) {
                 percent95 = latency;
             }
 
-            if (numRequestsSeen < percent99Count) {
+            if(numRequestsSeen < percent99Count) {
                 percent99 = latency;
             }
 
@@ -243,8 +201,8 @@ public class LatencyStat implements Cloneable {
         saveRequestsOverflow = nOverflow;
 
         return new Latency(maxTrackedLatencyMillis, saveMin, saveMax, saveAvg,
-                           saveNumOps, saveNumRequests, save95, save99,
-                           saveRequestsOverflow);
+                saveNumOps, saveNumRequests, save95, save99,
+                saveRequestsOverflow);
     }
 
     /**
@@ -262,7 +220,7 @@ public class LatencyStat implements Cloneable {
     public void set(int numRecordedOps, long nanoLatency) {
 
         /* ignore negative values [#22466] */
-        if (nanoLatency < 0) {
+        if(nanoLatency < 0) {
             return;
         }
 
@@ -274,12 +232,13 @@ public class LatencyStat implements Cloneable {
 
         /* Round the latency to determine where to mark the histogram. */
         final int millisRounded =
-            (int) ((nanoLatency + (1000000l / 2)) / 1000000l);
+                (int) ((nanoLatency + (1000000l / 2)) / 1000000l);
 
         /* Record this latency. */
-        if (millisRounded >= maxTrackedLatencyMillis) {
+        if(millisRounded >= maxTrackedLatencyMillis) {
             values.requestsOverflow.incrementAndGet();
-        } else {
+        }
+        else {
             values.histogram.incrementAndGet(millisRounded);
         }
 
@@ -287,10 +246,10 @@ public class LatencyStat implements Cloneable {
          * Update the min/max latency if necessary.  This is not atomic, so we
          * loop to account for lost updates.
          */
-        while (values.maxIncludingOverflow < millisRounded) {
+        while(values.maxIncludingOverflow < millisRounded) {
             values.maxIncludingOverflow = millisRounded;
         }
-        while (values.minIncludingOverflow > millisRounded) {
+        while(values.minIncludingOverflow > millisRounded) {
             values.minIncludingOverflow = millisRounded;
         }
 
@@ -310,15 +269,53 @@ public class LatencyStat implements Cloneable {
 
     public boolean isEmpty() {
         return (trackedValues.numOps.get() == 0) ||
-               (trackedValues.numRequests.get() == 0);
+                (trackedValues.numRequests.get() == 0);
     }
 
     @Override
     public String toString() {
         final Latency results =
-            new Latency(maxTrackedLatencyMillis, saveMin, saveMax, saveAvg,
+                new Latency(maxTrackedLatencyMillis, saveMin, saveMax, saveAvg,
                         saveNumRequests, saveNumOps, save95, save99,
                         saveRequestsOverflow);
         return results.toString();
+    }
+
+    private static class Values {
+
+        /* The number of total operations that have been tracked. */
+        final AtomicInteger numOps;
+
+        /* The number of total requests that have been tracked. */
+        final AtomicInteger numRequests;
+
+        /* The number of total nanoseconds that have been tracked. */
+        final AtomicLong totalNanos;
+
+        /*
+         * Array is indexed by latency in millis and elements contain the
+         * number of ops for that latency.
+         */
+        final AtomicIntegerArray histogram;
+        /* Number of requests whose latency exceed maxTrackedLatencyMillis. */
+        final AtomicInteger requestsOverflow;
+        /*
+         * Min and max latency. They may both exceed maxTrackedLatencyMillis.
+         * A volatile int rather than an AtomicInteger is used because
+         * AtomicInteger has no min() or max() method, so there is no advantage
+         * to using it.
+         */
+        volatile int minIncludingOverflow;
+        volatile int maxIncludingOverflow;
+
+        Values(final int maxTrackedLatencyMillis) {
+            histogram = new AtomicIntegerArray(maxTrackedLatencyMillis);
+            numOps = new AtomicInteger();
+            numRequests = new AtomicInteger();
+            requestsOverflow = new AtomicInteger();
+            totalNanos = new AtomicLong();
+            minIncludingOverflow = Integer.MAX_VALUE;
+            maxIncludingOverflow = 0;
+        }
     }
 }

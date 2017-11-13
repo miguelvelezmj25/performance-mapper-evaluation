@@ -26,16 +26,20 @@ import java.text.DecimalFormat;
 public class DoubleExpMovingAvg
         extends MapStatComponent<Double, DoubleExpMovingAvg> {
 
-    private static final long serialVersionUID = 1L;
-
-    /** Number format for output. */
+    /**
+     * Number format for output.
+     */
     static final DecimalFormat FORMAT =
-        new DecimalFormat("###,###,###,###,###,###,###.##");
-
-    /** The name of this stat. */
+            new DecimalFormat("###,###,###,###,###,###,###.##");
+    private static final long serialVersionUID = 1L;
+    /**
+     * The name of this stat.
+     */
     private final String name;
 
-    /** The averaging period in milliseconds. */
+    /**
+     * The averaging period in milliseconds.
+     */
     private final long periodMillis;
 
     /**
@@ -55,7 +59,7 @@ public class DoubleExpMovingAvg
      * Creates an instance of this class.  The {@code periodMillis} represents
      * the time period in milliseconds over which values will be averaged.
      *
-     * @param name the name of this stat
+     * @param name         the name of this stat
      * @param periodMillis the averaging period in milliseconds
      */
     public DoubleExpMovingAvg(String name, long periodMillis) {
@@ -73,8 +77,8 @@ public class DoubleExpMovingAvg
     DoubleExpMovingAvg(DoubleExpMovingAvg other) {
         name = other.name;
         periodMillis = other.periodMillis;
-        synchronized (this) {
-            synchronized (other) {
+        synchronized(this) {
+            synchronized(other) {
                 prevTime = other.prevTime;
                 avg = other.avg;
             }
@@ -95,24 +99,25 @@ public class DoubleExpMovingAvg
      * time of the previous call.
      *
      * @param value the new value
-     * @param time the current time in milliseconds
+     * @param time  the current time in milliseconds
      */
     public synchronized void add(double value, long time) {
         assert time > 0;
-        if (time <= prevTime) {
+        if(time <= prevTime) {
             return;
         }
-        if (prevTime == 0) {
+        if(prevTime == 0) {
             avg = value;
-        } else {
+        }
+        else {
 
             /*
              * Compute the exponential moving average, as described in:
              * http://en.wikipedia.org/wiki/
              *   Moving_average#Application_to_measuring_computer_performance
              */
-            double m = Math.exp(-((time - prevTime)/((double) periodMillis)));
-            avg = ((1-m) * value) + (m * avg);
+            double m = Math.exp(-((time - prevTime) / ((double) periodMillis)));
+            avg = ((1 - m) * value) + (m * avg);
         }
         prevTime = time;
     }
@@ -125,8 +130,8 @@ public class DoubleExpMovingAvg
     public void add(DoubleExpMovingAvg other) {
         final double otherValue;
         final long otherTime;
-        synchronized (other) {
-            if (other.isNotSet()) {
+        synchronized(other) {
+            if(other.isNotSet()) {
                 return;
             }
             otherValue = other.avg;
@@ -135,12 +140,16 @@ public class DoubleExpMovingAvg
         add(otherValue, otherTime);
     }
 
-    /** Returns the current average as a primitive value. */
+    /**
+     * Returns the current average as a primitive value.
+     */
     synchronized double getPrimitive() {
         return avg;
     }
 
-    /** Returns the current average, or 0 if no values have been added. */
+    /**
+     * Returns the current average, or 0 if no values have been added.
+     */
     @Override
     public Double get() {
         return getPrimitive();
@@ -159,38 +168,45 @@ public class DoubleExpMovingAvg
 
     @Override
     protected synchronized String getFormattedValue(boolean useCommas) {
-        if (isNotSet()) {
+        if(isNotSet()) {
             return "unknown";
-        } else if (Double.isNaN(avg)) {
+        }
+        else if(Double.isNaN(avg)) {
             return "NaN";
-        } else if (useCommas) {
+        }
+        else if(useCommas) {
             return FORMAT.format(avg);
-        } else {
+        }
+        else {
             return String.format("%.2f", avg);
         }
     }
 
     @Override
     public synchronized boolean isNotSet() {
-       return prevTime == 0;
+        return prevTime == 0;
     }
 
     @Override
     public synchronized String toString() {
         return "DoubleExpMovingAvg[name=" + name + ", avg=" + avg +
-            ", prevTime=" + prevTime + ", periodMillis=" + periodMillis + "]";
+                ", prevTime=" + prevTime + ", periodMillis=" + periodMillis + "]";
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void writeObject(ObjectOutputStream out)
-        throws IOException {
+            throws IOException {
 
         out.defaultWriteObject();
     }

@@ -39,6 +39,7 @@ public class AccessExample
     private Database db;
     private SortedMap<byte[], byte[]> map;
     private Environment env;
+
     /**
      * Constructor for the AccessExample object
      */
@@ -115,13 +116,13 @@ public class AccessExample
             AccessExample app = new AccessExample(env, databaseName);
             app.run();
             app.close();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
             System.exit(1);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             e.printStackTrace();
             System.exit(1);
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -176,15 +177,15 @@ public class AccessExample
                                 System.out.println("Key " + line +
                                         " already exists.");
                             }
-                        } catch (Exception e) {
+                        } catch(Exception e) {
                             System.err.println("doWork: " + e);
                         }
                     }
                 });
-            } catch (berkeley.com.sleepycat.je.DatabaseException e) {
+            } catch(berkeley.com.sleepycat.je.DatabaseException e) {
                 System.err.println("AccessExample: " + e);
                 System.exit(1);
-            } catch (java.lang.Exception e) {
+            } catch(java.lang.Exception e) {
                 System.err.println("AccessExample: " + e);
                 System.exit(1);
             }
@@ -197,7 +198,7 @@ public class AccessExample
          */
         Iterator<Map.Entry<byte[], byte[]>> iter = map.entrySet().iterator();
         System.out.println("Reading data");
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Map.Entry<byte[], byte[]> entry = iter.next();
             log("found \"" +
                     new String(entry.getKey()) +
@@ -220,7 +221,7 @@ public class AccessExample
                       String prompt) {
 
         String result = "";
-        while (result != null && result.length() == 0) {
+        while(result != null && result.length() == 0) {
             out.print(prompt);
             out.flush();
             result = getLine(reader);
@@ -242,12 +243,12 @@ public class AccessExample
         StringBuilder b = new StringBuilder();
         int c;
         try {
-            while ((c = reader.read()) != -1 && c != '\n') {
+            while((c = reader.read()) != -1 && c != '\n') {
                 if(c != '\r') {
                     b.append((char) c);
                 }
             }
-        } catch (IOException ioe) {
+        } catch(IOException ioe) {
             c = -1;
         }
 

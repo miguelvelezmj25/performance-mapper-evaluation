@@ -152,7 +152,7 @@ public class MyDbEnv {
 
                 // Finally, close the environment.
                 myEnv.close();
-            } catch (DatabaseException dbe) {
+            } catch(DatabaseException dbe) {
                 System.err.println("Error closing MyDbEnv: " +
                         dbe.toString());
                 System.exit(-1);

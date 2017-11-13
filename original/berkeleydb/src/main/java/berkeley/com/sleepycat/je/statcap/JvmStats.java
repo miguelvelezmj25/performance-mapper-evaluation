@@ -13,6 +13,13 @@
 
 package berkeley.com.sleepycat.je.statcap;
 
+import berkeley.com.sleepycat.je.StatsConfig;
+import berkeley.com.sleepycat.je.utilint.JVMSystemUtils;
+import berkeley.com.sleepycat.je.utilint.LongStat;
+import berkeley.com.sleepycat.je.utilint.StatDefinition;
+import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+import berkeley.com.sleepycat.je.utilint.StatGroup;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -21,44 +28,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.utilint.JVMSystemUtils;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatDefinition;
-import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-
 class JvmStats {
 
+    public static final StatDefinition LOAD_AVERAGE =
+            new StatDefinition("loadAverage",
+                    "Average JVM system load.",
+                    StatType.CUMULATIVE);
+    public static final StatDefinition HEAP_MEMORY_USAGE =
+            new StatDefinition("heap",
+                    "Heap memory usage.",
+                    StatType.CUMULATIVE);
     private final List<GarbageCollectorMXBean> gcBeans =
-        ManagementFactory.getGarbageCollectorMXBeans();
-
+            ManagementFactory.getGarbageCollectorMXBeans();
     private final MemoryMXBean memoryBean =
-        ManagementFactory.getMemoryMXBean();
+            ManagementFactory.getMemoryMXBean();
     private final String GROUPNAME = "Jvm";
     private final String GROUPDEF = "Statistics capture jvm statistics.";
     private final String GC_COUNT_DESC = "GC collection count.";
     private final String GC_COLLECTION_TIME_DESC = "GC collection time.";
     private final String GC_COUNT_NAME_SUFFIX = ".count";
     private final String GC_TIME_NAME_SUFFIX = ".time";
-
-    public static final StatDefinition LOAD_AVERAGE =
-        new StatDefinition("loadAverage",
-                           "Average JVM system load.",
-                           StatType.CUMULATIVE);
-
-    public static final StatDefinition HEAP_MEMORY_USAGE =
-        new StatDefinition("heap",
-                           "Heap memory usage.",
-                           StatType.CUMULATIVE);
-
+    private final Map<String, StatDefinition> statdefmap =
+            new HashMap<String, StatDefinition>();
     private StatGroup prev = null;
 
-    private final Map<String, StatDefinition> statdefmap =
-        new HashMap<String, StatDefinition>();
-
     public JvmStats() {
-        for (GarbageCollectorMXBean gcBean : gcBeans) {
+        for(GarbageCollectorMXBean gcBean : gcBeans) {
             String name = gcBean.getName();
             String statname = name + GC_COUNT_NAME_SUFFIX;
             StatDefinition sd = new StatDefinition(statname, GC_COUNT_DESC);
@@ -75,22 +70,23 @@ class JvmStats {
         StatGroup retgroup;
 
         StatGroup sg = new StatGroup(GROUPNAME, GROUPDEF);
-        for (GarbageCollectorMXBean gcBean : gcBeans) {
+        for(GarbageCollectorMXBean gcBean : gcBeans) {
             String name = gcBean.getName();
             String statname = name + GC_COUNT_NAME_SUFFIX;
             new LongStat(
-                sg, statdefmap.get(statname), gcBean.getCollectionCount());
+                    sg, statdefmap.get(statname), gcBean.getCollectionCount());
             statname = name + GC_TIME_NAME_SUFFIX;
             new LongStat(
-                sg, statdefmap.get(statname), gcBean.getCollectionTime());
+                    sg, statdefmap.get(statname), gcBean.getCollectionTime());
         }
         new LongStat(sg, LOAD_AVERAGE, (long) JVMSystemUtils.getSystemLoad());
         new LongStat(
-            sg, HEAP_MEMORY_USAGE, memoryBean.getHeapMemoryUsage().getUsed());
+                sg, HEAP_MEMORY_USAGE, memoryBean.getHeapMemoryUsage().getUsed());
 
-        if (prev != null) {
+        if(prev != null) {
             retgroup = sg.computeInterval(prev);
-        } else {
+        }
+        else {
             retgroup = sg;
         }
         prev = sg;
@@ -98,11 +94,11 @@ class JvmStats {
     }
 
     public void addVMStatDefs(SortedSet<String> projections) {
-        for (GarbageCollectorMXBean gcBean : gcBeans) {
+        for(GarbageCollectorMXBean gcBean : gcBeans) {
             projections.add(
-                GROUPNAME + ":" + gcBean.getName() + GC_COUNT_NAME_SUFFIX);
+                    GROUPNAME + ":" + gcBean.getName() + GC_COUNT_NAME_SUFFIX);
             projections.add(
-                GROUPNAME + ":" + gcBean.getName() + GC_TIME_NAME_SUFFIX);
+                    GROUPNAME + ":" + gcBean.getName() + GC_TIME_NAME_SUFFIX);
         }
         projections.add(GROUPNAME + ":" + LOAD_AVERAGE.getName());
         projections.add(GROUPNAME + ":" + HEAP_MEMORY_USAGE.getName());

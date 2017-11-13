@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.je;
 /**
  * Thrown by {@link Sequence#get Sequence.get} if the sequence record has been
  * deleted.
- *
+ * <p>
  * <p>The {@link Transaction} handle is <em>not</em> invalidated as a result of
  * this exception.</p>
  *
@@ -26,26 +26,29 @@ public class SequenceIntegrityException extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public SequenceIntegrityException(String message) {
         super(null /*locker*/, false /*abortOnly*/, message, null /*cause*/);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private SequenceIntegrityException(String message,
                                        SequenceIntegrityException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryHeader;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
+
+import java.nio.ByteBuffer;
 
 /**
  * Format for log entries sent across the wire for replication. Instead of
@@ -42,12 +42,12 @@ abstract class WireRecord {
      * Returns the log entry type for this record.
      */
     LogEntryType getLogEntryType()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogEntryType type = LogEntryType.findType(header.getType());
-        if (type == null) {
+        if(type == null) {
             throw EnvironmentFailureException.unexpectedState(
-                "Unknown header type:" + header.getType());
+                    "Unknown header type:" + header.getType());
         }
         return type;
     }
@@ -58,7 +58,7 @@ abstract class WireRecord {
      */
     LogEntry instantiateEntry(final EnvironmentImpl envImpl,
                               final ByteBuffer buffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogEntry entry = getLogEntryType().getNewLogEntry();
         buffer.mark();

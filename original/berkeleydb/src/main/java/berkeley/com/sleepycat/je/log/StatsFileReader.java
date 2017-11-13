@@ -13,20 +13,16 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
+
+import java.nio.ByteBuffer;
+import java.text.NumberFormat;
+import java.util.*;
 
 /**
  * The StatsFileReader generates stats about the log entries read, such as the
@@ -36,11 +32,10 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 public class StatsFileReader extends DumpFileReader {
 
     private final Map<LogEntryType, EntryInfo> entryInfoMap;
-    private long totalLogBytes;
-    private long totalCount;
-
     /* Keep stats on log composition in terms of ckpt intervals. */
     private final ArrayList<CheckpointCounter> ckptList;
+    private long totalLogBytes;
+    private long totalCount;
     private CheckpointCounter ckptCounter;
     private long firstLsnRead;
 
@@ -67,10 +62,10 @@ public class StatsFileReader extends DumpFileReader {
                            boolean verbose,
                            boolean repEntriesOnly,
                            boolean forwards)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(envImpl, readBufferSize, startLsn, finishLsn, endOfFileLsn,
-              entryTypes, dbIds, txnIds, verbose, repEntriesOnly, forwards);
+                entryTypes, dbIds, txnIds, verbose, repEntriesOnly, forwards);
         entryInfoMap = new TreeMap<>(new LogEntryTypeComparator());
 
         totalLogBytes = 0;
@@ -78,7 +73,7 @@ public class StatsFileReader extends DumpFileReader {
 
         ckptCounter = new CheckpointCounter();
         ckptList = new ArrayList<CheckpointCounter>();
-        if (verbose) {
+        if(verbose) {
             ckptList.add(ckptCounter);
         }
     }
@@ -92,11 +87,11 @@ public class StatsFileReader extends DumpFileReader {
         LogEntryType type = LogEntryType.findType(currentType);
         LogEntry entry = null;
 
-        if (needMatchEntry()) {
+        if(needMatchEntry()) {
             entry = type.getSharedLogEntry();
             entry.readEntry(envImpl, currentEntryHeader, entryBuffer);
 
-            if (!matchEntry(entry)) {
+            if(!matchEntry(entry)) {
                 return true;
             }
         }
@@ -111,7 +106,7 @@ public class StatsFileReader extends DumpFileReader {
          * create an info object and insert it.
          */
         EntryInfo info = entryInfoMap.get(type);
-        if (info == null) {
+        if(info == null) {
             info = new EntryInfo();
             entryInfoMap.put(type, info);
         }
@@ -119,7 +114,7 @@ public class StatsFileReader extends DumpFileReader {
         /* Update counts. */
         info.count++;
         totalCount++;
-        if (currentEntryHeader.getProvisional() == Provisional.YES) {
+        if(currentEntryHeader.getProvisional() == Provisional.YES) {
             info.provisionalCount++;
         }
         int size = itemSize + headerSize;
@@ -127,31 +122,32 @@ public class StatsFileReader extends DumpFileReader {
         info.headerBytes += headerSize;
         totalLogBytes += size;
 
-        if ((info.minBytes == 0) || (info.minBytes > size)) {
+        if((info.minBytes == 0) || (info.minBytes > size)) {
             info.minBytes = size;
         }
-        if (info.maxBytes < size) {
+        if(info.maxBytes < size) {
             info.maxBytes = size;
         }
 
-        if (verbose) {
-            if (firstLsnRead == DbLsn.NULL_LSN) {
+        if(verbose) {
+            if(firstLsnRead == DbLsn.NULL_LSN) {
                 firstLsnRead = getLastLsn();
             }
 
-            if (currentType == LogEntryType.LOG_CKPT_END.getTypeNum()) {
+            if(currentType == LogEntryType.LOG_CKPT_END.getTypeNum()) {
                 /* Start counting a new interval. */
                 ckptCounter.endCkptLsn = getLastLsn();
                 ckptCounter = new CheckpointCounter();
                 ckptList.add(ckptCounter);
-            } else {
+            }
+            else {
                 ckptCounter.increment(this, currentType);
             }
         }
 
-        if (type.isUserLNType()) {
+        if(type.isUserLNType()) {
             /* Read the entry into the ByteBuffer. */
-            if (entry == null) {
+            if(entry == null) {
                 entry = type.getSharedLogEntry();
                 entry.readEntry(envImpl, currentEntryHeader, entryBuffer);
             }
@@ -167,23 +163,23 @@ public class StatsFileReader extends DumpFileReader {
             realTotalKeyBytes += keyLen;
             realTotalKeyCount += 1;
 
-            if ((realMinKeyBytes == 0) || (realMinKeyBytes > keyLen)) {
+            if((realMinKeyBytes == 0) || (realMinKeyBytes > keyLen)) {
                 realMinKeyBytes = keyLen;
             }
-            if (realMaxKeyBytes < keyLen) {
+            if(realMaxKeyBytes < keyLen) {
                 realMaxKeyBytes = keyLen;
             }
 
-            if (!entry.isDeleted()) {
+            if(!entry.isDeleted()) {
                 int dataLen = lnEntry.getUnconvertedDataLength();
 
                 realTotalDataBytes += dataLen;
                 realTotalDataCount += 1;
 
-                if ((realMinDataBytes == 0) || (realMinDataBytes > dataLen)) {
+                if((realMinDataBytes == 0) || (realMinDataBytes > dataLen)) {
                     realMinDataBytes = dataLen;
                 }
-                if (realMaxDataBytes < dataLen) {
+                if(realMaxDataBytes < dataLen) {
                     realMaxDataBytes = dataLen;
                 }
             }
@@ -192,7 +188,7 @@ public class StatsFileReader extends DumpFileReader {
         /*
          * If we have not read the entry, skip over it.
          */
-        if (entry == null) {
+        if(entry == null) {
             int nextEntryPosition = entryBuffer.position() + itemSize;
             entryBuffer.position(nextEntryPosition);
         }
@@ -201,70 +197,26 @@ public class StatsFileReader extends DumpFileReader {
 
     @Override
     public void summarize(boolean csvFormat) {
-        if (csvFormat) {
+        if(csvFormat) {
             summarizeCSV();
-        } else {
+        }
+        else {
             summarizeText();
         }
     }
 
-    class CheckpointInfoTextFormatter {
-        private NumberFormat form;
-
-        CheckpointInfoTextFormatter() {
-        }
-
-        CheckpointInfoTextFormatter(NumberFormat form) {
-            this.form = form;
-        }
-
-        String format(String value) {
-            return pad(value);
-        }
-
-        String format(int value) {
-            return pad(form.format(value));
-        }
-
-        String format(long value) {
-            return pad(form.format(value));
-        }
-    }
-
-    class CheckpointInfoCSVFormatter
-        extends CheckpointInfoTextFormatter {
-
-        CheckpointInfoCSVFormatter() {
-        }
-
-        @Override
-        String format(String value) {
-            return value + ",";
-        }
-
-        @Override
-        String format(int value) {
-            return value + ",";
-        }
-
-        @Override
-        String format(long value) {
-            return value + ",";
-        }
-    }
-
     private void summarizeCSV() {
-        Iterator<Map.Entry<LogEntryType,EntryInfo>> iter =
-            entryInfoMap.entrySet().iterator();
+        Iterator<Map.Entry<LogEntryType, EntryInfo>> iter =
+                entryInfoMap.entrySet().iterator();
 
         NumberFormat form = NumberFormat.getIntegerInstance();
         NumberFormat percentForm = NumberFormat.getInstance();
         percentForm.setMaximumFractionDigits(1);
         System.out.println
-            ("type,total count,provisional count,total bytes," +
-             "min bytes,max bytes,avg bytes,entries as % of log");
+                ("type,total count,provisional count,total bytes," +
+                        "min bytes,max bytes,avg bytes,entries as % of log");
 
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Map.Entry<LogEntryType, EntryInfo> m = iter.next();
             EntryInfo info = m.getValue();
             StringBuilder sb = new StringBuilder();
@@ -277,7 +229,7 @@ public class StatsFileReader extends DumpFileReader {
             sb.append(info.maxBytes).append(',');
             sb.append(info.totalBytes / info.count).append(',');
             double entryPercent =
-                ((double) (info.totalBytes * 100) / totalLogBytes);
+                    ((double) (info.totalBytes * 100) / totalLogBytes);
             sb.append(entryPercent);
             System.out.println(sb.toString());
         }
@@ -292,7 +244,7 @@ public class StatsFileReader extends DumpFileReader {
         sb.append(realMaxKeyBytes).append(',');
         sb.append(realTotalKeyBytes / realTotalKeyCount).append(',');
         sb.append(((double) (realTotalKeyBytes * 100) /
-                   totalLogBytes));
+                totalLogBytes));
         System.out.println(sb.toString());
 
         sb = new StringBuilder();
@@ -304,46 +256,46 @@ public class StatsFileReader extends DumpFileReader {
         sb.append(realMaxDataBytes).append(',');
         sb.append(realTotalDataBytes / realTotalDataCount).append(',');
         sb.append((double) (realTotalDataBytes * 100) /
-                      totalLogBytes);
+                totalLogBytes);
         System.out.println(sb.toString());
 
         System.out.println("\nTotal bytes in portion of log read: " +
-                           form.format(totalLogBytes));
+                form.format(totalLogBytes));
         System.out.println("Total number of entries: " +
-                           form.format(totalCount));
+                form.format(totalCount));
 
-        if (verbose) {
+        if(verbose) {
             summarizeCheckpointInfo(new CheckpointInfoCSVFormatter());
         }
     }
 
     private void summarizeText() {
         System.out.println("Log statistics:");
-        Iterator<Map.Entry<LogEntryType,EntryInfo>> iter =
-            entryInfoMap.entrySet().iterator();
+        Iterator<Map.Entry<LogEntryType, EntryInfo>> iter =
+                entryInfoMap.entrySet().iterator();
 
         NumberFormat form = NumberFormat.getIntegerInstance();
         NumberFormat percentForm = NumberFormat.getInstance();
         percentForm.setMaximumFractionDigits(1);
         System.out.println(pad("type") +
-                           pad("total") +
-                           pad("provisional") +
-                           pad("total") +
-                           pad("min") +
-                           pad("max") +
-                           pad("avg") +
-                           pad("entries"));
+                pad("total") +
+                pad("provisional") +
+                pad("total") +
+                pad("min") +
+                pad("max") +
+                pad("avg") +
+                pad("entries"));
 
         System.out.println(pad("") +
-                           pad("count") +
-                           pad("count") +
-                           pad("bytes") +
-                           pad("bytes") +
-                           pad("bytes") +
-                           pad("bytes") +
-                           pad("as % of log"));
+                pad("count") +
+                pad("count") +
+                pad("bytes") +
+                pad("bytes") +
+                pad("bytes") +
+                pad("bytes") +
+                pad("as % of log"));
 
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Map.Entry<LogEntryType, EntryInfo> m = iter.next();
             EntryInfo info = m.getValue();
             StringBuilder sb = new StringBuilder();
@@ -356,7 +308,7 @@ public class StatsFileReader extends DumpFileReader {
             sb.append(pad(form.format(info.maxBytes)));
             sb.append(pad(form.format(info.totalBytes / info.count)));
             double entryPercent =
-                ((double) (info.totalBytes * 100) / totalLogBytes);
+                    ((double) (info.totalBytes * 100) / totalLogBytes);
             sb.append(pad(percentForm.format(entryPercent)));
             System.out.println(sb.toString());
         }
@@ -370,9 +322,9 @@ public class StatsFileReader extends DumpFileReader {
         sb.append(pad(form.format(realMinKeyBytes)));
         sb.append(pad(form.format(realMaxKeyBytes)));
         long keySize = (realTotalKeyCount == 0) ? 0 :
-            (realTotalKeyBytes / realTotalKeyCount);
+                (realTotalKeyBytes / realTotalKeyCount);
         double keyPct = (totalLogBytes == 0) ? 0 :
-            (((double) (realTotalKeyBytes * 100)) / totalLogBytes);
+                (((double) (realTotalKeyBytes * 100)) / totalLogBytes);
         sb.append(pad(form.format(keySize)));
         String realSize = "(" + percentForm.format(keyPct) + ")";
         sb.append(pad(realSize));
@@ -386,20 +338,20 @@ public class StatsFileReader extends DumpFileReader {
         sb.append(pad(form.format(realMinDataBytes)));
         sb.append(pad(form.format(realMaxDataBytes)));
         long dataSize = (realTotalDataCount == 0) ? 0 :
-            (realTotalDataBytes / realTotalDataCount);
+                (realTotalDataBytes / realTotalDataCount);
         double dataPct = (totalLogBytes == 0) ? 0 :
-            (((double) (realTotalDataBytes * 100))) / totalLogBytes;
+                (((double) (realTotalDataBytes * 100))) / totalLogBytes;
         sb.append(pad(form.format(dataSize)));
         realSize = "(" + percentForm.format(dataPct) + ")";
         sb.append(pad(realSize));
         System.out.println(sb.toString());
 
         System.out.println("\nTotal bytes in portion of log read: " +
-                           form.format(totalLogBytes));
+                form.format(totalLogBytes));
         System.out.println("Total number of entries: " +
-                           form.format(totalCount));
+                form.format(totalCount));
 
-        if (verbose) {
+        if(verbose) {
             summarizeCheckpointInfo(new CheckpointInfoTextFormatter(form));
         }
     }
@@ -407,7 +359,7 @@ public class StatsFileReader extends DumpFileReader {
     private String pad(String result) {
         int spaces = 20 - result.length();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < spaces; i++) {
+        for(int i = 0; i < spaces; i++) {
             sb.append(" ");
         }
         sb.append(result);
@@ -434,22 +386,22 @@ public class StatsFileReader extends DumpFileReader {
          * ckpt2 end -> end of log
          */
         System.out.println
-            (f.format("lnTxn") +
-             f.format("ln") +
-             f.format("mapLNTxn") +
-             f.format("mapLN") +
-             f.format("end to end") +  // ckpt n-1 end -> ckpt n end
-             f.format("end to start") +// ckpt n-1 end -> ckpt n start
-             f.format("start to end") +// ckpt n start -> ckpt n end
-             f.format("maxLNReplay") +
-             f.format("ckptEnd"));
+                (f.format("lnTxn") +
+                        f.format("ln") +
+                        f.format("mapLNTxn") +
+                        f.format("mapLN") +
+                        f.format("end to end") +  // ckpt n-1 end -> ckpt n end
+                        f.format("end to start") +// ckpt n-1 end -> ckpt n start
+                        f.format("start to end") +// ckpt n start -> ckpt n end
+                        f.format("maxLNReplay") +
+                        f.format("ckptEnd"));
 
         long logFileMax =
-            envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
+                envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
 
         Iterator<CheckpointCounter> iter = ckptList.iterator();
         CheckpointCounter prevCounter = null;
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             CheckpointCounter c = iter.next();
             StringBuilder sb = new StringBuilder();
 
@@ -459,23 +411,24 @@ public class StatsFileReader extends DumpFileReader {
             int maxLNs = c.preStartLNCount + c.postStartLNCount;
             sb.append(f.format(maxLNs));
             sb.append(f.format(c.preStartMapLNTxnCount +
-                               c.postStartMapLNTxnCount));
+                    c.postStartMapLNTxnCount));
             sb.append(f.format(c.preStartMapLNCount +
-                               c.postStartMapLNCount));
+                    c.postStartMapLNCount));
 
             /* Checkpoint interval distance. */
             long end = (c.endCkptLsn == DbLsn.NULL_LSN) ?
-                getLastLsn() :
-                c.endCkptLsn;
+                    getLastLsn() :
+                    c.endCkptLsn;
             long endToEndDistance = 0;
 
             FileManager fileMgr = envImpl.getFileManager();
-            if (prevCounter == null) {
+            if(prevCounter == null) {
                 endToEndDistance = DbLsn.getWithCleaningDistance(
-                    end, firstLsnRead, logFileMax, fileMgr);
-            } else {
+                        end, firstLsnRead, logFileMax, fileMgr);
+            }
+            else {
                 endToEndDistance = DbLsn.getWithCleaningDistance(
-                    end, prevCounter.endCkptLsn, logFileMax, fileMgr);
+                        end, prevCounter.endCkptLsn, logFileMax, fileMgr);
             }
             sb.append(f.format(endToEndDistance));
 
@@ -483,15 +436,16 @@ public class StatsFileReader extends DumpFileReader {
              * Interval between last checkpoint end and this checkpoint start.
              */
             long start = (c.startCkptLsn == DbLsn.NULL_LSN) ? getLastLsn() :
-                c.startCkptLsn;
+                    c.startCkptLsn;
             long endToStartDistance = 0;
 
-            if (prevCounter == null) {
+            if(prevCounter == null) {
                 endToStartDistance = DbLsn.getWithCleaningDistance(
-                    start, firstLsnRead, logFileMax, fileMgr);
-            } else {
+                        start, firstLsnRead, logFileMax, fileMgr);
+            }
+            else {
                 endToStartDistance = DbLsn.getWithCleaningDistance(
-                    start, prevCounter.endCkptLsn, logFileMax, fileMgr);
+                        start, prevCounter.endCkptLsn, logFileMax, fileMgr);
             }
             sb.append(f.format(endToStartDistance));
 
@@ -499,10 +453,10 @@ public class StatsFileReader extends DumpFileReader {
              * Interval between ckpt start and ckpt end.
              */
             long startToEndDistance = 0;
-            if ((c.startCkptLsn != DbLsn.NULL_LSN)  &&
-                (c.endCkptLsn != DbLsn.NULL_LSN)) {
+            if((c.startCkptLsn != DbLsn.NULL_LSN) &&
+                    (c.endCkptLsn != DbLsn.NULL_LSN)) {
                 startToEndDistance = DbLsn.getWithCleaningDistance(
-                    c.endCkptLsn, c.startCkptLsn, logFileMax, fileMgr);
+                        c.endCkptLsn, c.startCkptLsn, logFileMax, fileMgr);
             }
             sb.append(f.format(startToEndDistance));
 
@@ -512,15 +466,16 @@ public class StatsFileReader extends DumpFileReader {
              * interval.
              */
             int maxReplay = maxLNs + maxTxnLNs;
-            if (prevCounter != null) {
+            if(prevCounter != null) {
                 maxReplay += prevCounter.postStartLNTxnCount;
                 maxReplay += prevCounter.postStartLNCount;
             }
             sb.append(f.format(maxReplay));
 
-            if (c.endCkptLsn == DbLsn.NULL_LSN) {
+            if(c.endCkptLsn == DbLsn.NULL_LSN) {
                 sb.append("   ").append(DbLsn.getNoFormatString(getLastLsn()));
-            } else {
+            }
+            else {
                 sb.append("   ").append(DbLsn.getNoFormatString(c.endCkptLsn));
             }
 
@@ -549,11 +504,11 @@ public class StatsFileReader extends DumpFileReader {
 
     static class LogEntryTypeComparator implements Comparator<LogEntryType> {
         public int compare(LogEntryType o1, LogEntryType o2) {
-            if (o1 == null) {
+            if(o1 == null) {
                 return -1;
             }
 
-            if (o2 == null) {
+            if(o2 == null) {
                 return 1;
             }
 
@@ -578,33 +533,84 @@ public class StatsFileReader extends DumpFileReader {
         public int postStartMapLNTxnCount;
         public int postStartMapLNCount;
 
-        public void increment(FileReader reader,  byte currentEntryTypeNum) {
+        public void increment(FileReader reader, byte currentEntryTypeNum) {
             LogEntryType entryType =
-                LogEntryType.findType(currentEntryTypeNum);
+                    LogEntryType.findType(currentEntryTypeNum);
 
-            if (entryType == LogEntryType.LOG_CKPT_START) {
+            if(entryType == LogEntryType.LOG_CKPT_START) {
                 startCkptLsn = reader.getLastLsn();
-            } else if (entryType.isUserLNType()) {
-                if (entryType.isTransactional()) {
-                    if (startCkptLsn == DbLsn.NULL_LSN) {
+            }
+            else if(entryType.isUserLNType()) {
+                if(entryType.isTransactional()) {
+                    if(startCkptLsn == DbLsn.NULL_LSN) {
                         preStartLNTxnCount++;
-                    } else {
+                    }
+                    else {
                         postStartLNTxnCount++;
                     }
-                } else {
-                    if (startCkptLsn == DbLsn.NULL_LSN) {
+                }
+                else {
+                    if(startCkptLsn == DbLsn.NULL_LSN) {
                         preStartLNCount++;
-                    } else {
+                    }
+                    else {
                         postStartLNCount++;
                     }
                 }
-            } else if (entryType == LogEntryType.LOG_MAPLN) {
-                if (startCkptLsn == DbLsn.NULL_LSN) {
+            }
+            else if(entryType == LogEntryType.LOG_MAPLN) {
+                if(startCkptLsn == DbLsn.NULL_LSN) {
                     preStartMapLNCount++;
-                } else {
+                }
+                else {
                     postStartMapLNCount++;
                 }
             }
+        }
+    }
+
+    class CheckpointInfoTextFormatter {
+        private NumberFormat form;
+
+        CheckpointInfoTextFormatter() {
+        }
+
+        CheckpointInfoTextFormatter(NumberFormat form) {
+            this.form = form;
+        }
+
+        String format(String value) {
+            return pad(value);
+        }
+
+        String format(int value) {
+            return pad(form.format(value));
+        }
+
+        String format(long value) {
+            return pad(form.format(value));
+        }
+    }
+
+    class CheckpointInfoCSVFormatter
+            extends CheckpointInfoTextFormatter {
+
+        CheckpointInfoCSVFormatter() {
+        }
+
+        @Override
+        String format(String value) {
+            return value + ",";
+        }
+
+        @Override
+        String format(int value) {
+            return value + ",";
+        }
+
+        @Override
+        String format(long value) {
+            return value + ",";
         }
     }
 }

@@ -18,7 +18,7 @@ package berkeley.com.sleepycat.bind.tuple;
  * TupleTupleMarshalledBinding}.  This key creator works by calling the
  * methods of the {@link MarshalledTupleKeyEntity} interface to create and
  * clear the index key.
- *
+ * <p>
  * <p>Note that a marshalled tuple key creator is somewhat less efficient
  * than a non-marshalled key tuple creator because more conversions are
  * needed.  A marshalled key creator must convert the entry to an object in
@@ -27,8 +27,8 @@ package berkeley.com.sleepycat.bind.tuple;
  * @author Mark Hayes
  */
 public class TupleTupleMarshalledKeyCreator<E extends
-    MarshalledTupleEntry & MarshalledTupleKeyEntity>
-    extends TupleTupleKeyCreator<E> {
+        MarshalledTupleEntry & MarshalledTupleKeyEntity>
+        extends TupleTupleKeyCreator<E> {
 
     private String keyName;
     private TupleTupleMarshalledBinding<E> binding;
@@ -37,13 +37,12 @@ public class TupleTupleMarshalledKeyCreator<E extends
      * Creates a tuple-tuple marshalled key creator.
      *
      * @param binding is the binding used for the tuple-tuple entity.
-     *
      * @param keyName is the key name passed to the {@link
-     * MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
-     * index key.
+     *                MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
+     *                index key.
      */
     public TupleTupleMarshalledKeyCreator(TupleTupleMarshalledBinding<E>
-                                          binding,
+                                                  binding,
                                           String keyName) {
 
         this.binding = binding;
@@ -68,10 +67,11 @@ public class TupleTupleMarshalledKeyCreator<E extends
                                      TupleOutput dataOutput) {
 
         E entity = binding.entryToObject(null, dataInput);
-        if (entity.nullifyForeignKey(keyName)) {
+        if(entity.nullifyForeignKey(keyName)) {
             binding.objectToData(entity, dataOutput);
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }

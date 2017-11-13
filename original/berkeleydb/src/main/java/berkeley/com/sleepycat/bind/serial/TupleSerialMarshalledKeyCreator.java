@@ -23,13 +23,12 @@ import berkeley.com.sleepycat.bind.tuple.TupleOutput;
  * methods of the {@link MarshalledTupleKeyEntity} interface to create and
  * clear the index key fields.
  *
- * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
- *
  * @author Mark Hayes
+ * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
  */
 public class TupleSerialMarshalledKeyCreator<D extends
-                                             MarshalledTupleKeyEntity>
-    extends TupleSerialKeyCreator<D> {
+        MarshalledTupleKeyEntity>
+        extends TupleSerialKeyCreator<D> {
 
     private TupleSerialMarshalledBinding<D> binding;
     private String keyName;
@@ -38,20 +37,19 @@ public class TupleSerialMarshalledKeyCreator<D extends
      * Creates a tuple-serial marshalled key creator.
      *
      * @param binding is the binding used for the tuple-serial entity.
-     *
      * @param keyName is the key name passed to the {@link
-     * MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
-     * index key.
+     *                MarshalledTupleKeyEntity#marshalSecondaryKey} method to identify the
+     *                index key.
      */
     public TupleSerialMarshalledKeyCreator(TupleSerialMarshalledBinding<D>
-                                           binding,
+                                                   binding,
                                            String keyName) {
 
         super(binding.dataBinding);
         this.binding = binding;
         this.keyName = keyName;
 
-        if (dataBinding == null) {
+        if(dataBinding == null) {
             throw new NullPointerException("dataBinding may not be null");
         }
     }
@@ -67,7 +65,7 @@ public class TupleSerialMarshalledKeyCreator<D extends
          * primary key.
          */
         MarshalledTupleKeyEntity entity =
-            binding.entryToObject(primaryKeyInput, dataInput);
+                binding.entryToObject(primaryKeyInput, dataInput);
 
         return entity.marshalSecondaryKey(keyName, indexKeyOutput);
     }
@@ -76,7 +74,7 @@ public class TupleSerialMarshalledKeyCreator<D extends
     public D nullifyForeignKey(D dataInput) {
 
         MarshalledTupleKeyEntity entity =
-            binding.entryToObject(null, dataInput);
+                binding.entryToObject(null, dataInput);
 
         return entity.nullifyForeignKey(keyName) ? dataInput : null;
     }

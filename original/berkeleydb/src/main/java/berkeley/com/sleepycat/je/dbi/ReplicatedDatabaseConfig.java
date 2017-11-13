@@ -13,16 +13,16 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.DatabaseConfig;
 import berkeley.com.sleepycat.je.log.BasicVersionedWriteLoggable;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class contains all fields of the database configuration which are
@@ -44,11 +44,15 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
     private byte[] duplicateComparatorBytes = LogUtils.ZERO_LENGTH_BYTE_ARRAY;
     private byte[][] triggerBytes = null;
 
-    /** For reading */
+    /**
+     * For reading
+     */
     public ReplicatedDatabaseConfig() {
     }
 
-    /** For writing */
+    /**
+     * For writing
+     */
     ReplicatedDatabaseConfig(byte flags,
                              int maxTreeEntriesPerNode,
                              byte[] btreeComparatorBytes,
@@ -58,15 +62,15 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
         this.flags = flags;
         this.maxTreeEntriesPerNode = maxTreeEntriesPerNode;
 
-        if (btreeComparatorBytes != null) {
+        if(btreeComparatorBytes != null) {
             this.btreeComparatorBytes = btreeComparatorBytes;
         }
 
-        if (duplicateComparatorBytes != null) {
+        if(duplicateComparatorBytes != null) {
             this.duplicateComparatorBytes = duplicateComparatorBytes;
         }
 
-        if (triggerBytes != null) {
+        if(triggerBytes != null) {
             this.triggerBytes = triggerBytes;
         }
     }
@@ -79,7 +83,7 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
         DatabaseConfig replicaConfig = new DatabaseConfig();
         replicaConfig.setTransactional(true);
         replicaConfig.setSortedDuplicates
-            (DatabaseImpl.getSortedDuplicates(flags));
+                (DatabaseImpl.getSortedDuplicates(flags));
 
         /*
          * KeyPrefixing is set to true if dups are enabled, to account for the
@@ -87,33 +91,35 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
          * Replica has been.
          */
         replicaConfig.setKeyPrefixing(DatabaseImpl.getKeyPrefixing(flags) ||
-                                      DatabaseImpl.getSortedDuplicates(flags));
+                DatabaseImpl.getSortedDuplicates(flags));
         replicaConfig.setTemporary(DatabaseImpl.isTemporary(flags));
         replicaConfig.setReplicated(true);
         replicaConfig.setNodeMaxEntries(maxTreeEntriesPerNode);
 
         DatabaseImpl.ComparatorReader reader =
-            new DatabaseImpl.ComparatorReader(btreeComparatorBytes,
-                                              "Btree",
-                                              envImpl.getClassLoader());
-        if (reader.isClass()) {
+                new DatabaseImpl.ComparatorReader(btreeComparatorBytes,
+                        "Btree",
+                        envImpl.getClassLoader());
+        if(reader.isClass()) {
             replicaConfig.setBtreeComparator(reader.getComparatorClass());
-        } else {
+        }
+        else {
             replicaConfig.setBtreeComparator(reader.getComparator());
         }
 
         reader = new DatabaseImpl.ComparatorReader(duplicateComparatorBytes,
-                                                   "Duplicate",
-                                                   envImpl.getClassLoader());
-        if (reader.isClass()) {
+                "Duplicate",
+                envImpl.getClassLoader());
+        if(reader.isClass()) {
             replicaConfig.setDuplicateComparator(reader.getComparatorClass());
-        } else {
+        }
+        else {
             replicaConfig.setDuplicateComparator(reader.getComparator());
         }
 
         replicaConfig.setTriggers(TriggerUtils.
-                                  unmarshallTriggers(null, triggerBytes,
-                                                     envImpl.getClassLoader()));
+                unmarshallTriggers(null, triggerBytes,
+                        envImpl.getClassLoader()));
 
         return replicaConfig;
     }
@@ -131,10 +137,10 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
         return 1 + // flags, 1 byte
-            LogUtils.getPackedIntLogSize(maxTreeEntriesPerNode) +
-            LogUtils.getByteArrayLogSize(btreeComparatorBytes) +
-            LogUtils.getByteArrayLogSize(duplicateComparatorBytes) +
-            TriggerUtils.logSize(triggerBytes);
+                LogUtils.getPackedIntLogSize(maxTreeEntriesPerNode) +
+                LogUtils.getByteArrayLogSize(btreeComparatorBytes) +
+                LogUtils.getByteArrayLogSize(duplicateComparatorBytes) +
+                TriggerUtils.logSize(triggerBytes);
     }
 
     @Override
@@ -157,15 +163,15 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
          */
         flags = itemBuffer.get();
         maxTreeEntriesPerNode =
-            LogUtils.readInt(itemBuffer, false/*unpacked*/);
-        if (entryVersion < 8) {
+                LogUtils.readInt(itemBuffer, false/*unpacked*/);
+        if(entryVersion < 8) {
             /* Discard maxDupTreeEntriesPerNode. */
             LogUtils.readInt(itemBuffer, false/*unpacked*/);
         }
         btreeComparatorBytes =
-            LogUtils.readByteArray(itemBuffer, false/*unpacked*/);
+                LogUtils.readByteArray(itemBuffer, false/*unpacked*/);
         duplicateComparatorBytes =
-            LogUtils.readByteArray(itemBuffer, false/*unpacked*/);
+                LogUtils.readByteArray(itemBuffer, false/*unpacked*/);
         triggerBytes = (entryVersion < 8) ?
                 null :
                 TriggerUtils.readTriggers(itemBuffer, entryVersion);
@@ -176,10 +182,10 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
         sb.append("<config ");
         DatabaseImpl.dumpFlags(sb, verbose, flags);
         sb.append(" btcmpSet=\"").append(btreeComparatorBytes !=
-                                         LogUtils.ZERO_LENGTH_BYTE_ARRAY);
+                LogUtils.ZERO_LENGTH_BYTE_ARRAY);
         sb.append("\" dupcmpSet=\"").append(duplicateComparatorBytes !=
-                                            LogUtils.ZERO_LENGTH_BYTE_ARRAY
-                                            ).append("\"");
+                LogUtils.ZERO_LENGTH_BYTE_ARRAY
+        ).append("\"");
         TriggerUtils.dumpTriggers(sb, triggerBytes, null);
         sb.append(" />");
     }
@@ -191,29 +197,29 @@ public class ReplicatedDatabaseConfig extends BasicVersionedWriteLoggable {
 
     @Override
     public boolean logicalEquals(Loggable other) {
-        if (!(other instanceof ReplicatedDatabaseConfig)) {
+        if(!(other instanceof ReplicatedDatabaseConfig)) {
             return false;
         }
 
         ReplicatedDatabaseConfig otherConfig =
-            (ReplicatedDatabaseConfig) other;
+                (ReplicatedDatabaseConfig) other;
 
-        if (flags != otherConfig.flags) {
+        if(flags != otherConfig.flags) {
             return false;
         }
 
-        if (maxTreeEntriesPerNode !=
-            otherConfig.maxTreeEntriesPerNode) {
+        if(maxTreeEntriesPerNode !=
+                otherConfig.maxTreeEntriesPerNode) {
             return false;
         }
 
-        if (!Arrays.equals(btreeComparatorBytes,
-                           otherConfig.btreeComparatorBytes)) {
+        if(!Arrays.equals(btreeComparatorBytes,
+                otherConfig.btreeComparatorBytes)) {
             return false;
         }
 
-        if (!Arrays.equals(duplicateComparatorBytes,
-                           otherConfig.duplicateComparatorBytes)) {
+        if(!Arrays.equals(duplicateComparatorBytes,
+                otherConfig.duplicateComparatorBytes)) {
             return false;
         }
 

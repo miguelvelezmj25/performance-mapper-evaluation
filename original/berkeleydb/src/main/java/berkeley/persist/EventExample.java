@@ -275,7 +275,7 @@ public class EventExample {
         DatabaseEntry key = new DatabaseEntry();
         DatabaseEntry data = new DatabaseEntry();
 
-        while (cursor.getNext(key, data, null) ==
+        while(cursor.getNext(key, data, null) ==
                 OperationStatus.SUCCESS) {
             if(LongBinding.entryToLong(key) > endDate) {
                 break;
@@ -292,7 +292,7 @@ public class EventExample {
         DatabaseEntry priceKey = new DatabaseEntry();
         DatabaseEntry eventData = new DatabaseEntry();
 
-        while (cursor.getNext(priceKey, timeKey, eventData, null) ==
+        while(cursor.getNext(priceKey, timeKey, eventData, null) ==
                 OperationStatus.SUCCESS) {
             System.out.println("time=" +
                     new Date(LongBinding.entryToLong(timeKey)) +

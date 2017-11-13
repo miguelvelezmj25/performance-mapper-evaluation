@@ -13,23 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
@@ -38,6 +21,14 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
 import com.sun.nio.file.SensitivityWatchEventModifier;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
 class FileDeletionDetector {
 
@@ -82,7 +73,7 @@ class FileDeletionDetector {
          */
         try {
             fileDeletionWatcher =
-                FileSystems.getDefault().newWatchService();
+                    FileSystems.getDefault().newWatchService();
 
             /* 
              * Register the root env home or the sub-directories.
@@ -123,40 +114,142 @@ class FileDeletionDetector {
              * unexpected deleted, the current method can not handle
              * it.
              */
-            if (dbEnvDataDirs != null) {
-                for (File f : dbEnvDataDirs) {
+            if(dbEnvDataDirs != null) {
+                for(File f : dbEnvDataDirs) {
                     final WatchKey key = f.toPath().register(
+                            fileDeletionWatcher,
+                            new WatchEvent.Kind[]{ENTRY_DELETE},
+                            SensitivityWatchEventModifier.HIGH);
+                    fileDeletionWatchKeys.put(key, f);
+                }
+            }
+            else {
+                final WatchKey key = dbEnvHome.toPath().register(
                         fileDeletionWatcher,
                         new WatchEvent.Kind[]{ENTRY_DELETE},
                         SensitivityWatchEventModifier.HIGH);
-                    fileDeletionWatchKeys.put(key, f);
-                }
-            } else {
-                final WatchKey key = dbEnvHome.toPath().register(
-                    fileDeletionWatcher,
-                    new WatchEvent.Kind[]{ENTRY_DELETE},
-                    SensitivityWatchEventModifier.HIGH);
                 fileDeletionWatchKeys.put(key, dbEnvHome);
             }
-        } catch (IOException ie) {
+        } catch(IOException ie) {
             throw new EnvironmentFailureException(
-                envImpl,
-                EnvironmentFailureReason.UNEXPECTED_EXCEPTION,
-                "Can not register " +  dbEnvHome.toString() +
-                " or its sub-directories to WatchService.",
-                ie);
+                    envImpl,
+                    EnvironmentFailureReason.UNEXPECTED_EXCEPTION,
+                    "Can not register " + dbEnvHome.toString() +
+                            " or its sub-directories to WatchService.",
+                    ie);
         }
 
         DbConfigManager configManager = envImpl.getConfigManager();
         final int interval = configManager.getDuration(
-            EnvironmentParams.LOG_DETECT_FILE_DELETE_INTERVAL);
+                EnvironmentParams.LOG_DETECT_FILE_DELETE_INTERVAL);
         /* Periodically detect unexpected log file deletion. */
         fileDeletionTimer = new Timer(
-            envImpl.makeDaemonThreadName(
-                Environment.FILE_DELETION_DETECTOR_NAME),
-            true);
+                envImpl.makeDaemonThreadName(
+                        Environment.FILE_DELETION_DETECTOR_NAME),
+                true);
         fileDeletionTask = new FileDeleteDetectTask();
         fileDeletionTimer.schedule(fileDeletionTask, 0, interval);
+    }
+
+    private void handleUnexpectedThrowable(Thread t, Throwable e) {
+        StoppableThread.handleUncaughtException(
+                envImpl.getLogger(), envImpl, t, e);
+    }
+
+    /*
+     * Detect unexpected log file deletion.
+     */
+    private void processLogFileDeleteEvents() throws Exception {
+        /*
+         * We may register multi-directories to the WatchService,
+         * there may be multi WatchKey for this WatchService. It is
+         * possible that file deletion happen in these multi directories
+         * simultaneously, i.e. multi WatchKey may be non-null.
+         * We should handle them all.
+         */
+        while(true) {
+            final WatchKey key = fileDeletionWatcher.poll();
+            if(key == null) {
+                /*
+                 * If no event is detected, we check whether the directories
+                 * corresponding to the WatchKeys still exist.
+                 */
+                for(final File file : fileDeletionWatchKeys.values()) {
+                    if(!file.exists()) {
+                        final String dir = file.getCanonicalPath();
+                        throw new IOException(
+                                "Directory " + dir + " does not exist now. " +
+                                        "Something abnormal may happen.");
+                    }
+                }
+                break;
+            }
+
+            for(final WatchEvent<?> event : key.pollEvents()) {
+                final WatchEvent.Kind kind = event.kind();
+                if(kind == OVERFLOW) {
+                    continue;
+                }
+
+                /* Get the file name from the context. */
+                final WatchEvent<Path> ev = cast(event);
+                final String fileName = ev.context().toString();
+                if(fileName.endsWith(FileManager.JE_SUFFIX)) {
+                    synchronized(filesDeletedByJE) {
+                        if(!filesDeletedByJE.contains(fileName)) {
+                            /* TimerTask.run will handle this exception. */
+                            throw new EnvironmentFailureException(
+                                    envImpl,
+                                    EnvironmentFailureReason.
+                                            LOG_UNEXPECTED_FILE_DELETION,
+                                    "Log file " + fileName +
+                                            " was deleted unexpectedly.");
+                        }
+                        filesDeletedByJE.remove(fileName);
+                    }
+                }
+            }
+
+            if(!key.reset()) {
+                /*
+                 * If key.reset returns false, it indicates that the key
+                 * is no longer valid. Invalid state happens when one of
+                 * the following events occurs:
+                 * 1. The process explicitly cancels the key by using the
+                 *    cancel method. --- The JE code never does this.
+                 * 2. The directory becomes inaccessible.  -- This indicates
+                 *    an abnormal situation.
+                 * 3. The watch service is closed. -- The close may be
+                 *    expected, e.g. caused by WatchService.close. The
+                 *    exception caused by this can be handled in
+                 *    FileDeleteDetectTask.run.
+                 */
+                final String dir =
+                        fileDeletionWatchKeys.get(key).getCanonicalPath();
+                throw new IOException(
+                        "Watch Key corresponding to " + dir + " return false " +
+                                "when reset. Something abnormal may happen.");
+            }
+        }
+    }
+
+    void addDeletedFile(String fileName) {
+        synchronized(filesDeletedByJE) {
+            filesDeletedByJE.add(fileName);
+        }
+    }
+
+    public void close() throws IOException {
+        fileDeletionTask.cancel();
+        fileDeletionTimer.cancel();
+        synchronized(fileDeletionWatcher) {
+            fileDeletionWatcher.close();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    <T> WatchEvent<T> cast(WatchEvent<?> event) {
+        return (WatchEvent<T>) event;
     }
 
     private class FileDeleteDetectTask extends TimerTask {
@@ -165,14 +258,14 @@ class FileDeletionDetector {
             try {
                 processLogFileDeleteEvents();
                 success = true;
-            } catch (EnvironmentFailureException e) {
+            } catch(EnvironmentFailureException e) {
                 /*
                  * Log file is deleted unexpectedly. We have already
                  * invalidated the environment. Here we just close
                  * the Timer, TimerTask and the WatchService. Do this
                  * in finally block.
                  */
-            } catch (Exception e) {
+            } catch(Exception e) {
                 /*
                  * It is possible that processLogFileDeleteEvents is doing
                  * something on WatchService when FileManager.close call
@@ -197,126 +290,25 @@ class FileDeletionDetector {
                  * envImpl.isValid represents that the current env is valid.
                  * If the evn is invalid, then some other place has already
                  * invalidate the env, so here we do not need to invalidate
-                 * the env again. 
+                 * the env again.
                  */
-                if (envImpl.isValid() && !envImpl.isClosing()) {
+                if(envImpl.isValid() && !envImpl.isClosing()) {
                     handleUnexpectedThrowable(Thread.currentThread(), e);
                 }
-            } catch (Error e) {
+            } catch(Error e) {
                 /*
                  * Some ugly things happen.
                  */
                 handleUnexpectedThrowable(Thread.currentThread(), e);
             } finally {
-                if (!success) {
+                if(!success) {
                     try {
                         close();
-                    } catch (IOException ie) {
+                    } catch(IOException ie) {
                         handleUnexpectedThrowable(Thread.currentThread(), ie);
                     }
                 }
             }
         }
-    }
-
-    private void handleUnexpectedThrowable(Thread t, Throwable e) {
-        StoppableThread.handleUncaughtException(
-            envImpl.getLogger(), envImpl, t, e);
-    }
-
-    /*
-     * Detect unexpected log file deletion.
-     */
-    private void processLogFileDeleteEvents() throws Exception{
-        /*
-         * We may register multi-directories to the WatchService,
-         * there may be multi WatchKey for this WatchService. It is
-         * possible that file deletion happen in these multi directories
-         * simultaneously, i.e. multi WatchKey may be non-null.
-         * We should handle them all.
-         */
-        while (true) {
-            final WatchKey key = fileDeletionWatcher.poll();
-            if (key == null) {
-                /*
-                 * If no event is detected, we check whether the directories
-                 * corresponding to the WatchKeys still exist.
-                 */
-                for (final File file : fileDeletionWatchKeys.values()) {
-                    if (!file.exists()) {
-                        final String dir = file.getCanonicalPath();
-                        throw new IOException(
-                            "Directory " + dir + " does not exist now. " +
-                            "Something abnormal may happen.");
-                    }
-                }
-                break;
-            }
- 
-            for (final WatchEvent<?> event: key.pollEvents()) {
-                final WatchEvent.Kind kind = event.kind();
-                if (kind == OVERFLOW) {
-                    continue;
-                }
-
-                /* Get the file name from the context. */
-                final WatchEvent<Path> ev = cast(event);
-                final String fileName = ev.context().toString();
-                if (fileName.endsWith(FileManager.JE_SUFFIX)) {
-                    synchronized (filesDeletedByJE) {
-                        if (!filesDeletedByJE.contains(fileName)) {
-                            /* TimerTask.run will handle this exception. */
-                            throw new EnvironmentFailureException(
-                                envImpl,
-                                EnvironmentFailureReason.
-                                    LOG_UNEXPECTED_FILE_DELETION,
-                                "Log file " + fileName +
-                                " was deleted unexpectedly.");
-                        }
-                        filesDeletedByJE.remove(fileName);
-                    }
-                }
-            }
-
-            if (!key.reset()) {
-                /*
-                 * If key.reset returns false, it indicates that the key
-                 * is no longer valid. Invalid state happens when one of
-                 * the following events occurs:
-                 * 1. The process explicitly cancels the key by using the
-                 *    cancel method. --- The JE code never does this.
-                 * 2. The directory becomes inaccessible.  -- This indicates
-                 *    an abnormal situation.
-                 * 3. The watch service is closed. -- The close may be
-                 *    expected, e.g. caused by WatchService.close. The
-                 *    exception caused by this can be handled in
-                 *    FileDeleteDetectTask.run.
-                 */
-                final String dir =
-                    fileDeletionWatchKeys.get(key).getCanonicalPath();
-                throw new IOException(
-                    "Watch Key corresponding to " + dir + " return false " +
-                    "when reset. Something abnormal may happen.");
-            }
-        }
-    }
-
-    void addDeletedFile(String fileName) {
-        synchronized (filesDeletedByJE) {
-            filesDeletedByJE.add(fileName);
-        }
-    }
-
-    public void close() throws IOException {
-        fileDeletionTask.cancel();
-        fileDeletionTimer.cancel();
-        synchronized(fileDeletionWatcher) {
-            fileDeletionWatcher.close();
-        }
-    }
-    
-    @SuppressWarnings("unchecked")
-    <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
     }
 }

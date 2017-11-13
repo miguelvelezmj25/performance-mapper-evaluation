@@ -25,29 +25,29 @@ import java.util.logging.LogRecord;
  * In order to still have prefixed logging output, we incur the higher level
  * cost of resetting the formatter.
  */
-public class FormatterRedirectHandler 
-    extends java.util.logging.ConsoleHandler {
-    
+public class FormatterRedirectHandler
+        extends java.util.logging.ConsoleHandler {
+
     /*
      * We want console logging to be determined by the level for
      * com.sleepycat.je.util.ConsoleHandler. Check that handler's level and use
      * it to set FormatterRedirectHandler explicitly.
      */
-    private static final String HANDLER_LEVEL = 
-        berkeley.com.sleepycat.je.util.ConsoleHandler.class.getName() + ".level";
+    private static final String HANDLER_LEVEL =
+            berkeley.com.sleepycat.je.util.ConsoleHandler.class.getName() + ".level";
 
     public FormatterRedirectHandler() {
         super();
-        
+
         String level = LoggerUtils.getLoggerProperty(HANDLER_LEVEL);
         setLevel((level == null) ? Level.OFF : Level.parse(level));
     }
 
     @Override
     public void publish(LogRecord record) {
-        Formatter formatter = 
-            LoggerUtils.formatterMap.get(Thread.currentThread());
-        if (formatter != null) {
+        Formatter formatter =
+                LoggerUtils.formatterMap.get(Thread.currentThread());
+        if(formatter != null) {
             setFormatter(formatter);
         }
         super.publish(record);

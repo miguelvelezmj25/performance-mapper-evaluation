@@ -18,8 +18,8 @@ import java.io.Serializable;
 /**
  * The base class for all mutations.
  *
- * @see com.sleepycat.persist.evolve Class Evolution
  * @author Mark Hayes
+ * @see com.sleepycat.persist.evolve Class Evolution
  */
 public abstract class Mutation implements Serializable {
 
@@ -38,7 +38,7 @@ public abstract class Mutation implements Serializable {
     /**
      * Returns the class to which this mutation applies.
      *
-     * @return  the class to which this mutation applies.
+     * @return the class to which this mutation applies.
      */
     public String getClassName() {
         return className;
@@ -47,7 +47,7 @@ public abstract class Mutation implements Serializable {
     /**
      * Returns the class version to which this mutation applies.
      *
-     * @return  the class version to which this mutation applies.
+     * @return the class version to which this mutation applies.
      */
     public int getClassVersion() {
         return classVersion;
@@ -57,7 +57,7 @@ public abstract class Mutation implements Serializable {
      * Returns the field name to which this mutation applies, or null if this
      * mutation applies to the class itself.
      *
-     * @return  the field name to which this mutation applies, or null.
+     * @return the field name to which this mutation applies, or null.
      */
     public String getFieldName() {
         return fieldName;
@@ -69,13 +69,14 @@ public abstract class Mutation implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Mutation) {
+        if(other instanceof Mutation) {
             Mutation o = (Mutation) other;
             return className.equals(o.className) &&
-                   classVersion == o.classVersion &&
-                   ((fieldName != null) ? fieldName.equals(o.fieldName)
-                                        : (o.fieldName == null));
-        } else {
+                    classVersion == o.classVersion &&
+                    ((fieldName != null) ? fieldName.equals(o.fieldName)
+                            : (o.fieldName == null));
+        }
+        else {
             return false;
         }
     }
@@ -83,13 +84,13 @@ public abstract class Mutation implements Serializable {
     @Override
     public int hashCode() {
         return className.hashCode() +
-               classVersion +
-               ((fieldName != null) ? fieldName.hashCode() : 0);
+                classVersion +
+                ((fieldName != null) ? fieldName.hashCode() : 0);
     }
 
     @Override
     public String toString() {
         return "Class: " + className + " Version: " + classVersion +
-               ((fieldName != null) ? (" Field: " + fieldName) : "");
+                ((fieldName != null) ? (" Field: " + fieldName) : "");
     }
 }

@@ -13,96 +13,96 @@
 
 package berkeley.com.sleepycat.persist.model;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import berkeley.com.sleepycat.je.Environment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import berkeley.com.sleepycat.je.Environment;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Indicates the sorting position of a key field in a composite key class when
  * the {@code Comparable} interface is not implemented.  The {@code KeyField}
  * integer value specifies the sort order of this field within the set of
  * fields in the composite key.
- *
+ * <p>
  * <p>If the field type of a {@link PrimaryKey} or {@link SecondaryKey} is a
  * composite key class containing more than one key field, then a {@code
  * KeyField} annotation must be present on each non-transient instance field of
  * the composite key class.  The {@code KeyField} value must be a number
  * between one and the number of non-transient instance fields declared in the
  * composite key class.</p>
- *
+ * <p>
  * <p>Note that a composite key class is a flat container for one or more
  * simple type fields.  All non-transient instance fields in the composite key
  * class are key fields, and its superclass must be {@code Object}.</p>
- *
+ * <p>
  * <p>For example:</p>
  * <pre class="code">
- *  {@literal @Entity}
- *  class Animal {
- *      {@literal @PrimaryKey}
- *      Classification classification;
- *      ...
- *  }
- *
- *  {@literal @Persistent}
- *  class Classification {
- *      {@literal @KeyField(1) String kingdom;}
- *      {@literal @KeyField(2) String phylum;}
- *      {@literal @KeyField(3) String clazz;}
- *      {@literal @KeyField(4) String order;}
- *      {@literal @KeyField(5) String family;}
- *      {@literal @KeyField(6) String genus;}
- *      {@literal @KeyField(7) String species;}
- *      {@literal @KeyField(8) String subspecies;}
- *      ...
- *  }</pre>
- *
+ * {@literal @Entity}
+ * class Animal {
+ * {@literal @PrimaryKey}
+ * Classification classification;
+ * ...
+ * }
+ * <p>
+ * {@literal @Persistent}
+ * class Classification {
+ * {@literal @KeyField(1) String kingdom;}
+ * {@literal @KeyField(2) String phylum;}
+ * {@literal @KeyField(3) String clazz;}
+ * {@literal @KeyField(4) String order;}
+ * {@literal @KeyField(5) String family;}
+ * {@literal @KeyField(6) String genus;}
+ * {@literal @KeyField(7) String species;}
+ * {@literal @KeyField(8) String subspecies;}
+ * ...
+ * }</pre>
+ * <p>
  * <p>This causes entities to be sorted first by {@code kingdom}, then by
  * {@code phylum} within {@code kingdom}, and so on.</p>
- *
+ * <p>
  * <p>The fields in a composite key class may not be null.</p>
- *
+ * <p>
  * <p><a name="comparable"><strong>Custom Sort Order</strong></a></p>
- *
+ * <p>
  * <p>To override the default sort order, a composite key class may implement
  * the {@link Comparable} interface.  This allows overriding the sort order and
  * is therefore useful even when there is only one key field in the composite
  * key class.  For example, the following class sorts Strings using a Canadian
  * collator:</p>
- *
+ * <p>
  * <pre class="code">
- *  import java.text.Collator;
- *  import java.util.Locale;
- *
- *  {@literal @Entity}
- *  class Animal {
- *      ...
- *      {@literal @SecondaryKey(relate=ONE_TO_ONE)}
- *      CollatedString canadianName;
- *      ...
- *  }
- *
- *  {@literal @Persistent}
- *  {@literal class CollatedString implements Comparable<CollatedString>} {
- *
- *      static Collator collator = Collator.getInstance(Locale.CANADA);
- *
- *      {@literal @KeyField(1)}
- *      String value;
- *
- *      CollatedString(String value) { this.value = value; }
- *
- *      private CollatedString() {}
- *
- *      public int compareTo(CollatedString o) {
- *          return collator.compare(value, o.value);
- *      }
- *  }</pre>
- *
+ * import java.text.Collator;
+ * import java.util.Locale;
+ * <p>
+ * {@literal @Entity}
+ * class Animal {
+ * ...
+ * {@literal @SecondaryKey(relate=ONE_TO_ONE)}
+ * CollatedString canadianName;
+ * ...
+ * }
+ * <p>
+ * {@literal @Persistent}
+ * {@literal class CollatedString implements Comparable<CollatedString>} {
+ * <p>
+ * static Collator collator = Collator.getInstance(Locale.CANADA);
+ * <p>
+ * {@literal @KeyField(1)}
+ * String value;
+ * <p>
+ * CollatedString(String value) { this.value = value; }
+ * <p>
+ * private CollatedString() {}
+ * <p>
+ * public int compareTo(CollatedString o) {
+ * return collator.compare(value, o.value);
+ * }
+ * }</pre>
+ * <p>
  * <p>Several important rules should be considered when implementing a custom
  * comparison method.  Failure to follow these rules may result in the primary
  * or secondary index becoming unusable; in other words, the store will not be
@@ -127,7 +127,9 @@ import berkeley.com.sleepycat.je.Environment;
  *
  * @author Mark Hayes
  */
-@Documented @Retention(RUNTIME) @Target(FIELD)
+@Documented
+@Retention(RUNTIME)
+@Target(FIELD)
 public @interface KeyField {
 
     int value();

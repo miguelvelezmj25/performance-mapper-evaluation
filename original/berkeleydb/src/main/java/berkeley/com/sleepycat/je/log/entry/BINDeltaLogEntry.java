@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.tree.BIN;
 import berkeley.com.sleepycat.je.tree.IN;
 
+import java.nio.ByteBuffer;
+
 /**
  * Holds a partial BIN that serves as a live BIN delta.
- *
+ * <p>
  * A live delta (unlike a the obsolete OldBINDelta, which is contained in an
  * OldBINDeltaLogEntry) may appear in the Btree to serve as an incomplete BIN.
  */

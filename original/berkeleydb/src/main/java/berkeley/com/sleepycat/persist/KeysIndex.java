@@ -13,28 +13,20 @@
 
 package berkeley.com.sleepycat.persist;
 
-import java.util.Map;
-import java.util.SortedMap;
-
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.collections.StoredSortedMap;
 import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.*;
+
+import java.util.Map;
+import java.util.SortedMap;
+
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Get;
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.LockMode;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.OperationResult;
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.ReadOptions;
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.Transaction;
 
 /**
  * The EntityIndex returned by SecondaryIndex.keysIndex().  This index maps
@@ -53,10 +45,10 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
               EntryBinding keyBinding,
               Class<PK> pkeyClass,
               EntryBinding pkeyBinding)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(db, keyClass, keyBinding,
-              new DataValueAdapter<PK>(pkeyClass, pkeyBinding));
+                new DataValueAdapter<PK>(pkeyClass, pkeyBinding));
         this.pkeyBinding = pkeyBinding;
     }
 
@@ -66,18 +58,18 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
      */
 
     public PK get(SK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return get(null, key, null);
     }
 
     public PK get(Transaction txn, SK key, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* <!-- begin JE only --> */
-        if (DbCompat.IS_JE) {
+        if(DbCompat.IS_JE) {
             EntityResult<PK> result = get(
-                txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
+                    txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
             return result != null ? result.value() : null;
         }
         /* <!-- end JE only --> */
@@ -88,9 +80,10 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
 
         OperationStatus status = db.get(txn, keyEntry, pkeyEntry, lockMode);
 
-        if (status == OperationStatus.SUCCESS) {
+        if(status == OperationStatus.SUCCESS) {
             return (PK) pkeyBinding.entryToObject(pkeyEntry);
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -100,7 +93,7 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
                                 SK key,
                                 Get getType,
                                 ReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkGetType(getType);
 
@@ -109,13 +102,14 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
         keyBinding.objectToEntry(key, keyEntry);
 
         OperationResult result = db.get(
-            txn, keyEntry, pkeyEntry, getType, options);
+                txn, keyEntry, pkeyEntry, getType, options);
 
-        if (result != null) {
+        if(result != null) {
             return new EntityResult<>(
-                (PK) pkeyBinding.entryToObject(pkeyEntry),
-                result);
-        } else {
+                    (PK) pkeyBinding.entryToObject(pkeyEntry),
+                    result);
+        }
+        else {
             return null;
         }
     }
@@ -126,7 +120,7 @@ class KeysIndex<SK, PK> extends BasicIndex<SK, PK> {
     }
 
     public synchronized SortedMap<SK, PK> sortedMap() {
-        if (map == null) {
+        if(map == null) {
             map = new StoredSortedMap(db, keyBinding, pkeyBinding, false);
         }
         return map;

@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.io.File;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * Interface for opening a ReplicatedEnvironment from a JE standalone utility,

@@ -25,8 +25,8 @@ import java.text.DecimalFormat;
 public class Latency implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
-    private static final DecimalFormat FORMAT = 
-        new DecimalFormat("###,###,###,###,###,###,###.##");
+    private static final DecimalFormat FORMAT =
+            new DecimalFormat("###,###,###,###,###,###,###.##");
 
     private int maxTrackedLatencyMillis;
     private int min;
@@ -83,11 +83,11 @@ public class Latency implements Serializable, Cloneable {
 
     /* See totalRequests field. */
     private void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
 
-        if (totalRequests == 0) {
+        if(totalRequests == 0) {
             totalRequests = totalOps;
         }
     }
@@ -96,28 +96,28 @@ public class Latency implements Serializable, Cloneable {
     public Latency clone() {
         try {
             return (Latency) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             /* Should never happen. */
             throw new IllegalStateException(e);
         }
     }
-    
+
     @Override
     public String toString() {
-        if (totalOps == 0) {
+        if(totalOps == 0) {
             return "No operations";
         }
-        
-        return "maxTrackedLatencyMillis=" + 
-               FORMAT.format(maxTrackedLatencyMillis) +
-               " totalOps=" + FORMAT.format(totalOps) + 
-               " totalReq=" + FORMAT.format(totalRequests) + 
-               " reqOverflow=" + FORMAT.format(opsOverflow) +
-               " min=" + FORMAT.format(min) +
-               " max=" + FORMAT.format(max) +
-               " avg=" + FORMAT.format(avg) +
-               " 95%=" + FORMAT.format(percent95) +
-               " 99%=" + FORMAT.format(percent99);
+
+        return "maxTrackedLatencyMillis=" +
+                FORMAT.format(maxTrackedLatencyMillis) +
+                " totalOps=" + FORMAT.format(totalOps) +
+                " totalReq=" + FORMAT.format(totalRequests) +
+                " reqOverflow=" + FORMAT.format(opsOverflow) +
+                " min=" + FORMAT.format(min) +
+                " max=" + FORMAT.format(max) +
+                " avg=" + FORMAT.format(avg) +
+                " 95%=" + FORMAT.format(percent95) +
+                " 99%=" + FORMAT.format(percent99);
     }
 
     /**
@@ -183,34 +183,34 @@ public class Latency implements Serializable, Cloneable {
         return percent99;
     }
 
-    /** 
+    /**
      * Add the measurements from "other" and recalculate the min, max, and
-     * average values. The 95th and 99th percentile are not recalculated, 
+     * average values. The 95th and 99th percentile are not recalculated,
      * because the histogram from LatencyStatis not available, and those values
      * can't be generated.
      */
     public void rollup(Latency other) {
-        if (other == null || other.totalOps == 0 || other.totalRequests == 0) {
+        if(other == null || other.totalOps == 0 || other.totalRequests == 0) {
             throw new IllegalStateException
-                ("Can't rollup a Latency that doesn't have any data");
+                    ("Can't rollup a Latency that doesn't have any data");
         }
 
-        if (maxTrackedLatencyMillis != other.maxTrackedLatencyMillis) {
+        if(maxTrackedLatencyMillis != other.maxTrackedLatencyMillis) {
             throw new IllegalStateException
-                ("Can't rollup a Latency whose maxTrackedLatencyMillis is " +
-                 "different");
+                    ("Can't rollup a Latency whose maxTrackedLatencyMillis is " +
+                            "different");
         }
 
-        if (min > other.min) {
+        if(min > other.min) {
             min = other.min;
         }
 
-        if (max < other.max) {
+        if(max < other.max) {
             max = other.max;
         }
 
-        avg = ((totalRequests * avg) + (other.totalRequests * other.avg)) / 
-              (totalRequests + other.totalRequests);
+        avg = ((totalRequests * avg) + (other.totalRequests * other.avg)) /
+                (totalRequests + other.totalRequests);
 
         /* Clear out 95th and 99th. They have become invalid. */
         percent95 = 0;

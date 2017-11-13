@@ -13,9 +13,6 @@
 package berkeley.com.sleepycat.je.rep.stream;
 
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.stream.BaseProtocol.AlternateMatchpoint;
 import berkeley.com.sleepycat.je.rep.stream.BaseProtocol.Entry;
@@ -25,6 +22,9 @@ import berkeley.com.sleepycat.je.rep.utilint.NamedChannel;
 import berkeley.com.sleepycat.je.utilint.InternalException;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Object to sync-up the Feeder and Subscriber to establish the VLSN from
@@ -55,8 +55,7 @@ public class SubscriberFeederSyncup {
      * stream from a start VLSN, if it is available. Otherwise return NULL
      * VLSN to subscriber.
      *
-     * @param reqVLSN  VLSN requested by subscriber to stream log entries
-     *
+     * @param reqVLSN VLSN requested by subscriber to stream log entries
      * @return start VLSN from subscribe can stream log entries
      * @throws InternalException
      */
@@ -65,41 +64,42 @@ public class SubscriberFeederSyncup {
         final long startTime = System.currentTimeMillis();
 
         LoggerUtils.info(logger, repImpl,
-                         "Subscriber-Feeder " + namedChannel.getNameIdPair() +
-                         " syncup started.");
+                "Subscriber-Feeder " + namedChannel.getNameIdPair() +
+                        " syncup started.");
 
         try {
             /* first query the start VLSN from feeder */
             final VLSN startVLSN = getStartVLSNFromFeeder(reqVLSN);
-            if (!startVLSN.equals(VLSN.NULL_VLSN)) {
+            if(!startVLSN.equals(VLSN.NULL_VLSN)) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Response from feeder  " +
-                                 namedChannel.getNameIdPair() +
-                                 ": the start VLSN " + startVLSN +
-                                 ", the requested VLSN " + reqVLSN +
-                                 ", send startStream request with filter.");
+                        "Response from feeder  " +
+                                namedChannel.getNameIdPair() +
+                                ": the start VLSN " + startVLSN +
+                                ", the requested VLSN " + reqVLSN +
+                                ", send startStream request with filter.");
 
                 /* start streaming from feeder if valid start VLSN */
                 protocol.write(protocol.new StartStream(startVLSN, filter),
-                               namedChannel);
-            } else {
+                        namedChannel);
+            }
+            else {
                 LoggerUtils.info(logger, repImpl,
-                                 "Unable to stream from Feeder " +
-                                 namedChannel.getNameIdPair() +
-                                 " from requested VLSN " + reqVLSN);
+                        "Unable to stream from Feeder " +
+                                namedChannel.getNameIdPair() +
+                                " from requested VLSN " + reqVLSN);
             }
             return startVLSN;
-        } catch (IllegalStateException e) {
+        } catch(IllegalStateException e) {
             throw new InternalException(e.getMessage());
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new InternalException(e.getMessage());
         } finally {
             LoggerUtils.info(logger, repImpl,
-                             String.format("Subscriber to feeder " +
-                                           namedChannel.getNameIdPair() +
-                                           " sync-up done, elapsed time: %,dms",
-                                           System.currentTimeMillis() -
-                                           startTime));
+                    String.format("Subscriber to feeder " +
+                                    namedChannel.getNameIdPair() +
+                                    " sync-up done, elapsed time: %,dms",
+                            System.currentTimeMillis() -
+                                    startTime));
         }
     }
 
@@ -109,18 +109,17 @@ public class SubscriberFeederSyncup {
      * or null if feeder is unable to service the requested VLSN.
      *
      * @param requestVLSN start VLSN requested by subscriber
-     *
      * @return VLSN a valid start VLSN from feeder, or null if it unavailable
      * at the feeder
-     * @throws IOException if unable to read message from channel
+     * @throws IOException           if unable to read message from channel
      * @throws IllegalStateException if the feeder sends an unexpected message
      */
     private VLSN getStartVLSNFromFeeder(VLSN requestVLSN)
             throws IOException, IllegalStateException {
 
         LoggerUtils.fine(logger, repImpl,
-                         "Subscriber send requested VLSN " + requestVLSN + 
-                         " to feeder " + namedChannel.getNameIdPair());
+                "Subscriber send requested VLSN " + requestVLSN +
+                        " to feeder " + namedChannel.getNameIdPair());
 
         /* ask the feeder for the requested VLSN. */
         protocol.write(protocol.new EntryRequest(requestVLSN), namedChannel);
@@ -133,34 +132,37 @@ public class SubscriberFeederSyncup {
          */
         final Message message = protocol.read(namedChannel);
         final VLSN vlsn;
-        if (message instanceof Entry) {
+        if(message instanceof Entry) {
             vlsn = ((Entry) message).getWireRecord().getVLSN();
 
-            assert(vlsn.equals(requestVLSN));
+            assert (vlsn.equals(requestVLSN));
             LoggerUtils.finest(logger, repImpl,
-                               "Subscriber successfully requested VLSN " + 
-                               requestVLSN + " from feeder " + 
-                               namedChannel.getNameIdPair());
-        } else if (message instanceof AlternateMatchpoint) {
+                    "Subscriber successfully requested VLSN " +
+                            requestVLSN + " from feeder " +
+                            namedChannel.getNameIdPair());
+        }
+        else if(message instanceof AlternateMatchpoint) {
             vlsn = ((AlternateMatchpoint) message).getAlternateWireRecord()
-                                                  .getVLSN();
+                    .getVLSN();
             /* must be an earlier VLSN */
-            assert(vlsn.compareTo(requestVLSN) < 0);
-            LoggerUtils.finest(logger, repImpl, 
-                               "Feeder " + namedChannel.getNameIdPair() + 
-                               " returns a valid start VLSN" + vlsn + 
-                               " but earlier than requested one " +
-                               requestVLSN);
-        } else  if (message instanceof EntryNotFound) {
+            assert (vlsn.compareTo(requestVLSN) < 0);
+            LoggerUtils.finest(logger, repImpl,
+                    "Feeder " + namedChannel.getNameIdPair() +
+                            " returns a valid start VLSN" + vlsn +
+                            " but earlier than requested one " +
+                            requestVLSN);
+        }
+        else if(message instanceof EntryNotFound) {
             vlsn = VLSN.NULL_VLSN;
             LoggerUtils.finest(logger, repImpl,
-                               "Feeder " + namedChannel.getNameIdPair() + 
-                               " is unable to service the request vlsn " +
-                               requestVLSN );
-        } else {
+                    "Feeder " + namedChannel.getNameIdPair() +
+                            " is unable to service the request vlsn " +
+                            requestVLSN);
+        }
+        else {
             /* unexpected response from feeder */
             String msg = "Receive unexpected response " + message.toString() +
-                         "from feeder " + namedChannel.getNameIdPair();
+                    "from feeder " + namedChannel.getNameIdPair();
             LoggerUtils.warning(logger, repImpl, msg);
             throw new IllegalStateException(msg);
         }

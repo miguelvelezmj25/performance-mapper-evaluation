@@ -14,7 +14,7 @@
 package berkeley.com.sleepycat.je.rep.monitor;
 
 /**
- * MemberChangeEvent is the base class for all member status changed events. 
+ * MemberChangeEvent is the base class for all member status changed events.
  * Its subclasses provide additional event-specific information.
  */
 public abstract class MemberChangeEvent extends MonitorChangeEvent {

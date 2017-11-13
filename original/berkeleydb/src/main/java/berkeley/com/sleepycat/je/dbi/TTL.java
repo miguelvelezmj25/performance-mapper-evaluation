@@ -12,43 +12,43 @@
  */
 package berkeley.com.sleepycat.je.dbi;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.WriteOptions;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.tree.IN;
 import berkeley.com.sleepycat.je.utilint.TestHook;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Internal documentation and utility functions for the TTL feature.
- *
+ * <p>
  * Repeatable-read
  * -----------------
  * As described in {@link WriteOptions#setTTL}, repeatable-read is supported
  * in simple cases by treating a record that expires after being locked as if
  * it were not expired. This is implemented and documented in {@link
  * CursorImpl#lockLN}.
- *
+ * <p>
  * Unfortunately, we must check for whether a lock is already owned or shared
  * by the locker before we attempt to lock the record. To optimize and avoid
  * this extra overhead when it is unnecessary, we only do this when a record
  * might expire during the transaction, according to the {@link
  * EnvironmentParams#ENV_TTL_MAX_TXN_TIME} threshold.
- *
+ * <p>
  * When a slot contains an expired record, {@link CursorImpl#lockLN} returns
  * true in the LockStanding.defunct field, just as it does for deleted records.
  * That way deleted records and expired records are filtered out of queries in
  * the same way.
- *
+ * <p>
  * Locking (read or write locks) also protects a record from being purged. The
  * cleaner only considers an LN expired if its lock is uncontended, meaning
  * that it could write-lock it. It places locked LNs on the pending LN queue.
  * The compressor also only removes an expired slot if its lock is uncontended.
- *
+ * <p>
  * However, if the clock was changed, purging may have occurred. Therefore,
  * when an LN being fetched is in a cleaned file (LOG_FILE_NOT_FOUND), we treat
  * it as a deleted record if it expires within {@link
@@ -56,7 +56,7 @@ import berkeley.com.sleepycat.je.utilint.TestHook;
  * IN#fetchLN} returns null must also be filtered out of queries. This can
  * happen even after locking the record and determining that the slot is not
  * expired.
- *
+ * <p>
  * To prevent an LN from being purged while an operation is attempting to lock
  * it, due to thread scheduling, we purge LNs only if they are already expired
  * by at least {@link EnvironmentParams#ENV_TTL_MAX_TXN_TIME}. This is done to
@@ -64,31 +64,31 @@ import berkeley.com.sleepycat.je.utilint.TestHook;
  * an expired LN, while all other LN locking does latch the BIN. This also
  * means that, when calculating utilization of a .jdb file, we don't consider
  * LNs expired until the ENV_TTL_MAX_TXN_TIME after their expiration time.
- *
+ * <p>
  * There are several special cases involving LNs discovered to be purged after
  * locking the record. In the cases where the operation fails, the situation
  * is documented in {@link WriteOptions#setTTL}.
- *
- *  + For a read operation with a non-null 'data' param, if the LN was
- *    previously locked but the data was not requested, and the LN is found to
- *    be purged during the read, the operation fails (returns null).
- *
- *  + For an update operation with a partial 'data' param, if the LN was
- *    previously locked (but the data was not requested), and the LN is found
- *    to be purged during the update, the operation fails (returns null).
- *
- *  + For an update of a primary record with secondary keys, if the record is
- *    locked and then we find the LN has been purged, we simply don't delete
- *    any pre-existing secondary keys. This is OK because those secondary
- *    records are also expired and will be purged naturally.
- *
+ * <p>
+ * + For a read operation with a non-null 'data' param, if the LN was
+ * previously locked but the data was not requested, and the LN is found to
+ * be purged during the read, the operation fails (returns null).
+ * <p>
+ * + For an update operation with a partial 'data' param, if the LN was
+ * previously locked (but the data was not requested), and the LN is found
+ * to be purged during the update, the operation fails (returns null).
+ * <p>
+ * + For an update of a primary record with secondary keys, if the record is
+ * locked and then we find the LN has been purged, we simply don't delete
+ * any pre-existing secondary keys. This is OK because those secondary
+ * records are also expired and will be purged naturally.
+ * <p>
  * Note that when the expiration time is reduced, including setting it to zero,
  * no special handling is needed. The update operation itself will ensure that
  * the expiration time in the BIN and LN are in sync, in the case of a single
  * record, and that a primary record and its associated and secondary records
  * have expiration times that are in sync. Since expiration checking always
  * occurs after locking, the updated expiration time will always be used.
- *
+ * <p>
  * Secondaries
  * -----------
  * Locking also supports repeatable-read for secondaries, as long as the
@@ -98,11 +98,11 @@ import berkeley.com.sleepycat.je.utilint.TestHook;
  * secondary at all in this case, and rely only on the primary record lock.
  * This extra lock is taken after the primary lock, so locking order it not
  * violated, i.e., this does not increase the potential for deadlocks.
- *
+ * <p>
  * When reading via a secondary, if the secondary exists but the primary record
  * expired (within {@link EnvironmentParams#ENV_TTL_CLOCK_TOLERANCE}), then we
  * we treat the record as deleted.
- *
+ * <p>
  * When updating or deleting a primary record and its associated secondary
  * records, we ignore integrity problems if the secondary record has expired
  * (within {@link EnvironmentParams#ENV_TTL_CLOCK_TOLERANCE}). Specifically
@@ -117,23 +117,19 @@ public class TTL {
 
     /* Minimum JE version required for using TTL. */
     private static final JEVersion MIN_JE_VERSION = new JEVersion("6.5.0");
-
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private static final SimpleDateFormat TIME_FORMAT =
+            new SimpleDateFormat("yyyy-MM-dd.HH");
     /* Set by tests to override MIN_JE_VERSION. */
     public static JEVersion TEST_MIN_JE_VERSION = null;
-
     private static TestHook<Long> timeTestHook = null;
-
-    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-    private static final SimpleDateFormat TIME_FORMAT =
-        new SimpleDateFormat("yyyy-MM-dd.HH");
 
     static {
         TIME_FORMAT.setTimeZone(UTC);
     }
 
     public static JEVersion getMinJEVersion() {
-        if (TEST_MIN_JE_VERSION != null) {
+        if(TEST_MIN_JE_VERSION != null) {
             return TEST_MIN_JE_VERSION;
         }
         return MIN_JE_VERSION;
@@ -142,7 +138,7 @@ public class TTL {
     /**
      * Sets a hook for simulating changes in the clock time that is used in TTL
      * processing.
-     *
+     * <p>
      * If the hook is non-null, {@link TestHook#getHookValue()} returns the
      * value used as the system clock time for all TTL processing. Other
      * methods in the hook interface are not used.
@@ -156,7 +152,7 @@ public class TTL {
 
     public static long currentSystemTime() {
 
-        if (timeTestHook != null) {
+        if(timeTestHook != null) {
             return timeTestHook.getHookValue();
         }
 
@@ -170,7 +166,7 @@ public class TTL {
                                               final boolean hours) {
         assert expiration >= 0;
 
-        if (expiration == 0) {
+        if(expiration == 0) {
             return 0;
         }
 
@@ -183,32 +179,34 @@ public class TTL {
      */
     public static int ttlToExpiration(final int ttl, final TimeUnit ttlUnits) {
 
-        if (ttl < 0) {
+        if(ttl < 0) {
             throw new IllegalArgumentException("Illegal ttl value: " + ttl);
         }
 
-        if (ttl == 0) {
+        if(ttl == 0) {
             return 0;
         }
 
         final int currentTime;
 
-        if (ttlUnits == TimeUnit.DAYS) {
+        if(ttlUnits == TimeUnit.DAYS) {
 
             currentTime = (int)
-                ((currentSystemTime() + MILLIS_PER_DAY - 1) /
-                    MILLIS_PER_DAY);
+                    ((currentSystemTime() + MILLIS_PER_DAY - 1) /
+                            MILLIS_PER_DAY);
 
-        } else if (ttlUnits == TimeUnit.HOURS) {
+        }
+        else if(ttlUnits == TimeUnit.HOURS) {
 
             currentTime = (int)
-                ((currentSystemTime() + MILLIS_PER_HOUR - 1) /
-                    MILLIS_PER_HOUR);
+                    ((currentSystemTime() + MILLIS_PER_HOUR - 1) /
+                            MILLIS_PER_HOUR);
 
-        } else {
+        }
+        else {
 
             throw new IllegalArgumentException(
-                "ttlUnits not allowed: " + ttlUnits);
+                    "ttlUnits not allowed: " + ttlUnits);
         }
 
         return currentTime + ttl;
@@ -233,23 +231,27 @@ public class TTL {
     public static int systemTimeToExpiration(final long systemMs,
                                              final boolean hours) {
         return (int) (hours ?
-            ((systemMs + MILLIS_PER_HOUR - 1) / MILLIS_PER_HOUR) :
-            ((systemMs + MILLIS_PER_DAY - 1) / MILLIS_PER_DAY));
+                ((systemMs + MILLIS_PER_HOUR - 1) / MILLIS_PER_HOUR) :
+                ((systemMs + MILLIS_PER_DAY - 1) / MILLIS_PER_DAY));
     }
 
-    /** For logging and debugging output. */
+    /**
+     * For logging and debugging output.
+     */
     public static String formatExpiration(final int expiration,
                                           final boolean hours) {
 
         return formatExpirationTime(expirationToSystemTime(expiration, hours));
     }
 
-    /** For logging and debugging output. */
+    /**
+     * For logging and debugging output.
+     */
     public static String formatExpirationTime(final long time) {
 
         final Date date = new Date(time);
 
-        synchronized (TIME_FORMAT) {
+        synchronized(TIME_FORMAT) {
             return TIME_FORMAT.format(date);
         }
     }
@@ -261,8 +263,8 @@ public class TTL {
     public static boolean isExpired(final int expiration,
                                     final boolean hours) {
         return expiration != 0 &&
-            currentSystemTime() >
-                expirationToSystemTime(expiration, hours);
+                currentSystemTime() >
+                        expirationToSystemTime(expiration, hours);
     }
 
     /**
@@ -271,7 +273,7 @@ public class TTL {
      */
     public static boolean isExpired(final long expirationTime) {
         return expirationTime != 0 &&
-            currentSystemTime() > expirationTime;
+                currentSystemTime() > expirationTime;
     }
 
     /**
@@ -284,8 +286,8 @@ public class TTL {
                                         final boolean hours,
                                         final long withinMs) {
         return expiration != 0 &&
-            currentSystemTime() + withinMs >
-                expirationToSystemTime(expiration, hours);
+                currentSystemTime() + withinMs >
+                        expirationToSystemTime(expiration, hours);
     }
 
     /**
@@ -295,6 +297,6 @@ public class TTL {
     public static boolean expiresWithin(final long expirationTime,
                                         final long withinMs) {
         return expirationTime != 0 &&
-            currentSystemTime() + withinMs > expirationTime;
+                currentSystemTime() + withinMs > expirationTime;
     }
 }

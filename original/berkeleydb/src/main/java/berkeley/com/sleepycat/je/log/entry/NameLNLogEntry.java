@@ -13,29 +13,25 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
+import berkeley.com.sleepycat.je.dbi.DatabaseId;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.dbi.ReplicatedDatabaseConfig;
+import berkeley.com.sleepycat.je.log.*;
+import berkeley.com.sleepycat.je.tree.NameLN;
+import berkeley.com.sleepycat.je.txn.Txn;
+import berkeley.com.sleepycat.je.utilint.VLSN;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.ReplicatedDatabaseConfig;
-import berkeley.com.sleepycat.je.log.DbOpReplicationContext;
-import berkeley.com.sleepycat.je.log.LogEntryHeader;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.ReplicationContext;
-import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
-import berkeley.com.sleepycat.je.tree.NameLN;
-import berkeley.com.sleepycat.je.txn.Txn;
-import berkeley.com.sleepycat.je.utilint.VLSN;
 
 /**
  * NameLNLogEntry contains all the regular LNLogEntry fields and additional
  * information about the database operation which instigated the logging of
  * this NameLN. This additional information is used to support replication of
  * database operations in a replication group.
- *
+ * <p>
  * Database operations pose a special problem for replication because unlike
  * data record put and get calls, they can result in multiple log entries that
  * are not all members of a single transaction.  Create and truncate are the
@@ -44,44 +40,44 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * challenge two replication assumptions: (a) that all logical operations can
  * be repeated on the client node based on the contents of a single log entry,
  * and (b) that non-txnal log entries like MapLNs need not be replicated.
- *
+ * <p>
  * Specifically, here's what is logged for database operations.
- *
+ * <p>
  * create:
- *
- *  1. new NameLN_TX
- *  2. new MapLN, which has the database config info.
- *  3. txn commit of autocommit or user txn.
- *
+ * <p>
+ * 1. new NameLN_TX
+ * 2. new MapLN, which has the database config info.
+ * 3. txn commit of autocommit or user txn.
+ * <p>
  * rename:
- *
- *  1. deleted NameLN_TX
- *  2. new NameLN_TX
- *  3. txn commit from autocommit or user txn
- *
+ * <p>
+ * 1. deleted NameLN_TX
+ * 2. new NameLN_TX
+ * 3. txn commit from autocommit or user txn
+ * <p>
  * truncate:
- *
- *  1. new MapLN w/new id
- *  2. modify the existing NameLN with new id (old database is deleted by
- *     usual commit-time processing)
- *  3. txn commit from autocommit or user txn
- *
+ * <p>
+ * 1. new MapLN w/new id
+ * 2. modify the existing NameLN with new id (old database is deleted by
+ * usual commit-time processing)
+ * 3. txn commit from autocommit or user txn
+ * <p>
  * delete
- *
- *  1. deleted NameLN_TX (old database gets deleted by usual commit-time
- *     processing)
- *  2. txn commit from autocommit or user txn
- *
+ * <p>
+ * 1. deleted NameLN_TX (old database gets deleted by usual commit-time
+ * processing)
+ * 2. txn commit from autocommit or user txn
+ * <p>
  * Extra information is needed for create and truncate, which both log
  * information within the MapLN. Rename and delete only log NameLNs, so they
  * can be replicated on the client using the normal replication messages.  The
  * extra fields which follow the usual LNLogEntry fields are:
- *
+ * <p>
  * operationType - the type of database operation. In a single node system,
- *                 this is local information implicit in the code path.
+ * this is local information implicit in the code path.
  * databaseConfig (optional) - For creates, database configuration info
  * databaseId (optional)- For truncates, the old db id, so we know which
- *                        MapLN to delete.
+ * MapLN to delete.
  */
 public class NameLNLogEntry extends LNLogEntry<NameLN> {
 
@@ -113,35 +109,35 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
      * Constructor to write this entry.
      */
     public NameLNLogEntry(
-        LogEntryType entryType,
-        DatabaseId dbId,
-        Txn txn,
-        long abortLsn,
-        boolean abortKD,
-        byte[] key,
-        NameLN nameLN,
-        ReplicationContext repContext) {
+            LogEntryType entryType,
+            DatabaseId dbId,
+            Txn txn,
+            long abortLsn,
+            boolean abortKD,
+            byte[] key,
+            NameLN nameLN,
+            ReplicationContext repContext) {
 
         super(
-            entryType, dbId, txn,
-            abortLsn, abortKD,
-            null/*abortKey*/, null/*abortData*/,
-            VLSN.NULL_VLSN_SEQUENCE/*abortVLSN*/,
-            0 /*abortExpiration*/, false /*abortExpirationInHours*/,
-            key, nameLN, false/*newEmbeddedLN*/,
-            0 /*expiration*/, false /*expirationInHours*/);
+                entryType, dbId, txn,
+                abortLsn, abortKD,
+                null/*abortKey*/, null/*abortData*/,
+                VLSN.NULL_VLSN_SEQUENCE/*abortVLSN*/,
+                0 /*abortExpiration*/, false /*abortExpirationInHours*/,
+                key, nameLN, false/*newEmbeddedLN*/,
+                0 /*expiration*/, false /*expirationInHours*/);
 
         ReplicationContext operationContext = repContext;
 
         operationType = repContext.getDbOperationType();
-        if (DbOperationType.isWriteConfigType(operationType)) {
+        if(DbOperationType.isWriteConfigType(operationType)) {
             replicatedCreateConfig =
-                ((DbOpReplicationContext) operationContext).getCreateConfig();
+                    ((DbOpReplicationContext) operationContext).getCreateConfig();
         }
 
-        if (operationType == DbOperationType.TRUNCATE) {
+        if(operationType == DbOperationType.TRUNCATE) {
             truncateOldDbId =
-              ((DbOpReplicationContext) operationContext).getTruncateOldDbId();
+                    ((DbOpReplicationContext) operationContext).getTruncateOldDbId();
         }
     }
 
@@ -154,7 +150,7 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
                           ByteBuffer entryBuffer) {
 
         readBaseLNEntry(envImpl, header, entryBuffer,
-                        false /*keyIsLastSerializedField*/);
+                false /*keyIsLastSerializedField*/);
 
         /*
          * The NameLNLogEntry was introduced in version 6. Before, a LNLogEntry
@@ -162,19 +158,20 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
          * entry.
          */
         int version = header.getVersion();
-        if (version >= 6) {
+        if(version >= 6) {
             operationType = DbOperationType.readTypeFromLog(entryBuffer,
-                                                            version);
-            if (DbOperationType.isWriteConfigType(operationType)) {
+                    version);
+            if(DbOperationType.isWriteConfigType(operationType)) {
                 replicatedCreateConfig = new ReplicatedDatabaseConfig();
                 replicatedCreateConfig.readFromLog(entryBuffer, version);
             }
 
-            if (operationType == DbOperationType.TRUNCATE) {
+            if(operationType == DbOperationType.TRUNCATE) {
                 truncateOldDbId = new DatabaseId();
                 truncateOldDbId.readFromLog(entryBuffer, version);
             }
-        } else {
+        }
+        else {
             operationType = DbOperationType.NONE;
         }
     }
@@ -188,10 +185,10 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
         super.dumpEntry(sb, verbose);
 
         operationType.dumpLog(sb, verbose);
-        if (replicatedCreateConfig != null ) {
+        if(replicatedCreateConfig != null) {
             replicatedCreateConfig.dumpLog(sb, verbose);
         }
-        if (truncateOldDbId != null) {
+        if(truncateOldDbId != null) {
             truncateOldDbId.dumpLog(sb, verbose);
         }
 
@@ -206,10 +203,10 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
     @Override
     public Collection<VersionedWriteLoggable> getEmbeddedLoggables() {
         final Collection<VersionedWriteLoggable> list =
-            new ArrayList<>(super.getEmbeddedLoggables());
+                new ArrayList<>(super.getEmbeddedLoggables());
         list.addAll(Arrays.asList(
-            new NameLN(), DbOperationType.NONE,
-            new ReplicatedDatabaseConfig()));
+                new NameLN(), DbOperationType.NONE,
+                new ReplicatedDatabaseConfig()));
         return list;
     }
 
@@ -217,17 +214,17 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
     public int getSize(final int logVersion, final boolean forReplication) {
 
         int size = getBaseLNEntrySize(
-            logVersion, false /*keyIsLastSerializedField*/,
-            forReplication);
+                logVersion, false /*keyIsLastSerializedField*/,
+                forReplication);
 
         size += operationType.getLogSize(logVersion, forReplication);
 
-        if (DbOperationType.isWriteConfigType(operationType)) {
+        if(DbOperationType.isWriteConfigType(operationType)) {
             size += replicatedCreateConfig.getLogSize(
-                logVersion, forReplication);
+                    logVersion, forReplication);
         }
 
-        if (operationType == DbOperationType.TRUNCATE) {
+        if(operationType == DbOperationType.TRUNCATE) {
             size += truncateOldDbId.getLogSize(logVersion, forReplication);
         }
         return size;
@@ -239,17 +236,17 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
                            final boolean forReplication) {
 
         writeBaseLNEntry(
-            destBuffer, logVersion,
-            false /*keyIsLastSerializedField*/, forReplication);
+                destBuffer, logVersion,
+                false /*keyIsLastSerializedField*/, forReplication);
 
         operationType.writeToLog(destBuffer, logVersion, forReplication);
 
-        if (DbOperationType.isWriteConfigType(operationType)) {
+        if(DbOperationType.isWriteConfigType(operationType)) {
             replicatedCreateConfig.writeToLog(
-                destBuffer, logVersion, forReplication);
+                    destBuffer, logVersion, forReplication);
         }
 
-        if (operationType == DbOperationType.TRUNCATE) {
+        if(operationType == DbOperationType.TRUNCATE) {
             truncateOldDbId.writeToLog(destBuffer, logVersion, forReplication);
         }
     }
@@ -257,23 +254,25 @@ public class NameLNLogEntry extends LNLogEntry<NameLN> {
     @Override
     public boolean logicalEquals(LogEntry other) {
 
-        if (!super.logicalEquals(other))
+        if(!super.logicalEquals(other)) {
             return false;
+        }
 
         NameLNLogEntry otherEntry = (NameLNLogEntry) other;
-        if (!operationType.logicalEquals(otherEntry.operationType)) {
+        if(!operationType.logicalEquals(otherEntry.operationType)) {
             return false;
         }
 
-        if ((truncateOldDbId != null) &&
-            (!truncateOldDbId.logicalEquals(otherEntry.truncateOldDbId))) {
-                return false;
+        if((truncateOldDbId != null) &&
+                (!truncateOldDbId.logicalEquals(otherEntry.truncateOldDbId))) {
+            return false;
         }
 
-        if (replicatedCreateConfig != null) {
-            if (!replicatedCreateConfig.logicalEquals
-                (otherEntry.replicatedCreateConfig))
+        if(replicatedCreateConfig != null) {
+            if(!replicatedCreateConfig.logicalEquals
+                    (otherEntry.replicatedCreateConfig)) {
                 return false;
+            }
         }
         return true;
     }

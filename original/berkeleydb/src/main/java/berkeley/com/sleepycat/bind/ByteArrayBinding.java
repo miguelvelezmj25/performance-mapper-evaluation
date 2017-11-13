@@ -38,12 +38,13 @@ public class ByteArrayBinding implements EntryBinding<byte[]> {
     public byte[] entryToObject(DatabaseEntry entry) {
 
         int len = entry.getSize();
-        if (len == 0) {
+        if(len == 0) {
             return ZERO_LENGTH_BYTE_ARRAY;
-        } else {
+        }
+        else {
             byte[] bytes = new byte[len];
             System.arraycopy(entry.getData(), entry.getOffset(),
-                             bytes, 0, bytes.length);
+                    bytes, 0, bytes.length);
             return bytes;
         }
     }

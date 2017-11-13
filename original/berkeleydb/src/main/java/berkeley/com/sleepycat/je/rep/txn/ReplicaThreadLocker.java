@@ -24,7 +24,7 @@ import berkeley.com.sleepycat.je.txn.ThreadLocker;
 /**
  * A ReplicaThreadLocker is used with a user initiated non-transactional
  * operation on a Replica, for a replicated DB.
- *
+ * <p>
  * Like ReadonlyTxn, it enforces read-only semantics and implements the
  * ReplicaConsistencyPolicy.  Unlike ReadonlyTxn, the environment default
  * ReplicaConsistencyPolicy is enforced rather than the policy specified via
@@ -32,7 +32,7 @@ import berkeley.com.sleepycat.je.txn.ThreadLocker;
  * than the txnBeginHook.
  */
 public class ReplicaThreadLocker extends ThreadLocker {
-    
+
     private final RepImpl repImpl;
 
     public ReplicaThreadLocker(final RepImpl repImpl) {
@@ -57,23 +57,23 @@ public class ReplicaThreadLocker extends ThreadLocker {
                                    final boolean noWait,
                                    final boolean jumpAheadOfWaiters,
                                    final DatabaseImpl database) {
-        if (lockType.isWriteLock() && !database.allowReplicaWrite()) {
+        if(lockType.isWriteLock() && !database.allowReplicaWrite()) {
             disallowReplicaWrite();
         }
         return super.lockInternal(lsn, lockType, noWait, jumpAheadOfWaiters,
-                                  database);
+                database);
     }
 
     /**
      * If logging occurs before locking, we must screen out write locks here.
-     *
+     * <p>
      * If we allow the operation (e.g., for a non-replicated DB), then be sure
      * to call the base class method to prepare to undo in the (very unlikely)
      * event that logging succeeds but locking fails. [#22875]
      */
     @Override
     public void preLogWithoutLock(DatabaseImpl database) {
-        if (!database.allowReplicaWrite()) {
+        if(!database.allowReplicaWrite()) {
             disallowReplicaWrite();
         }
         super.preLogWithoutLock(database);
@@ -94,12 +94,12 @@ public class ReplicaThreadLocker extends ThreadLocker {
      */
     @Override
     public void openCursorHook(DatabaseImpl dbImpl)
-        throws ReplicaConsistencyException {
+            throws ReplicaConsistencyException {
 
-        if (!dbImpl.isReplicated()) {
+        if(!dbImpl.isReplicated()) {
             return;
         }
         ReadonlyTxn.checkConsistency(repImpl,
-                                     repImpl.getDefaultConsistencyPolicy());
+                repImpl.getDefaultConsistencyPolicy());
     }
 }

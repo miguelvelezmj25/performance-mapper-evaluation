@@ -13,13 +13,12 @@
 
 package berkeley.com.sleepycat.je.rep.jmx.plugin;
 
-import java.util.HashMap;
-
-import javax.management.MBeanServerConnection;
-
 import berkeley.com.sleepycat.je.jmx.plugin.Stats;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironmentStats;
 import berkeley.com.sleepycat.je.rep.jmx.RepJEMonitor;
+
+import javax.management.MBeanServerConnection;
+import java.util.HashMap;
 
 public class RepJEStats extends Stats {
     private static final long serialVersionUID = 4240112567440108407L;
@@ -30,20 +29,20 @@ public class RepJEStats extends Stats {
 
     @Override
     protected void initVariables() {
-        statsTitles = ReplicatedEnvironmentStats.getStatGroupTitles(); 
+        statsTitles = ReplicatedEnvironmentStats.getStatGroupTitles();
         opName = RepJEMonitor.OP_DUMP_REPSTATS;
         mBeanNamePrefix = RepJEStatsPlugin.mBeanNamePrefix;
     }
-   
-    @SuppressWarnings("unchecked") 
+
+    @SuppressWarnings("unchecked")
     @Override
     protected void generateTips() {
         try {
             tips = (HashMap) connection.invoke
-                (objName, RepJEMonitor.OP_GET_REP_TIPS, 
-                 new Object[] {}, new String[] {});
+                    (objName, RepJEMonitor.OP_GET_REP_TIPS,
+                            new Object[]{}, new String[]{});
             updateTips();
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }

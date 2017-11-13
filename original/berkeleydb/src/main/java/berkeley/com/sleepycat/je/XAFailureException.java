@@ -20,7 +20,7 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * invalidated as the result of an XA failure.  The invalidation occurs when
  * {@code XAResource.end} is called by the resource manager with a {@code
  * XAResource.TMFAIL} flag.
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  *
@@ -30,28 +30,31 @@ public class XAFailureException extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public XAFailureException(Locker locker) {
         super(locker, true /*abortOnly*/,
-              "The TM_FAIL flag was passed to XAEnvironment.end().",
-              null /*cause*/);
+                "The TM_FAIL flag was passed to XAEnvironment.end().",
+                null /*cause*/);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private XAFailureException(String message,
                                XAFailureException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

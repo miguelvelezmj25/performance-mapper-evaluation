@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.log.BasicVersionedWriteLoggable;
@@ -24,6 +20,10 @@ import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
 import berkeley.com.sleepycat.utilint.StringUtils;
+
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * DatabaseImpl Ids are wrapped in a class so they can be logged.
@@ -67,7 +67,7 @@ public class DatabaseId extends BasicVersionedWriteLoggable
      * @return id as bytes, for use as a key
      */
     public byte[] getBytes()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return StringUtils.toUTF8(toString());
     }
@@ -77,11 +77,11 @@ public class DatabaseId extends BasicVersionedWriteLoggable
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
 
-        if (!(obj instanceof DatabaseId)) {
+        if(!(obj instanceof DatabaseId)) {
             return false;
         }
 
@@ -103,15 +103,17 @@ public class DatabaseId extends BasicVersionedWriteLoggable
      */
     @Override
     public int compareTo(DatabaseId o) {
-        if (o == null) {
+        if(o == null) {
             throw EnvironmentFailureException.unexpectedState("null arg");
         }
 
-        if (id == o.id) {
+        if(id == o.id) {
             return 0;
-        } else if (id > o.id) {
+        }
+        else if(id > o.id) {
             return 1;
-        } else {
+        }
+        else {
             return -1;
         }
     }
@@ -144,9 +146,10 @@ public class DatabaseId extends BasicVersionedWriteLoggable
 
     @Override
     public void readFromLog(ByteBuffer itemBuffer, int entryVersion) {
-        if (entryVersion < 6) {
+        if(entryVersion < 6) {
             id = LogUtils.readInt(itemBuffer);
-        } else {
+        }
+        else {
             id = LogUtils.readPackedLong(itemBuffer);
         }
     }
@@ -166,8 +169,9 @@ public class DatabaseId extends BasicVersionedWriteLoggable
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof DatabaseId))
+        if(!(other instanceof DatabaseId)) {
             return false;
+        }
 
         return id == ((DatabaseId) other).id;
     }

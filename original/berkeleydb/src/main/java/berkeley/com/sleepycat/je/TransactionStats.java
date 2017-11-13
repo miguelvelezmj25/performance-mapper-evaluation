@@ -13,18 +13,11 @@
 
 package berkeley.com.sleepycat.je;
 
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ABORTS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ACTIVE;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_ACTIVE_TXNS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_BEGINS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_COMMITS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XAABORTS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XACOMMITS;
-import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.TXN_XAPREPARES;
+import berkeley.com.sleepycat.je.utilint.StatGroup;
 
 import java.io.Serializable;
 
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import static berkeley.com.sleepycat.je.dbi.TxnStatDefinition.*;
 
 /**
  * Transaction statistics for a database environment.
@@ -36,70 +29,10 @@ public class TransactionStats implements Serializable {
     private StatGroup stats;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public TransactionStats(StatGroup stats) {
         this.stats = stats;
-    }
-
-    /**
-     * The Active class represents an active transaction.
-     */
-    public static class Active implements Serializable {
-
-        private static final long serialVersionUID = 1286693589L;
-
-        /**
-         * The transaction ID of the transaction.
-         */
-        private long txnId;
-
-        /**
-         * The transaction ID of the parent transaction (or 0, if no parent).
-         */
-        private long parentId;
-
-        /**
-         * The transaction name, including the thread name if available.
-         */
-        private String name;
-
-        /**
-         * The transaction ID of the transaction.
-         */
-        public long getId() {
-            return txnId;
-        }
-
-        /**
-         * The transaction ID of the parent transaction (or 0, if no parent).
-         */
-        public long getParentId() {
-            return parentId;
-        }
-
-        /**
-         * The transaction name, including the thread name if available.
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @hidden
-         * Internal use only.
-         */
-        public Active(String name, long txnId, long parentId) {
-            this.name = name;
-            this.txnId = txnId;
-            this.parentId = parentId;
-        }
-
-        @Override
-        public String toString() {
-            return "txnId = " + txnId + " txnName = " + name;
-        }
     }
 
     /**
@@ -170,5 +103,63 @@ public class TransactionStats implements Serializable {
 
     public String toStringVerbose() {
         return stats.toStringVerbose();
+    }
+
+    /**
+     * The Active class represents an active transaction.
+     */
+    public static class Active implements Serializable {
+
+        private static final long serialVersionUID = 1286693589L;
+
+        /**
+         * The transaction ID of the transaction.
+         */
+        private long txnId;
+
+        /**
+         * The transaction ID of the parent transaction (or 0, if no parent).
+         */
+        private long parentId;
+
+        /**
+         * The transaction name, including the thread name if available.
+         */
+        private String name;
+
+        /**
+         * @hidden Internal use only.
+         */
+        public Active(String name, long txnId, long parentId) {
+            this.name = name;
+            this.txnId = txnId;
+            this.parentId = parentId;
+        }
+
+        /**
+         * The transaction ID of the transaction.
+         */
+        public long getId() {
+            return txnId;
+        }
+
+        /**
+         * The transaction ID of the parent transaction (or 0, if no parent).
+         */
+        public long getParentId() {
+            return parentId;
+        }
+
+        /**
+         * The transaction name, including the thread name if available.
+         */
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "txnId = " + txnId + " txnName = " + name;
+        }
     }
 }

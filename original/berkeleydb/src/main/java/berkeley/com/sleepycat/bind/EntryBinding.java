@@ -17,7 +17,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 
 /**
  * A binding between a key or data entry and a key or data object.
- *
+ * <p>
  * <p><em>WARNING:</em> Binding instances are typically shared by multiple
  * threads and binding methods are called without any special synchronization.
  * Therefore, bindings must be thread safe.  In general no shared state should
@@ -32,7 +32,6 @@ public interface EntryBinding<E> {
      * Converts a entry buffer into an Object.
      *
      * @param entry is the source entry buffer.
-     *
      * @return the resulting Object.
      */
     E entryToObject(DatabaseEntry entry);
@@ -41,8 +40,7 @@ public interface EntryBinding<E> {
      * Converts an Object into a entry buffer.
      *
      * @param object is the source Object.
-     *
-     * @param entry is the destination entry buffer.
+     * @param entry  is the destination entry buffer.
      */
     void objectToEntry(E object, DatabaseEntry entry);
 }

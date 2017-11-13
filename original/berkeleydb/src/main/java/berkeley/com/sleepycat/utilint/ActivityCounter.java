@@ -29,21 +29,18 @@ public class ActivityCounter {
 
     private final AtomicInteger activeCount;
     private final AtomicBoolean threadDumpInProgress;
-    private volatile long lastThreadDumpTime;
-    private volatile int numCompletedDumps;
     private final int activeThreshold;
-    private final int  maxNumDumps;
+    private final int maxNumDumps;
     private final AtomicInteger maxActivity;
-
     /*
      * Thread dumps can only happen this many milliseconds apart, to avoid
      * overwhelming the system.
      */
     private final long requiredIntervalMillis;
-
     private final Logger logger;
-
     private final ExecutorService dumper;
+    private volatile long lastThreadDumpTime;
+    private volatile int numCompletedDumps;
 
     public ActivityCounter(int activeThreshold,
                            long requiredIntervalMillis,
@@ -66,7 +63,7 @@ public class ActivityCounter {
     public void start() {
         int numActive = activeCount.incrementAndGet();
         int max = maxActivity.get();
-        if (numActive > max) {
+        if(numActive > max) {
             maxActivity.compareAndSet(max, numActive);
         }
         check(numActive);
@@ -95,21 +92,21 @@ public class ActivityCounter {
     private void check(int numActive) {
 
         /* Activity is low, no need to do any dumps. */
-        if (numActive <= activeThreshold) {
+        if(numActive <= activeThreshold) {
             return;
         }
 
-        if (numCompletedDumps >= maxNumDumps) {
+        if(numCompletedDumps >= maxNumDumps) {
             return;
         }
 
         /* Don't do a thread dump if the last dump was too recent */
-        if (intervalIsTooShort()) {
+        if(intervalIsTooShort()) {
             return;
         }
 
         /* There's one in progress. */
-        if (threadDumpInProgress.get()) {
+        if(threadDumpInProgress.get()) {
             return;
         }
 
@@ -132,13 +129,13 @@ public class ActivityCounter {
 
         public void run() {
 
-            if (intervalIsTooShort()) {
+            if(intervalIsTooShort()) {
                 return;
             }
 
-            if (!threadDumpInProgress.compareAndSet(false, true)) {
+            if(!threadDumpInProgress.compareAndSet(false, true)) {
                 logger.warning("Unexpected: ActivityCounter stack trace " +
-                               "dumper saw threadDumpInProgress flag set.");
+                        "dumper saw threadDumpInProgress flag set.");
                 return;
             }
 
@@ -157,18 +154,18 @@ public class ActivityCounter {
             int whichDump = numCompletedDumps;
 
             logger.info("[Dump " + whichDump +
-                        " --Dumping stack traces for all threads]");
+                    " --Dumping stack traces for all threads]");
 
             Map<Thread, StackTraceElement[]> stackTraces =
-                Thread.getAllStackTraces();
+                    Thread.getAllStackTraces();
 
-            for (Map.Entry<Thread, StackTraceElement[]> stme :
-                     stackTraces.entrySet()) {
-                if (stme.getKey() == Thread.currentThread()) {
+            for(Map.Entry<Thread, StackTraceElement[]> stme :
+                    stackTraces.entrySet()) {
+                if(stme.getKey() == Thread.currentThread()) {
                     continue;
                 }
                 logger.info(stme.getKey().toString());
-                for (StackTraceElement ste : stme.getValue()) {
+                for(StackTraceElement ste : stme.getValue()) {
                     logger.info("     " + ste);
                 }
             }

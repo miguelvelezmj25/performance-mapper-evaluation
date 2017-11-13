@@ -13,19 +13,8 @@
 
 package berkeley.com.sleepycat.je.rep.subscription;
 
-import java.io.IOException;
-import java.util.Timer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.rep.GroupShutdownException;
-import berkeley.com.sleepycat.je.rep.InsufficientLogException;
-import berkeley.com.sleepycat.je.rep.NodeType;
-import berkeley.com.sleepycat.je.rep.RepInternal;
-import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
+import berkeley.com.sleepycat.je.rep.*;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
@@ -39,23 +28,21 @@ import berkeley.com.sleepycat.je.rep.stream.Protocol;
 import berkeley.com.sleepycat.je.rep.stream.ReplicaFeederHandshake;
 import berkeley.com.sleepycat.je.rep.stream.ReplicaFeederHandshakeConfig;
 import berkeley.com.sleepycat.je.rep.stream.SubscriberFeederSyncup;
-import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol;
-import berkeley.com.sleepycat.je.rep.utilint.NamedChannel;
-import berkeley.com.sleepycat.je.rep.utilint.NamedChannelWithTimeout;
-import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.utilint.InternalException;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.StoppableThread;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.rep.utilint.*;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.io.IOException;
+import java.util.Timer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Main thread created by Subscription to stream log entries from feeder
  */
 class SubscriptionThread extends StoppableThread {
-    
+
     private final Logger logger;
     private final SubscriptionConfig config;
     private final SubscriptionStat stats;
@@ -63,19 +50,16 @@ class SubscriptionThread extends StoppableThread {
     /* communication queues and working threads */
     private final BlockingQueue<Long> outputQueue;
     private final BlockingQueue<Object> inputQueue;
+    /* requested VLSN from which to stream log entries */
+    private final VLSN reqVLSN;
     private SubscriptionOutputThread outputThread;
     private SubscriptionProcessMessageThread messageProcThread;
-
     /* communication channel between subscriber and feeder */
     private NamedChannelWithTimeout namedChannel;
     /* task to register channel with timeout */
     private ChannelTimeoutTask channelTimeoutTask;
     /* protocol used to communicate with feeder */
     private Protocol protocol;
-
-    /* requested VLSN from which to stream log entries */
-    private final VLSN reqVLSN;
-
     private volatile SubscriptionStatus status;
 
     /* stored exception */
@@ -96,7 +80,7 @@ class SubscriptionThread extends StoppableThread {
 
         super(RepInternal.getNonNullRepImpl(env), "Subscription Main");
         setUncaughtExceptionHandler(new SubscriptionThreadExceptionHandler());
-        
+
         this.reqVLSN = reqVLSN;
         this.config = config;
         this.stats = stats;
@@ -105,9 +89,9 @@ class SubscriptionThread extends StoppableThread {
         namedChannel = null;
         /* init subscription input and output queue */
         inputQueue =
-            new ArrayBlockingQueue<>(config.getInputMessageQueueSize());
+                new ArrayBlockingQueue<>(config.getInputMessageQueueSize());
         outputQueue =
-            new ArrayBlockingQueue<>(config.getOutputMessageQueueSize());
+                new ArrayBlockingQueue<>(config.getOutputMessageQueueSize());
 
         status = SubscriptionStatus.INIT;
         storedException = null;
@@ -141,22 +125,22 @@ class SubscriptionThread extends StoppableThread {
     public void run() {
 
         LoggerUtils.info(logger, envImpl,
-                         "Start subscription from VLSN " + reqVLSN +
-                         " from feeder at " +
-                         config.getFeederHost() + ":" + config.getFeederPort());
+                "Start subscription from VLSN " + reqVLSN +
+                        " from feeder at " +
+                        config.getFeederHost() + ":" + config.getFeederPort());
 
         try {
             final int maxRetry = config.getMaxConnectRetries();
             boolean auxThreadCreated = false;
             int numRetry = 0;
 
-            while (!isShutdown()) {
+            while(!isShutdown()) {
                 try {
                     initializeConnection();
-                    if (!auxThreadCreated) {
+                    if(!auxThreadCreated) {
                         LoggerUtils.fine(logger, envImpl,
-                                         "Create auxiliary msg processing " +
-                                         "and output threads");
+                                "Create auxiliary msg processing " +
+                                        "and output threads");
                         createAuxThread();
                         auxThreadCreated = true;
                     }
@@ -164,71 +148,72 @@ class SubscriptionThread extends StoppableThread {
                     status = SubscriptionStatus.SUCCESS;
                     loopInternal();
                     break;
-                } catch (ConnectionException e) {
-                    if (numRetry == maxRetry) {
+                } catch(ConnectionException e) {
+                    if(numRetry == maxRetry) {
                         LoggerUtils.info(logger, envImpl,
-                                         "Reaching the max retry " + maxRetry +
-                                         " to connect feeder " +
-                                         config.getFeederHost() +
-                                         ", shut down subscription" +
-                                         "\n" + LoggerUtils.getStackTrace(e));
+                                "Reaching the max retry " + maxRetry +
+                                        " to connect feeder " +
+                                        config.getFeederHost() +
+                                        ", shut down subscription" +
+                                        "\n" + LoggerUtils.getStackTrace(e));
                         storedException = e;
                         status = SubscriptionStatus.CONNECTION_ERROR;
                         break;
-                     } else {
+                    }
+                    else {
                         numRetry++;
                         LoggerUtils.fine(logger, envImpl,
-                                         "Fail to connect feeder at " +
-                                         config.getFeederHost() +
-                                         " sleep for " + e.getRetrySleepMs() +
-                                         " ms and re-connect again");
+                                "Fail to connect feeder at " +
+                                        config.getFeederHost() +
+                                        " sleep for " + e.getRetrySleepMs() +
+                                        " ms and re-connect again");
                         Thread.sleep(e.getRetrySleepMs());
                     }
                 }
             }
-        } catch (GroupShutdownException e) {
-            if (messageProcThread.isAlive()) {
+        } catch(GroupShutdownException e) {
+            if(messageProcThread.isAlive()) {
                 try {
                     /* let message processing thread finish up */
                     messageProcThread.join();
-                } catch (InterruptedException ie) {
+                } catch(InterruptedException ie) {
                     /* ignore since we will shut down, just log */
                     LoggerUtils.fine(logger, envImpl,
-                                     "exception in shutting down msg proc " +
-                                     "thread " + ie.getMessage() +
-                                     "\n" + LoggerUtils.getStackTrace(ie));
+                            "exception in shutting down msg proc " +
+                                    "thread " + ie.getMessage() +
+                                    "\n" + LoggerUtils.getStackTrace(ie));
                 }
             }
             storedException = e;
             LoggerUtils.info(logger, envImpl,
-                             "received group shutdown " + e.getMessage() +
-                             "\n" + LoggerUtils.getStackTrace(e));
+                    "received group shutdown " + e.getMessage() +
+                            "\n" + LoggerUtils.getStackTrace(e));
             status = SubscriptionStatus.GRP_SHUTDOWN;
-        } catch (InsufficientLogException e) {
+        } catch(InsufficientLogException e) {
             storedException = e;
             LoggerUtils.info(logger, envImpl,
-                             "unable to subscribe from requested VLSN " +
-                             e.getRefreshVLSN() +
-                             "\n" + LoggerUtils.getStackTrace(e));
+                    "unable to subscribe from requested VLSN " +
+                            e.getRefreshVLSN() +
+                            "\n" + LoggerUtils.getStackTrace(e));
             status = SubscriptionStatus.VLSN_NOT_AVAILABLE;
-        } catch (EnvironmentFailureException e) {
+        } catch(EnvironmentFailureException e) {
             storedException = e;
             LoggerUtils.warning(logger, envImpl,
-                                "unable to sync up with feeder due to EFE " +
-                                e.getMessage() +
-                                "\n" + LoggerUtils.getStackTrace(e));
+                    "unable to sync up with feeder due to EFE " +
+                            e.getMessage() +
+                            "\n" + LoggerUtils.getStackTrace(e));
             status = SubscriptionStatus.UNKNOWN_ERROR;
-        } catch (InterruptedException e) {
+        } catch(InterruptedException e) {
             storedException = e;
             LoggerUtils.warning(logger, envImpl,
-                                "interrupted exception " + e.getMessage() +
-                                "\n" + LoggerUtils.getStackTrace(e));
+                    "interrupted exception " + e.getMessage() +
+                            "\n" + LoggerUtils.getStackTrace(e));
             status = SubscriptionStatus.UNKNOWN_ERROR;
-        } catch (InternalException e) {
+        } catch(InternalException e) {
             storedException = e;
             LoggerUtils.warning(logger, envImpl,
-                                "internal exception " + e.getMessage() +
-                                "\n" + LoggerUtils.getStackTrace(e));
+                    "internal exception " + e.getMessage() +
+                            "\n" + LoggerUtils.getStackTrace(e));
             status = SubscriptionStatus.UNKNOWN_ERROR;
         } finally {
             shutdown();
@@ -241,7 +226,7 @@ class SubscriptionThread extends StoppableThread {
      * @param exceptionHandlingTestHook test hook
      */
     void setExceptionHandlingTestHook(
-        TestHook<SubscriptionThread> exceptionHandlingTestHook) {
+            TestHook<SubscriptionThread> exceptionHandlingTestHook) {
         this.exceptionHandlingTestHook = exceptionHandlingTestHook;
     }
 
@@ -252,38 +237,38 @@ class SubscriptionThread extends StoppableThread {
     void shutdown() {
 
         /* Note start of shutdown and return if already requested */
-        if (shutdownDone(logger)) {
+        if(shutdownDone(logger)) {
             return;
         }
 
         /* shutdown aux threads */
-        if (messageProcThread != null) {
+        if(messageProcThread != null) {
             try {
                 messageProcThread.shutdownThread(logger);
                 LoggerUtils.info(logger, envImpl,
-                                 "message processing thread has shut down.");
-            } catch (Exception e) {
+                        "message processing thread has shut down.");
+            } catch(Exception e) {
                 /* Ignore so shutdown can continue */
                 LoggerUtils.warning(logger, envImpl,
-                                    "error in shutdown msg proc thread: " +
-                                    e.getMessage() + ", continue shutdown the" +
-                                    " subscription thread.");
+                        "error in shutdown msg proc thread: " +
+                                e.getMessage() + ", continue shutdown the" +
+                                " subscription thread.");
             } finally {
                 messageProcThread = null;
             }
         }
-        if (outputThread != null) {
+        if(outputThread != null) {
             try {
                 outputThread.shutdownThread(logger);
                 LoggerUtils.info(logger, envImpl,
-                                 "output thread has shut down.");
+                        "output thread has shut down.");
 
-            } catch (Exception e) {
+            } catch(Exception e) {
                 /* Ignore we will clean up via killing IO channel anyway. */
                 LoggerUtils.warning(logger, envImpl,
-                                    "error in shutdown output thread: " +
-                                    e.getMessage() + ", continue shutdown " +
-                                    "subscription thread.");
+                        "error in shutdown output thread: " +
+                                e.getMessage() + ", continue shutdown " +
+                                "subscription thread.");
             } finally {
                 outputThread = null;
             }
@@ -292,41 +277,42 @@ class SubscriptionThread extends StoppableThread {
         inputQueue.clear();
         outputQueue.clear();
         RepUtils.shutdownChannel(namedChannel);
-        if (channelTimeoutTask != null) {
+        if(channelTimeoutTask != null) {
             channelTimeoutTask.cancel();
         }
 
         shutdownThread(logger);
 
         LoggerUtils.info(logger, envImpl,
-                         "queues cleared and channel closed, subscription " +
-                         "thread has completely shut down");
+                "queues cleared and channel closed, subscription " +
+                        "thread has completely shut down");
     }
 
     /**
      * Enqueue message received from feeder into input queue
      *
-     * @param message  message received from feeder
+     * @param message message received from feeder
      * @throws InterruptedException
      */
     void offer(Object message)
-        throws InterruptedException {
+            throws InterruptedException {
 
-        RepImpl repImpl = (RepImpl)envImpl;
+        RepImpl repImpl = (RepImpl) envImpl;
 
-        while (!isShutdown() &&     /* stop enqueue msg if thread is shutdown */
-               !inputQueue.offer(message,
-                                 SubscriptionConfig.QUEUE_POLL_INTERVAL_MS,
-                                 TimeUnit.MILLISECONDS)) {
+        while(!isShutdown() &&     /* stop enqueue msg if thread is shutdown */
+                !inputQueue.offer(message,
+                        SubscriptionConfig.QUEUE_POLL_INTERVAL_MS,
+                        TimeUnit.MILLISECONDS)) {
             /* Offer timed out. */
-            if (!messageProcThread.isAlive()) {
+            if(!messageProcThread.isAlive()) {
                 LoggerUtils.info(logger, repImpl,
-                                 "Thread consuming input queue is gone, start" +
-                                 " shutdown process");
+                        "Thread consuming input queue is gone, start" +
+                                " shutdown process");
                 throw new GroupShutdownException(logger, repImpl,
-                                                 config.getFeederHost(),
-                                                 stats.getHighVLSN(), 0);
-            } else {
+                        config.getFeederHost(),
+                        stats.getHighVLSN(), 0);
+            }
+            else {
                 /* count the overflow and retry */
                 stats.getNumReplayQueueOverflow().increment();
             }
@@ -341,34 +327,34 @@ class SubscriptionThread extends StoppableThread {
      * @throws ConnectionException
      */
     private void initializeConnection() throws InternalException,
-        EnvironmentFailureException, ConnectionException {
+            EnvironmentFailureException, ConnectionException {
 
         /* open a channel to feeder */
         LoggerUtils.fine(logger, envImpl,
-                         "subscription " + config.getSubNodeName() + 
-                         " open channel and handshake with feeder");
+                "subscription " + config.getSubNodeName() +
+                        " open channel and handshake with feeder");
         try {
 
             openChannel();
             ReplicaFeederHandshake handshake =
                     new ReplicaFeederHandshake(new SubFeederHandshakeConfig
-                                                   (config.getNodeType()));
+                            (config.getNodeType()));
 
             protocol = handshake.execute();
 
             LoggerUtils.fine(logger, envImpl,
-                             "subscription " + config.getSubNodeName() +
-                             " sync-up with feeder at vlsn: " + reqVLSN);
+                    "subscription " + config.getSubNodeName() +
+                            " sync-up with feeder at vlsn: " + reqVLSN);
             SubscriberFeederSyncup syncup =
-                new SubscriberFeederSyncup(namedChannel, protocol,
-                                           config.getFeederFilter(),
-                                           (RepImpl)envImpl, logger);
+                    new SubscriberFeederSyncup(namedChannel, protocol,
+                            config.getFeederFilter(),
+                            (RepImpl) envImpl, logger);
             final VLSN startVLSN = syncup.execute(reqVLSN);
             LoggerUtils.fine(logger, envImpl,
-                             "sync-up with feeder done, start vlsn: " +
-                             startVLSN);
+                    "sync-up with feeder done, start vlsn: " +
+                            startVLSN);
 
-            if (!startVLSN.equals(VLSN.NULL_VLSN)) {
+            if(!startVLSN.equals(VLSN.NULL_VLSN)) {
 
                 /* start VLSN should never be greater than requested VLSN */
                 assert (!(startVLSN.compareTo(reqVLSN) > 0));
@@ -376,34 +362,35 @@ class SubscriptionThread extends StoppableThread {
 
                 /* read heartbeat and respond */
                 protocol.read(namedChannel.getChannel(),
-                              Protocol.Heartbeat.class);
+                        Protocol.Heartbeat.class);
                 queueAck(ReplicaOutputThread.HEARTBEAT_ACK);
 
                 LoggerUtils.info(logger, envImpl,
-                                 "Subscription " + config.getSubNodeName() +
-                                 " successfully connect to feeder at " +
-                                 config.getFeederHost() + ":" +
-                                 config.getFeederPort() +
-                                 ", reqVLSN: " + reqVLSN +
-                                 ", start VLSN: " + startVLSN);
-            } else {
-                throw new InsufficientLogException((RepImpl)envImpl, reqVLSN);
+                        "Subscription " + config.getSubNodeName() +
+                                " successfully connect to feeder at " +
+                                config.getFeederHost() + ":" +
+                                config.getFeederPort() +
+                                ", reqVLSN: " + reqVLSN +
+                                ", start VLSN: " + startVLSN);
             }
-        } catch (IOException e) {
+            else {
+                throw new InsufficientLogException((RepImpl) envImpl, reqVLSN);
+            }
+        } catch(IOException e) {
             throw new ConnectionException("Unable to connect due to " +
-                                          e.getMessage() +
-                                          ",  will retry later.",
-                                          config.getSleepBeforeRetryMs(),
-                                          e);
-        } catch (EnvironmentFailureException e) {
+                    e.getMessage() +
+                    ",  will retry later.",
+                    config.getSleepBeforeRetryMs(),
+                    e);
+        } catch(EnvironmentFailureException e) {
             logger.warning("Fail to handshake with feeder: " +
-                           e.getMessage());
+                    e.getMessage());
             throw e;
-        } catch (BinaryProtocol.ProtocolException e) {
+        } catch(BinaryProtocol.ProtocolException e) {
             final String msg = ("Unable to connect to feeder " +
-                                config.getFeederHost() +
-                                " due to protocol exception " +
-                                e.getMessage());
+                    config.getFeederHost() +
+                    " due to protocol exception " +
+                    e.getMessage());
             LoggerUtils.warning(logger, envImpl, msg);
             throw new InternalException(msg, e);
         }
@@ -414,7 +401,7 @@ class SubscriptionThread extends StoppableThread {
      */
     private void createAuxThread() {
 
-        RepImpl repImpl = (RepImpl)envImpl;
+        RepImpl repImpl = (RepImpl) envImpl;
 
         inputQueue.clear();
         outputQueue.clear();
@@ -425,102 +412,101 @@ class SubscriptionThread extends StoppableThread {
                         protocol, namedChannel.getChannel(), stats);
         outputThread.start();
         LoggerUtils.fine(logger, envImpl,
-                         "output thread created for subscription " +
-                         config.getSubNodeName());
+                "output thread created for subscription " +
+                        config.getSubNodeName());
         /* start thread to consume data in input queue */
         messageProcThread =
-            new SubscriptionProcessMessageThread(repImpl, inputQueue, config,
-                                                 stats, logger);
+                new SubscriptionProcessMessageThread(repImpl, inputQueue, config,
+                        stats, logger);
         messageProcThread.start();
         LoggerUtils.fine(logger, envImpl,
-                         "message processing thread created for subscription " +
-                         config.getSubNodeName());
+                "message processing thread created for subscription " +
+                        config.getSubNodeName());
     }
 
     /**
      * Open a data channel to feeder
      *
      * @return created name channel
-     *
      * @throws ConnectionException unable to connect due to error and need retry
-     * @throws InternalException fail to handshake with feeder
+     * @throws InternalException   fail to handshake with feeder
      */
     private NamedChannel openChannel()
-        throws ConnectionException, InternalException {
+            throws ConnectionException, InternalException {
 
-        RepImpl repImpl = (RepImpl)envImpl;
+        RepImpl repImpl = (RepImpl) envImpl;
 
-        if (repImpl == null) {
+        if(repImpl == null) {
             throw new IllegalStateException("Replication env is unavailable.");
         }
 
         try {
             DataChannelFactory.ConnectOptions connectOpts =
-                new DataChannelFactory
-                    .ConnectOptions()
-                    .setTcpNoDelay(config.TCP_NO_DELAY)
-                    .setReceiveBufferSize(config.getReceiveBufferSize())
-                    .setOpenTimeout((int) config
-                        .getStreamOpenTimeout(TimeUnit.MILLISECONDS))
-                    .setBlocking(config.BLOCKING_MODE_CHANNEL);
+                    new DataChannelFactory
+                            .ConnectOptions()
+                            .setTcpNoDelay(config.TCP_NO_DELAY)
+                            .setReceiveBufferSize(config.getReceiveBufferSize())
+                            .setOpenTimeout((int) config
+                                    .getStreamOpenTimeout(TimeUnit.MILLISECONDS))
+                            .setBlocking(config.BLOCKING_MODE_CHANNEL);
 
             final DataChannel channel =
-                RepUtils.openBlockingChannel(config.getInetSocketAddress(),
-                                             repImpl.getChannelFactory(),
-                                             connectOpts);
+                    RepUtils.openBlockingChannel(config.getInetSocketAddress(),
+                            repImpl.getChannelFactory(),
+                            connectOpts);
 
             ServiceDispatcher.doServiceHandshake(channel,
-                                                 FeederManager.FEEDER_SERVICE);
+                    FeederManager.FEEDER_SERVICE);
             LoggerUtils.fine(logger, envImpl,
-                             "channel opened to service " +
-                             FeederManager.FEEDER_SERVICE + "@" +
-                             config.getFeederHost() +
-                             "[address: " + config.getFeederHostAddr() +
-                             " port: " + config.getFeederPort() + "]");
+                    "channel opened to service " +
+                            FeederManager.FEEDER_SERVICE + "@" +
+                            config.getFeederHost() +
+                            "[address: " + config.getFeederHostAddr() +
+                            " port: " + config.getFeederPort() + "]");
 
             final int timeoutMs = repImpl.getConfigManager().
-                getDuration(RepParams.PRE_HEARTBEAT_TIMEOUT);
+                    getDuration(RepParams.PRE_HEARTBEAT_TIMEOUT);
 
             channelTimeoutTask = new ChannelTimeoutTask(new Timer(true));
             namedChannel =
-                new NamedChannelWithTimeout(repImpl, logger, channelTimeoutTask,
-                                            channel, timeoutMs);
-        } catch (IOException cause) {
+                    new NamedChannelWithTimeout(repImpl, logger, channelTimeoutTask,
+                            channel, timeoutMs);
+        } catch(IOException cause) {
             /* retry if unable to connect to feeder */
             throw new ConnectionException("Fail to open channel to feeder " +
-                                          "due to " + cause.getMessage() +
-                                          ", will retry later",
-                                          config.getSleepBeforeRetryMs(),
-                                          cause);
-        } catch (ServiceDispatcher.ServiceConnectFailedException cause) {
+                    "due to " + cause.getMessage() +
+                    ", will retry later",
+                    config.getSleepBeforeRetryMs(),
+                    cause);
+        } catch(ServiceDispatcher.ServiceConnectFailedException cause) {
 
             /*
              * The feeder may not have established the Feeder Service
              * as yet. For example, the transition to the master may not have
              * been completed.
              */
-            if (cause.getResponse() ==
-                ServiceDispatcher.Response.UNKNOWN_SERVICE) {
+            if(cause.getResponse() ==
+                    ServiceDispatcher.Response.UNKNOWN_SERVICE) {
                 throw new ConnectionException("Service exception: " +
-                                              cause.getMessage() +
-                                              ", wait longer and will retry " +
-                                              "later",
-                                              config.getSleepBeforeRetryMs(),
-                                              cause);
+                        cause.getMessage() +
+                        ", wait longer and will retry " +
+                        "later",
+                        config.getSleepBeforeRetryMs(),
+                        cause);
             }
 
             throw new InternalException("Subscription " +
-                                        config.getSubNodeName() +
-                                        "failed to handshake for service " +
-                                        FeederManager.FEEDER_SERVICE +
-                                        " with feeder " +
-                                        config.getFeederHost(),
-                                        cause);
+                    config.getSubNodeName() +
+                    "failed to handshake for service " +
+                    FeederManager.FEEDER_SERVICE +
+                    " with feeder " +
+                    config.getFeederHost(),
+                    cause);
         }
         LoggerUtils.info(logger, envImpl,
-                         "Subscription " + config.getSubNodeName() +
-                         " has successfully created a channel to feeder at " +
-                         config.getFeederHost() + ":" + config.getFeederPort());
+                "Subscription " + config.getSubNodeName() +
+                        " has successfully created a channel to feeder at " +
+                        config.getFeederHost() + ":" + config.getFeederPort());
 
         return namedChannel;
     }
@@ -530,49 +516,50 @@ class SubscriptionThread extends StoppableThread {
      * process shutdown and heartbeat messages, and relay data operations to
      * the input queue to be consumed by input thread.
      *
-     * @throws InternalException if error in reading messages from channel or
-     *                           enqueue message into input queue
+     * @throws InternalException      if error in reading messages from channel or
+     *                                enqueue message into input queue
      * @throws GroupShutdownException if receive shutdown message from feeder
      */
     private void loopInternal()
-        throws InternalException, GroupShutdownException {
+            throws InternalException, GroupShutdownException {
 
-        RepImpl repImpl = (RepImpl)envImpl;
+        RepImpl repImpl = (RepImpl) envImpl;
 
         try {
 
             LoggerUtils.info(logger, envImpl,
-                             "Start reading messages from feeder " +
-                             config.getFeederHost() + ":" +
-                             config.getFeederPort());
-            while (!isShutdown()) {
+                    "Start reading messages from feeder " +
+                            config.getFeederHost() + ":" +
+                            config.getFeederPort());
+            while(!isShutdown()) {
 
                 BinaryProtocol.Message message = protocol.read(namedChannel);
 
-                if ((message == null)) {
+                if((message == null)) {
                     LoggerUtils.info(logger, envImpl,
-                                     "Subscription " + config.getSubNodeName() +
-                                     " has nothing stream, exit loop.");
+                            "Subscription " + config.getSubNodeName() +
+                                    " has nothing stream, exit loop.");
                     return;
                 }
 
                 assert TestHookExecute.doHookIfSet(exceptionHandlingTestHook,
-                                                   this);
+                        this);
 
                 stats.getNumMsgReceived().increment();
 
                 BinaryProtocol.MessageOp messageOp = message.getOp();
-                if (messageOp == Protocol.HEARTBEAT) {
+                if(messageOp == Protocol.HEARTBEAT) {
                     LoggerUtils.finest(logger, envImpl,
-                                       "receive heartbeat from " +
-                                       namedChannel.getNameIdPair());
+                            "receive heartbeat from " +
+                                    namedChannel.getNameIdPair());
                     queueAck(ReplicaOutputThread.HEARTBEAT_ACK);
-                } else if (messageOp == Protocol.SHUTDOWN_REQUEST) {
+                }
+                else if(messageOp == Protocol.SHUTDOWN_REQUEST) {
 
                     LoggerUtils.info(logger, envImpl,
-                                     "Receive shutdown request from feeder " +
-                                     config.getFeederHost() +
-                                     ", shutdown subscriber");
+                            "Receive shutdown request from feeder " +
+                                    config.getFeederHost() +
+                                    ", shutdown subscriber");
                     
                     /*
                      * create a shutdown request, make it in the queue so
@@ -583,32 +570,33 @@ class SubscriptionThread extends StoppableThread {
                      * GroupShutdownException
                      */
                     Protocol.ShutdownRequest req =
-                        (Protocol.ShutdownRequest) message;
+                            (Protocol.ShutdownRequest) message;
                     Exception exp =
-                        new GroupShutdownException(logger, repImpl,
-                                                   config.getFeederHost(),
-                                                   stats.getHighVLSN(),
-                                                   req.getShutdownTimeMs());
+                            new GroupShutdownException(logger, repImpl,
+                                    config.getFeederHost(),
+                                    stats.getHighVLSN(),
+                                    req.getShutdownTimeMs());
                     offer(exp);
                     throw exp;
-                } else {
+                }
+                else {
                     /* a regular data entry message */
                     offer(message);
 
                     final long pending = inputQueue.size();
-                    if (pending > stats.getMaxPendingInput().get()) {
+                    if(pending > stats.getMaxPendingInput().get()) {
                         stats.getMaxPendingInput().set(pending);
                         LoggerUtils.finest(logger, envImpl,
-                                           "Max pending request log items:" +
-                                           pending);
+                                "Max pending request log items:" +
+                                        pending);
                     }
                 }
 
             }
-        } catch (GroupShutdownException gse) {
+        } catch(GroupShutdownException gse) {
             /* throw gse to caller */
             throw gse;
-        } catch (Exception e) {
+        } catch(Exception e) {
             /* other exception is thrown as IE */
             throw new InternalException(e.getMessage(), e);
         }
@@ -624,7 +612,7 @@ class SubscriptionThread extends StoppableThread {
             throws IOException {
         try {
             outputQueue.put(xid);
-        } catch (InterruptedException ie) {
+        } catch(InterruptedException ie) {
 
             /*
              * If interrupted while waiting, have the higher levels treat
@@ -646,9 +634,10 @@ class SubscriptionThread extends StoppableThread {
 
         private final NodeType nodeType;
         private final RepImpl repImpl;
+
         SubFeederHandshakeConfig(NodeType nodeType) {
             this.nodeType = nodeType;
-            repImpl = (RepImpl)envImpl;
+            repImpl = (RepImpl) envImpl;
         }
 
         public RepImpl getRepImpl() {
@@ -680,7 +669,7 @@ class SubscriptionThread extends StoppableThread {
                     repImpl.getCurrentJEVersion());
 
             /* use uuid if specified, otherwise unknown uuid will be used */
-            if (config.getGroupUUID() != null) {
+            if(config.getGroupUUID() != null) {
                 repGroupImpl.setUUID(config.getGroupUUID());
             }
             return repGroupImpl;
@@ -714,7 +703,7 @@ class SubscriptionThread extends StoppableThread {
         @Override
         public String getMessage() {
             return "Failed to connect, will retry after sleeping " +
-                   retrySleepMs + " ms";
+                    retrySleepMs + " ms";
         }
     }
 
@@ -722,13 +711,13 @@ class SubscriptionThread extends StoppableThread {
      * Handle exceptions uncaught in SubscriptionThread
      */
     private class SubscriptionThreadExceptionHandler
-        implements UncaughtExceptionHandler {
+            implements UncaughtExceptionHandler {
 
         public void uncaughtException(Thread t, Throwable e) {
             logger.severe("Error { " + e.getMessage() +
-                          " } in SubscriptionThread {" +
-                          t + " } was uncaught.\nstack trace:\n" +
-                          LoggerUtils.getStackTrace(e));
+                    " } in SubscriptionThread {" +
+                    t + " } was uncaught.\nstack trace:\n" +
+                    LoggerUtils.getStackTrace(e));
         }
     }
 }

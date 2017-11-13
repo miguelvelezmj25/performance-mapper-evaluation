@@ -13,18 +13,15 @@
 
 package berkeley.com.sleepycat.collections;
 
-import java.util.Set;
-
 import berkeley.com.sleepycat.bind.EntityBinding;
 import berkeley.com.sleepycat.bind.EntryBinding;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
+import java.util.Set;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
 
 /**
  * The Set returned by Map.values() and Map.duplicates(), and which can also be
@@ -43,51 +40,43 @@ public class StoredValueSet<E> extends StoredCollection<E> implements Set<E> {
     /**
      * Creates a value set view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
+     * @param database     is the Database underlying the new collection.
      * @param valueBinding is the binding used to translate between value
-     * buffers and value objects.
-     *
+     *                     buffers and value objects.
      * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                     to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C Edition).
      */
     public StoredValueSet(Database database,
                           EntryBinding<E> valueBinding,
                           boolean writeAllowed) {
 
         super(new DataView(database, null, valueBinding, null,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     /**
      * Creates a value set entity view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
+     * @param database           is the Database underlying the new collection.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param writeAllowed       is true to create a read-write collection or false
+     *                           to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C Edition).
      */
     public StoredValueSet(Database database,
                           EntityBinding<E> valueEntityBinding,
                           boolean writeAllowed) {
 
         super(new DataView(database, null, null, valueEntityBinding,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     StoredValueSet(DataView valueSetView) {
@@ -101,33 +90,30 @@ public class StoredValueSet<E> extends StoredCollection<E> implements Set<E> {
      * This method conforms to the {@link Set#add} interface.
      *
      * @param entity is the entity to be added.
-     *
      * @return true if the entity was added, that is the key-value pair
      * represented by the entity was not previously present in the collection.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only,
-     * if the collection is indexed, or if an entity binding is not used.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       if the collection is indexed, or if an entity binding is not used.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean add(E entity) {
 
-        if (view.isSecondary()) {
+        if(view.isSecondary()) {
             throw new UnsupportedOperationException
-                ("Add not allowed with index");
-        } else if (view.range.isSingleKey()) {
+                    ("Add not allowed with index");
+        }
+        else if(view.range.isSingleKey()) {
             /* entity is actually just a value in this case */
-            if (!view.dupsAllowed) {
+            if(!view.dupsAllowed) {
                 throw new UnsupportedOperationException("Duplicates required");
             }
             DataCursor cursor = null;
@@ -136,18 +122,20 @@ public class StoredValueSet<E> extends StoredCollection<E> implements Set<E> {
                 cursor = new DataCursor(view, true);
                 cursor.useRangeKey();
                 OperationStatus status =
-                    cursor.putNoDupData(null, entity, null, true);
+                        cursor.putNoDupData(null, entity, null, true);
                 closeCursor(cursor);
                 commitAutoCommit(doAutoCommit);
                 return (status == OperationStatus.SUCCESS);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 closeCursor(cursor);
                 throw handleException(e, doAutoCommit);
             }
-        } else if (view.entityBinding == null) {
+        }
+        else if(view.entityBinding == null) {
             throw new UnsupportedOperationException
-                ("Add requires entity binding");
-        } else {
+                    ("Add requires entity binding");
+        }
+        else {
             return add(null, entity);
         }
     }
@@ -158,20 +146,17 @@ public class StoredValueSet<E> extends StoredCollection<E> implements Set<E> {
      * interface.
      *
      * @param value the value to check.
-     *
      * @return whether the set contains the given value.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean contains(Object value) {
 
@@ -185,20 +170,18 @@ public class StoredValueSet<E> extends StoredCollection<E> implements Set<E> {
      * given entity is removed.  If an entity binding is used, the first
      * occurrence of a key-value pair with the given value is removed.
      * This method conforms to the {@link Set#remove} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean remove(Object value) {
 

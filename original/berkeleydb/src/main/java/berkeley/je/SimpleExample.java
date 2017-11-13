@@ -98,7 +98,7 @@ class SimpleExample {
                     envHomeDirectory,
                     startOffset);
             app.run();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             e.printStackTrace();
             System.exit(EXIT_FAILURE);
         }
@@ -184,7 +184,7 @@ class SimpleExample {
             /* retrieve the data */
             Cursor cursor = exampleDb.openCursor(null, null);
 
-            while (cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
+            while(cursor.getNext(keyEntry, dataEntry, LockMode.DEFAULT) ==
                     OperationStatus.SUCCESS) {
                 System.out.println("key=" +
                         IntegerBinding.entryToInt(keyEntry) +

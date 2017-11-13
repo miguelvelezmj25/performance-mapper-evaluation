@@ -96,27 +96,27 @@ public class Block implements java.io.Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
+        if(o == null) {
             return false;
         }
-        if (!(o instanceof Block)) {
+        if(!(o instanceof Block)) {
             return false;
         }
         final Block other = (Block) o;
         return (this.blockId == other.blockId) &&
-            (this.numRecords == other.numRecords) &&
-            Arrays.equals(this.beginKey, other.beginKey) &&
-            Arrays.equals(this.beginData, other.beginData) &&
-            (this.rollingChksum == other.rollingChksum) &&
-            Arrays.equals(this.md5Hash, other.md5Hash);
+                (this.numRecords == other.numRecords) &&
+                Arrays.equals(this.beginKey, other.beginKey) &&
+                Arrays.equals(this.beginData, other.beginData) &&
+                (this.rollingChksum == other.rollingChksum) &&
+                Arrays.equals(this.md5Hash, other.md5Hash);
     }
 
     @Override
     public String toString() {
         final Formatter fmt = new Formatter();
-        fmt.format("Block %d: rollingChksum=%x md5Hash=%s numRecords=%d", 
-                   blockId, rollingChksum, Arrays.toString(md5Hash), 
-                   numRecords);
+        fmt.format("Block %d: rollingChksum=%x md5Hash=%s numRecords=%d",
+                blockId, rollingChksum, Arrays.toString(md5Hash),
+                numRecords);
         return fmt.toString();
     }
 }

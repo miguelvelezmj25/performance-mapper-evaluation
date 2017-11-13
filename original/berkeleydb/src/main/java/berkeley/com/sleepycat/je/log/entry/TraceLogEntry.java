@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.Trace;
+
+import java.nio.ByteBuffer;
 
 /**
  * Log entry for a trace object.
@@ -39,12 +39,16 @@ public class TraceLogEntry extends SingleItemReplicableEntry<Trace> {
      */
     private static volatile Loggable testPriorItem = null;
 
-    /** Construct a log entry for reading a {@link Trace} object. */
+    /**
+     * Construct a log entry for reading a {@link Trace} object.
+     */
     public TraceLogEntry() {
         super(Trace.class);
     }
 
-    /** Construct a log entry for writing a {@link Trace} object. */
+    /**
+     * Construct a log entry for writing a {@link Trace} object.
+     */
     public TraceLogEntry(final Trace trace) {
         super(LogEntryType.LOG_TRACE, trace);
     }
@@ -65,12 +69,12 @@ public class TraceLogEntry extends SingleItemReplicableEntry<Trace> {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * <p>This implementation provides additional behavior for testing.
      */
     @Override
     public int getSize(final int logVersion, final boolean forReplication) {
-        if (testPriorItem != null && logVersion == LAST_FORMAT_CHANGE - 1) {
+        if(testPriorItem != null && logVersion == LAST_FORMAT_CHANGE - 1) {
             return testPriorItem.getLogSize();
         }
         return super.getSize(logVersion, forReplication);
@@ -78,14 +82,14 @@ public class TraceLogEntry extends SingleItemReplicableEntry<Trace> {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * <p>This implementation provides additional behavior for testing.
      */
     @Override
     public void writeEntry(final ByteBuffer destBuffer,
                            final int logVersion,
                            final boolean forReplication) {
-        if (testPriorItem != null && logVersion == LAST_FORMAT_CHANGE - 1) {
+        if(testPriorItem != null && logVersion == LAST_FORMAT_CHANGE - 1) {
             testPriorItem.writeToLog(destBuffer);
             return;
         }

@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
+import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+import berkeley.com.sleepycat.je.rep.net.DataChannel;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-
-import berkeley.com.sleepycat.je.rep.net.DataChannel;
-import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 
 /**
  * Packages a DataChannel and a NameIdPair together so that logging
@@ -26,8 +26,8 @@ import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
  */
 public class NamedChannel implements ByteChannel {
 
-    private NameIdPair nameIdPair;
     protected final DataChannel channel;
+    private NameIdPair nameIdPair;
 
     public NamedChannel(DataChannel channel, NameIdPair nameIdPair) {
         this.channel = channel;
@@ -42,12 +42,12 @@ public class NamedChannel implements ByteChannel {
         this.nameIdPair = NameIdPair.NULL;
     }
 
-    public void setNameIdPair(NameIdPair nameIdPair) {
-        this.nameIdPair = nameIdPair;
-    }
-
     public NameIdPair getNameIdPair() {
         return nameIdPair;
+    }
+
+    public void setNameIdPair(NameIdPair nameIdPair) {
+        this.nameIdPair = nameIdPair;
     }
 
     public DataChannel getChannel() {
@@ -56,7 +56,7 @@ public class NamedChannel implements ByteChannel {
 
     @Override
     public String toString() {
-        if (getNameIdPair() == null) {
+        if(getNameIdPair() == null) {
             return getChannel().toString();
         }
 

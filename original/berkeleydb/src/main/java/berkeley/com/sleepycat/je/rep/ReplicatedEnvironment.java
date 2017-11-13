@@ -13,21 +13,7 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.io.File;
-import java.io.PrintStream;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.EnvironmentLockedException;
-import berkeley.com.sleepycat.je.EnvironmentNotFoundException;
-import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.VersionMismatchException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.DbEnvPool;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
@@ -37,6 +23,11 @@ import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
+
+import java.io.File;
+import java.io.PrintStream;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A replicated database environment that is a node in a replication
@@ -97,18 +88,18 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  * EnvironmentConfig envConfig = new EnvironmentConfig();
  * envConfig.setAllowCreate(true);
  * envConfig.setTransactional(true);
- *
+ * <p>
  * // Identify the node
  * ReplicationConfig repConfig = new ReplicationConfig();
  * repConfig.setGroupName("PlanetaryRepGroup");
  * repConfig.setNodeName("Mercury");
  * repConfig.setNodeHostPort("mercury.acme.com:5001");
- *
+ * <p>
  * // This is the first node, so its helper is itself
  * repConfig.setHelperHosts("mercury.acme.com:5001");
- *
+ * <p>
  * ReplicatedEnvironment repEnv =
- *     new ReplicatedEnvironment(envHome, repConfig, envConfig);
+ * new ReplicatedEnvironment(envHome, repConfig, envConfig);
  * </pre>
  * <p>
  * To create a new node when there are <b>other existing group members</b>,
@@ -119,19 +110,19 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  * EnvironmentConfig envConfig = new EnvironmentConfig();
  * envConfig.setAllowCreate(true);
  * envConfig.setTransactional(true);
- *
+ * <p>
  * // Identify the node
  * ReplicationConfig repConfig =
- *     new ReplicationConfig("PlanetaryRepGroup",
- *                           "Jupiter",
- *                           "jupiter.acme.com:5002");
- *
+ * new ReplicationConfig("PlanetaryRepGroup",
+ * "Jupiter",
+ * "jupiter.acme.com:5002");
+ * <p>
  * // Use the node at mercury.acme.com:5001 as a helper to find the rest
  * // of the group.
  * repConfig.setHelperHosts("mercury.acme.com:5001");
- *
+ * <p>
  * ReplicatedEnvironment repEnv =
- *     new ReplicatedEnvironment(envHome, repConfig, envConfig);
+ * new ReplicatedEnvironment(envHome, repConfig, envConfig);
  * </pre>
  * <p>
  * In these examples, node Mercury was configured as its own helper, and
@@ -151,23 +142,23 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  * EnvironmentConfig envConfig = new EnvironmentConfig();
  * envConfig.setTransactional(true);
  * ReplicationConfig repConfig =
- *     new ReplicationConfig("PlanetaryRepGroup",
- *                           "Mercury",
- *                           "mercury.acme.com:5001");
- *
+ * new ReplicationConfig("PlanetaryRepGroup",
+ * "Mercury",
+ * "mercury.acme.com:5001");
+ * <p>
  * ReplicatedEnvironment repEnv =
- *     new ReplicatedEnvironment(envHome, repConfig, envConfig);
+ * new ReplicatedEnvironment(envHome, repConfig, envConfig);
  * </pre>
  * </p>
  * {@literal See} {@link com.sleepycat.je.rep.util.ReplicationGroupAdmin
  * ReplicationGroupAdmin} for information on how to remove nodes from the
  * replication group.
- *
+ * <p>
  * <p>
  * ReplicatedEnvironment properties can be set via the the {@literal
  * <environmentHome>/}je.properties file, just like {@link Environment}
  * properties. They follow the same property value precedence rules.
- *
+ * <p>
  * <p>
  * A replicated environment directory can only be accessed by a read write
  * ReplicatedEnvironment handle or a read only {@link Environment} handle.  In
@@ -195,12 +186,12 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  * com.sleepycat.persist.PrimaryIndex} (when using the Direct Persistence
  * Layer) should be created, used and closed before calling {@link
  * ReplicatedEnvironment#close}.
- *
+ * <p>
  * <p>Replicated environments can be created with node type {@link
  * NodeType#ELECTABLE} or {@link NodeType#SECONDARY}. ELECTABLE nodes can be
  * masters or replicas, and participate in both master elections and commit
  * durability decisions.
- *
+ * <p>
  * <p>SECONDARY nodes can only be replicas, not masters, and do not participate
  * in either elections or durability decisions.  SECONDARY nodes can be used to
  * increase the available number of read replicas without changing the election
@@ -211,24 +202,24 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  * long distance networks.  SECONDARY nodes maintain replication streams with
  * the replication group master to update the data contents of their
  * environment.
- *
+ * <p>
  * <p>You can use SECONDARY nodes to:
  * <ul>
  * <li>Provide a copy of the data available at a distant location
  * <li>Maintain an extra copy of the data to increase redundancy
  * <li>Change the number of replicas to adjust to dynamically changing read
- *     loads
+ * loads
  * </ul>
- *
+ * <p>
  * <p>Membership information for SECONDARY nodes is not stored persistently, so
  * their membership is only known to the master, and only while the nodes
  * remain connected to the master.  Because a SECONDARY node cannot become a
  * master, it will not act as master even if it is the first node created for
  * the group.
- *
+ * <p>
  * <h3><a name="nonRepDbs">Non-replicated Databases in a Replicated
  * Environment</a></h3>
- *
+ * <p>
  * A database or entity store in a replicated environment is replicated by
  * default, but may be explicitly configured as non-replicated using
  * {@link com.sleepycat.je.DatabaseConfig#setReplicated} or
@@ -307,6 +298,8 @@ import berkeley.com.sleepycat.je.utilint.DatabaseUtil;
  */
 public class ReplicatedEnvironment extends Environment {
 
+    /* The unique name and id associated with the node. */
+    private final NameIdPair nameIdPair;
     /*
      * The canonical RepImpl associated with the environment directory,
      * accessed by different handles.
@@ -317,10 +310,6 @@ public class ReplicatedEnvironment extends Environment {
      * synchronized, it is safe to access it directly.
      */
     private volatile RepImpl repEnvironmentImpl;
-
-    /* The unique name and id associated with the node. */
-    private final NameIdPair nameIdPair;
-
     /*
      * The replication configuration that has been used to create this
      * handle. This is derived from the original configuration argument, after
@@ -395,150 +384,219 @@ public class ReplicatedEnvironment extends Environment {
      * most up to date environment as the master.
      * <p>
      *
-     * @param envHome The environment's home directory.
-     *
-     * @param repConfig replication configurations. If null, the default
-     * replication configurations are used.
-     *
-     * @param envConfig environment configurations for this node. If null, the
-     * default environment configurations are used.
-     *
-     * @param consistencyPolicy the consistencyPolicy used by the Replica at
-     * startup to make its environment current with respect to the master. This
-     * differs from the consistency policy specified
-     * {@link ReplicationConfig#setConsistencyPolicy} because it is used only
-     * at construction, when the node joins the group for the first time. The
-     * consistency policy set in {@link ReplicationConfig} is used any time a
-     * policy is used after node startup, such as at transaction begins.
-     *
+     * @param envHome               The environment's home directory.
+     * @param repConfig             replication configurations. If null, the default
+     *                              replication configurations are used.
+     * @param envConfig             environment configurations for this node. If null, the
+     *                              default environment configurations are used.
+     * @param consistencyPolicy     the consistencyPolicy used by the Replica at
+     *                              startup to make its environment current with respect to the master. This
+     *                              differs from the consistency policy specified
+     *                              {@link ReplicationConfig#setConsistencyPolicy} because it is used only
+     *                              at construction, when the node joins the group for the first time. The
+     *                              consistency policy set in {@link ReplicationConfig} is used any time a
+     *                              policy is used after node startup, such as at transaction begins.
      * @param initialElectionPolicy the policy to use when holding the initial
-     * election.
-     *
-     * @throws RestartRequiredException if some type of corrective action is
-     * required. The subclasses of this exception provide further details.
-     *
-     * @throws ReplicaConsistencyException if it is a Replica and cannot
-     * satisfy the specified consistency policy within the consistency timeout
-     * period
-     *
-     * @throws UnknownMasterException if the
-     * {@link ReplicationConfig#ENV_UNKNOWN_STATE_TIMEOUT} has a zero value and
-     * the node cannot join the group in the time period specified by the
-     * {@link ReplicationConfig#ENV_SETUP_TIMEOUT} property. The node may be
-     * unable to join the group because the Master could not be determined due
-     * to a lack of sufficient nodes as required by the election policy, or
-     * because a master was present but lacked a
-     * {@link QuorumPolicy#SIMPLE_MAJORITY} needed to update the environment
-     * with information about this node, if it's a new node and is joining the
-     * group for the first time.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws EnvironmentLockedException when an environment cannot be opened
-     * for write access because another process has the same environment open
-     * for write access. <strong>Warning:</strong> This exception should be
-     * handled when an environment is opened by more than one process.
-     *
-     * @throws VersionMismatchException when the existing log is not compatible
-     * with the version of JE that is running. This occurs when a later version
-     * of JE was used to create the log. <strong>Warning:</strong> This
-     * exception should be handled when more than one version of JE may be used
-     * to access an environment.
-     *
+     *                              election.
+     * @throws RestartRequiredException      if some type of corrective action is
+     *                                       required. The subclasses of this exception provide further details.
+     * @throws ReplicaConsistencyException   if it is a Replica and cannot
+     *                                       satisfy the specified consistency policy within the consistency timeout
+     *                                       period
+     * @throws UnknownMasterException        if the
+     *                                       {@link ReplicationConfig#ENV_UNKNOWN_STATE_TIMEOUT} has a zero value and
+     *                                       the node cannot join the group in the time period specified by the
+     *                                       {@link ReplicationConfig#ENV_SETUP_TIMEOUT} property. The node may be
+     *                                       unable to join the group because the Master could not be determined due
+     *                                       to a lack of sufficient nodes as required by the election policy, or
+     *                                       because a master was present but lacked a
+     *                                       {@link QuorumPolicy#SIMPLE_MAJORITY} needed to update the environment
+     *                                       with information about this node, if it's a new node and is joining the
+     *                                       group for the first time.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     * @throws EnvironmentLockedException    when an environment cannot be opened
+     *                                       for write access because another process has the same environment open
+     *                                       for write access. <strong>Warning:</strong> This exception should be
+     *                                       handled when an environment is opened by more than one process.
+     * @throws VersionMismatchException      when the existing log is not compatible
+     *                                       with the version of JE that is running. This occurs when a later version
+     *                                       of JE was used to create the log. <strong>Warning:</strong> This
+     *                                       exception should be handled when more than one version of JE may be used
+     *                                       to access an environment.
      * @throws UnsupportedOperationException if the environment exists and has
-     * not been enabled for replication.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified,
-     * for example, an invalid {@code EnvironmentConfig} parameter.
+     *                                       not been enabled for replication.
+     * @throws IllegalArgumentException      if an invalid parameter is specified,
+     *                                       for example, an invalid {@code EnvironmentConfig} parameter.
      */
     public ReplicatedEnvironment(File envHome,
                                  ReplicationConfig repConfig,
                                  EnvironmentConfig envConfig,
                                  ReplicaConsistencyPolicy consistencyPolicy,
                                  QuorumPolicy initialElectionPolicy)
-        throws EnvironmentNotFoundException,
-               EnvironmentLockedException,
-               InsufficientLogException,
-               ReplicaConsistencyException,
-               IllegalArgumentException {
+            throws EnvironmentNotFoundException,
+            EnvironmentLockedException,
+            InsufficientLogException,
+            ReplicaConsistencyException,
+            IllegalArgumentException {
 
         this(envHome,
-             repConfig,
-             envConfig,
-             consistencyPolicy,
-             initialElectionPolicy,
-             true /*joinGroup*/,
-             null /*envImplParam*/);
+                repConfig,
+                envConfig,
+                consistencyPolicy,
+                initialElectionPolicy,
+                true /*joinGroup*/,
+                null /*envImplParam*/);
     }
 
     /**
      * A convenience constructor that defaults the replica consistency policy
      * and the initial election policy to be used.
-     *
+     * <p>
      * <p>
      * The default replica consistency policy results in the replica being
      * consistent with the master as of the time the handle was created.
      * </p>
-     *
+     * <p>
      * <p>
      * The default initial election policy is
      * {@link QuorumPolicy#SIMPLE_MAJORITY}
      * </p>
      *
-     * @throws RestartRequiredException if some type of corrective action is
-     * required. The subclasses of this exception provide further details.
-     *
-     * @throws ReplicaConsistencyException if it is a Replica and and cannot be
-     * made consistent within the timeout specified by
-     * {@link ReplicationConfig#ENV_CONSISTENCY_TIMEOUT}
-     *
-     * @throws UnknownMasterException if the
-     * {@link ReplicationConfig#ENV_UNKNOWN_STATE_TIMEOUT} has a zero value and
-     * the node cannot join the group in the time period specified by the
-     * {@link ReplicationConfig#ENV_SETUP_TIMEOUT} property. The node may be
-     * unable to join the group because the Master could not be determined due
-     * to a lack of sufficient nodes as required by the election policy, or
-     * because a master was present but lacked a
-     * {@link QuorumPolicy#SIMPLE_MAJORITY} needed to update the environment
-     * with information about this node, if it's a new node and is joining the
-     * group for the first time.
-     *
-     * @throws EnvironmentLockedException when an environment cannot be opened
-     * for write access because another process has the same environment open
-     * for write access. <strong>Warning:</strong> This exception should be
-     * handled when an environment is opened by more than one process.
-     *
-     * @throws VersionMismatchException when the existing log is not compatible
-     * with the version of JE that is running. This occurs when a later version
-     * of JE was used to create the log. <strong>Warning:</strong> This
-     * exception should be handled when more than one version of JE may be used
-     * to access an environment.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
+     * @throws RestartRequiredException      if some type of corrective action is
+     *                                       required. The subclasses of this exception provide further details.
+     * @throws ReplicaConsistencyException   if it is a Replica and and cannot be
+     *                                       made consistent within the timeout specified by
+     *                                       {@link ReplicationConfig#ENV_CONSISTENCY_TIMEOUT}
+     * @throws UnknownMasterException        if the
+     *                                       {@link ReplicationConfig#ENV_UNKNOWN_STATE_TIMEOUT} has a zero value and
+     *                                       the node cannot join the group in the time period specified by the
+     *                                       {@link ReplicationConfig#ENV_SETUP_TIMEOUT} property. The node may be
+     *                                       unable to join the group because the Master could not be determined due
+     *                                       to a lack of sufficient nodes as required by the election policy, or
+     *                                       because a master was present but lacked a
+     *                                       {@link QuorumPolicy#SIMPLE_MAJORITY} needed to update the environment
+     *                                       with information about this node, if it's a new node and is joining the
+     *                                       group for the first time.
+     * @throws EnvironmentLockedException    when an environment cannot be opened
+     *                                       for write access because another process has the same environment open
+     *                                       for write access. <strong>Warning:</strong> This exception should be
+     *                                       handled when an environment is opened by more than one process.
+     * @throws VersionMismatchException      when the existing log is not compatible
+     *                                       with the version of JE that is running. This occurs when a later version
+     *                                       of JE was used to create the log. <strong>Warning:</strong> This
+     *                                       exception should be handled when more than one version of JE may be used
+     *                                       to access an environment.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
      * @throws UnsupportedOperationException if the environment exists and has
-     * not been enabled for replication.
-     *
-     * @throws IllegalArgumentException if an invalid parameter is specified,
-     * for example, an invalid {@code EnvironmentConfig} parameter.
-     *
+     *                                       not been enabled for replication.
+     * @throws IllegalArgumentException      if an invalid parameter is specified,
+     *                                       for example, an invalid {@code EnvironmentConfig} parameter.
      * @see #ReplicatedEnvironment(File, ReplicationConfig, EnvironmentConfig,
      * ReplicaConsistencyPolicy, QuorumPolicy)
      */
     public ReplicatedEnvironment(File envHome,
                                  ReplicationConfig repConfig,
                                  EnvironmentConfig envConfig)
-        throws EnvironmentNotFoundException,
-               EnvironmentLockedException,
-               ReplicaConsistencyException,
-               InsufficientLogException,
-               RollbackException,
-               IllegalArgumentException {
+            throws EnvironmentNotFoundException,
+            EnvironmentLockedException,
+            ReplicaConsistencyException,
+            InsufficientLogException,
+            RollbackException,
+            IllegalArgumentException {
 
         this(envHome, repConfig, envConfig, null /*consistencyPolicy*/,
-             QuorumPolicy.SIMPLE_MAJORITY);
+                QuorumPolicy.SIMPLE_MAJORITY);
+    }
+
+    /**
+     * For internal use only.
+     *
+     * @param envImplParam is non-null only when used by EnvironmentIml to
+     *                     create an InternalEnvironment.
+     * @hidden Note that repImpl.joinGroup is a synchronized
+     * method, and therefore protected against multiple concurrent attempts to
+     * create a handle.
+     */
+    protected ReplicatedEnvironment(File envHome,
+                                    ReplicationConfig repConfig,
+                                    EnvironmentConfig envConfig,
+                                    ReplicaConsistencyPolicy consistencyPolicy,
+                                    QuorumPolicy initialElectionPolicy,
+                                    boolean joinGroup,
+                                    RepImpl envImplParam)
+            throws EnvironmentNotFoundException,
+            EnvironmentLockedException,
+            ReplicaConsistencyException,
+            IllegalArgumentException {
+
+        super(envHome, envConfig, repConfig, envImplParam);
+
+        repEnvironmentImpl = (RepImpl) DbInternal.getNonNullEnvImpl(this);
+        nameIdPair = repEnvironmentImpl.getNameIdPair();
+
+        /*
+         * Ensure that the DataChannelFactory configuration is usable
+         * and initialize logging state.
+         */
+        repEnvironmentImpl.initializeChannelFactory();
+
+        if(joinGroup) {
+
+            try {
+                joinGroup(
+                        repEnvironmentImpl, consistencyPolicy,
+                        initialElectionPolicy);
+
+            } catch(RollbackException e) {
+
+                /*
+                 * Syncup failed, a hard recovery is needed. Throwing the
+                 * RollbackException closed the RepImpl and the EnvironmentImpl
+                 * Redo the creation of RepImpl and retry the join once. If the
+                 * second joinGroup fails, let the exception throw out to the
+                 * user.
+                 *
+                 * Clear references to the old envImpl/repImpl, to prevent OOME
+                 * during recovery when we retry below.
+                 */
+                DbInternal.clearEnvImpl(this);
+                repEnvironmentImpl = null;
+
+                repEnvironmentImpl = (RepImpl) makeEnvironmentImpl(
+                        envHome, envConfig, repConfig);
+
+                /*
+                 * Ensure that the DataChannelFactory configuration is usable
+                 * and initialize logging state.
+                 */
+                repEnvironmentImpl.initializeChannelFactory();
+
+                joinGroup(
+                        repEnvironmentImpl, consistencyPolicy,
+                        initialElectionPolicy);
+
+                repEnvironmentImpl.setHardRecoveryInfo(e);
+            }
+
+            /*
+             * Fire a JoinGroupEvent only when the ReplicatedEnvironment is
+             * successfully created for the first time.
+             */
+            if(repEnvironmentImpl.getRepNode() != null) {
+                repEnvironmentImpl.getRepNode().
+                        getMonitorEventManager().notifyJoinGroup();
+            }
+        }
+        else {
+            /* For testing only */
+            if(repEnvironmentImpl.getRepNode() != null) {
+                throw EnvironmentFailureException.unexpectedState
+                        ("An earlier handle creation had resulted in the node" +
+                                "joining the group");
+            }
+        }
     }
 
     /*
@@ -547,19 +605,19 @@ public class ReplicatedEnvironment extends Environment {
     private void joinGroup(RepImpl repImpl,
                            ReplicaConsistencyPolicy consistencyPolicy,
                            QuorumPolicy initialElectionPolicy)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Just return if we don't want to join the group. */
-        if (dontJoinGroup()) {
+        if(dontJoinGroup()) {
             return;
         }
 
         State state = null;
         try {
             state =
-                repImpl.joinGroup(consistencyPolicy, initialElectionPolicy);
+                    repImpl.joinGroup(consistencyPolicy, initialElectionPolicy);
         } finally {
-            if (state == null) {
+            if(state == null) {
 
                 /*
                  * Something bad happened, close the environment down with
@@ -582,99 +640,8 @@ public class ReplicatedEnvironment extends Environment {
     }
 
     /**
-     * For internal use only.
-     * @hidden
-     *
-     * Note that repImpl.joinGroup is a synchronized
-     * method, and therefore protected against multiple concurrent attempts to
-     * create a handle.
-     *
-     * @param envImplParam is non-null only when used by EnvironmentIml to
-     * create an InternalEnvironment.
-     */
-    protected ReplicatedEnvironment(File envHome,
-                                    ReplicationConfig repConfig,
-                                    EnvironmentConfig envConfig,
-                                    ReplicaConsistencyPolicy consistencyPolicy,
-                                    QuorumPolicy initialElectionPolicy,
-                                    boolean joinGroup,
-                                    RepImpl envImplParam)
-        throws EnvironmentNotFoundException,
-               EnvironmentLockedException,
-               ReplicaConsistencyException,
-               IllegalArgumentException {
-
-        super(envHome, envConfig, repConfig, envImplParam);
-
-        repEnvironmentImpl = (RepImpl) DbInternal.getNonNullEnvImpl(this);
-        nameIdPair = repEnvironmentImpl.getNameIdPair();
-
-        /*
-         * Ensure that the DataChannelFactory configuration is usable
-         * and initialize logging state.
-         */
-        repEnvironmentImpl.initializeChannelFactory();
-
-        if (joinGroup) {
-
-            try {
-                joinGroup(
-                    repEnvironmentImpl, consistencyPolicy,
-                    initialElectionPolicy);
-
-            } catch (RollbackException e) {
-
-                /*
-                 * Syncup failed, a hard recovery is needed. Throwing the
-                 * RollbackException closed the RepImpl and the EnvironmentImpl
-                 * Redo the creation of RepImpl and retry the join once. If the
-                 * second joinGroup fails, let the exception throw out to the
-                 * user.
-                 *
-                 * Clear references to the old envImpl/repImpl, to prevent OOME
-                 * during recovery when we retry below.
-                 */
-                DbInternal.clearEnvImpl(this);
-                repEnvironmentImpl = null;
-
-                repEnvironmentImpl = (RepImpl) makeEnvironmentImpl(
-                    envHome, envConfig, repConfig);
-
-                /*
-                 * Ensure that the DataChannelFactory configuration is usable
-                 * and initialize logging state.
-                 */
-                repEnvironmentImpl.initializeChannelFactory();
-
-                joinGroup(
-                    repEnvironmentImpl, consistencyPolicy,
-                    initialElectionPolicy);
-
-                repEnvironmentImpl.setHardRecoveryInfo(e);
-            }
-
-            /*
-             * Fire a JoinGroupEvent only when the ReplicatedEnvironment is
-             * successfully created for the first time.
-             */
-            if (repEnvironmentImpl.getRepNode() != null) {
-                repEnvironmentImpl.getRepNode().
-                    getMonitorEventManager().notifyJoinGroup();
-            }
-        } else {
-            /* For testing only */
-            if (repEnvironmentImpl.getRepNode() != null) {
-                throw EnvironmentFailureException.unexpectedState
-                    ("An earlier handle creation had resulted in the node" +
-                     "joining the group");
-            }
-        }
-    }
-
-    /**
-     * @hidden
-     * For internal use only.
-     *
+     * @hidden For internal use only.
+     * <p>
      * Validate and resolve replication configuration params, and extract a
      * ReplicationConfig with those params for passing into environment
      * creation. Note that a copy of the ReplicationConfig argument is created
@@ -692,10 +659,10 @@ public class ReplicatedEnvironment extends Environment {
          */
         ReplicationConfig repConfig = (ReplicationConfig) repConfigProxy;
         ReplicationConfig baseConfig =
-            (repConfig == null) ? ReplicationConfig.DEFAULT : repConfig;
+                (repConfig == null) ? ReplicationConfig.DEFAULT : repConfig;
         ReplicationConfig useConfig = baseConfig.clone();
 
-        if (envConfig.getReadOnly()) {
+        if(envConfig.getReadOnly()) {
 
             /*
              * Read-only replicated environments are not usually permitted,
@@ -713,20 +680,20 @@ public class ReplicatedEnvironment extends Environment {
              * refactoring of the env handle to call out those components.
              */
             boolean arbUse = useConfig.getConfigParam(
-                RepParams.ARBITER_USE.getName()).equals("true");
+                    RepParams.ARBITER_USE.getName()).equals("true");
             boolean subUse = useConfig.getConfigParam(
                     RepParams.SUBSCRIBER_USE.getName()).equals("true");
             boolean networkBackupUse = useConfig.getConfigParam(
                     RepParams.NETWORKBACKUP_USE.getName()).equals("true");
 
-            if (!arbUse && !subUse && !networkBackupUse) {
+            if(!arbUse && !subUse && !networkBackupUse) {
                 throw new IllegalArgumentException("A replicated environment " +
                         "may not be opened read-only");
             }
         }
         DbConfigManager.applyFileConfig(envHome,
-                                        useConfig.getProps(),
-                                        true); /* forReplication */
+                useConfig.getProps(),
+                true); /* forReplication */
         useConfig.propagateRepNetProps();
         this.handleRepConfig = useConfig;
         return handleRepConfig;
@@ -734,9 +701,9 @@ public class ReplicatedEnvironment extends Environment {
 
     /**
      * Returns the unique name used to identify this replicated environment.
-     * @see ReplicationConfig#setNodeName
      *
      * @return the node name
+     * @see ReplicationConfig#setNodeName
      */
     public String getNodeName() {
         return nameIdPair.getName();
@@ -751,21 +718,19 @@ public class ReplicatedEnvironment extends Environment {
      * approach, rather than using getState() directly.
      *
      * @return the current replication state associated with this node
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     public State getState()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final RepImpl repImpl = checkOpen();
 
         try {
             return repImpl.getState();
-        } catch (Error E) {
+        } catch(Error E) {
             repImpl.invalidate(E);
             throw E;
         }
@@ -780,25 +745,23 @@ public class ReplicatedEnvironment extends Environment {
      * SECONDARY nodes.
      *
      * @return the group description
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     /*
      * TODO: EXTERNAL is hidden for now. The doc need updated to include
      * EXTERNAL when it becomes public.
      */
     public ReplicationGroup getGroup()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final RepImpl repImpl = checkOpen();
 
         try {
             return new ReplicationGroup(repImpl.getRepNode().getGroup());
-        } catch (Error E) {
+        } catch(Error E) {
             repImpl.invalidate(E);
             throw E;
         }
@@ -807,7 +770,7 @@ public class ReplicatedEnvironment extends Environment {
     /**
      * Close this ReplicatedEnvironment and release any resources used by the
      * handle.
-     *
+     * <p>
      * <p>
      * When the last handle is closed, allocated resources are freed, and
      * daemon threads are stopped, even if they are performing work. The node
@@ -823,7 +786,7 @@ public class ReplicatedEnvironment extends Environment {
      * com.sleepycat.je.Database Database}, {@link com.sleepycat.je.Cursor
      * Cursor} and {@link com.sleepycat.je.Transaction Transaction} handles.
      * </p>
-     *
+     * <p>
      * <p>WARNING: To guard against memory leaks, the application should
      * discard all references to the closed handle.  While BDB makes an effort
      * to discard references from closed objects to the allocated memory for an
@@ -833,53 +796,22 @@ public class ReplicatedEnvironment extends Environment {
      */
     @Override
     synchronized public void close()
-        throws DatabaseException {
+            throws DatabaseException {
 
         try {
             super.close();
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             /* Add this node's address to the exception message for clarity. */
             e.addErrorMessage("Problem closing handle " + nameIdPair);
             throw e;
-        } catch (Exception e) {
+        } catch(Exception e) {
             /* Add this node's address to the exception message for clarity. */
             throw new EnvironmentFailureException(
-                repEnvironmentImpl,
-                EnvironmentFailureReason.UNEXPECTED_EXCEPTION,
-                "Problem closing handle " + nameIdPair, e);
+                    repEnvironmentImpl,
+                    EnvironmentFailureReason.UNEXPECTED_EXCEPTION,
+                    "Problem closing handle " + nameIdPair, e);
         } finally {
             repEnvironmentImpl = null;
-        }
-    }
-
-    /**
-     * Sets the listener used to receive asynchronous replication node state
-     * change events. Note that there is one listener per replication node, not
-     * one per handle. Invoking this method replaces the previous Listener.
-     *
-     * Invoking this method typically results in an immediate callback to the
-     * application via the {@link StateChangeListener#stateChange} method, so
-     * that the application is made aware of the existing state of the
-     * node at the time <code>StateChangeListener</code> is first established.
-     *
-     * @param listener the state change listener.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
-     */
-    public void setStateChangeListener(StateChangeListener listener)
-        throws DatabaseException {
-
-        final RepImpl repImpl = checkOpen();
-
-        try {
-            repImpl.setChangeListener(listener);
-        } catch (Error E) {
-            repImpl.invalidate(E);
-            throw E;
         }
     }
 
@@ -893,19 +825,47 @@ public class ReplicatedEnvironment extends Environment {
      * ReplicatedEnvironment handle.
      *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     public StateChangeListener getStateChangeListener()
-        throws DatabaseException {
+            throws DatabaseException {
 
         final RepImpl repImpl = checkOpen();
 
         try {
             return repImpl.getChangeListener();
-        } catch (Error E) {
+        } catch(Error E) {
+            repImpl.invalidate(E);
+            throw E;
+        }
+    }
+
+    /**
+     * Sets the listener used to receive asynchronous replication node state
+     * change events. Note that there is one listener per replication node, not
+     * one per handle. Invoking this method replaces the previous Listener.
+     * <p>
+     * Invoking this method typically results in an immediate callback to the
+     * application via the {@link StateChangeListener#stateChange} method, so
+     * that the application is made aware of the existing state of the
+     * node at the time <code>StateChangeListener</code> is first established.
+     *
+     * @param listener the state change listener.
+     * @throws EnvironmentFailureException if an unexpected, internal or
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
+     */
+    public void setStateChangeListener(StateChangeListener listener)
+            throws DatabaseException {
+
+        final RepImpl repImpl = checkOpen();
+
+        try {
+            repImpl.setChangeListener(listener);
+        } catch(Error E) {
             repImpl.invalidate(E);
             throw E;
         }
@@ -913,13 +873,34 @@ public class ReplicatedEnvironment extends Environment {
 
     /**
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
+     */
+    public ReplicationMutableConfig getRepMutableConfig()
+            throws DatabaseException {
+
+        final RepImpl repImpl = checkOpen();
+
+        try {
+            final ReplicationMutableConfig config =
+                    repImpl.cloneRepMutableConfig();
+            config.fillInEnvironmentGeneratedProps(repImpl);
+            return config;
+        } catch(Error E) {
+            repImpl.invalidate(E);
+            throw E;
+        }
+    }
+
+    /**
+     * @throws EnvironmentFailureException if an unexpected, internal or
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     public void setRepMutableConfig(ReplicationMutableConfig mutableConfig)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final RepImpl repImpl = checkOpen();
 
@@ -927,30 +908,7 @@ public class ReplicatedEnvironment extends Environment {
 
         try {
             repImpl.setRepMutableConfig(mutableConfig);
-        } catch (Error E) {
-            repImpl.invalidate(E);
-            throw E;
-        }
-    }
-
-    /**
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
-     */
-    public ReplicationMutableConfig getRepMutableConfig()
-        throws DatabaseException {
-
-        final RepImpl repImpl = checkOpen();
-
-        try {
-            final ReplicationMutableConfig config =
-                repImpl.cloneRepMutableConfig();
-            config.fillInEnvironmentGeneratedProps(repImpl);
-            return config;
-        } catch (Error E) {
+        } catch(Error E) {
             repImpl.invalidate(E);
             throw E;
         }
@@ -964,15 +922,13 @@ public class ReplicatedEnvironment extends Environment {
      * node.
      *
      * @return this handle's configuration.
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     public ReplicationConfig getRepConfig()
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkOpen();
 
@@ -984,21 +940,19 @@ public class ReplicatedEnvironment extends Environment {
      * ReplicatedEnvironmentStats} for the kind of information available.
      *
      * @param config is used to specify attributes such as whether the stats
-     * should be cleared, whether the complete set of stats should be obtained,
-     * etc.
-     *
+     *               should be cleared, whether the complete set of stats should be obtained,
+     *               etc.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if this handle or the underlying
+     *                                     environment has already been closed.
      */
     public ReplicatedEnvironmentStats getRepStats(StatsConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final RepImpl repImpl = checkOpen();
 
-        if (config == null) {
+        if(config == null) {
             config = StatsConfig.DEFAULT;
         }
 
@@ -1025,7 +979,7 @@ public class ReplicatedEnvironment extends Environment {
 
         final RepImpl repImpl = repEnvironmentImpl;
 
-        if (repImpl == null) {
+        if(repImpl == null) {
             throw new IllegalStateException("Environment is closed.");
         }
 
@@ -1034,7 +988,7 @@ public class ReplicatedEnvironment extends Environment {
 
     /**
      * Returns the underlying RepImpl, or null if the env has been closed.
-     *
+     * <p>
      * WARNING: This method will be phased out over time and normally
      * getNonNullRepImpl should be called instead.
      */
@@ -1044,8 +998,8 @@ public class ReplicatedEnvironment extends Environment {
 
     /**
      * @throws EnvironmentFailureException if the underlying environment is
-     * invalid.
-     * @throws IllegalStateException if the environment is not open.
+     *                                     invalid.
+     * @throws IllegalStateException       if the environment is not open.
      */
     private RepImpl checkOpen() {
 
@@ -1069,7 +1023,171 @@ public class ReplicatedEnvironment extends Environment {
         super.printStartupInfo(out);
 
         getNonNullRepImpl().getStartupTracker().displayStats(
-            out, Phase.TOTAL_JOIN_GROUP);
+                out, Phase.TOTAL_JOIN_GROUP);
+    }
+
+    /**
+     * Closes this handle and shuts down the Replication Group by forcing all
+     * active Replicas to exit.
+     * <p>
+     * This method must be invoked on the node that's currently the Master
+     * after all other outstanding handles have been closed.
+     * <p>
+     * The Master waits for all active Replicas to catch up so that they have a
+     * current set of logs, and then shuts them down. The Master will wait for
+     * a maximum of <code>replicaShutdownTimeout</code> for a Replica to catch
+     * up. If the Replica has not caught up in this time period it will force
+     * the Replica to shut down before it is completely caught up. A negative
+     * or zero <code>replicaShutdownTimeout</code> value will result in an
+     * immediate shutdown without waiting for lagging Replicas to catch up.
+     * Nodes that are currently inactive cannot be contacted by the Master, as
+     * a consequence, their state is not impacted by the shutdown.
+     * <p>
+     * The shutdown operation will close this handle on the Master node. The
+     * environments on Replica nodes will be invalidated, and attempts to use
+     * those handles will result in a {@link GroupShutdownException} being
+     * thrown. The application is responsible for closing the remaining handles
+     * on the Replica.
+     *
+     * @param replicaShutdownTimeout the maximum amount of time the Master
+     *                               waits for a Replica to shutdown.
+     * @param unit                   the time unit associated with the
+     *                               <code>replicaShutdownTimeout</code>
+     * @throws IllegalStateException if the method is invoked on a node that's
+     *                               not currently the Master, or there are other open handles to this
+     *                               Environment.
+     */
+    public synchronized void shutdownGroup(long replicaShutdownTimeout,
+                                           TimeUnit unit)
+            throws IllegalStateException {
+
+        final RepImpl repImpl = checkOpen();
+
+        /*
+         * Hold repImpl stable, across the setup and close. Note that close()
+         * synchronizes on DbEnvPool, and synchronization order must be
+         * DbEnvPool before repImpl/envImpl.
+         */
+        synchronized(DbEnvPool.getInstance()) {
+            synchronized(repImpl) {
+                repImpl.shutdownGroupSetup(
+                        unit.toMillis(replicaShutdownTimeout));
+                close();
+            }
+        }
+    }
+
+    /**
+     * Registers an {@link AppStateMonitor} to receive the application state
+     * which this {@link ReplicatedEnvironment} is running in. Note that there
+     * is only one <code>AppStateMonitor</code> per replication node, not one
+     * per handle. Invoking this method replaces the previous
+     * <code>AppStateMonitor</code>.
+     * <p>
+     * After registration, the application state can be returned by invoking
+     * {@link com.sleepycat.je.rep.util.ReplicationGroupAdmin#getNodeState}.
+     *
+     * @param appStateMonitor the user implemented AppStateMonitor
+     * @throws IllegalStateException if this handle or the underlying
+     *                               environment has already been closed.
+     */
+    public void registerAppStateMonitor(AppStateMonitor appStateMonitor)
+            throws IllegalStateException {
+
+        final RepImpl repImpl = checkOpen();
+
+        repImpl.getRepNode().registerAppStateMonitor(appStateMonitor);
+    }
+
+    /**
+     * Transfers the current master state from this node to one of the
+     * electable replicas supplied in the argument list.  The replica that is
+     * actually chosen to be the new master is the one with which the Master
+     * Transfer can be completed most rapidly.  The transfer operation ensures
+     * that all changes at this node are available at the new master upon
+     * conclusion of the operation.
+     * <p>
+     * The following sequence of steps is used to accomplish the transfer:
+     * <ol>
+     * <li>The master first waits for at least one replica, from
+     * amongst the supplied {@code Set} of candidate replicas, to
+     * become reasonably current.  It may have to wait for at least
+     * one of the replicas to establish a feeder, if none of them are
+     * currently connected to the master.  "Reasonably current" means
+     * that the replica is close enough to the end of the transaction
+     * stream that it has managed to acknowledge a transaction within
+     * the time that the commit thread is still awaiting
+     * acknowledgments.  If the candidate replicas are working
+     * through a long backlog after having been disconnected, this can
+     * take some time, so the timeout value should be chosen to allow
+     * for this possibility.
+     * <p>
+     * <li>The master blocks new transactions from being committed or
+     * aborted.
+     * <p>
+     * <li>The master now waits for one of the candidate replicas to
+     * become fully current (completely caught up with the end of the
+     * log on the master).  The first replica that becomes current is
+     * the one that is chosen to become the new master.  This second
+     * wait period is expected to be brief, since it only has to wait
+     * until transactions that were committed in the interval between
+     * step 1) and step 2) have been acknowledged by a replica.
+     * <p>
+     * <li>The master sends messages to all other nodes announcing the chosen
+     * replica as the new master. This node will eventually become a replica,
+     * and any subsequent attempt commit or abort existing transactions, or to
+     * do write operations will result in a {@code ReplicaWriteException}.
+     * <p>
+     * <li>The current master releases the transactions that were blocked in
+     * step 2) allowing them to proceed. The released transactions will fail
+     * with {@code ReplicaWriteException} since the environment has become a
+     * replica.
+     * </ol>
+     *
+     * @param replicas the set of replicas to be considered when choosing the
+     *                 new master. The method returns immediately if this node is a member of
+     *                 the set.
+     * @param timeout  the amount of time to allow for the transfer to be
+     *                 accomplished. A {@code MasterTransferFailureException} is thrown if the
+     *                 transfer is not accomplished within this timeout period.
+     * @param timeUnit the time unit associated with the timeout
+     * @return the name of the replica that was chosen to be the new master
+     * from amongst the set of supplied replicas
+     * @throws MasterTransferFailureException if the master transfer operation
+     *                                        fails
+     * @throws IllegalArgumentException       if any of the named replicas is not a
+     *                                        member of the replication group or is not of type
+     *                                        {@link NodeType#ELECTABLE}
+     * @throws IllegalStateException          if this node is not currently the master,
+     *                                        or this handle or the underlying environment has already been closed.
+     */
+    public String transferMaster(Set<String> replicas,
+                                 int timeout,
+                                 TimeUnit timeUnit) {
+        return transferMaster(replicas, timeout, timeUnit, false);
+    }
+
+    /**
+     * Transfers the current master state from this node to one of the replicas
+     * supplied in the argument list.
+     *
+     * @param force true if this request should supersede and cancel any
+     *              currently pending Master Transfer operation
+     * @see #transferMaster(Set, int, TimeUnit)
+     */
+    public String transferMaster(Set<String> replicas,
+                                 int timeout,
+                                 TimeUnit timeUnit,
+                                 boolean force) {
+        final RepImpl repImpl = checkOpen();
+
+        if(timeUnit == null || timeout <= 0) {
+            throw new IllegalArgumentException("Invalid timeout");
+        }
+
+        return repImpl.transferMaster(replicas,
+                timeUnit.toMillis(timeout),
+                force);
     }
 
     /**
@@ -1176,175 +1294,5 @@ public class ReplicatedEnvironment extends Environment {
         final public boolean isActive() {
             return (this == MASTER) || (this == REPLICA);
         }
-    }
-
-    /**
-     * Closes this handle and shuts down the Replication Group by forcing all
-     * active Replicas to exit.
-     * <p>
-     * This method must be invoked on the node that's currently the Master
-     * after all other outstanding handles have been closed.
-     * <p>
-     * The Master waits for all active Replicas to catch up so that they have a
-     * current set of logs, and then shuts them down. The Master will wait for
-     * a maximum of <code>replicaShutdownTimeout</code> for a Replica to catch
-     * up. If the Replica has not caught up in this time period it will force
-     * the Replica to shut down before it is completely caught up. A negative
-     * or zero <code>replicaShutdownTimeout</code> value will result in an
-     * immediate shutdown without waiting for lagging Replicas to catch up.
-     * Nodes that are currently inactive cannot be contacted by the Master, as
-     * a consequence, their state is not impacted by the shutdown.
-     * <p>
-     * The shutdown operation will close this handle on the Master node. The
-     * environments on Replica nodes will be invalidated, and attempts to use
-     * those handles will result in a {@link GroupShutdownException} being
-     * thrown. The application is responsible for closing the remaining handles
-     * on the Replica.
-     *
-     * @param replicaShutdownTimeout the maximum amount of time the Master
-     * waits for a Replica to shutdown.
-     *
-     * @param unit the time unit associated with the
-     * <code>replicaShutdownTimeout</code>
-     *
-     * @throws IllegalStateException if the method is invoked on a node that's
-     * not currently the Master, or there are other open handles to this
-     * Environment.
-     */
-    public synchronized void shutdownGroup(long replicaShutdownTimeout,
-                                           TimeUnit unit)
-        throws IllegalStateException {
-
-        final RepImpl repImpl = checkOpen();
-
-        /*
-         * Hold repImpl stable, across the setup and close. Note that close()
-         * synchronizes on DbEnvPool, and synchronization order must be
-         * DbEnvPool before repImpl/envImpl.
-         */
-        synchronized (DbEnvPool.getInstance()) {
-            synchronized (repImpl) {
-                repImpl.shutdownGroupSetup(
-                    unit.toMillis(replicaShutdownTimeout));
-                close();
-            }
-        }
-    }
-
-    /**
-     * Registers an {@link AppStateMonitor} to receive the application state
-     * which this {@link ReplicatedEnvironment} is running in. Note that there
-     * is only one <code>AppStateMonitor</code> per replication node, not one
-     * per handle. Invoking this method replaces the previous
-     * <code>AppStateMonitor</code>.
-     * <p>
-     * After registration, the application state can be returned by invoking
-     * {@link com.sleepycat.je.rep.util.ReplicationGroupAdmin#getNodeState}.
-     *
-     * @param appStateMonitor the user implemented AppStateMonitor
-     *
-     * @throws IllegalStateException if this handle or the underlying
-     * environment has already been closed.
-     */
-    public void registerAppStateMonitor(AppStateMonitor appStateMonitor)
-        throws IllegalStateException {
-
-        final RepImpl repImpl = checkOpen();
-
-        repImpl.getRepNode().registerAppStateMonitor(appStateMonitor);
-    }
-
-    /**
-     * Transfers the current master state from this node to one of the
-     * electable replicas supplied in the argument list.  The replica that is
-     * actually chosen to be the new master is the one with which the Master
-     * Transfer can be completed most rapidly.  The transfer operation ensures
-     * that all changes at this node are available at the new master upon
-     * conclusion of the operation.
-     * <p>
-     * The following sequence of steps is used to accomplish the transfer:
-     * <ol>
-     * <li>The master first waits for at least one replica, from
-     * amongst the supplied {@code Set} of candidate replicas, to
-     * become reasonably current.  It may have to wait for at least
-     * one of the replicas to establish a feeder, if none of them are
-     * currently connected to the master.  "Reasonably current" means
-     * that the replica is close enough to the end of the transaction
-     * stream that it has managed to acknowledge a transaction within
-     * the time that the commit thread is still awaiting
-     * acknowledgments.  If the candidate replicas are working
-     * through a long backlog after having been disconnected, this can
-     * take some time, so the timeout value should be chosen to allow
-     * for this possibility.
-     *
-     * <li>The master blocks new transactions from being committed or
-     * aborted.
-     *
-     * <li>The master now waits for one of the candidate replicas to
-     * become fully current (completely caught up with the end of the
-     * log on the master).  The first replica that becomes current is
-     * the one that is chosen to become the new master.  This second
-     * wait period is expected to be brief, since it only has to wait
-     * until transactions that were committed in the interval between
-     * step 1) and step 2) have been acknowledged by a replica.
-     *
-     * <li>The master sends messages to all other nodes announcing the chosen
-     * replica as the new master. This node will eventually become a replica,
-     * and any subsequent attempt commit or abort existing transactions, or to
-     * do write operations will result in a {@code ReplicaWriteException}.
-     *
-     * <li>The current master releases the transactions that were blocked in
-     * step 2) allowing them to proceed. The released transactions will fail
-     * with {@code ReplicaWriteException} since the environment has become a
-     * replica.
-     * </ol>
-     *
-     * @param replicas the set of replicas to be considered when choosing the
-     * new master. The method returns immediately if this node is a member of
-     * the set.
-     * @param timeout the amount of time to allow for the transfer to be
-     * accomplished. A {@code MasterTransferFailureException} is thrown if the
-     * transfer is not accomplished within this timeout period.
-     * @param timeUnit the time unit associated with the timeout
-     *
-     * @return the name of the replica that was chosen to be the new master
-     * from amongst the set of supplied replicas
-     *
-     * @throws MasterTransferFailureException if the master transfer operation
-     * fails
-     * @throws IllegalArgumentException if any of the named replicas is not a
-     * member of the replication group or is not of type
-     * {@link NodeType#ELECTABLE}
-     * @throws IllegalStateException if this node is not currently the master,
-     * or this handle or the underlying environment has already been closed.
-     */
-    public String transferMaster(Set<String> replicas,
-                                 int timeout,
-                                 TimeUnit timeUnit) {
-        return transferMaster(replicas, timeout, timeUnit, false);
-    }
-
-    /**
-     * Transfers the current master state from this node to one of the replicas
-     * supplied in the argument list.
-     *
-     * @param force true if this request should supersede and cancel any
-     * currently pending Master Transfer operation
-     *
-     * @see #transferMaster(Set, int, TimeUnit)
-     */
-    public String transferMaster(Set<String> replicas,
-                                 int timeout,
-                                 TimeUnit timeUnit,
-                                 boolean force) {
-        final RepImpl repImpl = checkOpen();
-
-        if (timeUnit == null || timeout <= 0) {
-            throw new IllegalArgumentException("Invalid timeout");
-        }
-
-        return repImpl.transferMaster(replicas,
-                                      timeUnit.toMillis(timeout),
-                                      force);
     }
 }

@@ -13,17 +13,17 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import javax.resource.ResourceException;
-import javax.resource.spi.ConnectionEvent;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.Transaction;
 import berkeley.com.sleepycat.je.TransactionConfig;
 import berkeley.com.sleepycat.je.XAEnvironment;
 
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionEvent;
+
 public class JELocalTransaction
-    implements javax.resource.cci.LocalTransaction,
-               javax.resource.spi.LocalTransaction {
+        implements javax.resource.cci.LocalTransaction,
+        javax.resource.spi.LocalTransaction {
 
     private static boolean DEBUG = false;
 
@@ -40,7 +40,7 @@ public class JELocalTransaction
     }
 
     public Transaction getTransaction()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return env.getThreadTransaction();
     }
@@ -50,9 +50,9 @@ public class JELocalTransaction
     }
 
     private void checkEnv(String methodName)
-        throws ResourceException {
+            throws ResourceException {
 
-        if (env == null) {
+        if(env == null) {
             throw new ResourceException("env is null in " + methodName);
         }
     }
@@ -62,7 +62,7 @@ public class JELocalTransaction
      */
 
     public void begin()
-        throws ResourceException {
+            throws ResourceException {
 
         checkEnv("begin");
         long id = -1;
@@ -70,27 +70,27 @@ public class JELocalTransaction
             Transaction txn = env.beginTransaction(null, transConfig);
             env.setThreadTransaction(txn);
             id = txn.getId();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             throw new ResourceException("During begin: " + DE.toString());
         }
 
         ConnectionEvent connEvent = new ConnectionEvent
-            (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_STARTED);
+                (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_STARTED);
         connEvent.setConnectionHandle(mgdConn);
         mgdConn.sendConnectionEvent(connEvent);
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("JELocalTransaction.begin " + id);
         }
     }
 
     public void commit()
-        throws ResourceException {
+            throws ResourceException {
 
         checkEnv("commit");
         try {
             env.getThreadTransaction().commit();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             ResourceException ret = new ResourceException(DE.toString());
             ret.initCause(DE);
             throw ret;
@@ -99,22 +99,22 @@ public class JELocalTransaction
         }
 
         ConnectionEvent connEvent = new ConnectionEvent
-            (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_COMMITTED);
+                (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_COMMITTED);
         connEvent.setConnectionHandle(mgdConn);
         mgdConn.sendConnectionEvent(connEvent);
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("JELocalTransaction.commit");
         }
     }
 
     public void rollback()
-        throws ResourceException {
+            throws ResourceException {
 
         checkEnv("rollback");
         try {
             env.getThreadTransaction().abort();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             ResourceException ret = new ResourceException(DE.toString());
             ret.initCause(DE);
             throw ret;
@@ -123,11 +123,11 @@ public class JELocalTransaction
         }
 
         ConnectionEvent connEvent = new ConnectionEvent
-            (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_ROLLEDBACK);
+                (mgdConn, ConnectionEvent.LOCAL_TRANSACTION_ROLLEDBACK);
         connEvent.setConnectionHandle(mgdConn);
         mgdConn.sendConnectionEvent(connEvent);
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("JELocalTransaction.rollback");
         }
     }

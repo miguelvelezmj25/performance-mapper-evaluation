@@ -15,7 +15,7 @@ package berkeley.com.sleepycat.je.evictor;
 
 /**
  * Implemented by off-heap memory allocators.
- *
+ * <p>
  * The allocator is responsible for allocating and freeing a block of memory
  * efficiently, maintaining the size of a block, identifying a block by a long
  * integer value (ID), and looking up a memory ID efficiently (in constant
@@ -55,12 +55,10 @@ package berkeley.com.sleepycat.je.evictor;
  */
 public interface OffHeapAllocator {
 
-    class OffHeapOverflowException extends Exception {}
-
     /**
      * Sets the maximum size of the off-heap cache, to be used as a hint for
      * the creation of implementation specific data structures.
-     *
+     * <p>
      * The maximum cache size is the amount of RAM that the app would like to
      * use for the off-heap cache, at the gross level of dividing up the RAM on
      * a machine among processes, the off-heap cache, the file system cache,
@@ -82,7 +80,7 @@ public interface OffHeapAllocator {
      * Returns an estimate of the amount of RAM used by the cache, including
      * the metadata and block overhead used by the implementation, as well as
      * any free space needed for performing compaction.
-     *
+     * <p>
      * This method should not cause thread contention when called frequently
      * from multiple threads. A volatile long field is the suggested
      * implementation.
@@ -93,7 +91,7 @@ public interface OffHeapAllocator {
 
     /**
      * Allocates a block of a given size and returns its ID.
-     *
+     * <p>
      * The bytes of the memory block must be initialized to zero.
      * <p>
      * Note that because the used cache size is only an estimate, and in fact
@@ -124,20 +122,17 @@ public interface OffHeapAllocator {
      * <p>
      *
      * @return non-zero memory ID, or zero when the memory cannot be allocated.
-     *
      * @throws OffHeapOverflowException if the block cannot be allocated
-     * because the max size has been reached. The internal off-heap cache
-     * size limit will be set as described above.
-     *
-     * @throws OutOfMemoryError if the block cannot be allocated because no
-     * system memory is available. The internal off-heap cache size limit will
-     * be set as described above. In addition, a SEVERE message for the
-     * exception will be logged.
-     *
+     *                                  because the max size has been reached. The internal off-heap cache
+     *                                  size limit will be set as described above.
+     * @throws OutOfMemoryError         if the block cannot be allocated because no
+     *                                  system memory is available. The internal off-heap cache size limit will
+     *                                  be set as described above. In addition, a SEVERE message for the
+     *                                  exception will be logged.
      * @see #getUsedBytes
      */
     long allocate(int size)
-        throws OutOfMemoryError, OffHeapOverflowException;
+            throws OutOfMemoryError, OffHeapOverflowException;
 
     /**
      * Frees a block previously allocated and returns the size freed, including
@@ -173,4 +168,7 @@ public interface OffHeapAllocator {
               long toMemId,
               int toMemOff,
               int len);
+
+    class OffHeapOverflowException extends Exception {
+    }
 }

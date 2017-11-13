@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree.dupConvert;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogEntryType;
@@ -23,10 +21,12 @@ import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.tree.LN;
 import berkeley.com.sleepycat.je.tree.TreeUtils;
 
+import java.nio.ByteBuffer;
+
 /**
  * A DupCountLN represents the transactional part of the root of a
  * duplicate tree, specifically the count of dupes in the tree.
- *
+ * <p>
  * Obsolete in log version 8, only used by DupConvert and some log readers.
  */
 public final class DupCountLN extends LN {
@@ -93,15 +93,15 @@ public final class DupCountLN extends LN {
     @Override
     public String dumpString(int nSpaces, boolean dumpTags) {
         StringBuilder sb = new StringBuilder();
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(beginTag());
             sb.append('\n');
         }
-        sb.append(TreeUtils.indent(nSpaces+2));
+        sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append("<count v=\"").append(dupCount).append("\"/>").append('\n');
         sb.append(super.dumpString(nSpaces, false));
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(endTag());
         }
@@ -113,14 +113,14 @@ public final class DupCountLN extends LN {
      */
 
     /**
-     * Return the correct log entry type for a DupCountLN depends on whether 
+     * Return the correct log entry type for a DupCountLN depends on whether
      * it's transactional.
      */
     @Override
     protected LogEntryType getLogType(boolean isInsert,
                                       boolean isTransactional) {
         return isTransactional ? LogEntryType.LOG_DUPCOUNTLN_TRANSACTIONAL :
-                                 LogEntryType.LOG_DUPCOUNTLN;
+                LogEntryType.LOG_DUPCOUNTLN;
     }
 
     /**

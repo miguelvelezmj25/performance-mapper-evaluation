@@ -26,14 +26,14 @@ import static berkeley.com.sleepycat.je.EnvironmentFailureException.assertState;
  * creating the HashSet and related elements as well as call Object.hashCode().
  * It was designed for holding the cursors of a BIN, which are often no more
  * than two in number.
- *
+ * <p>
  * If (elem1 != null || elem2 != null), they are the only elements in the
  * TinyHashSet.  If (set != null) then only the set's elements are in the
  * TinyHashSet.
- *
+ * <p>
  * It should never be true that:
- *   (elem1 != null || elem2 != null) and (set != null).
- *
+ * (elem1 != null || elem2 != null) and (set != null).
+ * <p>
  * This class does not support adding null elements, and only supports a few
  * of the methods in the Set interface.
  */
@@ -60,13 +60,13 @@ public class TinyHashSet<T> implements Iterable<T> {
      * Will return a fuzzy value if not under synchronized control.
      */
     public int size() {
-        if (elem1 != null && elem2 != null) {
+        if(elem1 != null && elem2 != null) {
             return 2;
         }
-        if (elem1 != null || elem2 != null) {
+        if(elem1 != null || elem2 != null) {
             return 1;
         }
-        if (set != null) {
+        if(set != null) {
             return set.size();
         }
         return 0;
@@ -75,13 +75,13 @@ public class TinyHashSet<T> implements Iterable<T> {
     public boolean contains(T o) {
         assertState(o != null);
         assertState((elem1 == null && elem2 == null) || (set == null));
-        if (set != null) {
+        if(set != null) {
             return set.contains(o);
         }
-        if (elem1 != null && (elem1 == o || elem1.equals(o))) {
+        if(elem1 != null && (elem1 == o || elem1.equals(o))) {
             return true;
         }
-        if (elem2 != null && (elem2 == o || elem2.equals(o))) {
+        if(elem2 != null && (elem2 == o || elem2.equals(o))) {
             return true;
         }
         return false;
@@ -90,8 +90,8 @@ public class TinyHashSet<T> implements Iterable<T> {
     public boolean remove(T o) {
         assertState(o != null);
         assertState((elem1 == null && elem2 == null) || (set == null));
-        if (set != null) {
-            if (!set.remove(o)) {
+        if(set != null) {
+            if(!set.remove(o)) {
                 return false;
             }
             /*
@@ -109,11 +109,11 @@ public class TinyHashSet<T> implements Iterable<T> {
             */
             return true;
         }
-        if (elem1 != null && (elem1 == o || elem1.equals(o))) {
+        if(elem1 != null && (elem1 == o || elem1.equals(o))) {
             elem1 = null;
             return true;
         }
-        if (elem2 != null && (elem2 == o || elem2.equals(o))) {
+        if(elem2 != null && (elem2 == o || elem2.equals(o))) {
             elem2 = null;
             return true;
         }
@@ -123,20 +123,20 @@ public class TinyHashSet<T> implements Iterable<T> {
     public boolean add(T o) {
         assertState(o != null);
         assertState((elem1 == null && elem2 == null) || (set == null));
-        if (set != null) {
+        if(set != null) {
             return set.add(o);
         }
-        if (elem1 != null && (elem1 == o || elem1.equals(o))) {
+        if(elem1 != null && (elem1 == o || elem1.equals(o))) {
             return false;
         }
-        if (elem2 != null && (elem2 == o || elem2.equals(o))) {
+        if(elem2 != null && (elem2 == o || elem2.equals(o))) {
             return false;
         }
-        if (elem1 == null) {
+        if(elem1 == null) {
             elem1 = o;
             return true;
         }
-        if (elem2 == null) {
+        if(elem2 == null) {
             elem2 = o;
             return true;
         }
@@ -150,14 +150,14 @@ public class TinyHashSet<T> implements Iterable<T> {
 
     public Set<T> copy() {
         assertState((elem1 == null && elem2 == null) || (set == null));
-        if (set != null) {
+        if(set != null) {
             return new HashSet<T>(set);
         }
         final Set<T> ret = new HashSet<T>();
-        if (elem1 != null) {
+        if(elem1 != null) {
             ret.add(elem1);
         }
-        if (elem2 != null) {
+        if(elem2 != null) {
             ret.add(elem2);
         }
         return ret;
@@ -165,7 +165,7 @@ public class TinyHashSet<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         assertState((elem1 == null && elem2 == null) || (set == null));
-        if (set != null) {
+        if(set != null) {
             return set.iterator();
         }
         return new TwoElementIterator<T>(this, elem1, elem2);
@@ -194,11 +194,11 @@ public class TinyHashSet<T> implements Iterable<T> {
         }
 
         public T next() {
-            if (!returnedElem1) {
+            if(!returnedElem1) {
                 returnedElem1 = true;
                 return elem1;
             }
-            if (!returnedElem2) {
+            if(!returnedElem2) {
                 returnedElem2 = true;
                 return elem2;
             }
@@ -210,11 +210,11 @@ public class TinyHashSet<T> implements Iterable<T> {
          * the last returned element when both elements were returned.
          */
         public void remove() {
-            if (returnedElem2 && elem2 != null) {
+            if(returnedElem2 && elem2 != null) {
                 parent.elem2 = null;
                 return;
             }
-            if (returnedElem1 && elem1 != null) {
+            if(returnedElem1 && elem1 != null) {
                 parent.elem1 = null;
                 return;
             }

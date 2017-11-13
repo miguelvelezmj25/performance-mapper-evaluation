@@ -12,10 +12,10 @@
  */
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.Date;
-
 import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.txn.Locker;
+
+import java.util.Date;
 
 /**
  * Provides a synchronous mechanism for informing an application about a change
@@ -35,12 +35,13 @@ public abstract class StateChangeException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     protected StateChangeException(Locker locker,
                                    StateChangeEvent stateChangeEvent) {
         super(locker, (locker != null),
-              makeMessage(locker, stateChangeEvent), null);
+                makeMessage(locker, stateChangeEvent), null);
         this.stateChangeEvent = stateChangeEvent;
     }
 
@@ -53,33 +54,33 @@ public abstract class StateChangeException extends OperationFailureException {
     }
 
     /**
+     * For internal use only.
+     *
+     * @hidden Only for use by wrapSelf methods.
+     */
+    protected StateChangeException(String message,
+                                   StateChangeException cause) {
+        super(message, cause);
+        stateChangeEvent =
+                (cause != null) ? cause.stateChangeEvent : null;
+    }
+
+    private static String makeMessage(Locker locker, StateChangeEvent event) {
+        long lockerId = (locker == null) ? 0 : locker.getId();
+        return (event != null) ?
+                ("Problem closing transaction " + lockerId +
+                        ". The current state is:" + event.getState() + "." +
+                        " The node transitioned to this state at:" +
+                        new Date(event.getEventTime())) :
+                "Node state inconsistent with operation";
+    }
+
+    /**
      * Returns the event that resulted in this exception.
      *
      * @return the state change event
      */
     public StateChangeEvent getEvent() {
         return stateChangeEvent;
-    }
-
-    private static String makeMessage(Locker locker, StateChangeEvent event) {
-        long lockerId = (locker == null) ? 0 : locker.getId();
-        return (event != null) ?
-              ("Problem closing transaction " + lockerId +
-               ". The current state is:" + event.getState() + "." +
-                " The node transitioned to this state at:" +
-                 new Date(event.getEventTime())) :
-               "Node state inconsistent with operation";
-    }
-
-    /**
-     * For internal use only.
-     * @hidden
-     * Only for use by wrapSelf methods.
-     */
-    protected StateChangeException(String message,
-                                   StateChangeException cause) {
-        super(message, cause);
-        stateChangeEvent =
-            (cause != null) ? cause.stateChangeEvent : null;
     }
 }

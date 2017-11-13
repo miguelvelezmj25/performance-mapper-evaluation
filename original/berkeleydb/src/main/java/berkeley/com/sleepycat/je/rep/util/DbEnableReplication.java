@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je.rep.util;
 
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
-
-import java.io.File;
-
 import berkeley.com.sleepycat.je.Durability;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.rep.RepInternal;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
 import berkeley.com.sleepycat.je.rep.ReplicationConfig;
+
+import java.io.File;
+
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
 
 /**
  * A utility to convert an existing, non replicated JE environment for
@@ -64,44 +64,53 @@ import berkeley.com.sleepycat.je.rep.ReplicationConfig;
  * <p>
  * For example:
  * <pre class="code">
- * // Create the first node using an existing environment 
- * DbEnableReplication converter = 
- *     new DbEnableReplication(envDirMars,          // env home dir
- *                             "UniversalRepGroup", // group name
- *                             "nodeMars",          // node name
- *                             "mars:5001");        // node host,port
+ * // Create the first node using an existing environment
+ * DbEnableReplication converter =
+ * new DbEnableReplication(envDirMars,          // env home dir
+ * "UniversalRepGroup", // group name
+ * "nodeMars",          // node name
+ * "mars:5001");        // node host,port
  * converter.convert();
- *
+ * <p>
  * ReplicatedEnvironment nodeMars = new ReplicatedEnvironment(envDirMars, ...);
- * 
- * // Bring up additional nodes, which will be initialized from 
+ * <p>
+ * // Bring up additional nodes, which will be initialized from
  * // nodeMars.
  * ReplicationConfig repConfig = null;
  * try {
- *     repConfig = new ReplicationConfig("UniversalRepGroup", // groupName
- *                                       "nodeVenus",         // nodeName
- *                                       "venus:5008");       // nodeHostPort
- *     repConfig.setHelperHosts("mars:5001");
- * 
- *     nodeVenus = new ReplicatedEnvironment(envDirB, repConfig, envConfig);
+ * repConfig = new ReplicationConfig("UniversalRepGroup", // groupName
+ * "nodeVenus",         // nodeName
+ * "venus:5008");       // nodeHostPort
+ * repConfig.setHelperHosts("mars:5001");
+ * <p>
+ * nodeVenus = new ReplicatedEnvironment(envDirB, repConfig, envConfig);
  * } catch (InsufficientLogException insufficientLogEx) {
- * 
- *     // log files will be copied from another node in the group
- *     NetworkRestore restore = new NetworkRestore();
- *     restore.execute(insufficientLogEx, new NetworkRestoreConfig());
- *     
- *     // try opening the node now
- *     nodeVenus = new ReplicatedEnvironment(envDirVenus, 
- *                                           repConfig,
- *                                           envConfig);
+ * <p>
+ * // log files will be copied from another node in the group
+ * NetworkRestore restore = new NetworkRestore();
+ * restore.execute(insufficientLogEx, new NetworkRestoreConfig());
+ * <p>
+ * // try opening the node now
+ * nodeVenus = new ReplicatedEnvironment(envDirVenus,
+ * repConfig,
+ * envConfig);
  * }
  * ...
  * </pre>
  */
 public class DbEnableReplication {
 
-    /* 
-     * The code snippet in the header comment is tested in 
+    private static final String usageString =
+            "usage: java -cp je.jar " +
+                    "com.sleepycat.je.rep.util.DbEnableReplication\n" +
+                    " -h <dir>                              # environment home directory\n" +
+                    " -groupName <group name>               # replication group name\n" +
+                    " -nodeName <node name>                 # replicated node name\n" +
+                    " -nodeHostPort <host name:port number> # host name or IP address\n" +
+                    "                                          and port number to use\n" +
+                    "                                          for this node\n";
+    /*
+     * The code snippet in the header comment is tested in
      * com.sleepycat.je.rep.util.EnvConvertTest.
      * testJavadocForDbEnableReplication(). Please update this test case
      * when the example is changed.
@@ -111,15 +120,26 @@ public class DbEnableReplication {
     private String nodeName;
     private String nodeHostPort;
 
-    private static final String usageString =
-        "usage: java -cp je.jar " +
-        "com.sleepycat.je.rep.util.DbEnableReplication\n" + 
-        " -h <dir>                              # environment home directory\n" +
-        " -groupName <group name>               # replication group name\n" +
-        " -nodeName <node name>                 # replicated node name\n" +
-        " -nodeHostPort <host name:port number> # host name or IP address\n" +
-        "                                          and port number to use\n" +
-        "                                          for this node\n";
+    private DbEnableReplication() {
+    }
+
+    /**
+     * Create a DbEnableReplication object for this node.
+     *
+     * @param envHome      The node's environment directory
+     * @param groupName    The name of the new replication group
+     * @param nodeName     The node's name
+     * @param nodeHostPort The host and port for this node
+     */
+    public DbEnableReplication(File envHome,
+                               String groupName,
+                               String nodeName,
+                               String nodeHostPort) {
+        this.envHome = envHome;
+        this.groupName = groupName;
+        this.nodeName = nodeName;
+        this.nodeHostPort = nodeHostPort;
+    }
 
     /**
      * Usage:
@@ -139,7 +159,7 @@ public class DbEnableReplication {
 
         try {
             converter.convert();
-        } catch (Throwable t) {
+        } catch(Throwable t) {
             t.printStackTrace();
         }
     }
@@ -154,102 +174,88 @@ public class DbEnableReplication {
         int argc = 0;
         int nArgs = args.length;
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = args[argc++].trim();
-            if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(args[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else if (thisArg.equals("-groupName")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-groupName")) {
+                if(argc < nArgs) {
                     groupName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage("-groupName requires an argument");
                 }
-            } else if (thisArg.equals("-nodeName")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-nodeName")) {
+                if(argc < nArgs) {
                     nodeName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage("-nodeName requires an argument");
                 }
-            } else if (thisArg.equals("-nodeHostPort")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-nodeHostPort")) {
+                if(argc < nArgs) {
                     nodeHostPort = args[argc++];
                     try {
                         NODE_HOST_PORT.validateValue(nodeHostPort);
-                    } catch (IllegalArgumentException e) {
+                    } catch(IllegalArgumentException e) {
                         e.printStackTrace();
                         printUsage("-nodeHostPort is illegal!");
                     }
-                } else {
+                }
+                else {
                     printUsage("-nodeHostPort requires an argument");
                 }
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage("-h is a required argument.");
         }
 
-        if (groupName == null) {
+        if(groupName == null) {
             printUsage("-groupName is a required argument.");
         }
 
-        if (nodeName == null) {
+        if(nodeName == null) {
             printUsage("-nodeName is a required argument.");
         }
 
-        if (nodeHostPort == null) {
+        if(nodeHostPort == null) {
             printUsage("-nodeHostPort is a required argument.");
         }
     }
 
-    private DbEnableReplication() {
-    }
-
     /**
-     * Create a DbEnableReplication object for this node.
-     *
-     * @param envHome The node's environment directory
-     * @param groupName The name of the new replication group
-     * @param nodeName The node's name
-     * @param nodeHostPort The host and port for this node
-     */
-    public DbEnableReplication(File envHome, 
-                               String groupName, 
-                               String nodeName, 
-                               String nodeHostPort) {
-        this.envHome = envHome;
-        this.groupName = groupName;
-        this.nodeName = nodeName;
-        this.nodeHostPort = nodeHostPort;
-    }
-
-     /**
      * Modify the log files in the environment directory to add a modicum of
      * replication required metadata.
      */
-     public void convert() {
+    public void convert() {
 
         Durability durability =
-            new Durability(Durability.SyncPolicy.WRITE_NO_SYNC,
-                           Durability.SyncPolicy.WRITE_NO_SYNC,
-                           Durability.ReplicaAckPolicy.SIMPLE_MAJORITY);
+                new Durability(Durability.SyncPolicy.WRITE_NO_SYNC,
+                        Durability.SyncPolicy.WRITE_NO_SYNC,
+                        Durability.ReplicaAckPolicy.SIMPLE_MAJORITY);
 
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setAllowCreate(true);
         envConfig.setTransactional(true);
         envConfig.setDurability(durability);
 
-        ReplicationConfig repConfig = 
-            new ReplicationConfig(groupName, nodeName, nodeHostPort);
+        ReplicationConfig repConfig =
+                new ReplicationConfig(groupName, nodeName, nodeHostPort);
         repConfig.setHelperHosts(repConfig.getNodeHostPort());
         RepInternal.setAllowConvert(repConfig, true);
 
-        ReplicatedEnvironment repEnv = 
-            new ReplicatedEnvironment(envHome, repConfig, envConfig);
+        ReplicatedEnvironment repEnv =
+                new ReplicatedEnvironment(envHome, repConfig, envConfig);
 
         repEnv.close();
     }

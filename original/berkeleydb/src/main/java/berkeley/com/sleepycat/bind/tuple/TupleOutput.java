@@ -13,25 +13,24 @@
 
 package berkeley.com.sleepycat.bind.tuple;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import berkeley.com.sleepycat.util.FastOutputStream;
 import berkeley.com.sleepycat.util.PackedInteger;
 import berkeley.com.sleepycat.util.UtfOps;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * An <code>OutputStream</code> with <code>DataOutput</code>-like methods for
  * writing tuple fields.  It is used by <code>TupleBinding</code>.
- *
+ * <p>
  * <p>This class has many methods that have the same signatures as methods in
  * the {@link java.io.DataOutput} interface.  The reason this class does not
  * implement {@link java.io.DataOutput} is because it would break the interface
  * contract for those methods because of data format differences.</p>
  *
- * @see <a href="package-summary.html#formats">Tuple Formats</a>
- *
  * @author Mark Hayes
+ * @see <a href="package-summary.html#formats">Tuple Formats</a>
  */
 public class TupleOutput extends FastOutputStream {
 
@@ -66,18 +65,68 @@ public class TupleOutput extends FastOutputStream {
     // --- begin DataOutput compatible methods ---
 
     /**
+     * Returns the exact byte length that would would be output for a given
+     * {@code BigInteger} value if {@link TupleOutput#writeBigInteger} were
+     * called.
+     *
+     * @param val the BigInteger
+     * @return the byte length.
+     * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
+     */
+    public static int getBigIntegerByteLength(BigInteger val) {
+        return 2 /* length bytes */ +
+                (val.bitLength() + 1 /* sign bit */ + 7 /* round up */) / 8;
+    }
+
+    /**
+     * Returns the maximum byte length that would be output for a given {@code
+     * BigDecimal} value if {@link TupleOutput#writeBigDecimal} were called.
+     *
+     * @param val the BigDecimal.
+     * @return the byte length.
+     * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
+     * Formats</a>
+     */
+    public static int getBigDecimalMaxByteLength(BigDecimal val) {
+
+        BigInteger unscaledVal = val.unscaledValue();
+        return PackedInteger.MAX_LENGTH * 2 +
+                unscaledVal.toByteArray().length;
+    }
+
+    /**
+     * Returns the maximum byte length that would be output for a given {@code
+     * BigDecimal} value if {@link TupleOutput#writeSortedBigDecimal} were
+     * called.
+     *
+     * @param val the BigDecimal.
+     * @return the byte length.
+     * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
+     * Formats</a>
+     */
+    public static int getSortedBigDecimalMaxByteLength(BigDecimal val) {
+
+        String digitsStr = val.stripTrailingZeros().unscaledValue().abs().
+                toString();
+
+        int numOfGroups = (digitsStr.length() + 8 /* round up */) / 9;
+
+        return 1 /* sign */ +
+                PackedInteger.MAX_LENGTH /* exponent */ +
+                PackedInteger.MAX_LENGTH * numOfGroups /* all the digits */ +
+                1; /* terminator byte */
+    }
+
+    /**
      * Writes the specified bytes to the buffer, converting each character to
      * an unsigned byte value.
      * Writes values that can be read using {@link TupleInput#readBytes}.
      *
      * @param val is the string containing the values to be written.
-     * Only characters with values below 0x100 may be written using this
-     * method, since the high-order 8 bits of all characters are discarded.
-     *
+     *            Only characters with values below 0x100 may be written using this
+     *            method, since the high-order 8 bits of all characters are discarded.
      * @return this tuple output object.
-     *
      * @throws NullPointerException if the val parameter is null.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeBytes(String val) {
@@ -92,11 +141,8 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readChars}.
      *
      * @param val is the string containing the characters to be written.
-     *
      * @return this tuple output object.
-     *
      * @throws NullPointerException if the val parameter is null.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeChars(String val) {
@@ -111,16 +157,15 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readString()}.
      *
      * @param val is the string containing the characters to be written.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#stringFormats">String Formats</a>
      */
     public final TupleOutput writeString(String val) {
 
-        if (val != null) {
+        if(val != null) {
             writeString(val.toCharArray());
-        } else {
+        }
+        else {
             writeFast(NULL_STRING_UTF_VALUE);
         }
         writeFast(0);
@@ -132,9 +177,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readChar}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeChar(int val) {
@@ -150,14 +193,12 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readBoolean}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeBoolean(boolean val) {
 
-        writeFast(val ? (byte)1 : (byte)0);
+        writeFast(val ? (byte) 1 : (byte) 0);
         return this;
     }
 
@@ -166,9 +207,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readByte}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeByte(int val) {
@@ -182,9 +221,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readShort}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeShort(int val) {
@@ -198,9 +235,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readInt}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeInt(int val) {
@@ -214,9 +249,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readLong}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeLong(long val) {
@@ -230,9 +263,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readFloat}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#floatFormats">Floating Point
      * Formats</a>
      */
@@ -242,14 +273,14 @@ public class TupleOutput extends FastOutputStream {
         return this;
     }
 
+    // --- end DataOutput compatible methods ---
+
     /**
      * Writes an unsorted double (eight byte) value to the buffer.
      * Writes values that can be read using {@link TupleInput#readDouble}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#floatFormats">Floating Point
      * Formats</a>
      */
@@ -264,9 +295,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readSortedFloat}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#floatFormats">Floating Point
      * Formats</a>
      */
@@ -283,9 +312,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readSortedDouble}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#floatFormats">Floating Point
      * Formats</a>
      */
@@ -297,26 +324,21 @@ public class TupleOutput extends FastOutputStream {
         return this;
     }
 
-    // --- end DataOutput compatible methods ---
-
     /**
      * Writes the specified bytes to the buffer, converting each character to
      * an unsigned byte value.
      * Writes values that can be read using {@link TupleInput#readBytes}.
      *
      * @param chars is the array of values to be written.
-     * Only characters with values below 0x100 may be written using this
-     * method, since the high-order 8 bits of all characters are discarded.
-     *
+     *              Only characters with values below 0x100 may be written using this
+     *              method, since the high-order 8 bits of all characters are discarded.
      * @return this tuple output object.
-     *
      * @throws NullPointerException if the chars parameter is null.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeBytes(char[] chars) {
 
-        for (int i = 0; i < chars.length; i++) {
+        for(int i = 0; i < chars.length; i++) {
             writeFast((byte) chars[i]);
         }
         return this;
@@ -328,16 +350,13 @@ public class TupleOutput extends FastOutputStream {
      * Writes values that can be read using {@link TupleInput#readChars}.
      *
      * @param chars is the array of characters to be written.
-     *
      * @return this tuple output object.
-     *
      * @throws NullPointerException if the chars parameter is null.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeChars(char[] chars) {
 
-        for (int i = 0; i < chars.length; i++) {
+        for(int i = 0; i < chars.length; i++) {
             writeFast((byte) (chars[i] >>> 8));
             writeFast((byte) chars[i]);
         }
@@ -351,22 +370,21 @@ public class TupleOutput extends FastOutputStream {
      * or {@link TupleInput#readString(char[])}.
      *
      * @param chars is the array of characters to be written.
-     *
      * @return this tuple output object.
-     *
      * @throws NullPointerException if the chars parameter is null.
-     *
      * @see <a href="package-summary.html#stringFormats">String Formats</a>
      */
     public final TupleOutput writeString(char[] chars) {
 
-        if (chars.length == 0) return this;
+        if(chars.length == 0) {
+            return this;
+        }
 
         int utfLength = UtfOps.getByteLength(chars);
 
         makeSpace(utfLength);
         UtfOps.charsToBytes(chars, 0, getBufferBytes(), getBufferLength(),
-                            chars.length);
+                chars.length);
         addSize(utfLength);
         return this;
     }
@@ -377,9 +395,7 @@ public class TupleOutput extends FastOutputStream {
      * TupleInput#readUnsignedByte}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeUnsignedByte(int val) {
@@ -394,9 +410,7 @@ public class TupleOutput extends FastOutputStream {
      * TupleInput#readUnsignedShort}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeUnsignedShort(int val) {
@@ -412,9 +426,7 @@ public class TupleOutput extends FastOutputStream {
      * TupleInput#readUnsignedInt}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeUnsignedInt(long val) {
@@ -447,9 +459,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes an unsorted packed integer.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writePackedInt(int val) {
@@ -467,9 +477,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes an unsorted packed long integer.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writePackedLong(long val) {
@@ -487,9 +495,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes a sorted packed integer.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeSortedPackedInt(int val) {
@@ -497,7 +503,7 @@ public class TupleOutput extends FastOutputStream {
         makeSpace(PackedInteger.MAX_LENGTH);
         int oldLen = getBufferLength();
         int newLen = PackedInteger.writeSortedInt(getBufferBytes(), oldLen,
-                                                  val);
+                val);
         addSize(newLen - oldLen);
         return this;
     }
@@ -506,9 +512,7 @@ public class TupleOutput extends FastOutputStream {
      * Writes a sorted packed long integer.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeSortedPackedLong(long val) {
@@ -517,7 +521,7 @@ public class TupleOutput extends FastOutputStream {
 
         int oldLen = getBufferLength();
         int newLen = PackedInteger.writeSortedLong(getBufferBytes(), oldLen,
-                                                   val);
+                val);
 
         addSize(newLen - oldLen);
         return this;
@@ -527,122 +531,79 @@ public class TupleOutput extends FastOutputStream {
      * Writes a {@code BigInteger}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
-     * @throws NullPointerException if val is null.
-     *
+     * @throws NullPointerException     if val is null.
      * @throws IllegalArgumentException if the byte array representation of val
-     * is larger than 0x7fff bytes.
-     *
+     *                                  is larger than 0x7fff bytes.
      * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
      */
     public final TupleOutput writeBigInteger(BigInteger val) {
-    
+
         byte[] a = val.toByteArray();
-        if (a.length > Short.MAX_VALUE) {
+        if(a.length > Short.MAX_VALUE) {
             throw new IllegalArgumentException
-                ("BigInteger byte array is larger than 0x7fff bytes");
+                    ("BigInteger byte array is larger than 0x7fff bytes");
         }
         int firstByte = a[0];
-        writeShort((firstByte < 0) ? (- a.length) : a.length);
+        writeShort((firstByte < 0) ? (-a.length) : a.length);
         writeByte(firstByte);
         writeFast(a, 1, a.length - 1);
         return this;
     }
 
     /**
-     * Returns the exact byte length that would would be output for a given
-     * {@code BigInteger} value if {@link TupleOutput#writeBigInteger} were
-     * called.
-     *
-     * @param val the BigInteger
-     *
-     * @return the byte length.
-     *
-     * @see <a href="package-summary.html#integerFormats">Integer Formats</a>
-     */
-    public static int getBigIntegerByteLength(BigInteger val) {
-        return 2 /* length bytes */ +
-               (val.bitLength() + 1 /* sign bit */ + 7 /* round up */) / 8;
-    }
-    
-    /**
      * Writes an unsorted {@code BigDecimal}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @throws NullPointerException if val is null.
-     *
      * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
      * Formats</a>
      */
     public final TupleOutput writeBigDecimal(BigDecimal val) {
-    
+
         /*
          * The byte format for a BigDecimal value is:
          *     Byte 0 ~ L:   The scale part written as a PackedInteger.
          *     Byte L+1 ~ M: The length of the unscaled value written as a
          *                   PackedInteger.
-         *     Byte M+1 ~ N: The BigDecimal.toByteArray array, written 
+         *     Byte M+1 ~ N: The BigDecimal.toByteArray array, written
          *                   without modification.
          *
          * Get the scale and the unscaled value of this BigDecimal.
          */
         int scale = val.scale();
         BigInteger unscaledVal = val.unscaledValue();
-        
+
         /* Store the scale. */
         writePackedInt(scale);
         byte[] a = unscaledVal.toByteArray();
         int len = a.length;
-        
+
         /* Store the length of the following bytes. */
         writePackedInt(len);
-        
+
         /* Store the bytes of the BigDecimal, without modification. */
         writeFast(a, 0, len);
         return this;
     }
-    
-    /**
-     * Returns the maximum byte length that would be output for a given {@code
-     * BigDecimal} value if {@link TupleOutput#writeBigDecimal} were called.
-     *
-     * @param val the BigDecimal.
-     *
-     * @return the byte length.
-     *
-     * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
-     * Formats</a>
-     */
-    public static int getBigDecimalMaxByteLength(BigDecimal val) {
 
-        BigInteger unscaledVal = val.unscaledValue();
-        return PackedInteger.MAX_LENGTH * 2 + 
-               unscaledVal.toByteArray().length;
-    }
-    
     /**
      * Writes a sorted {@code BigDecimal}.
      *
      * @param val is the value to write to the buffer.
-     *
      * @return this tuple output object.
-     *
      * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
      * Formats</a>
      */
     public final TupleOutput writeSortedBigDecimal(BigDecimal val) {
 
-        /* 
+        /*
          * We have several options for the serialization of sorted BigDecimal.
          * The reason for choosing this method is that it is simpler and more
          * compact, and in some cases, comparison time will be less.  For other
          * methods and detailed discussion, please refer to [#18379].
-         * 
+         *
          * First, we need to do the normalization, which means we normalize a
          * given BigDecimal into two parts: decimal part and the exponent part.
          * The decimal part contains one integer (non zero). For example,
@@ -651,9 +612,9 @@ public class TupleOutput extends FastOutputStream {
          *      -123.4E-100 will be normalized to -1.234E-98.
          *
          * After the normalization, the byte format is:
-         *     Byte 0: sign (-1 represents negative, 0 represents zero, and 1 
+         *     Byte 0: sign (-1 represents negative, 0 represents zero, and 1
          *             represents positive).
-         *     Byte 1 ~ 5: the exponent with sign, and written as a 
+         *     Byte 1 ~ 5: the exponent with sign, and written as a
          *                 SortedPackedInteger value.
          *     Byte 6 ~ N: the normalized decimal part with sign.
          *
@@ -663,21 +624,21 @@ public class TupleOutput extends FastOutputStream {
         int scale = valNoTrailZeros.scale();
         BigInteger unscaledVal = valNoTrailZeros.unscaledValue();
         int sign = valNoTrailZeros.signum();
-        
+
         /* Then do the normalization. */
         String unscaledValStr = unscaledVal.abs().toString();
         int normalizedScale = unscaledValStr.length() - 1;
-        BigDecimal normalizedVal = new BigDecimal(unscaledVal, 
-                                                  normalizedScale);
+        BigDecimal normalizedVal = new BigDecimal(unscaledVal,
+                normalizedScale);
         int exponent = (normalizedScale - scale) * sign;
-        
+
         /* Start serializing each part. */
         writeByte(sign);
         writeSortedPackedInt(exponent);
         writeSortedNormalizedBigDecimal(normalizedVal);
         return this;
     }
-    
+
     /**
      * Writes a normalized {@code BigDecimal}.
      */
@@ -685,7 +646,7 @@ public class TupleOutput extends FastOutputStream {
 
         /*
          * The byte format for a sorted normalized {@code BigDecimal} value is:
-         *     Byte 0 ~ N: Store all digits with sign. Each 9 digits is 
+         *     Byte 0 ~ N: Store all digits with sign. Each 9 digits is
          *                 regarded as one integer, and written as a
          *                 SortedPackedInteger value.  If there are not enough
          *                 9 digits, pad trailing zeros. Since we may pad
@@ -702,42 +663,42 @@ public class TupleOutput extends FastOutputStream {
         int precision = val.precision();
         int scale = val.scale();
         int sign = val.signum();
-        
+
         /* Start the serialization of the whole digits. */
         String digitsStr = val.abs().toPlainString();
-        
-        /* 
-         * The default capacity of a StringBuilder is 16 chars, which is 
+
+        /*
+         * The default capacity of a StringBuilder is 16 chars, which is
          * enough to hold a group of digits having 9 digits.
          */
         StringBuilder groupDigits = new StringBuilder();
-        for (int i = 0; i < digitsStr.length();) {
+        for(int i = 0; i < digitsStr.length(); ) {
             char digit = digitsStr.charAt(i++);
-            
+
             /* Ignore the decimal. */
-            if (digit != '.') {
+            if(digit != '.') {
                 groupDigits.append(digit);
             }
-            
-            /* 
+
+            /*
              * For the last group of the digits, if there are not 9 digits, pad
              * trailing zeros.
              */
-            if (i == digitsStr.length() && groupDigits.length() < 9) {
+            if(i == digitsStr.length() && groupDigits.length() < 9) {
                 final int insertLen = 9 - groupDigits.length();
-                for (int k = 0; k < insertLen; k++) {
+                for(int k = 0; k < insertLen; k++) {
                     groupDigits.append("0");
                 }
             }
-            
-            /* Group every 9 digits as an Integer. */            
-            if (groupDigits.length() == 9) {
+
+            /* Group every 9 digits as an Integer. */
+            if(groupDigits.length() == 9) {
                 int subVal = Integer.valueOf(groupDigits.toString());
-                if (sign < 0) {
+                if(sign < 0) {
                     subVal = -subVal;
                 }
-                
-                /* 
+
+                /*
                  * Reset the sub-value, so the value -1 will be designated as
                  * the terminator byte.
                  */
@@ -746,34 +707,9 @@ public class TupleOutput extends FastOutputStream {
                 groupDigits.setLength(0);
             }
         }
-        
+
         /* Write the terminator byte. */
         writeSortedPackedInt(-1);
         return this;
-    }
-    
-    /**
-     * Returns the maximum byte length that would be output for a given {@code
-     * BigDecimal} value if {@link TupleOutput#writeSortedBigDecimal} were
-     * called.
-     *
-     * @param val the BigDecimal.
-     *
-     * @return the byte length.
-     *
-     * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal
-     * Formats</a>
-     */
-    public static int getSortedBigDecimalMaxByteLength(BigDecimal val) {
-    
-        String digitsStr = val.stripTrailingZeros().unscaledValue().abs().
-                           toString();
-        
-        int numOfGroups = (digitsStr.length() + 8 /* round up */) / 9;
-        
-        return 1 /* sign */ + 
-               PackedInteger.MAX_LENGTH /* exponent */ +
-               PackedInteger.MAX_LENGTH * numOfGroups /* all the digits */ +
-               1; /* terminator byte */
     }
 }

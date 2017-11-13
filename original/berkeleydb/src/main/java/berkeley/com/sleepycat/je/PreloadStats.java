@@ -69,8 +69,7 @@ public class PreloadStats implements Serializable {
     private PreloadStatus status;
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public PreloadStats() {
         reset();
@@ -165,75 +164,66 @@ public class PreloadStats implements Serializable {
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
+     */
+    public void setStatus(PreloadStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * @hidden Internal use only.
      */
     public void incINsLoaded() {
         this.nINsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incBINsLoaded() {
         this.nBINsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incLNsLoaded() {
         this.nLNsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incEmbeddedLNs() {
         this.nEmbeddedLNs++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incDINsLoaded() {
         this.nDINsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incDBINsLoaded() {
         this.nDBINsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incDupCountLNsLoaded() {
         this.nDupCountLNsLoaded++;
     }
 
     /**
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void incMemoryExceeded() {
         this.nCountMemoryExceeded++;
-    }
-
-    /**
-     * @hidden
-     * Internal use only.
-     */
-    public void setStatus(PreloadStatus status) {
-        this.status = status;
     }
 
     /**

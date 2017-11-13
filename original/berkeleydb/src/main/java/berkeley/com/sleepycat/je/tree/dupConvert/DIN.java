@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree.dupConvert;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.LogEntryType;
@@ -25,9 +23,11 @@ import berkeley.com.sleepycat.je.tree.Key;
 import berkeley.com.sleepycat.je.tree.TreeUtils;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
 
+import java.nio.ByteBuffer;
+
 /**
  * An DIN represents an Duplicate Internal Node in the JE tree.
- *
+ * <p>
  * Obsolete in log version 8, only used by DupConvert and some log readers.
  */
 public final class DIN extends IN {
@@ -91,11 +91,11 @@ public final class DIN extends IN {
     @Override
     public long computeMemorySize() {
         long size = super.computeMemorySize();
-        if (dupCountLNRef != null) {
+        if(dupCountLNRef != null) {
             size += MemoryBudget.byteArraySize(dupCountLNRef.getKey().length);
-            if (dupCountLNRef.getTarget() != null) {
+            if(dupCountLNRef.getTarget() != null) {
                 size += dupCountLNRef.getTarget().
-                    getMemorySizeIncludedByParent();
+                        getMemorySizeIncludedByParent();
             }
         }
         return size;
@@ -108,18 +108,18 @@ public final class DIN extends IN {
         long dupKeySize = 0;
         long dupLNSize = 0;
 
-        if (dupCountLNRef != null) {
+        if(dupCountLNRef != null) {
             dupKeySize = MemoryBudget.
-                byteArraySize(dupCountLNRef.getKey().length);
-            if (dupCountLNRef.getTarget() != null) {
+                    byteArraySize(dupCountLNRef.getKey().length);
+            if(dupCountLNRef.getTarget() != null) {
                 dupLNSize =
-                    dupCountLNRef.getTarget().getMemorySizeIncludedByParent();
+                        dupCountLNRef.getTarget().getMemorySizeIncludedByParent();
             }
         }
 
         final long dupTotal = inTotal + dupKeySize + dupLNSize;
         System.out.format("DIN: %d dkey: %d ln: %d %n",
-                          dupTotal, dupKeySize, dupLNSize);
+                dupTotal, dupKeySize, dupLNSize);
         return dupTotal;
     }
 
@@ -170,9 +170,10 @@ public final class DIN extends IN {
         boolean dupCountLNRefExists = false;
         byte booleans = itemBuffer.get();
         dupCountLNRefExists = (booleans & 1) != 0;
-        if (dupCountLNRefExists) {
+        if(dupCountLNRefExists) {
             dupCountLNRef.readFromLog(itemBuffer, entryVersion);
-        } else {
+        }
+        else {
             dupCountLNRef = null;
         }
     }
@@ -184,7 +185,7 @@ public final class DIN extends IN {
     protected void dumpLogAdditional(StringBuilder sb) {
         super.dumpLogAdditional(sb);
         sb.append(Key.dumpString(dupKey, 0));
-        if (dupCountLNRef != null) {
+        if(dupCountLNRef != null) {
             dupCountLNRef.dumpLog(sb, true);
         }
     }
@@ -205,33 +206,35 @@ public final class DIN extends IN {
 
     /**
      * For unit test support:
+     *
      * @return a string that dumps information about this DIN, without
      */
     @Override
     public String dumpString(int nSpaces, boolean dumpTags) {
         StringBuilder sb = new StringBuilder();
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(beginTag());
             sb.append('\n');
         }
 
-        sb.append(TreeUtils.indent(nSpaces+2));
+        sb.append(TreeUtils.indent(nSpaces + 2));
         sb.append("<dupkey>");
         sb.append(dupKey == null ? "" :
-                  Key.dumpString(dupKey, 0));
+                Key.dumpString(dupKey, 0));
         sb.append("</dupkey>");
         sb.append('\n');
-        if (dupCountLNRef == null) {
-            sb.append(TreeUtils.indent(nSpaces+2));
+        if(dupCountLNRef == null) {
+            sb.append(TreeUtils.indent(nSpaces + 2));
             sb.append("<dupCountLN/>");
-        } else {
+        }
+        else {
             sb.append(dupCountLNRef.dumpString(nSpaces + 4, true));
         }
         sb.append('\n');
         sb.append(super.dumpString(nSpaces, false));
 
-        if (dumpTags) {
+        if(dumpTags) {
             sb.append(TreeUtils.indent(nSpaces));
             sb.append(endTag());
         }

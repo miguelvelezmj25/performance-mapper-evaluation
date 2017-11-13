@@ -19,14 +19,13 @@ package berkeley.com.sleepycat.je.tree;
  */
 public class CursorsExistException extends Exception {
 
-    private static final long serialVersionUID = 1051296202L;
-
     /*
      * Throw this static instance, in order to reduce the cost of
      * fill in the stack trace.
      */
     public static final CursorsExistException CURSORS_EXIST =
-        new CursorsExistException();
+            new CursorsExistException();
+    private static final long serialVersionUID = 1051296202L;
 
     /* Make the constructor public for serializability testing. */
     public CursorsExistException() {

@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.OperationResult;
 import berkeley.com.sleepycat.je.dbi.CursorImpl;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.txn.LockType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Estimates the number of non-deleted BIN entries between two end points,
@@ -35,6 +35,17 @@ public class CountEstimator {
 
     /* If exceeded, there must be a bug of some kind. */
     private static final int MAX_RETRIES_AFTER_SPLIT = 100;
+    private final DatabaseImpl dbImpl;
+    private final List<List<TrackingInfo>> avgEntriesStacks =
+            new ArrayList<List<TrackingInfo>>();
+    private List<TrackingInfo> beginStack;
+    private List<TrackingInfo> endStack;
+    private int levelCount;
+    private int rootLevel;
+    private float[] avgEntries;
+    private CountEstimator(DatabaseImpl dbImpl) {
+        this.dbImpl = dbImpl;
+    }
 
     /**
      * Returns an estimate of the number of records between two end points
@@ -47,7 +58,7 @@ public class CountEstimator {
                              boolean endInclusive) {
 
         /* If the two cursors are at the same position, return 1. */
-        if (beginCursor.isOnSamePosition(endCursor)) {
+        if(beginCursor.isOnSamePosition(endCursor)) {
             return 1;
         }
 
@@ -55,35 +66,80 @@ public class CountEstimator {
         final CountEstimator estimator = new CountEstimator(dbImpl);
 
         return estimator.count(beginCursor, endCursor) +
-               (beginInclusive ? 1 : 0) +
-               (endInclusive ? 1 : 0);
+                (beginInclusive ? 1 : 0) +
+                (endInclusive ? 1 : 0);
     }
 
-    private final DatabaseImpl dbImpl;
+    /*
+     * For future use, if getKeyRatios is exposed in the API.  Be sure to test
+     * boundary conditions when index is 0 or nEntries.
+     *
+     * Algorithm copied from __bam_key_range in BDB btree/bt_stat.c.
+     */
+    static KeyRatios getKeyRatios(List<TrackingInfo> infoByLevel,
+                                  boolean exact) {
+        double factor = 1.0;
+        double less = 0.0;
+        double greater = 0.0;
 
-    private List<TrackingInfo> beginStack;
-    private List<TrackingInfo> endStack;
+        /*
+         * At each level we know that INs greater than index contain keys
+         * greater than what we are looking for and those less than index are
+         * less than.  The one pointed to by index may have some less, some
+         * greater or even equal.  If index is equal to the number of entries,
+         * then the key is out of range and everything is less.
+         */
+        for(final TrackingInfo info : infoByLevel) {
+            if(info.index == 0) {
+                greater += (factor * (info.entries - 1)) / info.entries;
+            }
+            else if(info.index == info.entries) {
+                less += factor;
+            }
+            else {
+                less += (factor * info.index) / info.entries;
+                greater += (factor * ((info.entries - info.index) - 1)) /
+                        info.entries;
+            }
 
-    private final List<List<TrackingInfo>> avgEntriesStacks =
-        new ArrayList<List<TrackingInfo>>();
+            /* Factor at next level down is 1/n'th the amount at this level. */
+            factor /= info.entries;
 
-    private int levelCount;
-    private int rootLevel;
-    private float[] avgEntries;
+            /*
+            System.out.println("factor: " + factor +
+                               " less: " + less +
+                               " greater: " + greater);
+            */
+        }
 
-    private CountEstimator(DatabaseImpl dbImpl) {
-        this.dbImpl = dbImpl;
+        /*
+         * If there was an exact match then assign the 1/n'th factor to the key
+         * itself.  Otherwise that factor belongs to those greater than the
+         * key, unless the key was out of range.
+         */
+        final double equal;
+        if(exact) {
+            equal = factor;
+        }
+        else {
+            if(less != 1.0) {
+                greater += factor;
+            }
+            equal = 0.0;
+        }
+
+        return new KeyRatios(less, equal, greater);
     }
-    
+
     private long count(CursorImpl beginCursor, CursorImpl endCursor) {
 
-        for (int numRetries = 0;; numRetries += 1) {
+        for(int numRetries = 0; ; numRetries += 1) {
 
             /*
              * If we have retried too many times, give up.  This is probably
              * due to a bug of some kind, and we shouldn't loop forever.
              */
-            if (numRetries > MAX_RETRIES_AFTER_SPLIT) {
+            if(numRetries > MAX_RETRIES_AFTER_SPLIT) {
                 throw EnvironmentFailureException.unexpectedState();
             }
 
@@ -92,15 +148,15 @@ public class CountEstimator {
              * occurs.
              */
             beginStack = beginCursor.getAncestorPath();
-            if (beginStack == null) {
+            if(beginStack == null) {
                 continue;
             }
             endStack = endCursor.getAncestorPath();
-            if (endStack == null) {
+            if(endStack == null) {
                 continue;
             }
 
-            if (!findCommonAncestor()) {
+            if(!findCommonAncestor()) {
                 continue;
             }
 
@@ -124,21 +180,21 @@ public class CountEstimator {
     private boolean findCommonAncestor() {
 
         levelCount = beginStack.size();
-        if (levelCount != endStack.size()) {
+        if(levelCount != endStack.size()) {
             /* Must have been a root split. */
             return false;
         }
 
         rootLevel = -1;
 
-        for (int level = levelCount - 1; level >= 0; level -= 1) {
+        for(int level = levelCount - 1; level >= 0; level -= 1) {
 
-            if (beginStack.get(level).nodeId == endStack.get(level).nodeId) {
+            if(beginStack.get(level).nodeId == endStack.get(level).nodeId) {
                 rootLevel = level;
                 break;
             }
         }
-        if (rootLevel < 0) {
+        if(rootLevel < 0) {
             /* Must have been a split. */
             return false;
         }
@@ -153,11 +209,11 @@ public class CountEstimator {
 
         avgEntriesStacks.clear();
 
-        if (!addAvgEntriesSample(beginStack)) {
+        if(!addAvgEntriesSample(beginStack)) {
             sampleNextBIN(beginCursor, true /*moveForward*/);
         }
 
-        if (!addAvgEntriesSample(endStack)) {
+        if(!addAvgEntriesSample(endStack)) {
             sampleNextBIN(endCursor, false /*moveForward*/);
         }
 
@@ -168,29 +224,30 @@ public class CountEstimator {
      * FUTURE: use internal skip method instead, saving a btree lookup.
      */
     private void sampleNextBIN(
-        CursorImpl beginOrEndCursor,
-        boolean moveForward) {
+            CursorImpl beginOrEndCursor,
+            boolean moveForward) {
 
         final CursorImpl cursor =
-            beginOrEndCursor.cloneCursor(true /*samePosition*/);
-        
+                beginOrEndCursor.cloneCursor(true /*samePosition*/);
+
         try {
             cursor.latchBIN();
-            if (moveForward) {
+            if(moveForward) {
                 cursor.setOnLastSlot();
-            } else {
+            }
+            else {
                 cursor.setOnFirstSlot();
             }
 
             final OperationResult result = cursor.getNext(
-                null /*foundKey*/, null /*foundData*/,
-                LockType.NONE, false /*dirtyReadAll*/,
-                moveForward, true /*alreadyLatched*/,
-                null /*rangeConstraint*/);
+                    null /*foundKey*/, null /*foundData*/,
+                    LockType.NONE, false /*dirtyReadAll*/,
+                    moveForward, true /*alreadyLatched*/,
+                    null /*rangeConstraint*/);
 
-            if (result != null) {
+            if(result != null) {
                 final List<TrackingInfo> stack = cursor.getAncestorPath();
-                if (stack != null) {
+                if(stack != null) {
                     addAvgEntriesSample(stack);
                 }
             }
@@ -210,13 +267,13 @@ public class CountEstimator {
 
         avgEntries[levelCount - 1] = 1.0F;
 
-        if (avgEntriesStacks.size() == 0) {
+        if(avgEntriesStacks.size() == 0) {
             return;
         }
 
-        for (int level = levelCount - 1; level > 0; level -= 1) {
+        for(int level = levelCount - 1; level > 0; level -= 1) {
             long totalEntries = 0;
-            for (List<TrackingInfo> stack : avgEntriesStacks) {
+            for(List<TrackingInfo> stack : avgEntriesStacks) {
                 totalEntries += stack.get(level).entries;
             }
             final float avg = totalEntries / ((float) avgEntriesStacks.size());
@@ -225,7 +282,7 @@ public class CountEstimator {
     }
 
     private boolean addAvgEntriesSample(List<TrackingInfo> stack) {
-        if (isFirstBIN(stack) || isLastBIN(stack)) {
+        if(isFirstBIN(stack) || isLastBIN(stack)) {
             return false;
         }
         avgEntriesStacks.add(stack);
@@ -233,9 +290,9 @@ public class CountEstimator {
     }
 
     private boolean isFirstBIN(List<TrackingInfo> stack) {
-        for (int i = 0; i < stack.size() - 1; i += 1) {
+        for(int i = 0; i < stack.size() - 1; i += 1) {
             final TrackingInfo info = stack.get(i);
-            if (info.index != 0) {
+            if(info.index != 0) {
                 return false;
             }
         }
@@ -243,9 +300,9 @@ public class CountEstimator {
     }
 
     private boolean isLastBIN(List<TrackingInfo> stack) {
-        for (int i = 0; i < stack.size() - 1; i += 1) {
+        for(int i = 0; i < stack.size() - 1; i += 1) {
             final TrackingInfo info = stack.get(i);
-            if (info.index != info.entries - 1) {
+            if(info.index != info.entries - 1) {
                 return false;
             }
         }
@@ -261,28 +318,28 @@ public class CountEstimator {
         /* Add nodes between the end points at the root level. */
         final int rootIndex1 = beginStack.get(rootLevel).index + 1;
         final int rootIndex2 = endStack.get(rootLevel).index;
-        if (rootIndex2 > rootIndex1) {
+        if(rootIndex2 > rootIndex1) {
             total += Math.round((rootIndex2 - rootIndex1) *
-                                avgEntries[rootLevel]);
+                    avgEntries[rootLevel]);
         }
 
         /* Add nodes under the end points at lower levels. */
-        for (int level = rootLevel + 1; level < levelCount; level += 1) {
+        for(int level = rootLevel + 1; level < levelCount; level += 1) {
 
             /* Add nodes under left end point that are to its right. */
             final int leftIndex = beginStack.get(level).index;
             final int lastIndex = beginStack.get(level).entries - 1;
-            if (lastIndex > leftIndex) {
+            if(lastIndex > leftIndex) {
                 total += Math.round((lastIndex - leftIndex) *
-                                    avgEntries[level]);
+                        avgEntries[level]);
             }
 
             /* Add nodes under right end point that are to its left. */
             final int rightIndex = endStack.get(level).index;
             final int firstIndex = 0;
-            if (rightIndex > firstIndex) {
+            if(rightIndex > firstIndex) {
                 total += Math.round((rightIndex - firstIndex) *
-                                    avgEntries[level]);
+                        avgEntries[level]);
             }
         }
 
@@ -304,66 +361,8 @@ public class CountEstimator {
         @Override
         public String toString() {
             return "less: " + less +
-                   " equal: " + equal +
-                   " greater: " + greater;
+                    " equal: " + equal +
+                    " greater: " + greater;
         }
-    }
-
-    /*
-     * For future use, if getKeyRatios is exposed in the API.  Be sure to test
-     * boundary conditions when index is 0 or nEntries.
-     *
-     * Algorithm copied from __bam_key_range in BDB btree/bt_stat.c.
-     */
-    static KeyRatios getKeyRatios(List<TrackingInfo> infoByLevel,
-                                  boolean exact) {
-        double factor = 1.0;
-        double less = 0.0;
-        double greater = 0.0;
-
-        /*
-         * At each level we know that INs greater than index contain keys
-         * greater than what we are looking for and those less than index are
-         * less than.  The one pointed to by index may have some less, some
-         * greater or even equal.  If index is equal to the number of entries,
-         * then the key is out of range and everything is less.
-         */
-        for (final TrackingInfo info : infoByLevel) {
-            if (info.index == 0) {
-                greater += (factor * (info.entries - 1)) / info.entries;
-            } else if (info.index == info.entries) {
-                less += factor;
-            } else {
-                less += (factor * info.index) / info.entries;
-                greater += (factor * ((info.entries - info.index) - 1)) /
-                           info.entries;
-            }
-
-            /* Factor at next level down is 1/n'th the amount at this level. */
-            factor /= info.entries;
-
-            /*
-            System.out.println("factor: " + factor +
-                               " less: " + less +
-                               " greater: " + greater);
-            */
-        }
-
-        /*
-         * If there was an exact match then assign the 1/n'th factor to the key
-         * itself.  Otherwise that factor belongs to those greater than the
-         * key, unless the key was out of range.
-         */
-        final double equal;
-        if (exact) {
-            equal = factor;
-        } else {
-            if (less != 1.0) {
-                greater += factor;
-            }
-            equal = 0.0;
-        }
-
-        return new KeyRatios(less, equal, greater);
     }
 }

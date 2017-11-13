@@ -13,19 +13,18 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.persist.raw.RawObject;
+
 import java.util.IdentityHashMap;
 import java.util.Map;
-
-import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
  * Catalog operation interface used by format classes.
  *
+ * @author Mark Hayes
  * @see PersistCatalog
  * @see SimpleCatalog
  * @see ReadOnlyCatalog
- *
- * @author Mark Hayes
  */
 interface Catalog {
 
@@ -58,32 +57,30 @@ interface Catalog {
      * used when reading an object from the byte array format.
      *
      * @param expectStored is true if reading a record from a database, and
-     * therefore the format ID is expected to be stored also.  If the format ID
-     * is not stored, a RefreshException is thrown.
-     *
+     *                     therefore the format ID is expected to be stored also.  If the format ID
+     *                     is not stored, a RefreshException is thrown.
      * @throws IllegalStateException if the formatId does not correspond to a
-     * persistent class.  This is an internal consistency error.
+     *                               persistent class.  This is an internal consistency error.
      */
     Format getFormat(int formatId, boolean expectStored)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Returns a format for a given class, or throws an exception.  This method
      * is used when writing an object that was passed in by the user.
      *
      * @param checkEntitySubclassIndexes is true if we're expecting this format
-     * to be an entity subclass and therefore subclass secondary indexes should
-     * be opened.
-     *
+     *                                   to be an entity subclass and therefore subclass secondary indexes should
+     *                                   be opened.
      * @throws IllegalArgumentException if the class is not persistent.  This
-     * is a user error.
+     *                                  is a user error.
      */
     Format getFormat(Class cls, boolean checkEntitySubclassIndexes)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Returns a format by class name.  Unlike {@link
-     * #getFormat(Class,boolean)}, the format will not be created if it is not
+     * #getFormat(Class, boolean)}, the format will not be created if it is not
      * already known.
      */
     Format getFormat(String className);
@@ -107,13 +104,13 @@ interface Catalog {
      * @see PersistCatalog#convertRawObject
      */
     Object convertRawObject(RawObject o, IdentityHashMap converted)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see PersistCatalog#resolveClass
      */
     Class resolveClass(String clsName)
-        throws ClassNotFoundException;
+            throws ClassNotFoundException;
 
     /**
      * @see PersistCatalog#resolveKeyClass

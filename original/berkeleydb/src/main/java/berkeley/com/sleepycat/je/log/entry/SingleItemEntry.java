@@ -13,13 +13,13 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryHeader;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.Loggable;
+
+import java.nio.ByteBuffer;
 
 /**
  * This class embodies log entries that have a single loggable item.
@@ -41,26 +41,8 @@ public class SingleItemEntry<T extends Loggable> extends BaseEntry<T>
     /**
      * Construct a log entry for reading.
      */
-    public static <T extends Loggable> SingleItemEntry<T> create(
-        final Class<T> logClass) {
-
-        return new SingleItemEntry<T>(logClass);
-    }
-
-    /**
-     * Construct a log entry for reading.
-     */
     SingleItemEntry(final Class<T> logClass) {
         super(logClass);
-    }
-
-    /**
-     * Construct a log entry for writing.
-     */
-    public static <T extends Loggable> SingleItemEntry<T> create(
-        final LogEntryType entryType, final T item) {
-
-        return new SingleItemEntry<T>(entryType, item);
     }
 
     /**
@@ -69,6 +51,24 @@ public class SingleItemEntry<T extends Loggable> extends BaseEntry<T>
     public SingleItemEntry(final LogEntryType entryType, final T item) {
         setLogType(entryType);
         this.item = item;
+    }
+
+    /**
+     * Construct a log entry for reading.
+     */
+    public static <T extends Loggable> SingleItemEntry<T> create(
+            final Class<T> logClass) {
+
+        return new SingleItemEntry<T>(logClass);
+    }
+
+    /**
+     * Construct a log entry for writing.
+     */
+    public static <T extends Loggable> SingleItemEntry<T> create(
+            final LogEntryType entryType, final T item) {
+
+        return new SingleItemEntry<T>(entryType, item);
     }
 
     @Override

@@ -13,16 +13,17 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
+import berkeley.com.sleepycat.je.rep.impl.RepParams;
+
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
-import berkeley.com.sleepycat.je.rep.impl.RepParams;
 
 /**
  * Encapsulates the functionality around dealing with HostPort string pairs
  * having the format:
- *
- *  host[:port]
+ * <p>
+ * host[:port]
  */
 
 public class HostPortPair {
@@ -31,26 +32,27 @@ public class HostPortPair {
 
     /**
      * Parses a hostPort pair into the socket it represents.
+     *
      * @param hostPortPair
      * @return socket address for this host pair
-     *
      * @throws IllegalArgumentException via ReplicatedEnvironment and Monitor
-     * ctors.
+     *                                  ctors.
      */
     public static InetSocketAddress getSocket(String hostPortPair) {
-        if ("".equals(hostPortPair)) {
+        if("".equals(hostPortPair)) {
             throw new IllegalArgumentException
-                ("Host and port pair was missing");
+                    ("Host and port pair was missing");
         }
         int portStartIndex = hostPortPair.indexOf(SEPARATOR);
         String hostName = hostPortPair;
         int port = -1;
-        if (portStartIndex < 0) {
+        if(portStartIndex < 0) {
             port = Integer.parseInt(RepParams.DEFAULT_PORT.getDefault());
-        } else {
+        }
+        else {
             hostName = hostPortPair.substring(0, portStartIndex);
             port =
-                Integer.parseInt(hostPortPair.substring(portStartIndex+1));
+                    Integer.parseInt(hostPortPair.substring(portStartIndex + 1));
         }
         return new InetSocketAddress(hostName, port);
     }
@@ -59,15 +61,14 @@ public class HostPortPair {
      * Parses hostPort pairs into sockets it represents.
      *
      * @param hostPortPairs
-     *
      * @return a set of socket addresses for these host pairs
      */
     public static Set<InetSocketAddress> getSockets(String hostPortPairs) {
         Set<InetSocketAddress> helpers = new HashSet<InetSocketAddress>();
-        if (hostPortPairs != null) {
-            for (String hostPortPair : hostPortPairs.split(",")) {
+        if(hostPortPairs != null) {
+            for(String hostPortPair : hostPortPairs.split(",")) {
                 final String hpp = hostPortPair.trim();
-                if (hpp.length() > 0) {
+                if(hpp.length() > 0) {
                     helpers.add(getSocket(hpp));
                 }
             }
@@ -96,7 +97,7 @@ public class HostPortPair {
     public static int getPort(String hostPortPair) {
         int portStartIndex = hostPortPair.indexOf(SEPARATOR);
         return Integer.parseInt((portStartIndex < 0) ?
-                                RepParams.DEFAULT_PORT.getDefault() :
-                                hostPortPair.substring(portStartIndex+1));
+                RepParams.DEFAULT_PORT.getDefault() :
+                hostPortPair.substring(portStartIndex + 1));
     }
 }

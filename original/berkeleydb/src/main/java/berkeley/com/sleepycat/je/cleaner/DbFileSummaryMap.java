@@ -13,22 +13,18 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.log.FileManager;
 
+import java.util.*;
+
 public class DbFileSummaryMap {
 
     private final static int FILE_ENTRY_OVERHEAD =
-        MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
-        MemoryBudget.LONG_OVERHEAD +
-        MemoryBudget.DBFILESUMMARY_OVERHEAD;
+            MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
+                    MemoryBudget.LONG_OVERHEAD +
+                    MemoryBudget.DBFILESUMMARY_OVERHEAD;
 
     private Map<Long, DbFileSummary> map;
     private int memSize;
@@ -37,7 +33,7 @@ public class DbFileSummaryMap {
     /**
      * Creates a map of Long file number to DbFileSummary.  The init() method
      * must be called after creating this object.
-     *
+     * <p>
      * <p>Always counts this object and its contained objects in the memory
      * budget.  If countParentMapEntry is true, also counts a single HashMap
      * entry that contains this object.  This option allows all memory budget
@@ -47,7 +43,7 @@ public class DbFileSummaryMap {
     public DbFileSummaryMap(boolean countParentMapEntry) {
         map = new HashMap<Long, DbFileSummary>();
         memSize = MemoryBudget.HASHMAP_OVERHEAD;
-        if (countParentMapEntry) {
+        if(countParentMapEntry) {
             memSize += MemoryBudget.HASHMAP_ENTRY_OVERHEAD;
         }
     }
@@ -57,7 +53,7 @@ public class DbFileSummaryMap {
      * the budget.  When adding entries via the get() method prior to calling
      * this method, the adjustMemBudget parameter must be false.  After calling
      * this method, the adjustMemBudget parameter must be true.
-     *
+     * <p>
      * <p>This method is separate from the constructor so that the map may be
      * read from the log without having the EnvironmentImpl object
      * available.</p>
@@ -70,18 +66,15 @@ public class DbFileSummaryMap {
     /**
      * Returns the DbFileSummary for the given file, allocating it if
      * necessary.
-     *
+     * <p>
      * <p>Must be called under the log write latch.</p>
      *
-     * @param fileNum the file identifying the summary.
-     *
-     * @param adjustMemBudget see init().
-     *
+     * @param fileNum          the file identifying the summary.
+     * @param adjustMemBudget  see init().
      * @param checkResurrected is true if this method should check fileNum and
-     * return null if the file does not exist.
-     *
-     * @param fileManager is used to check for resurrected files and may be
-     * null if checkResurrected is false.
+     *                         return null if the file does not exist.
+     * @param fileManager      is used to check for resurrected files and may be
+     *                         null if checkResurrected is false.
      */
     public DbFileSummary get(Long fileNum,
                              boolean adjustMemBudget,
@@ -99,18 +92,19 @@ public class DbFileSummaryMap {
          * when resurrecting a file, which should be pretty rare.
          */
         DbFileSummary summary = map.get(fileNum);
-        if (summary == null) {
-            if (checkResurrected && 
-                fileNum < fileManager.getCurrentFileNum() &&
-                !fileManager.isFileValid(fileNum)) {
+        if(summary == null) {
+            if(checkResurrected &&
+                    fileNum < fileManager.getCurrentFileNum() &&
+                    !fileManager.isFileValid(fileNum)) {
                 /* Will return null. */
-            } else {
+            }
+            else {
                 summary = new DbFileSummary();
                 Object oldVal = map.put(fileNum, summary);
                 assert oldVal == null;
                 memSize += FILE_ENTRY_OVERHEAD;
-                if (adjustMemBudget) {
-                   budget.updateTreeAdminMemoryUsage(FILE_ENTRY_OVERHEAD);     
+                if(adjustMemBudget) {
+                    budget.updateTreeAdminMemoryUsage(FILE_ENTRY_OVERHEAD);
                 }
 
                 /*
@@ -120,10 +114,10 @@ public class DbFileSummaryMap {
                  * file can be deleted at any time. [#16832]
                  */
                 assert !checkResurrected ||
-                       fileManager == null ||
-                       fileNum == fileManager.getCurrentFileNum() ||
-                       fileManager.isFileValid(fileNum) :
-                       "Resurrected file: 0x" + Long.toHexString(fileNum);
+                        fileManager == null ||
+                        fileNum == fileManager.getCurrentFileNum() ||
+                        fileManager.isFileValid(fileNum) :
+                        "Resurrected file: 0x" + Long.toHexString(fileNum);
 
             }
         }
@@ -132,15 +126,16 @@ public class DbFileSummaryMap {
 
     /**
      * Removes the DbFileSummary for the given file.
-     *
+     * <p>
      * <p>Must be called under the log write latch.</p>
      */
     public boolean remove(Long fileNum) {
-        if (map.remove(fileNum) != null) {
+        if(map.remove(fileNum) != null) {
             budget.updateTreeAdminMemoryUsage(0 - FILE_ENTRY_OVERHEAD);
             memSize -= FILE_ENTRY_OVERHEAD;
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -157,13 +152,13 @@ public class DbFileSummaryMap {
 
     public void subtractFromMemoryBudget() {
         /* May not have been initialized if it was read by a FileReader */
-        if (budget != null) {
+        if(budget != null) {
             budget.updateTreeAdminMemoryUsage(0 - memSize);
             memSize = 0;
         }
     }
 
-    public Set<Map.Entry<Long,DbFileSummary>> entrySet() {
+    public Set<Map.Entry<Long, DbFileSummary>> entrySet() {
         return map.entrySet();
     }
 
@@ -177,10 +172,10 @@ public class DbFileSummaryMap {
 
     public Map<Long, DbFileSummary> cloneMap() {
         final Map<Long, DbFileSummary> clone =
-            new HashMap<Long, DbFileSummary>(map.size());
+                new HashMap<Long, DbFileSummary>(map.size());
         final Iterator<Map.Entry<Long, DbFileSummary>> i =
-            map.entrySet().iterator();
-        while (i.hasNext()) {
+                map.entrySet().iterator();
+        while(i.hasNext()) {
             final Map.Entry<Long, DbFileSummary> entry = i.next();
             final Long fileNum = entry.getKey();
             final DbFileSummary summary = entry.getValue();
@@ -201,9 +196,9 @@ public class DbFileSummaryMap {
     public void repair(EnvironmentImpl env) {
         Long[] existingFiles = env.getFileManager().getAllFileNumbers();
         Iterator<Long> iter = map.keySet().iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             Long fileNum = iter.next();
-            if (Arrays.binarySearch(existingFiles, fileNum) < 0) {
+            if(Arrays.binarySearch(existingFiles, fileNum) < 0) {
                 iter.remove();
                 budget.updateTreeAdminMemoryUsage(0 - FILE_ENTRY_OVERHEAD);
                 memSize -= FILE_ENTRY_OVERHEAD;

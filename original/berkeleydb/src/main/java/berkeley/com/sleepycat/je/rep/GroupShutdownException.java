@@ -12,15 +12,15 @@
  */
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Thrown when an attempt is made to access an environment  that was
@@ -41,55 +41,58 @@ public class GroupShutdownException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public GroupShutdownException(Logger logger,
                                   RepNode repNode,
                                   long shutdownTimeMs) {
         super(repNode.getRepImpl(),
-              EnvironmentFailureReason.SHUTDOWN_REQUESTED,
-              String.format("Master:%s, initiated shutdown at %1tc.",
-                            repNode.getMasterStatus().getNodeMasterNameId().
+                EnvironmentFailureReason.SHUTDOWN_REQUESTED,
+                String.format("Master:%s, initiated shutdown at %1tc.",
+                        repNode.getMasterStatus().getNodeMasterNameId().
                                 getName(),
-                            shutdownTimeMs));
+                        shutdownTimeMs));
 
         shutdownVLSN = repNode.getVLSNIndex().getRange().getLast();
         masterNodeName =
-            repNode.getMasterStatus().getNodeMasterNameId().getName();
+                repNode.getMasterStatus().getNodeMasterNameId().getName();
         this.shutdownTimeMs = shutdownTimeMs;
 
         LoggerUtils.warning(logger, repNode.getRepImpl(),
-                            "Explicit shutdown request from Master:" +
-                            masterNodeName);
+                "Explicit shutdown request from Master:" +
+                        masterNodeName);
     }
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public GroupShutdownException(Logger logger,
-                                 RepImpl repImpl,
-                                 String masterNodeName,
-                                 VLSN shutdownVLSN,
-                                 long shutdownTimeMs) {
+                                  RepImpl repImpl,
+                                  String masterNodeName,
+                                  VLSN shutdownVLSN,
+                                  long shutdownTimeMs) {
         super(repImpl,
                 EnvironmentFailureReason.SHUTDOWN_REQUESTED,
                 String.format("Master:%s, initiated shutdown at %1tc.",
-                              masterNodeName,
-                              shutdownTimeMs));
+                        masterNodeName,
+                        shutdownTimeMs));
 
-          this.shutdownVLSN = shutdownVLSN;
-          this.masterNodeName = masterNodeName;
-          this.shutdownTimeMs = shutdownTimeMs;
+        this.shutdownVLSN = shutdownVLSN;
+        this.masterNodeName = masterNodeName;
+        this.shutdownTimeMs = shutdownTimeMs;
 
-          LoggerUtils.warning(logger, repImpl,
-                              "Explicit shutdown request from Master:" +
-                              masterNodeName);
+        LoggerUtils.warning(logger, repImpl,
+                "Explicit shutdown request from Master:" +
+                        masterNodeName);
 
     }
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private GroupShutdownException(String message,
@@ -102,6 +105,7 @@ public class GroupShutdownException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override
@@ -111,7 +115,7 @@ public class GroupShutdownException extends EnvironmentFailureException {
 
     /**
      * For internal use only.
-     *
+     * <p>
      * Returns the shutdownVLSN, if it was available, at the time of the
      * exception
      *

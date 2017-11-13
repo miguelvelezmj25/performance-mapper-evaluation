@@ -44,7 +44,7 @@ public class ItemNameKeyCreator implements SecondaryKeyCreator {
             String theItem = inventoryItem.getItemName();
             try {
                 resultEntry.setData(theItem.getBytes("UTF-8"));
-            } catch (IOException willNeverOccur) {
+            } catch(IOException willNeverOccur) {
             }
         }
         return true;

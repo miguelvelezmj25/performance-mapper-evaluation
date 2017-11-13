@@ -20,7 +20,7 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
 /**
  * Extends BasicLocker to share locks with another specific locker.
- *
+ * <p>
  * <p>In general, a BuddyLocker can be used whenever the primary (API) locker
  * is in use, and we need to lock a node and release that lock before the
  * primary locker transaction ends.  In other words, for this particular lock
@@ -28,12 +28,12 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  * separate BuddyLocker instance to hold the lock, while sharing locks with the
  * primary locker.  The BuddyLocker can be closed to release this particular
  * lock, without releasing the other locks held by the primary locker.</p>
- *
+ * <p>
  * <p>In particular, a ReadCommittedLocker extends BuddyLocker. The
  * ReadCommittedLocker keeps track of read locks, while its buddy Txn keeps
  * track of write locks. The two lockers must share locks to prevent
  * conflicts.</p>
- *
+ * <p>
  * <p>In addition, a BuddyLocker is used when acquiring a RANGE_INSERT lock.
  * RANGE_INSERT only needs to be held until the point we have inserted the new
  * node into the BIN.  A separate locker is therefore used so we can release
@@ -56,7 +56,7 @@ public class BuddyLocker extends BasicLocker {
 
     public static BuddyLocker createBuddyLocker(EnvironmentImpl env,
                                                 Locker buddy)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return new BuddyLocker(env, buddy);
     }
@@ -98,7 +98,7 @@ public class BuddyLocker extends BasicLocker {
      */
     @Override
     public void releaseNonTxnLocks()
-        throws DatabaseException {
+            throws DatabaseException {
 
         super.releaseNonTxnLocks();
         buddy.releaseNonTxnLocks();
@@ -110,9 +110,10 @@ public class BuddyLocker extends BasicLocker {
     @Override
     public boolean sharesLocksWith(Locker other) {
 
-        if (super.sharesLocksWith(other)) {
+        if(super.sharesLocksWith(other)) {
             return true;
-        } else {
+        }
+        else {
             return (buddy == other ||
                     other.getBuddy() == this ||
                     buddy == other.getBuddy());
@@ -129,21 +130,21 @@ public class BuddyLocker extends BasicLocker {
     }
 
     /**
-     * Returns the transaction timeout of the buddy locker, since this locker
-     * has no independent timeout.
-     */
-    @Override
-    public long getTxnTimeout() {
-        return buddy.getTxnTimeout();
-    }
-
-    /**
      * Sets the lock timeout of the buddy locker, since this locker has no
      * independent timeout.
      */
     @Override
     public void setLockTimeout(long timeout) {
         buddy.setLockTimeout(timeout);
+    }
+
+    /**
+     * Returns the transaction timeout of the buddy locker, since this locker
+     * has no independent timeout.
+     */
+    @Override
+    public long getTxnTimeout() {
+        return buddy.getTxnTimeout();
     }
 
     /**
@@ -186,8 +187,8 @@ public class BuddyLocker extends BasicLocker {
      * all of its child buddies.
      */
     @Override
-    public void checkPreempted(final Locker allowPreemptedLocker) 
-        throws OperationFailureException {
+    public void checkPreempted(final Locker allowPreemptedLocker)
+            throws OperationFailureException {
 
         buddy.checkPreempted(allowPreemptedLocker);
     }

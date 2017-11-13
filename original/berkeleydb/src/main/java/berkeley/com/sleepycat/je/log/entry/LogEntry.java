@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -22,27 +20,29 @@ import berkeley.com.sleepycat.je.log.LogEntryHeader;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+
 /**
  * A Log entry allows you to read, write and dump a database log entry.  Each
  * entry may be made up of one or more loggable items.
- *
+ * <p>
  * <p>The log entry on disk consists of a log header defined by LogManager and
  * the specific contents of the log entry.
- *
+ * <p>
  * <p>Log entries that support replication are required to implement {@link
  * ReplicableLogEntry}.
  */
 public interface LogEntry extends Cloneable {
 
     /**
-     * Inform a LogEntry instance of its corresponding LogEntryType.
-     */
-    public void setLogType(LogEntryType entryType);
-
-    /**
      * @return the type of log entry
      */
     public LogEntryType getLogType();
+
+    /**
+     * Inform a LogEntry instance of its corresponding LogEntryType.
+     */
+    public void setLogType(LogEntryType entryType);
 
     /**
      * Read in a log entry.
@@ -64,7 +64,7 @@ public interface LogEntry extends Cloneable {
     /**
      * Construct a complete item from a item entry, fetching additional log
      * entries as needed to ensure that a usable main object is available.
-     *
+     * <p>
      * For an OldBINDeltaLogEntry, fetches the full BIN and merges the delta
      * information.  This is necessary to return a Node main object.
      * However, for the new BINDeltaLogEntry, the full BIN is not fetched,
@@ -91,6 +91,7 @@ public interface LogEntry extends Cloneable {
 
     /**
      * Serialize this object into the buffer.
+     *
      * @param logBuffer is the destination buffer
      */
     public void writeEntry(ByteBuffer logBuffer);

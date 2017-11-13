@@ -16,6 +16,7 @@ package berkeley.com.sleepycat.je;
 
 /**
  * Specifies the attributes of a DiskOrderedCursor.
+ *
  * @since 5.0
  */
 public class DiskOrderedCursorConfig implements Cloneable {
@@ -25,7 +26,7 @@ public class DiskOrderedCursorConfig implements Cloneable {
      * cursor.
      */
     public static final DiskOrderedCursorConfig DEFAULT =
-        new DiskOrderedCursorConfig();
+            new DiskOrderedCursorConfig();
 
     private boolean binsOnly = false;
 
@@ -51,23 +52,7 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * Specify whether the DiskOrderedCursor should return only the key or key
-     * + data.  The default value is false (key + data).  If keyOnly is true,
-     * the performance of the disk ordered scan will be better, because the
-     * Cursor only descends to the BIN level. 
-     *
-     * @param keysOnly If true, return only keys from this cursor.
-     *
-     * @return this
-     */
-    public DiskOrderedCursorConfig setKeysOnly(final boolean keysOnly) {
-        setKeysOnlyVoid(keysOnly);
-        return this;
-    }
-
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setKeysOnlyVoid(final boolean keysOnly) {
         this.keysOnly = keysOnly;
@@ -84,16 +69,22 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * For internal use only.
-     * @hidden
+     * Specify whether the DiskOrderedCursor should return only the key or key
+     * + data.  The default value is false (key + data).  If keyOnly is true,
+     * the performance of the disk ordered scan will be better, because the
+     * Cursor only descends to the BIN level.
+     *
+     * @param keysOnly If true, return only keys from this cursor.
+     * @return this
      */
-    public DiskOrderedCursorConfig setCountOnly(boolean val) {
-        setBINsOnlyVoid(val);
+    public DiskOrderedCursorConfig setKeysOnly(final boolean keysOnly) {
+        setKeysOnlyVoid(keysOnly);
         return this;
     }
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public void setCountOnlyVoid(boolean val) {
@@ -102,6 +93,7 @@ public class DiskOrderedCursorConfig implements Cloneable {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public boolean getCountOnly() {
@@ -109,25 +101,17 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * Specify whether the DiskOrderedCursor should scan the BINs only. If
-     * true, the performance of the disk ordered scan will be better, because
-     * LNs are not read from disk. However, in this case, the data portion
-     * of a record will be returned only if it is embedded in the BIN;
-     * otherwise only the key will be returned.
+     * For internal use only.
      *
-     * @param binsOnly If true, return keys and, if available, the associated
-     * embedded data.
-     *
-     * @return this
+     * @hidden
      */
-    public DiskOrderedCursorConfig setBINsOnly(final boolean binsOnly) {
-        setBINsOnlyVoid(binsOnly);
+    public DiskOrderedCursorConfig setCountOnly(boolean val) {
+        setBINsOnlyVoid(val);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setBINsOnlyVoid(final boolean binsOnly) {
         this.binsOnly = binsOnly;
@@ -145,26 +129,23 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * Set the maximum number of LSNs to gather and sort at any one time.  The
-     * default is an unlimited number of LSNs.  Setting this lower causes the
-     * DiskOrderedScan to use less memory, but it sorts and processes LSNs more
-     * frequently thereby causing slower performance.  Setting this higher will
-     * in general improve performance at the expense of memory.  Each LSN uses
-     * 16 bytes of memory.
+     * Specify whether the DiskOrderedCursor should scan the BINs only. If
+     * true, the performance of the disk ordered scan will be better, because
+     * LNs are not read from disk. However, in this case, the data portion
+     * of a record will be returned only if it is embedded in the BIN;
+     * otherwise only the key will be returned.
      *
-     * @param lsnBatchSize the maximum number of LSNs to accumulate and sort
-     * per batch.
-     *
+     * @param binsOnly If true, return keys and, if available, the associated
+     *                 embedded data.
      * @return this
      */
-    public DiskOrderedCursorConfig setLSNBatchSize(final long lsnBatchSize) {
-        setLSNBatchSizeVoid(lsnBatchSize);
+    public DiskOrderedCursorConfig setBINsOnly(final boolean binsOnly) {
+        setBINsOnlyVoid(binsOnly);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setLSNBatchSizeVoid(final long lsnBatchSize) {
         this.lsnBatchSize = lsnBatchSize;
@@ -182,27 +163,24 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * Set the maximum amount of JE Cache Memory that the DiskOrderedScan
-     * can use at one time.  The default is an unlimited amount of memory.
-     * Setting this lower causes the DiskOrderedScan to use less memory, but it
-     * sorts and processes LSNs more frequently thereby generally causing slower
-     * performance.  Setting this higher will in general improve performance at
-     * the expense of JE cache memory.
+     * Set the maximum number of LSNs to gather and sort at any one time.  The
+     * default is an unlimited number of LSNs.  Setting this lower causes the
+     * DiskOrderedScan to use less memory, but it sorts and processes LSNs more
+     * frequently thereby causing slower performance.  Setting this higher will
+     * in general improve performance at the expense of memory.  Each LSN uses
+     * 16 bytes of memory.
      *
-     * @param internalMemoryLimit the maximum number of non JE Cache bytes to
-     * use.
-     *
+     * @param lsnBatchSize the maximum number of LSNs to accumulate and sort
+     *                     per batch.
      * @return this
      */
-    public DiskOrderedCursorConfig setInternalMemoryLimit(
-        final long internalMemoryLimit) {
-        setInternalMemoryLimitVoid(internalMemoryLimit);
+    public DiskOrderedCursorConfig setLSNBatchSize(final long lsnBatchSize) {
+        setLSNBatchSizeVoid(lsnBatchSize);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setInternalMemoryLimitVoid(final long internalMemoryLimit) {
         this.internalMemoryLimit = internalMemoryLimit;
@@ -220,25 +198,25 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * Set the queue size for entries being passed between the
-     * DiskOrderedCursor producer thread and the application's consumer
-     * thread. If the queue size reaches this number of entries, the producer
-     * thread will block until the application thread removes one or more
-     * entries (by calling ForwardCursor.getNext().  The default is 1000.
+     * Set the maximum amount of JE Cache Memory that the DiskOrderedScan
+     * can use at one time.  The default is an unlimited amount of memory.
+     * Setting this lower causes the DiskOrderedScan to use less memory, but it
+     * sorts and processes LSNs more frequently thereby generally causing slower
+     * performance.  Setting this higher will in general improve performance at
+     * the expense of JE cache memory.
      *
-     * @param queueSize the maximum number of entries the queue can hold before
-     * the producer thread blocks.
-     *
+     * @param internalMemoryLimit the maximum number of non JE Cache bytes to
+     *                            use.
      * @return this
      */
-    public DiskOrderedCursorConfig setQueueSize(final int queueSize) {
-        setQueueSizeVoid(queueSize);
+    public DiskOrderedCursorConfig setInternalMemoryLimit(
+            final long internalMemoryLimit) {
+        setInternalMemoryLimitVoid(internalMemoryLimit);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setQueueSizeVoid(final int queueSize) {
         this.queueSize = queueSize;
@@ -256,17 +234,23 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * @deprecated this method has no effect and will be removed in a future
-     * release.
+     * Set the queue size for entries being passed between the
+     * DiskOrderedCursor producer thread and the application's consumer
+     * thread. If the queue size reaches this number of entries, the producer
+     * thread will block until the application thread removes one or more
+     * entries (by calling ForwardCursor.getNext().  The default is 1000.
+     *
+     * @param queueSize the maximum number of entries the queue can hold before
+     *                  the producer thread blocks.
+     * @return this
      */
-    public DiskOrderedCursorConfig setMaxSeedMillisecs(
-        final long maxSeedMillisecs) {
+    public DiskOrderedCursorConfig setQueueSize(final int queueSize) {
+        setQueueSizeVoid(queueSize);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMaxSeedMillisecsVoid(final long maxSeedMillisecs) {
     }
@@ -283,13 +267,13 @@ public class DiskOrderedCursorConfig implements Cloneable {
      * @deprecated this method has no effect and will be removed in a future
      * release.
      */
-    public DiskOrderedCursorConfig setMaxSeedNodes(final long maxSeedNodes) {
+    public DiskOrderedCursorConfig setMaxSeedMillisecs(
+            final long maxSeedMillisecs) {
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setMaxSeedNodesVoid(final long maxSeedNodes) {
     }
@@ -303,10 +287,10 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
-     * @hidden
+     * @deprecated this method has no effect and will be removed in a future
+     * release.
      */
-    public DiskOrderedCursorConfig setSerialDBScan(final boolean v) {
-        setSerialDBScanVoid(v);
+    public DiskOrderedCursorConfig setMaxSeedNodes(final long maxSeedNodes) {
         return this;
     }
 
@@ -327,8 +311,8 @@ public class DiskOrderedCursorConfig implements Cloneable {
     /**
      * @hidden
      */
-    public DiskOrderedCursorConfig setDebug(final boolean v) {
-        setDebugVoid(v);
+    public DiskOrderedCursorConfig setSerialDBScan(final boolean v) {
+        setSerialDBScanVoid(v);
         return this;
     }
 
@@ -347,13 +331,21 @@ public class DiskOrderedCursorConfig implements Cloneable {
     }
 
     /**
+     * @hidden
+     */
+    public DiskOrderedCursorConfig setDebug(final boolean v) {
+        setDebugVoid(v);
+        return this;
+    }
+
+    /**
      * Returns a copy of this configuration object.
      */
     @Override
     public DiskOrderedCursorConfig clone() {
         try {
             return (DiskOrderedCursorConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -366,8 +358,8 @@ public class DiskOrderedCursorConfig implements Cloneable {
     @Override
     public String toString() {
         return "keysOnly=" + keysOnly +
-            "\nlsnBatchSize=" + lsnBatchSize +
-            "\ninternalMemoryLimit=" + internalMemoryLimit +
-            "\nqueueSize=" + queueSize;
+                "\nlsnBatchSize=" + lsnBatchSize +
+                "\ninternalMemoryLimit=" + internalMemoryLimit +
+                "\nqueueSize=" + queueSize;
     }
 }

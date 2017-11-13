@@ -18,8 +18,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
 /**
- * @hidden
- * Interface for creating DataChannel instances.
+ * @hidden Interface for creating DataChannel instances.
  */
 public interface DataChannelFactory {
     /**
@@ -27,9 +26,26 @@ public interface DataChannelFactory {
      *
      * @param socketChannel the newly accepted SocketChannel
      * @return an implementation of DataChannel that wraps the
-     *         input SocketChannel
+     * input SocketChannel
      */
     DataChannel acceptChannel(SocketChannel socketChannel);
+
+    /**
+     * Creates a DataChannel that connects to the specified address,
+     * with the specified options.
+     *
+     * @param addr           The address to which the connection should be made.
+     *                       It is possible for a DataChannelFactory implementation to
+     *                       proxy this connection through an intermediary.
+     * @param connectOptions the collection of connection options to be
+     *                       applied to the connection.
+     * @return A DataChannel connected to the the specified address.
+     */
+    DataChannel connect(InetSocketAddress addr,
+                        ConnectOptions connectOptions)
+            throws IOException;
+
+    ;
 
     /**
      * A collection of options to apply to a connection.
@@ -58,18 +74,6 @@ public interface DataChannelFactory {
         }
 
         /**
-         * Sets the tcpNoDelay option for the connection.
-         *
-         * @param tcpNoDelay if true, disable the Nagle algorithm for delayed
-         * transmissions on connection
-         * @return this instance
-         */
-        public final ConnectOptions setTcpNoDelay(boolean tcpNoDelay) {
-            this.tcpNoDelay = tcpNoDelay;
-            return this;
-        }
-
-        /**
          * Gets the tcpNoDelay option for the connection.
          *
          * @return true if the tcpNoDelay option is enabled
@@ -79,14 +83,14 @@ public interface DataChannelFactory {
         }
 
         /**
-         * Sets the connection receive buffer size for the connection.
+         * Sets the tcpNoDelay option for the connection.
          *
-         * @param rcvBufferSize the desired size of the receive buffer, or
-         * 0 to use system defaults.
+         * @param tcpNoDelay if true, disable the Nagle algorithm for delayed
+         *                   transmissions on connection
          * @return this instance
          */
-        public final ConnectOptions setReceiveBufferSize(int rcvBufferSize) {
-            this.receiveBufferSize = rcvBufferSize;
+        public final ConnectOptions setTcpNoDelay(boolean tcpNoDelay) {
+            this.tcpNoDelay = tcpNoDelay;
             return this;
         }
 
@@ -100,14 +104,14 @@ public interface DataChannelFactory {
         }
 
         /**
-         * Sets the connection open timeout value for the connection.
+         * Sets the connection receive buffer size for the connection.
          *
-         * @param timeout the desired timeout value for connection initiation
-         * in milliseconds, or 0 if system defaults should be used
+         * @param rcvBufferSize the desired size of the receive buffer, or
+         *                      0 to use system defaults.
          * @return this instance
          */
-        public final ConnectOptions setOpenTimeout(int timeout) {
-            this.openTimeout = timeout;
+        public final ConnectOptions setReceiveBufferSize(int rcvBufferSize) {
+            this.receiveBufferSize = rcvBufferSize;
             return this;
         }
 
@@ -121,14 +125,14 @@ public interface DataChannelFactory {
         }
 
         /**
-         * Sets the read timeout value for the connection.
+         * Sets the connection open timeout value for the connection.
          *
-         * @param timeout the desired timeout value for read operations in
-         * milliseconds, or 0 if system defaults should be used
+         * @param timeout the desired timeout value for connection initiation
+         *                in milliseconds, or 0 if system defaults should be used
          * @return this instance
          */
-        public final ConnectOptions setReadTimeout(int timeout) {
-            this.readTimeout = timeout;
+        public final ConnectOptions setOpenTimeout(int timeout) {
+            this.openTimeout = timeout;
             return this;
         }
 
@@ -139,6 +143,27 @@ public interface DataChannelFactory {
          */
         public final int getReadTimeout() {
             return this.readTimeout;
+        }
+
+        /**
+         * Sets the read timeout value for the connection.
+         *
+         * @param timeout the desired timeout value for read operations in
+         *                milliseconds, or 0 if system defaults should be used
+         * @return this instance
+         */
+        public final ConnectOptions setReadTimeout(int timeout) {
+            this.readTimeout = timeout;
+            return this;
+        }
+
+        /**
+         * Gets the blocking mode option for the connection.
+         *
+         * @return the blockingMode configuration setting
+         */
+        public final boolean getBlocking() {
+            return this.blocking;
         }
 
         /**
@@ -153,27 +178,6 @@ public interface DataChannelFactory {
         }
 
         /**
-         * Gets the blocking mode option for the connection.
-         *
-         * @return  the blockingMode configuration setting
-         */
-        public final boolean getBlocking() {
-            return this.blocking;
-        }
-
-        /**
-         * Sets the reuseAddr option for the connection.
-         *
-         * @param reuseAddr if true, enable the SO_REUSEADDR option on the
-         * underlying socket
-         * @return this instance
-         */
-        public final ConnectOptions setReuseAddr(boolean reuseAddr) {
-            this.reuseAddr = reuseAddr;
-            return this;
-        }
-
-        /**
          * Gets the reuseAddr option for the connection.
          *
          * @return the setting of the reuseAddr option
@@ -183,33 +187,30 @@ public interface DataChannelFactory {
         }
 
         /**
+         * Sets the reuseAddr option for the connection.
+         *
+         * @param reuseAddr if true, enable the SO_REUSEADDR option on the
+         *                  underlying socket
+         * @return this instance
+         */
+        public final ConnectOptions setReuseAddr(boolean reuseAddr) {
+            this.reuseAddr = reuseAddr;
+            return this;
+        }
+
+        /**
          * Generates a String representation of the object.
          */
         @Override
         public String toString() {
             return "ConnectOptions[" +
-                "tcpNoDelay = " + tcpNoDelay +
-                ", receiveBufferSize = " + receiveBufferSize +
-                ", openTimeout = " + openTimeout +
-                ", readTimeout = " + readTimeout +
-                ", blocking = " + blocking +
-                ", reuseAddr = " + reuseAddr +
-                "]";
+                    "tcpNoDelay = " + tcpNoDelay +
+                    ", receiveBufferSize = " + receiveBufferSize +
+                    ", openTimeout = " + openTimeout +
+                    ", readTimeout = " + readTimeout +
+                    ", blocking = " + blocking +
+                    ", reuseAddr = " + reuseAddr +
+                    "]";
         }
-    };
-
-    /**
-     * Creates a DataChannel that connects to the specified address,
-     * with the specified options.
-     *
-     * @param addr The address to which the connection should be made.
-     *        It is possible for a DataChannelFactory implementation to
-     *        proxy this connection through an intermediary.
-     * @param connectOptions the collection of connection options to be
-     *        applied to the connection.
-     * @return A DataChannel connected to the the specified address.
-     */
-    DataChannel connect(InetSocketAddress addr,
-                        ConnectOptions connectOptions)
-        throws IOException;
+    }
 }

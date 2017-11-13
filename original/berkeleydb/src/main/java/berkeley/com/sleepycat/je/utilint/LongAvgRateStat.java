@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A long JE stat generated from an exponential moving average over a
@@ -24,16 +24,18 @@ import berkeley.com.sleepycat.je.utilint.StatDefinition.StatType;
 public class LongAvgRateStat extends Stat<Long> {
     private static final long serialVersionUID = 1L;
 
-    /** The underlying average rate. */
+    /**
+     * The underlying average rate.
+     */
     private final LongAvgRate avg;
 
     /**
      * Creates an instance of this class.  The definition type must be
      * INCREMENTAL.
      *
-     * @param group the statistics group
-     * @param definition the statistics definition
-     * @param periodMillis the averaging period in milliseconds
+     * @param group          the statistics group
+     * @param definition     the statistics definition
+     * @param periodMillis   the averaging period in milliseconds
      * @param reportTimeUnit the time unit for reporting the rate
      */
     public LongAvgRateStat(StatGroup group,
@@ -43,7 +45,7 @@ public class LongAvgRateStat extends Stat<Long> {
         super(group, definition);
         assert definition.getType() == StatType.INCREMENTAL;
         avg = new LongAvgRate(
-            definition.getName(), periodMillis, reportTimeUnit);
+                definition.getName(), periodMillis, reportTimeUnit);
     }
 
     private LongAvgRateStat(StatDefinition definition, LongAvgRate avg) {
@@ -55,7 +57,7 @@ public class LongAvgRateStat extends Stat<Long> {
      * Adds a new value to the average.
      *
      * @param value the new value
-     * @param time the current time
+     * @param time  the current time
      */
     public void add(long value, long time) {
         avg.add(value, time);
@@ -86,13 +88,17 @@ public class LongAvgRateStat extends Stat<Long> {
         return avg.isNotSet();
     }
 
-    /** @throws UnsupportedOperationException always */
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void set(Long newValue) {
         throw new UnsupportedOperationException();
     }
 
-    /** @throws UnsupportedOperationException always */
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void add(Stat<Long> other) {
         throw new UnsupportedOperationException();
@@ -111,7 +117,10 @@ public class LongAvgRateStat extends Stat<Long> {
         return new LongAvgRateStat(definition, avg.copyLatest(baseAvg));
     }
 
-    /** Do nothing for this non-additive stat. */
+    /**
+     * Do nothing for this non-additive stat.
+     */
     @Override
-    public void negate() { }
+    public void negate() {
+    }
 }

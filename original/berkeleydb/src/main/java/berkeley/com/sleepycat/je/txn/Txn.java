@@ -13,54 +13,10 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_READ_LOCKS;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_TOTAL;
-import static berkeley.com.sleepycat.je.txn.LockStatDefinition.LOCK_WRITE_LOCKS;
-import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
-
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-
-import berkeley.com.sleepycat.je.CommitToken;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Durability;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.Durability.SyncPolicy;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.OperationFailureException;
-import berkeley.com.sleepycat.je.ThreadInterruptedException;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
-import berkeley.com.sleepycat.je.dbi.TriggerManager;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.LogItem;
-import berkeley.com.sleepycat.je.log.LogManager;
-import berkeley.com.sleepycat.je.log.LogParams;
-import berkeley.com.sleepycat.je.log.LogUtils;
-import berkeley.com.sleepycat.je.log.Loggable;
-import berkeley.com.sleepycat.je.log.Provisional;
-import berkeley.com.sleepycat.je.log.ReplicationContext;
-import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+import berkeley.com.sleepycat.je.dbi.*;
+import berkeley.com.sleepycat.je.log.*;
 import berkeley.com.sleepycat.je.log.entry.AbortLogEntry;
 import berkeley.com.sleepycat.je.log.entry.CommitLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
@@ -68,12 +24,18 @@ import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
 import berkeley.com.sleepycat.je.recovery.RecoveryManager;
 import berkeley.com.sleepycat.je.tree.TreeLocation;
 import berkeley.com.sleepycat.je.txn.TxnChain.CompareSlot;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.IntStat;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TinyHashSet;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.txn.LockStatDefinition.*;
+import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
 
 /**
  * A Txn is the internal representation of a transaction created by a call to
@@ -87,19 +49,12 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * @see #getLastFormatChange
      */
     private static final int LAST_FORMAT_CHANGE = 8;
-
-    /* Use an AtomicInteger to record cursors opened under this txn. */
-    private final AtomicInteger cursors = new AtomicInteger();
-
-    /* Internal txn flags. */
-    private byte txnFlags;
     /* Set if prepare() has been called on this transaction. */
     private static final byte IS_PREPARED = 1;
     /* Set if xa_end(TMSUSPEND) has been called on this transaction. */
     private static final byte XA_SUSPENDED = 2;
     /* Set if this rollback() has been called on this transaction. */
     private static final byte PAST_ROLLBACK = 4;
-
     /*
      * Set if this transaction may abort other transactions holding a needed
      * lock.  Note that this bit flag and the setImportunate method could be
@@ -108,20 +63,78 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * and call setImportunate. [#16513]
      */
     private static final byte IMPORTUNATE = 8;
-
+    private static final int READ_LOCK_OVERHEAD =
+            MemoryBudget.HASHSET_ENTRY_OVERHEAD;
+    private static final int WRITE_LOCK_OVERHEAD =
+            MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
+                    MemoryBudget.WRITE_LOCKINFO_OVERHEAD;
+    /*
+     * Max allowable accumulation of memory budget changes before MemoryBudget
+     * should be updated. This allows for consolidating multiple calls to
+     * updateXXXMemoryBudget() into one call. Not declared final so that unit
+     * tests can modify this. See SR 12273.
+     */
+    public static int ACCUMULATED_LIMIT = 10000;
+    /* Use an AtomicInteger to record cursors opened under this txn. */
+    private final AtomicInteger cursors = new AtomicInteger();
+    /*
+     * We have to keep a set of DatabaseCleanupInfo objects so after commit or
+     * abort of Environment.truncateDatabase() or Environment.removeDatabase(),
+     * we can appropriately purge the unneeded MapLN and DatabaseImpl.
+     * Synchronize access to this set on this object.
+     */
+    protected Set<DatabaseCleanupInfo> deletedDatabases;
+    /*
+     * We need a map of the latest databaseImpl objects to drive the undo
+     * during an abort, because it's too hard to look up the database object in
+     * the mapping tree. (The normal code paths want to take locks, add
+     * cursors, etc.
+     */
+    protected Map<DatabaseId, DatabaseImpl> undoDatabases;
+    /**
+     * @see #addOpenedDatabase
+     * @see HandleLocker
+     */
+    protected Set<Database> openedDatabaseHandles;
+    /*
+     * First LSN logged for this transaction -- used for keeping track of the
+     * first active LSN point, for checkpointing. This field is not persistent.
+     *
+     * [#16861] This field is volatile to avoid making getFirstActiveLsn
+     * synchronized, which causes a deadlock in HA.
+     */
+    protected volatile long firstLoggedLsn = NULL_LSN;
+    /*
+     * Last LSN logged for this transaction. Serves as the handle onto the
+     * chained log entries belonging to this transaction. Is persistent.
+     */
+    protected long lastLoggedLsn = NULL_LSN;
+    /*
+     * The LSN used to commit the transaction. One of commitLSN or abortLSN
+     * must be set after a commit() or abort() operation. Note that a commit()
+     * may set abortLSN, if the commit failed, and the transaction had to be
+     * aborted.
+     */
+    protected long commitLsn = NULL_LSN;
+    /*
+     * Each Txn instance has a handle on a ReplicationContext instance for use
+     * in logging a TxnCommit or TxnAbort log entries.
+     */
+    protected ReplicationContext repContext;
+    /* The LSN used to record the abort of the transaction. */
+    long abortLsn = NULL_LSN;
+    /* Internal txn flags. */
+    private byte txnFlags;
     /* Holds the public Transaction state. */
     private Transaction.State txnState;
-
     /* Information about why a Txn was made only abortable. */
     private OperationFailureException onlyAbortableCause;
-
     /*
      * A Txn can be used by multiple threads. Modification to the read and
      * write lock collections is done by synchronizing on the txn.
      */
     private Set<Long> readLocks; // key is LSN
     private Map<Long, WriteLockInfo> writeInfo; // key is LSN
-
     /*
      * A set of BuddyLockers that have this locker as their buddy.  Currently
      * this set is only maintained (non-null) in a replicated environment
@@ -133,73 +146,14 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * lockers (for read-committed mode).
      */
     private TinyHashSet<BuddyLocker> buddyLockers;
-
-    private static final int READ_LOCK_OVERHEAD =
-        MemoryBudget.HASHSET_ENTRY_OVERHEAD;
-    private static final int WRITE_LOCK_OVERHEAD =
-        MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
-        MemoryBudget.WRITE_LOCKINFO_OVERHEAD;
-
-    /*
-     * We have to keep a set of DatabaseCleanupInfo objects so after commit or
-     * abort of Environment.truncateDatabase() or Environment.removeDatabase(),
-     * we can appropriately purge the unneeded MapLN and DatabaseImpl.
-     * Synchronize access to this set on this object.
-     */
-    protected Set<DatabaseCleanupInfo> deletedDatabases;
-
-    /*
-     * We need a map of the latest databaseImpl objects to drive the undo
-     * during an abort, because it's too hard to look up the database object in
-     * the mapping tree. (The normal code paths want to take locks, add
-     * cursors, etc.
-     */
-    protected Map<DatabaseId, DatabaseImpl> undoDatabases;
-
-    /**
-     * @see #addOpenedDatabase
-     * @see HandleLocker
-     */
-    protected Set<Database> openedDatabaseHandles;
-
-    /*
-     * First LSN logged for this transaction -- used for keeping track of the
-     * first active LSN point, for checkpointing. This field is not persistent.
-     *
-     * [#16861] This field is volatile to avoid making getFirstActiveLsn
-     * synchronized, which causes a deadlock in HA.
-     */
-    protected volatile long firstLoggedLsn = NULL_LSN;
-
-    /*
-     * Last LSN logged for this transaction. Serves as the handle onto the
-     * chained log entries belonging to this transaction. Is persistent.
-     */
-    protected long lastLoggedLsn = NULL_LSN;
-
-    /*
-     * The LSN used to commit the transaction. One of commitLSN or abortLSN
-     * must be set after a commit() or abort() operation. Note that a commit()
-     * may set abortLSN, if the commit failed, and the transaction had to be
-     * aborted.
-     */
-    protected long commitLsn = NULL_LSN;
-
-    /* The LSN used to record the abort of the transaction. */
-    long abortLsn = NULL_LSN;
-
     /* The configured durability at the time the transaction was created. */
     private Durability defaultDurability;
-
     /* The durability used for the actual commit. */
     private Durability commitDurability;
-
     /* Whether to use Serializable isolation (prevent phantoms). */
     private boolean serializableIsolation;
-
     /* Whether to use Read-Committed isolation. */
     private boolean readCommittedIsolation;
-
     /*
      * In-memory size, in bytes. A Txn tracks the memory needed for itself and
      * the readlock, writeInfo, undoDatabases, and deletedDatabases
@@ -207,39 +161,21 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * actual Lock object memory cost is maintained within the Lock class.
      */
     private int inMemorySize;
-
     /*
      * Accumulated memory budget delta. Once this exceeds ACCUMULATED_LIMIT we
      * inform the MemoryBudget that a change has occurred.
      */
     private int accumulatedDelta = 0;
-
     /*
      * The set of databases for which triggers were invoked during the
      * course of this transaction. It's null if no triggers were invoked.
      */
     private Set<DatabaseImpl> triggerDbs = null;
-
     /*
      * The user Transaction handle associated with this Txn. It's null if there
      * isn't one, e.g. it's an internal transaction.
      */
     private Transaction transaction;
-
-    /*
-     * Max allowable accumulation of memory budget changes before MemoryBudget
-     * should be updated. This allows for consolidating multiple calls to
-     * updateXXXMemoryBudget() into one call. Not declared final so that unit
-     * tests can modify this. See SR 12273.
-     */
-    public static int ACCUMULATED_LIMIT = 10000;
-
-    /*
-     * Each Txn instance has a handle on a ReplicationContext instance for use
-     * in logging a TxnCommit or TxnAbort log entries.
-     */
-    protected ReplicationContext repContext;
-
     /*
      * Used to track mixed mode (sync/durability) transaction API usage. When
      * the sync based api is removed, these tracking ivs can be as well.
@@ -262,7 +198,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     protected Txn(EnvironmentImpl envImpl,
                   TransactionConfig config,
                   ReplicationContext repContext) {
-        this(envImpl, config, repContext, 0L /*mandatedId */ );
+        this(envImpl, config, repContext, 0L /*mandatedId */);
     }
 
     /**
@@ -275,14 +211,14 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                   TransactionConfig config,
                   ReplicationContext repContext,
                   long mandatedId)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * Initialize using the config but don't hold a reference to it, since
          * it has not been cloned.
          */
         super(envImpl, config.getReadUncommitted(), config.getNoWait(),
-              mandatedId);
+                mandatedId);
         initTxn(config);
         this.repContext = repContext;
     }
@@ -310,10 +246,10 @@ public class Txn extends Locker implements VersionedWriteLoggable {
         Txn ret = null;
         try {
             ret = envImpl.isReplicated() ?
-                  envImpl.createRepUserTxn(config) :
-                  createLocalTxn(envImpl, config);
-        } catch (DatabaseException DE) {
-            if (ret != null) {
+                    envImpl.createRepUserTxn(config) :
+                    createLocalTxn(envImpl, config);
+        } catch(DatabaseException DE) {
+            if(ret != null) {
                 ret.close(false);
             }
             throw DE;
@@ -324,19 +260,20 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     static Txn createAutoTxn(EnvironmentImpl envImpl,
                              TransactionConfig config,
                              ReplicationContext repContext)
-        throws DatabaseException {
+            throws DatabaseException {
 
         Txn ret = null;
         try {
-            if (envImpl.isReplicated() && repContext.inReplicationStream()) {
+            if(envImpl.isReplicated() && repContext.inReplicationStream()) {
                 ret = envImpl.createRepUserTxn(config);
-            } else {
+            }
+            else {
                 ret = new Txn(envImpl, config, repContext);
             }
 
             ret.isAutoCommit = true;
-        } catch (DatabaseException DE) {
-            if (ret != null) {
+        } catch(DatabaseException DE) {
+            if(ret != null) {
                 ret.close(false);
             }
             throw DE;
@@ -346,19 +283,20 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     @SuppressWarnings("deprecation")
     private void initTxn(TransactionConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         serializableIsolation = config.getSerializableIsolation();
         readCommittedIsolation = config.getReadCommitted();
         defaultDurability = config.getDurability();
-        if (defaultDurability == null) {
+        if(defaultDurability == null) {
             explicitDurabilityConfigured = false;
             defaultDurability = config.getDurabilityFromSync(envImpl);
-        } else {
+        }
+        else {
             explicitDurabilityConfigured = true;
         }
         explicitSyncConfigured =
-            config.getSync() || config.getNoSync() || config.getWriteNoSync();
+                config.getSync() || config.getNoSync() || config.getWriteNoSync();
 
         assert (!(explicitDurabilityConfigured && explicitSyncConfigured));
 
@@ -370,7 +308,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
         txnFlags = 0;
         setState(Transaction.State.OPEN);
 
-        if (envImpl.isReplicated()) {
+        if(envImpl.isReplicated()) {
             buddyLockers = new TinyHashSet<BuddyLocker>();
         }
 
@@ -388,7 +326,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          */
         updateMemoryUsage(MemoryBudget.TXN_OVERHEAD);
 
-        if (registerImmediately()) {
+        if(registerImmediately()) {
             this.envImpl.getTxnManager().registerTxn(this);
         }
     }
@@ -404,8 +342,8 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     @Override
     void addBuddy(BuddyLocker buddy) {
-        if (buddyLockers != null) {
-            synchronized (buddyLockers) {
+        if(buddyLockers != null) {
+            synchronized(buddyLockers) {
                 buddyLockers.add(buddy);
             }
         }
@@ -413,8 +351,8 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     @Override
     void removeBuddy(BuddyLocker buddy) {
-        if (buddyLockers != null) {
-            synchronized (buddyLockers) {
+        if(buddyLockers != null) {
+            synchronized(buddyLockers) {
                 buddyLockers.remove(buddy);
             }
         }
@@ -438,7 +376,6 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     /**
-     *
      * Returns the durability used for the commit operation. It's only
      * available after a commit operation has been initiated.
      *
@@ -464,23 +401,25 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     public void setPrepared(boolean prepared) {
-        if (prepared) {
+        if(prepared) {
             txnFlags |= IS_PREPARED;
-        } else {
+        }
+        else {
             txnFlags &= ~IS_PREPARED;
         }
     }
 
-    public void setSuspended(boolean suspended) {
-        if (suspended) {
-            txnFlags |= XA_SUSPENDED;
-        } else {
-            txnFlags &= ~XA_SUSPENDED;
-        }
-   }
-
     public boolean isSuspended() {
         return (txnFlags & XA_SUSPENDED) != 0;
+    }
+
+    public void setSuspended(boolean suspended) {
+        if(suspended) {
+            txnFlags |= XA_SUSPENDED;
+        }
+        else {
+            txnFlags &= ~XA_SUSPENDED;
+        }
     }
 
     protected void setRollback() {
@@ -503,19 +442,17 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * LSN. Caller will set the abortLsn later, after the write lock has been
      * obtained.
      *
-     * @throws IllegalStateException via API read/write methods if the txn is
-     * closed, in theory.  However, this should not occur from a user API call,
-     * because the API methods first call Transaction.getLocker, which will
-     * throw IllegalStateException if the txn is closed.  It might occur,
-     * however, if the transaction ends in the window between the call to
-     * getLocker and the lock attempt.
-     *
+     * @throws IllegalStateException     via API read/write methods if the txn is
+     *                                   closed, in theory.  However, this should not occur from a user API call,
+     *                                   because the API methods first call Transaction.getLocker, which will
+     *                                   throw IllegalStateException if the txn is closed.  It might occur,
+     *                                   however, if the transaction ends in the window between the call to
+     *                                   getLocker and the lock attempt.
      * @throws OperationFailureException via API read/write methods if an
-     * OperationFailureException occurred earlier and set the txn to
-     * abort-only.
-     *
-     * @see Locker#lockInternal
+     *                                   OperationFailureException occurred earlier and set the txn to
+     *                                   abort-only.
      * @Override
+     * @see Locker#lockInternal
      */
     @Override
     protected LockResult lockInternal(long lsn,
@@ -523,26 +460,26 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                                       boolean noWait,
                                       boolean jumpAheadOfWaiters,
                                       DatabaseImpl database)
-        throws DatabaseException {
+            throws DatabaseException {
 
         long timeout = 0;
         boolean useNoWait = noWait || defaultNoWait;
-        synchronized (this) {
+        synchronized(this) {
             checkState(false);
-            if (!useNoWait) {
+            if(!useNoWait) {
                 timeout = getLockTimeout();
             }
         }
 
         /* Ask for the lock. */
         LockGrantType grant = lockManager.lock
-            (lsn, this, lockType, timeout, useNoWait, jumpAheadOfWaiters,
-             database);
+                (lsn, this, lockType, timeout, useNoWait, jumpAheadOfWaiters,
+                        database);
 
         WriteLockInfo info = null;
-        if (writeInfo != null) {
-            if (grant != LockGrantType.DENIED && lockType.isWriteLock()) {
-                synchronized (this) {
+        if(writeInfo != null) {
+            if(grant != LockGrantType.DENIED && lockType.isWriteLock()) {
+                synchronized(this) {
                     info = writeInfo.get(Long.valueOf(lsn));
                     /* Save the latest version of this database for undoing. */
                     undoDatabases.put(database.getId(), database);
@@ -567,41 +504,41 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * @throws IllegalStateException via XAResource
      */
     public synchronized int prepare(Xid xid)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if ((txnFlags & IS_PREPARED) != 0) {
+        if((txnFlags & IS_PREPARED) != 0) {
             throw new IllegalStateException
-                ("prepare() has already been called for Transaction " +
-                 id + ".");
+                    ("prepare() has already been called for Transaction " +
+                            id + ".");
         }
 
         checkState(false);
-        if (checkCursorsForClose()) {
+        if(checkCursorsForClose()) {
             throw new IllegalStateException
-                ("Transaction " + id +
-                 " prepare failed because there were open cursors.");
+                    ("Transaction " + id +
+                            " prepare failed because there were open cursors.");
         }
 
         setPrepared(true);
         envImpl.getTxnManager().notePrepare();
-        if (writeInfo == null) {
+        if(writeInfo == null) {
             return XAResource.XA_RDONLY;
         }
 
         SingleItemEntry<TxnPrepare> prepareEntry =
-            SingleItemEntry.create(LogEntryType.LOG_TXN_PREPARE,
-                                   new TxnPrepare(id,xid));
+                SingleItemEntry.create(LogEntryType.LOG_TXN_PREPARE,
+                        new TxnPrepare(id, xid));
         /* Flush required. */
         LogManager logManager = envImpl.getLogManager();
         logManager.logForceFlush(prepareEntry,
-                                 true,  // fsyncrequired
-                                 ReplicationContext.NO_REPLICATE);
+                true,  // fsyncrequired
+                ReplicationContext.NO_REPLICATE);
 
         return XAResource.XA_OK;
     }
 
     public void commit(Xid xid)
-        throws DatabaseException {
+            throws DatabaseException {
 
         commit(Durability.COMMIT_SYNC);
         envImpl.getTxnManager().unRegisterXATxn(xid, true);
@@ -609,7 +546,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     public void abort(Xid xid)
-        throws DatabaseException {
+            throws DatabaseException {
 
         abort(true /* forceFlush */);
         envImpl.getTxnManager().unRegisterXATxn(xid, false);
@@ -620,45 +557,45 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Call commit() with the default sync configuration property.
      */
     public long commit()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return commit(defaultDurability);
     }
 
     /**
      * Commit this transaction; it involves the following logical steps:
-     *
+     * <p>
      * 1. Run pre-commit hook.
-     *
+     * <p>
      * 2. Release read locks.
-     *
+     * <p>
      * 3. Log a txn commit record and flush the log as indicated by the
      * durability policy.
-     *
+     * <p>
      * 4. Run the post-commit hook.
-     *
+     * <p>
      * 5. Add deleted LN info to IN compressor queue.
-     *
+     * <p>
      * 6. Release all write locks
-     *
+     * <p>
      * If this transaction has not made any changes to the database, that is,
      * it is a read-only transaction, no entry is made to the log. Otherwise,
      * a concerted effort is made to log a commit entry, or an abort entry,
      * but NOT both. If exceptions are encountered and neither entry can be
      * logged, a EnvironmentFailureException is thrown.
-     *
+     * <p>
      * Error conditions (in contrast to Exceptions) always result in the
      * environment being invalidated and the Error being propagated back to the
      * application.  In addition, if the environment is made invalid in another
      * thread, or the transaction is closed by another thread, then we
      * propagate the exception and we do not attempt to abort.  This special
      * handling is prior to the pre-commit stage.
-     *
+     * <p>
      * From an exception handling viewpoint the commit goes through two stages:
      * a pre-commit stage spanning steps 1-3, and a post-commit stage
      * spanning steps 4-5. The post-commit stage is entered only after a commit
      * entry has been successfully logged.
-     *
+     * <p>
      * Any exceptions detected during the pre-commit stage results in an
      * attempt to log an abort entry. A NULL commitLsn (and abortLsn)
      * indicates that we are in the pre-commit stage. Note in particular, that
@@ -666,7 +603,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * then the lower levels are responsible for wrapping it in a
      * EnvironmentFailureException which is propagated directly to the
      * application.
-     *
+     * <p>
      * Exceptions thrown in the post-commit stage are examined to see if they
      * are expected and must be propagated back to the caller after completing
      * any pending cleanup; some replication exceptions fall into this
@@ -675,28 +612,27 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * current implementation only allows propagation of exceptions from the
      * post-commit hook, since we do not expect exceptions from any of the
      * other post-commit operations.
-     *
+     * <p>
      * When there are multiple failures in commit(), we want the caller to
      * receive the first exception, to make the problem manifest. So an effort
      * is made to preserve that primary exception and propagate it instead of
      * any following, secondary exceptions. The secondary exception is always
      * logged in such a circumstance.
      *
-     * @throws IllegalStateException via Transaction.commit if cursors are
-     * open.
-     *
+     * @throws IllegalStateException     via Transaction.commit if cursors are
+     *                                   open.
      * @throws OperationFailureException via Transaction.commit if an
-     * OperationFailureException occurred earlier and set the txn to
-     * abort-only.
-     *
-     * Note that IllegalStateException should never be thrown by
-     * Transaction.commit because of a closed txn, since Transaction.commit and
-     * abort set the Transaction.txn to null and disallow subsequent method
-     * calls (other than abort).  So in a sense the call to checkState(true) in
-     * this method is unnecessary, although perhaps a good safeguard.
+     *                                   OperationFailureException occurred earlier and set the txn to
+     *                                   abort-only.
+     *                                   <p>
+     *                                   Note that IllegalStateException should never be thrown by
+     *                                   Transaction.commit because of a closed txn, since Transaction.commit and
+     *                                   abort set the Transaction.txn to null and disallow subsequent method
+     *                                   calls (other than abort).  So in a sense the call to checkState(true) in
+     *                                   this method is unnecessary, although perhaps a good safeguard.
      */
     public long commit(Durability durability)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * If frozen, throw the appropriate exception, but don't attempt to
@@ -715,19 +651,19 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
         try {
 
-            synchronized (this) {
+            synchronized(this) {
                 checkState(false);
-                if (checkCursorsForClose()) {
+                if(checkCursorsForClose()) {
                     throw new IllegalStateException
-                        ("Transaction " + id +
-                         " commit failed because there were open cursors.");
+                            ("Transaction " + id +
+                                    " commit failed because there were open cursors.");
                 }
 
                 /*
                  * Do the pre-commit hook before executing any commit related
                  * actions like releasing locks.
                  */
-                if (updateLoggedForTxn()) {
+                if(updateLoggedForTxn()) {
                     preLogCommitHook();
                 }
 
@@ -753,7 +689,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                  */
                 int numWriteLocks = 0;
                 Collection<WriteLockInfo> obsoleteLsns = null;
-                if (writeInfo != null) {
+                if(writeInfo != null) {
                     numWriteLocks = writeInfo.size();
                     obsoleteLsns = getObsoleteLsnInfo();
                 }
@@ -762,22 +698,22 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                  * If nothing was written to log for this txn, no need to log a
                  * commit.
                  */
-                if (updateLoggedForTxn()) {
+                if(updateLoggedForTxn()) {
                     final LogItem commitItem =
-                        logCommitEntry(durability.getLocalSync(),
-                                       obsoleteLsns);
+                            logCommitEntry(durability.getLocalSync(),
+                                    obsoleteLsns);
                     commitLsn = commitItem.lsn;
 
                     try {
                         postLogCommitHook(commitItem);
-                    } catch (DatabaseException hookException) {
-                        if (txnState == Transaction.State.MUST_ABORT) {
+                    } catch(DatabaseException hookException) {
+                        if(txnState == Transaction.State.MUST_ABORT) {
                             throw EnvironmentFailureException.
-                                unexpectedException
-                                ("postLogCommitHook may not set MUST_ABORT",
-                                 hookException);
+                                    unexpectedException
+                                            ("postLogCommitHook may not set MUST_ABORT",
+                                                    hookException);
                         }
-                        if (!propagatePostCommitException(hookException)) {
+                        if(!propagatePostCommitException(hookException)) {
                             throw hookException;
                         }
                         queuedPostCommitException = hookException;
@@ -791,13 +727,13 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                 setDeletedDatabaseState(true);
 
                 /* Release all write locks, clear lock collection. */
-                if (numWriteLocks > 0) {
+                if(numWriteLocks > 0) {
                     releaseWriteLocks();
                 }
                 writeInfo = null;
 
                 /* Unload delete info, but don't wake up the compressor. */
-                if ((deleteInfo != null) && deleteInfo.size() > 0) {
+                if((deleteInfo != null) && deleteInfo.size() > 0) {
                     envImpl.addToCompressorQueue(deleteInfo.values());
                     deleteInfo.clear();
                 }
@@ -817,29 +753,29 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              */
             close(true);
 
-            if (queuedPostCommitException == null) {
+            if(queuedPostCommitException == null) {
                 TriggerManager.runCommitTriggers(this);
                 return commitLsn;
             }
-        } catch (Error e) {
+        } catch(Error e) {
             envImpl.invalidate(e);
             throw e;
-        } catch (RuntimeException commitException) {
-            if (!envImpl.isValid()) {
+        } catch(RuntimeException commitException) {
+            if(!envImpl.isValid()) {
                 /* Env is invalid, propagate exception. */
                 throw commitException;
             }
-            if (commitLsn != NULL_LSN) {
+            if(commitLsn != NULL_LSN) {
                 /* An unfiltered post commit exception */
                 throw new EnvironmentFailureException
-                    (envImpl,
-                     EnvironmentFailureReason.LOG_INCOMPLETE,
-                     "Failed after commiting transaction " +
-                     id +
-                     " during post transaction cleanup." +
-                     "Original exception = " +
-                     commitException.getMessage(),
-                     commitException);
+                        (envImpl,
+                                EnvironmentFailureReason.LOG_INCOMPLETE,
+                                "Failed after commiting transaction " +
+                                        id +
+                                        " during post transaction cleanup." +
+                                        "Original exception = " +
+                                        commitException.getMessage(),
+                                commitException);
             }
 
             /*
@@ -854,7 +790,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              * Final catch-all to ensure state is set, in case close(boolean)
              * is not called.
              */
-            if (txnState == Transaction.State.OPEN) {
+            if(txnState == Transaction.State.OPEN) {
                 setState(Transaction.State.COMMITTED);
             }
         }
@@ -865,10 +801,10 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Releases all write locks, nulls the lock collection.
      */
     protected void releaseWriteLocks() throws DatabaseException {
-        if (writeInfo == null) {
+        if(writeInfo == null) {
             return;
         }
-        for (Long lsn : writeInfo.keySet()) {
+        for(Long lsn : writeInfo.keySet()) {
             lockManager.release(lsn, this);
         }
         writeInfo = null;
@@ -877,7 +813,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     /**
      * Aborts the current transaction and throws the pre-commit Exception,
      * wrapped in a Database exception if it isn't already a DatabaseException.
-     *
+     * <p>
      * If the attempt at writing the abort entry fails, that is, if neither an
      * abort entry, nor a commit entry was successfully written to the log, the
      * environment is invalidated and a EnvironmentFailureException is thrown.
@@ -885,8 +821,8 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * made in the log, so that it can be replayed to the replicas and the
      * transaction is not left in limbo at the other nodes.
      *
-     * @param durability used to determine whether the abort record should be
-     * flushed to the log.
+     * @param durability         used to determine whether the abort record should be
+     *                           flushed to the log.
      * @param preCommitException the exception being handled.
      * @throws DatabaseException this is the normal return for the method.
      */
@@ -896,13 +832,13 @@ public class Txn extends Locker implements VersionedWriteLoggable {
         try {
             abortInternal(durability.getLocalSync() == SyncPolicy.SYNC);
             LoggerUtils.traceAndLogException(envImpl, "Txn", "commit",
-                                             "Commit of transaction " + id +
-                                             " failed", preCommitException);
-        } catch (Error e) {
+                    "Commit of transaction " + id +
+                            " failed", preCommitException);
+        } catch(Error e) {
             envImpl.invalidate(e);
             throw e;
-        } catch (RuntimeException abortT2) {
-            if (!envImpl.isValid()) {
+        } catch(RuntimeException abortT2) {
+            if(!envImpl.isValid()) {
                 /* Env already invalid, propagate exception. */
                 throw abortT2;
             }
@@ -912,12 +848,12 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                     preCommitException.getMessage() +
                     " The exception from the cleanup = " +
                     abortT2.getMessage();
-            if ((writeInfo != null) && (abortLsn == NULL_LSN)) {
+            if((writeInfo != null) && (abortLsn == NULL_LSN)) {
                 /* Failed to log an abort or commit entry */
                 throw new EnvironmentFailureException
-                    (envImpl,
-                     EnvironmentFailureReason.LOG_INCOMPLETE,
-                     message, preCommitException);
+                        (envImpl,
+                                EnvironmentFailureReason.LOG_INCOMPLETE,
+                                message, preCommitException);
             }
 
             /*
@@ -935,17 +871,17 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          * it.  An IllegalStateException is thrown by commit() when cursors are
          * open.
          */
-        if (preCommitException instanceof DatabaseException ||
-            preCommitException instanceof IllegalStateException) {
+        if(preCommitException instanceof DatabaseException ||
+                preCommitException instanceof IllegalStateException) {
             throw preCommitException;
         }
 
         /* Now throw an exception that shows the commit problem. */
         throw EnvironmentFailureException.unexpectedException
-            ("Failed while attempting to commit transaction " +
-              id + ", aborted instead. Original exception = " +
-              preCommitException.getMessage(),
-              preCommitException);
+                ("Failed while attempting to commit transaction " +
+                                id + ", aborted instead. Original exception = " +
+                                preCommitException.getMessage(),
+                        preCommitException);
     }
 
     /**
@@ -953,23 +889,21 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * behavior.
      *
      * @param flushSyncBehavior the local durability requirements
-     *
      * @return the committed log item
-     *
      * @throws DatabaseException
      */
     private LogItem logCommitEntry(SyncPolicy flushSyncBehavior,
                                    Collection<WriteLockInfo> obsoleteLsns)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LogManager logManager = envImpl.getLogManager();
         assert checkForValidReplicatorNodeId();
 
         final CommitLogEntry commitEntry =
-            new CommitLogEntry(new TxnCommit(id,
-                                             lastLoggedLsn,
-                                             getReplicatorNodeId(),
-                                             getDTVLSN()));
+                new CommitLogEntry(new TxnCommit(id,
+                        lastLoggedLsn,
+                        getReplicatorNodeId(),
+                        getDTVLSN()));
 
         LogParams params = new LogParams();
         params.entry = commitEntry;
@@ -978,7 +912,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
         params.obsoleteWriteLockInfo = obsoleteLsns;
 
-        switch (flushSyncBehavior) {
+        switch(flushSyncBehavior) {
 
             case SYNC:
                 params.flushRequired = true;
@@ -1008,7 +942,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
             LogItem item = logManager.log(params);
             logSuccess = true;
             return item;
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
 
             /*
              * Exceptions thrown during logging are expected to be fatal.
@@ -1016,14 +950,14 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              * exception is unexpectedly thrown, since the commit durability is
              * unknown [#21264].
              */
-            if (envImpl.isValid()) {
+            if(envImpl.isValid()) {
                 throw EnvironmentFailureException.unexpectedException
-                    (envImpl,
-                     "Unexpected non-fatal exception while logging commit",
-                     e);
+                        (envImpl,
+                                "Unexpected non-fatal exception while logging commit",
+                                e);
             }
             throw e;
-        } catch (Error e) {
+        } catch(Error e) {
             /* Ensure that the environment is invalidated. [#21264] */
             envImpl.invalidate(e);
             throw e;
@@ -1033,7 +967,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              * If logging fails, there is still a possibility that the commit
              * is durable. [#21264]
              */
-            if (!logSuccess) {
+            if(!logSuccess) {
                 setState(Transaction.State.POSSIBLY_COMMITTED);
             }
         }
@@ -1047,9 +981,9 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * [#21264]
      */
     private void preLogCommitCheck() {
-        if (Thread.interrupted()) {
+        if(Thread.interrupted()) {
             throw new ThreadInterruptedException
-                (envImpl, "Thread interrupted prior to logging the commit");
+                    (envImpl, "Thread interrupted prior to logging the commit");
         }
         envImpl.checkIfInvalid();
     }
@@ -1058,8 +992,8 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * A replicated txn must know the node of the master which issued it.
      */
     private boolean checkForValidReplicatorNodeId() {
-        if (isReplicated()) {
-            if (getReplicatorNodeId() == 0) {
+        if(isReplicated()) {
+            if(getReplicatorNodeId() == 0) {
                 return false;
             }
 
@@ -1086,7 +1020,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          */
         Map<Long, WriteLockInfo> map = new HashMap<Long, WriteLockInfo>();
 
-        for (WriteLockInfo info : writeInfo.values()) {
+        for(WriteLockInfo info : writeInfo.values()) {
             maybeCountObsoleteLSN(map, info);
         }
 
@@ -1094,28 +1028,28 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     private void maybeCountObsoleteLSN(
-        Map<Long, WriteLockInfo> obsoleteLsnSet,
-        WriteLockInfo info) {
+            Map<Long, WriteLockInfo> obsoleteLsnSet,
+            WriteLockInfo info) {
 
-        if (info.getAbortLsn() == DbLsn.NULL_LSN ||
-            info.getAbortKnownDeleted()) {
+        if(info.getAbortLsn() == DbLsn.NULL_LSN ||
+                info.getAbortKnownDeleted()) {
             return;
         }
 
-        if ((info.getDb() != null) &&
-            info.getDb().isLNImmediatelyObsolete()) {
+        if((info.getDb() != null) &&
+                info.getDb().isLNImmediatelyObsolete()) {
             /* Was already counted obsolete during logging. */
             return;
         }
 
-        if (info.getAbortData() != null) {
+        if(info.getAbortData() != null) {
             /* Was already counted obsolete during logging. */
             return;
         }
 
         final Long longLsn = Long.valueOf(info.getAbortLsn());
 
-        if (!obsoleteLsnSet.containsKey(longLsn)) {
+        if(!obsoleteLsnSet.containsKey(longLsn)) {
             obsoleteLsnSet.put(longLsn, info);
         }
     }
@@ -1125,9 +1059,9 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * require the logging of a durable abort record.
      */
     public void abort()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (isClosed()) {
+        if(isClosed()) {
             return;
         }
         abort(false /* forceFlush */);
@@ -1137,40 +1071,40 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Abort this transaction. Steps are:
      * 1. Release LN read locks.
      * 2. Write a txn abort entry to the log. This is used for log file
-     *    cleaning optimization and replication, and there's no need to
-     *    guarantee a flush to disk.
+     * cleaning optimization and replication, and there's no need to
+     * guarantee a flush to disk.
      * 3. Find the last LN log entry written for this txn, and use that
-     *    to traverse the log looking for nodes to undo. For each node,
-     *    use the same undo logic as recovery to undo the transaction. Note
-     *    that we walk the log in order to undo in reverse order of the
-     *    actual operations. For example, suppose the txn did this:
-     *       delete K1/D1 (in LN 10)
-     *       create K1/D1 (in LN 20)
-     *    If we process LN10 before LN 20, we'd inadvertently create a
-     *    duplicate tree of "K1", which would be fatal for the mapping tree.
+     * to traverse the log looking for nodes to undo. For each node,
+     * use the same undo logic as recovery to undo the transaction. Note
+     * that we walk the log in order to undo in reverse order of the
+     * actual operations. For example, suppose the txn did this:
+     * delete K1/D1 (in LN 10)
+     * create K1/D1 (in LN 20)
+     * If we process LN10 before LN 20, we'd inadvertently create a
+     * duplicate tree of "K1", which would be fatal for the mapping tree.
      * 4. Release the write lock for this LN.
-     *
+     * <p>
      * An abort differs from a rollback in that the former always undoes every
      * operation, and returns it to the pre-txn state. A rollback may return
      * the txn to an intermediate state, or to the pre-txn state.
      */
     public long abort(boolean forceFlush)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return abortInternal(forceFlush);
     }
 
     /**
      * @throws IllegalStateException via Transaction.abort if cursors are open.
-     *
-     * Note that IllegalStateException should never be thrown by
-     * Transaction.abort because of a closed txn, since Transaction.commit and
-     * abort set the Transaction.txn to null and disallow subsequent method
-     * calls (other than abort).  So in a sense the call to checkState(true) in
-     * this method is unnecessary, although perhaps a good safeguard.
+     *                               <p>
+     *                               Note that IllegalStateException should never be thrown by
+     *                               Transaction.abort because of a closed txn, since Transaction.commit and
+     *                               abort set the Transaction.txn to null and disallow subsequent method
+     *                               calls (other than abort).  So in a sense the call to checkState(true) in
+     *                               this method is unnecessary, although perhaps a good safeguard.
      */
     private long abortInternal(boolean forceFlush)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * If frozen, throw the appropriate exception, but don't attempt to
@@ -1181,7 +1115,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
         try {
             try {
-                synchronized (this) {
+                synchronized(this) {
                     checkState(true);
 
                     /*
@@ -1192,28 +1126,28 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                     setState(Transaction.State.ABORTED);
 
                     /* Log the abort. */
-                    if (updateLoggedForTxn()) {
+                    if(updateLoggedForTxn()) {
                         preLogAbortHook();
                         hooked = true;
                         assert checkForValidReplicatorNodeId();
                         assert (commitLsn == NULL_LSN) &&
-                               (abortLsn == NULL_LSN);
+                                (abortLsn == NULL_LSN);
                         final AbortLogEntry abortEntry =
-                            new AbortLogEntry(
-                                new TxnAbort(id, lastLoggedLsn,
-                                             getReplicatorNodeId(),
-                                             getDTVLSN()));
+                                new AbortLogEntry(
+                                        new TxnAbort(id, lastLoggedLsn,
+                                                getReplicatorNodeId(),
+                                                getDTVLSN()));
                         abortLsn = forceFlush ?
-                            envImpl.getLogManager().
-                            logForceFlush(abortEntry,
-                                          true /* fsyncRequired */,
-                                          repContext) :
-                            envImpl.getLogManager().log(abortEntry,
-                                                        repContext);
+                                envImpl.getLogManager().
+                                        logForceFlush(abortEntry,
+                                                true /* fsyncRequired */,
+                                                repContext) :
+                                envImpl.getLogManager().log(abortEntry,
+                                        repContext);
                     }
                 }
             } finally {
-                if (hooked) {
+                if(hooked) {
                     postLogAbortHook();
                     hooked = false;
                 }
@@ -1235,27 +1169,27 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              */
             cleanupDatabaseImpls(false);
 
-            synchronized (this) {
+            synchronized(this) {
                 boolean openCursors = checkCursorsForClose();
                 Logger logger = envImpl.getLogger();
-                if (logger.isLoggable(Level.FINE)) {
+                if(logger.isLoggable(Level.FINE)) {
                     LoggerUtils.fine(logger, envImpl,
-                                     "Abort: id = " + id + " openCursors= " +
-                                     openCursors);
+                            "Abort: id = " + id + " openCursors= " +
+                                    openCursors);
                 }
 
                 /* Invalidate any Db handles protected by this txn. */
-                if (openedDatabaseHandles != null) {
-                    for (Database handle : openedDatabaseHandles) {
+                if(openedDatabaseHandles != null) {
+                    for(Database handle : openedDatabaseHandles) {
                         DbInternal.invalidate(handle);
                     }
                 }
                 /* Delay the exception until cleanup is complete. */
-                if (openCursors) {
+                if(openCursors) {
                     envImpl.checkIfInvalid();
                     throw new IllegalStateException
                             ("Transaction " + id +
-                             " detected open cursors while aborting");
+                                    " detected open cursors while aborting");
                 }
             }
         } finally {
@@ -1275,7 +1209,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
              */
             close(false);
 
-            if (abortLsn != NULL_LSN) {
+            if(abortLsn != NULL_LSN) {
                 TriggerManager.runAbortTriggers(this);
             }
         }
@@ -1287,7 +1221,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Undo write operations and release all resources held by the transaction.
      */
     protected void undo()
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * We need to undo, or reverse the effect of any applied operations on
@@ -1300,20 +1234,20 @@ public class Txn extends Locker implements VersionedWriteLoggable {
         long undoLsn = lastLoggedLsn;
 
         try {
-            while (undoLsn != NULL_LSN) {
+            while(undoLsn != NULL_LSN) {
                 UndoReader undo =
-                    UndoReader.create(envImpl, undoLsn, undoDatabases);
+                        UndoReader.create(envImpl, undoLsn, undoDatabases);
                 /*
                  * Only undo the first instance we see of any node. All log
                  * entries for a given node have the same abortLsn, so we don't
                  * need to undo it multiple times.
                  */
-                if (firstInstance(
-                    alreadyUndoneLsns, alreadyUndoneSlots, undo)) {
+                if(firstInstance(
+                        alreadyUndoneLsns, alreadyUndoneSlots, undo)) {
 
                     RecoveryManager.abortUndo(
-                        envImpl.getLogger(), Level.FINER, location,
-                        undo.db, undo.logEntry, undoLsn);
+                            envImpl.getLogger(), Level.FINER, location,
+                            undo.db, undo.logEntry, undoLsn);
 
                     countObsoleteExact(undoLsn, undo, isRolledBack());
                 }
@@ -1321,22 +1255,22 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                 /* Move on to the previous log entry for this txn. */
                 undoLsn = undo.logEntry.getUserTxn().getLastLsn();
             }
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
             String lsnMsg = "LSN=" + DbLsn.getNoFormatString(undoLsn);
             LoggerUtils.traceAndLogException(envImpl, "Txn", "undo",
-                                             lsnMsg, e);
+                    lsnMsg, e);
             e.addErrorMessage(lsnMsg);
             throw e;
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             throw EnvironmentFailureException.unexpectedException
-                ("Txn undo for LSN=" + DbLsn.getNoFormatString(undoLsn), e);
+                    ("Txn undo for LSN=" + DbLsn.getNoFormatString(undoLsn), e);
         }
 
         /*
          * Release all read locks after the undo (since the undo may need to
          * read in mapLNs).
          */
-        if (readLocks != null) {
+        if(readLocks != null) {
             clearReadLocks();
         }
 
@@ -1364,24 +1298,25 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          * "Immediately obsolete" LNs are counted as obsolete when they are
          * logged, so no need to repeat here.
          */
-        if (undo.logEntry.isImmediatelyObsolete(undo.db)) {
+        if(undo.logEntry.isImmediatelyObsolete(undo.db)) {
             return;
         }
 
         LogManager logManager = envImpl.getLogManager();
 
-        if (obsoleteDupsAllowed) {
+        if(obsoleteDupsAllowed) {
             logManager.countObsoleteNodeDupsAllowed
-                (undoLsn,
-                 null, // type
-                 undo.logEntrySize,
-                 undo.db);
-        } else {
+                    (undoLsn,
+                            null, // type
+                            undo.logEntrySize,
+                            undo.db);
+        }
+        else {
             logManager.countObsoleteNode(undoLsn,
-                                         null,  // type
-                                         undo.logEntrySize,
-                                         undo.db,
-                                         true); // countExact
+                    null,  // type
+                    undo.logEntrySize,
+                    undo.db,
+                    true); // countExact
         }
     }
 
@@ -1389,39 +1324,39 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Release any write locks that are not in the retainedNodes set.
      */
     protected void clearWriteLocks(Set<Long> retainedNodes)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (writeInfo == null) {
+        if(writeInfo == null) {
             return;
         }
 
         /* Release all write locks, clear lock collection. */
         Iterator<Map.Entry<Long, WriteLockInfo>> iter =
-            writeInfo.entrySet().iterator();
-        while (iter.hasNext()) {
+                writeInfo.entrySet().iterator();
+        while(iter.hasNext()) {
             Map.Entry<Long, WriteLockInfo> entry = iter.next();
             Long lsn = entry.getKey();
 
             /* Release any write locks not in the retained set. */
-            if (!retainedNodes.contains(lsn)) {
+            if(!retainedNodes.contains(lsn)) {
                 lockManager.release(lsn, this);
                 iter.remove();
             }
         }
 
-        if (writeInfo.size() == 0) {
+        if(writeInfo.size() == 0) {
             writeInfo = null;
         }
     }
 
     protected int clearReadLocks()
-        throws DatabaseException {
+            throws DatabaseException {
 
         int numReadLocks = 0;
-        if (readLocks != null) {
+        if(readLocks != null) {
             numReadLocks = readLocks.size();
             Iterator<Long> iter = readLocks.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 Long rLockNid = iter.next();
                 lockManager.release(rLockNid, this);
             }
@@ -1434,7 +1369,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Called by LNLogEntry.postLogWork() via the LogManager (while still under
      * the LWL) after a transactional LN is logged. Also called by the recovery
      * manager when logging a transaction aware object.
-     *
+     * <p>
      * This method is synchronized by the caller, by being called within the
      * log latch. Record the last LSN for this transaction, to create the
      * transaction chain, and also record the LSN in the write info for abort
@@ -1450,7 +1385,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          * If this is the first LSN, save it for calculating the first LSN
          * of any active txn, for checkpointing.
          */
-        if (firstLoggedLsn == NULL_LSN) {
+        if(firstLoggedLsn == NULL_LSN) {
             firstLoggedLsn = lastLsn;
         }
     }
@@ -1473,23 +1408,23 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     /**
-     * @param dbImpl databaseImpl to remove
+     * @param dbImpl         databaseImpl to remove
      * @param deleteAtCommit true if this databaseImpl should be cleaned on
-     * commit, false if it should be cleaned on abort.
+     *                       commit, false if it should be cleaned on abort.
      */
     @Override
     public synchronized void markDeleteAtTxnEnd(DatabaseImpl dbImpl,
                                                 boolean deleteAtCommit) {
         int delta = 0;
-        if (deletedDatabases == null) {
+        if(deletedDatabases == null) {
             deletedDatabases = new HashSet<DatabaseCleanupInfo>();
             delta += MemoryBudget.HASHSET_OVERHEAD;
         }
 
         deletedDatabases.add(new DatabaseCleanupInfo(dbImpl,
-                                                     deleteAtCommit));
+                deleteAtCommit));
         delta += MemoryBudget.HASHSET_ENTRY_OVERHEAD +
-            MemoryBudget.OBJECT_OVERHEAD;
+                MemoryBudget.OBJECT_OVERHEAD;
         updateMemoryUsage(delta);
 
         /* releaseDb will be called by cleanupDatabaseImpls. */
@@ -1506,11 +1441,11 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * before the locks are released.
      */
     protected void setDeletedDatabaseState(boolean isCommit) {
-        if (deletedDatabases != null) {
+        if(deletedDatabases != null) {
             Iterator<DatabaseCleanupInfo> iter = deletedDatabases.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 DatabaseCleanupInfo info = iter.next();
-                if (info.deleteAtCommit == isCommit) {
+                if(info.deleteAtCommit == isCommit) {
                     info.dbImpl.startDeleteProcessing();
                 }
             }
@@ -1520,41 +1455,42 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     /**
      * Cleanup leftover databaseImpls that are a by-product of database
      * operations like removeDatabase(), truncateDatabase().
-     *
+     * <p>
      * This method must be called outside the synchronization on this txn,
      * because it calls finishDeleteProcessing, which gets the TxnManager's
      * allTxns latch. The checkpointer also gets the allTxns latch, and within
      * that latch, needs to synchronize on individual txns, so we must avoid a
      * latching hiearchy conflict.
-     *
+     * <p>
      * [#16861] FUTURE: Perhaps this special handling is no longer needed, now
      * that firstLoggedLsn is volatile and getFirstActiveLsn is not
      * synchronized.
      */
     protected void cleanupDatabaseImpls(boolean isCommit)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (deletedDatabases != null) {
+        if(deletedDatabases != null) {
             /* Make a copy of the deleted databases while synchronized. */
             DatabaseCleanupInfo[] infoArray;
-            synchronized (this) {
+            synchronized(this) {
                 infoArray = new DatabaseCleanupInfo[deletedDatabases.size()];
                 deletedDatabases.toArray(infoArray);
             }
-            for (DatabaseCleanupInfo info : infoArray) {
-                if (info.deleteAtCommit == isCommit) {
+            for(DatabaseCleanupInfo info : infoArray) {
+                if(info.deleteAtCommit == isCommit) {
 
                     /*
                      * If deletedDatabases contains same databases with
                      * different deleteAtCommit, firstly release the database,
                      * then delete it. [#19636]
                      */
-                    if (checkRepeatedDeletedDB(infoArray, info)) {
+                    if(checkRepeatedDeletedDB(infoArray, info)) {
                         envImpl.getDbTree().releaseDb(info.dbImpl);
                     }
                     /* releaseDb will be called by finishDeleteProcessing. */
                     info.dbImpl.finishDeleteProcessing();
-                } else if(!checkRepeatedDeletedDB(infoArray, info)){
+                }
+                else if(!checkRepeatedDeletedDB(infoArray, info)) {
 
                     /*
                      * If deletedDatabases contains same databases with
@@ -1569,17 +1505,17 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     private boolean checkRepeatedDeletedDB(DatabaseCleanupInfo[] infoArray,
                                            DatabaseCleanupInfo info) {
-        for (DatabaseCleanupInfo element : infoArray) {
-            if (element.dbImpl.getId().equals(info.dbImpl.getId()) &&
-                element.deleteAtCommit != info.deleteAtCommit){
-                    return true;
+        for(DatabaseCleanupInfo element : infoArray) {
+            if(element.dbImpl.getId().equals(info.dbImpl.getId()) &&
+                    element.deleteAtCommit != info.deleteAtCommit) {
+                return true;
             }
         }
         return false;
     }
 
     private synchronized void ensureWriteInfo() {
-        if (writeInfo == null) {
+        if(writeInfo == null) {
             writeInfo = new HashMap<Long, WriteLockInfo>();
             undoDatabases = new HashMap<DatabaseId, DatabaseImpl>();
             updateMemoryUsage(MemoryBudget.TWOHASHMAPS_OVERHEAD);
@@ -1593,27 +1529,28 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     protected synchronized void addLock(Long lsn,
                                         LockType type,
                                         LockGrantType grantStatus) {
-        if (type.isWriteLock()) {
+        if(type.isWriteLock()) {
 
             ensureWriteInfo();
             writeInfo.put(lsn, new WriteLockInfo());
 
             int delta = WRITE_LOCK_OVERHEAD;
 
-            if ((grantStatus == LockGrantType.PROMOTION) ||
-                (grantStatus == LockGrantType.WAIT_PROMOTION)) {
+            if((grantStatus == LockGrantType.PROMOTION) ||
+                    (grantStatus == LockGrantType.WAIT_PROMOTION)) {
                 readLocks.remove(lsn);
                 delta -= READ_LOCK_OVERHEAD;
             }
             updateMemoryUsage(delta);
-        } else {
+        }
+        else {
             addReadLock(lsn);
         }
     }
 
     private void addReadLock(Long lsn) {
         int delta = 0;
-        if (readLocks == null) {
+        if(readLocks == null) {
             readLocks = new HashSet<Long>();
             delta = MemoryBudget.HASHSET_OVERHEAD;
         }
@@ -1641,11 +1578,12 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          * Don't bother updating memory utilization here -- we'll update at
          * transaction end.
          */
-        if ((readLocks != null) &&
-            readLocks.remove(lsn)) {
+        if((readLocks != null) &&
+                readLocks.remove(lsn)) {
             updateMemoryUsage(0 - READ_LOCK_OVERHEAD);
-        } else if ((writeInfo != null) &&
-                   (writeInfo.remove(lsn) != null)) {
+        }
+        else if((writeInfo != null) &&
+                (writeInfo.remove(lsn) != null)) {
             updateMemoryUsage(0 - WRITE_LOCK_OVERHEAD);
         }
     }
@@ -1659,22 +1597,22 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     synchronized void moveWriteToReadLock(long lsn, Lock lock) {
 
         boolean found = false;
-        if ((writeInfo != null) &&
-            (writeInfo.remove(lsn) != null)) {
+        if((writeInfo != null) &&
+                (writeInfo.remove(lsn) != null)) {
             found = true;
             updateMemoryUsage(0 - WRITE_LOCK_OVERHEAD);
         }
 
         assert found : "Couldn't find lock for Node " + lsn +
-            " in writeInfo Map.";
+                " in writeInfo Map.";
         addReadLock(lsn);
     }
 
     private void updateMemoryUsage(int delta) {
         inMemorySize += delta;
         accumulatedDelta += delta;
-        if (accumulatedDelta > ACCUMULATED_LIMIT ||
-            accumulatedDelta < -ACCUMULATED_LIMIT) {
+        if(accumulatedDelta > ACCUMULATED_LIMIT ||
+                accumulatedDelta < -ACCUMULATED_LIMIT) {
             envImpl.getMemoryBudget().updateTxnMemoryUsage(accumulatedDelta);
             accumulatedDelta = 0;
         }
@@ -1693,15 +1631,15 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     @Override
     public WriteLockInfo getWriteLockInfo(long lsn) {
         WriteLockInfo wli = null;
-        synchronized (this) {
-            if (writeInfo != null) {
+        synchronized(this) {
+            if(writeInfo != null) {
                 wli = writeInfo.get(lsn);
             }
         }
 
-        if (wli == null) {
+        if(wli == null) {
             throw EnvironmentFailureException.unexpectedState
-                ("writeInfo is null in Txn.getWriteLockInfo");
+                    ("writeInfo is null in Txn.getWriteLockInfo");
         }
         return wli;
     }
@@ -1792,16 +1730,17 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     @Override
     public void operationEnd(boolean operationOK)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (!isAutoCommit) {
+        if(!isAutoCommit) {
             /* Created transactions do nothing at the end of the operation. */
             return;
         }
 
-        if (operationOK) {
+        if(operationOK) {
             commit();
-        } else {
+        }
+        else {
             abort(false); // no sync required
         }
     }
@@ -1810,7 +1749,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      * Called at the end of a database open operation to add the database
      * handle to a user txn.  When a user txn aborts, handles opened using that
      * txn are invalidated.
-     *
+     * <p>
      * A non-txnal locker or auto-commit txn does not retain the handle,
      * because the open database operation will succeed or fail atomically and
      * no database invalidation is needed at a later time.
@@ -1819,10 +1758,10 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     @Override
     public synchronized void addOpenedDatabase(Database dbHandle) {
-        if (isAutoCommit) {
+        if(isAutoCommit) {
             return;
         }
-        if (openedDatabaseHandles == null) {
+        if(openedDatabaseHandles == null) {
             openedDatabaseHandles = new HashSet<Database>();
         }
         openedDatabaseHandles.add(dbHandle);
@@ -1857,10 +1796,11 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     /**
      * Check if all cursors associated with the txn are closed. If not, those
      * open cursors will be forcibly closed.
+     *
      * @return true if open cursors exist
      */
     private boolean checkCursorsForClose() {
-      return (cursors.get() != 0);
+        return (cursors.get() != 0);
     }
 
     /**
@@ -1869,14 +1809,14 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     @Override
     public StatGroup collectStats() {
         StatGroup stats =
-            new StatGroup("Transaction lock counts" ,
-                          "Read and write locks held by transaction " + id);
+                new StatGroup("Transaction lock counts",
+                        "Read and write locks held by transaction " + id);
 
         IntStat statReadLocks = new IntStat(stats, LOCK_READ_LOCKS);
         IntStat statWriteLocks = new IntStat(stats, LOCK_WRITE_LOCKS);
         IntStat statTotalLocks = new IntStat(stats, LOCK_TOTAL);
 
-        synchronized (this) {
+        synchronized(this) {
             int nReadLocks = (readLocks == null) ? 0 : readLocks.size();
             statReadLocks.add(nReadLocks);
             int nWriteLocks = (writeInfo == null) ? 0 : writeInfo.size();
@@ -1888,14 +1828,11 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     }
 
     /**
-     * Set the state of a transaction to abort-only.  Should ONLY be called
-     * by OperationFailureException.
+     * Get the state of a transaction's IMPORTUNATE bit.
      */
     @Override
-    public void setOnlyAbortable(OperationFailureException cause) {
-        assert cause != null;
-        setState(Transaction.State.MUST_ABORT);
-        onlyAbortableCause = cause;
+    public boolean getImportunate() {
+        return (txnFlags & IMPORTUNATE) != 0;
     }
 
     /**
@@ -1903,19 +1840,12 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     @Override
     public void setImportunate(boolean importunate) {
-        if (importunate) {
+        if(importunate) {
             txnFlags |= IMPORTUNATE;
-        } else {
+        }
+        else {
             txnFlags &= ~IMPORTUNATE;
         }
-    }
-
-    /**
-     * Get the state of a transaction's IMPORTUNATE bit.
-     */
-    @Override
-    public boolean getImportunate() {
-        return (txnFlags & IMPORTUNATE) != 0;
     }
 
     /**
@@ -1925,7 +1855,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     @Override
     public void checkPreempted(final Locker allowPreemptedLocker)
-        throws OperationFailureException {
+            throws OperationFailureException {
 
         /* First check this locker. */
         throwIfPreempted(allowPreemptedLocker);
@@ -1934,9 +1864,9 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          * Then check our buddy lockers. It's OK to call throwIfPreempted while
          * synchronized on buddyLockers, since it takes no locks.
          */
-        if (buddyLockers != null) {
-            synchronized (buddyLockers) {
-                for (BuddyLocker buddy : buddyLockers) {
+        if(buddyLockers != null) {
+            synchronized(buddyLockers) {
+                for(BuddyLocker buddy : buddyLockers) {
                     buddy.throwIfPreempted(allowPreemptedLocker);
                 }
             }
@@ -1945,18 +1875,18 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     /**
      * Throw an exception if the transaction is not open.
-     *
+     * <p>
      * If calledByAbort is true, it means we're being called from abort(). But
      * once closed, a Transaction never calls abort(). See comment at the top
      * of abortInternal.
-     *
+     * <p>
      * Caller must invoke with "this" synchronized.
      */
     @Override
     public void checkState(boolean calledByAbort)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        switch (txnState) {
+        switch(txnState) {
 
             case OPEN:
                 return;
@@ -1964,7 +1894,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
             case MUST_ABORT:
 
                 /* Don't complain if the user is doing what we asked. */
-                if (calledByAbort) {
+                if(calledByAbort) {
                     return;
                 }
 
@@ -1978,8 +1908,8 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                  * synchronized.
                  */
                 throw onlyAbortableCause.wrapSelf
-                    ("Transaction " + id  +
-                     " must be aborted, caused by: " + onlyAbortableCause);
+                        ("Transaction " + id +
+                                " must be aborted, caused by: " + onlyAbortableCause);
 
             default:
                 /* All other states are equivalent to closed. */
@@ -1989,7 +1919,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                  * synchronized.
                  */
                 throw new IllegalStateException
-                    ("Transaction " + id + " has been closed.");
+                        ("Transaction " + id + " has been closed.");
         }
     }
 
@@ -1998,12 +1928,13 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     public void close(boolean isCommit) {
 
-        if (isCommit) {
+        if(isCommit) {
             /* Set final state to COMMITTED, if not set earlier. */
-            if (txnState == Transaction.State.OPEN) {
+            if(txnState == Transaction.State.OPEN) {
                 setState(Transaction.State.COMMITTED);
             }
-        } else {
+        }
+        else {
             /* This was set earlier by abort, but here also for safety. */
             setState(Transaction.State.ABORTED);
         }
@@ -2025,12 +1956,12 @@ public class Txn extends Locker implements VersionedWriteLoggable {
         close();
     }
 
-    private synchronized void setState(Transaction.State state) {
-        txnState = state;
-    }
-
     public Transaction.State getState() {
         return txnState;
+    }
+
+    private synchronized void setState(Transaction.State state) {
+        txnState = state;
     }
 
     @Override
@@ -2040,11 +1971,22 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
     public boolean isClosed() {
         return txnState != Transaction.State.OPEN &&
-               txnState != Transaction.State.MUST_ABORT;
+                txnState != Transaction.State.MUST_ABORT;
     }
 
     public boolean isOnlyAbortable() {
         return txnState == Transaction.State.MUST_ABORT;
+    }
+
+    /**
+     * Set the state of a transaction to abort-only.  Should ONLY be called
+     * by OperationFailureException.
+     */
+    @Override
+    public void setOnlyAbortable(OperationFailureException cause) {
+        assert cause != null;
+        setState(Transaction.State.MUST_ABORT);
+        onlyAbortableCause = cause;
     }
 
     /**
@@ -2087,14 +2029,14 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     @Override
     public void writeToLog(final ByteBuffer logBuffer) {
         writeToLog(
-            logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
+                logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
     }
 
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
         return LogUtils.getPackedLongLogSize(id) +
-               LogUtils.getPackedLongLogSize(
-                   forReplication ? DbLsn.NULL_LSN : lastLoggedLsn);
+                LogUtils.getPackedLongLogSize(
+                        forReplication ? DbLsn.NULL_LSN : lastLoggedLsn);
     }
 
     /**
@@ -2106,7 +2048,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
                            final boolean forReplication) {
         LogUtils.writePackedLong(logBuffer, id);
         LogUtils.writePackedLong(logBuffer,
-            forReplication ? DbLsn.NULL_LSN : lastLoggedLsn);
+                forReplication ? DbLsn.NULL_LSN : lastLoggedLsn);
     }
 
     /**
@@ -2148,7 +2090,7 @@ public class Txn extends Locker implements VersionedWriteLoggable {
     @Override
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof Txn)) {
+        if(!(other instanceof Txn)) {
             return false;
         }
 
@@ -2163,13 +2105,242 @@ public class Txn extends Locker implements VersionedWriteLoggable {
      */
     private void traceCommit(int numWriteLocks, int numReadLocks) {
         Logger logger = envImpl.getLogger();
-        if (logger.isLoggable(Level.FINE)) {
+        if(logger.isLoggable(Level.FINE)) {
             StringBuilder sb = new StringBuilder();
             sb.append(" Commit: id = ").append(id);
             sb.append(" numWriteLocks=").append(numWriteLocks);
             sb.append(" numReadLocks = ").append(numReadLocks);
             LoggerUtils.fine(logger, envImpl, sb.toString());
         }
+    }
+
+    /**
+     * A replicated environment introduces some new considerations when
+     * entering a transaction scope via an Environment.transactionBegin()
+     * operation.
+     * <p>
+     * On a Replica, the transactionBegin() operation must wait until the
+     * Replica has synched up to where it satisfies the ConsistencyPolicy that
+     * is in effect.
+     * <p>
+     * On a Master, the transactionBegin() must wait until the Feeder has
+     * sufficient connections to ensure that it can satisfy the
+     * ReplicaAckPolicy, since if it does not, it will fail at commit() and the
+     * work done in the transaction will need to be undone.
+     * <p>
+     * This hook provides the mechanism for implementing the above support for
+     * replicated transactions. It ignores all non-replicated transactions.
+     * <p>
+     * The hook throws ReplicaStateException, if a Master switches to a Replica
+     * state while waiting for its Replicas connections. Changes from a Replica
+     * to a Master are handled transparently to the application. Exceptions
+     * manifest themselves as DatabaseException at the interface to minimize
+     * use of Replication based exceptions in core JE.
+     *
+     * @param config the transaction config that applies to the txn
+     * @throws DatabaseException if there is a failure
+     */
+    protected void txnBeginHook(TransactionConfig config)
+            throws DatabaseException {
+
+        /* Overridden by Txn subclasses when appropriate */
+    }
+
+    /* Transaction hooks used for replication support. */
+
+    /**
+     * This hook is invoked before the commit of a transaction that made
+     * changes to a replicated environment. It's invoked for transactions
+     * executed on the master or replica, but is only relevant to transactions
+     * being done on the master. When invoked for a transaction on a replica
+     * the implementation just returns.
+     * <p>
+     * The hook is invoked at a very specific point in the normal commit
+     * sequence: immediately before the commit log entry is written to the log.
+     * It represents the last chance to abort the transaction and provides an
+     * opportunity to make some final checks before allowing the commit can go
+     * ahead. Note that it should be possible to abort the transaction at the
+     * time the hook is invoked.
+     * <p>
+     * After invocation of the "pre" hook one of the "post" hooks:
+     * postLogCommitHook or postLogAbortHook must always be invoked.
+     * <p>
+     * Exceptions thrown by this hook result in the transaction being aborted
+     * and the exception being propagated back to the application.
+     *
+     * @throws DatabaseException if there was a problem and that the
+     *                           transaction should be aborted.
+     */
+    protected void preLogCommitHook()
+            throws DatabaseException {
+
+        /* Overridden by Txn subclasses when appropriate */
+    }
+
+    /**
+     * This hook is invoked after the commit record has been written to the
+     * log, but before write locks have been released, so that other
+     * application cannot see the changes made by the transaction. At this
+     * point the transaction has been committed by the Master.
+     * <p>
+     * Exceptions thrown by this hook result in the transaction being completed
+     * on the Master, that is, locks are released, etc. and the exception is
+     * propagated back to the application.
+     *
+     * @param commitItem the commit item that was just logged
+     * @throws DatabaseException to indicate that there was a replication
+     *                           related problem that needs to be communicated back to the application.
+     */
+    protected void postLogCommitHook(LogItem commitItem)
+            throws DatabaseException {
+
+        /* Overridden by Txn subclasses when appropriate */
+    }
+
+    protected void preLogAbortHook()
+            throws DatabaseException {
+
+        /* Override by Txn subclasses when appropriate */
+    }
+
+    /**
+     * Invoked if the transaction associated with the preLogCommitHook was
+     * subsequently aborted, for example due to a lack of disk space. This
+     * method is responsible for any cleanup that may need to be done as a
+     * result of the abort.
+     * <p>
+     * Note that only one of the "post" hooks (commit or abort) is invoked
+     * following the invocation of the "pre" hook.
+     */
+    protected void postLogCommitAbortHook() {
+        /* Overridden by Txn subclasses when appropriate */
+    }
+
+    protected void postLogAbortHook() {
+        /* Overridden by Txn subclasses when appropriate */
+    }
+
+    /**
+     * Returns the CommitToken associated with a successful replicated commit.
+     *
+     * @see com.sleepycat.je.Transaction#getCommitToken
+     */
+    public CommitToken getCommitToken() {
+        return null;
+    }
+
+    /**
+     * Identifies exceptions that may be propagated back to the caller during
+     * the postCommit phase of a transaction commit.
+     *
+     * @param postCommitException the exception being evaluated
+     * @return true if the exception must be propagated back to the caller,
+     * false if the exception indicates there is a serious problem with the
+     * commit operation and the environment should be invalidated.
+     */
+    protected boolean
+    propagatePostCommitException(DatabaseException postCommitException) {
+        return false;
+    }
+
+    /**
+     * Use the marker Sets to record whether this is the first time we've see
+     * this logical node.
+     */
+    private boolean firstInstance(Set<Long> seenLsns,
+                                  Set<CompareSlot> seenSlots,
+                                  UndoReader undo) {
+        final LNLogEntry<?> undoEntry = undo.logEntry;
+        final long abortLsn1 = undoEntry.getAbortLsn();
+        if(abortLsn1 != DbLsn.NULL_LSN) {
+            return seenLsns.add(abortLsn1);
+        }
+        final CompareSlot slot = new CompareSlot(undo.db, undoEntry);
+        return seenSlots.add(slot);
+    }
+
+    /**
+     * Accumulates the set of databases for which transaction commit/abort
+     * triggers must be run.
+     *
+     * @param dbImpl the database that associated with the trigger
+     */
+    public void noteTriggerDb(DatabaseImpl dbImpl) {
+        if(triggerDbs == null) {
+            triggerDbs =
+                    Collections.synchronizedSet(new HashSet<DatabaseImpl>());
+        }
+        triggerDbs.add(dbImpl);
+    }
+
+    /**
+     * Returns the set of databases for which transaction commit/abort
+     * triggers must be run. Returns Null if no triggers need to be run.
+     */
+    public Set<DatabaseImpl> getTriggerDbs() {
+        return triggerDbs;
+    }
+
+    /**
+     * Get the set of lock ids owned by this transaction
+     */
+    public Set<Long> getWriteLockIds() {
+        if(writeInfo == null) {
+            Set<Long> empty = Collections.emptySet();
+            return empty;
+        }
+
+        return writeInfo.keySet();
+    }
+
+    /* For unit tests. */
+    public Set<Long> getReadLockIds() {
+        if(readLocks == null) {
+            return new HashSet<Long>();
+        }
+        return new HashSet<Long>(readLocks);
+    }
+
+    public EnvironmentImpl getEnvironmentImpl() {
+        return envImpl;
+    }
+
+    @Override
+    public Transaction getTransaction() {
+        return (transaction != null) ?
+                transaction :
+                (transaction = new AutoTransaction(this));
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public Map<DatabaseId, DatabaseImpl> getUndoDatabases() {
+        return undoDatabases;
+    }
+
+    /**
+     * Txn freezing is used to prevent changes to transaction lock contents.  A
+     * frozen transaction should ignore any transaction commit/abort
+     * requests. This is used only by MasterTxns, as a way of holding a
+     * transaction stable while cloning it to serve as a ReplayTxn during
+     * master->replica transitions.
+     *
+     * @param isCommit true if called by commit.
+     */
+    protected void checkIfFrozen(boolean isCommit)
+            throws DatabaseException {
+        return;
+    }
+
+    /*
+     * Used when creating a subset of MasterTxns. Using an explicit method
+     * like this rather than checking class types insulates us from any
+     * assumptions about the class hierarchy.
+     */
+    public boolean isMasterTxn() {
+        return false;
     }
 
     /**
@@ -2199,222 +2370,19 @@ public class Txn extends Locker implements VersionedWriteLoggable {
          */
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof DatabaseCleanupInfo)) {
+            if(!(obj instanceof DatabaseCleanupInfo)) {
                 return false;
             }
 
             DatabaseCleanupInfo other = (DatabaseCleanupInfo) obj;
             return (dbImpl.equals(other.dbImpl)) &&
-                (deleteAtCommit == other.deleteAtCommit);
+                    (deleteAtCommit == other.deleteAtCommit);
         }
 
         @Override
         public int hashCode() {
             return dbImpl.hashCode();
         }
-    }
-
-    /* Transaction hooks used for replication support. */
-
-    /**
-     * A replicated environment introduces some new considerations when
-     * entering a transaction scope via an Environment.transactionBegin()
-     * operation.
-     *
-     * On a Replica, the transactionBegin() operation must wait until the
-     * Replica has synched up to where it satisfies the ConsistencyPolicy that
-     * is in effect.
-     *
-     * On a Master, the transactionBegin() must wait until the Feeder has
-     * sufficient connections to ensure that it can satisfy the
-     * ReplicaAckPolicy, since if it does not, it will fail at commit() and the
-     * work done in the transaction will need to be undone.
-     *
-     * This hook provides the mechanism for implementing the above support for
-     * replicated transactions. It ignores all non-replicated transactions.
-     *
-     * The hook throws ReplicaStateException, if a Master switches to a Replica
-     * state while waiting for its Replicas connections. Changes from a Replica
-     * to a Master are handled transparently to the application. Exceptions
-     * manifest themselves as DatabaseException at the interface to minimize
-     * use of Replication based exceptions in core JE.
-     *
-     * @param config the transaction config that applies to the txn
-     *
-     * @throws DatabaseException if there is a failure
-     */
-    protected void txnBeginHook(TransactionConfig config)
-        throws DatabaseException {
-
-        /* Overridden by Txn subclasses when appropriate */
-    }
-
-    /**
-     * This hook is invoked before the commit of a transaction that made
-     * changes to a replicated environment. It's invoked for transactions
-     * executed on the master or replica, but is only relevant to transactions
-     * being done on the master. When invoked for a transaction on a replica
-     * the implementation just returns.
-     *
-     * The hook is invoked at a very specific point in the normal commit
-     * sequence: immediately before the commit log entry is written to the log.
-     * It represents the last chance to abort the transaction and provides an
-     * opportunity to make some final checks before allowing the commit can go
-     * ahead. Note that it should be possible to abort the transaction at the
-     * time the hook is invoked.
-     *
-     * After invocation of the "pre" hook one of the "post" hooks:
-     * postLogCommitHook or postLogAbortHook must always be invoked.
-     *
-     * Exceptions thrown by this hook result in the transaction being aborted
-     * and the exception being propagated back to the application.
-     *
-     * @throws DatabaseException if there was a problem and that the
-     * transaction should be aborted.
-     */
-    protected void preLogCommitHook()
-        throws DatabaseException {
-
-        /* Overridden by Txn subclasses when appropriate */
-    }
-
-    /**
-     * This hook is invoked after the commit record has been written to the
-     * log, but before write locks have been released, so that other
-     * application cannot see the changes made by the transaction. At this
-     * point the transaction has been committed by the Master.
-     *
-     * Exceptions thrown by this hook result in the transaction being completed
-     * on the Master, that is, locks are released, etc. and the exception is
-     * propagated back to the application.
-     *
-     * @param commitItem the commit item that was just logged
-     *
-     * @throws DatabaseException to indicate that there was a replication
-     * related problem that needs to be communicated back to the application.
-     */
-    protected void postLogCommitHook(LogItem commitItem)
-        throws DatabaseException {
-
-        /* Overridden by Txn subclasses when appropriate */
-    }
-
-    protected void preLogAbortHook()
-        throws DatabaseException {
-
-        /* Override by Txn subclasses when appropriate */
-    }
-
-    /**
-     * Invoked if the transaction associated with the preLogCommitHook was
-     * subsequently aborted, for example due to a lack of disk space. This
-     * method is responsible for any cleanup that may need to be done as a
-     * result of the abort.
-     *
-     * Note that only one of the "post" hooks (commit or abort) is invoked
-     * following the invocation of the "pre" hook.
-     */
-    protected void postLogCommitAbortHook() {
-        /* Overridden by Txn subclasses when appropriate */
-    }
-
-    protected void postLogAbortHook() {
-        /* Overridden by Txn subclasses when appropriate */
-    }
-
-    /**
-     * Returns the CommitToken associated with a successful replicated commit.
-     *
-     * @see com.sleepycat.je.Transaction#getCommitToken
-     */
-    public CommitToken getCommitToken() {
-        return null;
-    }
-
-    /**
-     * Identifies exceptions that may be propagated back to the caller during
-     * the postCommit phase of a transaction commit.
-     *
-     * @param postCommitException the exception being evaluated
-     *
-     * @return true if the exception must be propagated back to the caller,
-     * false if the exception indicates there is a serious problem with the
-     * commit operation and the environment should be invalidated.
-     */
-    protected boolean
-        propagatePostCommitException(DatabaseException postCommitException) {
-        return false;
-    }
-
-    /**
-     * Use the marker Sets to record whether this is the first time we've see
-     * this logical node.
-     */
-    private boolean firstInstance(Set<Long> seenLsns,
-                                  Set<CompareSlot> seenSlots,
-                                  UndoReader undo) {
-        final LNLogEntry<?> undoEntry = undo.logEntry;
-        final long abortLsn1 = undoEntry.getAbortLsn();
-        if (abortLsn1 != DbLsn.NULL_LSN) {
-            return seenLsns.add(abortLsn1);
-        }
-        final CompareSlot slot = new CompareSlot(undo.db, undoEntry);
-        return seenSlots.add(slot);
-    }
-
-    /**
-     * Accumulates the set of databases for which transaction commit/abort
-     * triggers must be run.
-     *
-     * @param dbImpl the database that associated with the trigger
-     */
-    public void noteTriggerDb(DatabaseImpl dbImpl) {
-        if (triggerDbs == null) {
-            triggerDbs =
-                Collections.synchronizedSet(new HashSet<DatabaseImpl>());
-        }
-        triggerDbs.add(dbImpl);
-    }
-
-    /**
-     * Returns the set of databases for which transaction commit/abort
-     * triggers must be run. Returns Null if no triggers need to be run.
-     */
-    public Set<DatabaseImpl> getTriggerDbs() {
-        return triggerDbs;
-    }
-
-    /** Get the set of lock ids owned by this transaction */
-    public Set<Long> getWriteLockIds() {
-        if (writeInfo == null) {
-            Set<Long> empty = Collections.emptySet();
-            return empty;
-        }
-
-        return writeInfo.keySet();
-    }
-
-    /* For unit tests. */
-    public Set<Long> getReadLockIds() {
-        if (readLocks == null) {
-            return new HashSet<Long>();
-        }
-        return new HashSet<Long>(readLocks);
-    }
-
-    public EnvironmentImpl getEnvironmentImpl() {
-        return envImpl;
-    }
-
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
-
-    @Override
-    public Transaction getTransaction() {
-        return (transaction != null) ?
-                transaction :
-                (transaction = new AutoTransaction(this));
     }
 
     private static class AutoTransaction extends Transaction {
@@ -2426,67 +2394,41 @@ public class Txn extends Locker implements VersionedWriteLoggable {
 
         @Override
         public synchronized void commit()
-            throws DatabaseException {
+                throws DatabaseException {
 
             EnvironmentFailureException.unexpectedState
-                ("commit() not permitted on an auto transaction");
+                    ("commit() not permitted on an auto transaction");
         }
 
         @Override
         public synchronized void commit
-            (@SuppressWarnings("unused") Durability durability) {
+                (@SuppressWarnings("unused") Durability durability) {
             EnvironmentFailureException.unexpectedState
-            ("commit() not permitted on an auto transaction");
+                    ("commit() not permitted on an auto transaction");
         }
 
         @Override
         public synchronized void commitNoSync()
-            throws DatabaseException {
+                throws DatabaseException {
 
             EnvironmentFailureException.unexpectedState
-                ("commit() not permitted on an auto transaction");
+                    ("commit() not permitted on an auto transaction");
         }
 
         @Override
         public synchronized void commitWriteNoSync()
-            throws DatabaseException {
+                throws DatabaseException {
 
             EnvironmentFailureException.unexpectedState
-                ("commit() not permitted on an auto transaction");
+                    ("commit() not permitted on an auto transaction");
         }
 
         @Override
         public synchronized void abort()
-            throws DatabaseException {
+                throws DatabaseException {
 
             EnvironmentFailureException.unexpectedState
-                ("abort() not permitted on an auto transaction");
+                    ("abort() not permitted on an auto transaction");
         }
-    }
-
-    public Map<DatabaseId, DatabaseImpl> getUndoDatabases() {
-        return undoDatabases;
-    }
-
-    /**
-     * Txn freezing is used to prevent changes to transaction lock contents.  A
-     * frozen transaction should ignore any transaction commit/abort
-     * requests. This is used only by MasterTxns, as a way of holding a
-     * transaction stable while cloning it to serve as a ReplayTxn during
-     * master->replica transitions.
-     * @param isCommit true if called by commit.
-     */
-    protected void checkIfFrozen(boolean isCommit)
-        throws DatabaseException {
-        return;
-    }
-
-    /*
-     * Used when creating a subset of MasterTxns. Using an explicit method
-     * like this rather than checking class types insulates us from any
-     * assumptions about the class hierarchy.
-     */
-    public boolean isMasterTxn() {
-        return false;
     }
 }

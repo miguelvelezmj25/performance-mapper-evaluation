@@ -13,36 +13,30 @@
 
 package berkeley.com.sleepycat.bind.serial;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamConstants;
-import java.io.OutputStream;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
+import java.io.*;
 
 /**
  * A specialized <code>ObjectOutputStream</code> that stores class description
  * information in a <code>ClassCatalog</code>.  It is used by
  * <code>SerialBinding</code>.
- *
+ * <p>
  * <p>This class is used instead of an {@link ObjectOutputStream}, which it
  * extends, to write a compact object stream.  For writing objects to a
  * database normally one of the serial binding classes is used.  {@link
  * SerialOutput} is used when an {@link ObjectOutputStream} is needed along
  * with compact storage.  A {@link ClassCatalog} must be supplied, however, to
  * stored shared class descriptions.</p>
- *
+ * <p>
  * <p>The {@link ClassCatalog} is used to store class definitions rather than
  * embedding these into the stream.  Instead, a class format identifier is
  * embedded into the stream.  This identifier is then used by {@link
  * SerialInput} to load the class format to deserialize the object.</p>
  *
- * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
- *
  * @author Mark Hayes
+ * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
  */
 public class SerialOutput extends ObjectOutputStream {
 
@@ -52,11 +46,12 @@ public class SerialOutput extends ObjectOutputStream {
      * use a PROTOCOL_VERSION_2 header.
      */
     private final static byte[] STREAM_HEADER;
+
     static {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             new SerialOutput(baos, null);
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
         STREAM_HEADER = baos.toByteArray();
@@ -67,16 +62,14 @@ public class SerialOutput extends ObjectOutputStream {
     /**
      * Creates a serial output stream.
      *
-     * @param out is the output stream to which the compact serialized objects
-     * will be written.
-     *
+     * @param out          is the output stream to which the compact serialized objects
+     *                     will be written.
      * @param classCatalog is the catalog to which the class descriptions for
-     * the serialized objects will be written.
-     *
+     *                     the serialized objects will be written.
      * @throws IOException if an I/O error occurs while writing stream header.
      */
     public SerialOutput(OutputStream out, ClassCatalog classCatalog)
-        throws IOException {
+            throws IOException {
 
         super(out);
         this.classCatalog = classCatalog;
@@ -84,27 +77,6 @@ public class SerialOutput extends ObjectOutputStream {
         /* guarantee that we'll always use the same serialization format */
 
         useProtocolVersion(ObjectStreamConstants.PROTOCOL_VERSION_2);
-    }
-
-    // javadoc is inherited
-    protected void writeClassDescriptor(ObjectStreamClass classdesc)
-        throws IOException {
-
-        try {
-            byte[] id = classCatalog.getClassID(classdesc);
-            writeByte(id.length);
-            write(id);
-        } catch (DatabaseException e) {
-
-            /*
-             * Do not throw IOException from here since ObjectOutputStream
-             * will write the exception to the stream, which causes another
-             * call here, etc.
-             */
-            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
-        } catch (ClassNotFoundException e) {
-            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
-        }
     }
 
     /**
@@ -120,5 +92,26 @@ public class SerialOutput extends ObjectOutputStream {
     public static byte[] getStreamHeader() {
 
         return STREAM_HEADER;
+    }
+
+    // javadoc is inherited
+    protected void writeClassDescriptor(ObjectStreamClass classdesc)
+            throws IOException {
+
+        try {
+            byte[] id = classCatalog.getClassID(classdesc);
+            writeByte(id.length);
+            write(id);
+        } catch(DatabaseException e) {
+
+            /*
+             * Do not throw IOException from here since ObjectOutputStream
+             * will write the exception to the stream, which causes another
+             * call here, etc.
+             */
+            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
+        } catch(ClassNotFoundException e) {
+            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
+        }
     }
 }

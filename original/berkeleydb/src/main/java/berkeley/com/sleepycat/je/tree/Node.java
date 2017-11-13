@@ -36,7 +36,7 @@ public abstract class Node implements Loggable {
      * Initialize a node that has been faulted in from the log.
      */
     public void postFetchInit(DatabaseImpl db, long sourceLsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Nothing to do. */
     }
@@ -45,18 +45,18 @@ public abstract class Node implements Loggable {
     }
 
     public void latchShared()
-        throws DatabaseException {
+            throws DatabaseException {
     }
 
     public void latchShared(CacheMode ignore)
-        throws DatabaseException {
+            throws DatabaseException {
     }
 
     public void releaseLatch() {
     }
 
     public void verify(byte[] maxKey)
-        throws DatabaseException {
+            throws DatabaseException {
     }
 
     /**
@@ -84,13 +84,13 @@ public abstract class Node implements Loggable {
      * should belong.
      */
     abstract void rebuildINList(INList inList)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * @return true if you're part of a deletable subtree.
      */
     abstract boolean isValidForDelete()
-        throws DatabaseException;
+            throws DatabaseException;
 
     public boolean isLN() {
         return false;
@@ -99,11 +99,11 @@ public abstract class Node implements Loggable {
     public boolean isIN() {
         return false;
     }
-    
+
     public boolean isUpperIN() {
         return false;
     }
-    
+
 
     public boolean isBIN() {
         return false;
@@ -163,12 +163,12 @@ public abstract class Node implements Loggable {
 
     /**
      * Returns the generic LogEntryType for this node. Returning the actual
-     * type used to log the node is not always possible. Specifically, for LN 
+     * type used to log the node is not always possible. Specifically, for LN
      * nodes the generic type is less specific than the actual type used to log
      * the node:
-     *  + A non-transactional type is always returned.
-     *  + LOG_INS_LN is returned rather than LOG_UPD_LN.
-     *  + LOG_DEL_LN is returned rather than LOG_DEL_DUPLN.
+     * + A non-transactional type is always returned.
+     * + LOG_INS_LN is returned rather than LOG_UPD_LN.
+     * + LOG_DEL_LN is returned rather than LOG_DEL_DUPLN.
      */
     public abstract LogEntryType getGenericLogType();
 

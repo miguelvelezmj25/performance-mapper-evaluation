@@ -13,14 +13,6 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import berkeley.com.sleepycat.bind.tuple.TupleInput;
 import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 import berkeley.com.sleepycat.je.dbi.TTL;
@@ -30,6 +22,9 @@ import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.tree.BIN;
 import berkeley.com.sleepycat.je.tree.Key;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tracks the expired bytes in each time window, i.e., a histogram. A separate
@@ -69,6 +64,66 @@ public class ExpirationTracker {
         this.fileNum = fileNum;
     }
 
+    public static String toString(final byte[] serializedForm) {
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("{ExpSerialized");
+
+        final TupleInput in = new TupleInput(
+                serializedForm, 1, serializedForm.length - 1);
+
+        final boolean hours = isExpirationInHours(serializedForm);
+        int prevExp = 0;
+
+        while(in.available() > 0) {
+            final int exp = in.readPackedInt() + prevExp;
+            final int size = in.readPackedInt();
+            sb.append(' ').append(TTL.formatExpiration(exp, hours));
+            sb.append('=').append(size);
+            prevExp = exp;
+        }
+
+        sb.append('}');
+        return sb.toString();
+    }
+
+    /**
+     * Computes the expired bytes for the given serialized histogram and
+     * expiration time.
+     */
+    static int getExpiredBytes(final byte[] serializedForm,
+                               final int dayLimit,
+                               final int hourLimit) {
+        final int expLimit =
+                ExpirationTracker.isExpirationInHours(serializedForm) ?
+                        hourLimit : dayLimit;
+
+        final TupleInput in = new TupleInput(
+                serializedForm, 1, serializedForm.length - 1);
+
+        int expiredSize = 0;
+        int prevExp = 0;
+
+        while(in.available() > 0) {
+            final int exp = in.readPackedInt() + prevExp;
+            if(exp > expLimit) {
+                break;
+            }
+            expiredSize += in.readPackedInt();
+            prevExp = exp;
+        }
+
+        return expiredSize;
+    }
+
+    /**
+     * Returns whether the given serialized form has expired values in hours.
+     * If false is returned, all values expired on day boundaries.
+     */
+    static boolean isExpirationInHours(final byte[] serialized) {
+        return (serialized[0] == 1);
+    }
+
     public long getFileNum() {
         return fileNum;
     }
@@ -77,9 +132,8 @@ public class ExpirationTracker {
      * Tracks expiration of a BIN or LN.
      *
      * @param entry is the LogEntry that was just logged. INs and LNs will be
-     * processed here, and must be protected by their parent latch.
-     *
-     * @param size byte size of logged entry.
+     *              processed here, and must be protected by their parent latch.
+     * @param size  byte size of logged entry.
      */
     public void track(final LogEntry entry, final int size) {
 
@@ -87,12 +141,12 @@ public class ExpirationTracker {
 
         final LogEntryType type = entry.getLogType();
 
-        if (type.isUserLNType()) {
+        if(type.isUserLNType()) {
 
             final LNLogEntry<?> lnEntry = (LNLogEntry<?>) entry;
             final int expiration = lnEntry.getExpiration();
 
-            if (expiration == 0) {
+            if(expiration == 0) {
                 return;
             }
 
@@ -100,26 +154,26 @@ public class ExpirationTracker {
             return;
         }
 
-        if (!type.equals(LogEntryType.LOG_BIN) &&
-            !type.equals(LogEntryType.LOG_BIN_DELTA)){
+        if(!type.equals(LogEntryType.LOG_BIN) &&
+                !type.equals(LogEntryType.LOG_BIN_DELTA)) {
             return;
         }
 
         final INLogEntry<?> inEntry = (INLogEntry<?>) entry;
         final BIN bin = inEntry.getBINWithExpiration();
 
-        if (bin == null) {
+        if(bin == null) {
             return;
         }
 
         final boolean inHours = bin.isExpirationInHours();
         final int entrySize = size / bin.getNEntries();
 
-        for (int i = 0; i < bin.getNEntries(); i += 1) {
+        for(int i = 0; i < bin.getNEntries(); i += 1) {
 
             final int expiration = bin.getExpiration(i);
 
-            if (expiration == 0) {
+            if(expiration == 0) {
                 continue;
             }
 
@@ -135,7 +189,7 @@ public class ExpirationTracker {
                        final int size) {
 
         final Integer expInHours =
-            expirationInHours ? expiration : (24 * expiration);
+                expirationInHours ? expiration : (24 * expiration);
 
         AtomicInteger counter = map.get(expInHours);
 
@@ -146,17 +200,17 @@ public class ExpirationTracker {
          * "install" the new map in the volatile field only after adding the
          * new counter.
          */
-        if (counter == null) {
-            synchronized (this) {
+        if(counter == null) {
+            synchronized(this) {
                 /*
                  * Check again while synchronized, since another thread may
                  * have added it. This "double check" is safe because the 'map'
                  * field is volatile.
                  */
                 counter = map.get(expInHours);
-                if (counter == null) {
+                if(counter == null) {
                     final Map<Integer, AtomicInteger> newMap =
-                        new HashMap<>(map);
+                            new HashMap<>(map);
                     counter = new AtomicInteger(0);
                     newMap.put(expInHours, counter);
                     map = newMap;
@@ -194,9 +248,9 @@ public class ExpirationTracker {
 
         int expiredSize = 0;
 
-        for (final Map.Entry<Integer, AtomicInteger> entry : map.entrySet()) {
+        for(final Map.Entry<Integer, AtomicInteger> entry : map.entrySet()) {
             final int exp = entry.getKey();
-            if (exp > expLimit) {
+            if(exp > expLimit) {
                 continue;
             }
             expiredSize += entry.getValue().get();
@@ -211,8 +265,8 @@ public class ExpirationTracker {
         final StringBuilder sb = new StringBuilder();
         sb.append("{ExpTracker file= ").append(fileNum);
 
-        for (final Map.Entry<Integer, AtomicInteger> entry :
-            new TreeMap<>(map).entrySet()) {
+        for(final Map.Entry<Integer, AtomicInteger> entry :
+                new TreeMap<>(map).entrySet()) {
 
             final int exp = entry.getKey();
             sb.append(' ').append(TTL.formatExpiration(exp, true));
@@ -223,63 +277,11 @@ public class ExpirationTracker {
         return sb.toString();
     }
 
-    public static String toString(final byte[] serializedForm) {
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append("{ExpSerialized");
-
-        final TupleInput in = new TupleInput(
-            serializedForm, 1, serializedForm.length - 1);
-
-        final boolean hours = isExpirationInHours(serializedForm);
-        int prevExp = 0;
-
-        while (in.available() > 0) {
-            final int exp = in.readPackedInt() + prevExp;
-            final int size = in.readPackedInt();
-            sb.append(' ').append(TTL.formatExpiration(exp, hours));
-            sb.append('=').append(size);
-            prevExp = exp;
-        }
-
-        sb.append('}');
-        return sb.toString();
-    }
-
-    /**
-     * Computes the expired bytes for the given serialized histogram and
-     * expiration time.
-     */
-    static int getExpiredBytes(final byte[] serializedForm,
-                               final int dayLimit,
-                               final int hourLimit) {
-        final int expLimit =
-            ExpirationTracker.isExpirationInHours(serializedForm) ?
-            hourLimit : dayLimit;
-
-        final TupleInput in = new TupleInput(
-            serializedForm, 1, serializedForm.length - 1);
-
-        int expiredSize = 0;
-        int prevExp = 0;
-
-        while (in.available() > 0) {
-            final int exp = in.readPackedInt() + prevExp;
-            if (exp > expLimit) {
-                break;
-            }
-            expiredSize += in.readPackedInt();
-            prevExp = exp;
-        }
-
-        return expiredSize;
-    }
-
     /**
      * Converts this object to a serialized form that is compact and can be
      * used to quickly find the total bytes after a given time. Returns an
      * empty array if no data in this file has an expiration time.
-     *
+     * <p>
      * The serialized form is a series of {interval,byteSize} pairs that is
      * ordered by expiration time and run length encoded. The interval and
      * byteSize are packed integers. The interval is the delta between the
@@ -292,7 +294,7 @@ public class ExpirationTracker {
 
         final Map<Integer, AtomicInteger> myMap = map;
 
-        if (myMap.isEmpty()) {
+        if(myMap.isEmpty()) {
             return Key.EMPTY_KEY;
         }
 
@@ -301,8 +303,8 @@ public class ExpirationTracker {
         Collections.sort(expList);
 
         boolean hours = false;
-        for (int exp : expList) {
-            if (exp % 24 != 0) {
+        for(int exp : expList) {
+            if(exp % 24 != 0) {
                 hours = true;
                 break;
             }
@@ -312,9 +314,9 @@ public class ExpirationTracker {
         out.write(hours ? 1 : 0);
         int prevExp = 0;
 
-        for (int exp : expList) {
+        for(int exp : expList) {
             final AtomicInteger counter = myMap.get(exp);
-            if (!hours) {
+            if(!hours) {
                 exp /= 24;
             }
             out.writePackedInt(exp - prevExp);
@@ -323,13 +325,5 @@ public class ExpirationTracker {
         }
 
         return out.toByteArray();
-    }
-
-    /**
-     * Returns whether the given serialized form has expired values in hours.
-     * If false is returned, all values expired on day boundaries.
-     */
-    static boolean isExpirationInHours(final byte[] serialized) {
-        return (serialized[0] == 1);
     }
 }

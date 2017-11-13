@@ -13,24 +13,15 @@
 
 package berkeley.com.sleepycat.je.jmx;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.DynamicMBean;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.DbInternal;
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import javax.management.*;
+import java.util.ArrayList;
+import java.util.logging.Level;
 
 /**
  * <p>
@@ -53,7 +44,7 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * <u>Operations:</u>
  * <ul>
  * <li> resetLoggingLevel: which sets the level for the current loggers in
- *      the LogManager.
+ * the LogManager.
  * </ul>
  * <p>
  * We can use these attributes and operations to dynamically change the
@@ -67,36 +58,36 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
 
     /* ConsoleHandler. */
     protected static final MBeanAttributeInfo ATT_CONSOLEHANDLER_LEVEL =
-        new MBeanAttributeInfo
-        (CONSOLEHANDLER_LEVEL, "java.lang.String", "ConsoleHandler level.",
-         true, true, false);
+            new MBeanAttributeInfo
+                    (CONSOLEHANDLER_LEVEL, "java.lang.String", "ConsoleHandler level.",
+                            true, true, false);
 
     /* FileHandler. */
     protected static final MBeanAttributeInfo ATT_FILEHANDLER_LEVEL =
-        new MBeanAttributeInfo
-        (FILEHANDLER_LEVEL, "java.lang.String", "FileHandler level.",
-         true, true, false);
+            new MBeanAttributeInfo
+                    (FILEHANDLER_LEVEL, "java.lang.String", "FileHandler level.",
+                            true, true, false);
 
     /* --------------------- Operations -------------------------- */
 
     /* Operation names */
     protected static final String OP_RESET_LOGGING = "resetLoggerLevel";
-    
+
     /* Set the parameters and operation info for resetting logger's level. */
     protected static final MBeanParameterInfo[] resetLoggingParams = {
-        new MBeanParameterInfo("Logger Name", "java.lang.String",
-                               "Specify the target logger."),
-        new MBeanParameterInfo("Logging Level", "java.lang.String",
-                               "The new logging level for the target logger.")
+            new MBeanParameterInfo("Logger Name", "java.lang.String",
+                    "Specify the target logger."),
+            new MBeanParameterInfo("Logging Level", "java.lang.String",
+                    "The new logging level for the target logger.")
     };
 
     /* Reset logger's level operation. */
-    protected static final MBeanOperationInfo OP_RESET_LOGGING_LEVEL = 
-        new MBeanOperationInfo
-        (OP_RESET_LOGGING,
-         "Change the logging level for the specified logger.",
-         resetLoggingParams, "void", MBeanOperationInfo.UNKNOWN);
-    
+    protected static final MBeanOperationInfo OP_RESET_LOGGING_LEVEL =
+            new MBeanOperationInfo
+                    (OP_RESET_LOGGING,
+                            "Change the logging level for the specified logger.",
+                            resetLoggingParams, "void", MBeanOperationInfo.UNKNOWN);
+
     protected JEDiagnostics(Environment env) {
         super(env);
     }
@@ -116,26 +107,28 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
      * @see DynamicMBean#getAttribute
      */
     public Object getAttribute(String attributeName)
-        throws AttributeNotFoundException,
-               MBeanException {
+            throws AttributeNotFoundException,
+            MBeanException {
 
-        if (attributeName == null) {
+        if(attributeName == null) {
             throw new AttributeNotFoundException
-                ("Attribute name can't be null.");
+                    ("Attribute name can't be null.");
         }
 
         try {
             EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
 
-            if (attributeName.equals(CONSOLEHANDLER_LEVEL)) {
+            if(attributeName.equals(CONSOLEHANDLER_LEVEL)) {
                 return envImpl.getConsoleHandler().getLevel().toString();
-            } else if (attributeName.equals(FILEHANDLER_LEVEL)) {
-                return envImpl.getFileHandler().getLevel().toString();
-            } else {
-                throw new AttributeNotFoundException
-                    ("Attributes " + attributeName + " is not valid.");
             }
-        } catch (DatabaseException e) {
+            else if(attributeName.equals(FILEHANDLER_LEVEL)) {
+                return envImpl.getFileHandler().getLevel().toString();
+            }
+            else {
+                throw new AttributeNotFoundException
+                        ("Attributes " + attributeName + " is not valid.");
+            }
+        } catch(DatabaseException e) {
             throw new MBeanException(new RuntimeException(e.getMessage()));
         }
     }
@@ -144,11 +137,11 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
      * @see DynamicMBean#setAttribute
      */
     public void setAttribute(Attribute attribute)
-        throws AttributeNotFoundException,
-               InvalidAttributeValueException,
-               MBeanException {
+            throws AttributeNotFoundException,
+            InvalidAttributeValueException,
+            MBeanException {
 
-        if (attribute == null) {
+        if(attribute == null) {
             throw new AttributeNotFoundException("Attribute can't be null.");
         }
 
@@ -156,33 +149,35 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
         String name = attribute.getName();
         Object value = attribute.getValue();
 
-        if (name == null) {
+        if(name == null) {
             throw new AttributeNotFoundException
-                ("Attribute name can't be null.");
+                    ("Attribute name can't be null.");
         }
 
-        if (value == null) {
+        if(value == null) {
             throw new InvalidAttributeValueException
-                ("Attribute value for attribute " + name + " can't be null");
+                    ("Attribute value for attribute " + name + " can't be null");
         }
 
         try {
             EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
             Level level = Level.parse((String) value);
 
-            if (name.equals(CONSOLEHANDLER_LEVEL)) {
+            if(name.equals(CONSOLEHANDLER_LEVEL)) {
                 envImpl.getConsoleHandler().setLevel(level);
-            } else if (name.equals(FILEHANDLER_LEVEL)) {
-                envImpl.getFileHandler().setLevel(level);
-            } else {
-                throw new AttributeNotFoundException
-                    ("Attribute " + name + " is not valid.");
             }
-        } catch (NullPointerException e) {
+            else if(name.equals(FILEHANDLER_LEVEL)) {
+                envImpl.getFileHandler().setLevel(level);
+            }
+            else {
+                throw new AttributeNotFoundException
+                        ("Attribute " + name + " is not valid.");
+            }
+        } catch(NullPointerException e) {
             throw new InvalidAttributeValueException
-                ("Setting value for attribute " + name + 
-                 "is invalid because of " + e.getMessage());
-        } catch (SecurityException e) {
+                    ("Setting value for attribute " + name +
+                            "is invalid because of " + e.getMessage());
+        } catch(SecurityException e) {
             throw new MBeanException(e, e.getMessage());
         }
     }
@@ -191,9 +186,9 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
     private Level getLevel(Object level) {
         try {
             return Level.parse((String) level);
-        } catch (NullPointerException e) {
+        } catch(NullPointerException e) {
             throw new IllegalArgumentException
-                ("Can't use null for level value.", e);
+                    ("Can't use null for level value.", e);
         }
     }
 
@@ -203,17 +198,17 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
     public AttributeList getAttributes(String[] attributes) {
 
         /* Sanity checking. */
-        if (attributes == null) {
+        if(attributes == null) {
             throw new IllegalArgumentException("Attributes can't be null");
         }
 
         AttributeList results = new AttributeList();
 
-        for (int i = 0; i < attributes.length; i++) {
+        for(int i = 0; i < attributes.length; i++) {
             try {
                 Object value = getAttribute(attributes[i]);
                 results.add(new Attribute(attributes[i], value));
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -227,20 +222,20 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
     public AttributeList setAttributes(AttributeList attributes) {
 
         /* Sanity checking. */
-        if (attributes == null) {
+        if(attributes == null) {
             throw new IllegalArgumentException("Attribute list can't be null");
         }
 
         AttributeList results = new AttributeList();
 
-        for (int i = 0; i < attributes.size(); i++) {
+        for(int i = 0; i < attributes.size(); i++) {
             Attribute attr = (Attribute) attributes.get(i);
             try {
                 setAttribute(attr);
                 String name = attr.getName();
                 Object newValue = getAttribute(name);
                 results.add(new Attribute(name, newValue));
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -254,46 +249,46 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
     public Object invoke(String actionName,
                          Object[] params,
                          String[] signature)
-        throws MBeanException {
+            throws MBeanException {
 
         /* Sanity checking. */
-        if (actionName == null) {
+        if(actionName == null) {
             throw new IllegalArgumentException("ActionName can't be null.");
         }
 
         try {
             EnvironmentImpl envImpl = DbInternal.getNonNullEnvImpl(env);
 
-            if (actionName.equals(OP_RESET_LOGGING)) {
-                if (params == null || params.length != 2) {
+            if(actionName.equals(OP_RESET_LOGGING)) {
+                if(params == null || params.length != 2) {
                     return new IllegalArgumentException
-                        ("Parameter is not valid");
+                            ("Parameter is not valid");
                 }
-                envImpl.resetLoggingLevel(((String) params[0]).trim(), 
-                                          Level.parse((String) params[1]));
+                envImpl.resetLoggingLevel(((String) params[0]).trim(),
+                        Level.parse((String) params[1]));
                 return null;
-            } 
+            }
 
             return new IllegalArgumentException
-                ("ActionName: " + actionName + " is not valid.");
-        } catch (DatabaseException e) {
+                    ("ActionName: " + actionName + " is not valid.");
+        } catch(DatabaseException e) {
 
             /*
              * Add the message for easiest deciphering of the problem. Since 
              * the original exception cannot be transferred, send the exception
              * stack.
              */
-             throw new MBeanException(new RuntimeException
-                                      (e.getMessage() +
-                                       LoggerUtils.getStackTrace(e)));
-        } catch (NullPointerException e) {
+            throw new MBeanException(new RuntimeException
+                    (e.getMessage() +
+                            LoggerUtils.getStackTrace(e)));
+        } catch(NullPointerException e) {
             throw new MBeanException(e, e.getMessage());
         }
     }
 
     @Override
     protected void doRegisterMBean(Environment env)
-        throws Exception {
+            throws Exception {
 
         server.registerMBean(new JEDiagnostics(env), jeName);
     }
@@ -301,10 +296,10 @@ public class JEDiagnostics extends JEMBean implements DynamicMBean {
     @Override
     protected MBeanAttributeInfo[] getAttributeList() {
         ArrayList<MBeanAttributeInfo> attrList =
-            new ArrayList<MBeanAttributeInfo>();
+                new ArrayList<MBeanAttributeInfo>();
 
         attrList.add(ATT_CONSOLEHANDLER_LEVEL);
-        if (DbInternal.getNonNullEnvImpl(env).getFileHandler() != null) {
+        if(DbInternal.getNonNullEnvImpl(env).getFileHandler() != null) {
             attrList.add(ATT_FILEHANDLER_LEVEL);
         }
 

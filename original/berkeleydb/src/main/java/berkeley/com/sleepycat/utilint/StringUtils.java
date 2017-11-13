@@ -16,10 +16,10 @@ package berkeley.com.sleepycat.utilint;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CharacterCodingException;
 
 public class StringUtils {
 
@@ -49,7 +49,7 @@ public class StringUtils {
     public static byte[] toUTF8(String str) {
         try {
             return str.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -62,7 +62,7 @@ public class StringUtils {
         try {
             final CharsetEncoder utf8Encoder = UTF8.newEncoder();
             return utf8Encoder.encode(chars);
-        } catch (CharacterCodingException e) {
+        } catch(CharacterCodingException e) {
             // Should never happen.
             throw new RuntimeException(e);
         }
@@ -71,7 +71,7 @@ public class StringUtils {
     public static String fromUTF8(byte[] bytes) {
         try {
             return new String(bytes, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -80,7 +80,7 @@ public class StringUtils {
     public static String fromUTF8(byte[] bytes, int offset, int len) {
         try {
             return new String(bytes, offset, len, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -93,7 +93,7 @@ public class StringUtils {
         try {
             final CharsetDecoder utf8Decoder = UTF8.newDecoder();
             return utf8Decoder.decode(bytes);
-        } catch (CharacterCodingException e) {
+        } catch(CharacterCodingException e) {
             // Should never happen.
             throw new RuntimeException(e);
         }
@@ -102,7 +102,7 @@ public class StringUtils {
     public static byte[] toASCII(String str) {
         try {
             return str.getBytes("US-ASCII");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -115,7 +115,7 @@ public class StringUtils {
         try {
             final CharsetEncoder asciiEncoder = ASCII.newEncoder();
             return asciiEncoder.encode(chars);
-        } catch (CharacterCodingException e) {
+        } catch(CharacterCodingException e) {
             // Should never happen.
             throw new RuntimeException(e);
         }
@@ -124,7 +124,7 @@ public class StringUtils {
     public static String fromASCII(byte[] bytes) {
         try {
             return new String(bytes, "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -133,7 +133,7 @@ public class StringUtils {
     public static String fromASCII(byte[] bytes, int offset, int len) {
         try {
             return new String(bytes, offset, len, "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
+        } catch(UnsupportedEncodingException e) {
             /* Should never happen. */
             throw new RuntimeException(e);
         }
@@ -146,7 +146,7 @@ public class StringUtils {
         try {
             final CharsetDecoder asciiDecoder = ASCII.newDecoder();
             return asciiDecoder.decode(bytes);
-        } catch (CharacterCodingException e) {
+        } catch(CharacterCodingException e) {
             // Should never happen.
             throw new RuntimeException(e);
         }

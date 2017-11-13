@@ -13,16 +13,19 @@
 
 package berkeley.com.sleepycat.je.statcap;
 
+import berkeley.com.sleepycat.je.utilint.TracerFormatter;
+
 import java.text.DateFormat;
 import java.util.Date;
 
-import berkeley.com.sleepycat.je.utilint.TracerFormatter;
-
 class StatUtils {
     private static final DateFormat formatter =
-        TracerFormatter.makeDateFormat();
+            TracerFormatter.makeDateFormat();
     private static final Date date = new Date();
-    /** Returns a string representation of the specified time. */
+
+    /**
+     * Returns a string representation of the specified time.
+     */
     public static synchronized String getDate(final long millis) {
         /* The date and formatter are not thread safe */
         date.setTime(millis);

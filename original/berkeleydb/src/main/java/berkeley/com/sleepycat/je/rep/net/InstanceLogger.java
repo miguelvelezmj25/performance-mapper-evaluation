@@ -25,7 +25,7 @@ public interface InstanceLogger {
      * with an instance-dependent identifier.
      *
      * @param logLevel the logging level at which the message should be logged.
-     * @param msg a string to be logged.
+     * @param msg      a string to be logged.
      */
     public void log(Level logLevel, String msg);
 }

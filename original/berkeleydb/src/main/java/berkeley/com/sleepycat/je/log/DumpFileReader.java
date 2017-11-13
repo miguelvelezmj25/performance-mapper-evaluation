@@ -13,32 +13,28 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * The DumpFileReader prints every log entry to stdout.
  */
 public abstract class DumpFileReader extends FileReader {
 
-    /* A set of the entry type numbers that this DumpFileReader should dump. */
-    private final Set<Byte> targetEntryTypes;
-
-    /* A set of the txn ids that this DumpFileReader should dump. */
-    private final Set<Long> targetTxnIds;
-
-    /* A set of the db ids that this DumpFileReader should dump. */
-    private final Set<Long> targetDbIds;
-
     /* If true, dump the long version of the entry. */
     protected final boolean verbose;
-
+    /* A set of the entry type numbers that this DumpFileReader should dump. */
+    private final Set<Byte> targetEntryTypes;
+    /* A set of the txn ids that this DumpFileReader should dump. */
+    private final Set<Long> targetTxnIds;
+    /* A set of the db ids that this DumpFileReader should dump. */
+    private final Set<Long> targetDbIds;
     /* If true, only dump entries that have a VLSN */
     private final boolean repEntriesOnly;
 
@@ -56,39 +52,39 @@ public abstract class DumpFileReader extends FileReader {
                           boolean verbose,
                           boolean repEntriesOnly,
                           boolean forwards)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env,
-              readBufferSize,
-              forwards, 
-              startLsn,
-              null, // single file number
-              endOfFileLsn, // end of file lsn
-              finishLsn); // finish lsn
+                readBufferSize,
+                forwards,
+                startLsn,
+                null, // single file number
+                endOfFileLsn, // end of file lsn
+                finishLsn); // finish lsn
 
         /* If entry types is not null, record the set of target entry types. */
         targetEntryTypes = new HashSet<>();
-        if (entryTypes != null) {
+        if(entryTypes != null) {
             StringTokenizer tokenizer = new StringTokenizer(entryTypes, ",");
-            while (tokenizer.hasMoreTokens()) {
+            while(tokenizer.hasMoreTokens()) {
                 String typeString = tokenizer.nextToken();
                 targetEntryTypes.add(Byte.valueOf(typeString.trim()));
             }
         }
         /* If db ids is not null, record the set of target db ids. */
         targetDbIds = new HashSet<>();
-        if (dbIds != null) {
+        if(dbIds != null) {
             StringTokenizer tokenizer = new StringTokenizer(dbIds, ",");
-            while (tokenizer.hasMoreTokens()) {
+            while(tokenizer.hasMoreTokens()) {
                 String dbIdString = tokenizer.nextToken();
                 targetDbIds.add(Long.valueOf(dbIdString.trim()));
             }
         }
         /* If txn ids is not null, record the set of target txn ids. */
         targetTxnIds = new HashSet<>();
-        if (txnIds != null) {
+        if(txnIds != null) {
             StringTokenizer tokenizer = new StringTokenizer(txnIds, ",");
-            while (tokenizer.hasMoreTokens()) {
+            while(tokenizer.hasMoreTokens()) {
                 String txnIdString = tokenizer.nextToken();
                 targetTxnIds.add(Long.valueOf(txnIdString.trim()));
             }
@@ -102,24 +98,24 @@ public abstract class DumpFileReader extends FileReader {
     }
 
     protected boolean matchEntry(LogEntry entry) {
-        if (!targetTxnIds.isEmpty()) {
+        if(!targetTxnIds.isEmpty()) {
             LogEntryType type = entry.getLogType();
-            if (!type.isTransactional()) {
+            if(!type.isTransactional()) {
                 /* If -tx spec'd and not a transactional entry, don't dump. */
                 return false;
             }
-            if (!targetTxnIds.contains(entry.getTransactionId())) {
+            if(!targetTxnIds.contains(entry.getTransactionId())) {
                 /* Not in the list of txn ids. */
                 return false;
             }
         }
-        if (!targetDbIds.isEmpty()) {
+        if(!targetDbIds.isEmpty()) {
             DatabaseId dbId = entry.getDbId();
-            if (dbId == null) {
+            if(dbId == null) {
                 /* If -db spec'd and not a db entry, don't dump. */
                 return false;
             }
-            if (!targetDbIds.contains(dbId.getId())) {
+            if(!targetDbIds.contains(dbId.getId())) {
                 /* Not in the list of db ids. */
                 return false;
             }
@@ -134,7 +130,7 @@ public abstract class DumpFileReader extends FileReader {
      */
     @Override
     protected boolean isTargetEntry() {
-        if (repEntriesOnly && !currentEntryHeader.getReplicated()) {
+        if(repEntriesOnly && !currentEntryHeader.getReplicated()) {
 
             /* 
              * Skip this entry; we only want replicated entries, and this
@@ -143,16 +139,16 @@ public abstract class DumpFileReader extends FileReader {
             return false;
         }
 
-        if (targetEntryTypes.size() == 0) {
+        if(targetEntryTypes.size() == 0) {
             /* We want to dump all entry types. */
             return true;
         }
         return targetEntryTypes.contains
-            (Byte.valueOf(currentEntryHeader.getType()));
+                (Byte.valueOf(currentEntryHeader.getType()));
     }
 
     /**
-     * @param ignore  
+     * @param ignore
      */
     public void summarize(boolean ignore /*csvFile*/) {
     }

@@ -15,7 +15,7 @@ package berkeley.com.sleepycat.je.tree;
 
 /**
  * Contains static methods for estimating record storage size.
- *
+ * <p>
  * Currently this only applies to KVS because we assume that VLSNs are
  * preserved.
  */
@@ -85,7 +85,8 @@ public class StorageSize {
     private final static int PRI_EMBEDDED_LN_SLOT_OVERHEAD = 20;
 
     /* Static methods only. */
-    private StorageSize() {}
+    private StorageSize() {
+    }
 
     /**
      * Returns the estimated disk storage size for the record in the given BIN
@@ -103,7 +104,7 @@ public class StorageSize {
      *    +
      *  Fixed per-Row internal overhead (64: LN_OVERHEAD + PRI_SLOT_OVERHEAD)
      * </pre>
-     *
+     * <p>
      * The storage overhead for an Index record is:
      * <pre>
      *  Serialized size of the IndexKey fields (JE key size)
@@ -112,35 +113,35 @@ public class StorageSize {
      *    +
      *  Fixed per-IndexKey internal overhead (12: SEC_SLOT_OVERHEAD)
      * </pre>
-     *
+     * <p>
      * This method returns the size estimate for an actual record based on the
      * use of that formula, getting the key and data size (or lastLoggedSize)
      * from the BIN. The amount calculated using the formula above will
      * normally be larger than the size returned by this method, for several
      * reasons:
      * <ul>
-     *   <li>
-     *   This method uses the key size after it is reduced by prefix
-     *   compression.
-     *   </li>
-     *   <li>
-     *   For a separate (non-embedded) LN, this method uses the lastLoggedSize
-     *   rather than adding LN_OVERHEAD to the data size (this is why
-     *   LN_OVERHEAD is not referenced in code here). This is more accurate
-     *   since the actual LN overhead is reduced due to integer packing, etc.
-     *   Also, this method cannot fetch the LN, so the data size is unknown.
-     *   </li>
-     *   <li>
-     *   For an embedded LN in a primary DB, the returned  size does not
-     *   include the LN size, since the LN is always obsolete. This means the
-     *   primary key size is not counted redundantly and the LN_OVERHEAD is not
-     *   included in the return value, as they are in the formula. These are
-     *   significant differences, but since embedded LNs require a data size
-     *   LTE 16, this is not expected to be a common use case. If it becomes
-     *   common, we should add a new case for this to the customer formula.
-     *   </li>
+     * <li>
+     * This method uses the key size after it is reduced by prefix
+     * compression.
+     * </li>
+     * <li>
+     * For a separate (non-embedded) LN, this method uses the lastLoggedSize
+     * rather than adding LN_OVERHEAD to the data size (this is why
+     * LN_OVERHEAD is not referenced in code here). This is more accurate
+     * since the actual LN overhead is reduced due to integer packing, etc.
+     * Also, this method cannot fetch the LN, so the data size is unknown.
+     * </li>
+     * <li>
+     * For an embedded LN in a primary DB, the returned  size does not
+     * include the LN size, since the LN is always obsolete. This means the
+     * primary key size is not counted redundantly and the LN_OVERHEAD is not
+     * included in the return value, as they are in the formula. These are
+     * significant differences, but since embedded LNs require a data size
+     * LTE 16, this is not expected to be a common use case. If it becomes
+     * common, we should add a new case for this to the customer formula.
+     * </li>
      * </ul>
-     *
+     * <p>
      * In addition, the size returned by this method will normally be larger
      * than the actual storage size on disk. This is because this method uses
      * PRI_SLOT_OVERHEAD and SEC_SLOT_OVERHEAD to calculate the Btree slot
@@ -171,7 +172,7 @@ public class StorageSize {
          * for data (primary key) size. We subtract it here because it is
          * included in SEC_SLOT_OVERHEAD.
          */
-        if (bin.getDatabase().getSortedDuplicates()) {
+        if(bin.getDatabase().getSortedDuplicates()) {
             return storedKeySize - 1 + SEC_SLOT_OVERHEAD;
         }
 
@@ -187,7 +188,7 @@ public class StorageSize {
          * for data (primary key) size. We subtract it here because it is
          * included in PRI_EMBEDDED_LN_SLOT_OVERHEAD.
          */
-        if (bin.isEmbeddedLN(idx)) {
+        if(bin.isEmbeddedLN(idx)) {
             return storedKeySize - 1 + PRI_EMBEDDED_LN_SLOT_OVERHEAD;
         }
 
@@ -203,7 +204,7 @@ public class StorageSize {
          * The storedKeySize is the key-size alone.
          */
         final int lastLoggedSize = bin.getLastLoggedSize(idx);
-        if (lastLoggedSize == 0) {
+        if(lastLoggedSize == 0) {
             /* Size is unknown. */
             return 0;
         }

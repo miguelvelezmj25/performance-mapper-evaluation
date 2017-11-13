@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-
 import berkeley.com.sleepycat.je.log.BasicVersionedWriteLoggable;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class writes out a log entry that can be used for replication syncup.
@@ -28,10 +28,10 @@ import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
  * the syncup interval in much the way that a checkpoint bounds the recovery
  * interval. The entry will a replicated one, which means that it will be
  * tagged with a VLSN.
- *
+ * <p>
  * Although this is a replication class, it resides in the utilint package
  * because it is referenced in LogEntryType.java.
- *
+ * <p>
  * TODO: This is currently not used. When it is used, it will be the first
  * replicated log entry that does not have a real txn id. All replicated
  * entries are expected to have negative ids, and the matchpoint should be
@@ -82,7 +82,7 @@ public class Matchpoint extends BasicVersionedWriteLoggable {
     @Override
     public int getLogSize(final int logVersion, final boolean forReplication) {
         return LogUtils.getTimestampLogSize(time) +
-            LogUtils.getPackedIntLogSize(repMasterNodeId);
+                LogUtils.getPackedIntLogSize(repMasterNodeId);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class Matchpoint extends BasicVersionedWriteLoggable {
 
     @Override
     public boolean logicalEquals(Loggable other) {
-        if (!(other instanceof Matchpoint)) {
+        if(!(other instanceof Matchpoint)) {
             return false;
         }
 

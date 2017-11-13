@@ -32,9 +32,9 @@ class ComparatorCatalog extends SimpleCatalog {
     }
 
     public Format getFormat(final String className) {
-        if (formatMap != null) {
+        if(formatMap != null) {
             final Format f = formatMap.get(className);
-            if (f != null) {
+            if(f != null) {
                 return f;
             }
         }

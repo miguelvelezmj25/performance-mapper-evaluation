@@ -36,14 +36,14 @@ class SubscriptionOutputThread extends ReplicaOutputThreadBase {
                                     DataChannel replicaFeederChannel,
                                     SubscriptionStat stats) {
         super(repImpl, repImpl.getRepNode(), outputQueue, protocol,
-              replicaFeederChannel);
+                replicaFeederChannel);
         this.stats = stats;
     }
 
     /**
      * Implement the heartbeat response for output thread
      *
-     * @param txnId  txn id
+     * @param txnId txn id
      * @throws IOException
      */
     @Override
@@ -51,8 +51,8 @@ class SubscriptionOutputThread extends ReplicaOutputThreadBase {
 
         /* report the most recently received VLSN to feeder */
         HeartbeatResponse response =
-            protocol.new HeartbeatResponse(stats.getHighVLSN(),
-                                           stats.getHighVLSN());
+                protocol.new HeartbeatResponse(stats.getHighVLSN(),
+                        stats.getHighVLSN());
 
         protocol.write(response, replicaFeederChannel);
         stats.getNumMsgResponded().increment();

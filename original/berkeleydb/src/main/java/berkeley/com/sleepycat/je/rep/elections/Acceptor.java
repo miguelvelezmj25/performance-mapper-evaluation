@@ -13,13 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.elections;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.nio.channels.Channels;
-import java.util.logging.Level;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.rep.elections.Acceptor.SuggestionGenerator.Ranking;
@@ -34,26 +27,29 @@ import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.channels.Channels;
+import java.util.logging.Level;
+
 /**
  * Plays the role of Acceptor in the consensus algorithm. It runs in its
  * own thread listening for and responding to messages sent by Proposers.
  */
 public class Acceptor extends ElectionAgentThread {
 
+    /* Identifies the Acceptor Service. */
+    public static final String SERVICE_NAME = "Acceptor";
+    /* Used to return suggestions in response to Propose requests. */
+    private final SuggestionGenerator suggestionGenerator;
+    private final ElectionsConfig config;
     /*
      * The currently promised proposal. Proposals below this one are rejected.
      */
     private Proposal promisedProposal = null;
-
     private Value acceptedValue = null;
-
-    /* Used to return suggestions in response to Propose requests. */
-    private final SuggestionGenerator suggestionGenerator;
-
-    /* Identifies the Acceptor Service. */
-    public static final String SERVICE_NAME = "Acceptor";
-
-    private final ElectionsConfig config;
 
     /**
      * Creates an Acceptor
@@ -63,7 +59,7 @@ public class Acceptor extends ElectionAgentThread {
                     SuggestionGenerator suggestionGenerator) {
 
         super(config.getRepImpl(), protocol,
-              "Acceptor Thread " + config.getNameIdPair().getName());
+                "Acceptor Thread " + config.getNameIdPair().getName());
         this.config = config;
 
         this.suggestionGenerator = suggestionGenerator;
@@ -75,18 +71,18 @@ public class Acceptor extends ElectionAgentThread {
     @Override
     public void run() {
         final ServiceDispatcher serviceDispatcher =
-            config.getServiceDispatcher();
+                config.getServiceDispatcher();
         serviceDispatcher.register(SERVICE_NAME, channelQueue);
         LoggerUtils.logMsg
-            (logger, envImpl, formatter, Level.FINE, "Acceptor started");
+                (logger, envImpl, formatter, Level.FINE, "Acceptor started");
         DataChannel channel = null;
         try {
-            while (true) {
+            while(true) {
                 channel = serviceDispatcher.takeChannel
-                    (SERVICE_NAME, true /* block */,
-                     protocol.getReadTimeout());
+                        (SERVICE_NAME, true /* block */,
+                                protocol.getReadTimeout());
 
-                if (channel == null) {
+                if(channel == null) {
                     /* A soft shutdown. */
                     return;
                 }
@@ -95,36 +91,39 @@ public class Acceptor extends ElectionAgentThread {
                 PrintWriter out = null;
                 try {
                     in = new BufferedReader(
-                        new InputStreamReader(
-                            Channels.newInputStream(channel)));
+                            new InputStreamReader(
+                                    Channels.newInputStream(channel)));
                     out = new PrintWriter(
-                        Channels.newOutputStream(channel), true);
+                            Channels.newOutputStream(channel), true);
                     String requestLine = in.readLine();
-                    if (requestLine == null) {
+                    if(requestLine == null) {
                         LoggerUtils.logMsg(logger, envImpl,
-                                           formatter, Level.FINE,
-                                           "Acceptor: EOF on request");
+                                formatter, Level.FINE,
+                                "Acceptor: EOF on request");
                         continue;
                     }
                     RequestMessage requestMessage = null;
                     try {
                         requestMessage = protocol.parseRequest(requestLine);
-                    } catch (InvalidMessageException ime) {
+                    } catch(InvalidMessageException ime) {
                         protocol.processIME(channel, ime);
                         continue;
                     }
                     ResponseMessage responseMessage = null;
-                    if (requestMessage.getOp() == protocol.PROPOSE) {
+                    if(requestMessage.getOp() == protocol.PROPOSE) {
                         responseMessage = process((Propose) requestMessage);
-                    } else if (requestMessage.getOp() == protocol.ACCEPT) {
+                    }
+                    else if(requestMessage.getOp() == protocol.ACCEPT) {
                         responseMessage = process((Accept) requestMessage);
-                    } else if (requestMessage.getOp() == protocol.SHUTDOWN) {
+                    }
+                    else if(requestMessage.getOp() == protocol.SHUTDOWN) {
                         break;
-                    } else {
+                    }
+                    else {
                         LoggerUtils.logMsg(logger, envImpl,
-                                           formatter, Level.SEVERE,
-                                           "Unrecognized request: " +
-                                           requestLine);
+                                formatter, Level.SEVERE,
+                                "Unrecognized request: " +
+                                        requestLine);
                         continue;
                     }
 
@@ -138,25 +137,25 @@ public class Acceptor extends ElectionAgentThread {
                      * that of the original request message.
                      */
                     responseMessage.setSendVersion
-                        (requestMessage.getSendVersion());
+                            (requestMessage.getSendVersion());
                     out.println(responseMessage.wireFormat());
-                } catch (IOException e) {
+                } catch(IOException e) {
                     LoggerUtils.logMsg
-                        (logger, envImpl, formatter, Level.WARNING,
-                         "IO error on socket: " + e.getMessage());
+                            (logger, envImpl, formatter, Level.WARNING,
+                                    "IO error on socket: " + e.getMessage());
                     continue;
                 } finally {
                     Utils.cleanup(logger, envImpl, formatter, channel, in, out);
                     cleanup();
                 }
             }
-        } catch (InterruptedException e) {
-            if (isShutdown()) {
+        } catch(InterruptedException e) {
+            if(isShutdown()) {
                 /* Treat it like a shutdown, exit the thread. */
                 return;
             }
             LoggerUtils.logMsg(logger, envImpl, formatter, Level.WARNING,
-                               "Acceptor unexpected interrupted");
+                    "Acceptor unexpected interrupted");
             throw EnvironmentFailureException.unexpectedException(e);
         } finally {
             serviceDispatcher.cancel(SERVICE_NAME);
@@ -168,36 +167,35 @@ public class Acceptor extends ElectionAgentThread {
      * Responds to a Propose request.
      *
      * @param propose the request proposal
-     *
      * @return the response: a Promise if the request was accepted, a Reject
-     *         otherwise.
+     * otherwise.
      */
     ResponseMessage process(Propose propose) {
 
-        if ((promisedProposal != null) &&
-            (promisedProposal.compareTo(propose.getProposal()) > 0)) {
+        if((promisedProposal != null) &&
+                (promisedProposal.compareTo(propose.getProposal()) > 0)) {
             LoggerUtils.logMsg(logger, envImpl, formatter, Level.FINE,
-                               "Reject Propose: " + propose.getProposal() +
-                               " Promised proposal: " + promisedProposal);
+                    "Reject Propose: " + propose.getProposal() +
+                            " Promised proposal: " + promisedProposal);
             return protocol.new Reject(promisedProposal);
         }
 
         promisedProposal = propose.getProposal();
         final Value suggestedValue = suggestionGenerator.get(promisedProposal);
         final Ranking suggestionRanking =
-            suggestionGenerator.getRanking(promisedProposal);
+                suggestionGenerator.getRanking(promisedProposal);
         LoggerUtils.logMsg(logger, envImpl, formatter, Level.FINE,
-                           "Promised: " + promisedProposal +
-                           " Suggested Value: " + suggestedValue +
-                           " Suggestion Ranking: " + suggestionRanking);
+                "Promised: " + promisedProposal +
+                        " Suggested Value: " + suggestedValue +
+                        " Suggestion Ranking: " + suggestionRanking);
         return protocol.new Promise
                 (promisedProposal,
-                 acceptedValue,
-                 suggestedValue,
-                 suggestionRanking,
-                 config.getElectionPriority(),
-                 config.getLogVersion(),
-                 JEVersion.CURRENT_VERSION);
+                        acceptedValue,
+                        suggestedValue,
+                        suggestionRanking,
+                        config.getElectionPriority(),
+                        config.getLogVersion(),
+                        JEVersion.CURRENT_VERSION);
     }
 
     /**
@@ -207,17 +205,17 @@ public class Acceptor extends ElectionAgentThread {
      * @return an Accepted or Reject response as appropriate.
      */
     ResponseMessage process(Accept accept) {
-        if ((promisedProposal != null) &&
-            (promisedProposal.compareTo(accept.getProposal()) != 0)) {
+        if((promisedProposal != null) &&
+                (promisedProposal.compareTo(accept.getProposal()) != 0)) {
             LoggerUtils.logMsg(logger, envImpl, formatter, Level.FINE,
-                               "Reject Accept: " + accept.getProposal() +
-                               " Promised proposal: " + promisedProposal);
+                    "Reject Accept: " + accept.getProposal() +
+                            " Promised proposal: " + promisedProposal);
             return protocol.new Reject(promisedProposal);
         }
         acceptedValue = accept.getValue();
         LoggerUtils.logMsg(logger, envImpl, formatter, Level.FINE,
-                           "Promised: " + promisedProposal + " Accepted: " +
-                           accept.getProposal() + " Value: " + acceptedValue);
+                "Promised: " + promisedProposal + " Accepted: " +
+                        accept.getProposal() + " Value: " + acceptedValue);
         return protocol.new Accepted(accept.getProposal(), acceptedValue);
     }
 
@@ -230,7 +228,6 @@ public class Acceptor extends ElectionAgentThread {
          * an election has completed.
          *
          * @param proposal the Proposal for which the value is being suggested.
-         *
          * @return the suggested value.
          */
         abstract Value get(Proposal proposal);
@@ -242,7 +239,6 @@ public class Acceptor extends ElectionAgentThread {
          * compared.
          *
          * @param the proposal associated with the ranking
-         *
          * @return the importance of the suggestion as a number
          */
         abstract Ranking getRanking(Proposal proposal);
@@ -252,14 +248,12 @@ public class Acceptor extends ElectionAgentThread {
          * Master.
          */
         class Ranking implements Comparable<Ranking> {
+            static Ranking UNINITIALIZED =
+                    new Ranking(Long.MIN_VALUE, Long.MIN_VALUE);
             /* The major component of the ranking. */
             final long major;
-
             /* The minor component. */
             final long minor;
-
-            static Ranking UNINITIALIZED =
-                new Ranking(Long.MIN_VALUE, Long.MIN_VALUE);
 
             public Ranking(long major, long minor) {
                 this.major = major;
@@ -277,20 +271,20 @@ public class Acceptor extends ElectionAgentThread {
 
             @Override
             public boolean equals(Object obj) {
-                if (this == obj) {
+                if(this == obj) {
                     return true;
                 }
-                if (obj == null) {
+                if(obj == null) {
                     return false;
                 }
-                if (getClass() != obj.getClass()) {
+                if(getClass() != obj.getClass()) {
                     return false;
                 }
                 Ranking other = (Ranking) obj;
-                if (major != other.major) {
+                if(major != other.major) {
                     return false;
                 }
-                if (minor != other.minor) {
+                if(minor != other.minor) {
                     return false;
                 }
                 return true;
@@ -304,7 +298,7 @@ public class Acceptor extends ElectionAgentThread {
             @Override
             public int compareTo(Ranking o) {
                 int result = Long.compare(major, o.major);
-                if (result != 0) {
+                if(result != 0) {
                     return result;
                 }
                 return Long.compare(minor, o.minor);

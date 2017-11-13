@@ -13,12 +13,11 @@
 
 package berkeley.com.sleepycat.je.jmx.plugin;
 
-import java.util.HashMap;
-
-import javax.management.MBeanServerConnection;
-
 import berkeley.com.sleepycat.je.EnvironmentStats;
 import berkeley.com.sleepycat.je.jmx.JEMonitor;
+
+import javax.management.MBeanServerConnection;
+import java.util.HashMap;
 
 public class JEStats extends Stats {
     private static final long serialVersionUID = 2327923744424679603L;
@@ -33,16 +32,16 @@ public class JEStats extends Stats {
         opName = JEMonitor.OP_ENV_STAT;
         mBeanNamePrefix = JEStatsPlugin.mBeanNamePrefix;
     }
-   
-    @SuppressWarnings("unchecked") 
+
+    @SuppressWarnings("unchecked")
     @Override
     protected void generateTips() {
         try {
             tips = (HashMap) connection.invoke
-                (objName, JEMonitor.OP_GET_TIPS, 
-                 new Object[] {}, new String[] {});
+                    (objName, JEMonitor.OP_GET_TIPS,
+                            new Object[]{}, new String[]{});
             updateTips();
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }

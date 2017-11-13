@@ -45,29 +45,7 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Configures the {@link com.sleepycat.je.Database#openSequence
-     * Database.openSequence} method to create the sequence if it does not
-     * already exist.
-     *
-     * <p>The default value is false.</p>
-     *
-     * <p>This method may be called at any time during the life of the
-     * application.</p>
-     *
-     * @param allowCreate If true, configure the {@link
-     * com.sleepycat.je.Database#openSequence Database.openSequence} method to
-     * create the sequence if it does not already exist.
-     *
-     * @return this
-     */
-    public SequenceConfig setAllowCreate(boolean allowCreate) {
-        setAllowCreateVoid(allowCreate);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setAllowCreateVoid(boolean allowCreate) {
         this.allowCreate = allowCreate;
@@ -77,7 +55,7 @@ public class SequenceConfig implements Cloneable {
      * Returns true if the {@link com.sleepycat.je.Database#openSequence
      * Database.openSequence} method is configured to create the sequence if it
      * does not already exist.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -90,27 +68,27 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Set the Configure the number of elements cached by a sequence handle.
-     *
-     * <p>The default value is zero.</p>
-     *
+     * Configures the {@link com.sleepycat.je.Database#openSequence
+     * Database.openSequence} method to create the sequence if it does not
+     * already exist.
+     * <p>
+     * <p>The default value is false.</p>
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
-     * @param cacheSize The number of elements cached by a sequence handle.
-     * May not be larger than the size of the range defined by {@link
-     * #setRange}.
-     *
+     * @param allowCreate If true, configure the {@link
+     *                    com.sleepycat.je.Database#openSequence Database.openSequence} method to
+     *                    create the sequence if it does not already exist.
      * @return this
      */
-    public SequenceConfig setCacheSize(int cacheSize) {
-        setCacheSizeVoid(cacheSize);
+    public SequenceConfig setAllowCreate(boolean allowCreate) {
+        setAllowCreateVoid(allowCreate);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setCacheSizeVoid(int cacheSize) {
         this.cacheSize = cacheSize;
@@ -118,7 +96,7 @@ public class SequenceConfig implements Cloneable {
 
     /**
      * Returns the number of elements cached by a sequence handle..
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -129,26 +107,25 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Specifies that the sequence should be decremented.
-     *
-     * <p>The default value is false.</p>
-     *
+     * Set the Configure the number of elements cached by a sequence handle.
+     * <p>
+     * <p>The default value is zero.</p>
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
-     * @param decrement If true, specify that the sequence should be
-     * decremented.
-     *
+     * @param cacheSize The number of elements cached by a sequence handle.
+     *                  May not be larger than the size of the range defined by {@link
+     *                  #setRange}.
      * @return this
      */
-    public SequenceConfig setDecrement(boolean decrement) {
-        setDecrementVoid(decrement);
+    public SequenceConfig setCacheSize(int cacheSize) {
+        setCacheSizeVoid(cacheSize);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setDecrementVoid(boolean decrement) {
         this.decrement = decrement;
@@ -156,39 +133,35 @@ public class SequenceConfig implements Cloneable {
 
     /**
      * Returns true if the sequence is configured to decrement.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
      * @return true if the sequence is configured to decrement.
      */
     public boolean getDecrement() {
-         return decrement;
+        return decrement;
     }
 
     /**
-     * Configures the {@link com.sleepycat.je.Database#openSequence
-     * Database.openSequence} method to fail if the database already exists.
-     *
+     * Specifies that the sequence should be decremented.
+     * <p>
      * <p>The default value is false.</p>
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
-     * @param exclusiveCreate If true, configure the {@link
-     * com.sleepycat.je.Database#openSequence Database.openSequence} method to
-     * fail if the database already exists.
-     *
+     * @param decrement If true, specify that the sequence should be
+     *                  decremented.
      * @return this
      */
-    public SequenceConfig setExclusiveCreate(boolean exclusiveCreate) {
-        setExclusiveCreateVoid(exclusiveCreate);
+    public SequenceConfig setDecrement(boolean decrement) {
+        setDecrementVoid(decrement);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setExclusiveCreateVoid(boolean exclusiveCreate) {
         this.exclusiveCreate = exclusiveCreate;
@@ -198,7 +171,7 @@ public class SequenceConfig implements Cloneable {
      * Returns true if the {@link com.sleepycat.je.Database#openSequence
      * Database.openSequence} method is configured to fail if the database
      * already exists.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -211,28 +184,26 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Sets the initial value for a sequence.
-     *
-     * <p>The default initial value is zero.</p>
-     *
-     * <p>This call is only effective when the sequence is being created.</p>
-     *
+     * Configures the {@link com.sleepycat.je.Database#openSequence
+     * Database.openSequence} method to fail if the database already exists.
+     * <p>
+     * <p>The default value is false.</p>
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
-     * @param initialValue The initial value for a sequence.  Must be within
-     * the range minimum and maximum values, inclusive.
-     *
+     * @param exclusiveCreate If true, configure the {@link
+     *                        com.sleepycat.je.Database#openSequence Database.openSequence} method to
+     *                        fail if the database already exists.
      * @return this
      */
-    public SequenceConfig setInitialValue(long initialValue) {
-        setInitialValueVoid(initialValue);
+    public SequenceConfig setExclusiveCreate(boolean exclusiveCreate) {
+        setExclusiveCreateVoid(exclusiveCreate);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setInitialValueVoid(long initialValue) {
         this.initialValue = initialValue;
@@ -240,7 +211,7 @@ public class SequenceConfig implements Cloneable {
 
     /**
      * Returns the initial value for a sequence..
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -251,27 +222,26 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Configures auto-commit operations on the sequence to not flush the
-     * transaction log.
-     *
-     * <p>The default value is false.</p>
-     *
+     * Sets the initial value for a sequence.
+     * <p>
+     * <p>The default initial value is zero.</p>
+     * <p>
+     * <p>This call is only effective when the sequence is being created.</p>
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
-     * @param autoCommitNoSync If true, configure auto-commit operations on
-     * the sequence to not flush the transaction log.
-     *
+     * @param initialValue The initial value for a sequence.  Must be within
+     *                     the range minimum and maximum values, inclusive.
      * @return this
      */
-    public SequenceConfig setAutoCommitNoSync(boolean autoCommitNoSync) {
-        setAutoCommitNoSyncVoid(autoCommitNoSync);
+    public SequenceConfig setInitialValue(long initialValue) {
+        setInitialValueVoid(initialValue);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setAutoCommitNoSyncVoid(boolean autoCommitNoSync) {
         this.autoCommitNoSync = autoCommitNoSync;
@@ -280,7 +250,7 @@ public class SequenceConfig implements Cloneable {
     /**
      * Returns true if the auto-commit operations on the sequence are configure
      * to not flush the transaction log..
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -292,17 +262,33 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
+     * Configures auto-commit operations on the sequence to not flush the
+     * transaction log.
+     * <p>
+     * <p>The default value is false.</p>
+     * <p>
+     * <p>This method may be called at any time during the life of the
+     * application.</p>
+     *
+     * @param autoCommitNoSync If true, configure auto-commit operations on
+     *                         the sequence to not flush the transaction log.
+     * @return this
+     */
+    public SequenceConfig setAutoCommitNoSync(boolean autoCommitNoSync) {
+        setAutoCommitNoSyncVoid(autoCommitNoSync);
+        return this;
+    }
+
+    /**
      * Configures a sequence range.  This call is only effective when the
      * sequence is being created.
-     *
+     * <p>
      * <p>The default minimum is {@code Long.MIN_VALUE} and the default maximum
      * is {@code Long.MAX_VALUE}.</p>
      *
      * @param min The minimum value for the sequence.  Must be less than max.
-     *
      * @param max The maximum value for the sequence.  Must be greater than
-     * min.
-     *
+     *            min.
      * @return this
      */
     public SequenceConfig setRange(long min, long max) {
@@ -310,51 +296,16 @@ public class SequenceConfig implements Cloneable {
         setRangeMax(max);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * Configures a sequence range minimum value.  This call is only effective 
-     * when the sequence is being created.
-     *
-     * <p>The default minimum is {@code Long.MIN_VALUE}</p>
-     *
-     * @param min The minimum value for the sequence.  Must be less than max.
-     *
-     * @return this
-     */
-    public SequenceConfig setRangeMin(long min) {
-        setRangeMinVoid(min);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setRangeMinVoid(long min) {
         this.rangeMin = min;
     }
-    
+
     /**
-     * @hidden
-     * Configures a sequence range maximum value.  This call is only effective 
-     * when the sequence is being created.
-     *
-     * <p>the default maximum is {@code Long.MAX_VALUE}.</p>
-     *
-     * @param max The maximum value for the sequence.  Must be greater than
-     * min.
-     *
-     * @return this
-     */
-    public SequenceConfig setRangeMax(long max) {
-        setRangeMaxVoid(max);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setRangeMaxVoid(long max) {
         this.rangeMax = max;
@@ -362,7 +313,7 @@ public class SequenceConfig implements Cloneable {
 
     /**
      * Returns the minimum value for the sequence.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -373,8 +324,21 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
+     * @param min The minimum value for the sequence.  Must be less than max.
+     * @return this
+     * @hidden Configures a sequence range minimum value.  This call is only effective
+     * when the sequence is being created.
+     * <p>
+     * <p>The default minimum is {@code Long.MIN_VALUE}</p>
+     */
+    public SequenceConfig setRangeMin(long min) {
+        setRangeMinVoid(min);
+        return this;
+    }
+
+    /**
      * Returns the maximum value for the sequence.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -385,28 +349,21 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
-     * Specifies that the sequence should wrap around when it is incremented
-     * (decremented) past the specified maximum (minimum) value.
-     *
-     * <p>The default value is false.</p>
-     *
-     * <p>This method may be called at any time during the life of the
-     * application.</p>
-     *
-     * @param wrap If true, specify that the sequence should wrap around when
-     * it is incremented (decremented) past the specified maximum (minimum)
-     * value.
-     *
+     * @param max The maximum value for the sequence.  Must be greater than
+     *            min.
      * @return this
+     * @hidden Configures a sequence range maximum value.  This call is only effective
+     * when the sequence is being created.
+     * <p>
+     * <p>the default maximum is {@code Long.MAX_VALUE}.</p>
      */
-    public SequenceConfig setWrap(boolean wrap) {
-        setWrapVoid(wrap);
+    public SequenceConfig setRangeMax(long max) {
+        setRangeMaxVoid(max);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setWrapVoid(boolean wrap) {
         this.wrap = wrap;
@@ -415,7 +372,7 @@ public class SequenceConfig implements Cloneable {
     /**
      * Returns true if the sequence will wrap around when it is incremented
      * (decremented) past the specified maximum (minimum) value.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -427,13 +384,32 @@ public class SequenceConfig implements Cloneable {
     }
 
     /**
+     * Specifies that the sequence should wrap around when it is incremented
+     * (decremented) past the specified maximum (minimum) value.
+     * <p>
+     * <p>The default value is false.</p>
+     * <p>
+     * <p>This method may be called at any time during the life of the
+     * application.</p>
+     *
+     * @param wrap If true, specify that the sequence should wrap around when
+     *             it is incremented (decremented) past the specified maximum (minimum)
+     *             value.
+     * @return this
+     */
+    public SequenceConfig setWrap(boolean wrap) {
+        setWrapVoid(wrap);
+        return this;
+    }
+
+    /**
      * Returns a copy of this configuration object.
      */
     @Override
     public SequenceConfig clone() {
         try {
             return (SequenceConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -446,14 +422,14 @@ public class SequenceConfig implements Cloneable {
     @Override
     public String toString() {
         return "allowCreate=" + allowCreate +
-            "\ncacheSize=" + cacheSize +
-            "\ndecrement=" + decrement +
-            "\nexclusiveCreate=" + exclusiveCreate +
-            "\ninitialValue=" + initialValue +
-            "\nautoCommitNoSync=" + autoCommitNoSync +
-            "\nrangeMin=" + rangeMin +
-            "\nrangeMax=" + rangeMax +
-            "\nwrap=" + wrap +
-            "\n";
+                "\ncacheSize=" + cacheSize +
+                "\ndecrement=" + decrement +
+                "\nexclusiveCreate=" + exclusiveCreate +
+                "\ninitialValue=" + initialValue +
+                "\nautoCommitNoSync=" + autoCommitNoSync +
+                "\nrangeMin=" + rangeMin +
+                "\nrangeMax=" + rangeMax +
+                "\nwrap=" + wrap +
+                "\n";
     }
 }

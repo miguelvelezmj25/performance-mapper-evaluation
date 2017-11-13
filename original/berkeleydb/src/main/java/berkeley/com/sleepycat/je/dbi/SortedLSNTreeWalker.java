@@ -13,11 +13,6 @@
 
 package berkeley.com.sleepycat.je.dbi;
 
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.DatabaseEntry;
 import berkeley.com.sleepycat.je.DatabaseException;
@@ -30,13 +25,14 @@ import berkeley.com.sleepycat.je.log.entry.BINDeltaLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.log.entry.OldBINDeltaLogEntry;
-import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.IN;
-import berkeley.com.sleepycat.je.tree.LN;
-import berkeley.com.sleepycat.je.tree.Node;
-import berkeley.com.sleepycat.je.tree.OldBINDelta;
+import berkeley.com.sleepycat.je.tree.*;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
+
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SortedLSNTreeWalker uses ordered disk access rather than random access to
@@ -45,7 +41,7 @@ import berkeley.com.sleepycat.je.utilint.SizeofMarker;
  * latter may require random access.  SortedLSN walking does not obey cursor
  * and locking constraints, and therefore can only be guaranteed consistent for
  * a quiescent tree which is not being modified by user or daemon threads.
- *
+ * <p>
  * The class walks over the tree using sorted LSN fetching for parts of the
  * tree that are not in memory. It returns LSNs for each node in the tree,
  * <b>except</b> the root IN, in an arbitrary order (i.e. not key
@@ -71,55 +67,28 @@ import berkeley.com.sleepycat.je.utilint.SizeofMarker;
  */
 public class SortedLSNTreeWalker {
 
-    /*
-     * The interface for calling back to the user with each LSN.
-     */
-    public interface TreeNodeProcessor {
-        void processLSN(long childLSN,
-                        LogEntryType childType,
-                        Node theNode,
-                        byte[] lnKey,
-                        int lastLoggedSize)
-            throws FileNotFoundException;
-
-        /* Used for processing dirty (unlogged) deferred write LNs. [#15365] */
-        void processDirtyDeletedLN(long childLSN, LN ln, byte[] lnKey);
-
-        /* Called when the internal memory limit is exceeded. */
-        void noteMemoryExceeded();
-    }
-
-    /*
-     * Optionally passed to the SortedLSNTreeWalker to be called when an
-     * exception occurs.
-     */
-    interface ExceptionPredicate {
-        /* Return true if the exception can be ignored. */
-        boolean ignoreException(Exception e);
-    }
-
-    final DatabaseImpl[] dbImpls;
     protected final EnvironmentImpl envImpl;
-
+    final DatabaseImpl[] dbImpls;
     /*
      * Save the root LSN at construction time, because the root may be
      * nulled out before walk() executes.
      */
     private final long[] rootLsns;
-
     /*
      * Whether to call DatabaseImpl.finishedINListHarvest().
      */
     private final boolean setDbState;
-
-    /* The limit on memory to be used for internal structures during SLTW. */
-    private long internalMemoryLimit = Long.MAX_VALUE;
-
-    /* The current memory usage by internal SLTW structures. */
-    private long internalMemoryUsage;
-
     private final TreeNodeProcessor callback;
-
+    /*
+     * If non-null, save any exceptions encountered while traversing nodes into
+     * this savedException list, in order to walk as much of the tree as
+     * possible. The caller of the tree walker will handle the exceptions.
+     */
+    private final List<DatabaseException> savedExceptions;
+    private final ExceptionPredicate excPredicate;
+    /* Holder for returning LN key from fetchLSN. */
+    private final DatabaseEntry lnKeyEntry = new DatabaseEntry();
+    private final Map<Long, INEntry> lsnINMap = new HashMap<>();
     /*
      * If true, then walker should fetch LNs and pass them to the
      * TreeNodeProcessor callback method.  Even if true, dup LNs are not
@@ -135,122 +104,14 @@ public class SortedLSNTreeWalker {
      * exceptional situations.  Currently this field is never set to true.
      */
     boolean accumulateDupLNs = false;
-
-    /*
-     * If non-null, save any exceptions encountered while traversing nodes into
-     * this savedException list, in order to walk as much of the tree as
-     * possible. The caller of the tree walker will handle the exceptions.
-     */
-    private final List<DatabaseException> savedExceptions;
-
-    private final ExceptionPredicate excPredicate;
-
+    /* The limit on memory to be used for internal structures during SLTW. */
+    private long internalMemoryLimit = Long.MAX_VALUE;
+    /* The current memory usage by internal SLTW structures. */
+    private long internalMemoryUsage;
     /*
      * The batch size of LSNs which will be sorted.
      */
     private long lsnBatchSize = Long.MAX_VALUE;
-
-    /* Holder for returning LN key from fetchLSN. */
-    private final DatabaseEntry lnKeyEntry = new DatabaseEntry();
-
-    /*
-     * This map provides an LSN to IN/index. When an LSN is processed by the
-     * tree walker, the map is used to lookup the parent IN and child entry
-     * index of each LSN processed by the tree walker.  Since fetchLSN is
-     * called with an arbitrary LSN, and since when we fetch (for preload) we
-     * need to setup the parent to refer to the node which we are prefetching,
-     * we need to have the parent in hand at the time of the call to fetchLSN.
-     * This map allows us to keep a reference to that parent so that we can
-     * call fetchNode on that parent.
-     *
-     * It is also necessary to maintain this map for cases other than preload()
-     * so that during multi-db walks (i.e. multi db preload), we can associate
-     * an arbitrary LSN back to the parent IN and therefore connect a fetch'ed
-     * Node into the proper place in the tree.
-     *
-     * LSN -> INEntry
-     */
-    /* struct to hold IN/entry-index pair. */
-    public static class INEntry {
-        final IN in;
-        final int index;
-
-        INEntry(IN in, int index) {
-            assert in != null;
-            assert in.getDatabase() != null;
-            this.in = in;
-            this.index = index;
-        }
-
-        public INEntry(@SuppressWarnings("unused") SizeofMarker marker) {
-            this.in = null;
-            this.index = 0;
-        }
-
-        Object getDelta() {
-            return null;
-        }
-
-        long getDeltaLsn() {
-            return DbLsn.NULL_LSN;
-        }
-
-        long getMemorySize() {
-            return MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
-                   MemoryBudget.INENTRY_OVERHEAD;
-        }
-    }
-
-    /**
-     * Supplements INEntry with BIN-delta information.  When a BIN-delta is
-     * encountered during the fetching process, we cannot immediately place it
-     * in the tree.  Instead we queue a DeltaINEntry for fetching the full BIN,
-     * in LSN order as usual.  When the full BIN is fetched, the DeltaINEntry
-     * is used to apply the delta and place the result in the tree.
-     */
-    public static class DeltaINEntry extends INEntry {
-        private final Object delta;
-        private final long deltaLsn;
-
-        DeltaINEntry(IN in, int index, Object delta, long deltaLsn) {
-            super(in, index);
-            assert (delta != null);
-            assert (deltaLsn != DbLsn.NULL_LSN);
-            this.delta = delta;
-            this.deltaLsn = deltaLsn;
-        }
-
-        public DeltaINEntry(@SuppressWarnings("unused") SizeofMarker marker) {
-            super(marker);
-            this.delta = null;
-            this.deltaLsn = 0;
-        }
-
-        @Override
-        Object getDelta() {
-            return delta;
-        }
-
-        @Override
-        long getDeltaLsn() {
-            return deltaLsn;
-        }
-
-        @Override
-        long getMemorySize() {
-            final long deltaSize;
-            if (delta instanceof OldBINDelta) {
-                deltaSize = ((OldBINDelta) delta).getMemorySize();
-            } else {
-                deltaSize = ((BIN) delta).getInMemorySize();
-            }
-            return deltaSize +
-                MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
-                MemoryBudget.DELTAINENTRY_OVERHEAD;
-        }
-    }
-
-    private final Map<Long, INEntry> lsnINMap = new HashMap<>();
 
     /*
      * @param dbImpls an array of DatabaseImpls which should be walked over
@@ -278,28 +139,28 @@ public class SortedLSNTreeWalker {
                                List<DatabaseException> savedExceptions,
                                ExceptionPredicate excPredicate) {
 
-        if (dbImpls == null || dbImpls.length < 1) {
+        if(dbImpls == null || dbImpls.length < 1) {
             throw EnvironmentFailureException.unexpectedState
-                ("DatabaseImpls array is null or 0-length for " +
-                 "SortedLSNTreeWalker");
+                    ("DatabaseImpls array is null or 0-length for " +
+                            "SortedLSNTreeWalker");
         }
 
         this.dbImpls = dbImpls;
         this.envImpl = dbImpls[0].getEnv();
         /* Make sure all databases are from the same environment. */
-        for (DatabaseImpl di : dbImpls) {
+        for(DatabaseImpl di : dbImpls) {
             EnvironmentImpl ei = di.getEnv();
-            if (ei == null) {
+            if(ei == null) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("environmentImpl is null for target db " +
-                     di.getDebugName());
+                        ("environmentImpl is null for target db " +
+                                di.getDebugName());
             }
 
-            if (ei != this.envImpl) {
+            if(ei != this.envImpl) {
                 throw new IllegalArgumentException
-                    ("Environment.preload() must be called with Databases " +
-                     "which are all in the same Environment. (" +
-                     di.getDebugName() + ")");
+                        ("Environment.preload() must be called with Databases " +
+                                "which are all in the same Environment. (" +
+                                di.getDebugName() + ")");
             }
         }
 
@@ -350,7 +211,7 @@ public class SortedLSNTreeWalker {
          * 2.
          */
         LSNAccumulator pendingLSNs = createLSNAccumulator();
-        for (int i = 0; i < dbImpls.length; i += 1) {
+        for(int i = 0; i < dbImpls.length; i += 1) {
             processRootLSN(dbImpls[i], pendingLSNs, rootLsns[i]);
         }
 
@@ -372,7 +233,7 @@ public class SortedLSNTreeWalker {
                                 LSNAccumulator pendingLSNs,
                                 long rootLsn) {
         IN root = getOrFetchRootIN(dbImpl, rootLsn);
-        if (root != null) {
+        if(root != null) {
             try {
                 accumulateLSNs(root, pendingLSNs, null, -1);
             } finally {
@@ -380,7 +241,7 @@ public class SortedLSNTreeWalker {
             }
         }
 
-        if (setDbState) {
+        if(setDbState) {
             dbImpl.finishedINListHarvest();
         }
     }
@@ -410,9 +271,10 @@ public class SortedLSNTreeWalker {
          * LN children, but BINs may contain a mix of LNs and DINs.
          */
         final boolean allChildrenAreLNs;
-        if (!dups || db.getDupsConverted()) {
+        if(!dups || db.getDupsConverted()) {
             allChildrenAreLNs = parent.isBIN();
-        } else {
+        }
+        else {
             allChildrenAreLNs = parent.isBIN() && parent.containsDuplicates();
         }
 
@@ -421,7 +283,7 @@ public class SortedLSNTreeWalker {
          * when all children are LNs.
          */
         final boolean accumulateChildren =
-            !allChildrenAreLNs || (dups ? accumulateDupLNs : accumulateLNs);
+                !allChildrenAreLNs || (dups ? accumulateDupLNs : accumulateLNs);
 
         final BIN parentBin = parent.isBIN() ? ((BIN) parent) : null;
         final OffHeapCache ohCache = envImpl.getOffHeapCache();
@@ -430,25 +292,26 @@ public class SortedLSNTreeWalker {
          * Process all children, but only accumulate LSNs for children that are
          * not in memory.
          */
-        for (int i = 0; i < parent.getNEntries(); i += 1) {
+        for(int i = 0; i < parent.getNEntries(); i += 1) {
 
             final long lsn = parent.getLsn(i);
             Node child = parent.getTarget(i);
             final boolean childCached = child != null;
 
             final byte[] lnKey =
-                (allChildrenAreLNs || (childCached && child.isLN())) ?
-                parent.getKey(i) : null;
+                    (allChildrenAreLNs || (childCached && child.isLN())) ?
+                            parent.getKey(i) : null;
 
-            if (parentBin != null && parentBin.isDefunct(i)) {
+            if(parentBin != null && parentBin.isDefunct(i)) {
 
                 /* Dirty LNs (deferred write) get special treatment. */
                 processDirtyLN(child, lsn, lnKey);
                 /* continue; */
 
-            } else if (!childCached &&
-                parentBin != null &&
-                parentBin.getOffHeapLNId(i) != 0) {
+            }
+            else if(!childCached &&
+                    parentBin != null &&
+                    parentBin.getOffHeapLNId(i) != 0) {
 
                 /* Embedded LNs are not stored off-heap */
                 assert !parent.isEmbeddedLN(i);
@@ -457,20 +320,21 @@ public class SortedLSNTreeWalker {
                 assert child != null;
 
                 processChild(
-                    lsn, child, lnKey, parent.getLastLoggedSize(i),
-                    pendingLSNs, null, -1);
+                        lsn, child, lnKey, parent.getLastLoggedSize(i),
+                        pendingLSNs, null, -1);
 
-            } else if (!childCached && parent.getOffHeapBINId(i) >= 0) {
+            }
+            else if(!childCached && parent.getOffHeapBINId(i) >= 0) {
 
                 child = ohCache.materializeBIN(
-                    envImpl, ohCache.getBINBytes(parent, i));
+                        envImpl, ohCache.getBINBytes(parent, i));
 
                 final BIN bin = (BIN) child;
                 bin.latchNoUpdateLRU(db);
                 boolean isLatched = true;
 
                 try {
-                    if (bin.isBINDelta()) {
+                    if(bin.isBINDelta()) {
 
                         /* Deltas not allowed with deferred-write. */
                         assert (lsn != DbLsn.NULL_LSN);
@@ -485,50 +349,55 @@ public class SortedLSNTreeWalker {
                         pendingLSNs.add(fullLsn);
                         addToLsnINMap(fullLsn, parent, i, bin, lsn);
 
-                    } else {
+                    }
+                    else {
 
                         bin.releaseLatch();
                         isLatched = false;
 
                         processChild(
-                            lsn, bin, lnKey, parent.getLastLoggedSize(i),
-                            pendingLSNs, parent, i);
+                                lsn, bin, lnKey, parent.getLastLoggedSize(i),
+                                pendingLSNs, parent, i);
                     }
                 } finally {
-                    if (isLatched) {
+                    if(isLatched) {
                         bin.releaseLatch();
                     }
                 }
 
-            } else if (accumulateChildren &&
-                       !childCached &&
-                       lsn != DbLsn.NULL_LSN) {
+            }
+            else if(accumulateChildren &&
+                    !childCached &&
+                    lsn != DbLsn.NULL_LSN) {
 
                 /*
                  * Child is not in cache. Put its LSN in the current batch of
                  * LSNs to be sorted and fetched in phase 2. But don't do
                  * this if the child is an embedded LN.
                  */
-                if (!parent.isEmbeddedLN(i)) {
+                if(!parent.isEmbeddedLN(i)) {
                     pendingLSNs.add(lsn);
-                    if (ohBinParent != null) {
+                    if(ohBinParent != null) {
                         addToLsnINMap(lsn, ohBinParent, ohBinIndex);
-                    } else {
+                    }
+                    else {
                         addToLsnINMap(lsn, parent, i);
                     }
-                } else {
+                }
+                else {
                     processChild(
-                        DbLsn.NULL_LSN, null /*child*/, lnKey,
-                        0 /*lastLoggedSize*/, pendingLSNs, null, -1);
+                            DbLsn.NULL_LSN, null /*child*/, lnKey,
+                            0 /*lastLoggedSize*/, pendingLSNs, null, -1);
                 }
 
-            } else if (childCached) {
+            }
+            else if(childCached) {
 
                 child.latchShared();
                 boolean isLatched = true;
 
                 try {
-                    if (child.isBINDelta()) {
+                    if(child.isBINDelta()) {
 
                         /* Deltas not allowed with deferred-write. */
                         assert (lsn != DbLsn.NULL_LSN);
@@ -538,30 +407,32 @@ public class SortedLSNTreeWalker {
                         pendingLSNs.add(fullLsn);
                         addToLsnINMap(fullLsn, parent, i, delta, lsn);
 
-                    } else {
+                    }
+                    else {
 
                         child.releaseLatch();
                         isLatched = false;
 
                         processChild(
-                            lsn, child, lnKey, parent.getLastLoggedSize(i),
-                            pendingLSNs, null, -1);
+                                lsn, child, lnKey, parent.getLastLoggedSize(i),
+                                pendingLSNs, null, -1);
                     }
                 } finally {
-                    if (isLatched) {
+                    if(isLatched) {
                         child.releaseLatch();
                     }
                 }
 
-            } else {
+            }
+            else {
                 /*
                  * We are here because the child was not cached and was not
                  * accumulated either (because it was an LN and LN accumulation
-                 * is turned off or its LSN was NULL). 
+                 * is turned off or its LSN was NULL).
                  */
                 processChild(
-                    lsn, null /*child*/, lnKey, parent.getLastLoggedSize(i),
-                    pendingLSNs, null, -1);
+                        lsn, null /*child*/, lnKey, parent.getLastLoggedSize(i),
+                        pendingLSNs, null, -1);
             }
 
             /*
@@ -569,11 +440,11 @@ public class SortedLSNTreeWalker {
              * batch and start a new one.
              */
             final boolean internalMemoryExceeded =
-                internalMemoryUsage > internalMemoryLimit;
+                    internalMemoryUsage > internalMemoryLimit;
 
-            if (pendingLSNs.getNTotalEntries() > lsnBatchSize ||
-                internalMemoryExceeded) {
-                if (internalMemoryExceeded) {
+            if(pendingLSNs.getNTotalEntries() > lsnBatchSize ||
+                    internalMemoryExceeded) {
+                if(internalMemoryExceeded) {
                     callback.noteMemoryExceeded();
                 }
                 processAccumulatedLSNs(pendingLSNs);
@@ -583,22 +454,22 @@ public class SortedLSNTreeWalker {
     }
 
     private void processDirtyLN(Node node, long lsn, byte[] lnKey) {
-        if (node != null && node.isLN()) {
+        if(node != null && node.isLN()) {
             LN ln = (LN) node;
-            if (ln.isDirty()) {
+            if(ln.isDirty()) {
                 callback.processDirtyDeletedLN(lsn, ln, lnKey);
             }
         }
     }
 
     private void processChild(
-        final long lsn,
-        final Node child,
-        final byte[] lnKey,
-        final int lastLoggedSize,
-        final LSNAccumulator pendingLSNs,
-        final IN ohBinParent,
-        final int ohBinIndex) {
+            final long lsn,
+            final Node child,
+            final byte[] lnKey,
+            final int lastLoggedSize,
+            final LSNAccumulator pendingLSNs,
+            final IN ohBinParent,
+            final int ohBinIndex) {
 
         final boolean childCached = (child != null);
 
@@ -606,13 +477,13 @@ public class SortedLSNTreeWalker {
          * If the child is resident, use its log type, else it must be an LN.
          */
         callProcessLSNHandleExceptions(
-            lsn,
-            (!childCached ?
-             LogEntryType.LOG_INS_LN /* Any LN type will do */ :
-             child.getGenericLogType()),
-            child, lnKey, lastLoggedSize);
+                lsn,
+                (!childCached ?
+                        LogEntryType.LOG_INS_LN /* Any LN type will do */ :
+                        child.getGenericLogType()),
+                child, lnKey, lastLoggedSize);
 
-        if (childCached && child.isIN()) {
+        if(childCached && child.isIN()) {
             final IN nodeAsIN = (IN) child;
             try {
                 nodeAsIN.latch(CacheMode.UNCHANGED);
@@ -628,10 +499,10 @@ public class SortedLSNTreeWalker {
      */
     private void processAccumulatedLSNs(LSNAccumulator pendingLSNs) {
 
-        while (!pendingLSNs.isEmpty()) {
+        while(!pendingLSNs.isEmpty()) {
             final long[] currentLSNs = pendingLSNs.getAndSortPendingLSNs();
             pendingLSNs = createLSNAccumulator();
-            for (long lsn : currentLSNs) {
+            for(long lsn : currentLSNs) {
                 fetchAndProcessLSN(lsn, pendingLSNs);
             }
         }
@@ -646,63 +517,65 @@ public class SortedLSNTreeWalker {
         lnKeyEntry.setData(null);
 
         final FetchResult result = fetchLSNHandleExceptions(
-            lsn, lnKeyEntry, pendingLSNs);
+                lsn, lnKeyEntry, pendingLSNs);
 
-        if (result == null) {
+        if(result == null) {
             return;
         }
 
         final boolean isIN = result.node.isIN();
         final IN in;
-        if (isIN) {
+        if(isIN) {
             in = (IN) result.node;
             in.latch(CacheMode.UNCHANGED);
-        } else {
+        }
+        else {
             in = null;
         }
 
         try {
             callProcessLSNHandleExceptions(
-                lsn, result.node.getGenericLogType(), result.node,
-                lnKeyEntry.getData(), result.lastLoggedSize);
+                    lsn, result.node.getGenericLogType(), result.node,
+                    lnKeyEntry.getData(), result.lastLoggedSize);
 
-            if (isIN) {
+            if(isIN) {
                 accumulateLSNs(
-                    in, pendingLSNs, result.ohBinParent, result.ohBinIndex);
+                        in, pendingLSNs, result.ohBinParent, result.ohBinIndex);
             }
         } finally {
-            if (isIN) {
+            if(isIN) {
                 in.releaseLatch();
             }
         }
     }
 
     private FetchResult fetchLSNHandleExceptions(
-        long lsn,
-        DatabaseEntry lnKeyEntry,
-        LSNAccumulator pendingLSNs) {
+            long lsn,
+            DatabaseEntry lnKeyEntry,
+            LSNAccumulator pendingLSNs) {
 
         DatabaseException dbe = null;
 
         try {
             return fetchLSN(lsn, lnKeyEntry, pendingLSNs);
 
-        } catch (DatabaseException e) {
-            if (excPredicate == null ||
-                !excPredicate.ignoreException(e)) {
+        } catch(DatabaseException e) {
+            if(excPredicate == null ||
+                    !excPredicate.ignoreException(e)) {
                 dbe = e;
             }
         }
 
-        if (dbe != null) {
-            if (savedExceptions != null) {
+        if(dbe != null) {
+            if(savedExceptions != null) {
 
                 /*
                  * This LSN fetch hit a failure. Do as much of the rest of
                  * the tree as possible.
                  */
                 savedExceptions.add(dbe);
-            } else {
+            }
+            else {
                 throw dbe;
             }
         }
@@ -719,31 +592,32 @@ public class SortedLSNTreeWalker {
 
         try {
             callback.processLSN(
-                childLSN, childType, theNode, lnKey, lastLoggedSize);
+                    childLSN, childType, theNode, lnKey, lastLoggedSize);
 
-        } catch (FileNotFoundException e) {
-            if (excPredicate == null ||
-                !excPredicate.ignoreException(e)) {
+        } catch(FileNotFoundException e) {
+            if(excPredicate == null ||
+                    !excPredicate.ignoreException(e)) {
                 dbe = new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+                        envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
             }
 
-        } catch (DatabaseException e) {
-            if (excPredicate == null ||
-                !excPredicate.ignoreException(e)) {
+        } catch(DatabaseException e) {
+            if(excPredicate == null ||
+                    !excPredicate.ignoreException(e)) {
                 dbe = e;
             }
         }
 
-        if (dbe != null) {
-            if (savedExceptions != null) {
+        if(dbe != null) {
+            if(savedExceptions != null) {
 
                 /*
                  * This LSN fetch hit a failure. Do as much of the rest of
                  * the tree as possible.
                  */
                 savedExceptions.add(dbe);
-            } else {
+            }
+            else {
                 throw dbe;
             }
         }
@@ -756,10 +630,10 @@ public class SortedLSNTreeWalker {
      */
     private IN getOrFetchRootIN(DatabaseImpl dbImpl, long rootLsn) {
         final IN root = getResidentRootIN(dbImpl);
-        if (root != null) {
+        if(root != null) {
             return root;
         }
-        if (rootLsn == DbLsn.NULL_LSN) {
+        if(rootLsn == DbLsn.NULL_LSN) {
             return null;
         }
         return getRootIN(dbImpl, rootLsn);
@@ -772,8 +646,8 @@ public class SortedLSNTreeWalker {
      */
     IN getRootIN(DatabaseImpl dbImpl, long rootLsn) {
         final IN root = (IN)
-            envImpl.getLogManager().getEntryHandleFileNotFound(rootLsn);
-        if (root == null) {
+                envImpl.getLogManager().getEntryHandleFileNotFound(rootLsn);
+        if(root == null) {
             return null;
         }
         root.setDatabase(dbImpl);
@@ -816,25 +690,8 @@ public class SortedLSNTreeWalker {
     }
 
     private void addEntryToLsnMap(long lsn, INEntry inEntry) {
-        if (lsnINMap.put(lsn, inEntry) == null) {
+        if(lsnINMap.put(lsn, inEntry) == null) {
             incInternalMemoryUsage(inEntry.getMemorySize());
-        }
-    }
-
-    private static class FetchResult {
-        final Node node;
-        final int lastLoggedSize;
-        final IN ohBinParent;
-        final int ohBinIndex;
-
-        FetchResult(final Node node,
-                    final int lastLoggedSize,
-                    final IN ohBinParent,
-                    final int ohBinIndex) {
-            this.node = node;
-            this.lastLoggedSize = lastLoggedSize;
-            this.ohBinParent = ohBinParent;
-            this.ohBinIndex = ohBinIndex;
         }
     }
 
@@ -844,18 +701,18 @@ public class SortedLSNTreeWalker {
      * sorted LSN order.
      */
     private FetchResult fetchLSN(
-        long lsn,
-        DatabaseEntry lnKeyEntry,
-        LSNAccumulator pendingLSNs) {
+            long lsn,
+            DatabaseEntry lnKeyEntry,
+            LSNAccumulator pendingLSNs) {
 
         final LogManager logManager = envImpl.getLogManager();
         final OffHeapCache ohCache = envImpl.getOffHeapCache();
 
         final INEntry inEntry = lsnINMap.remove(lsn);
         assert (inEntry != null) : DbLsn.getNoFormatString(lsn);
-        
-        incInternalMemoryUsage(- inEntry.getMemorySize());
-        
+
+        incInternalMemoryUsage(-inEntry.getMemorySize());
+
         IN in = inEntry.in;
         int index = inEntry.index;
 
@@ -865,7 +722,7 @@ public class SortedLSNTreeWalker {
         IN in1ToUnlatch = null;
         IN in2ToUnlatch = null;
 
-        if (!in.isLatchExclusiveOwner()) {
+        if(!in.isLatchExclusiveOwner()) {
             in.latch();
             in1ToUnlatch = in;
         }
@@ -874,7 +731,7 @@ public class SortedLSNTreeWalker {
         byte[] lnKey = null;
 
         Node residentNode = in.getTarget(index);
-        if (residentNode != null) {
+        if(residentNode != null) {
             residentNode.latch();
         }
 
@@ -888,7 +745,7 @@ public class SortedLSNTreeWalker {
             boolean isOffHeapBinInTree = in.getOffHeapBINId(index) >= 0;
             boolean isLnInOffHeapBin = false;
 
-            if (isOffHeapBinInTree && deltaObject == null) {
+            if(isOffHeapBinInTree && deltaObject == null) {
                 /*
                  * When fetching an LN within an off-heap BIN, materialize the
                  * parent BIN and set in/index to this true parent.
@@ -896,17 +753,17 @@ public class SortedLSNTreeWalker {
                 isLnInOffHeapBin = true;
 
                 final BIN ohBin = ohCache.materializeBIN(
-                    envImpl, ohCache.getBINBytes(in, index));
+                        envImpl, ohCache.getBINBytes(in, index));
 
                 int foundIndex = -1;
-                for (int i = 0; i < ohBin.getNEntries(); i += 1) {
-                    if (ohBin.getLsn(i) == lsn) {
+                for(int i = 0; i < ohBin.getNEntries(); i += 1) {
+                    if(ohBin.getLsn(i) == lsn) {
                         foundIndex = i;
                         break;
                     }
                 }
 
-                if (foundIndex == -1) {
+                if(foundIndex == -1) {
                     return null; // See note on concurrent activity below.
                 }
 
@@ -926,38 +783,39 @@ public class SortedLSNTreeWalker {
              * Repeat check for LN deletion/expiration and check that the LSN
              * has not changed.
              */
-            if (in.isBIN() && ((BIN) in).isDefunct(index)) {
+            if(in.isBIN() && ((BIN) in).isDefunct(index)) {
                 return null;
             }
 
-            if (deltaObject == null) {
-                if (in.getLsn(index) != lsn) {
+            if(deltaObject == null) {
+                if(in.getLsn(index) != lsn) {
                     return null;
                 }
-            } else {
-                if (in.getLsn(index) != inEntry.getDeltaLsn()) {
+            }
+            else {
+                if(in.getLsn(index) != inEntry.getDeltaLsn()) {
                     return null;
                 }
             }
 
             boolean mutateResidentDeltaToFullBIN = false;
 
-            if (residentNode != null) {
+            if(residentNode != null) {
                 /*
                  * If the resident node is not a delta then concurrent
                  * activity (e.g., log cleaning) must have loaded the node.
                  * Just return it and continue.
                  */
-                if (!residentNode.isBINDelta()) {
-                    if (residentNode.isLN()) {
+                if(!residentNode.isBINDelta()) {
+                    if(residentNode.isLN()) {
                         lnKeyEntry.setData(in.getKey(index));
                     }
                     return new FetchResult(
-                        residentNode, in.getLastLoggedSize(index), null, -1);
+                            residentNode, in.getLastLoggedSize(index), null, -1);
                 }
 
                 /* The resident node is a delta. */
-                if (((BIN) residentNode).getLastFullLsn() != lsn) {
+                if(((BIN) residentNode).getLastFullLsn() != lsn) {
                     return null; // See note on concurrent activity above.
                 }
                 mutateResidentDeltaToFullBIN = true;
@@ -968,20 +826,20 @@ public class SortedLSNTreeWalker {
             try {
                 wholeEntry = logManager.getWholeLogEntry(lsn);
 
-            } catch (FileNotFoundException e) {
+            } catch(FileNotFoundException e) {
                 final String msg =
-                    (fetchAndInsertIntoTree() ?
-                        "Preload failed" :
-                        "SortedLSNTreeWalker failed") +
-                    " dbId=" + dbImpl.getId() +
-                    " isOffHeapBinInTree=" + isOffHeapBinInTree +
-                    " isLnInOffHeapBin=" + isLnInOffHeapBin +
-                    " deltaObject=" + (deltaObject != null) +
-                    " residentNode=" + (residentNode != null);
+                        (fetchAndInsertIntoTree() ?
+                                "Preload failed" :
+                                "SortedLSNTreeWalker failed") +
+                                " dbId=" + dbImpl.getId() +
+                                " isOffHeapBinInTree=" + isOffHeapBinInTree +
+                                " isLnInOffHeapBin=" + isLnInOffHeapBin +
+                                " deltaObject=" + (deltaObject != null) +
+                                " residentNode=" + (residentNode != null);
 
                 throw new EnvironmentFailureException(
-                    envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
-                    in.makeFetchErrorMsg(msg, lsn, index), e);
+                        envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND,
+                        in.makeFetchErrorMsg(msg, lsn, index), e);
             }
 
             final LogEntry entry = wholeEntry.getEntry();
@@ -995,7 +853,7 @@ public class SortedLSNTreeWalker {
              * in the tree when there is not enough memory for the full BIN.
              * Ideally we should place the BIN-delta in the tree here.
              */
-            if (entry instanceof BINDeltaLogEntry) {
+            if(entry instanceof BINDeltaLogEntry) {
                 final BINDeltaLogEntry deltaEntry = (BINDeltaLogEntry) entry;
                 final long fullLsn = deltaEntry.getPrevFullLsn();
                 final BIN delta = deltaEntry.getMainItem();
@@ -1004,7 +862,7 @@ public class SortedLSNTreeWalker {
                 return null;
             }
 
-            if (entry instanceof OldBINDeltaLogEntry) {
+            if(entry instanceof OldBINDeltaLogEntry) {
                 final OldBINDelta delta = (OldBINDelta) entry.getMainItem();
                 final long fullLsn = delta.getLastFullLsn();
                 pendingLSNs.add(fullLsn);
@@ -1013,7 +871,7 @@ public class SortedLSNTreeWalker {
             }
 
             /* For an LNLogEntry, call postFetchInit and get the lnKey. */
-            if (entry instanceof LNLogEntry) {
+            if(entry instanceof LNLogEntry) {
                 final LNLogEntry<?> lnEntry = (LNLogEntry<?>) entry;
                 lnEntry.postFetchInit(dbImpl);
                 lnKey = lnEntry.getKey();
@@ -1028,7 +886,7 @@ public class SortedLSNTreeWalker {
              * nested fetches.
              */
             long lastLoggedLsn = lsn;
-            if (ret.isIN()) {
+            if(ret.isIN()) {
                 final IN retIn = (IN) ret;
                 retIn.setDatabase(dbImpl);
             }
@@ -1037,37 +895,39 @@ public class SortedLSNTreeWalker {
              * If there is a delta, then this is the full BIN to which the
              * delta must be applied. The delta LSN is the last logged LSN.
              */
-            if (mutateResidentDeltaToFullBIN) {
+            if(mutateResidentDeltaToFullBIN) {
                 final BIN fullBIN = (BIN) ret;
                 BIN delta = (BIN) residentNode;
-                if (fetchAndInsertIntoTree()) {
+                if(fetchAndInsertIntoTree()) {
                     delta.mutateToFullBIN(fullBIN, false /*leaveFreeSlot*/);
 
                     return new FetchResult(
-                        residentNode, lastLoggedSize, ohBinParent, ohBinIndex);
-                } else {
+                            residentNode, lastLoggedSize, ohBinParent, ohBinIndex);
+                }
+                else {
                     delta.reconstituteBIN(
-                        dbImpl, fullBIN, false /*leaveFreeSlot*/);
+                            dbImpl, fullBIN, false /*leaveFreeSlot*/);
 
                     return new FetchResult(
-                        ret, lastLoggedSize, ohBinParent, ohBinIndex);
+                            ret, lastLoggedSize, ohBinParent, ohBinIndex);
                 }
             }
 
-            if (deltaObject != null) {
+            if(deltaObject != null) {
                 final BIN fullBIN = (BIN) ret;
 
-                if (deltaObject instanceof OldBINDelta) {
+                if(deltaObject instanceof OldBINDelta) {
                     final OldBINDelta delta = (OldBINDelta) deltaObject;
                     assert lsn == delta.getLastFullLsn();
                     delta.reconstituteBIN(dbImpl, fullBIN);
                     lastLoggedLsn = inEntry.getDeltaLsn();
-                } else {
+                }
+                else {
                     final BIN delta = (BIN) deltaObject;
                     assert lsn == delta.getLastFullLsn();
 
                     delta.reconstituteBIN(
-                        dbImpl, fullBIN, false /*leaveFreeSlot*/);
+                            dbImpl, fullBIN, false /*leaveFreeSlot*/);
 
                     lastLoggedLsn = inEntry.getDeltaLsn();
                 }
@@ -1083,7 +943,7 @@ public class SortedLSNTreeWalker {
             int retOhBinIndex = -1;
 
             /* During a preload, finally place the Node into the Tree. */
-            if (fetchAndInsertIntoTree()) {
+            if(fetchAndInsertIntoTree()) {
 
                 /* Last logged size is not present before log version 9. */
                 in.setLastLoggedSize(index, lastLoggedSize);
@@ -1094,8 +954,8 @@ public class SortedLSNTreeWalker {
                  */
                 final MemoryBudget memBudget = envImpl.getMemoryBudget();
                 final boolean storeOffHeap =
-                    preloadIntoOffHeapCache &&
-                    memBudget.getCacheMemoryUsage() > memBudget.getMaxMemory();
+                        preloadIntoOffHeapCache &&
+                                memBudget.getCacheMemoryUsage() > memBudget.getMaxMemory();
 
                 /*
                  * Note that UINs are always stored in the main cache even if
@@ -1104,8 +964,8 @@ public class SortedLSNTreeWalker {
                  * and an off-heap cache is also being filled, we currently
                  * allow the main cache to overflow.
                  */
-                if (isOffHeapBinInTree || (storeOffHeap && !ret.isUpperIN())) {
-                    if (ret.isLN()) {
+                if(isOffHeapBinInTree || (storeOffHeap && !ret.isUpperIN())) {
+                    if(ret.isLN()) {
                         /*
                          * Store LN off-heap. If an oh LN was added to an oh
                          * BIN we must re-store the oh BIN as well. This is
@@ -1115,12 +975,13 @@ public class SortedLSNTreeWalker {
                         final BIN bin = (BIN) in;
                         final LN retLn = (LN) ret;
                         ohCache.storePreloadedLN(bin, index, retLn);
-                        if (isOffHeapBinInTree) {
+                        if(isOffHeapBinInTree) {
                             assert isLnInOffHeapBin;
                             ohCache.storePreloadedBIN(
-                                bin, ohBinParent, ohBinIndex);
+                                    bin, ohBinParent, ohBinIndex);
                         }
-                    } else {
+                    }
+                    else {
                         /*
                          * Store full BIN off-heap. Note that setLastLoggedLSN
                          * is normally called by postFetchInit or postLoadInit,
@@ -1132,8 +993,8 @@ public class SortedLSNTreeWalker {
                         retBin.latchNoUpdateLRU(dbImpl);
                         retBin.setLastLoggedLsn(lsn);
                         try {
-                            if (!ohCache.storePreloadedBIN(
-                                retBin, in, index)) {
+                            if(!ohCache.storePreloadedBIN(
+                                    retBin, in, index)) {
                                 return null; // could not allocate memory
                             }
                         } finally {
@@ -1142,25 +1003,27 @@ public class SortedLSNTreeWalker {
                         retOhBinParent = in;
                         retOhBinIndex = index;
                     }
-                } else {
+                }
+                else {
                     /* Attach node to the Btree as in a normal operation. */
-                    if (ret.isIN()) {
+                    if(ret.isIN()) {
                         final IN retIn = (IN) ret;
                         retIn.latchNoUpdateLRU(dbImpl);
                         ret.postFetchInit(dbImpl, lastLoggedLsn);
                         in.attachNode(index, ret, lnKey);
                         retIn.releaseLatch();
-                    } else {
+                    }
+                    else {
                         ret.postFetchInit(dbImpl, lastLoggedLsn);
                         in.attachNode(index, ret, lnKey);
                     }
 
                     /* BINs with resident LNs shouldn't be in the dirty LRU. */
-                    if (in.isBIN()) {
+                    if(in.isBIN()) {
                         final CacheMode mode =
-                            in.getDatabase().getDefaultCacheMode();
+                                in.getDatabase().getDefaultCacheMode();
 
-                        if (mode != CacheMode.EVICT_LN) {
+                        if(mode != CacheMode.EVICT_LN) {
                             envImpl.getEvictor().moveToPri1LRU(in);
                         }
                     }
@@ -1172,24 +1035,25 @@ public class SortedLSNTreeWalker {
                  * latched after being preloaded, as it normally would be after
                  * being attached.
                  */
-                if (ret.isIN()) {
+                if(ret.isIN()) {
                     ((IN) ret).setFetchedCold(false);
-                } else if (ret.isLN()) {
+                }
+                else if(ret.isLN()) {
                     ((LN) ret).setFetchedCold(false);
                 }
             }
 
             return new FetchResult(
-                ret, lastLoggedSize, retOhBinParent, retOhBinIndex);
+                    ret, lastLoggedSize, retOhBinParent, retOhBinIndex);
 
         } finally {
-            if (residentNode != null) {
+            if(residentNode != null) {
                 residentNode.releaseLatch();
             }
-            if (in1ToUnlatch != null) {
+            if(in1ToUnlatch != null) {
                 in1ToUnlatch.releaseLatch();
             }
-            if (in2ToUnlatch != null) {
+            if(in2ToUnlatch != null) {
                 in2ToUnlatch.releaseLatch();
             }
         }
@@ -1201,5 +1065,147 @@ public class SortedLSNTreeWalker {
      */
     protected boolean fetchAndInsertIntoTree() {
         return false;
+    }
+
+    /*
+     * The interface for calling back to the user with each LSN.
+     */
+    public interface TreeNodeProcessor {
+        void processLSN(long childLSN,
+                        LogEntryType childType,
+                        Node theNode,
+                        byte[] lnKey,
+                        int lastLoggedSize)
+                throws FileNotFoundException;
+
+        /* Used for processing dirty (unlogged) deferred write LNs. [#15365] */
+        void processDirtyDeletedLN(long childLSN, LN ln, byte[] lnKey);
+
+        /* Called when the internal memory limit is exceeded. */
+        void noteMemoryExceeded();
+    }
+
+    /*
+     * Optionally passed to the SortedLSNTreeWalker to be called when an
+     * exception occurs.
+     */
+    interface ExceptionPredicate {
+        /* Return true if the exception can be ignored. */
+        boolean ignoreException(Exception e);
+    }
+
+    /*
+     * This map provides an LSN to IN/index. When an LSN is processed by the
+     * tree walker, the map is used to lookup the parent IN and child entry
+     * index of each LSN processed by the tree walker.  Since fetchLSN is
+     * called with an arbitrary LSN, and since when we fetch (for preload) we
+     * need to setup the parent to refer to the node which we are prefetching,
+     * we need to have the parent in hand at the time of the call to fetchLSN.
+     * This map allows us to keep a reference to that parent so that we can
+     * call fetchNode on that parent.
+     *
+     * It is also necessary to maintain this map for cases other than preload()
+     * so that during multi-db walks (i.e. multi db preload), we can associate
+     * an arbitrary LSN back to the parent IN and therefore connect a fetch'ed
+     * Node into the proper place in the tree.
+     *
+     * LSN -> INEntry
+     */
+    /* struct to hold IN/entry-index pair. */
+    public static class INEntry {
+        final IN in;
+        final int index;
+
+        INEntry(IN in, int index) {
+            assert in != null;
+            assert in.getDatabase() != null;
+            this.in = in;
+            this.index = index;
+        }
+
+        public INEntry(@SuppressWarnings("unused") SizeofMarker marker) {
+            this.in = null;
+            this.index = 0;
+        }
+
+        Object getDelta() {
+            return null;
+        }
+
+        long getDeltaLsn() {
+            return DbLsn.NULL_LSN;
+        }
+
+        long getMemorySize() {
+            return MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
+                    MemoryBudget.INENTRY_OVERHEAD;
+        }
+    }
+
+    /**
+     * Supplements INEntry with BIN-delta information.  When a BIN-delta is
+     * encountered during the fetching process, we cannot immediately place it
+     * in the tree.  Instead we queue a DeltaINEntry for fetching the full BIN,
+     * in LSN order as usual.  When the full BIN is fetched, the DeltaINEntry
+     * is used to apply the delta and place the result in the tree.
+     */
+    public static class DeltaINEntry extends INEntry {
+        private final Object delta;
+        private final long deltaLsn;
+
+        DeltaINEntry(IN in, int index, Object delta, long deltaLsn) {
+            super(in, index);
+            assert (delta != null);
+            assert (deltaLsn != DbLsn.NULL_LSN);
+            this.delta = delta;
+            this.deltaLsn = deltaLsn;
+        }
+
+        public DeltaINEntry(@SuppressWarnings("unused") SizeofMarker marker) {
+            super(marker);
+            this.delta = null;
+            this.deltaLsn = 0;
+        }
+
+        @Override
+        Object getDelta() {
+            return delta;
+        }
+
+        @Override
+        long getDeltaLsn() {
+            return deltaLsn;
+        }
+
+        @Override
+        long getMemorySize() {
+            final long deltaSize;
+            if(delta instanceof OldBINDelta) {
+                deltaSize = ((OldBINDelta) delta).getMemorySize();
+            }
+            else {
+                deltaSize = ((BIN) delta).getInMemorySize();
+            }
+            return deltaSize +
+                    MemoryBudget.HASHMAP_ENTRY_OVERHEAD +
+                    MemoryBudget.DELTAINENTRY_OVERHEAD;
+        }
+    }
+
+    private static class FetchResult {
+        final Node node;
+        final int lastLoggedSize;
+        final IN ohBinParent;
+        final int ohBinIndex;
+
+        FetchResult(final Node node,
+                    final int lastLoggedSize,
+                    final IN ohBinParent,
+                    final int ohBinIndex) {
+            this.node = node;
+            this.lastLoggedSize = lastLoggedSize;
+            this.ohBinParent = ohBinParent;
+            this.ohBinIndex = ohBinIndex;
+        }
     }
 }

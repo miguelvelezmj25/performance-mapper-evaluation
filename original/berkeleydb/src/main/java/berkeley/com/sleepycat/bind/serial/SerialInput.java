@@ -13,20 +13,20 @@
 
 package berkeley.com.sleepycat.bind.serial;
 
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.util.ClassResolver;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.util.ClassResolver;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
-
 /**
  * A specialized <code>ObjectInputStream</code> that gets class description
  * information from a <code>ClassCatalog</code>.  It is used by
  * <code>SerialBinding</code>.
- *
+ * <p>
  * <p>This class is used instead of an {@link ObjectInputStream}, which it
  * extends, to read an object stream written by the {@link SerialOutput} class.
  * For reading objects from a database normally one of the serial binding
@@ -35,9 +35,8 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * ClassCatalog} must be supplied, however, to stored shared class
  * descriptions.</p>
  *
- * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
- *
  * @author Mark Hayes
+ * @see <a href="SerialBinding.html#evolution">Class Evolution</a>
  */
 public class SerialInput extends ClassResolver.Stream {
 
@@ -46,16 +45,14 @@ public class SerialInput extends ClassResolver.Stream {
     /**
      * Creates a serial input stream.
      *
-     * @param in is the input stream from which compact serialized objects will
-     * be read.
-     *
+     * @param in           is the input stream from which compact serialized objects will
+     *                     be read.
      * @param classCatalog is the catalog containing the class descriptions
-     * for the serialized objects.
-     *
+     *                     for the serialized objects.
      * @throws IOException if an I/O error occurs while reading stream header.
      */
     public SerialInput(InputStream in, ClassCatalog classCatalog)
-        throws IOException {
+            throws IOException {
 
         this(in, classCatalog, null);
     }
@@ -63,21 +60,18 @@ public class SerialInput extends ClassResolver.Stream {
     /**
      * Creates a serial input stream.
      *
-     * @param in is the input stream from which compact serialized objects will
-     * be read.
-     *
+     * @param in           is the input stream from which compact serialized objects will
+     *                     be read.
      * @param classCatalog is the catalog containing the class descriptions
-     * for the serialized objects.
-     *
-     * @param classLoader is the class loader to use, or null if a default
-     * class loader should be used.
-     *
+     *                     for the serialized objects.
+     * @param classLoader  is the class loader to use, or null if a default
+     *                     class loader should be used.
      * @throws IOException if an I/O error occurs while reading stream header.
      */
     public SerialInput(InputStream in,
                        ClassCatalog classCatalog,
                        ClassLoader classLoader)
-        throws IOException {
+            throws IOException {
 
         super(in, classLoader);
         this.classCatalog = classCatalog;
@@ -85,7 +79,7 @@ public class SerialInput extends ClassResolver.Stream {
 
     @Override
     protected ObjectStreamClass readClassDescriptor()
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         try {
             byte len = readByte();
@@ -93,7 +87,7 @@ public class SerialInput extends ClassResolver.Stream {
             readFully(id);
 
             return classCatalog.getClassFormat(id);
-        } catch (DatabaseException e) {
+        } catch(DatabaseException e) {
 
             /*
              * Do not throw IOException from here since ObjectOutputStream

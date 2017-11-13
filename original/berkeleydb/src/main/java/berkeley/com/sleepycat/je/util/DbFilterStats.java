@@ -13,17 +13,13 @@
 
 package berkeley.com.sleepycat.je.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import berkeley.com.sleepycat.je.utilint.CmdUtil;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import berkeley.com.sleepycat.je.utilint.CmdUtil;
 
 /**
  * Transform one or more je.stat.csv statistics files and
@@ -37,49 +33,46 @@ import berkeley.com.sleepycat.je.utilint.CmdUtil;
  * Multiple input files are processed in the order specified on the
  * command line. Duplicate column headers are suppressed in the output
  * when processing multiple input files.
- *
  */
 
 public class DbFilterStats {
 
     private static final String USAGE =
-        "usage: " + CmdUtil.getJavaCommand(DbFilterStats.class) + "\n" +
-        "      [-f <projection file>]     # use file for projection list\n" +
-        "      [-p \"<list of columns>\"]   # use specified projection list\n" +
-        "      <stat file> [<stat file>]  # list of statistic file names";
+            "usage: " + CmdUtil.getJavaCommand(DbFilterStats.class) + "\n" +
+                    "      [-f <projection file>]     # use file for projection list\n" +
+                    "      [-p \"<list of columns>\"]   # use specified projection list\n" +
+                    "      <stat file> [<stat file>]  # list of statistic file names";
 
     private static final String DELIMITER = ",";
-
-    private File projectionFile = null;
-    private String projectionArg = null;
     private final List<File> inputFiles = new ArrayList<File>();
-
     /* list of colunms/prefixes to project */
     private final List<String> projList = new ArrayList<String>();
-    private String header = null;
-    private String[] fileColHeader = null;
     private final StringBuffer rowBuf = new StringBuffer();
     /* used to save name/value from file */
     private final Map<String, String> valMap =
-       new HashMap<String, String>();
+            new HashMap<String, String>();
     private final Splitter tokenizer = new Splitter(',');
+    private File projectionFile = null;
+    private String projectionArg = null;
+    private String header = null;
+    private String[] fileColHeader = null;
 
     /**
      * The main used by the DbFilterStats utility.
      *
      * @param argv An array of command line arguments to the DbFilterStats
-     * utility.
-     *
-     * <pre>
-     * usage: java { com.sleepycat.je.util.DbFilterStats | -jar
-     * je.jar DbFilterStats }
-     *  -f  &lt;projection file&gt;
-     *  -p  &lt;column projection list&gt; A comma separated list of column
-     *      names to project.
-     *  &lt;stat file&gt; [&lt;stat file&gt;]
-     * </pre>
-     *
-     * <p>At least one argument must be specified.</p>
+     *             utility.
+     *             <p>
+     *             <pre>
+     *             usage: java { com.sleepycat.je.util.DbFilterStats | -jar
+     *             je.jar DbFilterStats }
+     *              -f  &lt;projection file&gt;
+     *              -p  &lt;column projection list&gt; A comma separated list of column
+     *                  names to project.
+     *              &lt;stat file&gt; [&lt;stat file&gt;]
+     *             </pre>
+     *             <p>
+     *             <p>At least one argument must be specified.</p>
      */
     public static void main(String argv[]) {
         DbFilterStats dbf = new DbFilterStats();
@@ -96,7 +89,7 @@ public class DbFilterStats {
     public boolean execute(String argv[]) {
         boolean retcode = true;
 
-        if (argv.length == 0) {
+        if(argv.length == 0) {
             System.err.println(USAGE);
             return retcode;
         }
@@ -106,14 +99,14 @@ public class DbFilterStats {
             dbf.parseArgs(argv);
             dbf.validateParams();
             dbf.processFiles();
-        } catch (IllegalArgumentException e) {
+        } catch(IllegalArgumentException e) {
             retcode = false;
         }
         return retcode;
     }
 
     private void processFiles() {
-        for (File f : inputFiles) {
+        for(File f : inputFiles) {
             processFile(f);
         }
     }
@@ -133,76 +126,78 @@ public class DbFilterStats {
 
         try {
             fr = new BufferedReader(new FileReader(statFile));
-            while ((row = fr.readLine()) != null) {
+            while((row = fr.readLine()) != null) {
                 String[] cols = parseRow(row, false);
-                if (outProj == null) {
+                if(outProj == null) {
                     /* form output projection list from header */
                     outProj = new ArrayList<String>();
                     Map<String, String> colNameMap =
-                        new HashMap<String, String>();
-                    for (String cname : cols) {
+                            new HashMap<String, String>();
+                    for(String cname : cols) {
                         colNameMap.put(cname, cname);
                     }
 
-                    for (String projName : projList ) {
-                        if (colNameMap.get(projName) != null) {
+                    for(String projName : projList) {
+                        if(colNameMap.get(projName) != null) {
                             outProj.add(projName);
-                        } else {
-                            for (String colName : cols) {
-                               if (colName.startsWith(projName)) {
-                                   outProj.add(colName);
-                               }
+                        }
+                        else {
+                            for(String colName : cols) {
+                                if(colName.startsWith(projName)) {
+                                    outProj.add(colName);
+                                }
                             }
                         }
                     }
 
-                    if (header == null || !header.equals(row)) {
+                    if(header == null || !header.equals(row)) {
                         /* output header row */
                         outputRow(outProj);
                         header = row;
                         fileColHeader = cols;
                     }
-                } else {
-                    if (cols.length != fileColHeader.length) {
+                }
+                else {
+                    if(cols.length != fileColHeader.length) {
                         printFatal("Invalid stat file " +
-                                   statFile.getAbsolutePath() +
-                                   " header/columns are not equal.");
+                                statFile.getAbsolutePath() +
+                                " header/columns are not equal.");
                     }
                     /* put column name/value in map*/
                     valMap.clear();
-                    for (int i = 0; i < cols.length; i++) {
+                    for(int i = 0; i < cols.length; i++) {
                         valMap.put(fileColHeader[i], cols[i]);
                     }
                     /* form output row based on projection list */
                     rowBuf.setLength(0);
-                    for (String pname : outProj) {
-                        if (rowBuf.length() != 0) {
+                    for(String pname : outProj) {
+                        if(rowBuf.length() != 0) {
                             rowBuf.append(DELIMITER);
                         }
                         String value = valMap.get(pname);
-                        if (value != null) {
+                        if(value != null) {
                             rowBuf.append(value);
-                        } else {
+                        }
+                        else {
                             rowBuf.append(" ");
                         }
                     }
                     System.out.println(rowBuf.toString());
                 }
             }
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             printFatal(
-                "Error occured accessing stat file " +
-                statFile.getAbsolutePath());
-        } catch (IOException e) {
+                    "Error occured accessing stat file " +
+                            statFile.getAbsolutePath());
+        } catch(IOException e) {
             printFatal(
-                "IOException occured accessing stat file " +
-                statFile.getAbsolutePath() + " exception " + e);
+                    "IOException occured accessing stat file " +
+                            statFile.getAbsolutePath() + " exception " + e);
         } finally {
-            if (fr != null) {
+            if(fr != null) {
                 try {
                     fr.close();
-                }
-                catch (IOException e) {
+                } catch(IOException e) {
                     /* eat exception */
                 }
             }
@@ -211,8 +206,8 @@ public class DbFilterStats {
 
     private void outputRow(List<String> cvals) {
         rowBuf.setLength(0);
-        for (String val : cvals) {
-            if (rowBuf.length() != 0) {
+        for(String val : cvals) {
+            if(rowBuf.length() != 0) {
                 rowBuf.append(DELIMITER);
             }
             rowBuf.append(val);
@@ -226,21 +221,25 @@ public class DbFilterStats {
         int nArgs = argv.length;
         inputFiles.clear();
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
-            if (thisArg.equals("-f")) {
-                if (argc < nArgs) {
+            if(thisArg.equals("-f")) {
+                if(argc < nArgs) {
                     projectionFile = new File(argv[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-f requires an argument");
                 }
-            } else if (thisArg.equals("-p")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-p")) {
+                if(argc < nArgs) {
                     projectionArg = argv[argc++];
-                } else {
+                }
+                else {
                     printUsage("-p requires an argument");
                 }
-            } else {
+            }
+            else {
                 inputFiles.add(new File(thisArg));
             }
         }
@@ -248,41 +247,41 @@ public class DbFilterStats {
 
     private void validateParams() {
         projList.clear();
-        if (inputFiles.size() == 0) {
+        if(inputFiles.size() == 0) {
             printUsage("requires statistic file argument");
         }
 
-        for (File f : inputFiles) {
-            if (!f.exists()) {
+        for(File f : inputFiles) {
+            if(!f.exists()) {
                 printFatal("Specified stat file " + f.getAbsolutePath() +
-                           " does not exist.");
+                        " does not exist.");
             }
-            if (f.isDirectory()) {
+            if(f.isDirectory()) {
                 printFatal("Specified stat file " + f.getAbsolutePath() +
-                           " is not a file.");
+                        " is not a file.");
             }
         }
 
-        if (projectionFile == null && projectionArg == null) {
+        if(projectionFile == null && projectionArg == null) {
             printUsage("requires either -p or -f argument");
         }
 
         /* add command line projections */
-        if (projectionArg != null) {
+        if(projectionArg != null) {
             addProjections(projectionArg);
         }
 
         /* add projection file projections */
-        if (projectionFile != null) {
-            if (!projectionFile.exists()) {
+        if(projectionFile != null) {
+            if(!projectionFile.exists()) {
                 printFatal("Specified projection file " +
-                           projectionFile.getAbsolutePath() +
-                           " does not exist.");
+                        projectionFile.getAbsolutePath() +
+                        " does not exist.");
             }
-            if (projectionFile.isDirectory()) {
+            if(projectionFile.isDirectory()) {
                 printFatal("Specified projection file " +
-                           projectionFile.getAbsolutePath() +
-                           " is not a file.");
+                        projectionFile.getAbsolutePath() +
+                        " is not a file.");
             }
             formProjections(projectionFile);
         }
@@ -295,25 +294,24 @@ public class DbFilterStats {
         try {
             fr = new BufferedReader(new FileReader(projFile));
             row = fr.readLine();
-            if (row == null) {
+            if(row == null) {
                 printFatal("Invalid projection file " +
-                           projFile.getAbsolutePath());
+                        projFile.getAbsolutePath());
             }
             addProjections(row);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             printFatal(
-                "Error occured accessing projection file " +
-                projFile.getAbsolutePath());
-        } catch (IOException e) {
+                    "Error occured accessing projection file " +
+                            projFile.getAbsolutePath());
+        } catch(IOException e) {
             printFatal(
-                "IOException occured accessing projection file " +
-                projFile.getAbsolutePath() + e);
+                    "IOException occured accessing projection file " +
+                            projFile.getAbsolutePath() + e);
         } finally {
-            if (fr != null) {
+            if(fr != null) {
                 try {
                     fr.close();
-                }
-                catch (IOException e) {
+                } catch(IOException e) {
                     /* eat exception */
                 }
             }
@@ -321,9 +319,9 @@ public class DbFilterStats {
     }
 
     private String[] parseRow(String row, boolean trimIt) {
-        String [] vals = tokenizer.tokenize(row);
-        if (trimIt) {
-            for (int i = 0; i < vals.length; i++) {
+        String[] vals = tokenizer.tokenize(row);
+        if(trimIt) {
+            for(int i = 0; i < vals.length; i++) {
                 vals[i] = vals[i].trim();
             }
         }
@@ -332,8 +330,8 @@ public class DbFilterStats {
 
     private void addProjections(String collist) {
         String[] names = parseRow(collist, true);
-        for (String name : names) {
-            if (name.length() == 0 ) {
+        for(String name : names) {
+            if(name.length() == 0) {
                 printFatal("Projection list contained a empty entry.");
             }
             projList.add(name);
@@ -341,7 +339,7 @@ public class DbFilterStats {
     }
 
     private void printUsage(String msg) {
-        if (msg != null) {
+        if(msg != null) {
             System.err.println(msg);
         }
         System.err.println(USAGE);

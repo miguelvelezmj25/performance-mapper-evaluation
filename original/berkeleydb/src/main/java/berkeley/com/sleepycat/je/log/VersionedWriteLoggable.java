@@ -13,20 +13,20 @@
 
 package berkeley.com.sleepycat.je.log;
 
+import berkeley.com.sleepycat.je.log.entry.ReplicableLogEntry;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
-
-import berkeley.com.sleepycat.je.log.entry.ReplicableLogEntry;
 
 /**
  * A sub-interface of {@link Loggable} implemented by classes that can write
  * themselves to a byte buffer in an earlier log format, for use by instances
  * of {@link ReplicableLogEntry} that need to support an earlier log format
  * during replication.  See [#22336].
- *
+ * <p>
  * <p>Classes that implement {@code Loggable} should implement this interface
  * if they are included in replication data.
- *
+ * <p>
  * <p>Implementing classes should document the version of the class's most
  * recent format change.  Log entry classes that contain {@code
  * VersionedWriteLoggable} items can use that information to determine if they
@@ -40,7 +40,6 @@ public interface VersionedWriteLoggable extends Loggable {
      * loggable item.
      *
      * @return the log version of the most recent format change
-     *
      * @see ReplicableLogEntry#getLastFormatChange()
      */
     int getLastFormatChange();
@@ -56,9 +55,9 @@ public interface VersionedWriteLoggable extends Loggable {
      * supported for log entries with format changes made in {@link
      * LogEntryType#LOG_VERSION_REPLICATE_OLDER} or greater.
      *
-     * @param logVersion the log version
+     * @param logVersion     the log version
      * @param forReplication whether the entry will be sent over the wire,
-     * and not written to the log.
+     *                       and not written to the log.
      * @return the number of bytes to store this object for the log version
      */
     int getLogSize(int logVersion, boolean forReplication);
@@ -69,10 +68,10 @@ public interface VersionedWriteLoggable extends Loggable {
      * supported for log entries with format changes made in {@link
      * LogEntryType#LOG_VERSION_REPLICATE_OLDER} or greater.
      *
-     * @param logBuffer the destination buffer
-     * @param logVersion the log version
+     * @param logBuffer      the destination buffer
+     * @param logVersion     the log version
      * @param forReplication whether the entry will be sent over the wire,
-     * and not written to the log.
+     *                       and not written to the log.
      */
     void writeToLog(ByteBuffer logBuffer,
                     int logVersion,
@@ -89,14 +88,14 @@ public interface VersionedWriteLoggable extends Loggable {
      * log entry in a format optimized for replication. Implementations should
      * attempt to check efficiently, without instantiating the log entry
      * object. Some implementations will simply return false.
-     *
+     * <p>
      * <p>WARNING: The logBuffer position must not be changed by this method.
-     *
+     * <p>
      * <p>WARNING: The shared LogEntry object is used for calling this method,
      * and this method must not change any of the fields in the object.
      *
-     * @param logBuffer contains the entry that would be re-serialized.
-     * @param srcVersion the log version of entry in logBuffer.
+     * @param logBuffer   contains the entry that would be re-serialized.
+     * @param srcVersion  the log version of entry in logBuffer.
      * @param destVersion the version that would be used for re-serialization.
      */
     boolean isReplicationFormatWorthwhile(ByteBuffer logBuffer,

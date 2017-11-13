@@ -49,7 +49,7 @@ class EntityValueAdapter<V> implements ValueAdapter<V> {
                              DatabaseEntry pkey,
                              DatabaseEntry data) {
         key.setData(null);
-        if (isSecondary) {
+        if(isSecondary) {
             pkey.setData(null);
         }
         data.setData(null);

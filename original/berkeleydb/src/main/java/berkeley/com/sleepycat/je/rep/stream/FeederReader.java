@@ -12,21 +12,11 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.ChecksumException;
-import berkeley.com.sleepycat.je.log.FileHandle;
-import berkeley.com.sleepycat.je.log.FileManager;
-import berkeley.com.sleepycat.je.log.LogBuffer;
-import berkeley.com.sleepycat.je.log.LogEntryType;
-import berkeley.com.sleepycat.je.log.LogItem;
-import berkeley.com.sleepycat.je.log.LogManager;
+import berkeley.com.sleepycat.je.log.*;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex.ForwardVLSNScanner;
@@ -35,26 +25,34 @@ import berkeley.com.sleepycat.je.rep.vlsn.VLSNRange;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * The FeederReader is a flavor of VLSNReader which supports replication
  * stream feeding. It assumes that reading will always go forward in the log.
  * Special features are:
- *
+ * <p>
  * - The reader can read either from a log buffer or from the file. Sometimes
- *   log entries are logged but are not yet available on disk. In general, it's
- *   better to read from the log buffers rather then the file.
- *
+ * log entries are logged but are not yet available on disk. In general, it's
+ * better to read from the log buffers rather then the file.
+ * <p>
  * - The reader can block for a given time period, waiting for the next vlsn to
- *    appear
+ * appear
  */
 public class FeederReader extends VLSNReader {
 
     /* The scanner is a cursor over the VLSNIndex. */
     private final ForwardVLSNScanner scanner;
-
+    /*
+     * If true, the FeederReader will always read directly from the log, and
+     * will not use the vlsnIndex LogItem cache. Should only be used for
+     * unit tests!
+     */
+    private final boolean bypassCache;
     /* The reader has never been used before, it needs to be initialized. */
     private boolean initDone = false;
-
     /*
      * A constantly resetting counter of hits in the log item cache. This
      * serves as state that lets the FeederReader know that its position in the
@@ -63,13 +61,6 @@ public class FeederReader extends VLSNReader {
      */
     private long prevCacheHits = 0;
 
-    /*
-     * If true, the FeederReader will always read directly from the log, and
-     * will not use the vlsnIndex LogItem cache. Should only be used for
-     * unit tests!
-     */
-    private final boolean bypassCache;
-
     public FeederReader(EnvironmentImpl envImpl,
                         VLSNIndex vlsnIndex,
                         long startLsn,
@@ -77,7 +68,7 @@ public class FeederReader extends VLSNReader {
                         NameIdPair nameIdPair) {
 
         this(envImpl, vlsnIndex, startLsn, readBufferSize, nameIdPair,
-             false /*bypassCache*/);
+                false /*bypassCache*/);
     }
 
     /**
@@ -89,8 +80,8 @@ public class FeederReader extends VLSNReader {
                  int readBufferSize) {
 
         this(envImpl, vlsnIndex, startLsn, readBufferSize,
-             new NameIdPair("test Node", 0),
-             true /*bypassCache*/);
+                new NameIdPair("test Node", 0),
+                true /*bypassCache*/);
     }
 
     private FeederReader(EnvironmentImpl envImpl,
@@ -100,12 +91,12 @@ public class FeederReader extends VLSNReader {
                          NameIdPair nameIdPair,
                          boolean bypassCache) {
         super(envImpl,
-              vlsnIndex,
-              true,            // forward
-              startLsn,
-              readBufferSize,
-              nameIdPair,
-              DbLsn.NULL_LSN); // finishLsn
+                vlsnIndex,
+                true,            // forward
+                startLsn,
+                readBufferSize,
+                nameIdPair,
+                DbLsn.NULL_LSN); // finishLsn
 
         scanner = new ForwardVLSNScanner(vlsnIndex);
         this.bypassCache = bypassCache;
@@ -114,6 +105,7 @@ public class FeederReader extends VLSNReader {
     /**
      * Use a ReadWindow which can read from LogBuffers as well as the physical
      * file.
+     *
      * @throws DatabaseException
      */
     @Override
@@ -132,16 +124,16 @@ public class FeederReader extends VLSNReader {
      * @throws IOException
      */
     public void initScan(VLSN startVLSN)
-        throws IOException {
+            throws IOException {
 
-        if (startVLSN.equals(VLSN.NULL_VLSN)) {
+        if(startVLSN.equals(VLSN.NULL_VLSN)) {
             throw EnvironmentFailureException.unexpectedState
-                ("startVLSN can't be null");
+                    ("startVLSN can't be null");
         }
 
         VLSNRange currentRange = vlsnIndex.getRange();
         VLSN startPoint = startVLSN;
-        if (currentRange.getLast().compareTo(startVLSN) < 0) {
+        if(currentRange.getLast().compareTo(startVLSN) < 0) {
             /*
              * When feeding, we may be starting at the VLSN following the last
              * VLSN in the node.
@@ -163,13 +155,13 @@ public class FeederReader extends VLSNReader {
      * Forward scanning for feeding the replica: get the log record for this
      * VLSN. If the log record hasn't been created yet, wait for a period
      * specified by "waitTime".
-     *
+     * <p>
      * Where possible, the FeederReader fetches the log record from the cache
      * within the VLSNIndex. (See the VLSNIndex for a description of this two
      * level cache). If the requested VLSN is not available from the cache, the
      * reader fetches the item from the JE log -- either from the log buffers
      * or from disk.
-     *
+     * <p>
      * The FeederReader is like a cursor on the log, and retains a position
      * in the log.  When there are log item cache hits, the FeederReader's
      * position can fall behind, because it is being bypassed. It is possible
@@ -182,7 +174,7 @@ public class FeederReader extends VLSNReader {
      * any cleaned gaps in the log.
      */
     public OutputWireRecord scanForwards(VLSN vlsn, int waitTime)
-        throws InterruptedException {
+            throws InterruptedException {
 
         assert initDone;
 
@@ -190,14 +182,14 @@ public class FeederReader extends VLSNReader {
 
         try {
             logItem = vlsnIndex.waitForVLSN(vlsn, waitTime);
-        } catch (WaitTimeOutException e) {
+        } catch(WaitTimeOutException e) {
             /* This vlsn not yet available */
             return null;
         }
 
         currentVLSN = vlsn;
 
-        if ((logItem != null) && (!bypassCache)) {
+        if((logItem != null) && (!bypassCache)) {
 
             /* We've found the requested log item in the cache. */
             assert logItem.header.getVLSN().equals(vlsn);
@@ -226,7 +218,7 @@ public class FeederReader extends VLSNReader {
          * vlsn range always exists.
          */
         long repositionLsn;
-        if (prevCacheHits > 0) {
+        if(prevCacheHits > 0) {
             repositionLsn = scanner.getApproximateLsn(vlsn);
 
             /*
@@ -240,10 +232,11 @@ public class FeederReader extends VLSNReader {
              * the log record from disk. We do not want to slide the
              * FeederReader from its current position at 21 back to VLSN 10.
              */
-            if (DbLsn.compareTo(getLastLsn(), repositionLsn) >= 0) {
+            if(DbLsn.compareTo(getLastLsn(), repositionLsn) >= 0) {
                 repositionLsn = DbLsn.NULL_LSN;
             }
-        } else {
+        }
+        else {
             repositionLsn = scanner.getPreciseLsn(vlsn);
         }
 
@@ -255,14 +248,14 @@ public class FeederReader extends VLSNReader {
         try {
             /* setPosition is a noop if repositionLsn is false. */
             setPosition(repositionLsn);
-        } catch (ChecksumException e) {
+        } catch(ChecksumException e) {
             throw new EnvironmentFailureException
-                (envImpl,
-                 EnvironmentFailureReason.LOG_CHECKSUM,
-                 "trying to reposition FeederReader to " +
-                 DbLsn.getNoFormatString(repositionLsn) + " prevWindow=" +
-                 window, e);
-        } catch (FileNotFoundException e) {
+                    (envImpl,
+                            EnvironmentFailureReason.LOG_CHECKSUM,
+                            "trying to reposition FeederReader to " +
+                                    DbLsn.getNoFormatString(repositionLsn) + " prevWindow=" +
+                                    window, e);
+        } catch(FileNotFoundException e) {
 
             /*
              * This is not necessarily a durable error. It could be a problem
@@ -270,20 +263,20 @@ public class FeederReader extends VLSNReader {
              * transient. Do not invalidate the environment.
              */
             throw new LogFileNotFoundException
-                (vlsn,
-                 "Trying to reposition FeederReader to " +
-                 DbLsn.getNoFormatString(repositionLsn) +
-                 " for vlsn:" + vlsn +
-                 " prevWindow=" +  window, e);
+                    (vlsn,
+                            "Trying to reposition FeederReader to " +
+                                    DbLsn.getNoFormatString(repositionLsn) +
+                                    " for vlsn:" + vlsn +
+                                    " prevWindow=" + window, e);
         }
 
-        if (readNextEntry()) {
+        if(readNextEntry()) {
             return currentFeedRecord;
         }
 
         throw EnvironmentFailureException.unexpectedState
-            (envImpl, "VLSN=" + vlsn + " repositionLsn = " +
-             DbLsn.getNoFormatString(repositionLsn) + window);
+                (envImpl, "VLSN=" + vlsn + " repositionLsn = " +
+                        DbLsn.getNoFormatString(repositionLsn) + window);
     }
 
     /**
@@ -291,11 +284,11 @@ public class FeederReader extends VLSNReader {
      * particular VLSN and we have passed it by.
      */
     private void checkForPassingTarget(int compareResult) {
-        if (compareResult > 0) {
+        if(compareResult > 0) {
             /* Hey, we passed the VLSN we wanted. */
             throw EnvironmentFailureException.unexpectedState
-                ("want to read " + currentVLSN + " but reader at " +
-                 currentEntryHeader.getVLSN());
+                    ("want to read " + currentVLSN + " but reader at " +
+                            currentEntryHeader.getVLSN());
         }
     }
 
@@ -306,11 +299,11 @@ public class FeederReader extends VLSNReader {
     protected boolean isTargetEntry() {
         nScanned++;
 
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
             return false;
         }
 
-        if (entryIsReplicated()) {
+        if(entryIsReplicated()) {
             VLSN entryVLSN = currentEntryHeader.getVLSN();
 
             int compareResult = entryVLSN.compareTo(currentVLSN);
@@ -321,6 +314,11 @@ public class FeederReader extends VLSNReader {
         }
 
         return false;
+    }
+
+    /* For debugging */
+    String dumpState() {
+        return "prevCacheHits=" + prevCacheHits + " " + window;
     }
 
     /**
@@ -348,34 +346,35 @@ public class FeederReader extends VLSNReader {
                                  long windowStartOffset,
                                  long targetOffset,
                                  boolean forward)
-            throws ChecksumException,
-                   FileNotFoundException,
-                   DatabaseException {
+                throws ChecksumException,
+                FileNotFoundException,
+                DatabaseException {
 
-            if (!fillFromLogBuffer(windowFileNum, targetOffset)) {
+            if(!fillFromLogBuffer(windowFileNum, targetOffset)) {
                 /* The entry was not in the LogBufferPool. */
                 super.slideAndFill(windowFileNum,
-                                   windowStartOffset,
-                                   targetOffset,
-                                   forward);
+                        windowStartOffset,
+                        targetOffset,
+                        forward);
             }
         }
 
         /**
          * Fill the read window's buffer from a LogBuffer.
+         *
          * @return true if the read window was filled.
          * @throws DatabaseException
          */
         private boolean fillFromLogBuffer(long windowFileNum,
                                           long targetOffset)
-            throws DatabaseException {
+                throws DatabaseException {
 
             LogBuffer logBuffer = null;
 
             try {
                 long fileLocation = DbLsn.makeLsn(windowFileNum, targetOffset);
                 logBuffer = logManager.getReadBufferByLsn(fileLocation);
-                if (logBuffer == null) {
+                if(logBuffer == null) {
                     return false;
                 }
 
@@ -399,12 +398,12 @@ public class FeederReader extends VLSNReader {
                  * positioned for writing and must be flipped for reading.
                  */
                 ByteBuffer wholeContents =
-                    logBuffer.getDataBuffer().duplicate();
-                if (wholeContents.position() != 0) {
+                        logBuffer.getDataBuffer().duplicate();
+                if(wholeContents.position() != 0) {
                     wholeContents.flip();
                 }
                 long firstOffset =
-                    DbLsn.getFileOffset(logBuffer.getFirstLsn());
+                        DbLsn.getFileOffset(logBuffer.getFirstLsn());
                 wholeContents.position((int) (targetOffset - firstOffset));
 
                 /* Make a buffer which starts at target. */
@@ -412,8 +411,8 @@ public class FeederReader extends VLSNReader {
                 byte[] data = startAtTarget.array();
                 int availableContentLen = startAtTarget.limit();
                 int copyLength =
-                    (availableContentLen > readBuffer.capacity()) ?
-                    readBuffer.capacity() : availableContentLen;
+                        (availableContentLen > readBuffer.capacity()) ?
+                                readBuffer.capacity() : availableContentLen;
 
                 readBuffer.clear();
                 readBuffer.put(data, startAtTarget.arrayOffset(), copyLength);
@@ -426,7 +425,7 @@ public class FeederReader extends VLSNReader {
                 readBuffer.position(0);
                 return true;
             } finally {
-                if (logBuffer != null) {
+                if(logBuffer != null) {
                     logBuffer.release();
                 }
             }
@@ -437,7 +436,7 @@ public class FeederReader extends VLSNReader {
          * following file (next largest number) if needed. Unlike other file
          * readers, we are reading log files that are concurrently growing, so
          * this read window must also know to look in the log buffers.
-         *
+         * <p>
          * The contract between the feeder reader and the VLSNIndex lets us
          * assume that the feeder reader is only active when it is sure that
          * there is more data available somewhere -- whether it's in the log
@@ -447,8 +446,8 @@ public class FeederReader extends VLSNReader {
          * @see ReadWindow#fillNext
          */
         @Override
-            protected boolean fillNext(boolean singleFile, int bytesNeeded)
-            throws ChecksumException, DatabaseException, EOFException {
+        protected boolean fillNext(boolean singleFile, int bytesNeeded)
+                throws ChecksumException, DatabaseException, EOFException {
 
             /*
              * The SwitchReadWindow should only be used for feeding, and
@@ -462,7 +461,7 @@ public class FeederReader extends VLSNReader {
              * Try to fill the window by asking for the next offset from
              * the log buffers.
              */
-            if (fillFromLogBuffer(currentFileNum(), endOffset)) {
+            if(fillFromLogBuffer(currentFileNum(), endOffset)) {
                 /* Didn't move to a new file. */
                 return false;
             }
@@ -484,7 +483,7 @@ public class FeederReader extends VLSNReader {
 
                 /* Attempt to read more from this file. */
                 startOffset = endOffset;
-                if (fillFromFile(fileHandle, startOffset)) {
+                if(fillFromFile(fileHandle, startOffset)) {
                     /*
                      * Successfully filled the read buffer, but didn't move to
                      * a new file.
@@ -496,7 +495,7 @@ public class FeederReader extends VLSNReader {
                 fileHandle = null;
 
                 /* This file is done -- can we read in the next file? */
-                if (singleFile) {
+                if(singleFile) {
                     throw new EOFException();
                 }
 
@@ -505,8 +504,8 @@ public class FeederReader extends VLSNReader {
                  * there has been log cleaning.
                  */
                 Long nextFile =
-                    fileManager.getFollowingFileNum(currentFileNum(),
-                                                    true /* forward */);
+                        fileManager.getFollowingFileNum(currentFileNum(),
+                                true /* forward */);
 
                 /*
                  * But if there's no next file, let's assume that the desired
@@ -515,12 +514,12 @@ public class FeederReader extends VLSNReader {
                  * from the first real log entry, because the file header entry
                  * is not in the log buffers.
                  */
-                if (nextFile == null) {
+                if(nextFile == null) {
                     nextFile = currentFileNum() + 1;
                 }
 
-                if (fillFromLogBuffer(nextFile,
-                                      FileManager.firstLogEntryOffset())) {
+                if(fillFromLogBuffer(nextFile,
+                        FileManager.firstLogEntryOffset())) {
                     /*
                      * We filled the read buffer, and jumped to a new
                      * file.
@@ -537,25 +536,20 @@ public class FeederReader extends VLSNReader {
                 startOffset = 0;
                 boolean moreData = fillFromFile(fileHandle, 0);
                 assert moreData :
-                   "FeederReader should find more data in next file";
+                        "FeederReader should find more data in next file";
                 return true;
-            } catch (IOException e) {
+            } catch(IOException e) {
                 e.printStackTrace();
                 throw EnvironmentFailureException.unexpectedException
-                    ("Problem in ReadWindow.fill, reading from  = " +
-                     currentFileNum(), e);
+                        ("Problem in ReadWindow.fill, reading from  = " +
+                                currentFileNum(), e);
 
             } finally {
-                if (fileHandle != null) {
+                if(fileHandle != null) {
                     fileHandle.release();
                 }
             }
         }
-    }
-
-    /* For debugging */
-    String dumpState() {
-        return "prevCacheHits=" + prevCacheHits + " " + window;
     }
 
     /**

@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.EnvironmentFailureException;
 /**
  * A ConfigParam embodies the metadata about a JE configuration parameter:
  * the parameter name, default value, and a validation method.
- *
+ * <p>
  * Validation can be done in the scope of this parameter, or as a function of
  * other parameters.
  */
@@ -37,11 +37,12 @@ public class ConfigParam {
                        String configDefault,
                        boolean mutable,
                        boolean forReplication)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (configName == null) {
+        if(configName == null) {
             name = null;
-        } else {
+        }
+        else {
 
             /*
              * For Multi-Value params (i.e. those whose names end with ".#"),
@@ -49,10 +50,11 @@ public class ConfigParam {
              * with isMultiValueParam=true.
              */
             int mvFlagIdx = configName.indexOf(".#");
-            if (mvFlagIdx < 0) {
+            if(mvFlagIdx < 0) {
                 name = configName;
                 isMultiValueParam = false;
-            } else {
+            }
+            else {
                 name = configName.substring(0, mvFlagIdx);
                 isMultiValueParam = true;
             }
@@ -76,7 +78,7 @@ public class ConfigParam {
      */
     public static String multiValueParamName(String paramName) {
         int mvParamIdx = paramName.lastIndexOf('.');
-        if (mvParamIdx < 0) {
+        if(mvParamIdx < 0) {
             return null;
         }
         return paramName.substring(0, mvParamIdx);
@@ -120,11 +122,11 @@ public class ConfigParam {
      * A param name can't be null or 0 length
      */
     private void validateName(String name)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if ((name == null) || (name.length() < 1)) {
+        if((name == null) || (name.length() < 1)) {
             throw EnvironmentFailureException.unexpectedState
-                ("A configuration parameter name can't be null or 0 length");
+                    ("A configuration parameter name can't be null or 0 length");
         }
     }
 
@@ -133,10 +135,10 @@ public class ConfigParam {
      * May be overridden for (e.g.) Multi-value params.
      *
      * @throws IllegalArgumentException via XxxConfig.setXxx methods and
-     * XxxConfig(Properties) ctor.
+     *                                  XxxConfig(Properties) ctor.
      */
     public void validateValue(String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
     }
 

@@ -13,6 +13,9 @@
 
 package berkeley.com.sleepycat.je.rep.elections;
 
+import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
+import berkeley.com.sleepycat.je.rep.elections.Proposer.ProposalParser;
+
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -22,41 +25,30 @@ import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import berkeley.com.sleepycat.je.rep.elections.Proposer.Proposal;
-import berkeley.com.sleepycat.je.rep.elections.Proposer.ProposalParser;
-
 /**
  * Generates a unique sequence of ascending proposal numbers that is unique
  * across all machines.
- *
+ * <p>
  * Each proposal number is built as the catenation of the following components:
- *
+ * <p>
  * ms time (8 bytes) | machineId (16 bytes) | locally unique Id (4 bytes)
- *
+ * <p>
  * The ms time supplies the increasing number and the IP address is a number
  * unique across machines.
- *
+ * <p>
  * The machineId is generated as described below.
- *
+ * <p>
  * The locally unique Id is used to allow for multiple unique proposal
  * generators in a single process.
  */
 public class TimebasedProposalGenerator {
 
-    /*
-     * A number that is unique for all instances of the TimeBasedGenerator on
-     * this machine.
-     */
-    private final int locallyUniqueId;
+    /* Width of each field in the Proposal number in hex characters. */
+    final static int TIME_WIDTH = 16;
+    /* Allow for 16 byte ipv6 addresses. */
+    final static int ADDRESS_WIDTH = 32;
+    final static int UID_WIDTH = 8;
     private static final AtomicInteger uniqueIdGenerator = new AtomicInteger(1);
-
-    /*
-     * Tracks the time (in ms) used to generate the previous proposal
-     * preventing the creation of duplicate proposals.  Synchronize on this
-     * instance when accessing this field.
-     */
-    private long prevProposalTime = System.currentTimeMillis();
-
     /*
      * A unique ID for this JVM, using a hex representation of the IP address
      * XOR'ed with a random value. If the IP address cannot be determined,
@@ -66,23 +58,16 @@ public class TimebasedProposalGenerator {
      */
     private static final String machineId;
 
-    /* Width of each field in the Proposal number in hex characters. */
-    final static int TIME_WIDTH = 16;
-
-    /* Allow for 16 byte ipv6 addresses. */
-    final static int ADDRESS_WIDTH =32;
-    final static int UID_WIDTH = 8;
-
     /*
      * Initialize machineId, do it just once to minimize latencies in the face
      * of misbehaving networks that slow down calls to getLocalHost()
      */
-    static  {
+    static {
 
         InetAddress localHost;
         try {
             localHost = java.net.InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
+        } catch(UnknownHostException e) {
             /*
              * Likely a misconfigured machine if it could not determine
              * localhost.
@@ -90,58 +75,71 @@ public class TimebasedProposalGenerator {
             localHost = null;
         }
         byte[] localAddress = null;
-        if (localHost != null) {
+        if(localHost != null) {
             localAddress = localHost.getAddress();
 
-            if (localHost.isLoopbackAddress()) {
+            if(localHost.isLoopbackAddress()) {
                 /* Linux platforms return a loopback address, examine the
                  * interfaces individually for a suitable address.
                  */
                 localAddress = null;
                 try {
-                    for (Enumeration<NetworkInterface> interfaces =
+                    for(Enumeration<NetworkInterface> interfaces =
                         NetworkInterface.getNetworkInterfaces();
-                        interfaces.hasMoreElements();) {
-                        for (Enumeration<InetAddress> addresses =
+                        interfaces.hasMoreElements(); ) {
+                        for(Enumeration<InetAddress> addresses =
                             interfaces.nextElement().getInetAddresses();
-                            addresses.hasMoreElements();) {
+                            addresses.hasMoreElements(); ) {
                             InetAddress ia = addresses.nextElement();
-                            if (! (ia.isLoopbackAddress() ||
-                                   ia.isAnyLocalAddress() ||
-                                   ia.isMulticastAddress())) {
+                            if(!(ia.isLoopbackAddress() ||
+                                    ia.isAnyLocalAddress() ||
+                                    ia.isMulticastAddress())) {
                                 /* Found one, any one of these will do. */
                                 localAddress = ia.getAddress();
                                 break;
                             }
                         }
                     }
-                } catch (SocketException e) {
+                } catch(SocketException e) {
                     /* Could not get the network interfaces, give up */
                 }
             }
         }
 
-        if (localAddress != null) {
+        if(localAddress != null) {
             /*
              * Convert the address to a positive integer, XOR it with a
              * random value of the right size, and format in hex
              */
             final BigInteger addrVal = new BigInteger(1, localAddress);
             final BigInteger randVal =
-                new BigInteger(ADDRESS_WIDTH * 4, new SecureRandom());
+                    new BigInteger(ADDRESS_WIDTH * 4, new SecureRandom());
             machineId = String.format("%0" + ADDRESS_WIDTH + "x",
-                                      addrVal.xor(randVal));
-        } else {
+                    addrVal.xor(randVal));
+        }
+        else {
             /*
              * If the localAddress is null, this host is likely disconnected,
              * or localHost is misconfigured, fall back to using just a secure
              * random number.
              */
             final BigInteger randVal =
-                new BigInteger(ADDRESS_WIDTH * 4, new SecureRandom());
+                    new BigInteger(ADDRESS_WIDTH * 4, new SecureRandom());
             machineId = String.format("%0" + ADDRESS_WIDTH + "x", randVal);
         }
     }
+
+    /*
+     * A number that is unique for all instances of the TimeBasedGenerator on
+     * this machine.
+     */
+    private final int locallyUniqueId;
+    /*
+     * Tracks the time (in ms) used to generate the previous proposal
+     * preventing the creation of duplicate proposals.  Synchronize on this
+     * instance when accessing this field.
+     */
+    private long prevProposalTime = System.currentTimeMillis();
 
     /**
      * Creates an instance with an application-specified locally (machine wide)
@@ -163,25 +161,6 @@ public class TimebasedProposalGenerator {
     }
 
     /**
-     * Returns the next Proposal greater than all previous proposals returned
-     * on this machine.
-     *
-     * @return the next unique proposal
-     */
-    public Proposal nextProposal() {
-        long proposalTime = System.currentTimeMillis();
-        synchronized (this) {
-            if (proposalTime <= prevProposalTime) {
-                /* Proposals are moving faster than the clock. */
-                proposalTime = ++prevProposalTime;
-            }
-            prevProposalTime = proposalTime;
-        }
-        return new StringProposal(String.format("%016x%s%08x", proposalTime,
-                                                machineId, locallyUniqueId));
-    }
-
-    /**
      * Returns the parser used to convert wire representations into Proposal
      * instances.
      *
@@ -192,25 +171,47 @@ public class TimebasedProposalGenerator {
     }
 
     /**
+     * Returns the next Proposal greater than all previous proposals returned
+     * on this machine.
+     *
+     * @return the next unique proposal
+     */
+    public Proposal nextProposal() {
+        long proposalTime = System.currentTimeMillis();
+        synchronized(this) {
+            if(proposalTime <= prevProposalTime) {
+                /* Proposals are moving faster than the clock. */
+                proposalTime = ++prevProposalTime;
+            }
+            prevProposalTime = proposalTime;
+        }
+        return new StringProposal(String.format("%016x%s%08x", proposalTime,
+                machineId, locallyUniqueId));
+    }
+
+    /**
      * Implements the Proposal interface for a string based proposal. The
      * string is a hex representation of the Proposal.
      */
     private static class StringProposal implements Proposal {
-        private final String proposal;
-
         /* The canonical proposal parser. */
         private static ProposalParser theParser = new ProposalParser() {
-                @Override
-                public Proposal parse(String wireFormat) {
-                    return ((wireFormat == null) || ("".equals(wireFormat))) ?
+            @Override
+            public Proposal parse(String wireFormat) {
+                return ((wireFormat == null) || ("".equals(wireFormat))) ?
                         null :
                         new StringProposal(wireFormat);
-                }
-            };
+            }
+        };
+        private final String proposal;
 
         StringProposal(String proposal) {
             assert (proposal != null);
             this.proposal = proposal;
+        }
+
+        private static ProposalParser getParser() {
+            return theParser;
         }
 
         @Override
@@ -221,21 +222,17 @@ public class TimebasedProposalGenerator {
         @Override
         public int compareTo(Proposal otherProposal) {
             return this.proposal.compareTo
-                (((StringProposal) otherProposal).proposal);
+                    (((StringProposal) otherProposal).proposal);
         }
 
         @Override
         public String toString() {
             return "Proposal(" +
-                proposal.substring(0, TIME_WIDTH) +
-                ":" +
-                proposal.substring(TIME_WIDTH, TIME_WIDTH + ADDRESS_WIDTH) +
-                ":" + proposal.substring(TIME_WIDTH + ADDRESS_WIDTH) +
-                ")";
-        }
-
-        private static ProposalParser getParser() {
-            return theParser;
+                    proposal.substring(0, TIME_WIDTH) +
+                    ":" +
+                    proposal.substring(TIME_WIDTH, TIME_WIDTH + ADDRESS_WIDTH) +
+                    ":" + proposal.substring(TIME_WIDTH + ADDRESS_WIDTH) +
+                    ")";
         }
 
         @Override
@@ -245,21 +242,22 @@ public class TimebasedProposalGenerator {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if(this == obj) {
                 return true;
             }
-            if (obj == null) {
+            if(obj == null) {
                 return false;
             }
-            if (!(obj instanceof StringProposal)) {
+            if(!(obj instanceof StringProposal)) {
                 return false;
             }
             final StringProposal other = (StringProposal) obj;
-            if (proposal == null) {
-                if (other.proposal != null) {
+            if(proposal == null) {
+                if(other.proposal != null) {
                     return false;
                 }
-            } else if (!proposal.equals(other.proposal)) {
+            }
+            else if(!proposal.equals(other.proposal)) {
                 return false;
             }
             return true;

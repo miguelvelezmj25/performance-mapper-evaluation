@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
+
+import java.nio.ByteBuffer;
 
 /**
  * The PrintFileReader prints out the target log entries.
@@ -38,44 +38,44 @@ public class PrintFileReader extends DumpFileReader {
                            boolean verbose,
                            boolean repEntriesOnly,
                            boolean forwards)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env,
-              readBufferSize,
-              startLsn,
-              finishLsn,
-              endOfFileLsn,
-              entryTypes,
-              dbIds,
-              txnIds,
-              verbose,
-              repEntriesOnly,
-              forwards);
+                readBufferSize,
+                startLsn,
+                finishLsn,
+                endOfFileLsn,
+                entryTypes,
+                dbIds,
+                txnIds,
+                verbose,
+                repEntriesOnly,
+                forwards);
     }
 
     /**
      * This reader prints the log entry item.
      */
     protected boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Figure out what kind of log entry this is */
         LogEntryType type =
-            LogEntryType.findType(currentEntryHeader.getType());
+                LogEntryType.findType(currentEntryHeader.getType());
 
         /* Read the entry. */
         LogEntry entry = type.getSharedLogEntry();
         entry.readEntry(envImpl, currentEntryHeader, entryBuffer);
 
         /* Match according to command line args. */
-        if (!matchEntry(entry)) {
+        if(!matchEntry(entry)) {
             return true;
         }
 
         /* Dump it. */
         StringBuilder sb = new StringBuilder();
         sb.append("<entry lsn=\"0x").append
-            (Long.toHexString(window.currentFileNum()));
+                (Long.toHexString(window.currentFileNum()));
         sb.append("/0x").append(Long.toHexString(currentEntryOffset));
         sb.append("\" ");
         currentEntryHeader.dumpLogNoTag(sb, verbose);

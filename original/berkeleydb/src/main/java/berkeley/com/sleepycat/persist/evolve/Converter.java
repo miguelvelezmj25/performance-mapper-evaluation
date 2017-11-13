@@ -13,44 +13,44 @@
 
 package berkeley.com.sleepycat.persist.evolve;
 
-import java.lang.reflect.Method;
-
 import berkeley.com.sleepycat.compat.DbCompat;
+
+import java.lang.reflect.Method;
 
 /**
  * A mutation for converting an old version of an object value to conform to
  * the current class or field definition.  For example:
- *
+ * <p>
  * <pre class="code">
- *  package my.package;
- *
- *  // The old class.  Version 0 is implied.
- *  //
- *  {@literal @Entity}
- *  class Person {
- *      // ...
- *  }
- *
- *  // The new class.  A new version number must be assigned.
- *  //
- *  {@literal @Entity(version=1)}
- *  class Person {
- *      // Incompatible changes were made here...
- *  }
- *
- *  // Add a converter mutation.
- *  //
- *  Mutations mutations = new Mutations();
- *
- *  mutations.addConverter(new Converter(Person.class.getName(), 0,
- *                                       new MyConversion()));
- *
- *  // Configure the mutations as described {@link Mutations here}.</pre>
- *
+ * package my.package;
+ * <p>
+ * // The old class.  Version 0 is implied.
+ * //
+ * {@literal @Entity}
+ * class Person {
+ * // ...
+ * }
+ * <p>
+ * // The new class.  A new version number must be assigned.
+ * //
+ * {@literal @Entity(version=1)}
+ * class Person {
+ * // Incompatible changes were made here...
+ * }
+ * <p>
+ * // Add a converter mutation.
+ * //
+ * Mutations mutations = new Mutations();
+ * <p>
+ * mutations.addConverter(new Converter(Person.class.getName(), 0,
+ * new MyConversion()));
+ * <p>
+ * // Configure the mutations as described {@link Mutations here}.</pre>
+ * <p>
  * <p>See {@link Conversion} for more information.</p>
  *
- * @see com.sleepycat.persist.evolve Class Evolution
  * @author Mark Hayes
+ * @see com.sleepycat.persist.evolve Class Evolution
  */
 public class Converter extends Mutation {
 
@@ -62,9 +62,9 @@ public class Converter extends Mutation {
      * Creates a mutation for converting all instances of the given class
      * version to the current version of the class.
      *
-     * @param className the class to which this mutation applies.
+     * @param className    the class to which this mutation applies.
      * @param classVersion the class version to which this mutation applies.
-     * @param conversion converter instance.
+     * @param conversion   converter instance.
      */
     public Converter(String className,
                      int classVersion,
@@ -77,11 +77,11 @@ public class Converter extends Mutation {
      * given class version to a type compatible with the current declared type
      * of the field.
      *
-     * @param declaringClassName the class to which this mutation applies.
+     * @param declaringClassName    the class to which this mutation applies.
      * @param declaringClassVersion the class version to which this mutation
-     * applies.
-     * @param fieldName field name to which this mutation applies.
-     * @param conversion converter instance.
+     *                              applies.
+     * @param fieldName             field name to which this mutation applies.
+     * @param conversion            converter instance.
      */
     public Converter(String declaringClassName,
                      int declaringClassVersion,
@@ -94,13 +94,13 @@ public class Converter extends Mutation {
         Class cls = conversion.getClass();
         try {
             Method m = cls.getMethod("equals", Object.class);
-            if (m.getDeclaringClass() == Object.class) {
+            if(m.getDeclaringClass() == Object.class) {
                 throw new IllegalArgumentException
-                    ("Conversion class does not implement the equals method " +
-                     "explicitly (Object.equals is not sufficient): " +
-                     cls.getName());
+                        ("Conversion class does not implement the equals method " +
+                                "explicitly (Object.equals is not sufficient): " +
+                                cls.getName());
             }
-        } catch (NoSuchMethodException e) {
+        } catch(NoSuchMethodException e) {
             throw DbCompat.unexpectedException(e);
         }
     }
@@ -108,7 +108,7 @@ public class Converter extends Mutation {
     /**
      * Returns the converter instance specified to the constructor.
      *
-     * @return  the converter instance.
+     * @return the converter instance.
      */
     public Conversion getConversion() {
         return conversion;
@@ -121,11 +121,12 @@ public class Converter extends Mutation {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Converter) {
+        if(other instanceof Converter) {
             Converter o = (Converter) other;
             return conversion.equals(o.conversion) &&
-                   super.equals(other);
-        } else {
+                    super.equals(other);
+        }
+        else {
             return false;
         }
     }
@@ -138,6 +139,6 @@ public class Converter extends Mutation {
     @Override
     public String toString() {
         return "[Converter " + super.toString() +
-               " Conversion: " + conversion + ']';
+                " Conversion: " + conversion + ']';
     }
 }

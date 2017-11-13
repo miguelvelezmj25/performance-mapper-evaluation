@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.persist.impl;
 /**
  * Field binding operations implemented via reflection (ReflectionAccessor) or
  * bytecode enhancement (EnhancedAccessor).
- *
+ * <p>
  * <p>Normally we read the set of all secondary key fields first and then the
  * set of all non-key fields, reading each set in order of field name.  But
  * when reading an old format record we must account for the following
@@ -53,7 +53,7 @@ interface Accessor {
     /**
      * Creates a new one dimensional array of the given length, having the
      * target class as its component type.
-     *
+     * <p>
      * <p>Using a special method for a one dimensional array, which can be
      * implemented by bytecode generation, is a compromise.  We use reflection
      * to create multidimensional arrays.  We could in the future generate code
@@ -71,161 +71,143 @@ interface Accessor {
 
     /**
      * Writes the primary key field value to the given EntityOutput.
-     *
+     * <p>
      * <p>To write a primary key with a reference type, this method must call
      * EntityOutput.writeKeyObject.</p>
      *
-     * @param o is the object whose primary key field is to be written.
-     *
+     * @param o      is the object whose primary key field is to be written.
      * @param output the output data to write to.
      */
     void writePriKeyField(Object o, EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Reads the primary key field value from the given EntityInput.
-     *
+     * <p>
      * <p>To read a primary key with a reference type, this method must call
      * EntityInput.readKeyObject.</p>
      *
-     * @param o is the object whose primary key field is to be read.
-     *
+     * @param o     is the object whose primary key field is to be read.
      * @param input the input data to read from.
      */
     void readPriKeyField(Object o, EntityInput input)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Writes all secondary key field values to the given EntityOutput,
      * writing fields in super classes first and in name order within class.
      *
-     * @param o is the object whose secondary key fields are to be written.
-     *
-     * <p>If the primary key has a reference type, this method must call
-     * EntityOutput.registerPriKeyObject before writing any other fields.</p>
-     *
+     * @param o      is the object whose secondary key fields are to be written.
+     *               <p>
+     *               <p>If the primary key has a reference type, this method must call
+     *               EntityOutput.registerPriKeyObject before writing any other fields.</p>
      * @param output the output data to write to.
      */
     void writeSecKeyFields(Object o, EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Reads a range of secondary key field values from the given EntityInput,
      * reading fields in super classes first and in name order within class.
-     *
+     * <p>
      * <p>If the primary key has a reference type, this method must call
      * EntityInput.registerPriKeyObject before reading any other fields.</p>
-     *
+     * <p>
      * <p>To read all fields, pass -1 for superLevel, zero for startField and
      * MAX_FIELD_NUM for endField.  Fields from super classes are read
      * first.</p>
-     *
+     * <p>
      * <p>To read a specific range of fields, pass a non-negative number for
      * superLevel and the specific indices of the field range to be read in the
      * class at that level.</p>
      *
-     * @param o is the object whose secondary key fields are to be read.
-     *
-     * @param input the input data to read from.
-     *
+     * @param o          is the object whose secondary key fields are to be read.
+     * @param input      the input data to read from.
      * @param startField the starting field index in the range of fields to
-     * read.  To read all fields, the startField should be zero.
-     *
-     * @param endField the ending field index in the range of fields to read.
-     * To read all fields, the endField should be MAX_FIELD_NUM.
-     *
+     *                   read.  To read all fields, the startField should be zero.
+     * @param endField   the ending field index in the range of fields to read.
+     *                   To read all fields, the endField should be MAX_FIELD_NUM.
      * @param superLevel is a non-negative number to read the fields of the
-     * class that is the Nth super instance; or a negative number to read
-     * fields in all classes.
+     *                   class that is the Nth super instance; or a negative number to read
+     *                   fields in all classes.
      */
     void readSecKeyFields(Object o,
                           EntityInput input,
                           int startField,
                           int endField,
                           int superLevel)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Writes all non-key field values to the given EntityOutput, writing
      * fields in super classes first and in name order within class.
      *
-     * @param o is the object whose non-key fields are to be written.
-     *
+     * @param o      is the object whose non-key fields are to be written.
      * @param output the output data to write to.
      */
     void writeNonKeyFields(Object o, EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Reads a range of non-key field values from the given EntityInput,
      * reading fields in super classes first and in name order within class.
-     *
+     * <p>
      * <p>To read all fields, pass -1 for superLevel, zero for startField and
      * MAX_FIELD_NUM for endField.  Fields from super classes are read
      * first.</p>
-     *
+     * <p>
      * <p>To read a specific range of fields, pass a non-negative number for
      * superLevel and the specific indices of the field range to be read in the
      * class at that level.</p>
      *
-     * @param o is the object whose non-key fields are to be read.
-     *
-     * @param input the input data to read from.
-     *
+     * @param o          is the object whose non-key fields are to be read.
+     * @param input      the input data to read from.
      * @param startField the starting field index in the range of fields to
-     * read.  To read all fields, the startField should be zero.
-     *
-     * @param endField the ending field index in the range of fields to read.
-     * To read all fields, the endField should be MAX_FIELD_NUM.
-     *
+     *                   read.  To read all fields, the startField should be zero.
+     * @param endField   the ending field index in the range of fields to read.
+     *                   To read all fields, the endField should be MAX_FIELD_NUM.
      * @param superLevel is a non-negative number to read the fields of the
-     * class that is the Nth super instance; or a negative number to read
-     * fields in all classes.
+     *                   class that is the Nth super instance; or a negative number to read
+     *                   fields in all classes.
      */
     void readNonKeyFields(Object o,
                           EntityInput input,
                           int startField,
                           int endField,
                           int superLevel)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Writes all composite key field values to the given EntityOutput, writing
      * in declared field number order.
      *
-     * @param o the composite key object whose fields are to be written.
-     *
+     * @param o      the composite key object whose fields are to be written.
      * @param output the output data to write to.
      */
     void writeCompositeKeyFields(Object o, EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Reads all composite key field values from the given EntityInput,
      * reading in declared field number order.
      *
-     * @param o the composite key object whose fields are to be read.
-     *
+     * @param o     the composite key object whose fields are to be read.
      * @param input the input data to read from.
      */
     void readCompositeKeyFields(Object o, EntityInput input)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Returns the value of a given field, representing primitives as primitive
      * wrapper objects.
      *
-     * @param o is the object containing the key field.
-     *
-     * @param field is the field index.
-     *
+     * @param o          is the object containing the key field.
+     * @param field      is the field index.
      * @param superLevel is a positive number to identify the field of the
-     * class that is the Nth super instance; or zero to identify the field in
-     * this class.
-     *
+     *                   class that is the Nth super instance; or zero to identify the field in
+     *                   this class.
      * @param isSecField is true for a secondary key field or false for a
-     * non-key field.
-     *
+     *                   non-key field.
      * @return the current field value, or null for a reference type field
      * that is null.
      */
@@ -238,40 +220,33 @@ interface Accessor {
      * Changes the value of a given field, representing primitives as primitive
      * wrapper objects.
      *
-     * @param o is the object containing the key field.
-     *
-     * @param field is the field index.
-     *
+     * @param o          is the object containing the key field.
+     * @param field      is the field index.
      * @param superLevel is a positive number to identify the field of the
-     * class that is the Nth super instance; or zero to identify the field in
-     * this class.
-     *
+     *                   class that is the Nth super instance; or zero to identify the field in
+     *                   this class.
      * @param isSecField is true for a secondary key field or false for a
-     * non-key field.
-     *
-     * @param value is the new value of the field, or null to set a reference
-     * type field to null.
+     *                   non-key field.
+     * @param value      is the new value of the field, or null to set a reference
+     *                   type field to null.
      */
     void setField(Object o,
                   int field,
                   int superLevel,
                   boolean isSecField,
                   Object value);
-    
+
     /**
-     * Changes the value of the primary key field, representing primitives as 
+     * Changes the value of the primary key field, representing primitives as
      * primitive wrapper objects.
      *
-     * @param o is the object containing the primary key field.
-     *
-     * @param field is the field index.
-     *
+     * @param o          is the object containing the primary key field.
+     * @param field      is the field index.
      * @param superLevel is a positive number to identify the field of the
-     * class that is the Nth super instance; or zero to identify the field in
-     * this class.
-     *
-     * @param value is the new value of the field, or null to set a reference
-     * type field to null.
+     *                   class that is the Nth super instance; or zero to identify the field in
+     *                   this class.
+     * @param value      is the new value of the field, or null to set a reference
+     *                   type field to null.
      */
-    void setPriField(Object o, Object value); 
+    void setPriField(Object o, Object value);
 }

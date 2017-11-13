@@ -22,18 +22,19 @@ package berkeley.com.sleepycat.je;
  * <ul>
  * <li>
  * {@link PreloadConfig#setProgressListener}, which accepts a
- *  ProgressListener&lt;PreloadConfig.Phase&gt;, and reports on
- *  Environment.preload() or Database.preload()</li>
-
+ * ProgressListener&lt;PreloadConfig.Phase&gt;, and reports on
+ * Environment.preload() or Database.preload()</li>
+ * <p>
  * <li>{@link EnvironmentConfig#setRecoveryProgressListener}, which accepts a
- *  ProgressListener&lt;RecoveryProgress&gt;, and reports on environment
- *  startup.
+ * ProgressListener&lt;RecoveryProgress&gt;, and reports on environment
+ * startup.
  * </li>
  * <li>{@link com.sleepycat.je.rep.ReplicationConfig#setSyncupProgressListener},
- *  which accepts a ProgressListener&lt;SyncupProgress&gt;, and reports on
- *  replication stream syncup.
+ * which accepts a ProgressListener&lt;SyncupProgress&gt;, and reports on
+ * replication stream syncup.
  * </li>
  * </ul>
+ *
  * @since 5.0
  */
 public interface ProgressListener<T extends Enum<T>> {
@@ -56,15 +57,14 @@ public interface ProgressListener<T extends Enum<T>> {
      * invalidate and close the environment.
      *
      * @param phase an enum indicating the phase of the operation for
-     * which progress is being reported.
-     * @param n indicates the number of units that have been processed so far.
-     * If this does not apply, -1 is returned.
+     *              which progress is being reported.
+     * @param n     indicates the number of units that have been processed so far.
+     *              If this does not apply, -1 is returned.
      * @param total indicates the total number of units that will be processed
-     * if it is known by JE.  If total is < 0, then the total number is
-     * unknown.  When total == n, this indicates that processing of this
-     * operation is 100% complete, even if all previous calls to progress
-     * passed a negative value for total.
-     *
+     *              if it is known by JE.  If total is < 0, then the total number is
+     *              unknown.  When total == n, this indicates that processing of this
+     *              operation is 100% complete, even if all previous calls to progress
+     *              passed a negative value for total.
      * @return true to continue the operation, false to stop it.
      */
     public boolean progress(T phase, long n, long total);

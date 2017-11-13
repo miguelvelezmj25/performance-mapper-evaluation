@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
+import java.nio.ByteBuffer;
+import java.util.Collection;
 
 /**
  * A sub-interface of {@link LogEntry} that must be implemented by all log
@@ -26,27 +26,27 @@ import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
  * LogEntryType#isReplicationPossible} method returns {@code true}.  These are
  * the log entries that can be included in the replication stream distributed
  * from feeders to replicas during replication.  See [#22336].
- *
+ * <p>
  * <p>Starting with the release using log version 9, as specified by {@link
  * LogEntryType#LOG_VERSION_REPLICATE_OLDER}, all replicable log entries
  * need to support writing themselves in earlier log formats, to support
  * replication during an upgrade when the master is replicated first.  Any
  * loggable objects that they reference should also implement {@link
  * com.sleepycat.je.log.VersionedWriteLoggable} for the same reason.
- *
+ * <p>
  * <p>The {@link #getLastFormatChange} method identifies the log version for
  * which the entry's log format has most recently changed.  This information is
  * used to determine if the current log format is compatible with a
  * non-upgraded replica.
- *
+ * <p>
  * <p>The {@link #getSize(int, boolean)} method overloading is used when
  * creating the buffer that will be used to transmit the log entry data in the
  * earlier format.
- *
+ * <p>
  * <p>The {@link #writeEntry(ByteBuffer, int, boolean)} method overloading is
  * used to convert the in-memory format of the log entry into the log data in
  * the earlier format.
- *
+ * <p>
  * <p>To simplify the implementation of writing log entries in multiple log
  * version formats, a log entry that needs to be written in a previous format
  * will first be read into its in-memory format in the current version, and
@@ -65,18 +65,18 @@ public interface ReplicableLogEntry extends LogEntry {
     /**
      * Returns all possible {@link VersionedWriteLoggable} objects that may be
      * embedded in the binary data of this log entry.
-     *
+     * <p>
      * <p>This is used by tests to ensure that for each X:Y pair, where X is a
      * ReplicableLogEntry and Y is a VersionedWriteLoggable, and X embeds Y
      * either directly or indirectly, X.getLastFormatChange is greater than or
      * equal to Y.getLastFormatChange.
-     *
+     * <p>
      * <p>Each ReplicableLogEntry and VersionedWriteLoggable class typically
      * has a LAST_FORMAT_CHANGE constant that is returned by its
      * getLastFormatChange method. When bumping this constant for an object X
      * embedded by an log entry Y, Y.LAST_FORMAT_CHANGE should also be set to
      * the minimum of its current value and X.LAST_FORMAT_CHANGE.
-     *
+     * <p>
      * <p>Enforcing this rule in a general way is made possible by the
      * getEmbeddedLoggables method of each ReplicableLogEntry and
      * VersionedWriteLoggable. Note that this method is not intended to be
@@ -90,9 +90,9 @@ public interface ReplicableLogEntry extends LogEntry {
      * supported for log entries with format changes made in {@link
      * LogEntryType#LOG_VERSION_REPLICATE_OLDER} or greater.
      *
-     * @param logVersion the log version
+     * @param logVersion     the log version
      * @param forReplication whether the entry will be sent over the wire,
-     * and not written to the log.
+     *                       and not written to the log.
      * @return the number of bytes to store this entry for the log version
      */
     int getSize(int logVersion, boolean forReplication);
@@ -103,10 +103,10 @@ public interface ReplicableLogEntry extends LogEntry {
      * supported for log entries with format changes made in {@link
      * LogEntryType#LOG_VERSION_REPLICATE_OLDER} or greater.
      *
-     * @param logBuffer the destination buffer
+     * @param logBuffer      the destination buffer
      * @param forReplication whether the entry will be sent over the wire,
-     * and not written to the log.
-     * @param logVersion the log version
+     *                       and not written to the log.
+     * @param logVersion     the log version
      */
     void writeEntry(ByteBuffer logBuffer,
                     int logVersion,
@@ -123,14 +123,14 @@ public interface ReplicableLogEntry extends LogEntry {
      * log entry in a format optimized for replication. Implementations should
      * attempt to check efficiently, without instantiating the log entry
      * object. Some implementations will simply return false.
-     *
+     * <p>
      * <p>WARNING: The logBuffer position must not be changed by this method.
-     *
+     * <p>
      * <p>WARNING: The shared LogEntry object is used for calling this method,
      * and this method must not change any of the fields in the object.
      *
-     * @param logBuffer contains the entry that would be re-serialized.
-     * @param srcVersion the log version of entry in logBuffer.
+     * @param logBuffer   contains the entry that would be re-serialized.
+     * @param srcVersion  the log version of entry in logBuffer.
      * @param destVersion the version that would be used for re-serialization.
      */
     boolean isReplicationFormatWorthwhile(ByteBuffer logBuffer,

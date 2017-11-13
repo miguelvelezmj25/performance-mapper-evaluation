@@ -24,14 +24,14 @@ import java.nio.ByteBuffer;
 public class Operation {
 
     public static final Operation PUT =
-        new Operation((byte) 1, "PUT");
+            new Operation((byte) 1, "PUT");
     public static final Operation NO_OVERWRITE =
-        new Operation((byte) 2, "NO_OVERWRITE");
+            new Operation((byte) 2, "NO_OVERWRITE");
     public static final Operation PLACEHOLDER =
-        new Operation((byte) 3, "PLACEHOLDER");
+            new Operation((byte) 3, "PLACEHOLDER");
 
     private static final Operation[] ALL_OPS =
-    {PUT, NO_OVERWRITE, PLACEHOLDER };
+            {PUT, NO_OVERWRITE, PLACEHOLDER};
 
     private static final byte MAX_OP = 3;
     private static final byte MIN_OP = 1;
@@ -47,26 +47,28 @@ public class Operation {
         this.name = name;
     }
 
+    public static Operation readFromBuffer(ByteBuffer buffer) {
+        byte opNum = buffer.get();
+        if(opNum >= MIN_OP &&
+                opNum <= MAX_OP) {
+            return ALL_OPS[opNum - 1];
+        }
+        else {
+            return new Operation(opNum, "UNKNOWN " + opNum);
+        }
+    }
+
     public int getContentSize() {
         return 1;
     }
 
     /**
      * Serialize this object into the buffer.
+     *
      * @param buffer is the destination buffer
      */
     public void writeToBuffer(ByteBuffer buffer) {
         buffer.put(op);
-    }
-
-    public static Operation readFromBuffer(ByteBuffer buffer) {
-        byte opNum = buffer.get();
-        if (opNum >= MIN_OP &&
-            opNum <= MAX_OP) {
-            return ALL_OPS[opNum - 1];
-        } else {
-            return new Operation(opNum, "UNKNOWN " + opNum);
-        }
     }
 
     @Override

@@ -15,9 +15,8 @@ package berkeley.com.sleepycat.je.log.entry;
 
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.tree.OldBINDelta;
 import berkeley.com.sleepycat.je.tree.IN;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
+import berkeley.com.sleepycat.je.tree.OldBINDelta;
 
 /**
  * Before log version 9, this was used to hold a OldBINDelta that can be combined
@@ -26,7 +25,7 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
  * create a live (but incomplete) BIN in the Btree.
  */
 public class OldBINDeltaLogEntry extends SingleItemEntry<OldBINDelta>
-    implements INContainingEntry {
+        implements INContainingEntry {
 
     public OldBINDeltaLogEntry(Class<OldBINDelta> logClass) {
         super(logClass);
@@ -57,7 +56,7 @@ public class OldBINDeltaLogEntry extends SingleItemEntry<OldBINDelta>
     @Override
     public DatabaseId getDbId() {
         OldBINDelta delta = getMainItem();
-        return delta.getDbId();        
+        return delta.getDbId();
     }
 
     @Override
@@ -69,6 +68,6 @@ public class OldBINDeltaLogEntry extends SingleItemEntry<OldBINDelta>
     @Override
     public long getPrevDeltaLsn() {
         OldBINDelta delta = getMainItem();
-        return delta.getPrevDeltaLsn();        
+        return delta.getPrevDeltaLsn();
     }
 }

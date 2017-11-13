@@ -13,37 +13,11 @@
 
 package berkeley.com.sleepycat.je.recovery;
 
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_CHECKPOINTS;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_DELTA_IN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_FULL_BIN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_FULL_IN_FLUSH;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPTID;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_END;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_INTERVAL;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.CKPT_LAST_CKPT_START;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.GROUP_DESC;
-import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.GROUP_NAME;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-
-import berkeley.com.sleepycat.je.CacheMode;
-import berkeley.com.sleepycat.je.CheckpointConfig;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
-import berkeley.com.sleepycat.je.StatsConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.cleaner.Cleaner;
 import berkeley.com.sleepycat.je.cleaner.FileSelector.CheckpointStartCleanerState;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
-import berkeley.com.sleepycat.je.dbi.DbTree;
-import berkeley.com.sleepycat.je.dbi.EnvConfigObserver;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.evictor.OffHeapCache;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.LogManager;
@@ -51,27 +25,22 @@ import berkeley.com.sleepycat.je.log.Provisional;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
 import berkeley.com.sleepycat.je.log.entry.INLogEntry;
 import berkeley.com.sleepycat.je.log.entry.SingleItemEntry;
-import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.ChildReference;
-import berkeley.com.sleepycat.je.tree.IN;
-import berkeley.com.sleepycat.je.tree.SearchResult;
-import berkeley.com.sleepycat.je.tree.Tree;
-import berkeley.com.sleepycat.je.tree.WithRootLatched;
-import berkeley.com.sleepycat.je.utilint.DaemonThread;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LSNStat;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.tree.*;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+
+import static berkeley.com.sleepycat.je.recovery.CheckpointStatDefinition.*;
 
 /**
  * The Checkpointer looks through the tree for internal nodes that must be
  * flushed to the log. Checkpoint flushes must be done in ascending order from
  * the bottom of the tree up.
- *
+ * <p>
  * Checkpoint and IN Logging Rules
  * -------------------------------
  * The checkpoint must log, and make accessible via non-provisional ancestors,
@@ -79,7 +48,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * CkptStart onward, any IN that became dirty (before the crash) after the
  * CkptStart must become dirty again as the result of replaying the action that
  * caused it to originally become dirty.
- *
+ * <p>
  * Therefore, when an IN is dirtied at some point in the checkpoint interval,
  * but is not logged by the checkpoint, the log entry representing the action
  * that dirtied the IN must follow either the CkptStart or the FirstActiveLSN
@@ -87,7 +56,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * equal to the CkptStart LSN.  Recovery will process LNs between the
  * FirstActiveLSN and the end of the log.  Other entries are only processed
  * from the CkptStart forward.  And provisional entries are not processed.
- *
+ * <p>
  * Example: Non-transactional LN logging.  We take two actions: 1) log the LN
  * and then 2) dirty the parent BIN.  What if the LN is logged before CkptStart
  * and the BIN is dirtied after CkptStart?  How do we avoid breaking the rules?
@@ -97,7 +66,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * the LN was logged before CkptStart, the BIN will be dirtied before the
  * checkpointer latches it during dirty map construction.  So the BIN will
  * always be included in the dirty map and logged by the checkpoint.
- *
+ * <p>
  * Example: Abort.  We take two actions: 1) log the abort and then 2) undo the
  * changes, which modifies (dirties) the BIN parents of the undone LNs.  There
  * is nothing to prevent logging CkptStart in between these two actions, so how
@@ -106,20 +75,20 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * by the undo after CkptStart is logged, the FirstActiveLSN will be prior to
  * CkptStart.  Therefore, we will process the Abort and replay the action that
  * modifies the BINs.
- *
+ * <p>
  * Exception: Lazy migration.  The log cleaner will make an IN dirty without
  * logging an action that makes it dirty.  This is an exception to the general
  * rule that actions should be logged when they cause dirtiness.   The reasons
  * this is safe are:
  * 1. The IN contents are not modified, so there is no information lost if the
- *    IN is never logged, or is logged provisionally and no ancestor is logged
- *    non-provisionally.
+ * IN is never logged, or is logged provisionally and no ancestor is logged
+ * non-provisionally.
  * 2. If the IN is logged non-provisionally, this will have the side effect of
- *    recording the old LSN as being obsolete. However, the general rules for
- *    checkpointing and recovery will ensure that the new version is used in
- *    the Btree.  The new version will either be replayed by recovery or
- *    referenced in the active Btree via a non-provisional ancestor.
- *
+ * recording the old LSN as being obsolete. However, the general rules for
+ * checkpointing and recovery will ensure that the new version is used in
+ * the Btree.  The new version will either be replayed by recovery or
+ * referenced in the active Btree via a non-provisional ancestor.
+ * <p>
  * Checkpoint Algorithm TODO update this
  * --------------------
  * The final checkpointDirtyMap field is used to hold (in addition to the dirty
@@ -127,63 +96,63 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * object is synchronized so that eviction and checkpointing can access it
  * concurrently.  When a checkpoint is not active, the state is CkptState.NONE
  * and the dirty map is empty.  When a checkpoint runs, we do this:
- *
+ * <p>
  * 1. Get set of files from cleaner that can be deleted after this checkpoint.
  * 2. Set checkpointDirtyMap state to DIRTY_MAP_INCOMPLETE, meaning that dirty
- *    map construction is in progress.
+ * map construction is in progress.
  * 3. Log CkptStart
  * 4. Construct dirty map, organized by Btree level, from dirty INs in INList.
- *    The highest flush levels are calculated during dirty map construction.
- *    Set checkpointDirtyMap state to DIRTY_MAP_COMPLETE.
+ * The highest flush levels are calculated during dirty map construction.
+ * Set checkpointDirtyMap state to DIRTY_MAP_COMPLETE.
  * 5. Flush INs in dirty map.
- *        + First, flush the bottom two levels a sub-tree at a time, where a
- *          sub-tree is one IN at level two and all its BIN children.  Higher
- *          levels (above level two) are logged strictly by level, not using
- *          subtrees.
- *              o If je.checkpointer.highPriority=false, we log one IN at a
- *                time, whether or not the IN is logged as part of a subtree,
- *                and do a Btree search for the parent of each IN.
- *              o If je.checkpointer.highPriority=true, for the bottom two
- *                levels we log each sub-tree in a single call to the
- *                LogManager with the parent IN latched, and we only do one
- *                Btree search for each level two IN.  Higher levels are logged
- *                one IN at a time as with highPriority=false.
- *        + The Provisional property is set as follows, depending on the level
- *          of the IN:
- *              o level is max flush level:  Provisional.NO
- *              o level is bottom level: Provisional.YES
- *              o Otherwise (middle levels): Provisional.BEFORE_CKPT_END
- *  6. Flush VLSNIndex cache to make VLSNIndex recoverable.
- *  7. Flush UtilizationTracker (write FileSummaryLNs) to persist all
- *     tracked obsolete offsets and utilization summary info, to make this info
- *     recoverable.
- *  8. Log CkptEnd
- *  9. Delete cleaned files from step 1.
+ * + First, flush the bottom two levels a sub-tree at a time, where a
+ * sub-tree is one IN at level two and all its BIN children.  Higher
+ * levels (above level two) are logged strictly by level, not using
+ * subtrees.
+ * o If je.checkpointer.highPriority=false, we log one IN at a
+ * time, whether or not the IN is logged as part of a subtree,
+ * and do a Btree search for the parent of each IN.
+ * o If je.checkpointer.highPriority=true, for the bottom two
+ * levels we log each sub-tree in a single call to the
+ * LogManager with the parent IN latched, and we only do one
+ * Btree search for each level two IN.  Higher levels are logged
+ * one IN at a time as with highPriority=false.
+ * + The Provisional property is set as follows, depending on the level
+ * of the IN:
+ * o level is max flush level:  Provisional.NO
+ * o level is bottom level: Provisional.YES
+ * o Otherwise (middle levels): Provisional.BEFORE_CKPT_END
+ * 6. Flush VLSNIndex cache to make VLSNIndex recoverable.
+ * 7. Flush UtilizationTracker (write FileSummaryLNs) to persist all
+ * tracked obsolete offsets and utilization summary info, to make this info
+ * recoverable.
+ * 8. Log CkptEnd
+ * 9. Delete cleaned files from step 1.
  * 10. Set checkpointDirtyMap state to NONE.
- *
+ * <p>
  * Per-DB Highest Flush Level
  * --------------------------
  * As mentioned above, when the dirty map is constructed we also determine the
  * highest flush level for each database.  This is the maximum Btree level at
  * which a dirty node exists in the DB.
- *
+ * <p>
  * When logging a node below the maxFlushLevel, we add the parent to the dirty
  * map.  It may or may not have been added when the dirty map was constructed.
  * The idea is to flush all ancestors of all nodes in the dirty map, up to and
  * including the maxFlushLevel, even if those ancestors were not dirty when the
  * dirty map was constructed.
- *
+ * <p>
  * This is done to avoid orphaning a dirty node as shown in this example.
- *
- *          IN-A       (root level=4)
- *         /    \
- *   (d) IN-B   IN-C   (maxFlushLevel=3)
- *               \
- *           (d) IN-D
- *
+ * <p>
+ * IN-A       (root level=4)
+ * /    \
+ * (d) IN-B   IN-C   (maxFlushLevel=3)
+ * \
+ * (d) IN-D
+ * <p>
  * IN-C is not dirty (d) when the dirty map is constructed, but it will be
  * logged because its child (IN-D) is dirty, and it is not above maxFlushLevel.
- *
+ * <p>
  * If IN-C were not logged, and there were a crash after the checkpoint, the
  * changes to IN-D would be lost.  IN-D would not be replayed by recovery
  * because it is logged provisionally, and it would not be accessible via its
@@ -191,106 +160,106 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * non-provisionally.  The actions that led to the changes in IN-D may not be
  * replayed either, because they may appear before the firstActiveLsn
  * associated with the checkpoint.
- *
+ * <p>
  * When log files are to be deleted at the end of the checkpoint (after being
  * processed by the log cleaner), the maxFlushLevel is increased by one.
  * This is to ensure that LSNs in deleted files will not be fetched during
  * recovery.  Such files are in the FileSelector.CLEANED state, which means
  * they have been processed by the cleaner since the last checkpoint.
- *
+ * <p>
  * TODO: Document circumstances and motivation for the extra flush level.
- *
+ * <p>
  * Lastly, for Database.sync or a checkpoint with MinimizeRecoveryTime
  * configured, we will flush all the way to the root rather than using the
  * maxFlushLevel computed as described above.
- *
+ * <p>
  * Provisional.BEFORE_CKPT_END
  * ---------------------------
  * See Provisional.java for a description of the relationship between the
  * checkpoint algorithm above and the BEFORE_CKPT_END property.
- *
+ * <p>
  * Coordination of Eviction and Checkpointing
  * ------------------------------------------
  * Eviction can proceed concurrently with all phases of a checkpoint, and
  * eviction may take place concurrently in multiple threads.  This concurrency
  * is crucial to avoid blocking application threads that perform eviction and
  * to reduce the amount of eviction required in application threads.
- *
+ * <p>
  * Eviction calls Checkpointer.coordinateEvictionWithCheckpoint, which calls
  * DirtyINMap.coordinateEvictionWithCheckpoint, just before logging an IN.
  * coordinateEvictionWithCheckpoint returns whether the IN should be logged
  * provisionally (Provisional.YES) or non-provisionally (Provisional.NO).
- *
+ * <p>
  * Other coordination necessary depends on the state of the checkpoint:
- *   + NONE: No additional action.
- *      o return Provisional.NO
- *   + DIRTY_MAP_INCOMPLETE: The parent IN is added to the dirty map, exactly
- *     as if it were encountered as dirty in the INList during dirty map
- *     construction.
- *      o IN is root: return Provisional.NO
- *      o IN is not root: return Provisional.YES
- *   + DIRTY_MAP_COMPLETE:
- *      o IN level GTE highest flush level: return Provisional.NO
- *      o IN level LT highest flush level: return Provisional.YES
- *
+ * + NONE: No additional action.
+ * o return Provisional.NO
+ * + DIRTY_MAP_INCOMPLETE: The parent IN is added to the dirty map, exactly
+ * as if it were encountered as dirty in the INList during dirty map
+ * construction.
+ * o IN is root: return Provisional.NO
+ * o IN is not root: return Provisional.YES
+ * + DIRTY_MAP_COMPLETE:
+ * o IN level GTE highest flush level: return Provisional.NO
+ * o IN level LT highest flush level: return Provisional.YES
+ * <p>
  * In general this is designed so that eviction will use the same provisional
  * value that would be used by the checkpoint, as if the checkpoint itself were
  * logging the IN.  However, there are several conditions where this is not
  * exactly the case.
- *
+ * <p>
  * 1. Eviction may log an IN with Provisional.YES when the IN was not dirty at
- *    the time of dirty map creation, if it became dirty afterwards.  In this
- *    case, the checkpointer would not have logged the IN at all.  This is safe
- *    because the actions that made that IN dirty are logged in the recovery
- *    period.
+ * the time of dirty map creation, if it became dirty afterwards.  In this
+ * case, the checkpointer would not have logged the IN at all.  This is safe
+ * because the actions that made that IN dirty are logged in the recovery
+ * period.
  * 2. Eviction may log an IN with Provisional.YES after the checkpoint has
- *    logged it, if it becomes dirty again.  In this case the IN is logged
- *    twice, which would not have been done by the checkpoint alone.  This is
- *    safe because the actions that made that IN dirty are logged in the
- *    recovery period.
+ * logged it, if it becomes dirty again.  In this case the IN is logged
+ * twice, which would not have been done by the checkpoint alone.  This is
+ * safe because the actions that made that IN dirty are logged in the
+ * recovery period.
  * 3. An intermediate level IN (not bottom most and not the highest flush
- *    level) will be logged by the checkpoint with Provisional.BEFORE_CKPT_END
- *    but will be logged by eviction with Provisional.YES.  See below for why
- *    this is safe.
+ * level) will be logged by the checkpoint with Provisional.BEFORE_CKPT_END
+ * but will be logged by eviction with Provisional.YES.  See below for why
+ * this is safe.
  * 4. Between checkpoint step 8 (log CkptEnd) and 10 (set checkpointDirtyMap
- *    state to NONE), eviction may log an IN with Provisional.YES, although a
- *    checkpoint is not strictly active during this interval.  See below for
- *    why this is safe.
- *
+ * state to NONE), eviction may log an IN with Provisional.YES, although a
+ * checkpoint is not strictly active during this interval.  See below for
+ * why this is safe.
+ * <p>
  * It is safe for eviction to log an IN as Provisional.YES for the last two
  * special cases, because this does not cause incorrect recovery behavior.  For
  * recovery to work properly, it is only necessary that:
- *
- *  + Provisional.NO is used for INs at the max flush level during an active
- *    checkpoint.
- *  + Provisional.YES or BEFORE_CKPT_END is used for INs below the max flush
- *    level, to avoid replaying an IN during recovery that may depend on a file
- *    deleted as the result of the checkpoint.
- *
+ * <p>
+ * + Provisional.NO is used for INs at the max flush level during an active
+ * checkpoint.
+ * + Provisional.YES or BEFORE_CKPT_END is used for INs below the max flush
+ * level, to avoid replaying an IN during recovery that may depend on a file
+ * deleted as the result of the checkpoint.
+ * <p>
  * You may ask why we don't use Provisional.YES for eviction when a checkpoint
  * is not active.  There are two reason, both related to performance:
- *
+ * <p>
  * 1. This would be wasteful when an IN is evicted in between checkpoints, and
- *    that portion of the log is processed by recovery later, in the event of a
- *    crash.  The evicted INs would be ignored by recovery, but the actions
- *    that caused them to be dirty would be replayed and the INs would be
- *    logged again redundantly.
+ * that portion of the log is processed by recovery later, in the event of a
+ * crash.  The evicted INs would be ignored by recovery, but the actions
+ * that caused them to be dirty would be replayed and the INs would be
+ * logged again redundantly.
  * 2. Logging a IN provisionally will not count the old LSN as obsolete
- *    immediately, so cleaner utilization will be inaccurate until the a
- *    non-provisional parent is logged, typically by the next checkpoint.  It
- *    is always important to keep the cleaner from stalling and spiking, to
- *    keep latency and throughput as level as possible.
- *
+ * immediately, so cleaner utilization will be inaccurate until the a
+ * non-provisional parent is logged, typically by the next checkpoint.  It
+ * is always important to keep the cleaner from stalling and spiking, to
+ * keep latency and throughput as level as possible.
+ * <p>
  * Therefore, it is safe to log with Provisional.YES in between checkpoints,
  * but not desirable.
- *
+ * <p>
  * Although we don't do this, it would be safe and optimal to evict with
  * BEFORE_CKPT_END in between checkpoints, because it would be treated by
  * recovery as if it were Provisional.NO.  This is because the interval between
  * checkpoints is only processed by recovery if it follows the last CkptEnd,
  * and BEFORE_CKPT_END is treated as Provisional.NO if the IN follows the last
  * CkptEnd.
- *
+ * <p>
  * However, it would not be safe to evict an IN with BEFORE_CKPT_END during a
  * checkpoint, when logging of the IN's ancestors does not occur according to
  * the rules of the checkpoint.  If this were done, then if the checkpoint
@@ -298,53 +267,53 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * the old version of the IN will mistakenly be recorded.  Below are two cases
  * where BEFORE_CKPT_END is used correctly and one showing how it could be used
  * incorrectly.
- *
+ * <p>
  * 1. Correct use of BEFORE_CKPT_END when the checkpoint does not complete.
- *
- *        050 BIN-A
- *        060 IN-B parent of BIN-A
- *        100 CkptStart
- *        200 BIN-A logged with BEFORE_CKPT_END
- *        300 FileSummaryLN with obsolete offset for BIN-A at 050
- *        Crash and recover
- *
- *    Recovery will process BIN-A at 200 (it will be considered
- *    non-provisional) because there is no following CkptEnd.  It is
- *    therefore correct that BIN-A at 050 is obsolete.
- *
+ * <p>
+ * 050 BIN-A
+ * 060 IN-B parent of BIN-A
+ * 100 CkptStart
+ * 200 BIN-A logged with BEFORE_CKPT_END
+ * 300 FileSummaryLN with obsolete offset for BIN-A at 050
+ * Crash and recover
+ * <p>
+ * Recovery will process BIN-A at 200 (it will be considered
+ * non-provisional) because there is no following CkptEnd.  It is
+ * therefore correct that BIN-A at 050 is obsolete.
+ * <p>
  * 2. Correct use of BEFORE_CKPT_END when the checkpoint does complete.
- *
- *        050 BIN-A
- *        060 IN-B parent of BIN-A
- *        100 CkptStart
- *        200 BIN-A logged with BEFORE_CKPT_END
- *        300 FileSummaryLN with obsolete offset for BIN-A at 050
- *        400 IN-B parent of BIN-A, non-provisional
- *        500 CkptEnd
- *        Crash and recover
- *
- *    Recovery will not process BIN-A at 200 (it will be considered
- *    provisional) because there is a following CkptEnd, but it will
- *    process its parent IN-B at 400, and therefore the BIN-A at 200 will be
- *    active in the tree.  It is therefore correct that BIN-A at 050 is
- *    obsolete.
- *
+ * <p>
+ * 050 BIN-A
+ * 060 IN-B parent of BIN-A
+ * 100 CkptStart
+ * 200 BIN-A logged with BEFORE_CKPT_END
+ * 300 FileSummaryLN with obsolete offset for BIN-A at 050
+ * 400 IN-B parent of BIN-A, non-provisional
+ * 500 CkptEnd
+ * Crash and recover
+ * <p>
+ * Recovery will not process BIN-A at 200 (it will be considered
+ * provisional) because there is a following CkptEnd, but it will
+ * process its parent IN-B at 400, and therefore the BIN-A at 200 will be
+ * active in the tree.  It is therefore correct that BIN-A at 050 is
+ * obsolete.
+ * <p>
  * 3. Incorrect use of BEFORE_CKPT_END when the checkpoint does complete.
- *
- *        050 BIN-A
- *        060 IN-B parent of BIN-A
- *        100 CkptStart
- *        200 BIN-A logged with BEFORE_CKPT_END
- *        300 FileSummaryLN with obsolete offset for BIN-A at 050
- *        400 CkptEnd
- *        Crash and recover
- *
- *    Recovery will not process BIN-A at 200 (it will be considered
- *    provisional) because there is a following CkptEnd, but no parent
- *    IN-B is logged, and therefore the IN-B at 060 and BIN-A at 050 will be
- *    active in the tree.  It is therefore incorrect that BIN-A at 050 is
- *    obsolete.
- *
+ * <p>
+ * 050 BIN-A
+ * 060 IN-B parent of BIN-A
+ * 100 CkptStart
+ * 200 BIN-A logged with BEFORE_CKPT_END
+ * 300 FileSummaryLN with obsolete offset for BIN-A at 050
+ * 400 CkptEnd
+ * Crash and recover
+ * <p>
+ * Recovery will not process BIN-A at 200 (it will be considered
+ * provisional) because there is a following CkptEnd, but no parent
+ * IN-B is logged, and therefore the IN-B at 060 and BIN-A at 050 will be
+ * active in the tree.  It is therefore incorrect that BIN-A at 050 is
+ * obsolete.
+ * <p>
  * This last case is what caused the LFNF in SR [#19422], when BEFORE_CKPT_END
  * was mistakenly used for logging evicted BINs via CacheMode.EVICT_BIN.
  * During the checkpoint, we evict BIN-A and log it with BEFORE_CKPT_END, yet
@@ -353,7 +322,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * 050 above) is cleaned and deleted.  During cleaning, it is not migrated
  * because an obsolete offset was previously recorded.  The LFNF occurs when
  * trying to access this BIN during a user operation.
- *
+ * <p>
  * CacheMode.EVICT_BIN
  * -------------------
  * Unlike in JE 4.0 where EVICT_BIN was first introduced, in JE 4.1 and later
@@ -372,10 +341,6 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
     public static TestHook<?> beforeFlushHook = null;
 
     public static TestHook<IN> examineINForCheckpointHook = null;
-
-    /* Checkpoint sequence, initialized at recovery. */
-    private long checkpointId;
-
     /*
      * How much the log should grow between checkpoints. If 0, we're using time
      * based checkpointing.
@@ -383,34 +348,33 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
     private final long logSizeBytesInterval;
     private final long logFileMax;
     private final long timeInterval;
-    private long lastCheckpointMillis;
-    private volatile boolean wakeupAfterNoWrites;
-
-    /* Configured to true to minimize checkpoint duration. */
-    private boolean highPriority;
-
-    private long nCheckpoints;
-    private long lastCheckpointStart;
-    private long lastCheckpointEnd;
-    private long lastCheckpointInterval;
     private final FlushStats flushStats;
-
     /**
      * The DirtyINMap for checkpointing is created once and is reset after each
      * checkpoint is complete.  Access to this object is synchronized so that
      * eviction and checkpointing can access it concurrently.
      */
     private final DirtyINMap checkpointDirtyMap;
+    /* Checkpoint sequence, initialized at recovery. */
+    private long checkpointId;
+    private long lastCheckpointMillis;
+    private volatile boolean wakeupAfterNoWrites;
+    /* Configured to true to minimize checkpoint duration. */
+    private boolean highPriority;
+    private long nCheckpoints;
+    private long lastCheckpointStart;
+    private long lastCheckpointEnd;
+    private long lastCheckpointInterval;
 
     public Checkpointer(EnvironmentImpl envImpl,
                         long waitTime,
                         String name) {
         super(waitTime, name, envImpl);
         logSizeBytesInterval =
-            envImpl.getConfigManager().getLong
-                (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL);
+                envImpl.getConfigManager().getLong
+                        (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL);
         logFileMax =
-            envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
+                envImpl.getConfigManager().getLong(EnvironmentParams.LOG_FILE_MAX);
         timeInterval = waitTime;
         lastCheckpointMillis = 0;
 
@@ -425,560 +389,38 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
     }
 
     /**
-     * Process notifications of mutable property changes.
-     */
-    @Override
-    public void envConfigUpdate(DbConfigManager cm,
-                                EnvironmentMutableConfig ignore) {
-        highPriority = cm.getBoolean
-            (EnvironmentParams.CHECKPOINTER_HIGH_PRIORITY);
-    }
-
-    /**
-     * Initializes the checkpoint intervals when no checkpoint is performed
-     * while opening the environment.
-     */
-    public void initIntervals(long lastCheckpointStart,
-                              long lastCheckpointEnd,
-                              long lastCheckpointMillis) {
-        this.lastCheckpointStart = lastCheckpointStart;
-        this.lastCheckpointEnd = lastCheckpointEnd;
-        this.lastCheckpointMillis = lastCheckpointMillis;
-    }
-
-    /**
-     * Coordinates an eviction with an in-progress checkpoint and returns
-     * whether provisional logging is needed.
-     *
-     * @return the provisional status to use for logging the target.
-     */
-    public Provisional coordinateEvictionWithCheckpoint(
-        final DatabaseImpl db,
-        final int targetLevel,
-        final IN parent) {
-
-        return checkpointDirtyMap.
-            coordinateEvictionWithCheckpoint(db, targetLevel, parent);
-    }
-
-    /**
-     * Coordinates a split with an in-progress checkpoint.
-     *
-     * @param newSibling the sibling IN created by the split.
-     */
-    public void coordinateSplitWithCheckpoint(final IN newSibling) {
-        checkpointDirtyMap.coordinateSplitWithCheckpoint(newSibling);
-    }
-
-    /**
      * Figure out the wakeup period. Supplied through this static method
      * because we need to pass wakeup period to the superclass and need to do
      * the calcuation outside this constructor.
      *
      * @throws IllegalArgumentException via Environment ctor and
-     * setMutableConfig.
+     *                                  setMutableConfig.
      */
     public static long getWakeupPeriod(DbConfigManager configManager)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         long wakeupPeriod = configManager.getDuration
-            (EnvironmentParams.CHECKPOINTER_WAKEUP_INTERVAL);
+                (EnvironmentParams.CHECKPOINTER_WAKEUP_INTERVAL);
         long bytePeriod = configManager.getLong
-            (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL);
+                (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL);
 
         /* Checkpointing period must be set either by time or by log size. */
-        if ((wakeupPeriod == 0) && (bytePeriod == 0)) {
+        if((wakeupPeriod == 0) && (bytePeriod == 0)) {
             throw new IllegalArgumentException
-                (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL.getName() +
-                 " and " +
-                 EnvironmentParams.CHECKPOINTER_WAKEUP_INTERVAL.getName() +
-                 " cannot both be 0. ");
+                    (EnvironmentParams.CHECKPOINTER_BYTES_INTERVAL.getName() +
+                            " and " +
+                            EnvironmentParams.CHECKPOINTER_WAKEUP_INTERVAL.getName() +
+                            " cannot both be 0. ");
         }
 
         /*
          * Checkpointing by log size takes precendence over time based period.
          */
-        if (bytePeriod == 0) {
+        if(bytePeriod == 0) {
             return wakeupPeriod;
-        } else {
+        }
+        else {
             return 0;
-        }
-    }
-
-    /**
-     * Set checkpoint id -- can only be done after recovery.
-     */
-    public synchronized void setCheckpointId(long lastCheckpointId) {
-        checkpointId = lastCheckpointId;
-    }
-
-    /**
-     * Load stats.
-     */
-    @SuppressWarnings("unused")
-    public StatGroup loadStats(StatsConfig config) {
-        StatGroup stats = new StatGroup(GROUP_NAME, GROUP_DESC);
-        new LongStat(stats, CKPT_LAST_CKPTID, checkpointId);
-        new LongStat(stats, CKPT_CHECKPOINTS, nCheckpoints);
-        new LongStat(stats, CKPT_LAST_CKPT_INTERVAL, lastCheckpointInterval);
-        new LSNStat(stats, CKPT_LAST_CKPT_START, lastCheckpointStart);
-        new LSNStat(stats, CKPT_LAST_CKPT_END, lastCheckpointEnd);
-        new LongStat(stats, CKPT_FULL_IN_FLUSH, flushStats.nFullINFlush);
-        new LongStat(stats, CKPT_FULL_BIN_FLUSH, flushStats.nFullBINFlush);
-        new LongStat(stats, CKPT_DELTA_IN_FLUSH, flushStats.nDeltaINFlush);
-
-        if (config.getClear()) {
-            nCheckpoints = 0;
-            flushStats.nFullINFlush = 0;
-            flushStats.nFullBINFlush = 0;
-            flushStats.nDeltaINFlush = 0;
-        }
-
-        return stats;
-    }
-
-    /**
-     * Return the number of retries when a deadlock exception occurs.
-     */
-    @Override
-    protected long nDeadlockRetries() {
-        return envImpl.getConfigManager().getInt
-            (EnvironmentParams.CHECKPOINTER_RETRY);
-    }
-
-    /**
-     * Called whenever the DaemonThread wakes up from a sleep.
-     */
-    @Override
-    protected void onWakeup() {
-
-        if (envImpl.isClosing()) {
-            return;
-        }
-
-        doCheckpoint(CheckpointConfig.DEFAULT, "daemon");
-
-        wakeupAfterNoWrites = false;
-    }
-
-    /**
-     * Wakes up the checkpointer if a checkpoint log interval is configured and
-     * the number of bytes written since the last checkpoint exceeds the size
-     * of the interval.
-     */
-    public void wakeupAfterWrite() {
-
-        if ((logSizeBytesInterval != 0) && !isRunning()) {
-
-            long nextLsn = envImpl.getFileManager().getNextLsn();
-
-            if (DbLsn.getNoCleaningDistance(
-                    nextLsn, lastCheckpointStart, logFileMax) >=
-                logSizeBytesInterval) {
-
-                wakeup();
-            }
-        }
-    }
-
-    /**
-     * Wakes up the checkpointer if a checkpoint is needed to reclaim disk
-     * space for already cleaned files. This method is called after an idle
-     * period with no writes.
-     */
-    public void wakeupAfterNoWrites() {
-
-        if (!isRunning() && needCheckpointForCleanedFiles()) {
-            wakeupAfterNoWrites = true;
-            wakeup();
-        }
-    }
-
-    private boolean needCheckpointForCleanedFiles() {
-        return envImpl.getCleaner().getFileSelector().isCheckpointNeeded();
-    }
-
-    /**
-     * Determine whether a checkpoint should be run.
-     */
-    private boolean isRunnable(CheckpointConfig config) {
-        /* Figure out if we're using log size or time to determine interval.*/
-        long useBytesInterval = 0;
-        long useTimeInterval = 0;
-        long nextLsn = DbLsn.NULL_LSN;
-        boolean runnable = false;
-        try {
-            if (config.getForce()) {
-                runnable = true;
-                return true;
-            }
-
-            if (wakeupAfterNoWrites && needCheckpointForCleanedFiles()) {
-                runnable = true;
-                return true;
-            }
-
-            if (config.getKBytes() != 0) {
-                useBytesInterval = config.getKBytes() << 10;
-
-            } else if (config.getMinutes() != 0) {
-                /* Convert to millis. */
-                useTimeInterval = config.getMinutes() * 60 * 1000;
-
-            } else if (logSizeBytesInterval != 0) {
-                useBytesInterval = logSizeBytesInterval;
-
-            } else {
-                useTimeInterval = timeInterval;
-            }
-
-            /*
-             * If our checkpoint interval is defined by log size, check on how
-             * much log has grown since the last checkpoint.
-             */
-            if (useBytesInterval != 0) {
-                nextLsn = envImpl.getFileManager().getNextLsn();
-
-                if (DbLsn.getNoCleaningDistance(
-                    nextLsn, lastCheckpointStart, logFileMax) >=
-                    useBytesInterval) {
-
-                    runnable = true;
-                }
-
-            } else if (useTimeInterval != 0) {
-
-                /*
-                 * Our checkpoint is determined by time.  If enough time has
-                 * passed and some log data has been written, do a checkpoint.
-                 */
-                final long lastUsedLsn =
-                    envImpl.getFileManager().getLastUsedLsn();
-
-                if (((System.currentTimeMillis() - lastCheckpointMillis) >=
-                     useTimeInterval) &&
-                    (DbLsn.compareTo(lastUsedLsn, lastCheckpointEnd) != 0)) {
-
-                    runnable = true;
-                }
-            }
-            return runnable;
-
-        } finally {
-            if (logger.isLoggable(Level.FINEST)) {
-                final StringBuilder sb = new StringBuilder();
-                sb.append("size interval=").append(useBytesInterval);
-                if (nextLsn != DbLsn.NULL_LSN) {
-                    sb.append(" nextLsn=").
-                        append(DbLsn.getNoFormatString(nextLsn));
-                }
-                if (lastCheckpointEnd != DbLsn.NULL_LSN) {
-                    sb.append(" lastCkpt=");
-                    sb.append(DbLsn.getNoFormatString(lastCheckpointEnd));
-                }
-                sb.append(" time interval=").append(useTimeInterval);
-                sb.append(" force=").append(config.getForce());
-                sb.append(" runnable=").append(runnable);
-
-                LoggerUtils.finest(logger, envImpl, sb.toString());
-            }
-        }
-    }
-
-    /**
-     * Estimates how many bytes will be written in order to complete the next
-     * N checkpoints, not including the current checkpoint (if in progress).
-     */
-    public long amountWrittenByNextCheckpoints(final int nCheckpoints) {
-
-        final long currentLsn = envImpl.getFileManager().getNextLsn();
-
-        final long ckptInterval;
-        final long distanceToNextCkptStart;
-
-        if (lastCheckpointInterval != 0) {
-            ckptInterval = lastCheckpointInterval;
-
-            distanceToNextCkptStart = DbLsn.getNoCleaningDistance(
-                currentLsn, lastCheckpointStart, logFileMax);
-        } else {
-            ckptInterval = logFileMax;
-            distanceToNextCkptStart = logFileMax;
-        }
-
-        return distanceToNextCkptStart + (nCheckpoints * ckptInterval);
-    }
-
-    /**
-     * The real work to do a checkpoint. This may be called by the checkpoint
-     * thread when waking up, or it may be invoked programatically through the
-     * api.
-     *
-     * @param invokingSource a debug aid, to indicate who invoked this
-     *       checkpoint. (i.e. recovery, the checkpointer daemon, the cleaner,
-     *       programatically)
-     */
-    public synchronized void doCheckpoint(CheckpointConfig config,
-                                          String invokingSource) {
-        if (envImpl.isReadOnly()) {
-            return;
-        }
-
-        if (!isRunnable(config)) {
-            return;
-        }
-
-        /*
-         * If minimizing recovery time is desired, then flush all the way to
-         * the top of the dbtree instead of stopping at the highest level last
-         * modified, so that only the root INs are processed by recovery.
-         */
-        final boolean flushAll = config.getMinimizeRecoveryTime();
-
-        /*
-         * If there are cleaned files to be deleted, flush an extra level to
-         * write out the parents of cleaned nodes.  This ensures that no node
-         * will contain the LSN of a cleaned file.
-         *
-         * Note that we don't currently distinguish between files in the
-         * CLEANED and FULLY_PROCESSED states.  For a FULLY_PROCESSED file, a
-         * pending LN may have been processed since the prior checkpoint.
-         * However, the BIN containing the LSN of the LN is guaranteed to be
-         * logged, so there is no need to increment maxFlushLevel.  So we could
-         * optimize in the future and only set flushExtraLevel when some files
-         * are CLEANED (i.e., do not set flushExtraLevel when all files are
-         * FULLY_PROCESSED or cleanerState.isEmpty()).
-         */
-        final Cleaner cleaner = envImpl.getCleaner();
-
-        final CheckpointStartCleanerState cleanerState =
-            cleaner.getFilesAtCheckpointStart();
-
-        final boolean flushExtraLevel = !cleanerState.isEmpty();
-
-        lastCheckpointMillis = System.currentTimeMillis();
-        flushStats.resetPerRunCounters();
-
-        /* Get the next checkpoint id. */
-        checkpointId++;
-        nCheckpoints++;
-
-        boolean success = false;
-        boolean traced = false;
-
-        final LogManager logManager = envImpl.getLogManager();
-
-        /*
-         * Set the checkpoint state so that concurrent eviction can be
-         * coordinated.
-         */
-        checkpointDirtyMap.beginCheckpoint(flushAll, flushExtraLevel);
-
-        try {
-            /* Log the checkpoint start. */
-            final SingleItemEntry<CheckpointStart> startEntry =
-                SingleItemEntry.create(
-                    LogEntryType.LOG_CKPT_START,
-                    new CheckpointStart(checkpointId, invokingSource));
-
-            final long checkpointStart =
-                logManager.log(startEntry, ReplicationContext.NO_REPLICATE);
-
-            /*
-             * Note the first active LSN point. The definition of
-             * firstActiveLsn is that all log entries for active transactions
-             * are equal to or after that LSN.  This is the starting point for
-             * replaying LNs during recovery and will be stored in the CkptEnd
-             * entry.
-             *
-             * Use the checkpointStart as the firstActiveLsn if firstActiveLsn
-             * is null, meaning that no txns are active.
-             *
-             * The current value must be retrieved from TxnManager after
-             * logging CkptStart. If it were instead retrieved before logging
-             * CkptStart, the following failure could occur.  [#20270]
-             *
-             *  ... getFirstActiveLsn returns NULL_LSN, will use 200 CkptStart
-             *  100 LN-A in Txn-1
-             *  200 CkptStart
-             *  300 BIN-B refers to 100 LN-A
-             *  400 CkptEnd
-             *  ... Crash and recover.  Recovery does not undo 100 LN-A.
-             *  ... Txn-1 is uncommitted, yet 100 LN-A takes effect.
-             */
-            long firstActiveLsn = envImpl.getTxnManager().getFirstActiveLsn();
-            if (firstActiveLsn == DbLsn.NULL_LSN) {
-                firstActiveLsn = checkpointStart;
-            }
-
-            /*
-             * In a replicated system, the checkpointer will be flushing out
-             * the VLSNIndex, which is HA metadata. Check that the in-memory
-             * version encompasses all metadata up to the point of the
-             * CheckpointStart record. This is no-op for non-replicated
-             * systems. [#19754]
-             */
-            envImpl.awaitVLSNConsistency();
-
-            /* Find the set of dirty INs that must be logged. */
-            checkpointDirtyMap.selectDirtyINsForCheckpoint();
-
-            /* Call hook after dirty map creation and before flushing. */
-            TestHookExecute.doHookIfSet(beforeFlushHook);
-
-            /* Flush IN nodes. */
-            flushDirtyNodes(
-                envImpl, checkpointDirtyMap, checkpointStart, highPriority,
-                flushStats);
-
-            if (DirtyINMap.DIRTY_SET_DEBUG_TRACE) {
-                LoggerUtils.logMsg(
-                    envImpl.getLogger(), envImpl, Level.INFO,
-                    "Ckpt flushed" +
-                        " nFullINFlushThisRun = " +
-                        flushStats.nFullINFlushThisRun +
-                        " nFullBINFlushThisRun = " +
-                        flushStats.nFullBINFlushThisRun +
-                        " nDeltaINFlushThisRun = " +
-                        flushStats.nDeltaINFlushThisRun);
-
-            }
-
-            /*
-             * Flush MapLNs if not already done by flushDirtyNodes.  Only flush
-             * a database if it has not already been flushed since checkpoint
-             * start.  Lastly, flush the DB mapping tree root.
-             */
-            checkpointDirtyMap.flushMapLNs(checkpointStart);
-            checkpointDirtyMap.flushRoot(checkpointStart);
-
-            /*
-             * Flush replication information if necessary so that the VLSNIndex
-             * cache is flushed and is recoverable.
-             */
-            envImpl.preCheckpointEndFlush();
-
-            /*
-             * Flush utilization info AFTER flushing IN nodes to reduce the
-             * inaccuracies caused by the sequence FileSummaryLN-LN-BIN.
-             */
-            envImpl.getUtilizationProfile().flushFileUtilization
-                (envImpl.getUtilizationTracker().getTrackedFiles());
-
-            final DbTree dbTree = envImpl.getDbTree();
-            final boolean willDeleteFiles = !cleanerState.isEmpty();
-
-            final CheckpointEnd ckptEnd = new CheckpointEnd(
-                invokingSource, checkpointStart, envImpl.getRootLsn(),
-                firstActiveLsn,
-                envImpl.getNodeSequence().getLastLocalNodeId(),
-                envImpl.getNodeSequence().getLastReplicatedNodeId(),
-                dbTree.getLastLocalDbId(), dbTree.getLastReplicatedDbId(),
-                envImpl.getTxnManager().getLastLocalTxnId(),
-                envImpl.getTxnManager().getLastReplicatedTxnId(),
-                checkpointId, willDeleteFiles);
-
-            final SingleItemEntry<CheckpointEnd> endEntry =
-                SingleItemEntry.create(LogEntryType.LOG_CKPT_END, ckptEnd);
-
-            /*
-             * Log checkpoint end and update state kept about the last
-             * checkpoint location. Send a trace message *before* the
-             * checkpoint end log entry. This is done so that the normal trace
-             * message doesn't affect the time-based isRunnable() calculation,
-             * which only issues a checkpoint if a log record has been written
-             * since the last checkpoint.
-             */
-            trace(envImpl, invokingSource, true);
-            traced = true;
-
-            lastCheckpointInterval = DbLsn.getNoCleaningDistance(
-                checkpointStart, lastCheckpointStart, logFileMax);
-
-            /*
-             * We must flush and fsync to ensure that cleaned files are not
-             * referenced. This also ensures that this checkpoint is not wasted
-             * if we crash.
-             */
-            lastCheckpointEnd = logManager.logForceFlush(
-                endEntry, true /*fsyncRequired*/,
-                ReplicationContext.NO_REPLICATE);
-
-            lastCheckpointStart = checkpointStart;
-
-            success = true;
-            cleaner.updateFilesAtCheckpointEnd(cleanerState);
-
-        } catch (DatabaseException e) {
-            LoggerUtils.traceAndLogException(envImpl, "Checkpointer",
-                                             "doCheckpoint", "checkpointId=" +
-                                             checkpointId, e);
-            throw e;
-        } finally {
-
-            /*
-             * Reset the checkpoint state so evictor activity knows there's no
-             * further requirement for provisional logging. SR 11163.
-             */
-            checkpointDirtyMap.reset();
-
-            if (!traced) {
-                trace(envImpl, invokingSource, success);
-            }
-        }
-    }
-
-    private void trace(EnvironmentImpl envImpl,
-                       String invokingSource,
-                       boolean success ) {
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Checkpoint ").append(checkpointId);
-        sb.append(": source=" ).append(invokingSource);
-        sb.append(" success=").append(success);
-        sb.append(" nFullINFlushThisRun=");
-        sb.append(flushStats.nFullINFlushThisRun);
-        sb.append(" nDeltaINFlushThisRun=");
-        sb.append(flushStats.nDeltaINFlushThisRun);
-        LoggerUtils.logMsg(logger, envImpl, Level.CONFIG, sb.toString());
-    }
-
-    /**
-     * Flush a given database to disk. Like checkpoint, log from the bottom
-     * up so that parents properly represent their children.
-     */
-    public void syncDatabase(EnvironmentImpl envImpl,
-                             DatabaseImpl dbImpl,
-                             boolean flushLog) {
-        if (envImpl.isReadOnly()) {
-            return;
-        }
-
-        final DirtyINMap dirtyMap = new DirtyINMap(envImpl);
-        final FlushStats fstats = new FlushStats();
-
-        try {
-            /* Find the dirty set. */
-            dirtyMap.selectDirtyINsForDbSync(dbImpl);
-
-            if (dirtyMap.getNumEntries() > 0) {
-                /* Write all dirtyINs out.*/
-                flushDirtyNodes(
-                    envImpl, dirtyMap, DbLsn.NULL_LSN  /*ckptStart*/,
-                    false /*highPriority*/, fstats);
-
-                /* Make changes durable. [#15254] */
-                if (flushLog) {
-                    envImpl.getLogManager().flushSync();
-                }
-            }
-        } catch (DatabaseException e) {
-            LoggerUtils.traceAndLogException
-                (envImpl, "Checkpointer", "syncDatabase",
-                 "of " + dbImpl.getDebugName(), e);
-            throw e;
-        } finally {
-            dirtyMap.reset();
         }
     }
 
@@ -997,7 +439,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
      * flush dirties its parent, add it to the dirty map, thereby cascading the
      * writes up the tree. If flushAll wasn't specified, we need only cascade
      * up to the highest level set at the start of checkpointing.
-     *
+     * <p>
      * Note that all but the top level INs are logged provisionally. That's
      * because we don't need to process lower INs during recovery because the
      * higher INs will end up pointing at them.
@@ -1012,7 +454,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
         final Map<DatabaseId, DatabaseImpl> dbCache = new HashMap<DatabaseId, DatabaseImpl>();
 
         try {
-            while (dirtyMap.getNumLevels() > 0) {
+            while(dirtyMap.getNumLevels() > 0) {
 
                 /*
                  * Work on one level's worth of nodes in ascending level order.
@@ -1025,16 +467,16 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
                  * mapping tree.  Only flush a database if it has not already
                  * been flushed since checkpoint start.
                  */
-                if (currentLevelVal == IN.DBMAP_LEVEL) {
+                if(currentLevelVal == IN.DBMAP_LEVEL) {
                     dirtyMap.flushMapLNs(checkpointStart);
                 }
 
                 /* Flush the nodes at the current level. */
-                while (true) {
+                while(true) {
                     final CheckpointReference targetRef =
-                        dirtyMap.removeNextNode(currentLevel);
+                            dirtyMap.removeNextNode(currentLevel);
 
-                    if (targetRef == null) {
+                    if(targetRef == null) {
                         break;
                     }
 
@@ -1044,19 +486,19 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
                      * deleted while we're working with it.
                      */
                     final DatabaseImpl db = dbTree.getDb(
-                        targetRef.dbId, -1 /*lockTimeout*/, dbCache);
+                            targetRef.dbId, -1 /*lockTimeout*/, dbCache);
 
-                    if (db != null && !db.isDeleted()) {
+                    if(db != null && !db.isDeleted()) {
 
                         /* Flush if we're below maxFlushLevel. */
                         final int maxFlushLevel =
-                            dirtyMap.getHighestFlushLevel(db);
+                                dirtyMap.getHighestFlushLevel(db);
 
-                        if (currentLevelVal <= maxFlushLevel) {
+                        if(currentLevelVal <= maxFlushLevel) {
 
                             flushIN(
-                                db, targetRef, dirtyMap, maxFlushLevel,
-                                highPriority, fstats, true /*allowLogSubtree*/);
+                                    db, targetRef, dirtyMap, maxFlushLevel,
+                                    highPriority, fstats, true /*allowLogSubtree*/);
 
                             /*
                              * Sleep if background read/write limit was
@@ -1091,7 +533,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
 
     /**
      * Flush the target IN.
-     *
+     * <p>
      * Where applicable, also attempt to flush the subtree that houses this
      * target, which means we flush the siblings of this target to promote
      * better cleaning throughput. The problem lies in the fact that
@@ -1104,41 +546,41 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
      * parent of a set of provisionally written nodes frees the cleaner to work
      * on that set of provisional nodes as soon as possible. For example, if a
      * tree consists of:
-     *
-     *             INa
-     *       +------+-------+
-     *      INb            INc
+     * <p>
+     * INa
+     * +------+-------+
+     * INb            INc
      * +-----+----+         +-----+
      * BINd BINe BINf      BINg BINh
-     *
+     * <p>
      * It is more efficient for cleaning throughput to log in this order:
-     *       BINd, BINe, BINf, INb, BINg, BINh, INc, INa
+     * BINd, BINe, BINf, INb, BINg, BINh, INc, INa
      * rather than:
-     *       BINd, BINe, BINf, BINg, BINh, INb, INc, INa
-     *
+     * BINd, BINe, BINf, BINg, BINh, INb, INc, INa
+     * <p>
      * Suppose the subtree in question is INb->{BINd, BINe, BINf}
-     *
+     * <p>
      * Suppose we see BINd in the dirty map first, before BINe and BINf.
-     *  - flushIN(BINd) is called
-     *  - we fetch and latch its parent, INb
-     *
+     * - flushIN(BINd) is called
+     * - we fetch and latch its parent, INb
+     * <p>
      * If this is a high priority checkpoint, we'll hold the INb latch across
      * the time it takes to flush all three children.  In flushIN(BINd), we
      * walk through INb, create a local map of all the siblings that can be
      * found in the dirty map, and then call logSiblings with that local map.
      * Then we'll write out INb.
-     *
+     * <p>
      * If high priority is false, we will not hold the INb latch across
      * multiple IOs. Instead, we
-     *  - write BINd out, using logSiblings
-     *  - while still holding the INb latch, we create a list of dirty siblings
-     *  - release the INb latch
-     *  - call flushIN() recursively on each entry in the local sibling map,
-     *    which will result in a search and write of each sibling.  These
-     *    recursive calls to flushIN are called with the allowLogSubtree
-     *    parameter of false to halt the recursion and prevent a repeat of the
-     *    sibling examination.
-     *  - write INb
+     * - write BINd out, using logSiblings
+     * - while still holding the INb latch, we create a list of dirty siblings
+     * - release the INb latch
+     * - call flushIN() recursively on each entry in the local sibling map,
+     * which will result in a search and write of each sibling.  These
+     * recursive calls to flushIN are called with the allowLogSubtree
+     * parameter of false to halt the recursion and prevent a repeat of the
+     * sibling examination.
+     * - write INb
      */
     private static void flushIN(final DatabaseImpl db,
                                 final CheckpointReference targetRef,
@@ -1154,12 +596,12 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
 
         /* Call test hook when we reach the max level. */
         assert (targetLevel < maxFlushLevel) ||
-            TestHookExecute.doHookIfSet(maxFlushLevelHook);
+                TestHookExecute.doHookIfSet(maxFlushLevelHook);
 
-        if (targetRef.isRoot) {
+        if(targetRef.isRoot) {
 
             final RootFlusher flusher =
-                new RootFlusher(db, targetRef.nodeId);
+                    new RootFlusher(db, targetRef.nodeId);
 
             tree.withRootLatchedExclusive(flusher);
 
@@ -1167,7 +609,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * Update the tree's owner, whether it's the env root or the
              * db-mapping tree.
              */
-            if (flusher.getFlushed()) {
+            if(flusher.getFlushed()) {
                 DbTree dbTree = envImpl.getDbTree();
                 dbTree.modifyDbRoot(db);
                 fstats.nFullINFlushThisRun++;
@@ -1178,7 +620,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * If this target isn't the root anymore, we'll have to handle it
              * like a regular node.
              */
-            if (flusher.stillRoot()) {
+            if(flusher.stillRoot()) {
                 return;
             }
         }
@@ -1190,18 +632,18 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
          * assembled but is not the root now.
          */
         final SearchResult result = tree.getParentINForChildIN(
-            -1 /*nodeId*/, targetRef.treeKey,
-            targetRef.nodeLevel /*targetLevel*/,
-            targetRef.nodeLevel + 1 /*exclusiveLevel*/,
-            false  /*requireExactMatch*/, false /*doFetch*/,
-            CacheMode.UNCHANGED, null /*trackingList*/);
+                -1 /*nodeId*/, targetRef.treeKey,
+                targetRef.nodeLevel /*targetLevel*/,
+                targetRef.nodeLevel + 1 /*exclusiveLevel*/,
+                false  /*requireExactMatch*/, false /*doFetch*/,
+                CacheMode.UNCHANGED, null /*trackingList*/);
 
         /*
          * If no possible parent is found, the compressor may have deleted
          * this item before we got to processing it. (Although it seems this
          * cannot currently happen since we never delete the root node.)
          */
-        if (result.parent == null) {
+        if(result.parent == null) {
             return;
         }
 
@@ -1220,7 +662,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * ordinary DBs and the mapping tree DB.
              */
             final boolean bottomLevelTarget =
-                ((parentLevel & IN.LEVEL_MASK) == 2);
+                    ((parentLevel & IN.LEVEL_MASK) == 2);
 
             /*
              * INs at the max flush level are always non-provisional and
@@ -1229,11 +671,13 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * provisional BEFORE_CKPT_END (see Provisional).
              */
             final Provisional provisional;
-            if (targetLevel >= maxFlushLevel) {
+            if(targetLevel >= maxFlushLevel) {
                 provisional = Provisional.NO;
-            } else if (bottomLevelTarget) {
+            }
+            else if(bottomLevelTarget) {
                 provisional = Provisional.YES;
-            } else {
+            }
+            else {
                 provisional = Provisional.BEFORE_CKPT_END;
             }
 
@@ -1247,12 +691,12 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * the child.  This ensures that the non-exact search does not
              * find a sibling rather than a parent. [#11555]
              */
-            if (!result.exactParentFound) {
-                if (parentLevel > targetLevel) {
+            if(!result.exactParentFound) {
+                if(parentLevel > targetLevel) {
                     dirtyMap.addIN(
-                        parent, -1 /*index*/,
-                        false /*updateFlushLevels*/,
-                        true /*updateMemoryBudget*/);
+                            parent, -1 /*index*/,
+                            false /*updateFlushLevels*/,
+                            true /*updateMemoryBudget*/);
                 }
                 return;
             }
@@ -1268,9 +712,9 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
             assert parentLevel == targetLevel + 1;
 
             dirtyMap.addIN(
-                parent, -1 /*index*/,
-                false /*updateFlushLevels*/,
-                true /*updateMemoryBudget*/);
+                    parent, -1 /*index*/,
+                    false /*updateFlushLevels*/,
+                    true /*updateMemoryBudget*/);
 
             /*
              * Determine whether our search found the IN identified by either
@@ -1298,19 +742,20 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * LSN or nodeId matches? logDirtyChildren is going to log it
              * anyway if it is dirty.
              */
-            if (targetRef.lsn != DbLsn.NULL_LSN) {
+            if(targetRef.lsn != DbLsn.NULL_LSN) {
 
-                if (targetRef.lsn != parent.getLsn(index)) {
+                if(targetRef.lsn != parent.getLsn(index)) {
                     return;
                 }
-            } else {
+            }
+            else {
                 assert targetRef.nodeId >= 0;
                 assert db.isDeferredWriteMode();
 
                 final IN target = (IN) parent.getTarget(index);
 
-                if (target == null ||
-                    targetRef.nodeId != target.getNodeId()) {
+                if(target == null ||
+                        targetRef.nodeId != target.getNodeId()) {
                     return;
                 }
             }
@@ -1323,7 +768,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * and this is not a recursive call to flushIN during sub-tree
              * logging. Return if we are only logging the target node here.
              */
-            if (!bottomLevelTarget || !allowLogSubtree) {
+            if(!bottomLevelTarget || !allowLogSubtree) {
                 return;
             }
 
@@ -1334,15 +779,16 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
              * the parent latch held, the amount of logging may cause the latch
              * to be held for too long a period.
              */
-            if (highPriority && !db.isDurableDeferredWrite()) {
+            if(highPriority && !db.isDurableDeferredWrite()) {
                 logSiblingsSeparately = null;
-            } else {
+            }
+            else {
                 logSiblingsSeparately = new ArrayList<>();
             }
 
-            for (int i = 0; i < parent.getNEntries(); i += 1) {
+            for(int i = 0; i < parent.getNEntries(); i += 1) {
 
-                if (i == index) {
+                if(i == index) {
                     continue;
                 }
 
@@ -1351,25 +797,27 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
                 final long childLsn = parent.getLsn(i);
 
                 final CheckpointReference childRef =
-                    dirtyMap.removeNode(targetLevel, childLsn, childId);
+                        dirtyMap.removeNode(targetLevel, childLsn, childId);
 
-                if (childRef == null) {
+                if(childRef == null) {
                     continue;
                 }
 
-                if (logSiblingsSeparately != null) {
+                if(logSiblingsSeparately != null) {
                     logSiblingsSeparately.add(childRef);
-                } else {
+                }
+                else {
                     logDirtyIN(envImpl, parent, i, provisional, fstats);
                 }
             }
 
             /* Get parentRef before releasing the latch. */
-            if (parentLevel <= maxFlushLevel) {
+            if(parentLevel <= maxFlushLevel) {
                 parentRef = dirtyMap.removeNode(
-                    parentLevel, parent.getLastLoggedLsn(),
-                    parent.getNodeId());
-            } else {
+                        parentLevel, parent.getLastLoggedLsn(),
+                        parent.getNodeId());
+            }
+            else {
                 parentRef = null;
             }
         } finally {
@@ -1382,11 +830,11 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
          * performing a separate search for each one, after releasing the
          * parent latch above.
          */
-        if (logSiblingsSeparately != null) {
-            for (final CheckpointReference childRef : logSiblingsSeparately) {
+        if(logSiblingsSeparately != null) {
+            for(final CheckpointReference childRef : logSiblingsSeparately) {
                 flushIN(
-                    db, childRef, dirtyMap, maxFlushLevel, highPriority,
-                    fstats, false /*allowLogSubtree*/);
+                        db, childRef, dirtyMap, maxFlushLevel, highPriority,
+                        fstats, false /*allowLogSubtree*/);
             }
         }
 
@@ -1396,10 +844,10 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
          * flushIN after releasing the parent latch above, since we must search
          * and acquire the grandparent latch.
          */
-        if (parentRef != null) {
+        if(parentRef != null) {
             flushIN(
-                db, parentRef, dirtyMap, maxFlushLevel, highPriority, fstats,
-                false /*allowLogSubtree*/);
+                    db, parentRef, dirtyMap, maxFlushLevel, highPriority, fstats,
+                    false /*allowLogSubtree*/);
         }
     }
 
@@ -1410,25 +858,25 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
      * parent must be logged according to the rule for max flush level.
      */
     private static void logDirtyIN(
-        final EnvironmentImpl envImpl,
-        final IN parent,
-        final int index,
-        final Provisional provisional,
-        final FlushStats fstats) {
+            final EnvironmentImpl envImpl,
+            final IN parent,
+            final int index,
+            final Provisional provisional,
+            final FlushStats fstats) {
 
         final IN child = (IN) parent.getTarget(index);
         final long newLsn;
         final boolean isBIN;
         final boolean isDelta;
 
-        if (child != null) {
+        if(child != null) {
             child.latch(CacheMode.UNCHANGED);
             try {
-                if (!child.getDirty()) {
+                if(!child.getDirty()) {
                     return;
                 }
 
-                if (child.getDatabase().isDurableDeferredWrite()) {
+                if(child.getDatabase().isDurableDeferredWrite()) {
 
                     /*
                      * Find dirty descendants to avoid logging nodes with
@@ -1449,8 +897,8 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
                 }
 
                 newLsn = child.log(
-                    true /*allowDeltas*/, provisional,
-                    true /*backgroundIO*/, parent);
+                        true /*allowDeltas*/, provisional,
+                        true /*backgroundIO*/, parent);
 
                 assert (newLsn != DbLsn.NULL_LSN);
 
@@ -1459,13 +907,14 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
             } finally {
                 child.releaseLatch();
             }
-        } else {
+        }
+        else {
             final OffHeapCache ohCache = envImpl.getOffHeapCache();
 
             final INLogEntry<BIN> logEntry =
-                ohCache.createBINLogEntryForCheckpoint(parent, index);
+                    ohCache.createBINLogEntryForCheckpoint(parent, index);
 
-            if (logEntry == null) {
+            if(logEntry == null) {
                 return;
             }
 
@@ -1473,23 +922,552 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
             isDelta = logEntry.isBINDelta();
 
             newLsn = IN.logEntry(
-                logEntry, provisional, true /*backgroundIO*/, parent);
+                    logEntry, provisional, true /*backgroundIO*/, parent);
 
             ohCache.postBINLog(parent, index, logEntry, newLsn);
         }
 
         parent.updateEntry(index, newLsn, VLSN.NULL_VLSN_SEQUENCE, 0);
 
-        if (isDelta) {
+        if(isDelta) {
             fstats.nDeltaINFlushThisRun++;
             fstats.nDeltaINFlush++;
-        } else {
+        }
+        else {
             fstats.nFullINFlushThisRun++;
             fstats.nFullINFlush++;
-            if (isBIN) {
+            if(isBIN) {
                 fstats.nFullBINFlush++;
                 fstats.nFullBINFlushThisRun++;
             }
+        }
+    }
+
+    /**
+     * Process notifications of mutable property changes.
+     */
+    @Override
+    public void envConfigUpdate(DbConfigManager cm,
+                                EnvironmentMutableConfig ignore) {
+        highPriority = cm.getBoolean
+                (EnvironmentParams.CHECKPOINTER_HIGH_PRIORITY);
+    }
+
+    /**
+     * Initializes the checkpoint intervals when no checkpoint is performed
+     * while opening the environment.
+     */
+    public void initIntervals(long lastCheckpointStart,
+                              long lastCheckpointEnd,
+                              long lastCheckpointMillis) {
+        this.lastCheckpointStart = lastCheckpointStart;
+        this.lastCheckpointEnd = lastCheckpointEnd;
+        this.lastCheckpointMillis = lastCheckpointMillis;
+    }
+
+    /**
+     * Coordinates an eviction with an in-progress checkpoint and returns
+     * whether provisional logging is needed.
+     *
+     * @return the provisional status to use for logging the target.
+     */
+    public Provisional coordinateEvictionWithCheckpoint(
+            final DatabaseImpl db,
+            final int targetLevel,
+            final IN parent) {
+
+        return checkpointDirtyMap.
+                coordinateEvictionWithCheckpoint(db, targetLevel, parent);
+    }
+
+    /**
+     * Coordinates a split with an in-progress checkpoint.
+     *
+     * @param newSibling the sibling IN created by the split.
+     */
+    public void coordinateSplitWithCheckpoint(final IN newSibling) {
+        checkpointDirtyMap.coordinateSplitWithCheckpoint(newSibling);
+    }
+
+    /**
+     * Set checkpoint id -- can only be done after recovery.
+     */
+    public synchronized void setCheckpointId(long lastCheckpointId) {
+        checkpointId = lastCheckpointId;
+    }
+
+    /**
+     * Load stats.
+     */
+    @SuppressWarnings("unused")
+    public StatGroup loadStats(StatsConfig config) {
+        StatGroup stats = new StatGroup(GROUP_NAME, GROUP_DESC);
+        new LongStat(stats, CKPT_LAST_CKPTID, checkpointId);
+        new LongStat(stats, CKPT_CHECKPOINTS, nCheckpoints);
+        new LongStat(stats, CKPT_LAST_CKPT_INTERVAL, lastCheckpointInterval);
+        new LSNStat(stats, CKPT_LAST_CKPT_START, lastCheckpointStart);
+        new LSNStat(stats, CKPT_LAST_CKPT_END, lastCheckpointEnd);
+        new LongStat(stats, CKPT_FULL_IN_FLUSH, flushStats.nFullINFlush);
+        new LongStat(stats, CKPT_FULL_BIN_FLUSH, flushStats.nFullBINFlush);
+        new LongStat(stats, CKPT_DELTA_IN_FLUSH, flushStats.nDeltaINFlush);
+
+        if(config.getClear()) {
+            nCheckpoints = 0;
+            flushStats.nFullINFlush = 0;
+            flushStats.nFullBINFlush = 0;
+            flushStats.nDeltaINFlush = 0;
+        }
+
+        return stats;
+    }
+
+    /**
+     * Return the number of retries when a deadlock exception occurs.
+     */
+    @Override
+    protected long nDeadlockRetries() {
+        return envImpl.getConfigManager().getInt
+                (EnvironmentParams.CHECKPOINTER_RETRY);
+    }
+
+    /**
+     * Called whenever the DaemonThread wakes up from a sleep.
+     */
+    @Override
+    protected void onWakeup() {
+
+        if(envImpl.isClosing()) {
+            return;
+        }
+
+        doCheckpoint(CheckpointConfig.DEFAULT, "daemon");
+
+        wakeupAfterNoWrites = false;
+    }
+
+    /**
+     * Wakes up the checkpointer if a checkpoint log interval is configured and
+     * the number of bytes written since the last checkpoint exceeds the size
+     * of the interval.
+     */
+    public void wakeupAfterWrite() {
+
+        if((logSizeBytesInterval != 0) && !isRunning()) {
+
+            long nextLsn = envImpl.getFileManager().getNextLsn();
+
+            if(DbLsn.getNoCleaningDistance(
+                    nextLsn, lastCheckpointStart, logFileMax) >=
+                    logSizeBytesInterval) {
+
+                wakeup();
+            }
+        }
+    }
+
+    /**
+     * Wakes up the checkpointer if a checkpoint is needed to reclaim disk
+     * space for already cleaned files. This method is called after an idle
+     * period with no writes.
+     */
+    public void wakeupAfterNoWrites() {
+
+        if(!isRunning() && needCheckpointForCleanedFiles()) {
+            wakeupAfterNoWrites = true;
+            wakeup();
+        }
+    }
+
+    private boolean needCheckpointForCleanedFiles() {
+        return envImpl.getCleaner().getFileSelector().isCheckpointNeeded();
+    }
+
+    /**
+     * Determine whether a checkpoint should be run.
+     */
+    private boolean isRunnable(CheckpointConfig config) {
+        /* Figure out if we're using log size or time to determine interval.*/
+        long useBytesInterval = 0;
+        long useTimeInterval = 0;
+        long nextLsn = DbLsn.NULL_LSN;
+        boolean runnable = false;
+        try {
+            if(config.getForce()) {
+                runnable = true;
+                return true;
+            }
+
+            if(wakeupAfterNoWrites && needCheckpointForCleanedFiles()) {
+                runnable = true;
+                return true;
+            }
+
+            if(config.getKBytes() != 0) {
+                useBytesInterval = config.getKBytes() << 10;
+
+            }
+            else if(config.getMinutes() != 0) {
+                /* Convert to millis. */
+                useTimeInterval = config.getMinutes() * 60 * 1000;
+
+            }
+            else if(logSizeBytesInterval != 0) {
+                useBytesInterval = logSizeBytesInterval;
+
+            }
+            else {
+                useTimeInterval = timeInterval;
+            }
+
+            /*
+             * If our checkpoint interval is defined by log size, check on how
+             * much log has grown since the last checkpoint.
+             */
+            if(useBytesInterval != 0) {
+                nextLsn = envImpl.getFileManager().getNextLsn();
+
+                if(DbLsn.getNoCleaningDistance(
+                        nextLsn, lastCheckpointStart, logFileMax) >=
+                        useBytesInterval) {
+
+                    runnable = true;
+                }
+
+            }
+            else if(useTimeInterval != 0) {
+
+                /*
+                 * Our checkpoint is determined by time.  If enough time has
+                 * passed and some log data has been written, do a checkpoint.
+                 */
+                final long lastUsedLsn =
+                        envImpl.getFileManager().getLastUsedLsn();
+
+                if(((System.currentTimeMillis() - lastCheckpointMillis) >=
+                        useTimeInterval) &&
+                        (DbLsn.compareTo(lastUsedLsn, lastCheckpointEnd) != 0)) {
+
+                    runnable = true;
+                }
+            }
+            return runnable;
+
+        } finally {
+            if(logger.isLoggable(Level.FINEST)) {
+                final StringBuilder sb = new StringBuilder();
+                sb.append("size interval=").append(useBytesInterval);
+                if(nextLsn != DbLsn.NULL_LSN) {
+                    sb.append(" nextLsn=").
+                            append(DbLsn.getNoFormatString(nextLsn));
+                }
+                if(lastCheckpointEnd != DbLsn.NULL_LSN) {
+                    sb.append(" lastCkpt=");
+                    sb.append(DbLsn.getNoFormatString(lastCheckpointEnd));
+                }
+                sb.append(" time interval=").append(useTimeInterval);
+                sb.append(" force=").append(config.getForce());
+                sb.append(" runnable=").append(runnable);
+
+                LoggerUtils.finest(logger, envImpl, sb.toString());
+            }
+        }
+    }
+
+    /**
+     * Estimates how many bytes will be written in order to complete the next
+     * N checkpoints, not including the current checkpoint (if in progress).
+     */
+    public long amountWrittenByNextCheckpoints(final int nCheckpoints) {
+
+        final long currentLsn = envImpl.getFileManager().getNextLsn();
+
+        final long ckptInterval;
+        final long distanceToNextCkptStart;
+
+        if(lastCheckpointInterval != 0) {
+            ckptInterval = lastCheckpointInterval;
+
+            distanceToNextCkptStart = DbLsn.getNoCleaningDistance(
+                    currentLsn, lastCheckpointStart, logFileMax);
+        }
+        else {
+            ckptInterval = logFileMax;
+            distanceToNextCkptStart = logFileMax;
+        }
+
+        return distanceToNextCkptStart + (nCheckpoints * ckptInterval);
+    }
+
+    /**
+     * The real work to do a checkpoint. This may be called by the checkpoint
+     * thread when waking up, or it may be invoked programatically through the
+     * api.
+     *
+     * @param invokingSource a debug aid, to indicate who invoked this
+     *                       checkpoint. (i.e. recovery, the checkpointer daemon, the cleaner,
+     *                       programatically)
+     */
+    public synchronized void doCheckpoint(CheckpointConfig config,
+                                          String invokingSource) {
+        if(envImpl.isReadOnly()) {
+            return;
+        }
+
+        if(!isRunnable(config)) {
+            return;
+        }
+
+        /*
+         * If minimizing recovery time is desired, then flush all the way to
+         * the top of the dbtree instead of stopping at the highest level last
+         * modified, so that only the root INs are processed by recovery.
+         */
+        final boolean flushAll = config.getMinimizeRecoveryTime();
+
+        /*
+         * If there are cleaned files to be deleted, flush an extra level to
+         * write out the parents of cleaned nodes.  This ensures that no node
+         * will contain the LSN of a cleaned file.
+         *
+         * Note that we don't currently distinguish between files in the
+         * CLEANED and FULLY_PROCESSED states.  For a FULLY_PROCESSED file, a
+         * pending LN may have been processed since the prior checkpoint.
+         * However, the BIN containing the LSN of the LN is guaranteed to be
+         * logged, so there is no need to increment maxFlushLevel.  So we could
+         * optimize in the future and only set flushExtraLevel when some files
+         * are CLEANED (i.e., do not set flushExtraLevel when all files are
+         * FULLY_PROCESSED or cleanerState.isEmpty()).
+         */
+        final Cleaner cleaner = envImpl.getCleaner();
+
+        final CheckpointStartCleanerState cleanerState =
+                cleaner.getFilesAtCheckpointStart();
+
+        final boolean flushExtraLevel = !cleanerState.isEmpty();
+
+        lastCheckpointMillis = System.currentTimeMillis();
+        flushStats.resetPerRunCounters();
+
+        /* Get the next checkpoint id. */
+        checkpointId++;
+        nCheckpoints++;
+
+        boolean success = false;
+        boolean traced = false;
+
+        final LogManager logManager = envImpl.getLogManager();
+
+        /*
+         * Set the checkpoint state so that concurrent eviction can be
+         * coordinated.
+         */
+        checkpointDirtyMap.beginCheckpoint(flushAll, flushExtraLevel);
+
+        try {
+            /* Log the checkpoint start. */
+            final SingleItemEntry<CheckpointStart> startEntry =
+                    SingleItemEntry.create(
+                            LogEntryType.LOG_CKPT_START,
+                            new CheckpointStart(checkpointId, invokingSource));
+
+            final long checkpointStart =
+                    logManager.log(startEntry, ReplicationContext.NO_REPLICATE);
+
+            /*
+             * Note the first active LSN point. The definition of
+             * firstActiveLsn is that all log entries for active transactions
+             * are equal to or after that LSN.  This is the starting point for
+             * replaying LNs during recovery and will be stored in the CkptEnd
+             * entry.
+             *
+             * Use the checkpointStart as the firstActiveLsn if firstActiveLsn
+             * is null, meaning that no txns are active.
+             *
+             * The current value must be retrieved from TxnManager after
+             * logging CkptStart. If it were instead retrieved before logging
+             * CkptStart, the following failure could occur.  [#20270]
+             *
+             *  ... getFirstActiveLsn returns NULL_LSN, will use 200 CkptStart
+             *  100 LN-A in Txn-1
+             *  200 CkptStart
+             *  300 BIN-B refers to 100 LN-A
+             *  400 CkptEnd
+             *  ... Crash and recover.  Recovery does not undo 100 LN-A.
+             *  ... Txn-1 is uncommitted, yet 100 LN-A takes effect.
+             */
+            long firstActiveLsn = envImpl.getTxnManager().getFirstActiveLsn();
+            if(firstActiveLsn == DbLsn.NULL_LSN) {
+                firstActiveLsn = checkpointStart;
+            }
+
+            /*
+             * In a replicated system, the checkpointer will be flushing out
+             * the VLSNIndex, which is HA metadata. Check that the in-memory
+             * version encompasses all metadata up to the point of the
+             * CheckpointStart record. This is no-op for non-replicated
+             * systems. [#19754]
+             */
+            envImpl.awaitVLSNConsistency();
+
+            /* Find the set of dirty INs that must be logged. */
+            checkpointDirtyMap.selectDirtyINsForCheckpoint();
+
+            /* Call hook after dirty map creation and before flushing. */
+            TestHookExecute.doHookIfSet(beforeFlushHook);
+
+            /* Flush IN nodes. */
+            flushDirtyNodes(
+                    envImpl, checkpointDirtyMap, checkpointStart, highPriority,
+                    flushStats);
+
+            if(DirtyINMap.DIRTY_SET_DEBUG_TRACE) {
+                LoggerUtils.logMsg(
+                        envImpl.getLogger(), envImpl, Level.INFO,
+                        "Ckpt flushed" +
+                                " nFullINFlushThisRun = " +
+                                flushStats.nFullINFlushThisRun +
+                                " nFullBINFlushThisRun = " +
+                                flushStats.nFullBINFlushThisRun +
+                                " nDeltaINFlushThisRun = " +
+                                flushStats.nDeltaINFlushThisRun);
+
+            }
+
+            /*
+             * Flush MapLNs if not already done by flushDirtyNodes.  Only flush
+             * a database if it has not already been flushed since checkpoint
+             * start.  Lastly, flush the DB mapping tree root.
+             */
+            checkpointDirtyMap.flushMapLNs(checkpointStart);
+            checkpointDirtyMap.flushRoot(checkpointStart);
+
+            /*
+             * Flush replication information if necessary so that the VLSNIndex
+             * cache is flushed and is recoverable.
+             */
+            envImpl.preCheckpointEndFlush();
+
+            /*
+             * Flush utilization info AFTER flushing IN nodes to reduce the
+             * inaccuracies caused by the sequence FileSummaryLN-LN-BIN.
+             */
+            envImpl.getUtilizationProfile().flushFileUtilization
+                    (envImpl.getUtilizationTracker().getTrackedFiles());
+
+            final DbTree dbTree = envImpl.getDbTree();
+            final boolean willDeleteFiles = !cleanerState.isEmpty();
+
+            final CheckpointEnd ckptEnd = new CheckpointEnd(
+                    invokingSource, checkpointStart, envImpl.getRootLsn(),
+                    firstActiveLsn,
+                    envImpl.getNodeSequence().getLastLocalNodeId(),
+                    envImpl.getNodeSequence().getLastReplicatedNodeId(),
+                    dbTree.getLastLocalDbId(), dbTree.getLastReplicatedDbId(),
+                    envImpl.getTxnManager().getLastLocalTxnId(),
+                    envImpl.getTxnManager().getLastReplicatedTxnId(),
+                    checkpointId, willDeleteFiles);
+
+            final SingleItemEntry<CheckpointEnd> endEntry =
+                    SingleItemEntry.create(LogEntryType.LOG_CKPT_END, ckptEnd);
+
+            /*
+             * Log checkpoint end and update state kept about the last
+             * checkpoint location. Send a trace message *before* the
+             * checkpoint end log entry. This is done so that the normal trace
+             * message doesn't affect the time-based isRunnable() calculation,
+             * which only issues a checkpoint if a log record has been written
+             * since the last checkpoint.
+             */
+            trace(envImpl, invokingSource, true);
+            traced = true;
+
+            lastCheckpointInterval = DbLsn.getNoCleaningDistance(
+                    checkpointStart, lastCheckpointStart, logFileMax);
+
+            /*
+             * We must flush and fsync to ensure that cleaned files are not
+             * referenced. This also ensures that this checkpoint is not wasted
+             * if we crash.
+             */
+            lastCheckpointEnd = logManager.logForceFlush(
+                    endEntry, true /*fsyncRequired*/,
+                    ReplicationContext.NO_REPLICATE);
+
+            lastCheckpointStart = checkpointStart;
+
+            success = true;
+            cleaner.updateFilesAtCheckpointEnd(cleanerState);
+
+        } catch(DatabaseException e) {
+            LoggerUtils.traceAndLogException(envImpl, "Checkpointer",
+                    "doCheckpoint", "checkpointId=" +
+                            checkpointId, e);
+            throw e;
+        } finally {
+
+            /*
+             * Reset the checkpoint state so evictor activity knows there's no
+             * further requirement for provisional logging. SR 11163.
+             */
+            checkpointDirtyMap.reset();
+
+            if(!traced) {
+                trace(envImpl, invokingSource, success);
+            }
+        }
+    }
+
+    private void trace(EnvironmentImpl envImpl,
+                       String invokingSource,
+                       boolean success) {
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Checkpoint ").append(checkpointId);
+        sb.append(": source=").append(invokingSource);
+        sb.append(" success=").append(success);
+        sb.append(" nFullINFlushThisRun=");
+        sb.append(flushStats.nFullINFlushThisRun);
+        sb.append(" nDeltaINFlushThisRun=");
+        sb.append(flushStats.nDeltaINFlushThisRun);
+        LoggerUtils.logMsg(logger, envImpl, Level.CONFIG, sb.toString());
+    }
+
+    /**
+     * Flush a given database to disk. Like checkpoint, log from the bottom
+     * up so that parents properly represent their children.
+     */
+    public void syncDatabase(EnvironmentImpl envImpl,
+                             DatabaseImpl dbImpl,
+                             boolean flushLog) {
+        if(envImpl.isReadOnly()) {
+            return;
+        }
+
+        final DirtyINMap dirtyMap = new DirtyINMap(envImpl);
+        final FlushStats fstats = new FlushStats();
+
+        try {
+            /* Find the dirty set. */
+            dirtyMap.selectDirtyINsForDbSync(dbImpl);
+
+            if(dirtyMap.getNumEntries() > 0) {
+                /* Write all dirtyINs out.*/
+                flushDirtyNodes(
+                        envImpl, dirtyMap, DbLsn.NULL_LSN  /*ckptStart*/,
+                        false /*highPriority*/, fstats);
+
+                /* Make changes durable. [#15254] */
+                if(flushLog) {
+                    envImpl.getLogManager().flushSync();
+                }
+            }
+        } catch(DatabaseException e) {
+            LoggerUtils.traceAndLogException
+                    (envImpl, "Checkpointer", "syncDatabase",
+                            "of " + dbImpl.getDebugName(), e);
+            throw e;
+        } finally {
+            dirtyMap.reset();
         }
     }
 
@@ -1498,9 +1476,9 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
      */
     private static class RootFlusher implements WithRootLatched {
         private final DatabaseImpl db;
+        private final long targetNodeId;
         private boolean flushed;
         private boolean stillRoot;
-        private final long targetNodeId;
 
         RootFlusher(final DatabaseImpl db,
                     final long targetNodeId) {
@@ -1516,20 +1494,20 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
         @Override
         public IN doWork(ChildReference root) {
 
-            if (root == null) {
+            if(root == null) {
                 return null;
             }
 
             IN rootIN = (IN) root.fetchTarget(db, null);
             rootIN.latch(CacheMode.UNCHANGED);
             try {
-                if (rootIN.getNodeId() == targetNodeId) {
+                if(rootIN.getNodeId() == targetNodeId) {
 
                     /*
                      * Find dirty descendants to avoid logging nodes with
                      * never-logged children. See [#13936]
                      */
-                    if (rootIN.getDatabase().isDurableDeferredWrite()) {
+                    if(rootIN.getDatabase().isDurableDeferredWrite()) {
                         rootIN.logDirtyChildren();
                     }
 
@@ -1539,7 +1517,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
                      */
                     stillRoot = true;
 
-                    if (rootIN.getDirty()) {
+                    if(rootIN.getDirty()) {
                         long newLsn = rootIN.log();
                         root.setLsn(newLsn);
                         flushed = true;
@@ -1605,7 +1583,7 @@ public class Checkpointer extends DaemonThread implements EnvConfigObserver {
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof CheckpointReference)) {
+            if(!(o instanceof CheckpointReference)) {
                 return false;
             }
 

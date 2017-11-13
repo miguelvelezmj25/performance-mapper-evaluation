@@ -19,8 +19,7 @@ import java.beans.BeanDescriptor;
 import java.beans.PropertyDescriptor;
 
 /**
- * @hidden
- * Getter/Setters for JavaBean based tools.
+ * @hidden Getter/Setters for JavaBean based tools.
  */
 public class DiskOrderedCursorConfigBeanInfo extends ConfigBeanInfoBase {
 
@@ -36,7 +35,7 @@ public class DiskOrderedCursorConfigBeanInfo extends ConfigBeanInfoBase {
          * setMaxSeedTestHook is only used for unit test, and 
          * setMaxSeedTestHookVoid method is not necessary, so add 
          * "setMaxSeedTestHook" into ignoreMethods list.
-         */         
+         */
         ignoreMethods.add("setMaxSeedTestHook");
         return getPdescriptor(DiskOrderedCursorConfig.class);
     }

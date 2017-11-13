@@ -13,27 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGES_WRITTEN;
-import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_WRITE_NANOS;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
@@ -51,25 +30,25 @@ import berkeley.com.sleepycat.je.utilint.StatGroup;
 import berkeley.com.sleepycat.je.utilint.TestHook;
 import berkeley.com.sleepycat.je.utilint.TestHookExecute;
 
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_MESSAGES_WRITTEN;
+import static berkeley.com.sleepycat.je.rep.utilint.BinaryProtocolStatDefinition.N_WRITE_NANOS;
+
 public class RepUtils {
 
     public static final boolean DEBUG_PRINT_THREAD = true;
     public static final boolean DEBUG_PRINT_TIME = true;
-
-    /**
-     * Maps from uppercase ReplicaConsistencyPolicy name to the policy's
-     * format.
-     */
-    private static final Map<String, ConsistencyPolicyFormat<?>>
-        consistencyPolicyFormats =
-            new HashMap<String, ConsistencyPolicyFormat<?>>();
-    static {
-        addConsistencyPolicyFormat(TimeConsistencyPolicy.NAME,
-                                   new TimeConsistencyPolicyFormat());
-        addConsistencyPolicyFormat(NoConsistencyRequiredPolicy.NAME,
-                                   new NoConsistencyRequiredPolicyFormat());
-    }
-
     /*
      * Canonical channel instance used to indicate that this is the last
      * instance of a channel in a channel queue and that the queue is
@@ -78,108 +57,48 @@ public class RepUtils {
      * take notice.
      */
     public final static DataChannel CHANNEL_EOF_MARKER;
-
-    static {
-        try {
-            CHANNEL_EOF_MARKER = new SimpleDataChannel(SocketChannel.open());
-        } catch (IOException e) {
-            throw EnvironmentFailureException.unexpectedException(e);
-        }
-    }
-
+    /**
+     * Maps from uppercase ReplicaConsistencyPolicy name to the policy's
+     * format.
+     */
+    private static final Map<String, ConsistencyPolicyFormat<?>>
+            consistencyPolicyFormats =
+            new HashMap<String, ConsistencyPolicyFormat<?>>();
     /**
      * If not null, called by openSocketChannel with the connect options before
      * opening the socket -- for unit testing.
      */
     public static volatile TestHook<ConnectOptions> openSocketChannelHook;
 
+    static {
+        addConsistencyPolicyFormat(TimeConsistencyPolicy.NAME,
+                new TimeConsistencyPolicyFormat());
+        addConsistencyPolicyFormat(NoConsistencyRequiredPolicy.NAME,
+                new NoConsistencyRequiredPolicyFormat());
+    }
+
+    static {
+        try {
+            CHANNEL_EOF_MARKER = new SimpleDataChannel(SocketChannel.open());
+        } catch(IOException e) {
+            throw EnvironmentFailureException.unexpectedException(e);
+        }
+    }
+
     /**
      * Define a new ConsistencyPolicyFormat.  Should only be called outside of
      * this class to add support custom policies for testing.  Must be called
      * when the system is quiescent, since the map is unsynchronized.
      *
-     * @param name must be the first part of the policy string with a
-     * non-letter delimiter following it, or must be the entire policy string.
-     *
+     * @param name   must be the first part of the policy string with a
+     *               non-letter delimiter following it, or must be the entire policy string.
      * @param format to register.
      */
     public static void
-        addConsistencyPolicyFormat(final String name,
-                                   final ConsistencyPolicyFormat<?> format) {
+    addConsistencyPolicyFormat(final String name,
+                               final ConsistencyPolicyFormat<?> format) {
         consistencyPolicyFormats.put
-            (name.toUpperCase(java.util.Locale.ENGLISH), format);
-    }
-
-    /**
-     * ReplicaConsistencyPolicy must be stored as a String for use with
-     * ReplicationConfig and je.properties.  ConsistencyPolicyFormat is an
-     * internal handler that formats and parses the string representation of
-     * the policy.  Only a fixed number of string-representable policies are
-     * supported. Other policies that are not string-representable can only be
-     * used in TransactionConfig, not ReplicationConfig.  For testing only, we
-     * allow defining new custom policies.
-     */
-    public interface
-        ConsistencyPolicyFormat<T extends ReplicaConsistencyPolicy> {
-
-        String policyToString(final T policy);
-
-        T stringToPolicy(final String string);
-    }
-
-    private static class TimeConsistencyPolicyFormat
-        implements ConsistencyPolicyFormat<TimeConsistencyPolicy> {
-
-        @Override
-        public String policyToString(final TimeConsistencyPolicy policy) {
-            return policy.getName() +
-                "(" + policy.getPermissibleLag(TimeUnit.MILLISECONDS) +
-                " ms," + policy.getTimeout(TimeUnit.MILLISECONDS) +
-                " ms)";
-        }
-
-        @Override
-        public TimeConsistencyPolicy stringToPolicy(final String string) {
-            /* Format: (<lag>, <timeout>) */
-            String args =
-                string.substring(TimeConsistencyPolicy.NAME.length());
-            if (args.charAt(0) != '(' ||
-                args.charAt(args.length()-1) != ')') {
-                throw new IllegalArgumentException
-                    ("Incorrect property value syntax: " + string);
-            }
-            int arg1 = args.indexOf(',');
-            if (arg1 == -1) {
-                throw new IllegalArgumentException
-                    ("Incorrect property value syntax: " + string);
-            }
-            int lag = PropUtil.parseDuration(args.substring(1, arg1));
-            int arg2 = args.indexOf(')');
-            if (arg2 == -1) {
-                throw new IllegalArgumentException
-                    ("Incorrect property value syntax: " + string);
-            }
-            int timeout =
-                PropUtil.parseDuration(args.substring(arg1 + 1, arg2));
-            return new TimeConsistencyPolicy
-                (lag, TimeUnit.MILLISECONDS, timeout, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private static class NoConsistencyRequiredPolicyFormat
-        implements ConsistencyPolicyFormat<NoConsistencyRequiredPolicy> {
-
-        @Override
-        public String
-            policyToString(final NoConsistencyRequiredPolicy policy) {
-            return NoConsistencyRequiredPolicy.NAME;
-        }
-
-        @Override
-        public NoConsistencyRequiredPolicy
-            stringToPolicy(final String string) {
-            return NoConsistencyRequiredPolicy.NO_CONSISTENCY;
-        }
+                (name.toUpperCase(java.util.Locale.ENGLISH), format);
     }
 
     /**
@@ -187,25 +106,22 @@ public class RepUtils {
      * in a je.properties file or elsewhere.
      *
      * @param policy the policy being converted.
-     *
      * @return the formatted string representing the policy.
-     *
      * @throws IllegalArgumentException if the specific policy does not have a
-     * property value format, via ReplicationConfig(Properties) ctor and
-     * setter.
-     *
+     *                                  property value format, via ReplicationConfig(Properties) ctor and
+     *                                  setter.
      * @see #getReplicaConsistencyPolicy(String)
      */
     @SuppressWarnings("unchecked")
     public static String getPropertyString(ReplicaConsistencyPolicy policy)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         @SuppressWarnings("rawtypes")
         ConsistencyPolicyFormat format =
-            consistencyPolicyFormats.get(policy.getName().toUpperCase());
-        if (format == null) {
+                consistencyPolicyFormats.get(policy.getName().toUpperCase());
+        if(format == null) {
             throw new IllegalArgumentException
-                ("Policy: " + policy + " cannot be used as a property");
+                    ("Policy: " + policy + " cannot be used as a property");
         }
         return format.policyToString(policy);
     }
@@ -214,163 +130,30 @@ public class RepUtils {
      * Converts a property string into a policy instance.
      *
      * @param propertyValue the formatted string representing the policy.
-     *
      * @return the policy computed from the string
-     *
      * @throws IllegalArgumentException via ReplicationConfig(Properties) ctor
-     * and setter.
+     *                                  and setter.
      */
     public static ReplicaConsistencyPolicy
-        getReplicaConsistencyPolicy(String propertyValue)
-        throws IllegalArgumentException {
+    getReplicaConsistencyPolicy(String propertyValue)
+            throws IllegalArgumentException {
 
         final String upperCasePropertyValue =
-            propertyValue.toUpperCase(java.util.Locale.ENGLISH);
-        for (final Map.Entry<String, ConsistencyPolicyFormat<?>> entry :
-                 consistencyPolicyFormats.entrySet()) {
+                propertyValue.toUpperCase(java.util.Locale.ENGLISH);
+        for(final Map.Entry<String, ConsistencyPolicyFormat<?>> entry :
+                consistencyPolicyFormats.entrySet()) {
             final String name = entry.getKey();
-            if (upperCasePropertyValue.equals(name) ||
-                (upperCasePropertyValue.startsWith(name) &&
-                 upperCasePropertyValue.length() > name.length() &&
-                 !Character.isLetter(
-                     upperCasePropertyValue.charAt(name.length())))) {
+            if(upperCasePropertyValue.equals(name) ||
+                    (upperCasePropertyValue.startsWith(name) &&
+                            upperCasePropertyValue.length() > name.length() &&
+                            !Character.isLetter(
+                                    upperCasePropertyValue.charAt(name.length())))) {
                 ConsistencyPolicyFormat<?> format = entry.getValue();
                 return format.stringToPolicy(propertyValue);
             }
         }
         throw new IllegalArgumentException
-            ("Invalid consistency policy: " + propertyValue);
-    }
-
-    /**
-     * Like CountDownLatch, but makes provision in the await for the await, or
-     * more specifically the new awaitOrException method to be exited via an
-     * exception.
-     */
-    public static class ExceptionAwareCountDownLatch extends CountDownLatch {
-        /* The environment that may need to be invalidated. */
-        final EnvironmentImpl envImpl;
-
-        /* The exception (if any) that caused the latch to be released */
-        private final AtomicReference<DatabaseException> terminatingException =
-            new AtomicReference<>();
-
-        public ExceptionAwareCountDownLatch(EnvironmentImpl envImpl,
-                                            int count) {
-            super(count);
-            this.envImpl = envImpl;
-        }
-
-        /**
-         * The method used to free an await, ensuring that it throws an
-         * exception at the awaitOrException.
-         *
-         * @param e the exception to be wrapped in a DatabaseException
-         * and thrown.
-         */
-        public void releaseAwait(Exception e) {
-            terminatingException.compareAndSet(
-                null, prepareTerminatingException(e, envImpl));
-            for (long count = getCount(); count > 0; count--) {
-                countDown();
-            }
-            assert(getCount() == 0);
-        }
-
-        /**
-         * Blocks, waiting for the latch to count down to zero, or until an
-         * {@code Exception} is provided.  The exception is thrown in every
-         * thread that is waiting in this method.
-         *
-         * @see #releaseAwait
-         */
-        public boolean awaitOrException(long timeout, TimeUnit unit)
-            throws InterruptedException,
-                   DatabaseException {
-
-            boolean done = super.await(timeout, unit);
-            if (!done) {
-                return done;
-            }
-            final DatabaseException e = terminatingException.get();
-            if (e != null) {
-                throw addLocalStackTrace(e);
-            }
-            return done;
-        }
-
-        public void awaitOrException()
-            throws InterruptedException,
-                   DatabaseException {
-            awaitOrException(Integer.MAX_VALUE, TimeUnit.SECONDS);
-        }
-
-        /**
-         * DO NOT use this method. Use awaitOrException instead, so that any
-         * outstanding exceptions are thrown.
-         */
-        @Override
-        @Deprecated
-        public boolean await(long timeout, TimeUnit unit) {
-            throw EnvironmentFailureException.unexpectedState
-                ("Use awaitOrException() instead of await");
-        }
-    }
-
-    /**
-     * Like {@code LinkedBlockingQueue}, but provides a {@code
-     * pollOrException()} method that should be used instead of {@code poll()},
-     * so that callers don't have to treat exception cases specially.
-     *
-     * @see ExceptionAwareCountDownLatch
-     */
-    @SuppressWarnings("serial")
-    public static class ExceptionAwareBlockingQueue<T>
-        extends LinkedBlockingQueue<T> {
-
-        final EnvironmentImpl envImpl;
-        final T dummyValue;
-
-        private final AtomicReference<DatabaseException> terminatingException =
-            new AtomicReference<>();
-
-        public ExceptionAwareBlockingQueue(EnvironmentImpl envImpl,
-                                           T dummyValue) {
-            super();
-            this.envImpl = envImpl;
-            this.dummyValue = dummyValue;
-        }
-
-        public void releasePoll(Exception e) {
-            terminatingException.compareAndSet(
-                null, prepareTerminatingException(e, envImpl));
-            add(dummyValue);
-        }
-
-        public T pollOrException(long timeout, TimeUnit unit)
-            throws InterruptedException,
-            DatabaseException {
-
-            T value = super.poll(timeout, unit);
-            if (value == null) {
-                return value;
-            }
-            final DatabaseException e = terminatingException.get();
-            if (e != null) {
-                throw addLocalStackTrace(e);
-            }
-            return value;
-        }
-
-        /**
-         * (Use {@link #pollOrException} instead.
-         */
-        @Override
-        @Deprecated
-        public T poll(long timeout, TimeUnit unit) {
-            throw EnvironmentFailureException.unexpectedState
-                ("Use pollOrException() instead of poll()");
-        }
+                ("Invalid consistency policy: " + propertyValue);
     }
 
     /**
@@ -380,21 +163,21 @@ public class RepUtils {
      * re-thrown in an app thread and the stack trace may be confusing.
      */
     private static DatabaseException prepareTerminatingException(
-        final Exception e,
-        final EnvironmentImpl envImpl) {
+            final Exception e,
+            final EnvironmentImpl envImpl) {
 
-        if (e == null) {
+        if(e == null) {
             return null;
         }
 
         final DatabaseException de =
-            (e instanceof DatabaseException) ?
-            ((DatabaseException) e) :
-            EnvironmentFailureException.unexpectedException(envImpl, e);
+                (e instanceof DatabaseException) ?
+                        ((DatabaseException) e) :
+                        EnvironmentFailureException.unexpectedException(envImpl, e);
 
         de.addErrorMessage(
-            "Originally thrown by HA thread: " +
-            Thread.currentThread().getName());
+                "Originally thrown by HA thread: " +
+                        Thread.currentThread().getName());
 
         return de;
     }
@@ -416,14 +199,14 @@ public class RepUtils {
      * @param namedChannel the channel to be shutdown
      */
     public static void shutdownChannel(NamedChannel namedChannel) {
-        if (namedChannel == null) {
+        if(namedChannel == null) {
             return;
         }
         shutdownChannel(namedChannel.getChannel());
     }
 
     public static void shutdownChannel(DataChannel channel) {
-        if (channel == null) {
+        if(channel == null) {
             return;
         }
 
@@ -434,7 +217,7 @@ public class RepUtils {
          */
         try {
             channel.close();
-        } catch (IOException e) {
+        } catch(IOException e) {
             /* Ignore */
         }
     }
@@ -442,14 +225,13 @@ public class RepUtils {
     /**
      * Create a socket channel with the designated properties
      *
-     * @param addr the remote endpoint socket address
+     * @param addr        the remote endpoint socket address
      * @param connectOpts connect options to be applied to the channel
      * @return the connected channel
-     *
      */
     public static SocketChannel openSocketChannel(InetSocketAddress addr,
                                                   ConnectOptions connectOpts)
-        throws IOException {
+            throws IOException {
 
         assert TestHookExecute.doHookIfSet(openSocketChannelHook, connectOpts);
 
@@ -457,7 +239,7 @@ public class RepUtils {
         channel.configureBlocking(connectOpts.getBlocking());
 
         final Socket socket = channel.socket();
-        if (connectOpts.getReceiveBufferSize() != 0) {
+        if(connectOpts.getReceiveBufferSize() != 0) {
             socket.setReceiveBufferSize(connectOpts.getReceiveBufferSize());
         }
         socket.setTcpNoDelay(connectOpts.getTcpNoDelay());
@@ -471,16 +253,15 @@ public class RepUtils {
     /**
      * Create a Data channel with the designated properties
      *
-     * @param addr the remote endpoint socket address
-     * @param factory DataChannel factory for channel creation
+     * @param addr        the remote endpoint socket address
+     * @param factory     DataChannel factory for channel creation
      * @param connectOpts connect options to be applied to the channel
      * @return the connected channel
-     *
      */
     public static DataChannel openBlockingChannel(InetSocketAddress addr,
                                                   DataChannelFactory factory,
                                                   ConnectOptions connectOpts)
-        throws IOException {
+            throws IOException {
         return factory.connect(addr, connectOpts);
     }
 
@@ -496,7 +277,7 @@ public class RepUtils {
                                                 Throwable oldt) {
         /* Don't lose the original exception */
         Throwable tail = newt;
-        while (tail.getCause() != null) {
+        while(tail.getCause() != null) {
             tail = tail.getCause();
         }
         tail.initCause(oldt);
@@ -508,29 +289,29 @@ public class RepUtils {
         long nWriteNanos = stats.getLong(N_WRITE_NANOS);
 
         long avgWriteNanos =
-            (nMessagesWritten <= 0) ? 0 : (nWriteNanos / nMessagesWritten);
+                (nMessagesWritten <= 0) ? 0 : (nWriteNanos / nMessagesWritten);
 
         return String.format(" write time: %, dms Avg write time: %,dus",
-                             nWriteNanos / 1000000, avgWriteNanos / 1000);
+                nWriteNanos / 1000000, avgWriteNanos / 1000);
     }
 
     /**
      * Read replication access properties from a property file.
      *
-     * @param props a Properties object into which the properties will be stored
+     * @param props           a Properties object into which the properties will be stored
      * @param accessPropsFile an abstract File naming a file containing property
-     *        settings.
+     *                        settings.
      * @return the input properties object, updated with the property settings
-     *        found in the file.
+     * found in the file.
      * @throws IllegalArgumentException if the accessPropsFile contains
-     *        invalid settings.
+     *                                  invalid settings.
      */
     public static Properties populateNetProps(Properties props,
                                               File accessPropsFile) {
 
         Properties rawProps = new Properties();
         DbConfigManager.applyFileConfig(accessPropsFile, rawProps,
-                                        true); //forReplication
+                true); //forReplication
 
         /* filter out the properties that are not relevant */
         ReplicationNetworkConfig.applyRepNetProperties(rawProps, props);
@@ -543,12 +324,11 @@ public class RepUtils {
      * like netstat, or jps, etc. It's up to the caller to ensure the
      * availability of the utility and ensure that it's on the search path.
      *
-     * @args the arguments to a ProcessBuilder with args[0] being the command
-     * and args[1-...] being its args
-     *
      * @return a string denoting the output from the command. Or a string
      * prefixed by the word EXCEPTION, if an exception was encountered,
      * followed by the exception class name and exception message.
+     * @args the arguments to a ProcessBuilder with args[0] being the command
+     * and args[1-...] being its args
      */
     public static String exec(String... args) {
 
@@ -566,16 +346,219 @@ public class RepUtils {
             final BufferedReader br = new BufferedReader(isr);
 
             String line;
-            while ((line = br.readLine()) != null) {
+            while((line = br.readLine()) != null) {
                 output.println(line);
             }
 
-        } catch (Exception e) {
+        } catch(Exception e) {
             output.println("EXCEPTION:" + " class:" + e.getClass().getName() +
-                           " message:" + e.getMessage());
+                    " message:" + e.getMessage());
         }
 
         return bao.toString();
+    }
+
+    /**
+     * ReplicaConsistencyPolicy must be stored as a String for use with
+     * ReplicationConfig and je.properties.  ConsistencyPolicyFormat is an
+     * internal handler that formats and parses the string representation of
+     * the policy.  Only a fixed number of string-representable policies are
+     * supported. Other policies that are not string-representable can only be
+     * used in TransactionConfig, not ReplicationConfig.  For testing only, we
+     * allow defining new custom policies.
+     */
+    public interface
+    ConsistencyPolicyFormat<T extends ReplicaConsistencyPolicy> {
+
+        String policyToString(final T policy);
+
+        T stringToPolicy(final String string);
+    }
+
+    private static class TimeConsistencyPolicyFormat
+            implements ConsistencyPolicyFormat<TimeConsistencyPolicy> {
+
+        @Override
+        public String policyToString(final TimeConsistencyPolicy policy) {
+            return policy.getName() +
+                    "(" + policy.getPermissibleLag(TimeUnit.MILLISECONDS) +
+                    " ms," + policy.getTimeout(TimeUnit.MILLISECONDS) +
+                    " ms)";
+        }
+
+        @Override
+        public TimeConsistencyPolicy stringToPolicy(final String string) {
+            /* Format: (<lag>, <timeout>) */
+            String args =
+                    string.substring(TimeConsistencyPolicy.NAME.length());
+            if(args.charAt(0) != '(' ||
+                    args.charAt(args.length() - 1) != ')') {
+                throw new IllegalArgumentException
+                        ("Incorrect property value syntax: " + string);
+            }
+            int arg1 = args.indexOf(',');
+            if(arg1 == -1) {
+                throw new IllegalArgumentException
+                        ("Incorrect property value syntax: " + string);
+            }
+            int lag = PropUtil.parseDuration(args.substring(1, arg1));
+            int arg2 = args.indexOf(')');
+            if(arg2 == -1) {
+                throw new IllegalArgumentException
+                        ("Incorrect property value syntax: " + string);
+            }
+            int timeout =
+                    PropUtil.parseDuration(args.substring(arg1 + 1, arg2));
+            return new TimeConsistencyPolicy
+                    (lag, TimeUnit.MILLISECONDS, timeout, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private static class NoConsistencyRequiredPolicyFormat
+            implements ConsistencyPolicyFormat<NoConsistencyRequiredPolicy> {
+
+        @Override
+        public String
+        policyToString(final NoConsistencyRequiredPolicy policy) {
+            return NoConsistencyRequiredPolicy.NAME;
+        }
+
+        @Override
+        public NoConsistencyRequiredPolicy
+        stringToPolicy(final String string) {
+            return NoConsistencyRequiredPolicy.NO_CONSISTENCY;
+        }
+    }
+
+    /**
+     * Like CountDownLatch, but makes provision in the await for the await, or
+     * more specifically the new awaitOrException method to be exited via an
+     * exception.
+     */
+    public static class ExceptionAwareCountDownLatch extends CountDownLatch {
+        /* The environment that may need to be invalidated. */
+        final EnvironmentImpl envImpl;
+
+        /* The exception (if any) that caused the latch to be released */
+        private final AtomicReference<DatabaseException> terminatingException =
+                new AtomicReference<>();
+
+        public ExceptionAwareCountDownLatch(EnvironmentImpl envImpl,
+                                            int count) {
+            super(count);
+            this.envImpl = envImpl;
+        }
+
+        /**
+         * The method used to free an await, ensuring that it throws an
+         * exception at the awaitOrException.
+         *
+         * @param e the exception to be wrapped in a DatabaseException
+         *          and thrown.
+         */
+        public void releaseAwait(Exception e) {
+            terminatingException.compareAndSet(
+                    null, prepareTerminatingException(e, envImpl));
+            for(long count = getCount(); count > 0; count--) {
+                countDown();
+            }
+            assert (getCount() == 0);
+        }
+
+        /**
+         * Blocks, waiting for the latch to count down to zero, or until an
+         * {@code Exception} is provided.  The exception is thrown in every
+         * thread that is waiting in this method.
+         *
+         * @see #releaseAwait
+         */
+        public boolean awaitOrException(long timeout, TimeUnit unit)
+                throws InterruptedException,
+                DatabaseException {
+
+            boolean done = super.await(timeout, unit);
+            if(!done) {
+                return done;
+            }
+            final DatabaseException e = terminatingException.get();
+            if(e != null) {
+                throw addLocalStackTrace(e);
+            }
+            return done;
+        }
+
+        public void awaitOrException()
+                throws InterruptedException,
+                DatabaseException {
+            awaitOrException(Integer.MAX_VALUE, TimeUnit.SECONDS);
+        }
+
+        /**
+         * DO NOT use this method. Use awaitOrException instead, so that any
+         * outstanding exceptions are thrown.
+         */
+        @Override
+        @Deprecated
+        public boolean await(long timeout, TimeUnit unit) {
+            throw EnvironmentFailureException.unexpectedState
+                    ("Use awaitOrException() instead of await");
+        }
+    }
+
+    /**
+     * Like {@code LinkedBlockingQueue}, but provides a {@code
+     * pollOrException()} method that should be used instead of {@code poll()},
+     * so that callers don't have to treat exception cases specially.
+     *
+     * @see ExceptionAwareCountDownLatch
+     */
+    @SuppressWarnings("serial")
+    public static class ExceptionAwareBlockingQueue<T>
+            extends LinkedBlockingQueue<T> {
+
+        final EnvironmentImpl envImpl;
+        final T dummyValue;
+
+        private final AtomicReference<DatabaseException> terminatingException =
+                new AtomicReference<>();
+
+        public ExceptionAwareBlockingQueue(EnvironmentImpl envImpl,
+                                           T dummyValue) {
+            super();
+            this.envImpl = envImpl;
+            this.dummyValue = dummyValue;
+        }
+
+        public void releasePoll(Exception e) {
+            terminatingException.compareAndSet(
+                    null, prepareTerminatingException(e, envImpl));
+            add(dummyValue);
+        }
+
+        public T pollOrException(long timeout, TimeUnit unit)
+                throws InterruptedException,
+                DatabaseException {
+
+            T value = super.poll(timeout, unit);
+            if(value == null) {
+                return value;
+            }
+            final DatabaseException e = terminatingException.get();
+            if(e != null) {
+                throw addLocalStackTrace(e);
+            }
+            return value;
+        }
+
+        /**
+         * (Use {@link #pollOrException} instead.
+         */
+        @Override
+        @Deprecated
+        public T poll(long timeout, TimeUnit unit) {
+            throw EnvironmentFailureException.unexpectedState
+                    ("Use pollOrException() instead of poll()");
+        }
     }
 
     /*

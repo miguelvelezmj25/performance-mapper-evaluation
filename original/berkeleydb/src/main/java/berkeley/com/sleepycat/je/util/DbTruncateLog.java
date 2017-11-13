@@ -13,22 +13,22 @@
 
 package berkeley.com.sleepycat.je.util;
 
-import java.io.File;
-import java.io.IOException;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.CmdUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * DbTruncateLog is a utility that lets the user truncate JE log starting at a
  * specified file and offset to the last log file, inclusive. Generally used in
- * replication systems for handling 
- * com.sleepycat.je.rep.RollbackProhibitedException, to permit the application 
+ * replication systems for handling
+ * com.sleepycat.je.rep.RollbackProhibitedException, to permit the application
  * to interject application specific handling. Should be used with caution.
  * <p>
  * The parameters for DbTruncateLog are provided through the
  * RollbackProhibitedException instance, and the exception message. The goal is
- * to truncate the JE log after a specified file number and file offset. 
+ * to truncate the JE log after a specified file number and file offset.
  * DbTruncateLog will automatically delete all log entries after that specified
  * log entry.
  * <p>
@@ -55,6 +55,9 @@ public class DbTruncateLog {
     private long truncateOffset = -1;
     private File envHome;
 
+    public DbTruncateLog() {
+    }
+
     /**
      * Usage:
      * <pre>
@@ -72,88 +75,87 @@ public class DbTruncateLog {
             DbTruncateLog truncator = new DbTruncateLog();
             truncator.parseArgs(argv);
             truncator.truncateLog();
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             usage();
             System.exit(1);
         }
     }
 
-    public DbTruncateLog() {
+    private static void usage() {
+        System.out.println("Usage: " +
+                CmdUtil.getJavaCommand(DbTruncateLog.class));
+        System.out.println("                 -h <environment home>");
+        System.out.println("                 -f <file number, in hex>");
+        System.out.println("                 -o <offset, in hex>");
+        System.out.println("JE log will be deleted starting from the " +
+                "position presented by the file number and " +
+                "offset to the end, inclusive.");
     }
-     
+
     private void parseArgs(String[] argv) {
         int whichArg = 0;
         boolean seenFile = false;
         boolean seenOffset = false;
 
-        while (whichArg < argv.length) {
+        while(whichArg < argv.length) {
             String nextArg = argv[whichArg];
 
-            if (nextArg.equals("-h")) {
+            if(nextArg.equals("-h")) {
                 whichArg++;
                 envHome = new File(CmdUtil.getArg(argv, whichArg));
-            } else if (nextArg.equals("-f")) {
+            }
+            else if(nextArg.equals("-f")) {
                 whichArg++;
                 truncateFileNum =
-                    CmdUtil.readLongNumber(CmdUtil.getArg(argv, whichArg));
+                        CmdUtil.readLongNumber(CmdUtil.getArg(argv, whichArg));
                 seenFile = true;
-            } else if (nextArg.equals("-o")) {
+            }
+            else if(nextArg.equals("-o")) {
                 whichArg++;
                 truncateOffset =
-                    CmdUtil.readLongNumber(CmdUtil.getArg(argv, whichArg));
+                        CmdUtil.readLongNumber(CmdUtil.getArg(argv, whichArg));
                 seenOffset = true;
-            } else {
+            }
+            else {
                 throw new IllegalArgumentException
-                    (nextArg + " is not a supported option.");
+                        (nextArg + " is not a supported option.");
             }
             whichArg++;
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             usage();
             System.exit(1);
         }
 
-        if ((!seenFile) || (!seenOffset)) {
+        if((!seenFile) || (!seenOffset)) {
             usage();
             System.exit(1);
         }
     }
 
-    private void truncateLog() 
-        throws IOException {
-        
+    private void truncateLog()
+            throws IOException {
+
         truncateLog(envHome, truncateFileNum, truncateOffset);
     }
 
     /**
-     * @hidden
-     * Truncate the JE log to the given file and offset. For unit tests.
+     * @hidden Truncate the JE log to the given file and offset. For unit tests.
      */
-    public void truncateLog(File env, 
-                            long truncFileNum, 
-                            long truncOffset) 
-        throws IOException {
+    public void truncateLog(File env,
+                            long truncFileNum,
+                            long truncOffset)
+            throws IOException {
 
         /* Make a read/write environment */
         EnvironmentImpl envImpl =
-            CmdUtil.makeUtilityEnvironment(env, false);
-        
+                CmdUtil.makeUtilityEnvironment(env, false);
+
         /* Go through the file manager to get the JE file. Truncate. */
         envImpl.getFileManager().truncateLog(truncFileNum, truncOffset);
 
         envImpl.close();
-    }
-
-    private static void usage() {
-        System.out.println("Usage: " +
-                           CmdUtil.getJavaCommand(DbTruncateLog.class));
-        System.out.println("                 -h <environment home>");
-        System.out.println("                 -f <file number, in hex>");
-        System.out.println("                 -o <offset, in hex>");
-        System.out.println("JE log will be deleted starting from the " +
-                           "position presented by the file number and " + 
-                           "offset to the end, inclusive.");
     }
 }

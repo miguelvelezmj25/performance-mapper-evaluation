@@ -13,29 +13,29 @@
 
 package berkeley.com.sleepycat.je.tree.dupConvert;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.tree.Key;
 
+import java.nio.ByteBuffer;
+
 /**
  * INDeleteInfo encapsulates the information logged about the removal of a
  * child from an IN during IN compression.
- *
+ * <p>
  * As of JE 3.3.87, INDelete is no longer logged becaue the root compression
  * feature has been removed.  However, INDelete must still be processed in log
  * files created with 3.3.87 and earlier. [#17546]
- *
+ * <p>
  * Obsolete in log version 8, only used by DupConvert and some log readers.
  */
 public class INDeleteInfo implements Loggable {
 
+    private final DatabaseId dbId;
     private long deletedNodeId;
     private byte[] deletedIdKey;
-    private final DatabaseId dbId;
 
     /**
      * Used by logging system only.

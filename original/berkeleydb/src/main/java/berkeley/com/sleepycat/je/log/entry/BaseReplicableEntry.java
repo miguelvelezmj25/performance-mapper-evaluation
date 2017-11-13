@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.log.VersionedWriteLoggable;
+
+import java.nio.ByteBuffer;
 
 /**
  * A basic implementation of a replicable log entry that provides for writing
@@ -52,7 +52,7 @@ abstract class BaseReplicableEntry<T extends VersionedWriteLoggable>
     @Override
     public void writeEntry(final ByteBuffer destBuffer) {
         writeEntry(
-            destBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
+                destBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
     }
 
     @Override

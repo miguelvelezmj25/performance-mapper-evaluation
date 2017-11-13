@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je;
 
+import berkeley.com.sleepycat.je.utilint.VLSN;
+
 import java.io.Serializable;
 import java.util.UUID;
-
-import berkeley.com.sleepycat.je.utilint.VLSN;
 
 /**
  * Defines an opaque token that can be used to identify a specific transaction
@@ -36,23 +36,21 @@ public class CommitToken implements Serializable, Comparable<CommitToken> {
     private final long vlsn;
 
     /**
-     * @hidden
-     * For internal use only.
-     * Creates a CommitToken suitable for use in a consistency policy.
-     *
      * @param repenvUUID identifies the replicated environment associated with
-     * the <code>vlsn</code>
-     * @param vlsn the vlsn representing the state of the database.
+     *                   the <code>vlsn</code>
+     * @param vlsn       the vlsn representing the state of the database.
+     * @hidden For internal use only.
+     * Creates a CommitToken suitable for use in a consistency policy.
      */
     public CommitToken(UUID repenvUUID, long vlsn) {
-        if (repenvUUID == null) {
+        if(repenvUUID == null) {
             throw EnvironmentFailureException.unexpectedState
-                ("The UUID must not be null");
+                    ("The UUID must not be null");
         }
 
-        if (vlsn == VLSN.NULL_VLSN_SEQUENCE) {
+        if(vlsn == VLSN.NULL_VLSN_SEQUENCE) {
             throw EnvironmentFailureException.unexpectedState
-                ("The vlsn must not be null");
+                    ("The vlsn must not be null");
         }
 
         this.repenvUUID = repenvUUID;
@@ -79,24 +77,25 @@ public class CommitToken implements Serializable, Comparable<CommitToken> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (!(obj instanceof CommitToken)) {
+        if(!(obj instanceof CommitToken)) {
             return false;
         }
         CommitToken other = (CommitToken) obj;
-        if (repenvUUID == null) {
-            if (other.repenvUUID != null) {
+        if(repenvUUID == null) {
+            if(other.repenvUUID != null) {
                 return false;
             }
-        } else if (!repenvUUID.equals(other.repenvUUID)) {
+        }
+        else if(!repenvUUID.equals(other.repenvUUID)) {
             return false;
         }
-        if (vlsn != other.vlsn) {
+        if(vlsn != other.vlsn) {
             return false;
         }
         return true;
@@ -110,15 +109,16 @@ public class CommitToken implements Serializable, Comparable<CommitToken> {
      * CommitToken(1) < CommitToken(2) implies that CommitToken(1) represents
      * a state of the database that preceded the state defined by
      * CommitToken(2).
+     *
      * @throws IllegalArgumentException if two tokens from different
-     * environments are compared.
+     *                                  environments are compared.
      */
     public int compareTo(CommitToken other) {
-        if (! repenvUUID.equals(other.repenvUUID)) {
+        if(!repenvUUID.equals(other.repenvUUID)) {
             throw new IllegalArgumentException
-            ("Comparisons across environments are not meaningful. " +
-             "This environment: " + repenvUUID +
-             " other environment: " + other.getRepenvUUID());
+                    ("Comparisons across environments are not meaningful. " +
+                            "This environment: " + repenvUUID +
+                            " other environment: " + other.getRepenvUUID());
         }
         final long compare = vlsn - other.vlsn;
         return (compare < 0) ? -1 : ((compare == 0) ? 0 : 1);

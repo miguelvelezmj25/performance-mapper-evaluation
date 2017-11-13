@@ -27,5 +27,5 @@ public interface EnvConfigObserver {
      */
     void envConfigUpdate(DbConfigManager configMgr,
                          EnvironmentMutableConfig newConfig)
-        throws DatabaseException;
+            throws DatabaseException;
 }

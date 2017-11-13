@@ -23,7 +23,7 @@ import berkeley.com.sleepycat.je.utilint.PropUtil;
 public class DurationConfigParam extends ConfigParam {
 
     private static final String DEBUG_NAME =
-        DurationConfigParam.class.getName();
+            DurationConfigParam.class.getName();
 
     private String minString;
     private int minMillis;
@@ -37,11 +37,11 @@ public class DurationConfigParam extends ConfigParam {
                                boolean mutable,
                                boolean forReplication) {
         super(configName, defaultValue, mutable, forReplication);
-        if (minVal != null) {
+        if(minVal != null) {
             minString = minVal;
             minMillis = PropUtil.parseDuration(minVal);
         }
-        if (maxVal != null) {
+        if(maxVal != null) {
             maxString = maxVal;
             maxMillis = PropUtil.parseDuration(maxVal);
         }
@@ -49,42 +49,42 @@ public class DurationConfigParam extends ConfigParam {
 
     @Override
     public void validateValue(String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         final int millis;
         try {
             /* Parse for validation side-effects. */
             millis = PropUtil.parseDuration(value);
-        } catch (IllegalArgumentException e) {
+        } catch(IllegalArgumentException e) {
             /* Identify this property in the exception message. */
             throw new IllegalArgumentException
-                (DEBUG_NAME + ":" +
-                 " param " + name +
-                 " doesn't validate, " +
-                 value +
-                 " fails validation: " + e.getMessage());
+                    (DEBUG_NAME + ":" +
+                            " param " + name +
+                            " doesn't validate, " +
+                            value +
+                            " fails validation: " + e.getMessage());
         }
         /* Check min/max. */
-        if (minString != null) {
-            if (millis < minMillis) {
+        if(minString != null) {
+            if(millis < minMillis) {
                 throw new IllegalArgumentException
-                    (DEBUG_NAME + ":" +
-                     " param " + name +
-                     " doesn't validate, " +
-                     value +
-                     " is less than min of "+
-                     minString);
+                        (DEBUG_NAME + ":" +
+                                " param " + name +
+                                " doesn't validate, " +
+                                value +
+                                " is less than min of " +
+                                minString);
             }
         }
-        if (maxString != null) {
-            if (millis > maxMillis) {
+        if(maxString != null) {
+            if(millis > maxMillis) {
                 throw new IllegalArgumentException
-                    (DEBUG_NAME + ":" +
-                     " param " + name +
-                     " doesn't validate, " +
-                     value +
-                     " is greater than max of " +
-                     maxString);
+                        (DEBUG_NAME + ":" +
+                                " param " + name +
+                                " doesn't validate, " +
+                                value +
+                                " is greater than max of " +
+                                maxString);
             }
         }
     }

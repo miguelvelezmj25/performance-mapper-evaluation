@@ -13,15 +13,7 @@
 
 package berkeley.com.sleepycat.je.rep.util.ldiff;
 
-import java.util.List;
-import java.util.HashSet;
-
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.OperationStatus;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.CursorImpl;
 import berkeley.com.sleepycat.je.log.LogManager;
 import berkeley.com.sleepycat.je.log.WholeEntry;
@@ -30,6 +22,9 @@ import berkeley.com.sleepycat.je.rep.util.ldiff.Protocol.RemoteDiffRequest;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.Message;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.util.HashSet;
+import java.util.List;
 
 /*
  * Class used for figuring out the difference on local and remote databases,
@@ -53,43 +48,43 @@ public class DiffRecordAnalyzer {
                                   DataChannel channel,
                                   DiffTracker tracker,
                                   boolean doPrint)
-        throws Exception {
+            throws Exception {
 
         List<MismatchedRegion> regions = tracker.getDiffRegions();
         Cursor localCursor = null;
         try {
             localCursor = localDb.openCursor(null, null);
 
-            for (MismatchedRegion region : regions) {
-                if (region.isLocalAdditional()) {
+            for(MismatchedRegion region : regions) {
+                if(region.isLocalAdditional()) {
                     printLocalAdditional(localCursor, region, doPrint);
                     continue;
                 }
 
-                if (region.isRemoteAdditional()) {
-                     HashSet<Record> records =
-                         getDiffArea(protocol, channel, region);
-                     if (doPrint) {
-                         printAdditional(records, true);
-                     }
-                     records.clear();
-                     continue;
+                if(region.isRemoteAdditional()) {
+                    HashSet<Record> records =
+                            getDiffArea(protocol, channel, region);
+                    if(doPrint) {
+                        printAdditional(records, true);
+                    }
+                    records.clear();
+                    continue;
                 }
 
                 HashSet<Record> localRecords =
-                    getDiffArea(localCursor, region.getLocalBeginKey(),
+                        getDiffArea(localCursor, region.getLocalBeginKey(),
                                 region.getLocalBeginData(),
                                 region.getLocalDiffSize());
                 HashSet<Record> remoteRecords =
-                    getDiffArea(protocol, channel, region);
-                if (doPrint) {
-                printDiffs(localRecords, remoteRecords);
-            }
+                        getDiffArea(protocol, channel, region);
+                if(doPrint) {
+                    printDiffs(localRecords, remoteRecords);
+                }
                 localRecords.clear();
                 remoteRecords.clear();
             }
         } finally {
-            if (localCursor != null) {
+            if(localCursor != null) {
                 localCursor.close();
             }
         }
@@ -100,7 +95,7 @@ public class DiffRecordAnalyzer {
                                   Database remoteDb,
                                   DiffTracker tracker,
                                   boolean doPrint)
-        throws Exception {
+            throws Exception {
 
         List<MismatchedRegion> regions = tracker.getDiffRegions();
         Cursor localCursor = null;
@@ -109,18 +104,18 @@ public class DiffRecordAnalyzer {
             localCursor = localDb.openCursor(null, null);
             remoteCursor = remoteDb.openCursor(null, null);
 
-            for (MismatchedRegion region : regions) {
-                if (region.isLocalAdditional()) {
+            for(MismatchedRegion region : regions) {
+                if(region.isLocalAdditional()) {
                     printLocalAdditional(localCursor, region, doPrint);
                     continue;
                 }
 
-                if (region.isRemoteAdditional()) {
+                if(region.isRemoteAdditional()) {
                     HashSet<Record> records =
-                        getDiffArea(remoteCursor, region.getRemoteBeginKey(),
+                            getDiffArea(remoteCursor, region.getRemoteBeginKey(),
                                     region.getRemoteBeginData(),
                                     region.getRemoteDiffSize());
-                    if (doPrint) {
+                    if(doPrint) {
                         printAdditional(records, true);
                     }
                     records.clear();
@@ -128,24 +123,24 @@ public class DiffRecordAnalyzer {
                 }
 
                 HashSet<Record> localRecords =
-                    getDiffArea(localCursor, region.getLocalBeginKey(),
+                        getDiffArea(localCursor, region.getLocalBeginKey(),
                                 region.getLocalBeginData(),
                                 region.getLocalDiffSize());
                 HashSet<Record> remoteRecords =
-                    getDiffArea(remoteCursor, region.getRemoteBeginKey(),
+                        getDiffArea(remoteCursor, region.getRemoteBeginKey(),
                                 region.getRemoteBeginData(),
                                 region.getRemoteDiffSize());
-                if (doPrint) {
-                printDiffs(localRecords, remoteRecords);
-            }
+                if(doPrint) {
+                    printDiffs(localRecords, remoteRecords);
+                }
                 localRecords.clear();
                 remoteRecords.clear();
             }
         } finally {
-            if (localCursor != null) {
+            if(localCursor != null) {
                 localCursor.close();
             }
-            if (remoteCursor != null) {
+            if(remoteCursor != null) {
                 remoteCursor.close();
             }
         }
@@ -155,15 +150,15 @@ public class DiffRecordAnalyzer {
     private static void printLocalAdditional(Cursor cursor,
                                              MismatchedRegion region,
                                              boolean doPrint)
-        throws Exception {
+            throws Exception {
 
         HashSet<Record> records = getDiffArea(cursor,
-                                              region.getLocalBeginKey(),
-                                    region.getLocalBeginData(),
-                                              region.getLocalDiffSize());
-        if (doPrint) {
+                region.getLocalBeginKey(),
+                region.getLocalBeginData(),
+                region.getLocalDiffSize());
+        if(doPrint) {
             printAdditional(records, false);
-    }
+        }
         records.clear();
     }
 
@@ -172,9 +167,9 @@ public class DiffRecordAnalyzer {
         String side = remote ? "Remote" : "Local";
         System.err.println("************************************************");
         System.err.println(side + " database has additional records, the " +
-                           "additional range as following:");
+                "additional range as following:");
         side = remote ? "remote" : "local";
-        for (Record record : diffRecords) {
+        for(Record record : diffRecords) {
             printRecord(record, side, false);
         }
         System.err.println("************************************************");
@@ -189,17 +184,17 @@ public class DiffRecordAnalyzer {
                                     boolean different) {
         System.err.print("Record with Key: [");
         byte[] keys = record.getKey();
-        for (int i = 0; i < keys.length; i++) {
+        for(int i = 0; i < keys.length; i++) {
             System.err.print(keys[i]);
-            if (i < (keys.length - 1)) {
+            if(i < (keys.length - 1)) {
                 System.err.print(" ");
             }
         }
         System.err.print("]");
-        if (record.getVLSN().getSequence() != -1) {
+        if(record.getVLSN().getSequence() != -1) {
             System.err.print(", VLSN: " + record.getVLSN());
         }
-        if (different) {
+        if(different) {
             System.err.print(" does not exist on " + side + " database");
         }
         System.err.println();
@@ -210,27 +205,27 @@ public class DiffRecordAnalyzer {
                                                byte[] beginKey,
                                                byte[] beginData,
                                                long diffSize)
-        throws Exception {
+            throws Exception {
 
         HashSet<Record> records = new HashSet<Record>();
         LogManager logManager = DbInternal.getNonNullEnvImpl
-            (cursor.getDatabase().getEnvironment()).getLogManager();
+                (cursor.getDatabase().getEnvironment()).getLogManager();
 
         DatabaseEntry key = new DatabaseEntry(beginKey);
         DatabaseEntry data = new DatabaseEntry(beginData);
         boolean scanToEnd = (diffSize == DATABASE_END ? true : false);
         long count = 1;
 
-        for (OperationStatus status =
-             cursor.getSearchBoth(key, data, LockMode.DEFAULT);
-             status == OperationStatus.SUCCESS;
-             status = cursor.getNext(key, data, LockMode.DEFAULT)) {
+        for(OperationStatus status =
+            cursor.getSearchBoth(key, data, LockMode.DEFAULT);
+            status == OperationStatus.SUCCESS;
+            status = cursor.getNext(key, data, LockMode.DEFAULT)) {
 
-            if (!scanToEnd && count > diffSize) {
+            if(!scanToEnd && count > diffSize) {
                 break;
             }
             records.add(new Record(key.getData(), data.getData(),
-                                   getVLSN(cursor, logManager)));
+                    getVLSN(cursor, logManager)));
             count++;
         }
 
@@ -240,44 +235,44 @@ public class DiffRecordAnalyzer {
     /* Used by LDiffService. */
     public static HashSet<Record> getDiffArea(Cursor cursor,
                                               RemoteDiffRequest request)
-        throws Exception {
+            throws Exception {
 
         return getDiffArea(cursor, request.getKey(),
-                           request.getData(), request.getDiffSize());
+                request.getData(), request.getDiffSize());
     }
 
     /* Get the records of a different area on remote database in a HashSet. */
     private static HashSet<Record> getDiffArea(Protocol protocol,
                                                DataChannel channel,
                                                MismatchedRegion region)
-        throws Exception {
+            throws Exception {
 
         protocol.write(protocol.new RemoteDiffRequest(region), channel);
 
         /* Check whether getting records on remote database is successful. */
         Message message = protocol.read(channel);
-        if (message.getOp() == Protocol.ERROR) {
+        if(message.getOp() == Protocol.ERROR) {
             throw new LDiffRecordRequestException
-                (((Protocol.Error) message).getErrorMessage());
+                    (((Protocol.Error) message).getErrorMessage());
         }
 
-        if (message.getOp() != Protocol.DIFF_AREA_START) {
+        if(message.getOp() != Protocol.DIFF_AREA_START) {
             throw new ProtocolException
-                (message, Protocol.DiffAreaStart.class);
+                    (message, Protocol.DiffAreaStart.class);
         }
 
         /* Add those different records until protocol sees an end signal. */
         HashSet<Record> records = new HashSet<Record>();
-        while (true) {
+        while(true) {
             try {
                 Protocol.RemoteRecord record =
-                    protocol.read(channel, Protocol.RemoteRecord.class);
+                        protocol.read(channel, Protocol.RemoteRecord.class);
                 records.add(new Record(record.getKey(),
-                                       record.getData(),
-                                       record.getVLSN()));
-            } catch (ProtocolException pe) {
-                if (pe.getUnexpectedMessage().getOp() !=
-                    Protocol.DIFF_AREA_END) {
+                        record.getData(),
+                        record.getVLSN()));
+            } catch(ProtocolException pe) {
+                if(pe.getUnexpectedMessage().getOp() !=
+                        Protocol.DIFF_AREA_END) {
                     throw pe;
                 }
                 break;
@@ -289,18 +284,18 @@ public class DiffRecordAnalyzer {
 
     /* Compare the differences between two sets. */
     private static void printDiffs(HashSet<Record> localDiffs,
-                                     HashSet<Record> remoteDiffs) {
+                                   HashSet<Record> remoteDiffs) {
         System.err.println("************************************************");
         System.err.println("Different records between local and remote database " +
-                           "in a specific different area.");
-        for (Record record : localDiffs) {
-            if (!remoteDiffs.contains(record)) {
+                "in a specific different area.");
+        for(Record record : localDiffs) {
+            if(!remoteDiffs.contains(record)) {
                 printRecord(record, "remote", true);
             }
         }
 
-        for (Record record : remoteDiffs) {
-            if (!localDiffs.contains(record)) {
+        for(Record record : remoteDiffs) {
+            if(!localDiffs.contains(record)) {
                 printRecord(record, "local", true);
             }
         }
@@ -317,7 +312,7 @@ public class DiffRecordAnalyzer {
      * that the message doesn't complain about a null value.
      */
     private static VLSN getVLSN(Cursor cursor, LogManager logManager)
-        throws Exception {
+            throws Exception {
 
         CursorImpl cursorImpl = DbInternal.getCursorImpl(cursor);
         cursorImpl.latchBIN();
@@ -327,7 +322,7 @@ public class DiffRecordAnalyzer {
         WholeEntry entry = logManager.getLogEntryAllowInvisible(lsn);
 
         VLSN vlsn = entry.getHeader().getVLSN();
-        if (vlsn == null) {
+        if(vlsn == null) {
             vlsn = VLSN.NULL_VLSN;
         }
 

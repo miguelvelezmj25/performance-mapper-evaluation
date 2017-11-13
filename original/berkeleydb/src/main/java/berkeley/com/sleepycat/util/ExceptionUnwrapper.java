@@ -28,22 +28,21 @@ public class ExceptionUnwrapper {
      * Error if the underlying Throwable is an Error.
      *
      * @param e is the Exception to unwrap.
-     *
      * @return the underlying Exception.
-     *
-     * @throws Error if the underlying Throwable is an Error.
-     *
+     * @throws Error                    if the underlying Throwable is an Error.
      * @throws IllegalArgumentException if the underlying Throwable is not an
-     * Exception or an Error.
+     *                                  Exception or an Error.
      */
     public static Exception unwrap(Exception e) {
 
         Throwable t = unwrapAny(e);
-        if (t instanceof Exception) {
+        if(t instanceof Exception) {
             return (Exception) t;
-        } else if (t instanceof Error) {
+        }
+        else if(t instanceof Error) {
             throw (Error) t;
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Not Exception or Error: " + t);
         }
     }
@@ -52,20 +51,21 @@ public class ExceptionUnwrapper {
      * Unwraps an Exception and returns the underlying Throwable.
      *
      * @param e is the Exception to unwrap.
-     *
      * @return the underlying Throwable.
      */
     public static Throwable unwrapAny(Throwable e) {
 
-        while (true) {
-            if (e instanceof ExceptionWrapper) {
+        while(true) {
+            if(e instanceof ExceptionWrapper) {
                 Throwable e2 = ((ExceptionWrapper) e).getCause();
-                if (e2 == null) {
+                if(e2 == null) {
                     return e;
-                } else {
+                }
+                else {
                     e = e2;
                 }
-            } else {
+            }
+            else {
                 return e;
             }
         }

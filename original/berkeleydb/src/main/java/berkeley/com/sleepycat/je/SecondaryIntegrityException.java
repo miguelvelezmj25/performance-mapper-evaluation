@@ -13,7 +13,6 @@
 
 package berkeley.com.sleepycat.je;
 
-import berkeley.com.sleepycat.je.dbi.TTL;
 import berkeley.com.sleepycat.je.txn.Locker;
 
 /**
@@ -21,34 +20,34 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * database, including access to secondaries while writing to a primary
  * database. Secondary integrity problems are normally caused by the use of
  * secondaries without transactions.
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
- *
+ * <p>
  * <p>Some possible causes of a secondary integrity exception are listed
  * below.  Note that only the first item -- the use of a non-transactional
  * store -- is applicable when using the {@link com.sleepycat.persist DPL}.
  * All other items below do not apply to the use of the DPL, because the DPL
  * ensures that secondary databases are configured and managed correctly.</p>
  * <ol>
- *  <li>The use of non-transactional databases or stores can cause secondary
- *  corruption as described in <a
- *  href="SecondaryDatabase.html#transactions">Special considerations for using
- *  Secondary Databases with and without Transactions</a>.  Secondary databases
- *  and indexes should always be used in conjunction with transactional
- *  databases and stores.</li>
- *
- *  <li>Secondary corruption can be caused by an incorrectly implemented
- *  secondary key creator method, for example, one which uses mutable state
- *  information or is not properly synchronized.  When the DPL is not used, the
- *  application is responsible for correctly implementing the key creator.</li>
- *
- *  <li>Secondary corruption can be caused by failing to open a secondary
- *  database before writing to the primary database, by writing to a secondary
- *  database directly using a {@link Database} handle, or by truncating or
- *  removing primary database without also truncating or removing all secondary
- *  databases.  When the DPL is not used, the application is responsible for
- *  managing associated databases correctly.</p>
+ * <li>The use of non-transactional databases or stores can cause secondary
+ * corruption as described in <a
+ * href="SecondaryDatabase.html#transactions">Special considerations for using
+ * Secondary Databases with and without Transactions</a>.  Secondary databases
+ * and indexes should always be used in conjunction with transactional
+ * databases and stores.</li>
+ * <p>
+ * <li>Secondary corruption can be caused by an incorrectly implemented
+ * secondary key creator method, for example, one which uses mutable state
+ * information or is not properly synchronized.  When the DPL is not used, the
+ * application is responsible for correctly implementing the key creator.</li>
+ * <p>
+ * <li>Secondary corruption can be caused by failing to open a secondary
+ * database before writing to the primary database, by writing to a secondary
+ * database directly using a {@link Database} handle, or by truncating or
+ * removing primary database without also truncating or removing all secondary
+ * databases.  When the DPL is not used, the application is responsible for
+ * managing associated databases correctly.</p>
  * </ol>
  *
  * @since 4.0
@@ -56,9 +55,10 @@ import berkeley.com.sleepycat.je.txn.Locker;
 public class SecondaryIntegrityException extends SecondaryReferenceException {
     private static final long serialVersionUID = 1L;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public SecondaryIntegrityException(Locker locker,
                                        String message,
@@ -69,18 +69,20 @@ public class SecondaryIntegrityException extends SecondaryReferenceException {
         super(locker, message, secDbName, secKey, priKey, expirationTime);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private SecondaryIntegrityException(String message,
                                         SecondaryIntegrityException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

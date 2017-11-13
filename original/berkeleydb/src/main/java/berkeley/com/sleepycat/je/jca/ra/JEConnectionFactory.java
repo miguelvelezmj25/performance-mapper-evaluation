@@ -13,12 +13,11 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import java.io.Serializable;
-
-import javax.resource.Referenceable;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.TransactionConfig;
+
+import javax.resource.Referenceable;
+import java.io.Serializable;
 
 /**
  * An application may obtain a {@link JEConnection} in this manner:
@@ -29,20 +28,20 @@ import berkeley.com.sleepycat.je.TransactionConfig;
  *    JEConnectionFactory dcf = (JEConnectionFactory) ref;
  *    JEConnection dc = dcf.getConnection(envDir, envConfig);
  * </pre>
- *
+ * <p>
  * See &lt;JEHOME&gt;/examples/jca/HOWTO-**.txt and
  * &lt;JEHOME&gt;/examples/jca/simple/SimpleBean.java for more information
  * on how to build the resource adapter and use a JEConnection.
  */
 public interface JEConnectionFactory
-    extends Referenceable, Serializable {
+        extends Referenceable, Serializable {
 
     public JEConnection getConnection(String jeRootDir,
                                       EnvironmentConfig envConfig)
-        throws JEException;
+            throws JEException;
 
     public JEConnection getConnection(String jeRootDir,
                                       EnvironmentConfig envConfig,
                                       TransactionConfig transConfig)
-        throws JEException;
+            throws JEException;
 }

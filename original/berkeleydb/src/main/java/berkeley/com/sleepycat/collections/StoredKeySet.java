@@ -13,17 +13,14 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.util.Set;
 
-import berkeley.com.sleepycat.bind.EntryBinding;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * The Set returned by Map.keySet() and which can also be constructed directly
@@ -40,26 +37,22 @@ public class StoredKeySet<K> extends StoredCollection<K> implements Set<K> {
     /**
      * Creates a key set view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                     to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C Edition).
      */
     public StoredKeySet(Database database,
                         EntryBinding<K> keyBinding,
                         boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, null, null,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     StoredKeySet(DataView keySetView) {
@@ -71,26 +64,24 @@ public class StoredKeySet<K> extends StoredCollection<K> implements Set<K> {
      * Adds the specified key to this set if it is not already present
      * (optional operation).
      * This method conforms to the {@link Set#add} interface.
-     *
+     * <p>
      * <p>WARNING: When a key is added the value in the underlying data store
      * will be empty, i.e., the byte array will be zero length.  Such a record
      * cannot be accessed using the Map interface unless the value binding
      * supports zero length byte arrays.</p>
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is indexed, or
-     * if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                       if the collection is read-only.
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean add(K key) {
 
@@ -102,7 +93,7 @@ public class StoredKeySet<K> extends StoredCollection<K> implements Set<K> {
             closeCursor(cursor);
             commitAutoCommit(doAutoCommit);
             return (status == OperationStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch(Exception e) {
             closeCursor(cursor);
             throw handleException(e, doAutoCommit);
         }
@@ -114,20 +105,18 @@ public class StoredKeySet<K> extends StoredCollection<K> implements Set<K> {
      * If duplicates are allowed, this method removes all duplicates for the
      * given key.
      * This method conforms to the {@link Set#remove} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
      *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
+     * @throws OperationFailureException     if one of the <a
+     *                                       href="../je/OperationFailureException.html#writeFailures">Write
+     *                                       Operation Failures</a> occurs.
+     * @throws EnvironmentFailureException   if an unexpected, internal or
+     *                                       environment-wide failure occurs.
+     *                                       <!-- end JE only -->
      * @throws UnsupportedOperationException if the collection is read-only.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     * @throws RuntimeExceptionWrapper       if a checked exception is thrown,
+     *                                       including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean remove(Object key) {
 
@@ -137,18 +126,17 @@ public class StoredKeySet<K> extends StoredCollection<K> implements Set<K> {
     /**
      * Returns true if this set contains the specified key.
      * This method conforms to the {@link Set#contains} interface.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
      *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C Edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C Edition).
      */
     public boolean contains(Object key) {
 

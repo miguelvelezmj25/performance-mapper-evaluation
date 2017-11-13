@@ -30,10 +30,10 @@ class MyRangeCursor extends RangeCursor {
                   CursorConfig config,
                   DataView view,
                   boolean writeAllowed)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(range, view.dupsRange, view.dupsOrdered,
-              openCursor(view, config, writeAllowed));
+                openCursor(view, config, writeAllowed));
         this.view = view;
         isRecnoOrQueue = view.recNumAllowed && !view.btreeRecNumDb;
         writeCursor = isWriteCursor(config, writeAllowed);
@@ -48,27 +48,27 @@ class MyRangeCursor extends RangeCursor {
     private static boolean isWriteCursor(CursorConfig config,
                                          boolean writeAllowed) {
         return DbCompat.getWriteCursor(config) ||
-               (config == CursorConfig.DEFAULT && writeAllowed);
+                (config == CursorConfig.DEFAULT && writeAllowed);
     }
 
     private static Cursor openCursor(DataView view,
                                      CursorConfig config,
                                      boolean writeAllowed)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return view.currentTxn.openCursor
-            (view.db, config, isWriteCursor(config, writeAllowed),
-             view.useTransaction());
+                (view.db, config, isWriteCursor(config, writeAllowed),
+                        view.useTransaction());
     }
 
     protected Cursor dupCursor(Cursor cursor, boolean samePosition)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return view.currentTxn.dupCursor(cursor, writeCursor, samePosition);
     }
 
     protected void closeCursor(Cursor cursor)
-        throws DatabaseException {
+            throws DatabaseException {
 
         view.currentTxn.closeCursor(cursor);
     }

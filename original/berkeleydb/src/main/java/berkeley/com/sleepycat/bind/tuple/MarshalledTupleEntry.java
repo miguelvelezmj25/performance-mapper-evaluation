@@ -16,13 +16,13 @@ package berkeley.com.sleepycat.bind.tuple;
 /**
  * A marshalling interface implemented by key, data or entity classes that
  * are represented as tuples.
- *
+ * <p>
  * <p>Key classes implement this interface to marshal their key entry.  Data or
  * entity classes implement this interface to marshal their data entry.
  * Implementations of this interface must have a public no arguments
  * constructor so that they can be instantiated by a binding, prior to calling
  * the {@link #unmarshalEntry} method.</p>
- *
+ * <p>
  * <p>Note that implementing this interface is not necessary when the object is
  * a Java simple type, for example: String, Integer, etc. These types can be
  * used with built-in bindings returned by {@link

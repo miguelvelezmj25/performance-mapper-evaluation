@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import berkeley.com.sleepycat.compat.DbCompat;
 
 /**
  * Implements Accessor for a complex persistent class.
@@ -29,39 +29,15 @@ import berkeley.com.sleepycat.compat.DbCompat;
  */
 public class EnhancedAccessor implements Accessor {
 
-    private static final Map<String, Enhanced> classRegistry =
-        Collections.synchronizedMap(new HashMap<String, Enhanced>());
-
     /* Is public for unit tests. */
     public static final boolean EXPECT_ENHANCED =
-        "true".equals(System.getProperty("expectEnhanced"));
-
+            "true".equals(System.getProperty("expectEnhanced"));
+    private static final Map<String, Enhanced> classRegistry =
+            Collections.synchronizedMap(new HashMap<String, Enhanced>());
     private Enhanced prototype;
     private Format priKeyFormat;
-    private Format[] compositeKeyFormats; 
+    private Format[] compositeKeyFormats;
     private Class type;
-
-    /**
-     * Registers a prototype instance, and should be called during
-     * initialization of the prototype class.  The prototype may be null for
-     * an abstract class.
-     */
-    public static void registerClass(String className, Enhanced prototype) {
-        classRegistry.put(className, prototype);
-    }
-
-    /**
-     * Returns whether a given class is a (registered) enhanced class.
-     */
-    static boolean isEnhanced(Class type) {
-        boolean enhanced = classRegistry.containsKey(type.getName());
-        if (!enhanced && EXPECT_ENHANCED) {
-            throw new IllegalStateException
-                ("Test was run with expectEnhanced=true but class " +
-                 type.getName() + " is not enhanced");
-        }
-        return enhanced;
-    }
 
     private EnhancedAccessor(Class type) {
         this.type = type;
@@ -80,12 +56,13 @@ public class EnhancedAccessor implements Accessor {
          * formats.
          */
         ComplexFormat declaringFormat = format;
-        while (declaringFormat != null) {
+        while(declaringFormat != null) {
             FieldInfo priKeyField = declaringFormat.getPriKeyFieldInfo();
-            if (priKeyField != null) {
+            if(priKeyField != null) {
                 priKeyFormat = catalog.getFormat(priKeyField.getClassName());
                 break;
-            } else {
+            }
+            else {
                 declaringFormat = declaringFormat.getComplexSuper();
             }
         }
@@ -98,14 +75,36 @@ public class EnhancedAccessor implements Accessor {
         this(type);
         final int nFields = fieldInfos.size();
         compositeKeyFormats = new Format[nFields];
-        for (int i = 0; i < nFields; i += 1) {
+        for(int i = 0; i < nFields; i += 1) {
             compositeKeyFormats[i] =
-                catalog.getFormat(fieldInfos.get(i).getClassName());
+                    catalog.getFormat(fieldInfos.get(i).getClassName());
         }
     }
 
+    /**
+     * Registers a prototype instance, and should be called during
+     * initialization of the prototype class.  The prototype may be null for
+     * an abstract class.
+     */
+    public static void registerClass(String className, Enhanced prototype) {
+        classRegistry.put(className, prototype);
+    }
+
+    /**
+     * Returns whether a given class is a (registered) enhanced class.
+     */
+    static boolean isEnhanced(Class type) {
+        boolean enhanced = classRegistry.containsKey(type.getName());
+        if(!enhanced && EXPECT_ENHANCED) {
+            throw new IllegalStateException
+                    ("Test was run with expectEnhanced=true but class " +
+                            type.getName() + " is not enhanced");
+        }
+        return enhanced;
+    }
+
     public Object newInstance() {
-        if (prototype == null) {
+        if(prototype == null) {
             /* Abstract class -- internal error. */
             throw DbCompat.unexpectedState();
         }
@@ -113,7 +112,7 @@ public class EnhancedAccessor implements Accessor {
     }
 
     public Object newArray(int len) {
-        if (prototype == null) {
+        if(prototype == null) {
             /* Abstract class -- use reflection for now. */
             return Array.newInstance(type, len);
         }
@@ -121,35 +120,35 @@ public class EnhancedAccessor implements Accessor {
     }
 
     public boolean isPriKeyFieldNullOrZero(Object o) {
-        if (priKeyFormat == null) {
+        if(priKeyFormat == null) {
             throw DbCompat.unexpectedState
-                ("No primary key: " + o.getClass().getName());
+                    ("No primary key: " + o.getClass().getName());
         }
         return ((Enhanced) o).bdbIsPriKeyFieldNullOrZero();
     }
 
     public void writePriKeyField(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyFormat == null) {
+        if(priKeyFormat == null) {
             throw DbCompat.unexpectedState
-                ("No primary key: " + o.getClass().getName());
+                    ("No primary key: " + o.getClass().getName());
         }
         ((Enhanced) o).bdbWritePriKeyField(output, priKeyFormat);
     }
 
     public void readPriKeyField(Object o, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
-        if (priKeyFormat == null) {
+        if(priKeyFormat == null) {
             throw DbCompat.unexpectedState
-                ("No primary key: " + o.getClass().getName());
+                    ("No primary key: " + o.getClass().getName());
         }
         ((Enhanced) o).bdbReadPriKeyField(input, priKeyFormat);
     }
 
     public void writeSecKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbWriteSecKeyFields(output);
     }
@@ -159,14 +158,14 @@ public class EnhancedAccessor implements Accessor {
                                  int startField,
                                  int endField,
                                  int superLevel)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbReadSecKeyFields
-            (input, startField, endField, superLevel);
+                (input, startField, endField, superLevel);
     }
 
     public void writeNonKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbWriteNonKeyFields(output);
     }
@@ -176,20 +175,20 @@ public class EnhancedAccessor implements Accessor {
                                  int startField,
                                  int endField,
                                  int superLevel)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbReadNonKeyFields
-            (input, startField, endField, superLevel);
+                (input, startField, endField, superLevel);
     }
 
     public void writeCompositeKeyFields(Object o, EntityOutput output)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbWriteCompositeKeyFields(output, compositeKeyFormats);
     }
 
     public void readCompositeKeyFields(Object o, EntityInput input)
-        throws RefreshException {
+            throws RefreshException {
 
         ((Enhanced) o).bdbReadCompositeKeyFields(input, compositeKeyFormats);
     }
@@ -208,7 +207,7 @@ public class EnhancedAccessor implements Accessor {
                          Object value) {
         ((Enhanced) o).bdbSetField(o, field, superLevel, isSecField, value);
     }
-    
+
     public void setPriField(Object o, Object value) {
         ((Enhanced) o).bdbSetPriField(o, value);
     }

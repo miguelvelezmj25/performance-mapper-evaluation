@@ -13,6 +13,11 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.config.ConfigParam;
+import berkeley.com.sleepycat.je.dbi.DbConfigManager;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.log.Trace;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
@@ -22,11 +27,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import berkeley.com.sleepycat.je.config.ConfigParam;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.Trace;
-
 /**
  * <b>Logging Architecture</b>
  * ===========================
@@ -35,20 +35,20 @@ import berkeley.com.sleepycat.je.log.Trace;
  * Logging output is directed to the console, to the je.info files, and in
  * special cases, to a MemoryHandler. The latter is meant for debugging and
  * field support.
- *
+ * <p>
  * Logging output from multiple environments may end up going to the same
  * handler, either because a single process is executing multiple environments,
  * or because the output of multiple environments, such as a replication group,
  * is combined in a single display. Because of that, it's important for logging
  * output to be prefixed with an environment id so it can be distinguished by
  * environment.
- *
+ * <p>
  * Loggers managed by java.util.logging.LogManager are supposed to be
  * maintained with a weak reference by the LogManager. In our experience,
  * loggers do not seem to be released, and seem to accumulate in
  * memory. Because of that, we create a single logger per JE class, rather than
  * a logger per class instance.
- *
+ * <p>
  * The latter would be more convenient, because we wish to use environment
  * specific information, such as the environment name as a prefix, or the
  * location of the je.info file, when creating output. Restricting ourselves to
@@ -59,28 +59,28 @@ import berkeley.com.sleepycat.je.log.Trace;
  * the logging prefix) and file handler location. Because we've seen some
  * performance issues with ThreadLocals, we elected instead to maintain a
  * per-thread map to store state information needed by the logger.
- *
+ * <p>
  * This state information is:
- *
+ * <p>
  * - the environment impl from the envMap(from which one can obtain the prefix
  * and the console, file and memory handlers to use)
- *
+ * <p>
  * - or if the environment impl is null because the component executes without
  * an environment, the output will go to only a console handler. It will use a
  * particular formatter to prefix the output with a useful id. This is obtained
  * from the formatter map.
- *
- *
+ * <p>
+ * <p>
  * With this scheme, a JE process has a maximum of
- *  - N loggers, where N is the number of classes which get loggers
- *  - 3 handlers * number of environments, because each environment creates
+ * - N loggers, where N is the number of classes which get loggers
+ * - 3 handlers * number of environments, because each environment creates
  * a Console, File and Memory handler.
- *
+ * <p>
  * <b>How To Use Logging in a JE Class</b>
  * =======================================
  * Creating a Logger: There are three kinds of loggers that a class may chose
  * to use.
- *
+ * <p>
  * 1. A class with a reference to EnvironmentImpl or RepImpl should use
  * LoggerUtils.getLogger(Class<?>) to create a logger which prefixes its output
  * with an environment id. When a logger is obtained this way, the logger
@@ -88,10 +88,10 @@ import berkeley.com.sleepycat.je.log.Trace;
  * like this:
  * LoggerUtils.severe() equals to logger.severe
  * LoggerUtils.warning() equals to logger.warning
- *  etc
+ * etc
  * LoggerUtils.logMsg(Logger, EnvironmentImpl, Level, String) equals to
  * logger.log(Level, String)
- *
+ * <p>
  * 2. A class without an EnvironmentImpl which still has some kind of custom
  * information to prepend to the logging output should use
  * LoggerUtils.getFormatterNeeded(). For example,
@@ -102,46 +102,44 @@ import berkeley.com.sleepycat.je.log.Trace;
  * use:
  * LoggerUtils.logMsg(Logger, Formatter, Level, String) where the
  * formatter is the one created by the using class.
- *
+ * <p>
  * 3. A logger without an EnvironmentImpl does not prefix or customize the
  * logging output, and uses LoggerUtils.getLoggerFixedPrefix to create a
  * logger. In this case, use the usual java.util.logging.Logger logging
  * methods.
- *
+ * <p>
  * Note: there are some JE classes which only conditionally reference an
  * environment. In that case, the environment must also conditionally create
  * a logger, and then use the wrapper methods which use both an environmentImpl
  * and a formatter. For example:
- *
- *   if (envImpl != null) {
- *       logger = LoggerUtils.getLogger(getClass());
- *   } else {
- *       logger = LoggerUtils.getLoggerFormatterNeeded();
- *   }
- *   formatter = new Formatter(.....);
- *
+ * <p>
+ * if (envImpl != null) {
+ * logger = LoggerUtils.getLogger(getClass());
+ * } else {
+ * logger = LoggerUtils.getLoggerFormatterNeeded();
+ * }
+ * formatter = new Formatter(.....);
+ * <p>
  * Then use LoggerUtils.logMsg(Logger, EnvironmentImpl, Formatter, Level,
  * String) instead of Logger.log(Level, String)
  */
 public class LoggerUtils {
 
+    public static final String NO_ENV = ".noEnv";
+    public static final String FIXED_PREFIX = ".fixedPrefix";
     /*
      * Environment state to be used by a logger. Must be set and released
      * per logger call.
      */
     static final Map<Thread, EnvironmentImpl> envMap =
-        new ConcurrentHashMap<Thread, EnvironmentImpl>();
-
+            new ConcurrentHashMap<Thread, EnvironmentImpl>();
     /*
      * Formatter state to be used by a logger. Must be set and released
      * per logger call. Used by logging calls that do not have an available
      * environment.
      */
     static final Map<Thread, Formatter> formatterMap =
-        new ConcurrentHashMap<Thread, Formatter>();
-
-    public static final String NO_ENV = ".noEnv";
-    public static final String FIXED_PREFIX = ".fixedPrefix";
+            new ConcurrentHashMap<Thread, Formatter>();
     private static final String PUSH_LEVEL = ".push.level";
 
     /* Used to prevent multiple full thread dumps. */
@@ -152,7 +150,7 @@ public class LoggerUtils {
      * file handlers of an EnvironmentImpl and prefixes all messages with an
      * environment identifier. Use this for classes which have a reference
      * to an EnvironmentImpl (or RepImpl).
-     *
+     * <p>
      * When a logger is obtained this way, the logger should not be used
      * directly. Instead, the wrapper methods in LoggerUtils which put and
      * remove the environment from the envMap must be used, so that the logging
@@ -174,8 +172,8 @@ public class LoggerUtils {
          * empty array.
          */
         Handler[] handlers = logger.getHandlers();
-        if (handlers != null) {
-            for (Handler h : handlers) {
+        if(handlers != null) {
+            for(Handler h : handlers) {
 
                 /*
                  * Intentionally check for java.util.logging.ConsoleHandler
@@ -186,29 +184,29 @@ public class LoggerUtils {
                  * to set com.sleepycat.je.util.ConsoleHandler in their logging
                  * properties file.
                  */
-                if (h instanceof java.util.logging.ConsoleHandler) {
+                if(h instanceof java.util.logging.ConsoleHandler) {
                     hasConsoleHandler = true;
                 }
-         
-                if (h instanceof FileRedirectHandler) {
+
+                if(h instanceof FileRedirectHandler) {
                     hasFileHandler = true;
                 }
 
-                if (h instanceof ConfiguredRedirectHandler) {
+                if(h instanceof ConfiguredRedirectHandler) {
                     hasConfiguredHandler = true;
                 }
             }
         }
 
-        if (!hasConsoleHandler) {
+        if(!hasConsoleHandler) {
             logger.addHandler(new ConsoleRedirectHandler());
         }
 
-        if (!hasFileHandler) {
+        if(!hasFileHandler) {
             logger.addHandler(new FileRedirectHandler());
         }
 
-        if (!hasConfiguredHandler) {
+        if(!hasConfiguredHandler) {
             logger.addHandler(new ConfiguredRedirectHandler());
         }
 
@@ -221,7 +219,7 @@ public class LoggerUtils {
      * the proper state. This should be used by a class that does not have
      * an EnvironmentImpl, but still wishes to prepend some kind of custom
      * prefix to the logging output.
-     *
+     * <p>
      * When a logger is obtained this way, the logger should not be used
      * directly. Instead, the wrapper methods in LoggerUtils which use a
      * Formatter parameter, and put and remove the environment from the
@@ -239,7 +237,7 @@ public class LoggerUtils {
         Logger logger = createLogger(cl.getName() + NO_ENV);
 
         /* Add a new handler if a console handler does not already exist. */
-        if (!hasConsoleHandler(logger)) {
+        if(!hasConsoleHandler(logger)) {
             logger.addHandler(new FormatterRedirectHandler());
         }
 
@@ -269,9 +267,9 @@ public class LoggerUtils {
         Logger logger = createLogger(cl.getName() + FIXED_PREFIX);
 
         /* Check whether the logger already has this handler. */
-        if (!hasConsoleHandler(logger)) {
+        if(!hasConsoleHandler(logger)) {
             logger.addHandler(new berkeley.com.sleepycat.je.util.ConsoleHandler
-                              (new TracerFormatter(prefix), envImpl));
+                    (new TracerFormatter(prefix), envImpl));
         }
 
         return logger;
@@ -288,12 +286,12 @@ public class LoggerUtils {
          * empty array.
          */
         Handler[] handlers = logger.getHandlers();
-        if (handlers == null) {
+        if(handlers == null) {
             return false;
         }
 
-        for (Handler h : handlers) {
-            if (h instanceof java.util.logging.ConsoleHandler) {
+        for(Handler h : handlers) {
+            if(h instanceof java.util.logging.ConsoleHandler) {
                 return true;
             }
         }
@@ -326,7 +324,7 @@ public class LoggerUtils {
     /* Get the value of a specified Logger property. */
     public static String getLoggerProperty(String property) {
         java.util.logging.LogManager mgr =
-            java.util.logging.LogManager.getLogManager();
+                java.util.logging.LogManager.getLogManager();
 
         return mgr.getProperty(property);
     }
@@ -338,7 +336,7 @@ public class LoggerUtils {
         String propertyValue = getLoggerProperty(name + PUSH_LEVEL);
 
         Level level = Level.OFF;
-        if (propertyValue != null) {
+        if(propertyValue != null) {
             level = Level.parse(propertyValue);
         }
 
@@ -356,7 +354,7 @@ public class LoggerUtils {
                               Level logLevel,
                               String msg) {
         /* Set thread specific context. */
-        if (envImpl != null) {
+        if(envImpl != null) {
             envMap.put(Thread.currentThread(), envImpl);
         }
         try {
@@ -389,9 +387,10 @@ public class LoggerUtils {
                               Formatter formatter,
                               Level logLevel,
                               String msg) {
-        if (envImpl != null) {
+        if(envImpl != null) {
             logMsg(useLogger, envImpl, logLevel, msg);
-        } else {
+        }
+        else {
             logMsg(useLogger, formatter, logLevel, msg);
         }
     }
@@ -444,7 +443,7 @@ public class LoggerUtils {
                               Level logLevel,
                               String msg) {
         /* Set thread specific Formatter. */
-        if (formatter != null) {
+        if(formatter != null) {
             formatterMap.put(Thread.currentThread(), formatter);
         }
         try {
@@ -469,7 +468,7 @@ public class LoggerUtils {
         envMap.put(Thread.currentThread(), envImpl);
         try {
             envImpl.getLogger().logp
-                (Level.SEVERE, sourceClass, sourceMethod, traceMsg);
+                    (Level.SEVERE, sourceClass, sourceMethod, traceMsg);
         } finally {
             envMap.remove(Thread.currentThread());
         }
@@ -481,7 +480,7 @@ public class LoggerUtils {
      * the trace system which writes to the .jdb files. The logLevel parameter
      * only applies to the java.util.logging system. Trace messages are
      * unconditionally written to the .jdb files.
-     *
+     * <p>
      * Because of that, this method should be used sparingly, for critical
      * messages.
      */
@@ -493,7 +492,9 @@ public class LoggerUtils {
         Trace.trace(envImpl, msg);
     }
 
-    /** Return a String version of a stack trace */
+    /**
+     * Return a String version of a stack trace
+     */
     public static String getStackTrace(Throwable t) {
         StringWriter sw = new StringWriter();
         t.printStackTrace(new PrintWriter(sw));
@@ -504,7 +505,9 @@ public class LoggerUtils {
         return stackTrace;
     }
 
-    /** Return the stack trace of the caller, for debugging. */
+    /**
+     * Return the stack trace of the caller, for debugging.
+     */
     public static String getStackTrace() {
         Exception e = new Exception();
         return getStackTrace(e);
@@ -518,7 +521,7 @@ public class LoggerUtils {
 
         /* Check if the level params are set. */
         String level = configManager.get(param);
-        if (!param.getDefault().equals(level)) {
+        if(!param.getDefault().equals(level)) {
             changed = true;
         }
 
@@ -529,7 +532,7 @@ public class LoggerUtils {
          * If the params are not set, and levels are set in the properties
          * file, then set the level from properties file.
          */
-        if (!changed && propertyLevel != null) {
+        if(!changed && propertyLevel != null) {
             level = propertyLevel;
         }
 
@@ -538,7 +541,7 @@ public class LoggerUtils {
 
     /**
      * Logs a full thread dump as if jstack were piped to the je.info file.
-     *
+     * <p>
      * Only one dump per EnvironmentImpl lifetime is allowed. Allowing multiple
      * dumps can causes them to be interleaved, and risks filling the je.info
      * files with repeated dumps. The envImpl should be invalidated when this
@@ -548,14 +551,14 @@ public class LoggerUtils {
                                       EnvironmentImpl envImpl,
                                       Level level) {
 
-        if (!logger.isLoggable(level)) {
+        if(!logger.isLoggable(level)) {
             return;
         }
 
-        synchronized (fullThreadDumpMutex) {
+        synchronized(fullThreadDumpMutex) {
 
-            if (envImpl != null) {
-                if (envImpl.getDidFullThreadDump()) {
+            if(envImpl != null) {
+                if(envImpl.getDidFullThreadDump()) {
                     return;
                 }
 
@@ -563,20 +566,20 @@ public class LoggerUtils {
             }
 
             Map<Thread, StackTraceElement[]> stackTraces =
-                Thread.getAllStackTraces();
+                    Thread.getAllStackTraces();
 
-            for (Map.Entry<Thread, StackTraceElement[]> stme :
-                stackTraces.entrySet()) {
+            for(Map.Entry<Thread, StackTraceElement[]> stme :
+                    stackTraces.entrySet()) {
                 logMsg(logger, envImpl, level, stme.getKey().toString());
-                for (StackTraceElement ste : stme.getValue()) {
+                for(StackTraceElement ste : stme.getValue()) {
                     logMsg(logger, envImpl, level, "     " + ste);
                 }
             }
         }
     }
-    
+
     /**
-     * Displays both the exception class and the message. Use you wnat a 
+     * Displays both the exception class and the message. Use you wnat a
      * relatively terse display of the exception (i.e. omitting stacktrace).
      * Prefer to use this over exception.getMessage(), as some exceptions have
      * null messages.

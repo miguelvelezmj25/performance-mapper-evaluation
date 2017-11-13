@@ -19,35 +19,35 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * Thrown when an attempt is made to delete a key from a foreign key database,
  * when that key is referenced by a secondary database, and the secondary is
  * configured to cause an abort in this situation.
- *
+ * <p>
  * <p>When using the base API ({@code com.sleepycat.je}), this can occur when a
  * {@link SecondaryDatabase} is configured to be associated with a foreign key
  * database (see {@link SecondaryConfig#setForeignKeyDatabase}), and is also
  * configured with the {@link ForeignKeyDeleteAction#ABORT} delete action (see
  * {@link SecondaryConfig#setForeignKeyDeleteAction}).  Note that {@code ABORT}
  * is the default setting.</p>
- *
+ * <p>
  * <p>When using the DPL ({@code com.sleepycat.persist}), this can occur when a
  * {@link com.sleepycat.persist.model.SecondaryKey} is defined with a {@link
  * com.sleepycat.persist.model.SecondaryKey#relatedEntity}, and {@link
  * com.sleepycat.persist.model.SecondaryKey#onRelatedEntityDelete} is {@link
  * com.sleepycat.persist.model.DeleteAction#ABORT} (which is the default).</p>
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  *
  * @see <a href="SecondaryDatabase.html#transactions">Special considerations
  * for using Secondary Databases with and without Transactions</a>
- *
  * @since 4.0
  */
 public class DeleteConstraintException extends SecondaryConstraintException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public DeleteConstraintException(Locker locker,
                                      String message,
@@ -58,18 +58,20 @@ public class DeleteConstraintException extends SecondaryConstraintException {
         super(locker, message, secDbName, secKey, priKey, expirationTime);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private DeleteConstraintException(String message,
                                       DeleteConstraintException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

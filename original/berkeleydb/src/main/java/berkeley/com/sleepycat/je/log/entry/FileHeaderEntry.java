@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.FileHeader;
 import berkeley.com.sleepycat.je.log.LogEntryHeader;
 import berkeley.com.sleepycat.je.log.LogEntryType;
+
+import java.nio.ByteBuffer;
 
 /**
  * Contains a FileHeader entry.

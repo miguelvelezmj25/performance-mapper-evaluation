@@ -22,22 +22,22 @@ import berkeley.com.sleepycat.je.tree.IN;
  * An INContainingEntry is a log entry that contains internal nodes.
  */
 public interface INContainingEntry {
-        
+
     /**
      * Currently used by recovery only. For an OldBINDeltaEntry it merges
      * the delta with the last full BIN and returns the new full BIN. For
-     * a new BINDeltaLogEntry, it just returns the delta. And for an 
+     * a new BINDeltaLogEntry, it just returns the delta. And for an
      * INLogEntry it just returns the (full) IN.
      */
     public IN getIN(DatabaseImpl dbImpl)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /*
      * A quick way to check whether this LogEntry reads/writes a BIN-Delta
      * logrec.
      */
     public boolean isBINDelta();
-        
+
     /**
      * @return the database id held within this log entry.
      */

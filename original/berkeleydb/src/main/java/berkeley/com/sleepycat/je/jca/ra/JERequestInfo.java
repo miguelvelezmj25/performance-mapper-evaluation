@@ -13,12 +13,11 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import java.io.File;
-
-import javax.resource.spi.ConnectionRequestInfo;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.TransactionConfig;
+
+import javax.resource.spi.ConnectionRequestInfo;
+import java.io.File;
 
 public class JERequestInfo implements ConnectionRequestInfo {
     private File rootDir;

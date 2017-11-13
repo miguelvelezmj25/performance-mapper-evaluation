@@ -21,14 +21,14 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
 /**
- * A ghost bucket stands in as a placeholder for a set of vlsns that are 
- * unknown. This kind of bucket can only be present at the very beginning of 
- * the vlsn range. 
- *
- * This fulfills an edge case that can arise when vlsns are inserted out of 
- * order, and log cleaner truncation lops off the leading edge of the index. 
+ * A ghost bucket stands in as a placeholder for a set of vlsns that are
+ * unknown. This kind of bucket can only be present at the very beginning of
+ * the vlsn range.
+ * <p>
+ * This fulfills an edge case that can arise when vlsns are inserted out of
+ * order, and log cleaner truncation lops off the leading edge of the index.
  * For example, suppose vlsns were inserted in this order:
-
+ * <p>
  * vlsnIndex.put(vlsn=2, lsn=1/2)
  * vlsnIndex.put(vlsn=1, lsn=1/0)
  * vlsnIndex.put(vlsn=3, lsn=1/3)
@@ -46,7 +46,7 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
 class GhostBucket extends VLSNBucket {
     private long firstPossibleLsn;
     private long lastPossibleLsn;
-    
+
     GhostBucket(VLSN ghostVLSN,
                 long firstPossibleLsn,
                 long lastPossibleLsn) {
@@ -55,10 +55,10 @@ class GhostBucket extends VLSNBucket {
          * getFirst, getLast() methods work.
          */
         super(DbLsn.getFileNumber(firstPossibleLsn), // fileNumber
-              0, // stride
-              1, // maxMappings
-              1, // maxDistance,
-              ghostVLSN); // firstVLSN
+                0, // stride
+                1, // maxMappings
+                1, // maxDistance,
+                ghostVLSN); // firstVLSN
         this.firstPossibleLsn = firstPossibleLsn;
         this.lastPossibleLsn = lastPossibleLsn;
         dirty = true;
@@ -91,7 +91,7 @@ class GhostBucket extends VLSNBucket {
      * Return a lsn as a starting point for a backward scan.
      */
     @Override
-    public synchronized long getGTELsn(VLSN vlsn) { 
+    public synchronized long getGTELsn(VLSN vlsn) {
         return lastPossibleLsn;
     }
 
@@ -99,7 +99,7 @@ class GhostBucket extends VLSNBucket {
      * Return a lsn as a starting point for a forward scan.
      */
     @Override
-    synchronized long getLTELsn(VLSN vlsn) { 
+    synchronized long getLTELsn(VLSN vlsn) {
         return firstPossibleLsn;
     }
 
@@ -107,15 +107,15 @@ class GhostBucket extends VLSNBucket {
      * There is no mapping for this VLSN, so always return NULL_LSN.
      */
     @Override
-    public synchronized long getLsn(VLSN vlsn) { 
-        return DbLsn.NULL_LSN;            
+    public synchronized long getLsn(VLSN vlsn) {
+        return DbLsn.NULL_LSN;
     }
 
     /**
      * Return a file number that is less or equal to the first mapped vlsn,
      * for use in determining the CBVLSN.
      */
-    @Override 
+    @Override
     long getLTEFileNumber() {
         return DbLsn.getFileNumber(firstPossibleLsn);
     }
@@ -128,21 +128,21 @@ class GhostBucket extends VLSNBucket {
     @Override
     synchronized boolean put(VLSN vlsn, long lsn) {
         throw EnvironmentFailureException.unexpectedState
-            ("Shouldn't be called");
+                ("Shouldn't be called");
     }
-          
+
     @Override
-    VLSNBucket removeFromHead(EnvironmentImpl envImpl, 
-                                  VLSN lastDuplicate) {
+    VLSNBucket removeFromHead(EnvironmentImpl envImpl,
+                              VLSN lastDuplicate) {
         throw EnvironmentFailureException.unexpectedState
-            ("Shouldn't be called, only used in recovery merging.");
+                ("Shouldn't be called, only used in recovery merging.");
     }
 
     @Override
     void removeFromTail(VLSN startOfDelete, long prevLsn) {
-    
+
         throw EnvironmentFailureException.unexpectedState
-            ("Shouldn't be called");
+                ("Shouldn't be called");
     }
 
     @Override
@@ -150,7 +150,7 @@ class GhostBucket extends VLSNBucket {
         return 0;
     }
 
-    @Override 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("<GhostBucket vlsn=");
         sb.append(firstVLSN);

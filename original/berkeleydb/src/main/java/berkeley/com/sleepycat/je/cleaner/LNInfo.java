@@ -21,7 +21,7 @@ import berkeley.com.sleepycat.je.tree.LN;
  * The information necessary to lookup an LN.  Used for pending LNs that are
  * locked and must be migrated later, or cannot be migrated immediately during
  * a split.  Also used in a look ahead cache in FileProcessor.
- *
+ * <p>
  * Is public for Sizeof only.
  */
 public final class LNInfo {
@@ -63,10 +63,10 @@ public final class LNInfo {
      */
     int getMemorySize() {
         int size = MemoryBudget.LN_INFO_OVERHEAD;
-        if (ln != null) {
+        if(ln != null) {
             size += ln.getMemorySizeIncludedByParent();
         }
-        if (key != null) {
+        if(key != null) {
             size += MemoryBudget.byteArraySize(key.length);
         }
         return size;

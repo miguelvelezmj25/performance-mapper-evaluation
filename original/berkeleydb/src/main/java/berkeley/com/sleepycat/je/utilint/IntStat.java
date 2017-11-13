@@ -58,7 +58,7 @@ public class IntStat extends Stat<Integer> {
     @Override
     public Stat<Integer> computeInterval(Stat<Integer> base) {
         Stat<Integer> ret = copy();
-        if (definition.getType() == StatType.INCREMENTAL) {
+        if(definition.getType() == StatType.INCREMENTAL) {
             ret.set(counter - base.get());
         }
         return ret;

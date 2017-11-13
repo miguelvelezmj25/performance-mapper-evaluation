@@ -210,7 +210,7 @@ public class UpdateForwardingStockQuotes extends RouterDrivenStockQuotes {
             System.out.println(repEnv.getNodeName() + " forwarded " +
                     stockUpdateLine + " to " + currentmasterName);
 
-        } catch (IOException e) {
+        } catch(IOException e) {
             printStream.println("Could not connect to master: " +
                     currentmasterName + " Exception: " + e);
         }
@@ -242,7 +242,7 @@ public class UpdateForwardingStockQuotes extends RouterDrivenStockQuotes {
         public void stateChange(StateChangeEvent stateChangeEvent)
                 throws RuntimeException {
 
-            switch (stateChangeEvent.getState()) {
+            switch(stateChangeEvent.getState()) {
 
                 case MASTER:
                 case REPLICA:

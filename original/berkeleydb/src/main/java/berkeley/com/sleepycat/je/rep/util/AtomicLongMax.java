@@ -31,8 +31,8 @@ public class AtomicLongMax {
      */
     public long updateMax(long newMax) {
         long currMax = value.get();
-        for (; newMax > currMax; currMax = value.get()) {
-            if (value.compareAndSet(currMax, newMax)) {
+        for(; newMax > currMax; currMax = value.get()) {
+            if(value.compareAndSet(currMax, newMax)) {
                 return newMax;
             }
         }

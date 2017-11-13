@@ -13,23 +13,24 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.bind.EntityBinding;
+import berkeley.com.sleepycat.je.Database;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import berkeley.com.sleepycat.bind.EntityBinding;
-import berkeley.com.sleepycat.je.Database;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * The SortedSet returned by Map.values() and which can also be constructed
  * directly if a Map is not needed.
  * Although this collection is a set it may contain duplicate values.  Only if
  * an entity value binding is used are all elements guaranteed to be unique.
- *
+ * <p>
  * <p>In addition to the standard SortedSet methods, this class provides the
  * following methods for stored sorted value sets only.  Note that the use of
  * these methods is not compatible with the standard Java collections
@@ -43,8 +44,8 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class StoredSortedValueSet<E>
-    extends StoredValueSet<E>
-    implements SortedSet<E> {
+        extends StoredValueSet<E>
+        implements SortedSet<E> {
 
     /*
      * No valueBinding ctor is possible since key cannot be derived.
@@ -53,26 +54,22 @@ public class StoredSortedValueSet<E>
     /**
      * Creates a sorted value set entity view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
+     * @param database           is the Database underlying the new collection.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param writeAllowed       is true to create a read-write collection or false
+     *                           to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedValueSet(Database database,
                                 EntityBinding<E> valueEntityBinding,
                                 boolean writeAllowed) {
 
         super(new DataView(database, null, null, valueEntityBinding,
-                           writeAllowed, null));
+                writeAllowed, null));
         checkKeyDerivation();
     }
 
@@ -84,7 +81,7 @@ public class StoredSortedValueSet<E>
 
     private void checkKeyDerivation() {
 
-        if (!view.canDeriveKeyFromValue()) {
+        if(!view.canDeriveKeyFromValue()) {
             throw new IllegalArgumentException("Cannot derive key from value");
         }
     }
@@ -108,18 +105,16 @@ public class StoredSortedValueSet<E>
      * This method conforms to the {@link SortedSet#first} interface.
      *
      * @return the first element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public E first() {
 
@@ -131,18 +126,16 @@ public class StoredSortedValueSet<E>
      * This method conforms to the {@link SortedSet#last} interface.
      *
      * @return the last element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public E last() {
 
@@ -153,16 +146,14 @@ public class StoredSortedValueSet<E>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly less than toValue.
      * This method conforms to the {@link SortedSet#headSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param toValue the upper bound.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> headSet(E toValue) {
 
@@ -173,18 +164,15 @@ public class StoredSortedValueSet<E>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly less than toValue, optionally including toValue.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param toValue is the upper bound.
-     *
+     * @param toValue     is the upper bound.
      * @param toInclusive is true to include toValue.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> headSet(E toValue, boolean toInclusive) {
 
@@ -195,16 +183,14 @@ public class StoredSortedValueSet<E>
      * Returns a view of the portion of this sorted set whose elements are
      * greater than or equal to fromValue.
      * This method conforms to the {@link SortedSet#tailSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromValue is the lower bound.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> tailSet(E fromValue) {
 
@@ -215,18 +201,15 @@ public class StoredSortedValueSet<E>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly greater than fromValue, optionally including fromValue.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromValue is the lower bound.
-     *
+     * @param fromValue     is the lower bound.
      * @param fromInclusive is true to include fromValue.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> tailSet(E fromValue, boolean fromInclusive) {
 
@@ -237,18 +220,15 @@ public class StoredSortedValueSet<E>
      * Returns a view of the portion of this sorted set whose elements range
      * from fromValue, inclusive, to toValue, exclusive.
      * This method conforms to the {@link SortedSet#subSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromValue is the lower bound.
-     *
-     * @param toValue is the upper bound.
-     *
+     * @param toValue   is the upper bound.
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> subSet(E fromValue, E toValue) {
 
@@ -260,22 +240,17 @@ public class StoredSortedValueSet<E>
      * strictly greater than fromValue and strictly less than toValue,
      * optionally including fromValue and toValue.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromValue is the lower bound.
-     *
+     * @param fromValue     is the lower bound.
      * @param fromInclusive is true to include fromValue.
-     *
-     * @param toValue is the upper bound.
-     *
-     * @param toInclusive is true to include toValue.
-     *
+     * @param toValue       is the upper bound.
+     * @param toInclusive   is true to include toValue.
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<E> subSet(E fromValue,
                                boolean fromInclusive,
@@ -283,8 +258,8 @@ public class StoredSortedValueSet<E>
                                boolean toInclusive) {
         try {
             return new StoredSortedValueSet<E>(view.subView
-                (fromValue, fromInclusive, toValue, toInclusive, null));
-        } catch (Exception e) {
+                    (fromValue, fromInclusive, toValue, toInclusive, null));
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }

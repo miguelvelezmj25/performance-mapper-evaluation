@@ -24,10 +24,10 @@ public enum Relationship {
 
     /**
      * Relates many entities to one secondary key.
-     *
+     * <p>
      * <p>The secondary index will have non-unique keys; in other words,
      * duplicates will be allowed.</p>
-     *
+     * <p>
      * <p>The secondary key field is singular, in other words, it may not be an
      * array or collection type.</p>
      */
@@ -35,30 +35,30 @@ public enum Relationship {
 
     /**
      * Relates one entity to many secondary keys.
-     *
+     * <p>
      * <p>The secondary index will have unique keys, in other words, duplicates
      * will not be allowed.</p>
-     *
+     * <p>
      * <p>The secondary key field must be an array or collection type.</p>
      */
     ONE_TO_MANY,
 
     /**
      * Relates many entities to many secondary keys.
-     *
+     * <p>
      * <p>The secondary index will have non-unique keys, in other words,
      * duplicates will be allowed.</p>
-     *
+     * <p>
      * <p>The secondary key field must be an array or collection type.</p>
      */
     MANY_TO_MANY,
 
     /**
      * Relates one entity to one secondary key.
-     *
+     * <p>
      * <p>The secondary index will have unique keys, in other words, duplicates
      * will not be allowed.</p>
-     *
+     * <p>
      * <p>The secondary key field is singular, in other words, it may not be an
      * array or collection type.</p>
      */

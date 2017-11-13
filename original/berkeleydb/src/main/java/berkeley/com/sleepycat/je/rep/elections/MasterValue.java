@@ -24,7 +24,15 @@ import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 public class MasterValue extends StringValue {
     private static final String DELIMITER = "$$$";
     private static final String DELIMITER_REGEXP = "\\$\\$\\$";
+    private static final ValueParser masterValueParser = new ValueParser() {
 
+        @Override
+        public Value parse(String wireFormat) {
+            return ((wireFormat == null) || "".equals(wireFormat)) ?
+                    null :
+                    new MasterValue(wireFormat);
+        }
+    };
     private final String hostname;
     private final int port;
     private final NameIdPair nameIdPair;
@@ -33,9 +41,9 @@ public class MasterValue extends StringValue {
                        int masterPort,
                        NameIdPair masterNameIdPair) {
         super(masterHostname + DELIMITER +
-              masterPort + DELIMITER +
-              masterNameIdPair.getName() + DELIMITER +
-              masterNameIdPair.getId());
+                masterPort + DELIMITER +
+                masterNameIdPair.getName() + DELIMITER +
+                masterNameIdPair.getId());
         this.hostname = masterHostname;
         this.port = masterPort;
         this.nameIdPair = masterNameIdPair;
@@ -47,6 +55,15 @@ public class MasterValue extends StringValue {
         hostname = tokens[0];
         port = Integer.parseInt(tokens[1]);
         nameIdPair = new NameIdPair(tokens[2], Integer.parseInt(tokens[3]));
+    }
+
+    /**
+     * Returns a parser that can convert a wire format value into a MasterValue
+     *
+     * @return the value parser
+     */
+    static public ValueParser getParser() {
+        return masterValueParser;
     }
 
     public String getHostName() {
@@ -65,25 +82,6 @@ public class MasterValue extends StringValue {
         return nameIdPair;
     }
 
-    /**
-     * Returns a parser that can convert a wire format value into a MasterValue
-     *
-     * @return the value parser
-     */
-    static public ValueParser getParser() {
-        return masterValueParser;
-    }
-
-    private static final ValueParser masterValueParser = new ValueParser() {
-
-        @Override
-        public Value parse(String wireFormat) {
-            return ((wireFormat == null) || "".equals(wireFormat)) ?
-                    null :
-                    new MasterValue(wireFormat);
-        }
-    };
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -97,27 +95,28 @@ public class MasterValue extends StringValue {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if(!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof MasterValue)) {
+        if(!(obj instanceof MasterValue)) {
             return false;
         }
         final MasterValue other = (MasterValue) obj;
-        if (hostname == null) {
-            if (other.hostname != null) {
+        if(hostname == null) {
+            if(other.hostname != null) {
                 return false;
             }
-        } else if (!hostname.equals(other.hostname)) {
+        }
+        else if(!hostname.equals(other.hostname)) {
             return false;
         }
-        if (!nameIdPair.equals(other.nameIdPair)) {
+        if(!nameIdPair.equals(other.nameIdPair)) {
             return false;
         }
-        if (port != other.port) {
+        if(port != other.port) {
             return false;
         }
         return true;

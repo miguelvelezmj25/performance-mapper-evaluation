@@ -26,11 +26,11 @@ public class StoreNotFoundException extends OperationFailureException {
 
     private static final long serialVersionUID = 1895430616L;
 
-    /** 
+    /**
      * For internal use only.
      * <!-- begin JE only -->
-     * @hidden 
-     * <!-- end JE only -->
+     *
+     * @hidden <!-- end JE only -->
      */
     public StoreNotFoundException(String message) {
         super(message);
@@ -38,22 +38,22 @@ public class StoreNotFoundException extends OperationFailureException {
 
     /* <!-- begin JE only --> */
 
-    /** 
+    /**
      * For internal use only.
      * <!-- begin JE only -->
-     * @hidden 
-     * <!-- end JE only -->
+     *
+     * @hidden <!-- end JE only -->
      */
     private StoreNotFoundException(String message,
                                    OperationFailureException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
      * <!-- begin JE only -->
-     * @hidden 
-     * <!-- end JE only -->
+     *
+     * @hidden <!-- end JE only -->
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

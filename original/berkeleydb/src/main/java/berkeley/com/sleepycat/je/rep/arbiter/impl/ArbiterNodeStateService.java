@@ -13,18 +13,18 @@
 
 package berkeley.com.sleepycat.je.rep.arbiter.impl;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.rep.impl.NodeStateProtocol;
 import berkeley.com.sleepycat.je.rep.impl.NodeStateProtocol.NodeStateRequest;
 import berkeley.com.sleepycat.je.rep.impl.TextProtocol.RequestMessage;
 import berkeley.com.sleepycat.je.rep.impl.TextProtocol.ResponseMessage;
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingService;
 import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingRunnable;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ExecutingService;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * The service registered by an Arbiter to answer the state request from
@@ -32,22 +32,21 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  */
 public class ArbiterNodeStateService extends ExecutingService {
 
+    /* Identifies the Node State querying Service. */
+    public static final String SERVICE_NAME = "NodeState";
     private final NodeStateProtocol protocol;
     private final Logger logger;
     private final ArbiterImpl arbImpl;
-
-    /* Identifies the Node State querying Service. */
-    public static final String SERVICE_NAME = "NodeState";
 
     public ArbiterNodeStateService(ServiceDispatcher dispatcher,
                                    ArbiterImpl arbImpl) {
         super(SERVICE_NAME, dispatcher);
         this.arbImpl = arbImpl;
         protocol = new NodeStateProtocol(
-            arbImpl.getGroupName(),
-            arbImpl.getNameIdPair(),
-            arbImpl.getRepImpl(),
-            dispatcher.getChannelFactory());
+                arbImpl.getGroupName(),
+                arbImpl.getNameIdPair(),
+                arbImpl.getRepImpl(),
+                dispatcher.getChannelFactory());
         logger = LoggerUtils.getLogger(getClass());
     }
 
@@ -56,7 +55,7 @@ public class ArbiterNodeStateService extends ExecutingService {
      */
     public ResponseMessage process(NodeStateRequest stateRequest) {
         return protocol.new
-            NodeStateResponse(
+                NodeStateResponse(
                 arbImpl.getNameIdPair().getName(),
                 arbImpl.getMasterStatus().getNodeMasterNameId().getName(),
                 arbImpl.getJoinGroupTime(),
@@ -76,7 +75,7 @@ public class ArbiterNodeStateService extends ExecutingService {
 
         @Override
         protected ResponseMessage getResponse(RequestMessage request)
-            throws IOException {
+                throws IOException {
 
             return protocol.process(ArbiterNodeStateService.this, request);
         }

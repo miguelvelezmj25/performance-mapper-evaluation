@@ -31,7 +31,7 @@ class JEFileFilter implements FilenameFilter {
 
     /**
      * @param maxFileNumber this filter will only return
-     * files that are numbers <= maxFileNumber.
+     *                      files that are numbers <= maxFileNumber.
      */
     JEFileFilter(String[] suffix, long maxFileNumber) {
         this.suffix = suffix;
@@ -40,9 +40,9 @@ class JEFileFilter implements FilenameFilter {
 
     /**
      * @param minFileNumber this filter will only return files that are >=
-     * minFileNumber.
+     *                      minFileNumber.
      * @param maxFileNumber this filter will only return
-     * files that are numbers <= maxFileNumber.
+     *                      files that are numbers <= maxFileNumber.
      */
     JEFileFilter(String[] suffix, long minFileNumber, long maxFileNumber) {
         this.suffix = suffix;
@@ -51,8 +51,8 @@ class JEFileFilter implements FilenameFilter {
     }
 
     private boolean matches(String fileSuffix) {
-        for (int i = 0; i < suffix.length; i++) {
-            if (fileSuffix.equalsIgnoreCase(suffix[i])) {
+        for(int i = 0; i < suffix.length; i++) {
+            if(fileSuffix.equalsIgnoreCase(suffix[i])) {
                 return true;
             }
         }
@@ -67,34 +67,35 @@ class JEFileFilter implements FilenameFilter {
         StringTokenizer tokenizer = new StringTokenizer(name, ".");
         /* There should be two parts. */
         int nTokens = tokenizer.countTokens();
-        if (nTokens == 2 || nTokens == 3) {
+        if(nTokens == 2 || nTokens == 3) {
             boolean hasVersion = (nTokens == 3);
             String fileNumber = tokenizer.nextToken();
             String fileSuffix = "." + tokenizer.nextToken();
             String fileVersion = (hasVersion ? tokenizer.nextToken() : null);
 
             /* Check the length and the suffix. */
-            if ((fileNumber.length() == 8) &&
-                matches(fileSuffix)) {
+            if((fileNumber.length() == 8) &&
+                    matches(fileSuffix)) {
                 //(fileSuffix.equalsIgnoreCase(suffix))) {
 
                 /* The first part should be a number. */
                 try {
                     long fileNum = Long.parseLong(fileNumber, 16);
-                    if (fileNum < minFileNumber) {
+                    if(fileNum < minFileNumber) {
                         ok = false;
-                    } else if ((fileNum <= maxFileNumber) ||
-                               (maxFileNumber == -1)) {
+                    }
+                    else if((fileNum <= maxFileNumber) ||
+                            (maxFileNumber == -1)) {
                         ok = true;
                     }
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     ok = false;
                 }
-                if (hasVersion) {
+                if(hasVersion) {
                     try {
                         Integer.parseInt(fileVersion);
                         ok = true;
-                    } catch (NumberFormatException e) {
+                    } catch(NumberFormatException e) {
                         ok = false;
                     }
                 }

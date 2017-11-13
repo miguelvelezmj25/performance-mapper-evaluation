@@ -13,22 +13,22 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-
 /**
  * Bitmap which supports indexing with long arguments. java.util.BitSet
  * provides all the functionality and performance we need, but requires integer
  * indexing.
- *
+ * <p>
  * Long indexing is implemented by keeping a Map of java.util.BitSets, where
  * each bitset covers 2^16 bits worth of values. The Bitmap may be sparse, in
  * that each segment is only instantiated when needed.
- *
+ * <p>
  * Note that this class is currently not thread safe; adding a new bitset
  * segment is not protected.
  */
@@ -50,16 +50,16 @@ public class BitMap {
      * @throws IndexOutOfBoundsException if index is negative.
      */
     public void set(long index)
-        throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException {
 
-        if (index < 0) {
+        if(index < 0) {
             throw new IndexOutOfBoundsException(index + " is negative.");
         }
 
         BitSet bitset = getBitSet(index, true);
-        if (bitset == null) {
+        if(bitset == null) {
             throw EnvironmentFailureException.unexpectedState
-                (index + " is out of bounds");
+                    (index + " is out of bounds");
         }
         int useIndex = getIntIndex(index);
         bitset.set(useIndex);
@@ -69,14 +69,14 @@ public class BitMap {
      * @throws IndexOutOfBoundsException if index is negative.
      */
     public boolean get(long index)
-        throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException {
 
-        if (index < 0) {
+        if(index < 0) {
             throw new IndexOutOfBoundsException(index + " is negative.");
         }
 
         BitSet bitset = getBitSet(index, false);
-        if (bitset == null) {
+        if(bitset == null) {
             return false;
         }
 
@@ -98,8 +98,8 @@ public class BitMap {
         Long segmentId = Long.valueOf(index >> SEGMENT_SIZE);
 
         BitSet bitset = bitSegments.get(segmentId);
-        if (allowCreate) {
-            if (bitset == null) {
+        if(allowCreate) {
+            if(bitset == null) {
                 bitset = new BitSet();
                 bitSegments.put(segmentId, bitset);
             }
@@ -124,7 +124,7 @@ public class BitMap {
     int cardinality() {
         int count = 0;
         Iterator<BitSet> iter = bitSegments.values().iterator();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             BitSet b = iter.next();
             count += b.cardinality();
         }

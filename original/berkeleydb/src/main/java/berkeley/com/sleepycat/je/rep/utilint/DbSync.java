@@ -13,24 +13,18 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
+import berkeley.com.sleepycat.je.Durability;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.je.Transaction;
+import berkeley.com.sleepycat.je.rep.*;
+import berkeley.com.sleepycat.je.utilint.CmdUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import berkeley.com.sleepycat.je.Durability;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.rep.GroupShutdownException;
-import berkeley.com.sleepycat.je.rep.QuorumPolicy;
-import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
-import berkeley.com.sleepycat.je.rep.ReplicationNetworkConfig;
-import berkeley.com.sleepycat.je.rep.ReplicationConfig;
-import berkeley.com.sleepycat.je.rep.StateChangeEvent;
-import berkeley.com.sleepycat.je.rep.StateChangeListener;
-import berkeley.com.sleepycat.je.utilint.CmdUtil;
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
 
 /**
  * DbSync is a utility for ensuring that a group of replication nodes have
@@ -56,32 +50,54 @@ public class DbSync {
     public static final String DBSYNC_TIMEOUT = "-timeout";
     public static final String DBSYNC_NET_PROPS = "-netProps";
     private static final String FORMAT = "%1$-15s";
-
+    private static final String usageString =
+            "usage: " + CmdUtil.getJavaCommand(DbSync.class) + "\n" +
+                    String.format(FORMAT, DBSYNC_ENV) +
+                    "# environment home directory for the node\n" +
+                    String.format(FORMAT, DBSYNC_GROUP_NAME) +
+                    "# name of the replication group\n" +
+                    String.format(FORMAT, DBSYNC_NODE_NAME) +
+                    "# name of the node in the group\n" +
+                    String.format(FORMAT, DBSYNC_NODE_HOST) +
+                    "# host name or IP address and port number for the node\n" +
+                    String.format(FORMAT, DBSYNC_HELPER_HOST) +
+                    "# helperHost for the node\n" +
+                    String.format(FORMAT, DBSYNC_TIMEOUT) +
+                    "# time for the node to catch up with master, in milliseconds\n";
     private String envHome;
     private ReplicationConfig repConfig;
     private EnvironmentConfig envConfig;
     private String helperHost;
-
     /* The group shutdown timeout value, in milliseconds. */
     private long timeout;
 
-    private static final String usageString =
-        "usage: " + CmdUtil.getJavaCommand(DbSync.class) + "\n" +
-        String.format(FORMAT, DBSYNC_ENV) +
-        "# environment home directory for the node\n" +
-        String.format(FORMAT, DBSYNC_GROUP_NAME) +
-        "# name of the replication group\n" +
-        String.format(FORMAT, DBSYNC_NODE_NAME) +
-        "# name of the node in the group\n" +
-        String.format(FORMAT, DBSYNC_NODE_HOST) +
-        "# host name or IP address and port number for the node\n" +
-        String.format(FORMAT, DBSYNC_HELPER_HOST) +
-        "# helperHost for the node\n" +
-        String.format(FORMAT, DBSYNC_TIMEOUT) +
-        "# time for the node to catch up with master, in milliseconds\n";
+    private DbSync() {
+    }
+
+    /**
+     * Create a DbSync object for the purposed of syncing up a specific
+     * replication group.
+     *
+     * @param envHome    The Environment home directories of this replica.
+     * @param helperHost The helper host for this replica.
+     * @param timeout    The permitted time period, in milliseconds, for the
+     *                   replica to catch up with master.
+     */
+    public DbSync(String envHome,
+                  EnvironmentConfig envConfig,
+                  ReplicationConfig repConfig,
+                  String helperHost,
+                  long timeout) {
+
+        this.envHome = envHome;
+        this.envConfig = envConfig;
+        this.repConfig = repConfig;
+        this.helperHost = helperHost;
+        this.timeout = timeout;
+    }
 
     public static void main(String[] args)
-        throws Exception {
+            throws Exception {
 
         DbSync syncup = new DbSync();
         syncup.parseArgs(args);
@@ -95,7 +111,7 @@ public class DbSync {
     }
 
     private void parseArgs(String[] args)
-        throws Exception {
+            throws Exception {
 
         int argc = 0;
         int nArgs = args.length;
@@ -105,96 +121,109 @@ public class DbSync {
         String groupName = null;
         String netPropsName = null;
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = args[argc++].trim();
-            if (thisArg.equals(DBSYNC_ENV)) {
-                if (argc < nArgs) {
+            if(thisArg.equals(DBSYNC_ENV)) {
+                if(argc < nArgs) {
                     envHome = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_ENV + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_GROUP_NAME)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_GROUP_NAME)) {
+                if(argc < nArgs) {
                     groupName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_GROUP_NAME + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_NODE_NAME)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_NODE_NAME)) {
+                if(argc < nArgs) {
                     nodeName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_NODE_NAME + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_NODE_HOST)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_NODE_HOST)) {
+                if(argc < nArgs) {
                     nodeHost = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_NODE_HOST + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_HELPER_HOST)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_HELPER_HOST)) {
+                if(argc < nArgs) {
                     helperHost = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_HELPER_HOST + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_TIMEOUT)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_TIMEOUT)) {
+                if(argc < nArgs) {
                     timeout = Long.parseLong(args[argc++]);
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_TIMEOUT + " requires an argument");
                 }
-            } else if (thisArg.equals(DBSYNC_NET_PROPS)) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals(DBSYNC_NET_PROPS)) {
+                if(argc < nArgs) {
                     netPropsName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage(DBSYNC_NET_PROPS + " requires an argument");
                 }
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage(DBSYNC_ENV + " is a required argument.");
         }
 
-        if (groupName == null) {
+        if(groupName == null) {
             printUsage(DBSYNC_GROUP_NAME + " is a required argument.");
         }
 
-        if (nodeName == null) {
+        if(nodeName == null) {
             printUsage(DBSYNC_NODE_NAME + " is a required argument.");
         }
 
-        if (nodeHost == null) {
+        if(nodeHost == null) {
             printUsage(DBSYNC_NODE_HOST + " is a required argument.");
         }
 
-        if (helperHost == null) {
+        if(helperHost == null) {
             printUsage(DBSYNC_HELPER_HOST + " is a required argument.");
         }
 
-        if (timeout <= 0) {
+        if(timeout <= 0) {
             printUsage(DBSYNC_TIMEOUT + " should be a positive long number.");
         }
 
         try {
             NODE_HOST_PORT.validateValue(nodeHost);
-        } catch (IllegalArgumentException e) {
+        } catch(IllegalArgumentException e) {
             e.printStackTrace();
             printUsage("Host and Port pair for this node is illegal.");
         }
 
         ReplicationNetworkConfig repNetConfig =
-            ReplicationNetworkConfig.createDefault();
-        if (netPropsName != null) {
+                ReplicationNetworkConfig.createDefault();
+        if(netPropsName != null) {
             try {
                 repNetConfig =
-                    ReplicationNetworkConfig.create(new File(netPropsName));
-            } catch (FileNotFoundException fnfe) {
+                        ReplicationNetworkConfig.create(new File(netPropsName));
+            } catch(FileNotFoundException fnfe) {
                 printUsage("The netProps file " + netPropsName +
-                           " does not exist.");
-            } catch (IllegalArgumentException iae) {
+                        " does not exist.");
+            } catch(IllegalArgumentException iae) {
                 printUsage("The net properties file " + netPropsName +
-                           " is not valid: " + iae.getMessage());
+                        " is not valid: " + iae.getMessage());
             }
         }
 
@@ -212,46 +241,21 @@ public class DbSync {
 
     }
 
-    private DbSync() {
-    }
-
-    /**
-     * Create a DbSync object for the purposed of syncing up a specific
-     * replication group.
-     *
-     * @param envHome The Environment home directories of this replica.
-     * @param helperHost The helper host for this replica.
-     * @param timeout The permitted time period, in milliseconds, for the
-     * replica to catch up with master.
-     */
-    public DbSync(String envHome,
-                  EnvironmentConfig envConfig,
-                  ReplicationConfig repConfig,
-                  String helperHost,
-                  long timeout) {
-
-        this.envHome = envHome;
-        this.envConfig = envConfig;
-        this.repConfig = repConfig;
-        this.helperHost = helperHost;
-        this.timeout = timeout;
-    }
-
     /**
      * Open this replication node. Block until the node has opened, synced up,
      * and closed.
      */
     public void sync()
-        throws Exception {
+            throws Exception {
 
         /*
          * Set the ReplicaAckPolicy to ALL, so that all the replicas can get
          * into a same sync point.
          */
         Durability durability =
-            new Durability(Durability.SyncPolicy.WRITE_NO_SYNC,
-                           Durability.SyncPolicy.WRITE_NO_SYNC,
-                           Durability.ReplicaAckPolicy.ALL);
+                new Durability(Durability.SyncPolicy.WRITE_NO_SYNC,
+                        Durability.SyncPolicy.WRITE_NO_SYNC,
+                        Durability.ReplicaAckPolicy.ALL);
 
         envConfig.setDurability(durability);
         repConfig.setHelperHosts(helperHost);
@@ -261,21 +265,21 @@ public class DbSync {
         ReplicatedEnvironment repEnv = null;
         try {
             repEnv = new ReplicatedEnvironment(new File(envHome),
-                                               repConfig,
-                                               envConfig,
-                                               null,
-                                               QuorumPolicy.ALL);
+                    repConfig,
+                    envConfig,
+                    null,
+                    QuorumPolicy.ALL);
             repEnv.setStateChangeListener(listener);
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Can't successfully initialize " +
-                               repConfig.getNodeName() + " because of " + e);
+                    repConfig.getNodeName() + " because of " + e);
             System.exit(-1);
         }
 
         /* Wait until the node becomes active. */
         listener.awaitActiveState();
 
-        if (repEnv.getState().isMaster()) {
+        if(repEnv.getState().isMaster()) {
 
             /*
              * If master, start a transaction as a way of ascertaining whether
@@ -287,8 +291,9 @@ public class DbSync {
 
             /* Invoke the group shutdown API. */
             repEnv.shutdownGroup(timeout, TimeUnit.SECONDS);
-        } else if (repEnv.getState().isReplica()) {
-            for (long i = 0; i < timeout; i++) {
+        }
+        else if(repEnv.getState().isReplica()) {
+            for(long i = 0; i < timeout; i++) {
                 try {
 
                     /*
@@ -298,7 +303,7 @@ public class DbSync {
                      */
                     repEnv.getState();
                     Thread.sleep(1000);
-                } catch (GroupShutdownException e) {
+                } catch(GroupShutdownException e) {
                     break;
                 }
             }
@@ -316,23 +321,23 @@ public class DbSync {
 
         @Override
         public void stateChange(StateChangeEvent stateChangeEvent)
-            throws RuntimeException {
+                throws RuntimeException {
 
-            switch (stateChangeEvent.getState()) {
-            case MASTER:
-            case REPLICA:
-                activeLatch.countDown();
-                break;
-            default:
-                System.err.println
-                    (repConfig.getNodeName() +
-                     " is disconnected from group.");
-                break;
+            switch(stateChangeEvent.getState()) {
+                case MASTER:
+                case REPLICA:
+                    activeLatch.countDown();
+                    break;
+                default:
+                    System.err.println
+                            (repConfig.getNodeName() +
+                                    " is disconnected from group.");
+                    break;
             }
         }
 
         public void awaitActiveState()
-            throws InterruptedException {
+                throws InterruptedException {
 
             activeLatch.await();
         }

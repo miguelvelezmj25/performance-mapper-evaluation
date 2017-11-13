@@ -12,9 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
@@ -23,6 +20,9 @@ import berkeley.com.sleepycat.je.rep.StateChangeListener;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
+
 /**
  * NodeState encapsulates the current replicator state, and the ability to wait
  * for state transition and fire state change notifications.
@@ -30,33 +30,30 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 public class NodeState {
     /* The rep impl whose state is being tracked. */
     private final RepImpl repImpl;
-
-    /* The application registered state change listener for this node. */
-    private StateChangeListener stateChangeListener = null;
-
-    /* The state change event that resulted in the current state. */
-    private StateChangeEvent stateChangeEvent = null;
     private final AtomicReference<ReplicatedEnvironment.State> currentState;
     private final Logger logger;
     private final NameIdPair nameIdPair;
+    /* The application registered state change listener for this node. */
+    private StateChangeListener stateChangeListener = null;
+    /* The state change event that resulted in the current state. */
+    private StateChangeEvent stateChangeEvent = null;
 
     public NodeState(NameIdPair nameIdPair,
                      RepImpl repImpl) {
 
         currentState = new AtomicReference<ReplicatedEnvironment.State>
-            (ReplicatedEnvironment.State.DETACHED);
+                (ReplicatedEnvironment.State.DETACHED);
         this.nameIdPair = nameIdPair;
         this.repImpl = repImpl;
         logger = LoggerUtils.getLogger(getClass());
     }
 
-    synchronized public
-        void setChangeListener(StateChangeListener stateChangeListener){
-        this.stateChangeListener = stateChangeListener;
-    }
-
     synchronized public StateChangeListener getChangeListener() {
         return stateChangeListener;
+    }
+
+    synchronized public void setChangeListener(StateChangeListener stateChangeListener) {
+        this.stateChangeListener = stateChangeListener;
     }
 
     /**
@@ -71,18 +68,18 @@ public class NodeState {
         stateChangeEvent = new StateChangeEvent(state, masterNameId);
 
         LoggerUtils.info(logger, repImpl,
-                         "node:" + masterNameId +
-                         " state change from " + oldState + " to " + newState);
+                "node:" + masterNameId +
+                        " state change from " + oldState + " to " + newState);
 
-        if (stateChangeListener != null) {
+        if(stateChangeListener != null) {
             try {
                 stateChangeListener.stateChange(stateChangeEvent);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 LoggerUtils.severe(logger, repImpl,
-                                   "State Change listener exception" +
-                                   e.getMessage());
+                        "State Change listener exception" +
+                                e.getMessage());
                 throw new EnvironmentFailureException
-                    (repImpl, EnvironmentFailureReason.LISTENER_EXCEPTION, e);
+                        (repImpl, EnvironmentFailureReason.LISTENER_EXCEPTION, e);
             }
         }
 

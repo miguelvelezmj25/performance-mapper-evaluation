@@ -13,13 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.cleaner.RecoveryUtilizationTracker;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
@@ -37,11 +30,18 @@ import berkeley.com.sleepycat.je.tree.MapLN;
 import berkeley.com.sleepycat.je.tree.Node;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * INFileReader supports recovery by scanning log files during the IN rebuild
  * pass. It looks for internal nodes (all types), segregated by whether they
  * belong to the main tree or the duplicate trees.
- *
+ * <p>
  * <p>This file reader can also be run in tracking mode to keep track of the
  * maximum node ID, database ID and txn ID seen so those sequences can be
  * updated properly at recovery.  In this mode it also performs utilization
@@ -85,7 +85,9 @@ public class INFileReader extends FileReader {
     /* Used for replication. */
     private VLSNRecoveryProxy vlsnProxy;
 
-    /** DBs that may violate the rule for upgrading to log version 8. */
+    /**
+     * DBs that may violate the rule for upgrading to log version 8.
+     */
     private Set<DatabaseId> logVersion8UpgradeDbs;
     private AtomicBoolean logVersion8UpgradeDeltas;
 
@@ -101,9 +103,9 @@ public class INFileReader extends FileReader {
                         long ckptEnd,
                         RecoveryUtilizationTracker tracker) {
         this(env, readBufferSize, startLsn, finishLsn, trackIds,
-             partialCkptStart, ckptEnd, tracker,
-             null /*logVersion8UpgradeDbs*/,
-             null /*logVersion8UpgradeDeltas*/);
+                partialCkptStart, ckptEnd, tracker,
+                null /*logVersion8UpgradeDbs*/,
+                null /*logVersion8UpgradeDeltas*/);
     }
 
     /**
@@ -119,16 +121,16 @@ public class INFileReader extends FileReader {
                         RecoveryUtilizationTracker tracker,
                         Set<DatabaseId> logVersion8UpgradeDbs,
                         AtomicBoolean logVersion8UpgradeDeltas)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env, readBufferSize, true, startLsn, null,
-              DbLsn.NULL_LSN, finishLsn);
+                DbLsn.NULL_LSN, finishLsn);
 
         this.trackIds = trackIds;
         this.ckptEnd = ckptEnd;
         targetEntryMap = new HashMap<LogEntryType, LogEntry>();
 
-        if (trackIds) {
+        if(trackIds) {
             maxNodeId = 0;
             maxDbId = 0;
             maxTxnId = 0;
@@ -150,8 +152,8 @@ public class INFileReader extends FileReader {
              * - Need MapLN for obsolete and DB ID tracking.
              * - Need BIN-delta for obsolete tracking.
              */
-            for (LogEntryType entryType : LogEntryType.getAllTypes()) {
-                if (entryType.isNodeType()) {
+            for(LogEntryType entryType : LogEntryType.getAllTypes()) {
+                if(entryType.isNodeType()) {
                     idTrackingSet.add(entryType);
                 }
             }
@@ -172,7 +174,7 @@ public class INFileReader extends FileReader {
      * Configure this reader to target this kind of entry.
      */
     public void addTargetType(LogEntryType entryType)
-        throws DatabaseException {
+            throws DatabaseException {
 
         targetEntryMap.put(entryType, entryType.getNewLogEntry());
     }
@@ -217,33 +219,33 @@ public class INFileReader extends FileReader {
      */
     @Override
     protected boolean isTargetEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
         lastEntryWasDelete = false;
         lastEntryWasDupDelete = false;
         targetLogEntry = null;
         isProvisional = currentEntryHeader.getProvisional().isProvisional
-            (getLastLsn(), ckptEnd);
+                (getLastLsn(), ckptEnd);
 
         /* Get the log entry type instance we need to read the entry. */
         fromLogType = LogEntryType.findType(currentEntryHeader.getType());
         LogEntry possibleTarget = targetEntryMap.get(fromLogType);
 
         /* Always select a non-provisional target entry. */
-        if (!isProvisional) {
+        if(!isProvisional) {
             targetLogEntry = possibleTarget;
         }
 
         /* Recognize IN deletion. */
-        if (LogEntryType.LOG_IN_DELETE_INFO.equals(fromLogType)) {
+        if(LogEntryType.LOG_IN_DELETE_INFO.equals(fromLogType)) {
             lastEntryWasDelete = true;
         }
-        if (LogEntryType.LOG_IN_DUPDELETE_INFO.equals(fromLogType)) {
+        if(LogEntryType.LOG_IN_DUPDELETE_INFO.equals(fromLogType)) {
             lastEntryWasDupDelete = true;
         }
 
         /* If we're not tracking IDs, select only the targeted entry. */
-        if (!trackIds) {
+        if(!trackIds) {
             return (targetLogEntry != null);
         }
 
@@ -253,15 +255,15 @@ public class INFileReader extends FileReader {
          * entries will be counted in processEntry.  Null is passed for the
          * database ID; it is only needed for node entries.
          */
-        if (!fromLogType.isNodeType() &&
-            !fromLogType.equals(LogEntryType.LOG_BIN_DELTA) &&
-            !fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA) &&
-            !LogEntryType.LOG_FILE_HEADER.equals(fromLogType)) {
+        if(!fromLogType.isNodeType() &&
+                !fromLogType.equals(LogEntryType.LOG_BIN_DELTA) &&
+                !fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA) &&
+                !LogEntryType.LOG_FILE_HEADER.equals(fromLogType)) {
             tracker.countNewLogEntry(getLastLsn(),
-                                     fromLogType,
-                                     currentEntryHeader.getSize() +
-                                     currentEntryHeader.getItemSize(),
-                                     null); // DatabaseId
+                    fromLogType,
+                    currentEntryHeader.getSize() +
+                            currentEntryHeader.getItemSize(),
+                    null); // DatabaseId
         }
 
         /*
@@ -270,7 +272,7 @@ public class INFileReader extends FileReader {
          * previously for these databases during this recovery pass. Save the
          * LSN for these databases for use by undo/redo.
          */
-        if (LogEntryType.LOG_DBTREE.equals(fromLogType)) {
+        if(LogEntryType.LOG_DBTREE.equals(fromLogType)) {
             tracker.saveLastLoggedMapLN(DbTree.ID_DB_ID, getLastLsn());
             tracker.saveLastLoggedMapLN(DbTree.NAME_DB_ID, getLastLsn());
             tracker.resetDbInfo(DbTree.ID_DB_ID);
@@ -278,10 +280,10 @@ public class INFileReader extends FileReader {
         }
 
         /* Track VLSNs in the log entry header of all replicated entries. */
-        if (currentEntryHeader.getReplicated()) {
+        if(currentEntryHeader.getReplicated()) {
             vlsnProxy.trackMapping(getLastLsn(),
-                                   currentEntryHeader,
-                                   null /*targetLogEntry*/);
+                    currentEntryHeader,
+                    null /*targetLogEntry*/);
         }
 
         /* Return true if this logrec should be passed on to processEntry. */
@@ -292,32 +294,32 @@ public class INFileReader extends FileReader {
     /**
      * This reader returns non-provisional INs and IN delete entries.
      * In tracking mode, it may also scan log entries that aren't returned:
-     *  -to set the sequences for txn, node, and database ID.
-     *  -to update utilization and obsolete offset information.
-     *  -for VLSN mappings for recovery
+     * -to set the sequences for txn, node, and database ID.
+     * -to update utilization and obsolete offset information.
+     * -for VLSN mappings for recovery
      */
     protected boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         boolean useEntry = false;
 
         /* Read targeted entry. */
-        if (targetLogEntry != null) {
+        if(targetLogEntry != null) {
             targetLogEntry.readEntry(envImpl, currentEntryHeader, entryBuffer);
             useEntry = true;
         }
 
         /* If we're not tracking IDs, we're done. */
-        if (!trackIds) {
+        if(!trackIds) {
             return useEntry;
         }
 
         /* Read non-target entry. */
-        if (targetLogEntry == null) {
+        if(targetLogEntry == null) {
             assert idTrackingSet.contains(fromLogType);
 
             targetLogEntry = idTrackingMap.get(fromLogType);
-            if (targetLogEntry == null) {
+            if(targetLogEntry == null) {
                 targetLogEntry = fromLogType.getNewLogEntry();
                 idTrackingMap.put(fromLogType, targetLogEntry);
             }
@@ -329,24 +331,24 @@ public class INFileReader extends FileReader {
          * Count node and delta entries as new.  Non-node/delta entries are
          * counted in isTargetEntry.
          */
-        if (fromLogType.isNodeType() ||
-            fromLogType.equals(LogEntryType.LOG_BIN_DELTA) ||
-            fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
+        if(fromLogType.isNodeType() ||
+                fromLogType.equals(LogEntryType.LOG_BIN_DELTA) ||
+                fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
             tracker.countNewLogEntry(getLastLsn(), fromLogType,
-                                     currentEntryHeader.getSize() +
-                                     currentEntryHeader.getItemSize(),
-                                     targetLogEntry.getDbId());
+                    currentEntryHeader.getSize() +
+                            currentEntryHeader.getItemSize(),
+                    targetLogEntry.getDbId());
         }
 
         /* Track VLSNs in RollbackStart. */
-        if (fromLogType.equals(LogEntryType.LOG_ROLLBACK_START)) {
+        if(fromLogType.equals(LogEntryType.LOG_ROLLBACK_START)) {
             vlsnProxy.trackMapping(getLastLsn(),
-                                   currentEntryHeader,
-                                   targetLogEntry);
+                    currentEntryHeader,
+                    targetLogEntry);
         }
 
         /* Process LN types. */
-        if (fromLogType.isLNType()) {
+        if(fromLogType.isLNType()) {
 
             LNLogEntry<?> lnEntry = (LNLogEntry<?>) targetLogEntry;
 
@@ -360,7 +362,7 @@ public class INFileReader extends FileReader {
              * Also, save the LSN of the MapLN for use in utilization counting
              * during LN undo/redo.
              */
-            if (fromLogType.equals(LogEntryType.LOG_MAPLN)) {
+            if(fromLogType.equals(LogEntryType.LOG_MAPLN)) {
 
                 MapLN mapLN = (MapLN) lnEntry.getMainItem();
                 DatabaseId dbId = mapLN.getDatabase().getId();
@@ -369,7 +371,7 @@ public class INFileReader extends FileReader {
                 long dbIdVal = dbId.getId();
                 maxDbId = (dbIdVal > maxDbId ? dbIdVal : maxDbId);
                 minReplicatedDbId = (dbIdVal < minReplicatedDbId ?
-                                     dbIdVal : minReplicatedDbId);
+                        dbIdVal : minReplicatedDbId);
 
                 tracker.resetDbInfo(dbId);
 
@@ -377,11 +379,11 @@ public class INFileReader extends FileReader {
             }
 
             /* Track latest txn ID. */
-            if (fromLogType.isTransactional()) {
+            if(fromLogType.isTransactional()) {
                 long txnId = lnEntry.getTxnId().longValue();
                 maxTxnId = (txnId > maxTxnId ? txnId : maxTxnId);
                 minReplicatedTxnId = (txnId < minReplicatedTxnId ?
-                                      txnId : minReplicatedTxnId);
+                        txnId : minReplicatedTxnId);
             }
 
             /*
@@ -394,7 +396,7 @@ public class INFileReader extends FileReader {
              * Also, save the LSN of the FSLN for use in utilization counting
              * during LN undo/redo.
              */
-            if (LogEntryType.LOG_FILESUMMARYLN.equals(fromLogType)) {
+            if(LogEntryType.LOG_FILESUMMARYLN.equals(fromLogType)) {
 
                 lnEntry.postFetchInit(false /*isDupDb*/);
 
@@ -412,7 +414,7 @@ public class INFileReader extends FileReader {
         }
 
         /* Process IN types. */
-        if (fromLogType.isINType()) {
+        if(fromLogType.isINType()) {
             INLogEntry<?> inEntry = (INLogEntry<?>) targetLogEntry;
 
             /* Keep track of the largest node ID seen. */
@@ -421,13 +423,13 @@ public class INFileReader extends FileReader {
 
             maxNodeId = (nodeId > maxNodeId ? nodeId : maxNodeId);
 
-            minReplicatedNodeId = 
-                (nodeId < minReplicatedNodeId ? nodeId : minReplicatedNodeId);
+            minReplicatedNodeId =
+                    (nodeId < minReplicatedNodeId ? nodeId : minReplicatedNodeId);
         }
 
         /* Process INContainingEntry types. */
-        if (fromLogType.isINType() ||
-            fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
+        if(fromLogType.isINType() ||
+                fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
 
             INContainingEntry inEntry = (INContainingEntry) targetLogEntry;
             DatabaseId dbId = inEntry.getDbId();
@@ -455,16 +457,16 @@ public class INFileReader extends FileReader {
              */
             long oldLsn = inEntry.getPrevFullLsn();
 
-            if (oldLsn != DbLsn.NULL_LSN && !inEntry.isBINDelta()) {
+            if(oldLsn != DbLsn.NULL_LSN && !inEntry.isBINDelta()) {
                 tracker.countObsoleteUnconditional(
-                    oldLsn, fromLogType, 0, dbId, false /*countExact*/);
+                        oldLsn, fromLogType, 0, dbId, false /*countExact*/);
             }
 
             oldLsn = inEntry.getPrevDeltaLsn();
 
-            if (oldLsn != DbLsn.NULL_LSN) {
+            if(oldLsn != DbLsn.NULL_LSN) {
                 tracker.countObsoleteUnconditional(
-                    oldLsn, fromLogType, 0, dbId, false /*countExact*/);
+                        oldLsn, fromLogType, 0, dbId, false /*countExact*/);
             }
 
             /*
@@ -507,12 +509,12 @@ public class INFileReader extends FileReader {
              * of N. After all REDO-INs passes are done, count as obsolete any
              * LSNs remaining in the saved set. 
              */
-            if (isProvisional &&
-                partialCkptStart != DbLsn.NULL_LSN &&
-                DbLsn.compareTo(partialCkptStart, newLsn) < 0) {
+            if(isProvisional &&
+                    partialCkptStart != DbLsn.NULL_LSN &&
+                    DbLsn.compareTo(partialCkptStart, newLsn) < 0) {
                 tracker.countObsoleteUnconditional(
-                    newLsn, fromLogType, 0, inEntry.getDbId(),
-                    false /*countExact*/);
+                        newLsn, fromLogType, 0, inEntry.getDbId(),
+                        false /*countExact*/);
             }
         }
 
@@ -520,14 +522,14 @@ public class INFileReader extends FileReader {
          * Add candidate DB IDs and note deltas for possible log version 8
          * upgrade violations.
          */
-        if (currentEntryHeader.getVersion() < 8) {
-            if (logVersion8UpgradeDbs != null &&
-                fromLogType.isNodeType()) {
+        if(currentEntryHeader.getVersion() < 8) {
+            if(logVersion8UpgradeDbs != null &&
+                    fromLogType.isNodeType()) {
                 logVersion8UpgradeDbs.add(targetLogEntry.getDbId());
             }
-            if (logVersion8UpgradeDeltas != null &&
-                (fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA) ||
-                 fromLogType.equals(LogEntryType.LOG_OLD_DUP_BIN_DELTA))) {
+            if(logVersion8UpgradeDeltas != null &&
+                    (fromLogType.equals(LogEntryType.LOG_OLD_BIN_DELTA) ||
+                            fromLogType.equals(LogEntryType.LOG_OLD_DUP_BIN_DELTA))) {
                 logVersion8UpgradeDeltas.set(true);
             }
         }
@@ -540,7 +542,7 @@ public class INFileReader extends FileReader {
      * Get the last IN seen by the reader.
      */
     public IN getIN(DatabaseImpl dbImpl)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return ((INContainingEntry) targetLogEntry).getIN(dbImpl);
     }
@@ -604,8 +606,8 @@ public class INFileReader extends FileReader {
      */
     public boolean isBINDelta() {
         return
-            targetLogEntry.getLogType().equals(LogEntryType.LOG_BIN_DELTA) ||
-            targetLogEntry.getLogType().equals(LogEntryType.LOG_OLD_BIN_DELTA);
+                targetLogEntry.getLogType().equals(LogEntryType.LOG_BIN_DELTA) ||
+                        targetLogEntry.getLogType().equals(LogEntryType.LOG_OLD_BIN_DELTA);
     }
 
     public VLSNRecoveryProxy getVLSNProxy() {

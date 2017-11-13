@@ -13,25 +13,21 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.DbInternal;
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.ChecksumException;
-import berkeley.com.sleepycat.je.log.ChecksumValidator;
-import berkeley.com.sleepycat.je.log.FileHeader;
-import berkeley.com.sleepycat.je.log.LogEntryHeader;
-import berkeley.com.sleepycat.je.log.LogEntryType;
+import berkeley.com.sleepycat.je.log.*;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.util.LogVerificationException;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Verifies the checksums in the contents of a log file in a JE {@code
  * Environment}.
- *
+ * <p>
  * <p>The caller supplies the contents of the log file by passing arrays of
  * bytes in a series of calls to the {@link #verify} method, which verifies the
  * checksums for log records, and by calling the {@link #verifyAtEof} when the
@@ -46,37 +42,29 @@ import berkeley.com.sleepycat.je.util.LogVerificationException;
 public class LogVerifier {
 
     private static final byte FILE_HEADER_TYPE_NUM =
-                              LogEntryType.LOG_FILE_HEADER.getTypeNum();
+            LogEntryType.LOG_FILE_HEADER.getTypeNum();
 
     private final EnvironmentImpl envImpl;
     private final String fileName;
     private final long fileNum;
-
-    /* Stream verification state information. */
-    private enum State {
-        INIT, FIXED_HEADER, VARIABLE_HEADER, ITEM, FILE_HEADER_ITEM, INVALID
-    }
+    private final ChecksumValidator validator;
+    private final ByteBuffer headerBuf;
     private State state;
     private long entryStart;
     private long prevEntryStart;
-    private final ChecksumValidator validator;
-    private final ByteBuffer headerBuf;
     private LogEntryHeader header;
     private int itemPosition;
     private int logVersion;
-
     /**
      * Creates a log verifier.
      *
-     * @param env the {@code Environment} associated with the log
-     *
+     * @param env      the {@code Environment} associated with the log
      * @param fileName the file name of the log, for reporting in the {@code
-     * LogVerificationException}.  This should be a simple file name of the
-     * form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
-     * hexadecimal format.
-     *
+     *                 LogVerificationException}.  This should be a simple file name of the
+     *                 form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
+     *                 hexadecimal format.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
+     *                                     environment-wide failure occurs
      */
     public LogVerifier(final Environment env, final String fileName) {
         this(DbInternal.getNonNullEnvImpl(env), fileName);
@@ -85,15 +73,13 @@ public class LogVerifier {
     /**
      * Creates a log verifier.
      *
-     * @param envImpl the {@code EnvironmentImpl} associated with the log
-     *
+     * @param envImpl  the {@code EnvironmentImpl} associated with the log
      * @param fileName the file name of the log, for reporting in the {@code
-     * LogVerificationException}.  This should be a simple file name of the
-     * form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
-     * hexadecimal format.
-     *
+     *                 LogVerificationException}.  This should be a simple file name of the
+     *                 form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
+     *                 hexadecimal format.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
+     *                                     environment-wide failure occurs
      */
     public LogVerifier(final EnvironmentImpl envImpl, final String fileName) {
         this(envImpl, fileName, -1L);
@@ -103,14 +89,12 @@ public class LogVerifier {
      * <p>Creates a log verifier for use with an internal environment.  If
      * {@code fileNum} is less than zero, it is derived from {@code fileName}.
      *
-     * @param envImpl the {@code EnvironmentImpl} associated with the log
-     *
+     * @param envImpl  the {@code EnvironmentImpl} associated with the log
      * @param fileName the file name of the log, for reporting in the {@code
-     * LogVerificationException}.  This should be a simple file name of the
-     * form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
-     * hexadecimal format.
-     *
-     * @param fileNum the file number
+     *                 LogVerificationException}.  This should be a simple file name of the
+     *                 form {@code NNNNNNNN.jdb}, where NNNNNNNN is the file number in
+     *                 hexadecimal format.
+     * @param fileNum  the file number
      */
     public LogVerifier(final EnvironmentImpl envImpl,
                        final String fileName,
@@ -118,7 +102,7 @@ public class LogVerifier {
         this.envImpl = envImpl;
         this.fileName = fileName;
         this.fileNum = (fileNum >= 0) ?
-            fileNum : envImpl.getFileManager().getNumFromName(fileName);
+                fileNum : envImpl.getFileManager().getNumFromName(fileName);
         state = State.INIT;
         entryStart = 0L;
         prevEntryStart = 0L;
@@ -129,7 +113,7 @@ public class LogVerifier {
          * header portion, and file header entry.
          */
         headerBuf = ByteBuffer.allocate
-            (Math.max(LogEntryHeader.MAX_HEADER_SIZE, FileHeader.entrySize()));
+                (Math.max(LogEntryHeader.MAX_HEADER_SIZE, FileHeader.entrySize()));
 
         /* Initial log version for reading the file header. */
         logVersion = LogEntryType.UNKNOWN_FILE_HEADER_VERSION;
@@ -139,45 +123,41 @@ public class LogVerifier {
      * Verifies the next portion of the log file.
      *
      * @param buf the buffer containing the log file bytes
-     *
      * @param off the start offset of the log file bytes in the buffer
-     *
      * @param len the number of log file bytes in the buffer
-     *
-     * @throws LogVerificationException if a checksum cannot be verified or a
-     * log entry is determined to be invalid by examining its contents
-     *
+     * @throws LogVerificationException    if a checksum cannot be verified or a
+     *                                     log entry is determined to be invalid by examining its contents
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
+     *                                     environment-wide failure occurs
      */
     public void verify(final byte[] buf, final int off, final int len)
-        throws LogVerificationException {
+            throws LogVerificationException {
 
         final int endOffset = off + len;
         int curOffset = off;
-        while (curOffset < endOffset) {
+        while(curOffset < endOffset) {
             final int remaining = endOffset - curOffset;
-            switch (state) {
-            case INIT:
-                processInit();
-                break;
-            case FIXED_HEADER:
-                curOffset = processFixedHeader(buf, curOffset, remaining);
-                break;
-            case VARIABLE_HEADER:
-                curOffset = processVariableHeader(buf, curOffset, remaining);
-                break;
-            case FILE_HEADER_ITEM:
-                curOffset = processFileHeaderItem(buf, curOffset, remaining);
-                break;
-            case ITEM:
-                curOffset = processItem(buf, curOffset, remaining);
-                break;
-            case INVALID:
-                throw newVerifyException
-                    ("May not read after LogVerificationException is thrown");
-            default:
-                assert false;
+            switch(state) {
+                case INIT:
+                    processInit();
+                    break;
+                case FIXED_HEADER:
+                    curOffset = processFixedHeader(buf, curOffset, remaining);
+                    break;
+                case VARIABLE_HEADER:
+                    curOffset = processVariableHeader(buf, curOffset, remaining);
+                    break;
+                case FILE_HEADER_ITEM:
+                    curOffset = processFileHeaderItem(buf, curOffset, remaining);
+                    break;
+                case ITEM:
+                    curOffset = processItem(buf, curOffset, remaining);
+                    break;
+                case INVALID:
+                    throw newVerifyException
+                            ("May not read after LogVerificationException is thrown");
+                default:
+                    assert false;
             }
         }
     }
@@ -187,22 +167,21 @@ public class LogVerifier {
      * completed verifying the log file contents through calls to {@link
      * #verify}.
      *
-     * @throws LogVerificationException if the stream does not end with a
-     * complete log entry
-     *
+     * @throws LogVerificationException    if the stream does not end with a
+     *                                     complete log entry
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs
+     *                                     environment-wide failure occurs
      */
     public void verifyAtEof()
-        throws LogVerificationException {
+            throws LogVerificationException {
 
         /* State should be INIT at EOF. */
-        if (state == State.INIT) {
+        if(state == State.INIT) {
             return;
         }
 
         /* Ignore partial entry at end of last log file. */
-        if (fileNum == envImpl.getFileManager().getLastFileNum()) {
+        if(fileNum == envImpl.getFileManager().getLastFileNum()) {
             return;
         }
 
@@ -230,54 +209,56 @@ public class LogVerifier {
     private int processFixedHeader(final byte[] buf,
                                    final int curOffset,
                                    final int remaining)
-        throws LogVerificationException {
+            throws LogVerificationException {
 
         assert header == null;
 
         final int maxSize = LogEntryHeader.MIN_HEADER_SIZE;
         final int processSize =
-            Math.min(remaining, maxSize - headerBuf.position());
+                Math.min(remaining, maxSize - headerBuf.position());
 
         headerBuf.put(buf, curOffset, processSize);
         assert headerBuf.position() <= maxSize;
 
-        if (headerBuf.position() == maxSize) {
+        if(headerBuf.position() == maxSize) {
             headerBuf.flip();
             try {
                 header = new LogEntryHeader(
-                    headerBuf, logVersion, DbLsn.makeLsn(fileNum, entryStart));
-            } catch (ChecksumException e) {
+                        headerBuf, logVersion, DbLsn.makeLsn(fileNum, entryStart));
+            } catch(ChecksumException e) {
                 throw newVerifyException(
-                    "Invalid header bytes=" +
-                        Arrays.toString(headerBuf.array()),
-                    e);
+                        "Invalid header bytes=" +
+                                Arrays.toString(headerBuf.array()),
+                        e);
             }
 
-            if (header.getPrevOffset() != prevEntryStart) {
+            if(header.getPrevOffset() != prevEntryStart) {
                 throw newVerifyException(
-                    "Header prevOffset=0x" +
-                    Long.toHexString(header.getPrevOffset()) +
-                    " but prevEntryStart=0x" +
-                    Long.toHexString(prevEntryStart));
+                        "Header prevOffset=0x" +
+                                Long.toHexString(header.getPrevOffset()) +
+                                " but prevEntryStart=0x" +
+                                Long.toHexString(prevEntryStart));
             }
 
             /* If the header is invisible, turn off the invisible bit. */
-            if (header.isInvisible()) {
+            if(header.isInvisible()) {
                 LogEntryHeader.turnOffInvisible(headerBuf, 0);
             }
 
             /* Do not validate the bytes of the checksum itself. */
             validator.update(headerBuf.array(),
-                             LogEntryHeader.CHECKSUM_BYTES,
-                             maxSize - LogEntryHeader.CHECKSUM_BYTES);
+                    LogEntryHeader.CHECKSUM_BYTES,
+                    maxSize - LogEntryHeader.CHECKSUM_BYTES);
 
-            if (header.isVariableLength()) {
+            if(header.isVariableLength()) {
                 headerBuf.clear();
                 state = State.VARIABLE_HEADER;
-            } else if (header.getType() == FILE_HEADER_TYPE_NUM) {
+            }
+            else if(header.getType() == FILE_HEADER_TYPE_NUM) {
                 headerBuf.clear();
                 state = State.FILE_HEADER_ITEM;
-            } else {
+            }
+            else {
                 state = State.ITEM;
             }
         }
@@ -297,20 +278,21 @@ public class LogVerifier {
 
         final int maxSize = header.getVariablePortionSize();
         final int processSize =
-            Math.min(remaining, maxSize - headerBuf.position());
+                Math.min(remaining, maxSize - headerBuf.position());
 
         headerBuf.put(buf, curOffset, processSize);
         assert headerBuf.position() <= maxSize;
 
-        if (headerBuf.position() == maxSize) {
+        if(headerBuf.position() == maxSize) {
             headerBuf.flip();
             header.readVariablePortion(headerBuf);
             validator.update(headerBuf.array(), 0, maxSize);
 
-            if (header.getType() == FILE_HEADER_TYPE_NUM) {
+            if(header.getType() == FILE_HEADER_TYPE_NUM) {
                 headerBuf.clear();
                 state = State.FILE_HEADER_ITEM;
-            } else {
+            }
+            else {
                 state = State.ITEM;
             }
         }
@@ -321,32 +303,32 @@ public class LogVerifier {
     private int processFileHeaderItem(final byte[] buf,
                                       final int curOffset,
                                       final int remaining)
-        throws LogVerificationException {
+            throws LogVerificationException {
 
         assert header != null;
         assert logVersion == LogEntryType.UNKNOWN_FILE_HEADER_VERSION;
 
         final int maxSize = FileHeader.entrySize();
         final int processSize =
-            Math.min(remaining, maxSize - headerBuf.position());
+                Math.min(remaining, maxSize - headerBuf.position());
 
         headerBuf.put(buf, curOffset, processSize);
         assert headerBuf.position() <= maxSize;
 
-        if (headerBuf.position() == maxSize) {
+        if(headerBuf.position() == maxSize) {
             validator.update(headerBuf.array(), 0, maxSize);
             try {
                 validator.validate(header.getChecksum(), fileNum, entryStart);
-            } catch (ChecksumException e) {
+            } catch(ChecksumException e) {
                 throw newVerifyException(e);
             }
 
             headerBuf.flip();
             LogEntry fileHeaderEntry =
-                LogEntryType.LOG_FILE_HEADER.getNewLogEntry();
+                    LogEntryType.LOG_FILE_HEADER.getNewLogEntry();
             fileHeaderEntry.readEntry(envImpl, header, headerBuf);
             FileHeader fileHeaderItem =
-                (FileHeader) fileHeaderEntry.getMainItem();
+                    (FileHeader) fileHeaderEntry.getMainItem();
 
             /* Log version in the file header applies to all other entries. */
             logVersion = fileHeaderItem.getLogVersion();
@@ -366,7 +348,7 @@ public class LogVerifier {
     private int processItem(final byte[] buf,
                             final int curOffset,
                             final int remaining)
-        throws LogVerificationException {
+            throws LogVerificationException {
 
         assert header != null;
 
@@ -377,10 +359,10 @@ public class LogVerifier {
         itemPosition += processSize;
         assert itemPosition <= maxSize;
 
-        if (itemPosition == maxSize) {
+        if(itemPosition == maxSize) {
             try {
                 validator.validate(header.getChecksum(), fileNum, entryStart);
-            } catch (ChecksumException e) {
+            } catch(ChecksumException e) {
                 /*
                 LogEntryType lastEntryType = LogEntryType.findType(header.getType());
                 System.out.println();
@@ -414,20 +396,26 @@ public class LogVerifier {
 
         final String logEntrySize;
 
-        if (header != null) {
+        if(header != null) {
             logEntrySize =
-                String.valueOf(header.getSize() + header.getItemSize());
-        } else {
+                    String.valueOf(header.getSize() + header.getItemSize());
+        }
+        else {
             logEntrySize = "unknown";
         }
 
         return new LogVerificationException
-            ("Log is invalid, fileName: " + fileName +
-             " fileNumber: 0x" + Long.toHexString(fileNum) +
-             " logEntryOffset: 0x" + Long.toHexString(entryStart) +
-             " logEntrySize: " + logEntrySize +
-             " verifyState: " + state +
-             " reason: " + reason,
-             cause);
+                ("Log is invalid, fileName: " + fileName +
+                        " fileNumber: 0x" + Long.toHexString(fileNum) +
+                        " logEntryOffset: 0x" + Long.toHexString(entryStart) +
+                        " logEntrySize: " + logEntrySize +
+                        " verifyState: " + state +
+                        " reason: " + reason,
+                        cause);
+    }
+
+    /* Stream verification state information. */
+    private enum State {
+        INIT, FIXED_HEADER, VARIABLE_HEADER, ITEM, FILE_HEADER_ITEM, INVALID
     }
 }

@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.bind.tuple;
 
-import java.math.BigDecimal;
-
 import berkeley.com.sleepycat.je.DatabaseEntry;
+
+import java.math.BigDecimal;
 
 /**
  * A concrete <code>TupleBinding</code> for a sorted <code>BigDecimal</code>
  * value.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -33,6 +33,38 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
  * @see <a href="package-summary.html#bigDecimalFormats">BigDecimal Formats</a>
  */
 public class SortedBigDecimalBinding extends TupleBinding<BigDecimal> {
+
+    /**
+     * Converts an entry buffer into a <code>BigDecimal</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static BigDecimal entryToBigDecimal(DatabaseEntry entry) {
+
+        return entryToInput(entry).readSortedBigDecimal();
+    }
+
+    /**
+     * Converts a <code>BigDecimal</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void bigDecimalToEntry(BigDecimal val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput(val).writeSortedBigDecimal(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the maximum size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput(BigDecimal val) {
+
+        int len = TupleOutput.getSortedBigDecimalMaxByteLength(val);
+        return new TupleOutput(new byte[len]);
+    }
 
     // javadoc is inherited
     public BigDecimal entryToObject(TupleInput input) {
@@ -50,39 +82,5 @@ public class SortedBigDecimalBinding extends TupleBinding<BigDecimal> {
     protected TupleOutput getTupleOutput(BigDecimal object) {
 
         return sizedOutput(object);
-    }
-
-    /**
-     * Converts an entry buffer into a <code>BigDecimal</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static BigDecimal entryToBigDecimal(DatabaseEntry entry) {
-
-        return entryToInput(entry).readSortedBigDecimal();
-    }
-
-    /**
-     * Converts a <code>BigDecimal</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void bigDecimalToEntry(BigDecimal val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput(val).writeSortedBigDecimal(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the maximum size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput(BigDecimal val) {
-
-        int len = TupleOutput.getSortedBigDecimalMaxByteLength(val);
-        return new TupleOutput(new byte[len]);
     }
 }

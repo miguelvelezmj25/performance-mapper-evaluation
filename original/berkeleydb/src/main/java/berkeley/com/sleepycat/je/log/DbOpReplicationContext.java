@@ -33,8 +33,8 @@ public class DbOpReplicationContext extends ReplicationContext {
      * non-replicated node or it's a local operation for a local database.
      */
     public static DbOpReplicationContext NO_REPLICATE =
-        new DbOpReplicationContext(false, // inReplicationStream
-                                   DbOperationType.NONE);
+            new DbOpReplicationContext(false, // inReplicationStream
+                    DbOperationType.NONE);
 
     final private DbOperationType opType;
     private ReplicatedDatabaseConfig createConfig = null;
@@ -64,9 +64,10 @@ public class DbOpReplicationContext extends ReplicationContext {
         super(vlsn);
         opType = nameLNEntry.getOperationType();
 
-        if (DbOperationType.isWriteConfigType(opType)) {
+        if(DbOperationType.isWriteConfigType(opType)) {
             createConfig = nameLNEntry.getReplicatedCreateConfig();
-        } else if (opType == DbOperationType.TRUNCATE) {
+        }
+        else if(opType == DbOperationType.TRUNCATE) {
             truncateOldDbId = nameLNEntry.getTruncateOldDbId();
         }
     }
@@ -76,24 +77,24 @@ public class DbOpReplicationContext extends ReplicationContext {
         return opType;
     }
 
-    public void setCreateConfig(ReplicatedDatabaseConfig createConfig) {
-        assert(DbOperationType.isWriteConfigType(opType));
-        this.createConfig = createConfig;
-    }
-
     public ReplicatedDatabaseConfig getCreateConfig() {
-        assert(DbOperationType.isWriteConfigType(opType));
+        assert (DbOperationType.isWriteConfigType(opType));
         return createConfig;
     }
 
-    public void setTruncateOldDbId(DatabaseId truncateOldDbId) {
-        assert(opType == DbOperationType.TRUNCATE);
-        this.truncateOldDbId = truncateOldDbId;
+    public void setCreateConfig(ReplicatedDatabaseConfig createConfig) {
+        assert (DbOperationType.isWriteConfigType(opType));
+        this.createConfig = createConfig;
     }
 
     public DatabaseId getTruncateOldDbId() {
-        assert(opType == DbOperationType.TRUNCATE);
+        assert (opType == DbOperationType.TRUNCATE);
         return truncateOldDbId;
+    }
+
+    public void setTruncateOldDbId(DatabaseId truncateOldDbId) {
+        assert (opType == DbOperationType.TRUNCATE);
+        this.truncateOldDbId = truncateOldDbId;
     }
 
     @Override

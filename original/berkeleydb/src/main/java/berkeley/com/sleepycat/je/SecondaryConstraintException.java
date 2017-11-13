@@ -18,23 +18,23 @@ import berkeley.com.sleepycat.je.txn.Locker;
 /**
  * Base class for exceptions thrown when a write operation fails because of a
  * secondary constraint.  See subclasses for more information.
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  *
  * @see <a href="SecondaryDatabase.html#transactions">Special considerations
  * for using Secondary Databases with and without Transactions</a>
- *
  * @since 4.0
  */
 public abstract class SecondaryConstraintException
-    extends SecondaryReferenceException {
+        extends SecondaryReferenceException {
 
     private static final long serialVersionUID = 1L;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public SecondaryConstraintException(Locker locker,
                                         String message,
@@ -45,9 +45,10 @@ public abstract class SecondaryConstraintException
         super(locker, message, secDbName, secKey, priKey, expirationTime);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     SecondaryConstraintException(String message,
                                  SecondaryReferenceException cause) {

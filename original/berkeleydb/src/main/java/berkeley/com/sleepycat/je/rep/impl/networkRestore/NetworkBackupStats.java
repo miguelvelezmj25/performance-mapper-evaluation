@@ -13,18 +13,12 @@
 
 package berkeley.com.sleepycat.je.rep.impl.networkRestore;
 
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.BACKUP_FILE_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.DISPOSED_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.EXPECTED_BYTES;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.FETCH_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.SKIP_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.TRANSFERRED_BYTES;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.TRANSFER_RATE;
+import berkeley.com.sleepycat.je.utilint.LongAvgRateStat;
+import berkeley.com.sleepycat.je.utilint.StatGroup;
 
 import java.io.Serializable;
 
-import berkeley.com.sleepycat.je.utilint.LongAvgRateStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.*;
 
 /**
  * Stores NetworkBackup statistics.
@@ -66,7 +60,7 @@ public class NetworkBackupStats implements Serializable {
 
     public long getTransferRate() {
         final LongAvgRateStat stat =
-            (LongAvgRateStat) statGroup.getStat(TRANSFER_RATE);
+                (LongAvgRateStat) statGroup.getStat(TRANSFER_RATE);
         return (stat == null) ? 0 : stat.get();
     }
 

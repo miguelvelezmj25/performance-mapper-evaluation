@@ -21,26 +21,12 @@ import java.io.Serializable;
  */
 public class StatDefinition implements Comparable, Serializable {
     private static final long serialVersionUID = 1L;
-
-    /*
-     * A CUMULATIVE statistic is a statistic that is never cleared
-     * (represents totals) or whose value is computed from the system
-     * state at the time the statistic is acquired.
-     * An INCREMENTAL statistic is cleared when StatConfig.getClear
-     * is true. The value of the statistic represent an incremental
-     * value since the last clear.
-     */
-    public enum StatType {
-        INCREMENTAL,
-        CUMULATIVE
-    }
-
     private final String name;
     private final String description;
     private final StatType type;
-
     /**
      * Convenience constructor used for INCREMENTAL stats.
+     *
      * @param name
      * @param description
      */
@@ -52,6 +38,7 @@ public class StatDefinition implements Comparable, Serializable {
 
     /**
      * Constructor
+     *
      * @param name
      * @param description
      * @param type
@@ -86,11 +73,11 @@ public class StatDefinition implements Comparable, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
 
-        if (!(obj instanceof StatDefinition)) {
+        if(!(obj instanceof StatDefinition)) {
             return false;
         }
 
@@ -101,5 +88,18 @@ public class StatDefinition implements Comparable, Serializable {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    /*
+     * A CUMULATIVE statistic is a statistic that is never cleared
+     * (represents totals) or whose value is computed from the system
+     * state at the time the statistic is acquired.
+     * An INCREMENTAL statistic is cleared when StatConfig.getClear
+     * is true. The value of the statistic represent an incremental
+     * value since the last clear.
+     */
+    public enum StatType {
+        INCREMENTAL,
+        CUMULATIVE
     }
 }

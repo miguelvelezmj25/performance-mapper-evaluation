@@ -44,28 +44,7 @@ public class StatsConfig implements Cloneable {
     }
 
     /**
-     * Configures the statistics operation to return only the values which do
-     * not incur some performance penalty.
-     *
-     * <p>The default value is false.</p>
-     *
-     * <p>For example, skip stats that require a traversal of the database or
-     * in-memory tree, or which lock down the lock table for a period of
-     * time.</p>
-     *
-     * @param fast If set to true, configure the statistics operation to return
-     * only the values which do not incur some performance penalty.
-     *
-     * @return this
-     */
-    public StatsConfig setFast(boolean fast) {
-        setFastVoid(fast);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setFastVoid(boolean fast) {
         this.fast = fast;
@@ -83,22 +62,26 @@ public class StatsConfig implements Cloneable {
     }
 
     /**
-     * Configures the statistics operation to reset statistics after they are
-     * returned. The default value is false.
+     * Configures the statistics operation to return only the values which do
+     * not incur some performance penalty.
+     * <p>
+     * <p>The default value is false.</p>
+     * <p>
+     * <p>For example, skip stats that require a traversal of the database or
+     * in-memory tree, or which lock down the lock table for a period of
+     * time.</p>
      *
-     * @param clear If set to true, configure the statistics operation to
-     * reset statistics after they are returned.
-     *
+     * @param fast If set to true, configure the statistics operation to return
+     *             only the values which do not incur some performance penalty.
      * @return this
      */
-    public StatsConfig setClear(boolean clear) {
-        setClearVoid(clear);
+    public StatsConfig setFast(boolean fast) {
+        setFastVoid(fast);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setClearVoid(boolean clear) {
         this.clear = clear;
@@ -116,20 +99,20 @@ public class StatsConfig implements Cloneable {
     }
 
     /**
-     * Configures the statistics operation to display progress to the
-     * PrintStream argument.  The accumulated statistics will be displayed
-     * every N records, where N is the value of showProgressInterval.
+     * Configures the statistics operation to reset statistics after they are
+     * returned. The default value is false.
      *
+     * @param clear If set to true, configure the statistics operation to
+     *              reset statistics after they are returned.
      * @return this
      */
-    public StatsConfig setShowProgressStream(PrintStream showProgressStream) {
-        setShowProgressStreamVoid(showProgressStream);
+    public StatsConfig setClear(boolean clear) {
+        setClearVoid(clear);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setShowProgressStreamVoid(PrintStream showProgressStream) {
         this.showProgressStream = showProgressStream;
@@ -144,19 +127,19 @@ public class StatsConfig implements Cloneable {
     }
 
     /**
-     * When the statistics operation is configured to display progress the
-     * showProgressInterval is the number of LNs between each progress report.
+     * Configures the statistics operation to display progress to the
+     * PrintStream argument.  The accumulated statistics will be displayed
+     * every N records, where N is the value of showProgressInterval.
      *
      * @return this
      */
-    public StatsConfig setShowProgressInterval(int showProgressInterval) {
-        setShowProgressIntervalVoid(showProgressInterval);
+    public StatsConfig setShowProgressStream(PrintStream showProgressStream) {
+        setShowProgressStreamVoid(showProgressStream);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setShowProgressIntervalVoid(int showProgressInterval) {
         this.showProgressInterval = showProgressInterval;
@@ -170,13 +153,24 @@ public class StatsConfig implements Cloneable {
     }
 
     /**
+     * When the statistics operation is configured to display progress the
+     * showProgressInterval is the number of LNs between each progress report.
+     *
+     * @return this
+     */
+    public StatsConfig setShowProgressInterval(int showProgressInterval) {
+        setShowProgressIntervalVoid(showProgressInterval);
+        return this;
+    }
+
+    /**
      * Returns a copy of this configuration object.
      */
     @Override
     public StatsConfig clone() {
         try {
             return (StatsConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }
@@ -189,9 +183,9 @@ public class StatsConfig implements Cloneable {
     @Override
     public String toString() {
         return "fast=" + fast +
-            "\nclear=" + clear +
-            "\nshowProgressStream=" + showProgressStream +
-            "\nshowProgressInterval=" + showProgressInterval +
-            "\n";
+                "\nclear=" + clear +
+                "\nshowProgressStream=" + showProgressStream +
+                "\nshowProgressInterval=" + showProgressInterval +
+                "\n";
     }
 }

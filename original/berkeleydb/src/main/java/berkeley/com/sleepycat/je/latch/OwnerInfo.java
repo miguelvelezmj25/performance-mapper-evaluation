@@ -25,7 +25,7 @@ class OwnerInfo {
         thread = Thread.currentThread();
         acquireTime = System.currentTimeMillis();
         acquireStack =
-            new Exception("Latch Acquired: " + context.getLatchName());
+                new Exception("Latch Acquired: " + context.getLatchName());
     }
 
     void toString(StringBuilder builder) {
@@ -33,10 +33,11 @@ class OwnerInfo {
         builder.append(thread);
         builder.append(" acquireTime: ");
         builder.append(acquireTime);
-        if (acquireStack != null) {
+        if(acquireStack != null) {
             builder.append("\n");
             builder.append(LoggerUtils.getStackTrace(acquireStack));
-        } else {
+        }
+        else {
             builder.append(" -no stack-");
         }
     }

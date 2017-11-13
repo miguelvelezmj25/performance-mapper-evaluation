@@ -13,14 +13,13 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.util.Set;
-import java.util.List;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * SyncedLockManager uses the synchronized keyword to implement its critical
@@ -92,13 +91,13 @@ public class SyncedLockManager extends LockManager {
                                   LockType type,
                                   boolean nonBlockingRequest,
                                   boolean jumpAheadOfWaiters)
-        throws DatabaseException {
+            throws DatabaseException {
 
         int lockTableIndex = getLockTableIndex(lsn);
         synchronized(lockTableLatches[lockTableIndex]) {
             return attemptLockInternal
-                (lsn, locker, type, nonBlockingRequest, jumpAheadOfWaiters,
-                 lockTableIndex);
+                    (lsn, locker, type, nonBlockingRequest, jumpAheadOfWaiters,
+                            lockTableIndex);
         }
     }
 
@@ -107,24 +106,24 @@ public class SyncedLockManager extends LockManager {
      */
     @Override
     TimeoutInfo getTimeoutInfo(
-        boolean isLockNotTxnTimeout,
-        Locker locker,
-        long lsn,
-        LockType type,
-        LockGrantType grantType,
-        Lock useLock,
-        long timeout,
-        long start,
-        long now,
-        DatabaseImpl database,
-        Set<LockInfo> owners,
-        List<LockInfo> waiters) {
+            boolean isLockNotTxnTimeout,
+            Locker locker,
+            long lsn,
+            LockType type,
+            LockGrantType grantType,
+            Lock useLock,
+            long timeout,
+            long start,
+            long now,
+            DatabaseImpl database,
+            Set<LockInfo> owners,
+            List<LockInfo> waiters) {
 
         int lockTableIndex = getLockTableIndex(lsn);
         synchronized(lockTableLatches[lockTableIndex]) {
             return getTimeoutInfoInternal(
-                isLockNotTxnTimeout, locker, lsn, type, grantType, useLock,
-                timeout, start, now, database, owners, waiters);
+                    isLockNotTxnTimeout, locker, lsn, type, grantType, useLock,
+                    timeout, start, now, database, owners, waiters);
         }
     }
 
@@ -136,7 +135,7 @@ public class SyncedLockManager extends LockManager {
         int lockTableIndex = getLockTableIndex(lsn);
         synchronized(lockTableLatches[lockTableIndex]) {
             return releaseAndFindNotifyTargetsInternal
-                (lsn, locker, lockTableIndex);
+                    (lsn, locker, lockTableIndex);
         }
     }
 
@@ -236,8 +235,8 @@ public class SyncedLockManager extends LockManager {
         int lockTableIndex = getLockTableIndex(lsn);
         synchronized(lockTableLatches[lockTableIndex]) {
             return validateOwnershipInternal(
-                lsn, locker, type, getOwnersAndWaiters, flushFromWaiters,
-                lockTableIndex, owners, waiters);
+                    lsn, locker, type, getOwnersAndWaiters, flushFromWaiters,
+                    lockTableIndex, owners, waiters);
         }
     }
 
@@ -246,9 +245,9 @@ public class SyncedLockManager extends LockManager {
      */
     @Override
     public LockAttemptResult stealLock(Long lsn,
-                                          Locker locker,
-                                          LockType lockType)
-        throws DatabaseException {
+                                       Locker locker,
+                                       LockType lockType)
+            throws DatabaseException {
 
         int lockTableIndex = getLockTableIndex(lsn);
         synchronized(lockTableLatches[lockTableIndex]) {
@@ -261,7 +260,7 @@ public class SyncedLockManager extends LockManager {
      */
     @Override
     void dumpLockTable(StatGroup stats, boolean clear) {
-        for (int i = 0; i < nLockTables; i++) {
+        for(int i = 0; i < nLockTables; i++) {
             synchronized(lockTableLatches[i]) {
                 dumpLockTableInternal(stats, i, clear);
             }

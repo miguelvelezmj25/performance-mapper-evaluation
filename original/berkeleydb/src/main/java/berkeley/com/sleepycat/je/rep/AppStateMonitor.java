@@ -23,7 +23,7 @@ package berkeley.com.sleepycat.je.rep;
  * JE-centric information, such as whether the node is a master or
  * replica. However, it may be important to add in some application specific
  * information to enable the best use of the status.
- * <p> 
+ * <p>
  * For example, an application may want to direct operations to specific nodes
  * based on whether the node is available. The fields in {@link NodeState} will
  * tell the application whether the node is up and available in a JE HA sense,
@@ -44,21 +44,22 @@ package berkeley.com.sleepycat.je.rep;
  * {@link NodeState}, through {@link NodeState#getAppState}.
  * <p>
  * {@link AppStateMonitor#getAppState()} returns a byte array whose length
- * should be larger than 0. An IllegalStateException will be thrown if the 
+ * should be larger than 0. An IllegalStateException will be thrown if the
  * returned byte array is 0 size. Users are responsible for serializing and
  * deserializing the desired information into this byte array.
+ *
  * @since 5.0
  */
 public interface AppStateMonitor {
 
     /**
-     * Return a byte array which holds information about the application's 
+     * Return a byte array which holds information about the application's
      * state. The application is responsible for serialize and deserialize this
      * information.
      * <p>
      * Note the returned byte array's length should be larger than 0.
      *
-     * @return the application state 
+     * @return the application state
      */
     public byte[] getAppState();
 }

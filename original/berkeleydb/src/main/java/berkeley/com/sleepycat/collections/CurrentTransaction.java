@@ -13,28 +13,19 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
 
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.LockMode;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * Provides access to the current transaction for the current thread within the
@@ -50,7 +41,7 @@ public class CurrentTransaction {
     /* For internal use, this class doubles as an Environment wrapper. */
 
     private static WeakHashMap<Environment, CurrentTransaction> envMap =
-        new WeakHashMap<Environment, CurrentTransaction>();
+            new WeakHashMap<Environment, CurrentTransaction>();
 
     private LockMode writeLockMode;
     private boolean cdbMode;
@@ -67,13 +58,33 @@ public class CurrentTransaction {
      */
     private WeakReference<Environment> envRef;
 
+    private CurrentTransaction(Environment env) {
+        envRef = new WeakReference<Environment>(env);
+        try {
+            EnvironmentConfig config = env.getConfig();
+            txnMode = config.getTransactional();
+            lockingMode = DbCompat.getInitializeLocking(config);
+            if(txnMode || lockingMode) {
+                writeLockMode = LockMode.RMW;
+            }
+            else {
+                writeLockMode = LockMode.DEFAULT;
+            }
+            cdbMode = DbCompat.getInitializeCDB(config);
+            if(cdbMode) {
+                localCdbCursors = new ThreadLocal();
+            }
+        } catch(DatabaseException e) {
+            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
+        }
+    }
+
     /**
      * Gets the CurrentTransaction accessor for a specified Berkeley DB
      * environment.  This method always returns the same reference when called
      * more than once with the same environment parameter.
      *
      * @param env is an open Berkeley DB environment.
-     *
      * @return the CurrentTransaction accessor for the given environment, or
      * null if the environment is not transactional.
      */
@@ -90,33 +101,13 @@ public class CurrentTransaction {
      * @param env is an open Berkeley DB environment.
      */
     static CurrentTransaction getInstanceInternal(Environment env) {
-        synchronized (envMap) {
+        synchronized(envMap) {
             CurrentTransaction ct = envMap.get(env);
-            if (ct == null) {
+            if(ct == null) {
                 ct = new CurrentTransaction(env);
                 envMap.put(env, ct);
             }
             return ct;
-        }
-    }
-
-    private CurrentTransaction(Environment env) {
-        envRef = new WeakReference<Environment>(env);
-        try {
-            EnvironmentConfig config = env.getConfig();
-            txnMode = config.getTransactional();
-            lockingMode = DbCompat.getInitializeLocking(config);
-            if (txnMode || lockingMode) {
-                writeLockMode = LockMode.RMW;
-            } else {
-                writeLockMode = LockMode.DEFAULT;
-            }
-            cdbMode = DbCompat.getInitializeCDB(config);
-            if (cdbMode) {
-                localCdbCursors = new ThreadLocal();
-            }
-        } catch (DatabaseException e) {
-            throw RuntimeExceptionWrapper.wrapIfNeeded(e);
         }
     }
 
@@ -183,10 +174,10 @@ public class CurrentTransaction {
      * and no XA transaction is currently active.
      */
     boolean isAutoCommitAllowed()
-        throws DatabaseException {
+            throws DatabaseException {
 
         return getTransaction() == null &&
-               DbCompat.getThreadTransaction(getEnvironment()) == null;
+                DbCompat.getThreadTransaction(getEnvironment()) == null;
     }
 
     /**
@@ -195,50 +186,47 @@ public class CurrentTransaction {
      * environment and thread, a nested transaction will be created.
      *
      * @param config the transaction configuration used for calling
-     * {@link Environment#beginTransaction}, or null to use the default
-     * configuration.
-     *
+     *               {@link Environment#beginTransaction}, or null to use the default
+     *               configuration.
      * @return the new transaction.
-     *
+     * <p>
      * <!-- begin JE only -->
      * @throws com.sleepycat.je.rep.InsufficientReplicasException if the Master
-     * in a replicated environment could not contact a quorum of replicas as
-     * determined by the {@link com.sleepycat.je.Durability.ReplicaAckPolicy}.
-     *
-     * @throws com.sleepycat.je.rep.ReplicaConsistencyException if a replica
-     * in a replicated environment cannot become consistent within the timeout
-     * period.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException if the transaction cannot be started, in which
-     * case any existing transaction is not affected.
-     *
-     * @throws IllegalStateException if a transaction is already active and
-     * nested transactions are not supported by the environment.
+     *                                                            in a replicated environment could not contact a quorum of replicas as
+     *                                                            determined by the {@link com.sleepycat.je.Durability.ReplicaAckPolicy}.
+     * @throws com.sleepycat.je.rep.ReplicaConsistencyException   if a replica
+     *                                                            in a replicated environment cannot become consistent within the timeout
+     *                                                            period.
+     * @throws EnvironmentFailureException                        if an unexpected, internal or
+     *                                                            environment-wide failure occurs.
+     *                                                            <!-- end JE only -->
+     * @throws DatabaseException                                  if the transaction cannot be started, in which
+     *                                                            case any existing transaction is not affected.
+     * @throws IllegalStateException                              if a transaction is already active and
+     *                                                            nested transactions are not supported by the environment.
      */
     public final Transaction beginTransaction(TransactionConfig config)
-        throws DatabaseException {
+            throws DatabaseException {
 
         Environment env = getEnvironment();
         Trans trans = (Trans) localTrans.get();
-        if (trans != null) {
-            if (trans.txn != null) {
-                if (!DbCompat.NESTED_TRANSACTIONS) {
+        if(trans != null) {
+            if(trans.txn != null) {
+                if(!DbCompat.NESTED_TRANSACTIONS) {
                     throw new IllegalStateException
-                        ("Nested transactions are not supported");
+                            ("Nested transactions are not supported");
                 }
                 Transaction parentTxn = trans.txn;
                 trans = new Trans(trans, config);
                 trans.txn = env.beginTransaction(parentTxn, config);
                 localTrans.set(trans);
-            } else {
+            }
+            else {
                 trans.txn = env.beginTransaction(null, config);
                 trans.config = config;
             }
-        } else {
+        }
+        else {
             trans = new Trans(null, config);
             trans.txn = env.beginTransaction(null, config);
             localTrans.set(trans);
@@ -253,43 +241,38 @@ public class CurrentTransaction {
      *
      * @return the parent transaction or null if the committed transaction was
      * not nested.
-     *
+     * <p>
      * <!-- begin JE only -->
      * @throws com.sleepycat.je.rep.InsufficientReplicasException if the master
-     * in a replicated environment could not contact a quorum of replicas as
-     * determined by the {@link com.sleepycat.je.Durability.ReplicaAckPolicy}.
-     * The application must abort the transaction and can choose to retry it.
-     *
-     * @throws com.sleepycat.je.rep.InsufficientAcksException if the master in
-     * a replicated environment did not receive enough replica acknowledgments,
-     * although the commit succeeded locally.
-     *
-     * @throws com.sleepycat.je.rep.ReplicaWriteException if a write operation
-     * was performed with this transaction, but this node is now a Replica.
-     *
-     * @throws OperationFailureException if this exception occurred earlier and
-     * caused the transaction to be invalidated.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException if an error occurs committing the transaction.
-     * The transaction will still be closed and the parent transaction will
-     * become the current transaction.
-     *
-     * @throws IllegalStateException if no transaction is active for the
-     * current thread for this environment.
+     *                                                            in a replicated environment could not contact a quorum of replicas as
+     *                                                            determined by the {@link com.sleepycat.je.Durability.ReplicaAckPolicy}.
+     *                                                            The application must abort the transaction and can choose to retry it.
+     * @throws com.sleepycat.je.rep.InsufficientAcksException     if the master in
+     *                                                            a replicated environment did not receive enough replica acknowledgments,
+     *                                                            although the commit succeeded locally.
+     * @throws com.sleepycat.je.rep.ReplicaWriteException         if a write operation
+     *                                                            was performed with this transaction, but this node is now a Replica.
+     * @throws OperationFailureException                          if this exception occurred earlier and
+     *                                                            caused the transaction to be invalidated.
+     * @throws EnvironmentFailureException                        if an unexpected, internal or
+     *                                                            environment-wide failure occurs.
+     *                                                            <!-- end JE only -->
+     * @throws DatabaseException                                  if an error occurs committing the transaction.
+     *                                                            The transaction will still be closed and the parent transaction will
+     *                                                            become the current transaction.
+     * @throws IllegalStateException                              if no transaction is active for the
+     *                                                            current thread for this environment.
      */
     public final Transaction commitTransaction()
-        throws DatabaseException, IllegalStateException {
+            throws DatabaseException, IllegalStateException {
 
         Trans trans = (Trans) localTrans.get();
-        if (trans != null && trans.txn != null) {
+        if(trans != null && trans.txn != null) {
             Transaction parent = closeTxn(trans);
             trans.txn.commit();
             return parent;
-        } else {
+        }
+        else {
             throw new IllegalStateException("No transaction is active");
         }
     }
@@ -301,28 +284,27 @@ public class CurrentTransaction {
      *
      * @return the parent transaction or null if the aborted transaction was
      * not nested.
-     *
+     * <p>
      * <!-- begin JE only -->
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException if an error occurs aborting the transaction.
-     * The transaction will still be closed and the parent transaction will
-     * become the current transaction.
-     *
-     * @throws IllegalStateException if no transaction is active for the
-     * current thread for this environment.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           if an error occurs aborting the transaction.
+     *                                     The transaction will still be closed and the parent transaction will
+     *                                     become the current transaction.
+     * @throws IllegalStateException       if no transaction is active for the
+     *                                     current thread for this environment.
      */
     public final Transaction abortTransaction()
-        throws DatabaseException, IllegalStateException {
+            throws DatabaseException, IllegalStateException {
 
         Trans trans = (Trans) localTrans.get();
-        if (trans != null && trans.txn != null) {
+        if(trans != null && trans.txn != null) {
             Transaction parent = closeTxn(trans);
             trans.txn.abort();
             return parent;
-        } else {
+        }
+        else {
             throw new IllegalStateException("No transaction is active");
         }
     }
@@ -334,9 +316,10 @@ public class CurrentTransaction {
     final boolean isReadUncommitted() {
 
         Trans trans = (Trans) localTrans.get();
-        if (trans != null && trans.config != null) {
+        if(trans != null && trans.config != null) {
             return trans.config.getReadUncommitted();
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -345,6 +328,163 @@ public class CurrentTransaction {
 
         localTrans.set(trans.parent);
         return (trans.parent != null) ? trans.parent.txn : null;
+    }
+
+    /**
+     * Opens a cursor for a given database, dup'ing an existing CDB cursor if
+     * one is open for the current thread.
+     */
+    Cursor openCursor(Database db,
+                      CursorConfig cursorConfig,
+                      boolean writeCursor,
+                      Transaction txn)
+            throws DatabaseException {
+
+        if(cdbMode) {
+            CdbCursors cdbCursors = null;
+            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
+            if(cdbCursorsMap == null) {
+                cdbCursorsMap = new WeakHashMap();
+                localCdbCursors.set(cdbCursorsMap);
+            }
+            else {
+                cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
+            }
+            if(cdbCursors == null) {
+                cdbCursors = new CdbCursors();
+                cdbCursorsMap.put(db, cdbCursors);
+            }
+
+            /*
+             * In CDB mode the cursorConfig specified by the user is ignored
+             * and only the writeCursor parameter is honored.  This is the only
+             * meaningful cursor attribute for CDB, and here we count on
+             * writeCursor flag being set correctly by the caller.
+             */
+            List cursors;
+            CursorConfig cdbConfig;
+            if(writeCursor) {
+                if(cdbCursors.readCursors.size() > 0) {
+
+                    /*
+                     * Although CDB allows opening a write cursor when a read
+                     * cursor is open, a self-deadlock will occur if a write is
+                     * attempted for a record that is read-locked; we should
+                     * avoid self-deadlocks at all costs
+                     */
+                    throw new IllegalStateException
+                            ("Cannot open CDB write cursor when read cursor " +
+                                    "is open");
+                }
+                cursors = cdbCursors.writeCursors;
+                cdbConfig = new CursorConfig();
+                DbCompat.setWriteCursor(cdbConfig, true);
+            }
+            else {
+                cursors = cdbCursors.readCursors;
+                cdbConfig = null;
+            }
+            Cursor cursor;
+            if(cursors.size() > 0) {
+                Cursor other = ((Cursor) cursors.get(0));
+                cursor = other.dup(false);
+            }
+            else {
+                cursor = db.openCursor(null, cdbConfig);
+            }
+            cursors.add(cursor);
+            return cursor;
+        }
+        else {
+            return db.openCursor(txn, cursorConfig);
+        }
+    }
+
+    /**
+     * Duplicates a cursor for a given database.
+     *
+     * @param writeCursor  true to open a write cursor in a CDB environment, and
+     *                     ignored for other environments.
+     * @param samePosition is passed through to Cursor.dup().
+     * @return the open cursor.
+     * @throws DatabaseException if a database problem occurs.
+     */
+    Cursor dupCursor(Cursor cursor, boolean writeCursor, boolean samePosition)
+            throws DatabaseException {
+
+        if(cdbMode) {
+            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
+            if(cdbCursorsMap != null) {
+                Database db = cursor.getDatabase();
+                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
+                if(cdbCursors != null) {
+                    List cursors = writeCursor ? cdbCursors.writeCursors
+                            : cdbCursors.readCursors;
+                    if(cursors.contains(cursor)) {
+                        Cursor newCursor = cursor.dup(samePosition);
+                        cursors.add(newCursor);
+                        return newCursor;
+                    }
+                }
+            }
+            throw new IllegalStateException("Cursor to dup not tracked");
+        }
+        else {
+            return cursor.dup(samePosition);
+        }
+    }
+
+    /**
+     * Closes a cursor.
+     *
+     * @param cursor the cursor to close.
+     * @throws DatabaseException if a database problem occurs.
+     */
+    void closeCursor(Cursor cursor)
+            throws DatabaseException {
+
+        if(cursor == null) {
+            return;
+        }
+        if(cdbMode) {
+            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
+            if(cdbCursorsMap != null) {
+                Database db = cursor.getDatabase();
+                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
+                if(cdbCursors != null) {
+                    if(cdbCursors.readCursors.remove(cursor) ||
+                            cdbCursors.writeCursors.remove(cursor)) {
+                        cursor.close();
+                        return;
+                    }
+                }
+            }
+            throw new IllegalStateException
+                    ("Closing CDB cursor that was not known to be open");
+        }
+        else {
+            cursor.close();
+        }
+    }
+
+    /**
+     * Returns true if a CDB cursor is open and therefore a Database write
+     * operation should not be attempted since a self-deadlock may result.
+     */
+    boolean isCDBCursorOpen(Database db) {
+        if(cdbMode) {
+            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
+            if(cdbCursorsMap != null) {
+                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
+
+                if(cdbCursors != null &&
+                        (cdbCursors.readCursors.size() > 0 ||
+                                cdbCursors.writeCursors.size() > 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static class Trans {
@@ -358,161 +498,6 @@ public class CurrentTransaction {
             this.parent = parent;
             this.config = config;
         }
-    }
-
-    /**
-     * Opens a cursor for a given database, dup'ing an existing CDB cursor if
-     * one is open for the current thread.
-     */
-    Cursor openCursor(Database db,
-                      CursorConfig cursorConfig,
-                      boolean writeCursor,
-                      Transaction txn)
-        throws DatabaseException {
-
-        if (cdbMode) {
-            CdbCursors cdbCursors = null;
-            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
-            if (cdbCursorsMap == null) {
-                cdbCursorsMap = new WeakHashMap();
-                localCdbCursors.set(cdbCursorsMap);
-            } else {
-                cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
-            }
-            if (cdbCursors == null) {
-                cdbCursors = new CdbCursors();
-                cdbCursorsMap.put(db, cdbCursors);
-            }
-
-            /*
-             * In CDB mode the cursorConfig specified by the user is ignored
-             * and only the writeCursor parameter is honored.  This is the only
-             * meaningful cursor attribute for CDB, and here we count on
-             * writeCursor flag being set correctly by the caller.
-             */
-            List cursors;
-            CursorConfig cdbConfig;
-            if (writeCursor) {
-                if (cdbCursors.readCursors.size() > 0) {
-
-                    /*
-                     * Although CDB allows opening a write cursor when a read
-                     * cursor is open, a self-deadlock will occur if a write is
-                     * attempted for a record that is read-locked; we should
-                     * avoid self-deadlocks at all costs
-                     */
-                    throw new IllegalStateException
-                        ("Cannot open CDB write cursor when read cursor " +
-                         "is open");
-                }
-                cursors = cdbCursors.writeCursors;
-                cdbConfig = new CursorConfig();
-                DbCompat.setWriteCursor(cdbConfig, true);
-            } else {
-                cursors = cdbCursors.readCursors;
-                cdbConfig = null;
-            }
-            Cursor cursor;
-            if (cursors.size() > 0) {
-                Cursor other = ((Cursor) cursors.get(0));
-                cursor = other.dup(false);
-            } else {
-                cursor = db.openCursor(null, cdbConfig);
-            }
-            cursors.add(cursor);
-            return cursor;
-        } else {
-            return db.openCursor(txn, cursorConfig);
-        }
-    }
-
-    /**
-     * Duplicates a cursor for a given database.
-     *
-     * @param writeCursor true to open a write cursor in a CDB environment, and
-     * ignored for other environments.
-     *
-     * @param samePosition is passed through to Cursor.dup().
-     *
-     * @return the open cursor.
-     *
-     * @throws DatabaseException if a database problem occurs.
-     */
-    Cursor dupCursor(Cursor cursor, boolean writeCursor, boolean samePosition)
-        throws DatabaseException {
-
-        if (cdbMode) {
-            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
-            if (cdbCursorsMap != null) {
-                Database db = cursor.getDatabase();
-                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
-                if (cdbCursors != null) {
-                    List cursors = writeCursor ? cdbCursors.writeCursors
-                                               : cdbCursors.readCursors;
-                    if (cursors.contains(cursor)) {
-                        Cursor newCursor = cursor.dup(samePosition);
-                        cursors.add(newCursor);
-                        return newCursor;
-                    }
-                }
-            }
-            throw new IllegalStateException("Cursor to dup not tracked");
-        } else {
-            return cursor.dup(samePosition);
-        }
-    }
-
-    /**
-     * Closes a cursor.
-     *
-     * @param cursor the cursor to close.
-     *
-     * @throws DatabaseException if a database problem occurs.
-     */
-    void closeCursor(Cursor cursor)
-        throws DatabaseException {
-
-        if (cursor == null) {
-            return;
-        }
-        if (cdbMode) {
-            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
-            if (cdbCursorsMap != null) {
-                Database db = cursor.getDatabase();
-                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
-                if (cdbCursors != null) {
-                    if (cdbCursors.readCursors.remove(cursor) ||
-                        cdbCursors.writeCursors.remove(cursor)) {
-                        cursor.close();
-                        return;
-                    }
-                }
-            }
-            throw new IllegalStateException
-                ("Closing CDB cursor that was not known to be open");
-        } else {
-            cursor.close();
-        }
-    }
-
-    /**
-     * Returns true if a CDB cursor is open and therefore a Database write
-     * operation should not be attempted since a self-deadlock may result.
-     */
-    boolean isCDBCursorOpen(Database db) {
-        if (cdbMode) {
-            WeakHashMap cdbCursorsMap = (WeakHashMap) localCdbCursors.get();
-            if (cdbCursorsMap != null) {
-                CdbCursors cdbCursors = (CdbCursors) cdbCursorsMap.get(db);
-
-                if (cdbCursors != null &&
-                    (cdbCursors.readCursors.size() > 0 ||
-                     cdbCursors.writeCursors.size() > 0)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     static final class CdbCursors {

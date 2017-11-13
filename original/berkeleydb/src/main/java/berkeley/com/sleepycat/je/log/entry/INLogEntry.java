@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.log.entry;
 
-import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
-
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -27,18 +23,22 @@ import berkeley.com.sleepycat.je.tree.BIN;
 import berkeley.com.sleepycat.je.tree.IN;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.nio.ByteBuffer;
+
+import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
+
 /**
  * - INLogEntry is used to read/write full-version IN logrecs.
- *
+ * <p>
  * - BINDeltaLogEntry subclasses INLogEntry and is used to read/write
- *   BIN-delta logrecs for log versions 9 or later.
- *
+ * BIN-delta logrecs for log versions 9 or later.
+ * <p>
  * - OldBINDeltaLogEntry is used to read/write BIN-delta logrecs for
- *   log versions earlier than 9. OldBINDeltaLogEntry is not a subclass
- *   of INLogEntry.
- *
+ * log versions earlier than 9. OldBINDeltaLogEntry is not a subclass
+ * of INLogEntry.
+ * <p>
  * On disk, a full IN logrec contains:
- * 
+ * <p>
  * <pre>
  * (3 <= version < 6)
  *        IN
@@ -56,9 +56,9 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
  *        prevDeltaLsn
  *        IN
  * </pre>
- *
- *  On disk, a BIN-delta logrec written via the BINDeltaLogEntry contains:
- *
+ * <p>
+ * On disk, a BIN-delta logrec written via the BINDeltaLogEntry contains:
+ * <p>
  * <pre>
  * (version == 9)
  *        database id
@@ -72,12 +72,11 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
  *        prevFullLsn
  *        prevDeltaLsn
  *        BIN (dirty slots only and including the new fullBinNEntries and
- *             fullBinMaxEntries fields) 
+ *             fullBinMaxEntries fields)
  * </pre>
- *
  */
 public class INLogEntry<T extends IN> extends BaseEntry<T>
-    implements LogEntry, INContainingEntry {
+        implements LogEntry, INContainingEntry {
 
     /*
      * Persistent fields in an IN entry.
@@ -116,13 +115,6 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
      * See comment above about the evolution of this field.
      */
     private long prevDeltaLsn;
-
-    /**
-     * Construct a log entry for reading.
-     */
-    public static <T extends IN> INLogEntry<T> create(final Class<T> INClass) {
-        return new INLogEntry<T>(INClass);
-    }
 
     INLogEntry(Class<T> INClass) {
         super(INClass);
@@ -169,6 +161,13 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
 
         prevFullLsn = lastFullLsn;
         prevDeltaLsn = lastDeltaLsn;
+    }
+
+    /**
+     * Construct a log entry for reading.
+     */
+    public static <T extends IN> INLogEntry<T> create(final Class<T> INClass) {
+        return new INLogEntry<T>(INClass);
     }
 
     /*
@@ -222,17 +221,17 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
     /**
      * Returns the main item BIN if it has any slots with expiration times.
      * Must only be called if this entry's type is BIN or BIN_DELTA.
-     *
+     * <p>
      * This method is called for expiration tracking because getMainItem and
      * getIN cannot be called on an INLogEntry logging parameter, since it may
      * be in pre-serialize form when it appears in the off-heap cache.
      */
     public BIN getBINWithExpiration() {
 
-        if (inBytes != null) {
+        if(inBytes != null) {
             final BIN bin = new BIN();
-            if (!bin.mayHaveExpirationValues(
-                inBytes, LogEntryType.LOG_VERSION)) {
+            if(!bin.mayHaveExpirationValues(
+                    inBytes, LogEntryType.LOG_VERSION)) {
                 return null;
             }
             inBytes.mark();
@@ -252,29 +251,30 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
 
     @Override
     public void readEntry(
-        EnvironmentImpl envImpl,
-        LogEntryHeader header,
-        ByteBuffer entryBuffer) {
+            EnvironmentImpl envImpl,
+            LogEntryHeader header,
+            ByteBuffer entryBuffer) {
 
         assert inBytes == null;
 
         int logVersion = header.getVersion();
         boolean version6OrLater = (logVersion >= 6);
 
-        if (logVersion < 2) {
+        if(logVersion < 2) {
             throw unexpectedState(
-                "Attempt to read from log file with version " +
-                logVersion + ", which is not supported any more");
+                    "Attempt to read from log file with version " +
+                            logVersion + ", which is not supported any more");
         }
 
-        if (version6OrLater) {
+        if(version6OrLater) {
             dbId = new DatabaseId();
             dbId.readFromLog(entryBuffer, logVersion);
 
             prevFullLsn = LogUtils.readLong(entryBuffer, false/*unpacked*/);
-            if (logVersion >= 8) {
+            if(logVersion >= 8) {
                 prevDeltaLsn = LogUtils.readPackedLong(entryBuffer);
-            } else {
+            }
+            else {
                 prevDeltaLsn = DbLsn.NULL_LSN;
             }
         }
@@ -283,7 +283,7 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
         in = newInstanceOfType();
         readMainItem(in, entryBuffer, logVersion);
 
-        if (!version6OrLater) {
+        if(!version6OrLater) {
             dbId = new DatabaseId();
             dbId.readFromLog(entryBuffer, logVersion);
 
@@ -294,19 +294,20 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
 
     private void readMainItem(T in, ByteBuffer entryBuffer, int logVersion) {
 
-        if (isBINDelta()) {
-            assert(logVersion >= 9);
+        if(isBINDelta()) {
+            assert (logVersion >= 9);
 
             in.readFromLog(
-                entryBuffer, logVersion, true /*deltasOnly*/);
+                    entryBuffer, logVersion, true /*deltasOnly*/);
 
-            if (logVersion == 9) {
+            if(logVersion == 9) {
                 prevFullLsn = LogUtils.readPackedLong(entryBuffer);
             }
 
             in.setLastFullLsn(prevFullLsn);
 
-        } else {
+        }
+        else {
             in.readFromLog(entryBuffer, logVersion);
         }
     }
@@ -319,9 +320,10 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
 
         final int inSize;
 
-        if (inBytes != null) {
+        if(inBytes != null) {
             inSize = inBytes.remaining();
-        } else {
+        }
+        else {
             inSize = in.getLogSize(isBINDelta());
         }
 
@@ -339,11 +341,12 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
         LogUtils.writePackedLong(destBuffer, prevFullLsn);
         LogUtils.writePackedLong(destBuffer, prevDeltaLsn);
 
-        if (inBytes != null) {
+        if(inBytes != null) {
             final int pos = inBytes.position();
             destBuffer.put(inBytes);
             inBytes.position(pos);
-        } else {
+        }
+        else {
             in.writeToLog(destBuffer, isBINDelta());
         }
     }
@@ -367,20 +370,21 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
 
         dbId.dumpLog(sb, verbose);
 
-        if (inBytes != null) {
+        if(inBytes != null) {
             sb.append("<INBytes len=\"");
             sb.append(inBytes.remaining());
             sb.append("\"/>");
-        } else {
+        }
+        else {
             in.dumpLog(sb, verbose);
         }
 
-        if (prevFullLsn != DbLsn.NULL_LSN) {
+        if(prevFullLsn != DbLsn.NULL_LSN) {
             sb.append("<prevFullLsn>");
             sb.append(DbLsn.getNoFormatString(prevFullLsn));
             sb.append("</prevFullLsn>");
         }
-        if (prevDeltaLsn != DbLsn.NULL_LSN) {
+        if(prevDeltaLsn != DbLsn.NULL_LSN) {
             sb.append("<prevDeltaLsn>");
             sb.append(DbLsn.getNoFormatString(prevDeltaLsn));
             sb.append("</prevDeltaLsn>");
@@ -388,7 +392,9 @@ public class INLogEntry<T extends IN> extends BaseEntry<T>
         return sb;
     }
 
-    /** Never replicated. */
+    /**
+     * Never replicated.
+     */
     public void dumpRep(@SuppressWarnings("unused") StringBuilder sb) {
     }
 }

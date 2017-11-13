@@ -13,22 +13,21 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
+import berkeley.com.sleepycat.compat.DbCompat;
+import berkeley.com.sleepycat.persist.raw.RawObject;
+
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
-import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.persist.raw.RawObject;
 
 /**
  * Read-only catalog operations used when initializing new formats.  This
  * catalog is used temprarily when the main catalog has not been updated yet,
  * but the new formats need to do catalog lookups.
  *
- * @see PersistCatalog#addNewFormat
- *
  * @author Mark Hayes
+ * @see PersistCatalog#addNewFormat
  */
 class ReadOnlyCatalog implements Catalog {
 
@@ -51,22 +50,22 @@ class ReadOnlyCatalog implements Catalog {
     public Format getFormat(int formatId, boolean expectStored) {
         try {
             Format format = formatList.get(formatId);
-            if (format == null) {
+            if(format == null) {
                 throw DbCompat.unexpectedState
-                    ("Format does not exist: " + formatId);
+                        ("Format does not exist: " + formatId);
             }
             return format;
-        } catch (NoSuchElementException e) {
+        } catch(NoSuchElementException e) {
             throw DbCompat.unexpectedState
-                ("Format does not exist: " + formatId);
+                    ("Format does not exist: " + formatId);
         }
     }
 
     public Format getFormat(Class cls, boolean checkEntitySubclassIndexes) {
         Format format = formatMap.get(cls.getName());
-        if (format == null) {
+        if(format == null) {
             throw new IllegalArgumentException
-                ("Class is not persistent: " + cls.getName());
+                    ("Class is not persistent: " + cls.getName());
         }
         return format;
     }
@@ -93,7 +92,7 @@ class ReadOnlyCatalog implements Catalog {
     }
 
     public Class resolveClass(String clsName)
-        throws ClassNotFoundException {
+            throws ClassNotFoundException {
 
         return SimpleCatalog.resolveClass(clsName, classLoader);
     }

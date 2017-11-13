@@ -13,22 +13,18 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.rep.ReplicationNetworkConfig;
+import berkeley.com.sleepycat.je.rep.net.*;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+import berkeley.com.sleepycat.je.utilint.TracerFormatter;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.rep.ReplicationNetworkConfig;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
-import berkeley.com.sleepycat.je.rep.net.InstanceContext;
-import berkeley.com.sleepycat.je.rep.net.InstanceLogger;
-import berkeley.com.sleepycat.je.rep.net.InstanceParams;
-import berkeley.com.sleepycat.je.rep.net.LoggerFactory;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.TracerFormatter;
 
 /**
  * Class for creating DataChannel instances.
@@ -53,23 +49,23 @@ public class DataChannelFactoryBuilder {
      * configuration.
      * The choice of DataChannelFactory type is determined by the setting
      * of {@link ReplicationNetworkConfig#CHANNEL_TYPE je.rep.channelType}.
-     *
+     * <p>
      * If set to <code>ssl</code>then the internal SSL implementation is
      * is used.  If set to <code>custom</code> then a custom channel
      * factory is constructed based on the setting of
-     *   {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
-     *
+     * {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
+     * <p>
      * If set to <code>basic</code> or not set, SimpleChannelFactory
      * is instantiated.
      *
      * @param repNetConfig The configuration to control factory building
      * @return a DataChannelFactory
      * @throws IllegalArgumentException if an invalid configuration
-     * property value or combination of values was specified.
+     *                                  property value or combination of values was specified.
      */
     public static DataChannelFactory construct(
             ReplicationNetworkConfig repNetConfig)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         return construct(repNetConfig, (String) null);
     }
@@ -79,37 +75,39 @@ public class DataChannelFactoryBuilder {
      * configuration.
      * The choice of DataChannelFactory type is determined by the setting
      * of {@link ReplicationNetworkConfig#CHANNEL_TYPE je.rep.channelType}.
-     *
+     * <p>
      * If set to <code>ssl</code>then the internal SSL implementation is
      * is used.  If set to <code>custom</code> then a custom channel
      * factory is constructed based on the setting of
-     *   {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
-     *
+     * {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
+     * <p>
      * If set to <code>basic</code> or not set, SimpleChannelFactory
      * is instantiated.
      *
      * @param repNetConfig The configuration to control factory building
-     * @param logContext A null-allowable String that contributes to the
-     * logging identifier for the factory.
+     * @param logContext   A null-allowable String that contributes to the
+     *                     logging identifier for the factory.
      * @return a DataChannelFactory
      * @throws IllegalArgumentException if an invalid configuration
-     * property value or combination of values was specified.
+     *                                  property value or combination of values was specified.
      */
     public static DataChannelFactory construct(
             ReplicationNetworkConfig repNetConfig, String logContext)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         final String logName = repNetConfig.getLogName();
-        if (logName.isEmpty() && (logContext == null || logContext.isEmpty())) {
+        if(logName.isEmpty() && (logContext == null || logContext.isEmpty())) {
             return construct(repNetConfig, (LoggerFactory) null);
         }
 
         final String logId;
-        if (logName.isEmpty()) {
+        if(logName.isEmpty()) {
             logId = logContext;
-        } else if (logContext == null || logContext.isEmpty()) {
+        }
+        else if(logContext == null || logContext.isEmpty()) {
             logId = logName;
-        } else {
+        }
+        else {
             logId = logName + ":" + logContext;
         }
         final LoggerFactory loggerFactory = makeLoggerFactory(logId);
@@ -122,26 +120,26 @@ public class DataChannelFactoryBuilder {
      * configuration.
      * The choice of DataChannelFactory type is determined by the setting
      * of {@link ReplicationNetworkConfig#CHANNEL_TYPE je.rep.channelType}.
-     *
+     * <p>
      * If set to <code>ssl</code>then the internal SSL implementation is
      * is used.  If set to <code>custom</code> then a custom channel
      * factory is constructed based on the setting of
-     *   {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
-     *
+     * {@link ReplicationNetworkConfig#CHANNEL_FACTORY_CLASS je.rep.dataChannelFactoryClass}
+     * <p>
      * If set to <code>basic</code> or not set, SimpleChannelFactory
      * is instantiated.
      *
-     * @param repNetConfig The configuration to control factory building
+     * @param repNetConfig  The configuration to control factory building
      * @param loggerFactory A null-allowable LoggerFactory for use in channel
-     * factory construction
+     *                      factory construction
      * @return a DataChannelFactory
      * @throws IllegalArgumentException if an invalid configuration
-     * property value or combination of values was specified.
+     *                                  property value or combination of values was specified.
      */
     public static DataChannelFactory construct(
             ReplicationNetworkConfig repNetConfig,
             LoggerFactory loggerFactory)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         final String channelType = repNetConfig.getChannelType();
         final int factoryIndex = factoryCount.getAndIncrement();
@@ -149,55 +147,56 @@ public class DataChannelFactoryBuilder {
         /*
          * Build the LoggerFactory if not provided by the caller
          */
-        if (loggerFactory == null) {
+        if(loggerFactory == null) {
             String logName = repNetConfig.getLogName();
-            if (logName.isEmpty()) {
+            if(logName.isEmpty()) {
                 logName = Integer.toString(factoryIndex);
             }
             loggerFactory = makeLoggerFactory(logName);
         }
 
         final InstanceContext context =
-            new InstanceContext(repNetConfig, loggerFactory);
+                new InstanceContext(repNetConfig, loggerFactory);
 
         final String factoryClass = repNetConfig.getChannelFactoryClass();
-        if (factoryClass == null || factoryClass.isEmpty()) {
-            if (channelType.equalsIgnoreCase("basic")) {
+        if(factoryClass == null || factoryClass.isEmpty()) {
+            if(channelType.equalsIgnoreCase("basic")) {
                 return new SimpleChannelFactory(
-                    new InstanceParams(context, null));
+                        new InstanceParams(context, null));
             }
 
-            if (channelType.equalsIgnoreCase("ssl")) {
+            if(channelType.equalsIgnoreCase("ssl")) {
                 return new SSLChannelFactory(new InstanceParams(context, null));
             }
 
             throw new IllegalArgumentException(
-                "The channelType setting '" + channelType + "' is not valid");
+                    "The channelType setting '" + channelType + "' is not valid");
         }
 
         final String classParams = repNetConfig.getChannelFactoryParams();
         final InstanceParams factoryParams =
-            new InstanceParams(context, classParams);
+                new InstanceParams(context, classParams);
         return construct(factoryClass, factoryParams);
     }
 
     /**
      * Constructs a DataChannelFactory implementation.
+     *
      * @param factoryClassName the name of the class to instantiate,
-     * which must implement DataChannelFactory
-     * @param factoryParams the context and factory arguments
+     *                         which must implement DataChannelFactory
+     * @param factoryParams    the context and factory arguments
      * @return a newly constructed instance
      * @throws IllegalArgumentException if the arguments are invalid
      */
     private static DataChannelFactory construct(
-        String factoryClassName, InstanceParams factoryParams)
-        throws IllegalArgumentException {
+            String factoryClassName, InstanceParams factoryParams)
+            throws IllegalArgumentException {
 
         return (DataChannelFactory) constructObject(
-            factoryClassName, DataChannelFactory.class,
-            "data channel factory",
-            new CtorArgSpec(new Class<?>[] { InstanceParams.class },
-                            new Object[] { factoryParams }));
+                factoryClassName, DataChannelFactory.class,
+                "data channel factory",
+                new CtorArgSpec(new Class<?>[]{InstanceParams.class},
+                        new Object[]{factoryParams}));
     }
 
     /**
@@ -209,20 +208,20 @@ public class DataChannelFactoryBuilder {
      *
      * @param instClassName the name of the class to instantiate
      * @param mustImplement a class denoting a required base class or
-     * required implemented interface of the class whose name is
-     * specified by instClassName.
-     * @param miDesc a descriptive term for the mustImplement class
-     * @param ctorArgSpec specifies the required constructor signature and
-     * the values to be passed
+     *                      required implemented interface of the class whose name is
+     *                      specified by instClassName.
+     * @param miDesc        a descriptive term for the mustImplement class
+     * @param ctorArgSpec   specifies the required constructor signature and
+     *                      the values to be passed
      * @return an instance of the specified class
      * @throws IllegalArgumentException if any of the input arguments are
-     * invalid
+     *                                  invalid
      */
     static Object constructObject(String instClassName,
                                   Class<?> mustImplement,
                                   String miDesc,
                                   CtorArgSpec ctorArgSpec)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         /*
          * Resolve the class
@@ -230,10 +229,10 @@ public class DataChannelFactoryBuilder {
         Class<?> instClass = null;
         try {
             instClass = Class.forName(instClassName);
-        } catch (ClassNotFoundException cnfe) {
+        } catch(ClassNotFoundException cnfe) {
             throw new IllegalArgumentException(
-                "Error resolving " + miDesc + " class " +
-                instClassName, cnfe);
+                    "Error resolving " + miDesc + " class " +
+                            instClassName, cnfe);
         }
 
         /*
@@ -242,10 +241,10 @@ public class DataChannelFactoryBuilder {
         final Constructor<?> constructor;
         try {
             constructor = instClass.getConstructor(ctorArgSpec.argTypes);
-        } catch (NoSuchMethodException nsme) {
+        } catch(NoSuchMethodException nsme) {
             throw new IllegalArgumentException(
-                "Unable to find an appropriate constructor for " + miDesc +
-                " class " + instClassName);
+                    "Unable to find an appropriate constructor for " + miDesc +
+                            " class " + instClassName);
         }
 
         /*
@@ -254,39 +253,39 @@ public class DataChannelFactoryBuilder {
         final Object instObject;
         try {
             instObject = constructor.newInstance(ctorArgSpec.argValues);
-        } catch (IllegalAccessException iae) {
+        } catch(IllegalAccessException iae) {
             /* Constructor is not accessible */
             throw new IllegalArgumentException(
-                "Error instantiating " + miDesc + " class " + instClassName +
-                ".  Not accessible?",
-                iae);
-        } catch (IllegalArgumentException iae) {
+                    "Error instantiating " + miDesc + " class " + instClassName +
+                            ".  Not accessible?",
+                    iae);
+        } catch(IllegalArgumentException iae) {
             /* Wrong arguments - should not be possible here */
             throw new IllegalArgumentException(
-                "Error instantiating " + miDesc + " class " + instClassName,
-                iae);
-        } catch (InstantiationException ie) {
+                    "Error instantiating " + miDesc + " class " + instClassName,
+                    iae);
+        } catch(InstantiationException ie) {
             /* Class is abstract */
             throw new IllegalArgumentException(
-                "Error instantiating " + miDesc + " class " + instClassName +
-                ". Class is abstract?",
-                ie);
-        } catch (InvocationTargetException ite) {
+                    "Error instantiating " + miDesc + " class " + instClassName +
+                            ". Class is abstract?",
+                    ie);
+        } catch(InvocationTargetException ite) {
             /* Exception thrown within constructor */
             throw new IllegalArgumentException(
-                "Error instantiating " + miDesc + " class " + instClassName +
-                ". Exception within constructor",
-                ite);
+                    "Error instantiating " + miDesc + " class " + instClassName +
+                            ". Exception within constructor",
+                    ite);
         }
 
         /*
          * In this context, the class must implement the specified
          * interface.
          */
-        if (! (mustImplement.isAssignableFrom(instObject.getClass()))) {
+        if(!(mustImplement.isAssignableFrom(instObject.getClass()))) {
             throw new IllegalArgumentException(
-                "The " + miDesc + " class " +  instClassName +
-                " does not implement " + mustImplement.getName());
+                    "The " + miDesc + " class " + instClassName +
+                            " does not implement " + mustImplement.getName());
         }
 
         return instObject;
@@ -298,7 +297,7 @@ public class DataChannelFactoryBuilder {
      * @param envImpl a non-null EnvironmentImpl
      */
     public static LoggerFactory makeLoggerFactory(EnvironmentImpl envImpl) {
-        if (envImpl == null) {
+        if(envImpl == null) {
             throw new IllegalArgumentException("envImpl must not be null");
         }
 
@@ -311,7 +310,7 @@ public class DataChannelFactoryBuilder {
      * @param prefix a fixed string to be used as logger prefix
      */
     public static LoggerFactory makeLoggerFactory(String prefix) {
-        if (prefix == null) {
+        if(prefix == null) {
             throw new IllegalArgumentException("prefix must not be null");
         }
 
@@ -336,7 +335,7 @@ public class DataChannelFactoryBuilder {
     }
 
     /**
-     * A simple implementation of LoggerFactory that encapsulates the 
+     * A simple implementation of LoggerFactory that encapsulates the
      * necessary information to do JE environment-friendly logging without
      * needing to know JE HA internal logging.
      */
@@ -348,8 +347,8 @@ public class DataChannelFactoryBuilder {
          * Creates a LoggerFactory for use in construction of channel
          * objects. The caller should supply either an EnvironmentImpl or a
          * Formatter object.
-         * 
-         * @param envImpl a possibly-null EnvironmentImpl
+         *
+         * @param envImpl   a possibly-null EnvironmentImpl
          * @param formatter a possible null formatter
          */
         ChannelLoggerFactory(EnvironmentImpl envImpl,
@@ -364,9 +363,10 @@ public class DataChannelFactoryBuilder {
         @Override
         public InstanceLogger getLogger(Class<?> clazz) {
             final Logger logger;
-            if (envImpl == null) {
+            if(envImpl == null) {
                 logger = LoggerUtils.getLoggerFormatterNeeded(clazz);
-            } else {
+            }
+            else {
                 logger = LoggerUtils.getLogger(clazz);
             }
             return new ChannelInstanceLogger(envImpl, formatter, logger);
@@ -374,7 +374,7 @@ public class DataChannelFactoryBuilder {
     }
 
     /**
-     * A simple implementation of InstanceLogger that encapuslates the 
+     * A simple implementation of InstanceLogger that encapuslates the
      * necessary information to do JE environment-friendly logging without
      * needing to know JE logging rules.
      */
@@ -387,10 +387,10 @@ public class DataChannelFactoryBuilder {
          * Creates a ChannelInstanceLogger for use in construction of channel
          * objects. The caller should supply either an EnvironmentImpl or a
          * Formatter object.
-         * 
-         * @param envImpl a possibly-null EnvironmentImpl
+         *
+         * @param envImpl   a possibly-null EnvironmentImpl
          * @param formatter a possible null formatter
-         * @param logger a logger created via LoggerUtils.getLogger()
+         * @param logger    a logger created via LoggerUtils.getLogger()
          */
         ChannelInstanceLogger(EnvironmentImpl envImpl,
                               Formatter formatter,

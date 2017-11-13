@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# This script will compress a file or directory of files. The following paths need to be
+# set to the appropriate locations:
+#
+# Courtney Napoles, cdnapoles@gmail.com, 6 July 2012
+
+
+CPLEX=$HOME/Applications/IBM/ILOG/CPLEX_Studio126/cplex/
+thisdir=`dirname $0`
+
+usage(){
+    echo "Usage: ./compress -i path/to/input -l path/to/lm [-x] "
+    echo "  -i val  input file or directory"
+    echo "  -d      debug"
+    echo "  -l      path to language model (binary or ARPA format)"
+    echo "  -t      output should be <= 120 characters"
+    echo "  -q      suppress cplex output (normally goes to stderr)"
+    echo "  -r      minimum compression rate (default 0.4)"
+    echo "  -x      input file(s) in xml format"
+}
+
+command="java -Xmx10g -Djava.library.path=$CPLEX/bin/x86-64_osx/ -classpath $thisdir/bin:$thisdir/lib/stanford-parser.jar:$thisdir/lib/berkeleylm.jar:$CPLEX/lib/cplex.jar research.compression.SentenceCompressor"
+
+while getopts 'i:l:dqtxr' opt
+do
+    case $opt in
+	i) infile="$OPTARG";;
+	d) command="$command -debug";;
+	l) lmfile="$OPTARG";;
+	q) command="$command -quiet";;
+        r) command="$command -cr=$OPTARG";;
+	t) command="$command -tweet";;
+	x) command="$command -xml";;
+	?) usage
+	    exit 2;;
+    esac
+done
+
+if [ ! $infile ]
+then
+    echo "Input not specified."
+    usage
+    exit
+fi
+
+command="$command -in=$infile -lm=$lmfile"
+
+echo $command 1>&2
+eval $command

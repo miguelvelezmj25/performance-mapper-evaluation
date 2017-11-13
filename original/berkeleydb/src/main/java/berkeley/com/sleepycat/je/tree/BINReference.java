@@ -49,11 +49,11 @@ public class BINReference {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
 
-        if (!(obj instanceof BINReference)) {
+        if(!(obj instanceof BINReference)) {
             return false;
         }
 
@@ -68,7 +68,7 @@ public class BINReference {
     @Override
     public String toString() {
         return "idKey=" + Key.getNoFormatString(idKey) +
-            " nodeId = " + nodeId +
-            " db=" + databaseId;
+                " nodeId = " + nodeId +
+                " db=" + databaseId;
     }
 }

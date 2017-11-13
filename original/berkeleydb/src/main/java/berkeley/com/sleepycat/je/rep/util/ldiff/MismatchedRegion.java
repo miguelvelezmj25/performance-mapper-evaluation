@@ -30,52 +30,52 @@ public class MismatchedRegion {
     private byte[] localBeginData;
     private long localDiffSize;
 
-    public void setRemoteBeginKey(byte[] remoteBeginKey) {
-        this.remoteBeginKey = remoteBeginKey;
-    }
-
-    public void setRemoteBeginData(byte[] remoteBeginData) {
-        this.remoteBeginData = remoteBeginData;
-    }
-
-    public void setRemoteDiffSize(long remoteDiffSize) {
-        this.remoteDiffSize = remoteDiffSize;
-    }
-
-    public void setLocalBeginKey(byte[] localBeginKey) {
-        this.localBeginKey = localBeginKey;
-    }
-
-    public void setLocalBeginData(byte[] localBeginData) {
-        this.localBeginData = localBeginData;
-    }
-
-    public void setLocalDiffSize(long localDiffSize) {
-        this.localDiffSize = localDiffSize;
-    }
-
     public byte[] getRemoteBeginKey() {
         return remoteBeginKey;
+    }
+
+    public void setRemoteBeginKey(byte[] remoteBeginKey) {
+        this.remoteBeginKey = remoteBeginKey;
     }
 
     public byte[] getRemoteBeginData() {
         return remoteBeginData;
     }
 
+    public void setRemoteBeginData(byte[] remoteBeginData) {
+        this.remoteBeginData = remoteBeginData;
+    }
+
     public long getRemoteDiffSize() {
         return remoteDiffSize;
+    }
+
+    public void setRemoteDiffSize(long remoteDiffSize) {
+        this.remoteDiffSize = remoteDiffSize;
     }
 
     public byte[] getLocalBeginKey() {
         return localBeginKey;
     }
 
+    public void setLocalBeginKey(byte[] localBeginKey) {
+        this.localBeginKey = localBeginKey;
+    }
+
     public byte[] getLocalBeginData() {
         return localBeginData;
     }
 
+    public void setLocalBeginData(byte[] localBeginData) {
+        this.localBeginData = localBeginData;
+    }
+
     public long getLocalDiffSize() {
         return localDiffSize;
+    }
+
+    public void setLocalDiffSize(long localDiffSize) {
+        this.localDiffSize = localDiffSize;
     }
 
     /* 
@@ -97,7 +97,7 @@ public class MismatchedRegion {
     /* Present a different area is meaningless. */
     public boolean isNull() {
         return (remoteBeginKey == null) && (remoteBeginData == null) &&
-               (localBeginKey == null) && (localBeginData == null) &&
-               (localDiffSize == 0) && (remoteDiffSize == 0);
+                (localBeginKey == null) && (localBeginData == null) &&
+                (localDiffSize == 0) && (remoteDiffSize == 0);
     }
 }

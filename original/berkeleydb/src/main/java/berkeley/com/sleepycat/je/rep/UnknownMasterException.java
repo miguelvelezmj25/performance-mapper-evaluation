@@ -57,8 +57,10 @@ public class UnknownMasterException extends StateChangeException {
                                    UnknownMasterException cause) {
         super(message, cause);
     }
+
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

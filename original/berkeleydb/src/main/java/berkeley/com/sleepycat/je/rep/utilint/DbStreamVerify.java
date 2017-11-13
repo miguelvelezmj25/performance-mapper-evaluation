@@ -13,20 +13,9 @@
 
 package berkeley.com.sleepycat.je.rep.utilint;
 
-import java.io.File;
-import java.io.PrintStream;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.bind.tuple.LongBinding;
 import berkeley.com.sleepycat.bind.tuple.StringBinding;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseConfig;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DbType;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -45,6 +34,12 @@ import berkeley.com.sleepycat.je.utilint.CmdUtil;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.io.File;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * For internal use only.
  * Utility to verify the replication stream and VLSN index. Used file readers
@@ -54,34 +49,19 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
 public class DbStreamVerify {
 
     private static final String USAGE =
-        "usage: " + CmdUtil.getJavaCommand(DbStreamVerify.class) + "\n" +
-        " -h <dir>      # environment home directory\n" +
-        " -s <hex>      # start file\n" +
-        " -e <hex>      # end file\n" +
-        " -verifyStream # check that replication stream is ascending\n" +
-        " -dumpVLSN     # scan log file for log entries that make up the" +
-                        " VLSN index, don't run verify.\n" +
-        " -dumpRepGroup # scan log file for log entries that make up the" +
-                        " rep group db, don't run verify.\n" +
-        " -i            # show invisible. If true, print invisible entries"+
-                        " when running verify mode.\n" +
-        " -v            # verbose\n";
-
-    public static void main(String argv[])
-        throws Exception {
-
-        DbStreamVerify verify = new DbStreamVerify(System.out);
-        verify.parseArgs(argv);
-
-        try {
-            verify.run();
-            System.exit(0);
-        } catch (Throwable e) {
-            e.printStackTrace(System.err);
-            System.exit(1);
-        }
-    }
-
+            "usage: " + CmdUtil.getJavaCommand(DbStreamVerify.class) + "\n" +
+                    " -h <dir>      # environment home directory\n" +
+                    " -s <hex>      # start file\n" +
+                    " -e <hex>      # end file\n" +
+                    " -verifyStream # check that replication stream is ascending\n" +
+                    " -dumpVLSN     # scan log file for log entries that make up the" +
+                    " VLSN index, don't run verify.\n" +
+                    " -dumpRepGroup # scan log file for log entries that make up the" +
+                    " rep group db, don't run verify.\n" +
+                    " -i            # show invisible. If true, print invisible entries" +
+                    " when running verify mode.\n" +
+                    " -v            # verbose\n";
+    private final PrintStream out;
     private File envHome = null;
     private boolean showInvisible = false;
     private boolean verbose = false;
@@ -91,14 +71,27 @@ public class DbStreamVerify {
     private long startLsn = DbLsn.NULL_LSN;
     private long endLsn = DbLsn.NULL_LSN;
 
-    private final PrintStream out;
-
     private DbStreamVerify(PrintStream out) {
         this.out = out;
     }
 
+    public static void main(String argv[])
+            throws Exception {
+
+        DbStreamVerify verify = new DbStreamVerify(System.out);
+        verify.parseArgs(argv);
+
+        try {
+            verify.run();
+            System.exit(0);
+        } catch(Throwable e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+
     private void printUsage(String msg) {
-        if (msg != null) {
+        if(msg != null) {
             out.println(msg);
         }
         out.println(USAGE);
@@ -110,45 +103,54 @@ public class DbStreamVerify {
         int argc = 0;
         int nArgs = argv.length;
 
-        if (nArgs == 0) {
+        if(nArgs == 0) {
             printUsage(null);
             System.exit(0);
         }
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = argv[argc++];
-            if (thisArg.equals("-i")) {
+            if(thisArg.equals("-i")) {
                 showInvisible = true;
-            } else if (thisArg.equals("-v")) {
+            }
+            else if(thisArg.equals("-v")) {
                 verbose = true;
-            } else if (thisArg.equals("-verifyStream")) {
+            }
+            else if(thisArg.equals("-verifyStream")) {
                 verifyStream = true;
-            } else if (thisArg.equals("-dumpVLSN")) {
+            }
+            else if(thisArg.equals("-dumpVLSN")) {
                 vlsnDump = true;
-            } else if (thisArg.equals("-dumpRepGroup")) {
+            }
+            else if(thisArg.equals("-dumpRepGroup")) {
                 repGroupDump = true;
-            } else if (thisArg.equals("-s")) {
+            }
+            else if(thisArg.equals("-s")) {
                 startLsn = CmdUtil.readLsn(CmdUtil.getArg(argv, argc++));
-            } else if (thisArg.equals("-e")) {
+            }
+            else if(thisArg.equals("-e")) {
                 endLsn = CmdUtil.readLsn(CmdUtil.getArg(argv, argc++));
-            } else if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(argv[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else {
+            }
+            else {
                 printUsage(thisArg + " is not a valid argument");
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage("-h is a required argument");
         }
 
-        if (!(vlsnDump || repGroupDump || verifyStream)) {
+        if(!(vlsnDump || repGroupDump || verifyStream)) {
             printUsage("Must specify -dumpVLSN, -dumpRepGroup or " +
-                       "-verifyStream");
+                    "-verifyStream");
         }
     }
 
@@ -160,36 +162,39 @@ public class DbStreamVerify {
 
         try {
             FileReader reader;
-            if (vlsnDump) {
+            if(vlsnDump) {
                 out.println("Dump VLSNIndex LNs");
                 reader = new VLSNIndexReader(env, out, startLsn, endLsn);
-            } else if (repGroupDump) {
+            }
+            else if(repGroupDump) {
                 out.println("Dump RepGroup LNs");
                 reader = new RepGroupReader(env, out, startLsn, endLsn);
-            } else if (verifyStream) {
+            }
+            else if(verifyStream) {
                 out.println("Replication stream: check that vlsns ascend");
                 reader = new VerifyReader(envImpl, out, startLsn, endLsn);
-            } else {
+            }
+            else {
                 out.println("No action specified.");
                 return;
             }
 
-            while (reader.readNextEntry()) {
+            while(reader.readNextEntry()) {
             }
 
-            if ((!vlsnDump) && (!repGroupDump)) {
+            if((!vlsnDump) && (!repGroupDump)) {
                 ((VerifyReader) reader).displayLast();
                 VLSNIndex.verifyDb(env, out, verbose);
             }
 
             System.exit(0);
-        } catch (Throwable e) {
+        } catch(Throwable e) {
             e.printStackTrace(out);
             System.exit(1);
         } finally {
             try {
                 env.close();
-            } catch (Throwable e) {
+            } catch(Throwable e) {
                 e.printStackTrace(out);
                 System.exit(1);
             }
@@ -197,19 +202,19 @@ public class DbStreamVerify {
     }
 
     private class VerifyReader extends FileReader {
+        private final PrintStream out1;
         private VLSN lastVLSN = VLSN.NULL_VLSN;
         private long lastLSN = DbLsn.NULL_LSN;
-        private final PrintStream out1;
 
         VerifyReader(EnvironmentImpl envImpl, PrintStream out, long startLsn,
                      long endLsn) {
             super(envImpl,
-                  10000,
-                  true,              // forward
-                  startLsn,
-                  null,              // singleFileNumber,
-                  DbLsn.NULL_LSN,
-                  endLsn);
+                    10000,
+                    true,              // forward
+                    startLsn,
+                    null,              // singleFileNumber,
+                    DbLsn.NULL_LSN,
+                    endLsn);
             this.out1 = out;
         }
 
@@ -223,56 +228,57 @@ public class DbStreamVerify {
             VLSN currentVLSN = currentEntryHeader.getVLSN();
             long currentLSN = getLastLsn();
 
-            if (currentVLSN == null) {
+            if(currentVLSN == null) {
                 throw new RuntimeException
-                     (DbLsn.getNoFormatString(currentLSN) +
-                      "Should be a replicated entry");
+                        (DbLsn.getNoFormatString(currentLSN) +
+                                "Should be a replicated entry");
             }
 
-            if (currentVLSN.isNull()) {
+            if(currentVLSN.isNull()) {
                 out1.println("unexpected LSN " +
-                            DbLsn.getNoFormatString(getLastLsn()) +
-                            " has vlsn " + currentVLSN);
+                        DbLsn.getNoFormatString(getLastLsn()) +
+                        " has vlsn " + currentVLSN);
             }
 
-            if ((lastVLSN != null) && lastVLSN.isNull()) {
+            if((lastVLSN != null) && lastVLSN.isNull()) {
 
                 /* First entry seen */
                 out1.println("first VLSN = " + currentVLSN + " at lsn " +
-                            DbLsn.getNoFormatString(getLastLsn()));
-            } else if (!currentEntryHeader.isInvisible() &&
-                       !currentVLSN.follows(lastVLSN)) {
+                        DbLsn.getNoFormatString(getLastLsn()));
+            }
+            else if(!currentEntryHeader.isInvisible() &&
+                    !currentVLSN.follows(lastVLSN)) {
 
                 /* Note the first entry, check for a gap. */
                 out1.println("gap of " +
-                            (currentVLSN.getSequence() -
-                            lastVLSN.getSequence()) +
-                            " Last=" + lastVLSN + " at lsn " +
-                            DbLsn.getNoFormatString(lastLSN) +
-                            " next=" + currentVLSN + " at lsn " +
-                            DbLsn.getNoFormatString(currentLSN));
+                        (currentVLSN.getSequence() -
+                                lastVLSN.getSequence()) +
+                        " Last=" + lastVLSN + " at lsn " +
+                        DbLsn.getNoFormatString(lastLSN) +
+                        " next=" + currentVLSN + " at lsn " +
+                        DbLsn.getNoFormatString(currentLSN));
 
             }
 
             /* Note the invisible log entries. */
-            if (showInvisible && currentEntryHeader.isInvisible()) {
+            if(showInvisible && currentEntryHeader.isInvisible()) {
                 out1.println("VLSN " + currentVLSN + " at lsn " +
-                            DbLsn.getNoFormatString(currentLSN) +
-                            " is invisible.");
+                        DbLsn.getNoFormatString(currentLSN) +
+                        " is invisible.");
             }
 
-            if (!currentEntryHeader.isInvisible()) {
+            if(!currentEntryHeader.isInvisible()) {
                 lastVLSN = currentVLSN;
                 lastLSN = currentLSN;
             }
             entryBuffer.position(entryBuffer.position() +
-                                 currentEntryHeader.getItemSize());
+                    currentEntryHeader.getItemSize());
             return true;
         }
 
         void displayLast() {
             out1.println("LastVLSN = " + lastVLSN + " at " +
-                         DbLsn.getNoFormatString(lastLSN));
+                    DbLsn.getNoFormatString(lastLSN));
         }
     }
 
@@ -285,8 +291,8 @@ public class DbStreamVerify {
     private abstract class DecoderReader extends FileReader {
         protected final PrintStream outStream;
         private final Map<Byte, LNLogEntry<?>> targetMap;
-        protected LNLogEntry<?> targetEntry;
         private final DatabaseId targetDbId;
+        protected LNLogEntry<?> targetEntry;
 
         DecoderReader(Environment env,
                       PrintStream out,
@@ -294,20 +300,20 @@ public class DbStreamVerify {
                       long endLsn,
                       String dbName) {
             super(DbInternal.getNonNullEnvImpl(env),
-                  10000,
-                  true,              // forward
-                  startLsn,
-                  null,              // singleFileNumber,
-                  DbLsn.NULL_LSN,
-                  endLsn);
+                    10000,
+                    true,              // forward
+                    startLsn,
+                    null,              // singleFileNumber,
+                    DbLsn.NULL_LSN,
+                    endLsn);
             this.outStream = out;
 
             targetMap = new HashMap<Byte, LNLogEntry<?>>();
 
-            for (LogEntryType entryType : LogEntryType.getAllTypes()) {
-                if (entryType.isUserLNType()) {
+            for(LogEntryType entryType : LogEntryType.getAllTypes()) {
+                if(entryType.isUserLNType()) {
                     targetMap.put(entryType.getTypeNum(),
-                                  (LNLogEntry<?>) entryType.getNewLogEntry());
+                            (LNLogEntry<?>) entryType.getNewLogEntry());
                 }
             }
 
@@ -331,7 +337,7 @@ public class DbStreamVerify {
             targetEntry.readEntry(envImpl, currentEntryHeader, entryBuffer);
             targetEntry.postFetchInit(false /*isDupDb*/);
 
-            if (!targetEntry.getDbId().equals(targetDbId)) {
+            if(!targetEntry.getDbId().equals(targetDbId)) {
                 return false;
             }
 
@@ -355,7 +361,7 @@ public class DbStreamVerify {
                         long startLsn,
                         long endLsn) {
             super(env, out, startLsn, endLsn,
-                  DbType.VLSN_MAP.getInternalName());
+                    DbType.VLSN_MAP.getInternalName());
         }
 
         @Override
@@ -363,20 +369,22 @@ public class DbStreamVerify {
             DatabaseEntry key = new DatabaseEntry(targetEntry.getKey());
             long keyVal = LongBinding.entryToLong(key);
             LN ln = targetEntry.getLN();
-            if (ln.isDeleted()) {
+            if(ln.isDeleted()) {
                 outStream.println("key=" + keyVal + " <deleted>");
-            } else {
+            }
+            else {
                 DatabaseEntry data = new DatabaseEntry(ln.getData());
 
-                if (keyVal == VLSNRange.RANGE_KEY) {
+                if(keyVal == VLSNRange.RANGE_KEY) {
                     outStream.print(" range: ");
                     VLSNRange range = VLSNRange.readFromDatabase(data);
                     outStream.println(range);
-                } else {
+                }
+                else {
                     outStream.print(" key=" + keyVal);
                     VLSNBucket bucket = VLSNBucket.readFromDatabase(data);
                     outStream.println(" " + bucket);
-                    if (verbose) {
+                    if(verbose) {
                         outStream.println("-------------------------------");
                         bucket.dump(outStream);
                         outStream.println("-------------------------------\n");
@@ -395,7 +403,7 @@ public class DbStreamVerify {
         RepGroupReader(Environment env, PrintStream out,
                        long startLsn, long endLsn) {
             super(env, out, startLsn, endLsn,
-                  DbType.REP_GROUP.getInternalName());
+                    DbType.REP_GROUP.getInternalName());
         }
 
         @Override
@@ -405,22 +413,24 @@ public class DbStreamVerify {
             DatabaseEntry key = new DatabaseEntry(targetEntry.getKey());
 
             LN ln = targetEntry.getLN();
-            if (ln.isDeleted()) {
+            if(ln.isDeleted()) {
                 outStream.print("<deleted>");
-            } else {
+            }
+            else {
                 DatabaseEntry data = new DatabaseEntry(ln.getData());
                 String keyVal = StringBinding.entryToString(key);
-                if (keyVal.equals(RepGroupDB.GROUP_KEY)) {
+                if(keyVal.equals(RepGroupDB.GROUP_KEY)) {
                     final RepGroupImpl group =
-                        new GroupBinding().entryToObject(data);
+                            new GroupBinding().entryToObject(data);
                     nodeBinding = new NodeBinding(group.getFormatVersion());
                     outStream.print(" GroupInfo: ");
                     outStream.println(group);
-                } else {
+                }
+                else {
                     outStream.print(" NodeInfo: " + keyVal);
-                    if (nodeBinding == null) {
+                    if(nodeBinding == null) {
                         throw new IllegalStateException(
-                            "Node entry before group entry");
+                                "Node entry before group entry");
                     }
                     outStream.print(nodeBinding.entryToObject(data));
                 }

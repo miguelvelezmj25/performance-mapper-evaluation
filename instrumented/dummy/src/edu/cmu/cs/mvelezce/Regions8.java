@@ -6,7 +6,6 @@ import edu.cmu.cs.mvelezce.analysis.option.Source;
 /**
  * Removing regions. 1 region is left
  */
-
 public class Regions8 {
 
     static boolean A = Source.getOptionA(true);
@@ -29,4 +28,5 @@ public class Regions8 {
             System.out.println();
         }
     }
+
 }

@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je;
 
-import java.io.File;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.txn.PreparedTxn;
 import berkeley.com.sleepycat.je.txn.Txn;
 import berkeley.com.sleepycat.je.txn.TxnManager;
+
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.io.File;
 
 /**
  * An Environment that implements XAResource.  If JE is used in an XA
@@ -35,26 +35,25 @@ public class XAEnvironment extends Environment implements XAResource {
     /**
      * Create a database environment handle.
      *
-     * @param envHome The database environment's home directory.
-     *
+     * @param envHome       The database environment's home directory.
      * @param configuration The database environment attributes.  If null,
-     * default attributes are used.
+     *                      default attributes are used.
      */
     public XAEnvironment(File envHome, EnvironmentConfig configuration)
-        throws EnvironmentNotFoundException, EnvironmentLockedException {
+            throws EnvironmentNotFoundException, EnvironmentLockedException {
 
         super(envHome, configuration);
     }
 
     /**
      * Used to get the Transaction object given an XA Xid.
-     * @hidden
-     * Internal use only.
+     *
+     * @hidden Internal use only.
      */
     public Transaction getXATransaction(Xid xid) {
         Txn ret = getXATransactionInternal(xid);
-        if (ret == null ||
-            ret instanceof PreparedTxn) {
+        if(ret == null ||
+                ret instanceof PreparedTxn) {
             return null;
         }
 
@@ -69,12 +68,11 @@ public class XAEnvironment extends Environment implements XAResource {
     /**
      * Used to set the Transaction object for an XA Xid.  Public for tests.
      *
-     * @hidden
-     * Internal use only.
+     * @hidden Internal use only.
      */
     public void setXATransaction(Xid xid, Transaction txn) {
         getNonNullEnvImpl().getTxnManager().registerXATxn(
-            xid, txn.getTxn(), false);
+                xid, txn.getTxn(), false);
     }
 
     /*
@@ -83,41 +81,41 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public void commit(Xid xid, boolean ignore /*onePhase*/)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** commit called " + xid + "/" + ignore);
         }
 
-        if (xid == null) {
+        if(xid == null) {
             return;
         }
 
         try {
             checkOpen();
             Txn txn = getXATransactionInternal(xid);
-            if (txn == null) {
+            if(txn == null) {
                 throw new XAException
-                    ("No transaction found for " + xid + " during commit.");
+                        ("No transaction found for " + xid + " during commit.");
             }
             removeReferringHandle(new Transaction(this, txn));
-            if (txn.isOnlyAbortable()) {
+            if(txn.isOnlyAbortable()) {
                 throw new XAException(XAException.XA_RBROLLBACK);
             }
             txn.commit(xid);
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             throwNewXAException(DE);
         }
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** commit finished");
         }
     }
 
     @Override
     public void end(Xid xid, int flags)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** end called " + xid + "/" + flags);
         }
 
@@ -126,30 +124,30 @@ public class XAEnvironment extends Environment implements XAResource {
         boolean tmFail = (flags & XAResource.TMFAIL) != 0;
         boolean tmSuccess = (flags & XAResource.TMSUCCESS) != 0;
         boolean tmSuspend = (flags & XAResource.TMSUSPEND) != 0;
-        if ((!tmFail && !tmSuccess && !tmSuspend) ||
-            (tmFail && tmSuccess) ||
-            ((tmFail || tmSuccess) && tmSuspend)) {
+        if((!tmFail && !tmSuccess && !tmSuspend) ||
+                (tmFail && tmSuccess) ||
+                ((tmFail || tmSuccess) && tmSuspend)) {
             throw new XAException(XAException.XAER_INVAL);
         }
 
         final EnvironmentImpl envImpl = getNonNullEnvImpl();
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println
-                ("Transaction for " + Thread.currentThread() + " is " +
-                 envImpl.getTxnManager().getTxnForThread());
+                    ("Transaction for " + Thread.currentThread() + " is " +
+                            envImpl.getTxnManager().getTxnForThread());
         }
 
         Transaction transaction = envImpl.getTxnManager().unsetTxnForThread();
-        if (transaction == null) {
+        if(transaction == null) {
             transaction = getXATransaction(xid);
         }
         Txn txn = (transaction != null) ? transaction.getTxn() : null;
-        if (txn == null) {
+        if(txn == null) {
             throw new XAException(XAException.XAER_NOTA);
         }
 
-        if (tmFail) {
+        if(tmFail) {
 
             /*
              * Creating the XAFailureException will set the txn to abort-only.
@@ -160,8 +158,8 @@ public class XAEnvironment extends Environment implements XAResource {
             new XAFailureException(txn);
         }
 
-        if (tmSuspend) {
-            if (txn.isSuspended()) {
+        if(tmSuspend) {
+            if(txn.isSuspended()) {
                 throw new XAException(XAException.XAER_PROTO);
             }
             txn.setSuspended(true);
@@ -172,9 +170,9 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public void forget(Xid xid)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** forget called");
         }
 
@@ -183,49 +181,49 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public boolean isSameRM(XAResource rm)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** isSameRM called");
         }
 
         EnvironmentImpl envImpl = null;
         try {
             envImpl = checkOpen();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             throwNewXAException(DE);
         }
 
-        if (rm == null) {
+        if(rm == null) {
             return false;
         }
 
-        if (!(rm instanceof XAEnvironment)) {
+        if(!(rm instanceof XAEnvironment)) {
             return false;
         }
 
         return envImpl ==
-            DbInternal.getNonNullEnvImpl((XAEnvironment) rm);
+                DbInternal.getNonNullEnvImpl((XAEnvironment) rm);
     }
 
     @Override
     public int prepare(Xid xid)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** prepare called");
         }
 
         try {
             checkOpen();
             Transaction txn = getXATransaction(xid);
-            if (txn == null) {
+            if(txn == null) {
                 throw new XAException
-                    ("No transaction found for " + xid + " during prepare.");
+                        ("No transaction found for " + xid + " during prepare.");
             }
             int ret = txn.getTxn().prepare(xid);
 
-            if (DEBUG) {
+            if(DEBUG) {
                 System.out.println("*** prepare returning " + ret);
             }
 
@@ -234,12 +232,12 @@ public class XAEnvironment extends Environment implements XAResource {
              * commit it here because the user doesn't need to (and isn't
              * allowed to either).
              */
-            if (ret == XAResource.XA_RDONLY) {
+            if(ret == XAResource.XA_RDONLY) {
                 commit(xid, true);
             }
 
             return ret;
-        } catch (RuntimeException e) {
+        } catch(RuntimeException e) {
             throwNewXAException(e);
         }
         return XAResource.XA_OK;        // for compiler
@@ -247,9 +245,9 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public Xid[] recover(int flags)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** recover called");
         }
 
@@ -257,8 +255,8 @@ public class XAEnvironment extends Environment implements XAResource {
 
         boolean tmStartRScan = (flags & XAResource.TMSTARTRSCAN) != 0;
         boolean tmEndRScan = (flags & XAResource.TMENDRSCAN) != 0;
-        if ((tmStartRScan && tmEndRScan) ||
-            (!tmStartRScan && !tmEndRScan && flags != TMNOFLAGS)) {
+        if((tmStartRScan && tmEndRScan) ||
+                (!tmStartRScan && !tmEndRScan && flags != TMNOFLAGS)) {
             throw new XAException(XAException.XAER_INVAL);
         }
 
@@ -269,12 +267,12 @@ public class XAEnvironment extends Environment implements XAResource {
         try {
             final EnvironmentImpl envImpl = checkOpen();
 
-            if (DEBUG) {
+            if(DEBUG) {
                 System.out.println("*** recover returning1");
             }
 
             return envImpl.getTxnManager().XARecover();
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             throwNewXAException(DE);
         }
         return null;                // for compiler
@@ -282,37 +280,37 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public void rollback(Xid xid)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** rollback called");
         }
 
         try {
             checkOpen();
             Txn txn = getXATransactionInternal(xid);
-            if (txn == null) {
+            if(txn == null) {
                 throw new XAException
-                    ("No transaction found for " + xid + " during rollback.");
+                        ("No transaction found for " + xid + " during rollback.");
             }
             removeReferringHandle(new Transaction(this, txn));
             txn.abort(xid);
-        } catch (DatabaseException DE) {
+        } catch(DatabaseException DE) {
             throwNewXAException(DE);
         }
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** rollback returning");
         }
     }
 
     @Override
     public int getTransactionTimeout()
-        throws XAException {
+            throws XAException {
 
         try {
             return (int) ((getConfig().getTxnTimeout() + 999999L) / 1000000L);
-        } catch (Exception DE) {
+        } catch(Exception DE) {
             throwNewXAException(DE);
         }
         return 0;                // for compiler
@@ -325,9 +323,9 @@ public class XAEnvironment extends Environment implements XAResource {
 
     @Override
     public void start(Xid xid, int flags)
-        throws XAException {
+            throws XAException {
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** start called " + xid + "/" + flags);
         }
 
@@ -335,11 +333,11 @@ public class XAEnvironment extends Environment implements XAResource {
         boolean tmResume = (flags & XAResource.TMRESUME) != 0;
 
         /* Check flags - only one of TMNOFLAGS, TMJOIN, or TMRESUME. */
-        if (xid == null ||
-            (tmJoin && tmResume) ||
-            (!tmJoin &&
-             !tmResume &&
-             flags != XAResource.TMNOFLAGS)) {
+        if(xid == null ||
+                (tmJoin && tmResume) ||
+                (!tmJoin &&
+                        !tmResume &&
+                        flags != XAResource.TMNOFLAGS)) {
             throw new XAException(XAException.XAER_INVAL);
         }
 
@@ -347,63 +345,66 @@ public class XAEnvironment extends Environment implements XAResource {
             Transaction txn = getXATransaction(xid);
             TxnManager txnMgr = getNonNullEnvImpl().getTxnManager();
 
-            if (flags == XAResource.TMNOFLAGS) {
+            if(flags == XAResource.TMNOFLAGS) {
 
                 /*
                  * If neither RESUME nor JOIN was set, make sure xid doesn't
                  * exist in allXATxns.  Throw XAER_DUPID if it does.
                  */
-                if (txn == null) {
-                    if (DEBUG) {
+                if(txn == null) {
+                    if(DEBUG) {
                         System.out.println
-                            ("Transaction for XID " + xid + " being created");
+                                ("Transaction for XID " + xid + " being created");
                     }
 
                     txn = beginTransaction(null, null);
                     setXATransaction(xid, txn);
 
-                } else {
+                }
+                else {
                     throw new XAException(XAException.XAER_DUPID);
                 }
-            } else if (tmJoin) {
-                if (txn == null) {
+            }
+            else if(tmJoin) {
+                if(txn == null) {
                     throw new XAException(XAException.XAER_NOTA);
                 }
 
-                if (txnMgr.getTxnForThread() != null ||
-                    txn.getPrepared()) {
+                if(txnMgr.getTxnForThread() != null ||
+                        txn.getPrepared()) {
                     throw new XAException(XAException.XAER_PROTO);
                 }
-            } else if (tmResume) {
-                if (txn == null) {
+            }
+            else if(tmResume) {
+                if(txn == null) {
                     throw new XAException(XAException.XAER_NOTA);
                 }
 
-                if (!txn.getTxn().isSuspended()) {
+                if(!txn.getTxn().isSuspended()) {
                     throw new XAException(XAException.XAER_PROTO);
                 }
                 txn.getTxn().setSuspended(false);
             }
 
-            if (DEBUG) {
+            if(DEBUG) {
                 System.out.println
-                    ("Setting Transaction for " + Thread.currentThread());
+                        ("Setting Transaction for " + Thread.currentThread());
             }
             txnMgr.setTxnForThread(txn);
-        } catch (DatabaseException DE) {
-            if (DEBUG) {
+        } catch(DatabaseException DE) {
+            if(DEBUG) {
                 System.out.println("*** start exception");
             }
             throwNewXAException(DE);
         }
 
-        if (DEBUG) {
+        if(DEBUG) {
             System.out.println("*** start finished");
         }
     }
 
     private void throwNewXAException(Exception E)
-        throws XAException {
+            throws XAException {
 
         XAException ret = new XAException(E.toString());
         ret.initCause(E);

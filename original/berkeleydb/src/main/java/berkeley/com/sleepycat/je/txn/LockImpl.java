@@ -13,14 +13,9 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
+
+import java.util.*;
 
 /**
  * A Lock embodies the lock state of a LSN.  It includes a set of owners and
@@ -29,26 +24,26 @@ import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 public // for Sizeof
 class LockImpl implements Lock {
     private static final int REMOVE_LOCKINFO_OVERHEAD =
-        0 - MemoryBudget.LOCKINFO_OVERHEAD;
+            0 - MemoryBudget.LOCKINFO_OVERHEAD;
 
     /**
      * A single locker always appears only once in the logical set of owners.
      * The owners set is always in one of the following states.
-     *
+     * <p>
      * 1- Empty
      * 2- A single writer
      * 3- One or more readers
      * 4- Multiple writers or a mix of readers and writers, all for
      * txns which share locks (all ThreadLocker instances for the same
      * thread)
-     *
+     * <p>
      * Both ownerSet and waiterList are a collection of LockInfo.  Since the
      * common case is that there is only one owner or waiter, we have added an
      * optimization to avoid the cost of collections.  FirstOwner and
      * firstWaiter are used for the first owner or waiter of the lock, and the
      * corresponding collection is instantiated and used only if more owners
      * arrive.
-     *
+     * <p>
      * In terms of memory accounting, we count up the cost of each added or
      * removed LockInfo, but not the cost of the HashSet/List entry
      * overhead. We could do the latter for more precise accounting.
@@ -87,18 +82,20 @@ class LockImpl implements Lock {
                                       MemoryBudget mb,
                                       int lockTableIndex) {
         /* Careful: order important! */
-        if (waiterList == null) {
-            if (firstWaiter == null) {
+        if(waiterList == null) {
+            if(firstWaiter == null) {
                 firstWaiter = waiter;
-            } else {
+            }
+            else {
                 waiterList = new ArrayList<LockInfo>();
                 waiterList.add(waiter);
             }
-        } else {
+        }
+        else {
             waiterList.add(waiter);
         }
         mb.updateLockMemoryUsage
-            (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
+                (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
     }
 
     /**
@@ -108,8 +105,8 @@ class LockImpl implements Lock {
                                        MemoryBudget mb,
                                        int lockTableIndex) {
         /* Shuffle the current first waiter down a slot. */
-        if (firstWaiter != null) {
-            if (waiterList == null) {
+        if(firstWaiter != null) {
+            if(waiterList == null) {
                 waiterList = new ArrayList<LockInfo>();
             }
             waiterList.add(0, firstWaiter);
@@ -117,7 +114,7 @@ class LockImpl implements Lock {
 
         firstWaiter = waiter;
         mb.updateLockMemoryUsage
-            (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
+                (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
     }
 
     /**
@@ -125,11 +122,11 @@ class LockImpl implements Lock {
      */
     public List<LockInfo> getWaitersListClone() {
         List<LockInfo> dumpWaiters = new ArrayList<LockInfo>();
-        if (firstWaiter != null) {
+        if(firstWaiter != null) {
             dumpWaiters.add(firstWaiter);
         }
 
-        if (waiterList != null) {
+        if(waiterList != null) {
             dumpWaiters.addAll(waiterList);
         }
 
@@ -142,18 +139,19 @@ class LockImpl implements Lock {
     public void flushWaiter(Locker locker,
                             MemoryBudget mb,
                             int lockTableIndex) {
-        if ((firstWaiter != null) && (firstWaiter.getLocker() == locker)) {
+        if((firstWaiter != null) && (firstWaiter.getLocker() == locker)) {
             firstWaiter = null;
             mb.updateLockMemoryUsage
-                (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
-        } else if (waiterList != null) {
+                    (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
+        }
+        else if(waiterList != null) {
             Iterator<LockInfo> iter = waiterList.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo info = iter.next();
-                if (info.getLocker() == locker) {
+                if(info.getLocker() == locker) {
                     iter.remove();
                     mb.updateLockMemoryUsage
-                        (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
+                            (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
                     return;
                 }
             }
@@ -163,16 +161,17 @@ class LockImpl implements Lock {
     private void addOwner(LockInfo newLock,
                           MemoryBudget mb,
                           int lockTableIndex) {
-        if (firstOwner == null) {
+        if(firstOwner == null) {
             firstOwner = newLock;
-        } else {
-            if (ownerSet == null) {
+        }
+        else {
+            if(ownerSet == null) {
                 ownerSet = new HashSet<LockInfo>();
             }
             ownerSet.add(newLock);
         }
         mb.updateLockMemoryUsage
-            (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
+                (MemoryBudget.LOCKINFO_OVERHEAD, lockTableIndex);
     }
 
     /**
@@ -182,12 +181,13 @@ class LockImpl implements Lock {
 
         /* No need to update memory usage, the returned Set is transient. */
         Set<LockInfo> owners;
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             owners = new HashSet<LockInfo>(ownerSet);
-        } else {
+        }
+        else {
             owners = new HashSet<LockInfo>();
         }
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             owners.add(firstOwner);
         }
         return owners;
@@ -200,16 +200,17 @@ class LockImpl implements Lock {
                                MemoryBudget mb,
                                int lockTableIndex) {
         boolean removed = false;
-        if (oldOwner != null) {
-            if (firstOwner == oldOwner) {
+        if(oldOwner != null) {
+            if(firstOwner == oldOwner) {
                 firstOwner = null;
                 removed = true;
-            } else if (ownerSet != null) {
+            }
+            else if(ownerSet != null) {
                 removed = ownerSet.remove(oldOwner);
             }
         }
 
-        if (removed) {
+        if(removed) {
             mb.updateLockMemoryUsage(REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
         }
         return removed;
@@ -222,21 +223,22 @@ class LockImpl implements Lock {
                                 MemoryBudget mb,
                                 int lockTableIndex) {
         LockInfo flushedInfo = null;
-        if ((firstOwner != null) &&
-            (firstOwner.getLocker() == locker)) {
+        if((firstOwner != null) &&
+                (firstOwner.getLocker() == locker)) {
             flushedInfo = firstOwner;
             firstOwner = null;
-        } else if (ownerSet != null) {
+        }
+        else if(ownerSet != null) {
             Iterator<LockInfo> iter = ownerSet.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo o = iter.next();
-                if (o.getLocker() == locker) {
+                if(o.getLocker() == locker) {
                     iter.remove();
                     flushedInfo = o;
                 }
             }
         }
-        if (flushedInfo != null) {
+        if(flushedInfo != null) {
             mb.updateLockMemoryUsage(REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
         }
 
@@ -248,15 +250,15 @@ class LockImpl implements Lock {
      * owner.
      */
     private LockInfo getOwnerLockInfo(Locker locker) {
-        if ((firstOwner != null) && (firstOwner.getLocker() == locker)) {
+        if((firstOwner != null) && (firstOwner.getLocker() == locker)) {
             return firstOwner;
         }
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             Iterator<LockInfo> iter = ownerSet.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo o = iter.next();
-                if (o.getLocker() == locker) {
+                if(o.getLocker() == locker) {
                     return o;
                 }
             }
@@ -290,22 +292,22 @@ class LockImpl implements Lock {
 
     /**
      * Return true if locker is a waiter on this Lock.
-     *
+     * <p>
      * This method is only used by unit tests.
      */
     public boolean isWaiter(Locker locker) {
 
-        if (firstWaiter != null) {
-            if (firstWaiter.getLocker() == locker) {
+        if(firstWaiter != null) {
+            if(firstWaiter.getLocker() == locker) {
                 return true;
             }
         }
 
-        if (waiterList != null) {
+        if(waiterList != null) {
             Iterator<LockInfo> iter = waiterList.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo info = iter.next();
-                if (info.getLocker() == locker) {
+                if(info.getLocker() == locker) {
                     return true;
                 }
             }
@@ -315,10 +317,10 @@ class LockImpl implements Lock {
 
     public int nWaiters() {
         int count = 0;
-        if (firstWaiter != null) {
+        if(firstWaiter != null) {
             count++;
         }
-        if (waiterList != null) {
+        if(waiterList != null) {
             count += waiterList.size();
         }
         return count;
@@ -326,11 +328,11 @@ class LockImpl implements Lock {
 
     public int nOwners() {
         int count = 0;
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             count++;
         }
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             count += ownerSet.size();
         }
         return count;
@@ -338,7 +340,7 @@ class LockImpl implements Lock {
 
     /**
      * Attempts to acquire the lock and returns the LockGrantType.
-     *
+     * <p>
      * Assumes we hold the lockTableLatch when entering this method.
      */
     public LockAttemptResult lock(LockType requestType,
@@ -353,13 +355,13 @@ class LockImpl implements Lock {
         /* Request an ordinary lock by checking the owners list. */
         LockInfo newLock = new LockInfo(locker, requestType);
         LockGrantType grant = tryLock
-            (newLock, jumpAheadOfWaiters || (nWaiters() == 0), mb,
-             lockTableIndex);
+                (newLock, jumpAheadOfWaiters || (nWaiters() == 0), mb,
+                        lockTableIndex);
 
         /* Do we have to wait for this lock? */
-        if (grant == LockGrantType.WAIT_NEW ||
-            grant == LockGrantType.WAIT_PROMOTION ||
-            grant == LockGrantType.WAIT_RESTART) {
+        if(grant == LockGrantType.WAIT_NEW ||
+                grant == LockGrantType.WAIT_PROMOTION ||
+                grant == LockGrantType.WAIT_RESTART) {
 
             /*
              * If the request type can cause a restart and a restart conflict
@@ -367,22 +369,23 @@ class LockImpl implements Lock {
              * for restart conflicts.  A restart conflict must take precedence
              * or it may be missed.
              */
-            if (requestType.getCausesRestart() &&
-                grant != LockGrantType.WAIT_RESTART) {
+            if(requestType.getCausesRestart() &&
+                    grant != LockGrantType.WAIT_RESTART) {
                 LockInfo waiter = null;
                 Iterator<LockInfo> iter = null;
 
-                if (waiterList != null) {
+                if(waiterList != null) {
                     iter = waiterList.iterator();
                 }
 
-                if (firstWaiter != null) {
+                if(firstWaiter != null) {
                     waiter = firstWaiter;
-                } else if ((iter != null) && (iter.hasNext())) {
+                }
+                else if((iter != null) && (iter.hasNext())) {
                     waiter = iter.next();
                 }
 
-                while (waiter != null) {
+                while(waiter != null) {
 
                     /*
                      * Check for a restart conflict.  Ignore LockType.RESTART
@@ -390,40 +393,43 @@ class LockImpl implements Lock {
                      */
                     Locker waiterLocker = waiter.getLocker();
                     LockType waiterType = waiter.getLockType();
-                    if (waiterType != LockType.RESTART &&
-                        locker != waiterLocker &&
-                        !locker.sharesLocksWith(waiterLocker)) {
+                    if(waiterType != LockType.RESTART &&
+                            locker != waiterLocker &&
+                            !locker.sharesLocksWith(waiterLocker)) {
                         LockConflict conflict =
-                            waiterType.getConflict(requestType);
-                        if (conflict.getRestart()) {
+                                waiterType.getConflict(requestType);
+                        if(conflict.getRestart()) {
                             grant = LockGrantType.WAIT_RESTART;
                             break;
                         }
                     }
 
                     /* Move to the next waiter, if it's in the list. */
-                    if ((iter != null) && (iter.hasNext())) {
+                    if((iter != null) && (iter.hasNext())) {
                         waiter = iter.next();
-                    } else {
+                    }
+                    else {
                         waiter = null;
                     }
                 }
             }
 
             /* Add the waiter or deny the lock as appropriate. */
-            if (nonBlockingRequest) {
+            if(nonBlockingRequest) {
                 grant = LockGrantType.DENIED;
-            } else {
-                if (grant == LockGrantType.WAIT_PROMOTION) {
+            }
+            else {
+                if(grant == LockGrantType.WAIT_PROMOTION) {
                     /*
                      * By moving our waiter to the top of the list we reduce
                      * the time window where deadlocks can occur due to the
                      * promotion.
                      */
                     addWaiterToHeadOfList(newLock, mb, lockTableIndex);
-                } else {
+                }
+                else {
                     assert grant == LockGrantType.WAIT_NEW ||
-                           grant == LockGrantType.WAIT_RESTART;
+                            grant == LockGrantType.WAIT_RESTART;
 
                     /*
                      * If waiting to restart, change the lock type to RESTART
@@ -432,7 +438,7 @@ class LockImpl implements Lock {
                      * prevent the requester from spinning performing repeated
                      * restarts, but we don't grant the lock.
                      */
-                    if (grant == LockGrantType.WAIT_RESTART) {
+                    if(grant == LockGrantType.WAIT_RESTART) {
                         newLock.setLockType(LockType.RESTART);
                     }
 
@@ -447,8 +453,8 @@ class LockImpl implements Lock {
 
     /**
      * Releases a lock and moves the next waiter(s) to the owners.
-     * @return
-     * null if we were not the owner,
+     *
+     * @return null if we were not the owner,
      * a non-empty set if owners should be notified after releasing,
      * an empty set if no notification is required.
      */
@@ -457,14 +463,14 @@ class LockImpl implements Lock {
                                int lockTableIndex) {
 
         LockInfo removedLock = flushOwner(locker, mb, lockTableIndex);
-        if (removedLock == null) {
+        if(removedLock == null) {
             /* Not owner. */
             return null;
         }
 
         Set<Locker> lockersToNotify = Collections.emptySet();
 
-        if (nWaiters() == 0) {
+        if(nWaiters() == 0) {
             /* No more waiters, so no one to notify. */
             return lockersToNotify;
         }
@@ -477,59 +483,64 @@ class LockImpl implements Lock {
         Iterator<LockInfo> iter = null;
         boolean isFirstWaiter = false;
 
-        if (waiterList != null) {
+        if(waiterList != null) {
             iter = waiterList.iterator();
         }
 
-        if (firstWaiter != null) {
+        if(firstWaiter != null) {
             waiter = firstWaiter;
             isFirstWaiter = true;
-        } else if ((iter != null) && (iter.hasNext())) {
+        }
+        else if((iter != null) && (iter.hasNext())) {
             waiter = iter.next();
         }
 
-        while (waiter != null) {
+        while(waiter != null) {
             /* Make the waiter an owner if the lock can be acquired. */
             LockType waiterType = waiter.getLockType();
             Locker waiterLocker = waiter.getLocker();
             LockGrantType grant;
-            if (waiterType == LockType.RESTART) {
+            if(waiterType == LockType.RESTART) {
                 /* Special case for restarts: see rangeInsertConflict. */
                 grant = rangeInsertConflict(waiterLocker) ?
-                    LockGrantType.WAIT_NEW : LockGrantType.NEW;
-            } else {
+                        LockGrantType.WAIT_NEW : LockGrantType.NEW;
+            }
+            else {
                 /* Try locking. */
                 grant = tryLock(waiter, true, mb, lockTableIndex);
             }
             /* Check if granted. */
-            if (grant == LockGrantType.NEW ||
-                grant == LockGrantType.EXISTING ||
-                grant == LockGrantType.PROMOTION) {
+            if(grant == LockGrantType.NEW ||
+                    grant == LockGrantType.EXISTING ||
+                    grant == LockGrantType.PROMOTION) {
                 /* Remove it from the waiters list. */
-                if (isFirstWaiter) {
+                if(isFirstWaiter) {
                     firstWaiter = null;
-                } else {
+                }
+                else {
                     iter.remove();
                 }
-                if (lockersToNotify == Collections.EMPTY_SET) {
+                if(lockersToNotify == Collections.EMPTY_SET) {
                     lockersToNotify = new HashSet<Locker>();
                 }
                 lockersToNotify.add(waiterLocker);
                 mb.updateLockMemoryUsage
-                    (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
-            } else {
+                        (REMOVE_LOCKINFO_OVERHEAD, lockTableIndex);
+            }
+            else {
                 assert grant == LockGrantType.WAIT_NEW ||
-                       grant == LockGrantType.WAIT_PROMOTION ||
-                       grant == LockGrantType.WAIT_RESTART;
+                        grant == LockGrantType.WAIT_PROMOTION ||
+                        grant == LockGrantType.WAIT_RESTART;
                 /* Stop on first waiter that cannot be an owner. */
                 break;
             }
 
             /* Move to the next waiter, if it's in the list. */
-            if ((iter != null) && (iter.hasNext())) {
+            if((iter != null) && (iter.hasNext())) {
                 waiter = iter.next();
                 isFirstWaiter = false;
-            } else {
+            }
+            else {
                 waiter = null;
             }
         }
@@ -538,28 +549,28 @@ class LockImpl implements Lock {
 
     public void stealLock(Locker locker, MemoryBudget mb, int lockTableIndex) {
 
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             Locker thisLocker = firstOwner.getLocker();
-            if (thisLocker != locker &&
-                thisLocker.getPreemptable()) {
+            if(thisLocker != locker &&
+                    thisLocker.getPreemptable()) {
                 thisLocker.setPreempted();
                 firstOwner = null;
                 mb.updateLockMemoryUsage(REMOVE_LOCKINFO_OVERHEAD,
-                                         lockTableIndex);
+                        lockTableIndex);
             }
         }
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             Iterator<LockInfo> iter = ownerSet.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo lockInfo = iter.next();
                 Locker thisLocker = lockInfo.getLocker();
-                if (thisLocker != locker &&
-                    thisLocker.getPreemptable()) {
+                if(thisLocker != locker &&
+                        thisLocker.getPreemptable()) {
                     thisLocker.setPreempted();
                     iter.remove();
                     mb.updateLockMemoryUsage(REMOVE_LOCKINFO_OVERHEAD,
-                                             lockTableIndex);
+                            lockTableIndex);
                 }
             }
         }
@@ -569,16 +580,13 @@ class LockImpl implements Lock {
      * Called from lock() to try locking a new request, and from release() to
      * try locking a waiting request.
      *
-     * @param newLock is the lock that is requested.
-     *
+     * @param newLock           is the lock that is requested.
      * @param firstWaiterInLine determines whether to grant the lock when a
-     * NEW lock can be granted, but other non-conflicting owners exist; for
-     * example, when a new READ lock is requested but READ locks are held by
-     * other owners.  This parameter should be true if the requestor is the
-     * first waiter in line (or if there are no waiters), and false otherwise.
-     *
-     * @param mb is the current memory budget.
-     *
+     *                          NEW lock can be granted, but other non-conflicting owners exist; for
+     *                          example, when a new READ lock is requested but READ locks are held by
+     *                          other owners.  This parameter should be true if the requestor is the
+     *                          first waiter in line (or if there are no waiters), and false otherwise.
+     * @param mb                is the current memory budget.
      * @return LockGrantType.EXISTING, NEW, PROMOTION, WAIT_RESTART, WAIT_NEW
      * or WAIT_PROMOTION.
      */
@@ -588,7 +596,7 @@ class LockImpl implements Lock {
                                   int lockTableIndex) {
 
         /* If no one owns this right now, just grab it. */
-        if (nOwners() == 0) {
+        if(nOwners() == 0) {
             addOwner(newLock, mb, lockTableIndex);
             return LockGrantType.NEW;
         }
@@ -608,20 +616,21 @@ class LockImpl implements Lock {
         LockInfo owner = null;
         Iterator<LockInfo> iter = null;
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             iter = ownerSet.iterator();
         }
 
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             owner = firstOwner;
-        } else if ((iter != null) && (iter.hasNext())) {
+        }
+        else if((iter != null) && (iter.hasNext())) {
             owner = iter.next();
         }
 
-        while (owner != null) {
+        while(owner != null) {
             Locker ownerLocker = owner.getLocker();
             LockType ownerType = owner.getLockType();
-            if (locker == ownerLocker) {
+            if(locker == ownerLocker) {
 
                 /*
                  * Requestor currently holds this lock: check for upgrades.
@@ -631,12 +640,14 @@ class LockImpl implements Lock {
                  */
                 assert (upgrade == null); // An owner should appear only once
                 upgrade = ownerType.getUpgrade(requestType);
-                if (upgrade.getUpgrade() == null) {
+                if(upgrade.getUpgrade() == null) {
                     return LockGrantType.EXISTING;
-                } else {
+                }
+                else {
                     lockToUpgrade = owner;
                 }
-            } else {
+            }
+            else {
 
                 /*
                  * Requestor does not hold this lock: check for conflicts.
@@ -644,13 +655,14 @@ class LockImpl implements Lock {
                  * otherwise, if a restart conflict exists, return it now;
                  * otherwise, save the conflict information.
                  */
-                if (!locker.sharesLocksWith(ownerLocker) &&
-                    !ownerLocker.sharesLocksWith(locker)) {
+                if(!locker.sharesLocksWith(ownerLocker) &&
+                        !ownerLocker.sharesLocksWith(locker)) {
                     LockConflict conflict = ownerType.getConflict(requestType);
-                    if (conflict.getRestart()) {
+                    if(conflict.getRestart()) {
                         return LockGrantType.WAIT_RESTART;
-                    } else {
-                        if (!conflict.getAllowed()) {
+                    }
+                    else {
+                        if(!conflict.getAllowed()) {
                             ownerConflicts = true;
                         }
                         ownerExists = true;
@@ -659,34 +671,38 @@ class LockImpl implements Lock {
             }
 
             /* Move on to the next owner. */
-            if ((iter != null) && (iter.hasNext())) {
+            if((iter != null) && (iter.hasNext())) {
                 owner = iter.next();
-            } else {
+            }
+            else {
                 owner = null;
             }
         }
 
         /* Now handle the upgrade or conflict as appropriate. */
-        if (upgrade != null) {
+        if(upgrade != null) {
             /* The requestor holds this lock. */
             LockType upgradeType = upgrade.getUpgrade();
             assert upgradeType != null;
-            if (!ownerConflicts) {
+            if(!ownerConflicts) {
                 /* No conflict: grant the upgrade.  */
                 lockToUpgrade.setLockType(upgradeType);
                 return upgrade.getPromotion() ?
-                    LockGrantType.PROMOTION : LockGrantType.EXISTING;
-            } else {
+                        LockGrantType.PROMOTION : LockGrantType.EXISTING;
+            }
+            else {
                 /* Upgrade cannot be granted at this time. */
                 return LockGrantType.WAIT_PROMOTION;
             }
-        } else {
+        }
+        else {
             /* The requestor doesn't hold this lock. */
-            if (!ownerConflicts && (!ownerExists || firstWaiterInLine)) {
+            if(!ownerConflicts && (!ownerExists || firstWaiterInLine)) {
                 /* No conflict: grant the lock. */
                 addOwner(newLock, mb, lockTableIndex);
                 return LockGrantType.NEW;
-            } else {
+            }
+            else {
                 /* Lock cannot be granted at this time. */
                 return LockGrantType.WAIT_NEW;
             }
@@ -703,28 +719,30 @@ class LockImpl implements Lock {
         LockInfo owner = null;
         Iterator<LockInfo> iter = null;
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             iter = ownerSet.iterator();
         }
 
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             owner = firstOwner;
-        } else if ((iter != null) && (iter.hasNext())) {
+        }
+        else if((iter != null) && (iter.hasNext())) {
             owner = iter.next();
         }
 
-        while (owner != null) {
+        while(owner != null) {
             Locker ownerLocker = owner.getLocker();
-            if (ownerLocker != waiterLocker &&
-                !ownerLocker.sharesLocksWith(waiterLocker) &&
-                owner.getLockType() == LockType.RANGE_INSERT) {
+            if(ownerLocker != waiterLocker &&
+                    !ownerLocker.sharesLocksWith(waiterLocker) &&
+                    owner.getLockType() == LockType.RANGE_INSERT) {
                 return true;
             }
 
             /* Move on to the next owner. */
-            if ((iter != null) && (iter.hasNext())) {
+            if((iter != null) && (iter.hasNext())) {
                 owner = iter.next();
-            } else {
+            }
+            else {
                 owner = null;
             }
         }
@@ -737,11 +755,11 @@ class LockImpl implements Lock {
      */
     public void demote(Locker locker) {
         LockInfo owner = getOwnerLockInfo(locker);
-        if (owner != null) {
+        if(owner != null) {
             LockType type = owner.getLockType();
-            if (type.isWriteLock()) {
+            if(type.isWriteLock()) {
                 owner.setLockType((type == LockType.RANGE_WRITE) ?
-                                  LockType.RANGE_READ : LockType.READ);
+                        LockType.RANGE_READ : LockType.READ);
             }
         }
     }
@@ -755,26 +773,28 @@ class LockImpl implements Lock {
         LockInfo owner = null;
         Iterator<LockInfo> iter = null;
 
-        if (ownerSet != null) {
+        if(ownerSet != null) {
             iter = ownerSet.iterator();
         }
 
-        if (firstOwner != null) {
+        if(firstOwner != null) {
             owner = firstOwner;
-        } else if ((iter != null) && (iter.hasNext())) {
+        }
+        else if((iter != null) && (iter.hasNext())) {
             owner = iter.next();
         }
 
-        while (owner != null) {
+        while(owner != null) {
             /* Return locker if it owns a write lock. */
-            if (owner.getLockType().isWriteLock()) {
+            if(owner.getLockType().isWriteLock()) {
                 return owner.getLocker();
             }
 
             /* Move on to the next owner. */
-            if ((iter != null) && (iter.hasNext())) {
+            if((iter != null) && (iter.hasNext())) {
                 owner = iter.next();
-            } else {
+            }
+            else {
                 owner = null;
             }
         }
@@ -786,20 +806,20 @@ class LockImpl implements Lock {
      * Debugging aid, validation before a lock request.
      */
     private boolean validateRequest(Locker locker) {
-        if (firstWaiter != null) {
-            if (firstWaiter.getLocker() == locker) {
+        if(firstWaiter != null) {
+            if(firstWaiter.getLocker() == locker) {
                 assert false : "locker " + locker +
-                                " is already on waiters list.";
+                        " is already on waiters list.";
             }
         }
 
-        if (waiterList != null) {
+        if(waiterList != null) {
             Iterator<LockInfo> iter = waiterList.iterator();
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 LockInfo o = iter.next();
-                if (o.getLocker() == locker) {
+                if(o.getLocker() == locker) {
                     assert false : "locker " + locker +
-                        " is already on waiters list.";
+                            " is already on waiters list.";
                 }
             }
         }
@@ -818,16 +838,17 @@ class LockImpl implements Lock {
         StringBuilder sb = new StringBuilder();
         sb.append(" LockAddr:").append(System.identityHashCode(this));
         sb.append(" Owners:");
-        if (nOwners() == 0) {
+        if(nOwners() == 0) {
             sb.append(" (none)");
-        } else {
-            if (firstOwner != null) {
+        }
+        else {
+            if(firstOwner != null) {
                 sb.append(firstOwner);
             }
 
-            if (ownerSet != null) {
+            if(ownerSet != null) {
                 Iterator<LockInfo> iter = ownerSet.iterator();
-                while (iter.hasNext()) {
+                while(iter.hasNext()) {
                     LockInfo info = iter.next();
                     sb.append(info);
                 }
@@ -835,9 +856,10 @@ class LockImpl implements Lock {
         }
 
         sb.append(" Waiters:");
-        if (nWaiters() == 0) {
+        if(nWaiters() == 0) {
             sb.append(" (none)");
-        } else {
+        }
+        else {
             sb.append(getWaitersListClone());
         }
         return sb.toString();

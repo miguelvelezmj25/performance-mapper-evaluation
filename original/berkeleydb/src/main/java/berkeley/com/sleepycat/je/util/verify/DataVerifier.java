@@ -13,17 +13,6 @@
 
 package berkeley.com.sleepycat.je.util.verify;
 
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.ENV_RUN_VERIFIER;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_SCHEDULE;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_LOG;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_SECONDARIES;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_BTREE;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_DATA_RECORDS;
-import static berkeley.com.sleepycat.je.config.EnvironmentParams.VERIFY_OBSOLETE_RECORDS;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 import berkeley.com.sleepycat.je.Environment;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
@@ -34,23 +23,27 @@ import berkeley.com.sleepycat.je.util.LogVerificationException;
 import berkeley.com.sleepycat.je.utilint.CronScheduleParser;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static berkeley.com.sleepycat.je.config.EnvironmentParams.*;
+
 /**
- *  Periodically perform checksum verification, Btree verification, or both,
- *  depending on {@link com.sleepycat.je.EnvironmentConfig#VERIFY_LOG} and
- *  {@link com.sleepycat.je.EnvironmentConfig#VERIFY_BTREE}.
- *  
- *  The first-time start time and the period of the verification is determined
- *  by {@link com.sleepycat.je.EnvironmentConfig#VERIFY_SCHEDULE}.
- *  
- *  For current version, JE only implements checksum verification feature. The
- *  Btree verification feature will be implemented in next release.
+ * Periodically perform checksum verification, Btree verification, or both,
+ * depending on {@link com.sleepycat.je.EnvironmentConfig#VERIFY_LOG} and
+ * {@link com.sleepycat.je.EnvironmentConfig#VERIFY_BTREE}.
+ * <p>
+ * The first-time start time and the period of the verification is determined
+ * by {@link com.sleepycat.je.EnvironmentConfig#VERIFY_SCHEDULE}.
+ * <p>
+ * For current version, JE only implements checksum verification feature. The
+ * Btree verification feature will be implemented in next release.
  */
 public class DataVerifier {
     private final EnvironmentImpl envImpl;
     private final Timer timer;
-    private VerifyTask verifyTask;
     private final DbVerifyLog dbLogVerifier;
-
+    private VerifyTask verifyTask;
     private long verifyDelay;
     private long verifyInterval;
     private String cronSchedule;
@@ -61,9 +54,9 @@ public class DataVerifier {
 
         this.envImpl = envImpl;
         this.timer = new Timer(
-            envImpl.makeDaemonThreadName(
-                Environment.DATA_CORRUPTION_VERIFIER_NAME),
-            true /*isDaemon*/);
+                envImpl.makeDaemonThreadName(
+                        Environment.DATA_CORRUPTION_VERIFIER_NAME),
+                true /*isDaemon*/);
         dbLogVerifier = new DbVerifyLog(envImpl, 0);
     }
 
@@ -73,22 +66,22 @@ public class DataVerifier {
      */
     public void configVerifyTask(DbConfigManager configMgr) {
 
-        if (!updateConfig(configMgr)) {
+        if(!updateConfig(configMgr)) {
             return;
         }
 
-        synchronized (this) {
-            if (!shutdownRequest) {
+        synchronized(this) {
+            if(!shutdownRequest) {
                 cancel();
 
-                if (cronSchedule != null) {
+                if(cronSchedule != null) {
                     verifyTask = new VerifyTask(
-                        envImpl,
-                        configMgr.getBoolean(VERIFY_LOG),
-                        configMgr.getBoolean(VERIFY_BTREE),
-                        configMgr.getBoolean(VERIFY_SECONDARIES),
-                        configMgr.getBoolean(VERIFY_DATA_RECORDS),
-                        configMgr.getBoolean(VERIFY_OBSOLETE_RECORDS));
+                            envImpl,
+                            configMgr.getBoolean(VERIFY_LOG),
+                            configMgr.getBoolean(VERIFY_BTREE),
+                            configMgr.getBoolean(VERIFY_SECONDARIES),
+                            configMgr.getBoolean(VERIFY_DATA_RECORDS),
+                            configMgr.getBoolean(VERIFY_OBSOLETE_RECORDS));
 
                     timer.schedule(verifyTask, verifyDelay, verifyInterval);
                 }
@@ -97,7 +90,7 @@ public class DataVerifier {
     }
 
     private void cancel() {
-        if (verifyTask != null) {
+        if(verifyTask != null) {
             verifyTask.cancel();
             verifyTask = null;
         }
@@ -108,7 +101,7 @@ public class DataVerifier {
     }
 
     public void shutdown() {
-        synchronized (this) {
+        synchronized(this) {
             shutdownRequest = true;
             cancel();
             timer.cancel();
@@ -142,17 +135,18 @@ public class DataVerifier {
         /*
          * If set to false (which is not the default).
          */
-        if (!configMgr.getBoolean(ENV_RUN_VERIFIER)) {
+        if(!configMgr.getBoolean(ENV_RUN_VERIFIER)) {
             newCronSchedule = null;
-            if (cronSchedule == null) {
+            if(cronSchedule == null) {
                 return false;
             }
             cronSchedule = null;
             verifyDelay = 0;
             verifyInterval = 0;
             return true;
-        } else {
-            if (CronScheduleParser.checkSame(cronSchedule, newCronSchedule)) {
+        }
+        else {
+            if(CronScheduleParser.checkSame(cronSchedule, newCronSchedule)) {
                 return false;
             }
             CronScheduleParser csp = new CronScheduleParser(newCronSchedule);
@@ -172,12 +166,12 @@ public class DataVerifier {
         private final boolean verifyObsoleteRecords;
 
         VerifyTask(
-            EnvironmentImpl envImpl,
-            boolean verifyLog,
-            boolean verifyBtree,
-            boolean verifySecondaries,
-            boolean verifyDataRecords,
-            boolean verifyObsoleteRecords) {
+                EnvironmentImpl envImpl,
+                boolean verifyLog,
+                boolean verifyBtree,
+                boolean verifySecondaries,
+                boolean verifyDataRecords,
+                boolean verifyObsoleteRecords) {
 
             this.envImpl = envImpl;
             this.verifyLog = verifyLog;
@@ -196,7 +190,7 @@ public class DataVerifier {
                  * media/disk failure. Btree corruption will be verified
                  * in next release.
                  */
-                if (verifyLog) {
+                if(verifyLog) {
                     dbLogVerifier.verifyAll();
                 }
 
@@ -218,22 +212,22 @@ public class DataVerifier {
                 }
                 */
                 success = true;
-            } catch (LogVerificationException lve) {
+            } catch(LogVerificationException lve) {
                 new EnvironmentFailureException(
-                    envImpl,
-                    EnvironmentFailureReason.LOG_CHECKSUM,
-                    "Corruption detected by log verifier",
-                    lve /*LogVerificationException*/);
-            } catch (EnvironmentFailureException efe) {
+                        envImpl,
+                        EnvironmentFailureReason.LOG_CHECKSUM,
+                        "Corruption detected by log verifier",
+                        lve /*LogVerificationException*/);
+            } catch(EnvironmentFailureException efe) {
                 // Do nothing. Just cancel this timer in finally.
-            } catch (Throwable e) {
-                if (envImpl.isValid()) {
+            } catch(Throwable e) {
+                if(envImpl.isValid()) {
                     StoppableThread.handleUncaughtException(
-                        envImpl.getLogger(), envImpl, Thread.currentThread(),
-                        e);
+                            envImpl.getLogger(), envImpl, Thread.currentThread(),
+                            e);
                 }
             } finally {
-                if (!success) {
+                if(!success) {
                     shutdown();
                 }
             }

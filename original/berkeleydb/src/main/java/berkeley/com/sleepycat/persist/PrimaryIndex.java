@@ -13,92 +13,76 @@
 
 package berkeley.com.sleepycat.persist;
 
-import java.util.Map;
-import java.util.SortedMap;
-
 import berkeley.com.sleepycat.bind.EntityBinding;
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.collections.StoredSortedMap;
 import berkeley.com.sleepycat.compat.DbCompat;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.CursorConfig;
-import berkeley.com.sleepycat.je.Database;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.DbInternal;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.Environment;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.Get;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.LockMode;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.OperationFailureException;
-import berkeley.com.sleepycat.je.OperationResult;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.OperationStatus;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.Put;
-import berkeley.com.sleepycat.je.ReadOptions;
-/* <!-- end JE only --> */
-import berkeley.com.sleepycat.je.Transaction;
-import berkeley.com.sleepycat.je.TransactionConfig;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.WriteOptions;
-/* <!-- end JE only --> */
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.persist.impl.PersistEntityBinding;
 import berkeley.com.sleepycat.persist.impl.PersistKeyAssigner;
 import berkeley.com.sleepycat.persist.model.Entity;
 import berkeley.com.sleepycat.persist.model.PrimaryKey;
 
+import java.util.Map;
+import java.util.SortedMap;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+
 /**
  * The primary index for an entity class and its primary key.
- *
+ * <p>
  * <p>{@code PrimaryIndex} objects are thread-safe.  Multiple threads may
  * safely call the methods of a shared {@code PrimaryIndex} object.</p>
- *
+ * <p>
  * <p>{@code PrimaryIndex} implements {@link EntityIndex} to map the primary
  * key type (PK) to the entity type (E).</p>
- *
+ * <p>
  * <p>The {@link Entity} annotation may be used to define an entity class and
  * the {@link PrimaryKey} annotation may be used to define a primary key as
  * shown in the following example.</p>
- *
+ * <p>
  * <pre class="code">
  * {@literal @Entity}
  * class Employee {
- *
- *     {@literal @PrimaryKey}
- *     long id;
- *
- *     String name;
- *
- *     Employee(long id, String name) {
- *         this.id = id;
- *         this.name = name;
- *     }
- *
- *     private Employee() {} // For bindings
+ * <p>
+ * {@literal @PrimaryKey}
+ * long id;
+ * <p>
+ * String name;
+ * <p>
+ * Employee(long id, String name) {
+ * this.id = id;
+ * this.name = name;
+ * }
+ * <p>
+ * private Employee() {} // For bindings
  * }</pre>
- *
+ * <p>
  * <p>To obtain the {@code PrimaryIndex} for a given entity class, call {@link
  * EntityStore#getPrimaryIndex EntityStore.getPrimaryIndex}, passing the
  * primary key class and the entity class.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * EntityStore store = new EntityStore(...);
- *
+ * <p>
  * {@code PrimaryIndex<Long, Employee>} primaryIndex =
- *     store.getPrimaryIndex(Long.class, Employee.class);</pre>
- *
+ * store.getPrimaryIndex(Long.class, Employee.class);</pre>
+ * <p>
  * <p>Note that {@code Long.class} is passed as the primary key class, but the
  * primary key field has the primitive type {@code long}.  When a primitive
  * primary key field is used, the corresponding primitive wrapper class is used
  * to access the primary index.  For more information on key field types, see
  * {@link PrimaryKey}.</p>
- *
+ * <p>
  * <p>The {@code PrimaryIndex} provides the primary storage and access methods
  * for the instances of a particular entity class.  Entities are inserted and
  * updated in the {@code PrimaryIndex} by calling a method in the family of
@@ -106,7 +90,7 @@ import berkeley.com.sleepycat.persist.model.PrimaryKey;
  * entity with the same primary key already exists.  If an entity with the same
  * primary key does exist, it will update the entity and return the existing
  * (old) entity.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * Employee oldEntity;
  * oldEntity = primaryIndex.put(new Employee(1, "Jane Smith"));    // Inserts an entity
@@ -115,22 +99,22 @@ import berkeley.com.sleepycat.persist.model.PrimaryKey;
  * assert oldEntity == null;
  * oldEntity = primaryIndex.put(new Employee(2, "Joan M. Smith")); // Updates an entity
  * assert oldEntity != null;</pre>
- *
+ * <p>
  * <p>The {@link #putNoReturn} method can be used to avoid the overhead of
  * returning the existing entity, when the existing entity is not important to
  * the application.  The return type of {@link #putNoReturn} is void.  For
  * example:</p>
- *
+ * <p>
  * <pre class="code">
  * primaryIndex.putNoReturn(new Employee(1, "Jane Smith"));    // Inserts an entity
  * primaryIndex.putNoReturn(new Employee(2, "Joan Smith"));    // Inserts an entity
  * primaryIndex.putNoReturn(new Employee(2, "Joan M. Smith")); // Updates an entity</pre>
- *
+ * <p>
  * <p>The {@link #putNoOverwrite} method can be used to ensure that an existing
  * entity is not overwritten.  {@link #putNoOverwrite} returns true if the
  * entity was inserted, or false if an existing entity exists and no action was
  * taken.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * boolean inserted;
  * inserted = primaryIndex.putNoOverwrite(new Employee(1, "Jane Smith"));    // Inserts an entity
@@ -139,41 +123,41 @@ import berkeley.com.sleepycat.persist.model.PrimaryKey;
  * assert inserted;
  * inserted = primaryIndex.putNoOverwrite(new Employee(2, "Joan M. Smith")); // <strong>No action was taken!</strong>
  * assert !inserted;</pre>
- *
+ * <p>
  * <p>Primary key values must be unique, in other words, each instance of a
  * given entity class must have a distinct primary key value.  Rather than
  * assigning the unique primary key values yourself, a <em>sequence</em> can be
  * used to assign sequential integer values automatically, starting with the
  * value 1 (one).  A sequence is defined using the {@link PrimaryKey#sequence}
  * annotation property.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * {@literal @Entity}
  * class Employee {
- *
- *     {@literal @PrimaryKey(sequence="ID")}
- *     long id;
- *
- *     String name;
- *
- *     Employee(String name) {
- *         this.name = name;
- *     }
- *
- *     private Employee() {} // For bindings
+ * <p>
+ * {@literal @PrimaryKey(sequence="ID")}
+ * long id;
+ * <p>
+ * String name;
+ * <p>
+ * Employee(String name) {
+ * this.name = name;
+ * }
+ * <p>
+ * private Employee() {} // For bindings
  * }</pre>
- *
+ * <p>
  * <p>The name of the sequence used above is "ID".  Any name can be used.  If
  * the same sequence name is used in more than one entity class, the sequence
  * will be shared by those classes, in other words, a single sequence of
  * integers will be used for all instances of those classes.  See {@link
  * PrimaryKey#sequence} for more information.</p>
- *
+ * <p>
  * <p>Any method in the family of {@link #put} methods may be used to insert
  * entities where the primary key is assigned from a sequence.  When the {@link
  * #put} method returns, the primary key field of the entity object will be set
  * to the assigned key value.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * Employee employee;
  * employee = new Employee("Jane Smith");
@@ -182,14 +166,14 @@ import berkeley.com.sleepycat.persist.model.PrimaryKey;
  * employee = new Employee("Joan Smith");
  * primaryIndex.putNoReturn(employee);    // Inserts an entity
  * assert employee.id == 2;</pre>
- *
+ * <p>
  * <p>This begs the question:  How do you update an existing entity, without
  * assigning a new primary key?  The answer is that the {@link #put} methods
  * will only assign a new key from the sequence if the primary key field is
  * zero or null (for reference types).  If an entity with a non-zero and
  * non-null key field is passed to a {@link #put} method, any existing entity
  * with that primary key value will be updated.  For example:</p>
- *
+ * <p>
  * <pre class="code">
  * Employee employee;
  * employee = new Employee("Jane Smith");
@@ -201,12 +185,12 @@ import berkeley.com.sleepycat.persist.model.PrimaryKey;
  * employee.name = "Joan M. Smith";
  * primaryIndex.putNoReturn(employee);    // Updates an existing entity
  * assert employee.id == 2;</pre>
- *
+ * <p>
  * <p>Since {@code PrimaryIndex} implements the {@link EntityIndex} interface,
  * it shares the common index methods for retrieving and deleting entities,
  * opening cursors and using transactions.  See {@link EntityIndex} for more
  * information on these topics.</p>
- *
+ * <p>
  * <p>Note that when using an index, keys and values are stored and retrieved
  * by value not by reference.  In other words, if an entity object is stored
  * and then retrieved, or retrieved twice, each object will be a separate
@@ -231,12 +215,12 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
 
     /**
      * Creates a primary index without using an <code>EntityStore</code>.
-     *
+     * <p>
      * <p>This constructor is not normally needed and is provided for
      * applications that wish to use custom bindings along with the Direct
      * Persistence Layer.  Normally, {@link EntityStore#getPrimaryIndex
      * getPrimaryIndex} is used instead.</p>
-     *
+     * <p>
      * <p>Note that when this constructor is used directly, primary keys cannot
      * be automatically assigned from a sequence.  The key assignment feature
      * requires knowledge of the primary key field, which is only available if
@@ -244,16 +228,11 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
      * assigned from a sequence manually before calling the <code>put</code>
      * methods in this class.</p>
      *
-     * @param database the primary database.
-     *
-     * @param keyClass the class of the primary key.
-     *
-     * @param keyBinding the binding to be used for primary keys.
-     *
-     * @param entityClass the class of the entities stored in this index.
-     *
+     * @param database      the primary database.
+     * @param keyClass      the class of the primary key.
+     * @param keyBinding    the binding to be used for primary keys.
+     * @param entityClass   the class of the entities stored in this index.
      * @param entityBinding the binding to be used for entities.
-     *
      * @throws DatabaseException the base class for all BDB exceptions.
      */
     public PrimaryIndex(Database database,
@@ -261,17 +240,17 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
                         EntryBinding<PK> keyBinding,
                         Class<E> entityClass,
                         EntityBinding<E> entityBinding)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(database, keyClass, keyBinding,
-              new EntityValueAdapter(entityClass, entityBinding, false));
+                new EntityValueAdapter(entityClass, entityBinding, false));
 
         this.entityClass = entityClass;
         this.entityBinding = entityBinding;
 
-        if (entityBinding instanceof PersistEntityBinding) {
+        if(entityBinding instanceof PersistEntityBinding) {
             keyAssigner =
-                ((PersistEntityBinding) entityBinding).getKeyAssigner();
+                    ((PersistEntityBinding) entityBinding).getKeyAssigner();
         }
     }
 
@@ -314,31 +293,28 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     /**
      * Inserts an entity and returns null, or updates it if the primary key
      * already exists and returns the existing entity.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
-     *
+     * <p>
      * <p>Auto-commit is used implicitly if the store is transactional.</p>
      *
      * @param entity the entity to be inserted or updated.
-     *
      * @return the existing entity that was updated, or null if the entity was
      * inserted.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public E put(E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return put(null, entity);
     }
@@ -346,32 +322,28 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     /**
      * Inserts an entity and returns null, or updates it if the primary key
      * already exists and returns the existing entity.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
      *
-     * @param txn the transaction used to protect this operation, null to use
-     * auto-commit, or null if the store is non-transactional.
-     *
+     * @param txn    the transaction used to protect this operation, null to use
+     *               auto-commit, or null if the store is non-transactional.
      * @param entity the entity to be inserted or updated.
-     *
      * @return the existing entity that was updated, or null if the entity was
      * inserted.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public E put(Transaction txn, E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseEntry keyEntry = new DatabaseEntry();
         DatabaseEntry dataEntry = new DatabaseEntry();
@@ -379,36 +351,37 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
 
         boolean autoCommit = false;
         Environment env = db.getEnvironment();
-        if (transactional &&
-            txn == null &&
-            DbCompat.getThreadTransaction(env) == null) {
+        if(transactional &&
+                txn == null &&
+                DbCompat.getThreadTransaction(env) == null) {
             txn = env.beginTransaction(null, getAutoCommitTransactionConfig());
             autoCommit = true;
         }
-        
+
         CursorConfig cursorConfig = null;
-        if (concurrentDB) {
+        if(concurrentDB) {
             cursorConfig = new CursorConfig();
             DbCompat.setWriteCursor(cursorConfig, true);
-        } 
+        }
         boolean failed = true;
         Cursor cursor = db.openCursor(txn, cursorConfig);
         LockMode lockMode = locking ? LockMode.RMW : null;
         try {
-            while (true) {
+            while(true) {
                 OperationStatus status =
-                    cursor.getSearchKey(keyEntry, dataEntry, lockMode);
-                if (status == OperationStatus.SUCCESS) {
+                        cursor.getSearchKey(keyEntry, dataEntry, lockMode);
+                if(status == OperationStatus.SUCCESS) {
                     E existing =
-                        entityBinding.entryToObject(keyEntry, dataEntry);
+                            entityBinding.entryToObject(keyEntry, dataEntry);
                     entityBinding.objectToData(entity, dataEntry);
                     cursor.put(keyEntry, dataEntry);
                     failed = false;
                     return existing;
-                } else {
+                }
+                else {
                     entityBinding.objectToData(entity, dataEntry);
                     status = cursor.putNoOverwrite(keyEntry, dataEntry);
-                    if (status != OperationStatus.KEYEXIST) {
+                    if(status != OperationStatus.KEYEXIST) {
                         failed = false;
                         return null;
                     }
@@ -416,10 +389,11 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
             }
         } finally {
             cursor.close();
-            if (autoCommit) {
-                if (failed) {
+            if(autoCommit) {
+                if(failed) {
                     txn.abort();
-                } else {
+                }
+                else {
                     txn.commit();
                 }
             }
@@ -431,28 +405,26 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
      * not return the existing entity).  This method may be used instead of
      * {@link #put(Object)} to save the overhead of returning the existing
      * entity.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
-     *
+     * <p>
      * <p>Auto-commit is used implicitly if the store is transactional.</p>
      *
      * @param entity the entity to be inserted or updated.
-     *
-     * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     *               <p>
+     *               <!-- begin JE only -->
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public void putNoReturn(E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         putNoReturn(null, entity);
     }
@@ -460,34 +432,31 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     /**
      * Inserts an entity, or updates it if the primary key already exists (does
      * not return the existing entity).  This method may be used instead of
-     * {@link #put(Transaction,Object)} to save the overhead of returning the
+     * {@link #put(Transaction, Object)} to save the overhead of returning the
      * existing entity.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
      *
-     * @param txn the transaction used to protect this operation, null to use
-     * auto-commit, or null if the store is non-transactional.
-     *
+     * @param txn    the transaction used to protect this operation, null to use
+     *               auto-commit, or null if the store is non-transactional.
      * @param entity the entity to be inserted or updated.
-     *
-     * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     *               <p>
+     *               <!-- begin JE only -->
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public void putNoReturn(Transaction txn, E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* <!-- begin JE only --> */
-        if (DbCompat.IS_JE) {
+        if(DbCompat.IS_JE) {
             put(txn, entity, Put.OVERWRITE, null);
             return;
         }
@@ -504,31 +473,28 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     /**
      * Inserts an entity and returns true, or returns false if the primary key
      * already exists.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
-     *
+     * <p>
      * <p>Auto-commit is used implicitly if the store is transactional.</p>
      *
      * @param entity the entity to be inserted.
-     *
      * @return true if the entity was inserted, or false if an entity with the
      * same primary key is already present.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public boolean putNoOverwrite(E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return putNoOverwrite(null, entity);
     }
@@ -536,35 +502,31 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     /**
      * Inserts an entity and returns true, or returns false if the primary key
      * already exists.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
      *
-     * @param txn the transaction used to protect this operation, null to use
-     * auto-commit, or null if the store is non-transactional.
-     *
+     * @param txn    the transaction used to protect this operation, null to use
+     *               auto-commit, or null if the store is non-transactional.
      * @param entity the entity to be inserted.
-     *
      * @return true if the entity was inserted, or false if an entity with the
      * same primary key is already present.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws DatabaseException           the base class for all BDB exceptions.
      */
     public boolean putNoOverwrite(Transaction txn, E entity)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* <!-- begin JE only --> */
-        if (DbCompat.IS_JE) {
+        if(DbCompat.IS_JE) {
             return put(txn, entity, Put.NO_OVERWRITE, null) != null;
         }
         /* <!-- end JE only --> */
@@ -580,37 +542,30 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     }
 
     /* <!-- begin JE only --> */
+
     /**
      * Inserts or updates an entity, using Put type and WriteOptions
      * parameters, and returning an OperationResult.
-     *
+     * <p>
      * <p>If a {@link PrimaryKey#sequence} is used and the primary key field of
      * the given entity is null or zero, this method will assign the next value
      * from the sequence to the primary key field of the given entity.</p>
      *
-     * @param txn the transaction used to protect this operation, null to use
-     * auto-commit, or null if the store is non-transactional.
-     *
-     * @param entity the entity to be inserted.
-     *
+     * @param txn     the transaction used to protect this operation, null to use
+     *                auto-commit, or null if the store is non-transactional.
+     * @param entity  the entity to be inserted.
      * @param putType is {@link Put#OVERWRITE} or {@link Put#NO_OVERWRITE}.
-     *
      * @param options the WriteOptions, or null to use default options.
-     *
      * @return the OperationResult if the record is written, else null. If
      * {@code Put.NO_OVERWRITE} is used, null is returned if an entity with the
      * same primary key is already present. If {@code Put.OVERWRITE} is used,
      * null is never returned.
-     *
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#writeFailures">Write
-     * Operation Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#writeFailures">Write
+     *                                     Operation Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws DatabaseException the base class for all BDB exceptions.
-     *
+     *                                     environment-wide failure occurs.
+     * @throws DatabaseException           the base class for all BDB exceptions.
      * @since 7.0
      */
     public OperationResult put(Transaction txn,
@@ -618,9 +573,9 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
                                Put putType,
                                WriteOptions options) {
 
-        if (putType != Put.OVERWRITE && putType != Put.NO_OVERWRITE) {
+        if(putType != Put.OVERWRITE && putType != Put.NO_OVERWRITE) {
             throw new IllegalArgumentException(
-                "putType not allowed: " + putType);
+                    "putType not allowed: " + putType);
         }
 
         DatabaseEntry keyEntry = new DatabaseEntry();
@@ -637,13 +592,14 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
      * and set the primary key field.
      */
     private void assignKey(E entity, DatabaseEntry keyEntry)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (keyAssigner != null) {
-            if (!keyAssigner.assignPrimaryKey(entity, keyEntry)) {
+        if(keyAssigner != null) {
+            if(!keyAssigner.assignPrimaryKey(entity, keyEntry)) {
                 entityBinding.objectToKey(entity, keyEntry);
             }
-        } else {
+        }
+        else {
             entityBinding.objectToKey(entity, keyEntry);
         }
     }
@@ -654,18 +610,18 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
      */
 
     public E get(PK key)
-        throws DatabaseException {
+            throws DatabaseException {
 
         return get(null, key, null);
     }
 
     public E get(Transaction txn, PK key, LockMode lockMode)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* <!-- begin JE only --> */
-        if (DbCompat.IS_JE) {
+        if(DbCompat.IS_JE) {
             EntityResult<E> result = get(
-                txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
+                    txn, key, Get.SEARCH, DbInternal.getReadOptions(lockMode));
             return result != null ? result.value() : null;
         }
         /* <!-- end JE only --> */
@@ -676,9 +632,10 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
 
         OperationStatus status = db.get(txn, keyEntry, dataEntry, lockMode);
 
-        if (status == OperationStatus.SUCCESS) {
+        if(status == OperationStatus.SUCCESS) {
             return makeEntity(key, keyEntry, dataEntry);
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -688,7 +645,7 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
                                PK key,
                                Get getType,
                                ReadOptions options)
-        throws DatabaseException {
+            throws DatabaseException {
 
         checkGetType(getType);
 
@@ -697,13 +654,14 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
         keyBinding.objectToEntry(key, keyEntry);
 
         OperationResult result = db.get(
-            txn, keyEntry, dataEntry, getType, options);
+                txn, keyEntry, dataEntry, getType, options);
 
-        if (result != null) {
+        if(result != null) {
             return new EntityResult<>(
-                makeEntity(key, keyEntry, dataEntry),
-                result);
-        } else {
+                    makeEntity(key, keyEntry, dataEntry),
+                    result);
+        }
+        else {
             return null;
         }
     }
@@ -714,9 +672,9 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
                          DatabaseEntry dataEntry) {
 
         return (entityBinding instanceof PersistEntityBinding) ?
-            (E)((PersistEntityBinding) entityBinding).
-                entryToObjectWithPriKey(key, dataEntry) :
-            entityBinding.entryToObject(keyEntry, dataEntry);
+                (E) ((PersistEntityBinding) entityBinding).
+                        entryToObjectWithPriKey(key, dataEntry) :
+                entityBinding.entryToObject(keyEntry, dataEntry);
     }
 
     public Map<PK, E> map() {
@@ -724,7 +682,7 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
     }
 
     public synchronized SortedMap<PK, E> sortedMap() {
-        if (map == null) {
+        if(map == null) {
             map = new StoredSortedMap(db, keyBinding, entityBinding, true);
         }
         return map;
@@ -732,10 +690,10 @@ public class PrimaryIndex<PK, E> extends BasicIndex<PK, E> {
 
     /**
      * <!-- begin JE only -->
-     * @hidden
-     * <!-- end JE only -->
-     * For internal use only.
      *
+     * @hidden <!-- end JE only -->
+     * For internal use only.
+     * <p>
      * Used for obtaining the auto-commit txn config from the store, which
      * overrides this method to return it.
      */

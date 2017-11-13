@@ -13,11 +13,7 @@
 
 package berkeley.com.sleepycat.je.util;
 
-import berkeley.com.sleepycat.je.CheckpointConfig;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Environment;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.FileManager;
 import berkeley.com.sleepycat.je.log.LogEntryType;
@@ -61,7 +57,7 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  *  t2     000000001.jdb     Backup finishes copying file 4, starts and
  *         000000004.jdb     finishes file 5, has caught up. Backup ends.
  *         000000005.jdb
- *</pre>
+ * </pre>
  * <p>
  * In the example above, the backup operation must be sure to copy file 5,
  * which came into existence after the backup had started. If the backup
@@ -104,27 +100,27 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * performed to minimize recovery time.
  * <pre class="code">
  * void myBackup(Environment env, File destDir) {
- *     DbBackup backupHelper = new DbBackup(env);
- *
- *     // Optional: Do a checkpoint to reduce recovery time after a restore.
- *     env.checkpoint(new CheckpointConfig().setForce(true));
- *
- *     // Start backup, find out what needs to be copied.
- *     backupHelper.startBackup();
- *     try {
- *         // Copy the necessary files to archival storage.
- *         String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
- *         myCopyFiles(env, filesToCopy, destDir);
- *     } finally {
- *         // Remember to exit backup mode, or the JE cleaner cannot delete
- *         // log files and disk usage will grow without bounds.
- *        backupHelper.endBackup();
- *     }
+ * DbBackup backupHelper = new DbBackup(env);
+ * <p>
+ * // Optional: Do a checkpoint to reduce recovery time after a restore.
+ * env.checkpoint(new CheckpointConfig().setForce(true));
+ * <p>
+ * // Start backup, find out what needs to be copied.
+ * backupHelper.startBackup();
+ * try {
+ * // Copy the necessary files to archival storage.
+ * String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
+ * myCopyFiles(env, filesToCopy, destDir);
+ * } finally {
+ * // Remember to exit backup mode, or the JE cleaner cannot delete
+ * // log files and disk usage will grow without bounds.
+ * backupHelper.endBackup();
  * }
- *
+ * }
+ * <p>
  * void myCopyFiles(Environment env, String[] filesToCopy, File destDir) {
- *     // See {@link LogVerificationReadableByteChannel} and
- *     // {@link LogVerificationInputStream}
+ * // See {@link LogVerificationReadableByteChannel} and
+ * // {@link LogVerificationInputStream}
  * }
  * </pre>
  * When copying files to the backup directory, it is critical that each file is
@@ -177,19 +173,19 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * Accordingly, the list of current files (that is made at the time of the
  * backup), should be used in one of two ways.
  * <ol>
- *   <li>If you only need to restore to the point in time of the most recent
- *   backup, then the list should be used to delete unused files from the
- *   backup set.  After copying all files during the backup, any file that is
- *   <em>not</em> present in the list may then be deleted from the backup set.
- *   This both reduces the size of the backup set, and ensures that unused
- *   files will not be present in the backup set and therefore will not be
- *   restored.</li>
- *   <li>If you need to keep all log files from each backup so you can restore
- *   to more than one point in time, then the list for each backup should be
- *   saved with the backup file set so it can be used during a restore. During
- *   the restore, only the files in the list should be copied, starting with an
- *   empty destination directory.  This ensures that unused files will not be
- *   restored.</li>
+ * <li>If you only need to restore to the point in time of the most recent
+ * backup, then the list should be used to delete unused files from the
+ * backup set.  After copying all files during the backup, any file that is
+ * <em>not</em> present in the list may then be deleted from the backup set.
+ * This both reduces the size of the backup set, and ensures that unused
+ * files will not be present in the backup set and therefore will not be
+ * restored.</li>
+ * <li>If you need to keep all log files from each backup so you can restore
+ * to more than one point in time, then the list for each backup should be
+ * saved with the backup file set so it can be used during a restore. During
+ * the restore, only the files in the list should be copied, starting with an
+ * empty destination directory.  This ensures that unused files will not be
+ * restored.</li>
  * </ol>
  * <p>
  * The following two examples shows how to perform an incremental backup.  In
@@ -197,46 +193,46 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * the backup set that are no longer needed.
  * <pre class="code">
  * void myBackup(Environment env, File destDir) {
- *
- *     // Get the file number of the last file in the previous backup.
- *     long lastFileInPrevBackup =  ...
- *
- *     DbBackup backupHelper = new DbBackup(env, lastFileInPrevBackup);
- *
- *     // Optional: Do a checkpoint to reduce recovery time after a restore.
- *     env.checkpoint(new CheckpointConfig().setForce(true));
- *
- *     // Start backup, find out what needs to be copied.
- *     backupHelper.startBackup();
- *     try {
- *         // Copy the necessary files to archival storage.
- *         String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
- *         myCopyFiles(env, filesToCopy, destDir);
- *
- *         // Delete files that are no longer needed.
- *         // WARNING: This should only be done after copying all new files.
- *         String[] filesInSnapshot = backupHelper.getLogFilesInSnapshot();
- *         myDeleteUnusedFiles(destDir, filesInSnapshot);
- *
- *         // Update knowledge of last file saved in the backup set.
- *         lastFileInPrevBackup = backupHelper.getLastFileInBackupSet();
- *         // Save lastFileInPrevBackup persistently here ...
- *     } finally {
- *         // Remember to exit backup mode, or the JE cleaner cannot delete
- *         // log files and disk usage will grow without bounds.
- *        backupHelper.endBackup();
- *     }
+ * <p>
+ * // Get the file number of the last file in the previous backup.
+ * long lastFileInPrevBackup =  ...
+ * <p>
+ * DbBackup backupHelper = new DbBackup(env, lastFileInPrevBackup);
+ * <p>
+ * // Optional: Do a checkpoint to reduce recovery time after a restore.
+ * env.checkpoint(new CheckpointConfig().setForce(true));
+ * <p>
+ * // Start backup, find out what needs to be copied.
+ * backupHelper.startBackup();
+ * try {
+ * // Copy the necessary files to archival storage.
+ * String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
+ * myCopyFiles(env, filesToCopy, destDir);
+ * <p>
+ * // Delete files that are no longer needed.
+ * // WARNING: This should only be done after copying all new files.
+ * String[] filesInSnapshot = backupHelper.getLogFilesInSnapshot();
+ * myDeleteUnusedFiles(destDir, filesInSnapshot);
+ * <p>
+ * // Update knowledge of last file saved in the backup set.
+ * lastFileInPrevBackup = backupHelper.getLastFileInBackupSet();
+ * // Save lastFileInPrevBackup persistently here ...
+ * } finally {
+ * // Remember to exit backup mode, or the JE cleaner cannot delete
+ * // log files and disk usage will grow without bounds.
+ * backupHelper.endBackup();
  * }
- *
+ * }
+ * <p>
  * void myDeleteUnusedFiles(File destDir, String[] filesInSnapshot) {
- *     // For each file in destDir that is NOT in filesInSnapshot, it should
- *     // be deleted from destDir to save disk space in the backup set, and to
- *     // ensure that unused files will not be restored.
+ * // For each file in destDir that is NOT in filesInSnapshot, it should
+ * // be deleted from destDir to save disk space in the backup set, and to
+ * // ensure that unused files will not be restored.
  * }
- *
+ * <p>
  * void myCopyFiles(Environment env, String[] filesToCopy, File destDir) {
- *     // See {@link LogVerificationReadableByteChannel} and
- *     // {@link LogVerificationInputStream}
+ * // See {@link LogVerificationReadableByteChannel} and
+ * // {@link LogVerificationInputStream}
  * }
  * </pre>
  * <p>
@@ -249,39 +245,39 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * points in time.
  * <pre class="code">
  * void myBackup(Environment env, File destDir) {
- *
- *     // Get the file number of the last file in the previous backup.
- *     long lastFileInPrevBackup =  ...
- *
- *     DbBackup backupHelper = new DbBackup(env, lastFileInPrevBackup);
- *
- *     // Optional: Do a checkpoint to reduce recovery time after a restore.
- *     env.checkpoint(new CheckpointConfig().setForce(true));
- *
- *     // Start backup, find out what needs to be copied.
- *     backupHelper.startBackup();
- *     try {
- *         // Copy the necessary files to archival storage.
- *         String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
- *         myCopyFiles(env, filesToCopy, destDir);
- *
- *         // Save current list of files with backup data set.
- *         String[] filesInSnapshot = backupHelper.getLogFilesInSnapshot();
- *         // Save filesInSnapshot persistently here ...
- *
- *         // Update knowledge of last file saved in the backup set.
- *         lastFileInPrevBackup = backupHelper.getLastFileInBackupSet();
- *         // Save lastFileInPrevBackup persistently here ...
- *     } finally {
- *         // Remember to exit backup mode, or the JE cleaner cannot delete
- *         // log files and disk usage will grow without bounds.
- *        backupHelper.endBackup();
- *     }
+ * <p>
+ * // Get the file number of the last file in the previous backup.
+ * long lastFileInPrevBackup =  ...
+ * <p>
+ * DbBackup backupHelper = new DbBackup(env, lastFileInPrevBackup);
+ * <p>
+ * // Optional: Do a checkpoint to reduce recovery time after a restore.
+ * env.checkpoint(new CheckpointConfig().setForce(true));
+ * <p>
+ * // Start backup, find out what needs to be copied.
+ * backupHelper.startBackup();
+ * try {
+ * // Copy the necessary files to archival storage.
+ * String[] filesToCopy = backupHelper.getLogFilesInBackupSet();
+ * myCopyFiles(env, filesToCopy, destDir);
+ * <p>
+ * // Save current list of files with backup data set.
+ * String[] filesInSnapshot = backupHelper.getLogFilesInSnapshot();
+ * // Save filesInSnapshot persistently here ...
+ * <p>
+ * // Update knowledge of last file saved in the backup set.
+ * lastFileInPrevBackup = backupHelper.getLastFileInBackupSet();
+ * // Save lastFileInPrevBackup persistently here ...
+ * } finally {
+ * // Remember to exit backup mode, or the JE cleaner cannot delete
+ * // log files and disk usage will grow without bounds.
+ * backupHelper.endBackup();
  * }
- *
+ * }
+ * <p>
  * void myCopyFiles(Environment env, String[] filesToCopy, File destDir) {
- *     // See {@link LogVerificationReadableByteChannel} and
- *     // {@link LogVerificationInputStream}
+ * // See {@link LogVerificationReadableByteChannel} and
+ * // {@link LogVerificationInputStream}
  * }
  * </pre>
  * <p>
@@ -301,13 +297,13 @@ import berkeley.com.sleepycat.je.utilint.TestHookExecute;
  * There is one additional consideration when performing a restore, under the
  * following condition:
  * <ul>
- *     <li>Incremental backups are used, AND
- *     <ul>
- *         <li>the backup was created using DbBackup with JE 6.2 or earlier,
- *         OR</li>
- *         <li>the backup was created in a read-only JE environment.</li>
- *     </ul>
- *     </li>
+ * <li>Incremental backups are used, AND
+ * <ul>
+ * <li>the backup was created using DbBackup with JE 6.2 or earlier,
+ * OR</li>
+ * <li>the backup was created in a read-only JE environment.</li>
+ * </ul>
+ * </li>
  * </ul>
  * <p>
  * If the above condition holds, after copying the files an additional step is
@@ -350,20 +346,19 @@ public class DbBackup {
 
     /**
      * Creates a DbBackup helper for a full backup.
-     *
-     * <p>This is equivalent to using {@link #DbBackup(Environment,long)} and
+     * <p>
+     * <p>This is equivalent to using {@link #DbBackup(Environment, long)} and
      * passing {@code -1} for the {@code lastFileInPrevBackup} parameter.</p>
      *
      * @param env with an open, valid environment handle.  If the environment
-     * directory has read/write permissions, the environment handle must be
-     * configured for read/write.
-     *
+     *            directory has read/write permissions, the environment handle must be
+     *            configured for read/write.
      * @throws IllegalArgumentException if the environment directory has
-     * read/write permissions, but the environment handle is not configured for
-     * read/write.
+     *                                  read/write permissions, but the environment handle is not configured for
+     *                                  read/write.
      */
     public DbBackup(Environment env)
-        throws DatabaseException {
+            throws DatabaseException {
 
         this(env, -1);
     }
@@ -371,29 +366,25 @@ public class DbBackup {
     /**
      * Creates a DbBackup helper for an incremental backup.
      *
-     * @param env with an open, valid environment handle.  If the environment
-     * directory has read/write permissions, the environment handle must be
-     * configured for read/write.
-     *
+     * @param env                  with an open, valid environment handle.  If the environment
+     *                             directory has read/write permissions, the environment handle must be
+     *                             configured for read/write.
      * @param lastFileInPrevBackup the last file in the previous backup set
-     * when performing an incremental backup, or {@code -1} to perform a full
-     * backup.  The first file in this backup set will be the file following
-     * {@code lastFileInPrevBackup}.
-     *
+     *                             when performing an incremental backup, or {@code -1} to perform a full
+     *                             backup.  The first file in this backup set will be the file following
+     *                             {@code lastFileInPrevBackup}.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalArgumentException if the environment directory has
-     * read/write permissions, but the environment handle is not configured for
-     * read/write.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalArgumentException    if the environment directory has
+     *                                     read/write permissions, but the environment handle is not configured for
+     *                                     read/write.
      */
     public DbBackup(Environment env, long lastFileInPrevBackup) {
         this(env, DbInternal.getNonNullEnvImpl(env), lastFileInPrevBackup);
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      */
     public DbBackup(EnvironmentImpl envImpl) {
         this(null, envImpl, -1);
@@ -408,7 +399,7 @@ public class DbBackup {
                      long lastFileInPrevBackup) {
 
         /* Check that the Environment is open. */
-        if (env != null) {
+        if(env != null) {
             DbInternal.checkOpen(env);
         }
 
@@ -419,10 +410,10 @@ public class DbBackup {
          * in order to flip the file.
          */
         envIsReadOnly = envImpl.getFileManager().checkEnvHomePermissions(true);
-        if ((!envIsReadOnly) && envImpl.isReadOnly()) {
+        if((!envIsReadOnly) && envImpl.isReadOnly()) {
             throw new IllegalArgumentException
-                ("Environment handle may not be read-only when directory " +
-                 "is read-write");
+                    ("Environment handle may not be read-only when directory " +
+                            "is read-write");
         }
 
         firstFileInBackup = lastFileInPrevBackup + 1;
@@ -431,13 +422,13 @@ public class DbBackup {
     /**
      * Start backup mode in order to determine the definitive backup set needed
      * at this point in time.
-     *
+     * <p>
      * <p>This method determines the last file in the backup set, which is the
      * last log file in the environment at this point in time.  Following this
      * method call, all new data will be written to other, new log files.  In
      * other words, the last file in the backup set will not be modified after
      * this method returns.</p>
-     *
+     * <p>
      * <p><em>WARNING:</em> After calling this method, deletion of log files in
      * the backup set by the JE log cleaner will be disabled until {@link
      * #endBackup()} is called.  To prevent unbounded growth of disk usage, be
@@ -447,27 +438,25 @@ public class DbBackup {
      * </p>
      *
      * @throws com.sleepycat.je.rep.LogOverwriteException if a replication
-     * operation is overwriting log files. The backup can not proceed because
-     * files may be invalid. The backup may be attempted at a later time.
-     *
-     * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if a backup is already in progress
+     *                                                    operation is overwriting log files. The backup can not proceed because
+     *                                                    files may be invalid. The backup may be attempted at a later time.
+     * @throws EnvironmentFailureException                if an unexpected, internal or
+     *                                                    environment-wide failure occurs.
+     * @throws IllegalStateException                      if a backup is already in progress
      */
     public synchronized void startBackup()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (backupStarted) {
+        if(backupStarted) {
             throw new IllegalStateException("startBackup was already called");
         }
 
         /* Throw a LogOverwriteException if the Environment is rolling back. */
-        if (!envImpl.addDbBackup(this)) {
+        if(!envImpl.addDbBackup(this)) {
             throw envImpl.createLogOverwriteException
-                ("A replication operation is overwriting log files. The " +
-                 "backup can not proceed because files may be invalid. The " +
-                 "backup may be attempted at a later time.");
+                    ("A replication operation is overwriting log files. The " +
+                            "backup can not proceed because files may be invalid. The " +
+                            "backup may be attempted at a later time.");
         }
 
         /* Protect all files from deletion while we get the backup list. */
@@ -482,7 +471,7 @@ public class DbBackup {
              */
             backupStarted = true;
 
-            if (envIsReadOnly) {
+            if(envIsReadOnly) {
                 /*
                  * All files are currently immutable, so the backup list can
                  * include all files. However, we can't add a marker to the
@@ -491,7 +480,8 @@ public class DbBackup {
                  * user sets ENV_RECOVERY_FORCE_NEW_FILE after restoring).
                  */
                 lastFileInBackup = envImpl.getFileManager().getLastFileNum();
-            } else {
+            }
+            else {
                 /*
                  * Flip the log so that all files in the backup list are
                  * immutable. But first, write an "immutable file" marker in
@@ -499,10 +489,10 @@ public class DbBackup {
                  * it is restored. Recovery enforces this rule.
                  */
                 LogEntry marker = new SingleItemEntry<EmptyLogEntry>(
-                    LogEntryType.LOG_IMMUTABLE_FILE, new EmptyLogEntry());
+                        LogEntryType.LOG_IMMUTABLE_FILE, new EmptyLogEntry());
 
                 long markerLsn = envImpl.getLogManager().log(
-                    marker, ReplicationContext.NO_REPLICATE);
+                        marker, ReplicationContext.NO_REPLICATE);
 
                 envImpl.forceLogFileFlip();
                 lastFileInBackup = DbLsn.getFileNumber(markerLsn);
@@ -510,7 +500,7 @@ public class DbBackup {
 
             /* Get files in snapshot while all files are protected. */
             snapshotFiles =
-                envImpl.getFileManager().listFileNames(0, lastFileInBackup);
+                    envImpl.getFileManager().listFileNames(0, lastFileInBackup);
         } finally {
             envImpl.getCleaner().removeProtectedFileRange(0);
         }
@@ -520,15 +510,13 @@ public class DbBackup {
      * End backup mode, thereby re-enabling normal deletion of log files by the
      * JE log cleaner.
      *
-     * @throws com.sleepycat.je.rep.LogOverwriteException if a replication
-     * operation has overwritten log files. Any copied files should be
-     * considered invalid and discarded.  The backup may be attempted at a
-     * later time.
-     *
+     * @throws com.sleepycat.je.rep.LogOverwriteException   if a replication
+     *                                                      operation has overwritten log files. Any copied files should be
+     *                                                      considered invalid and discarded.  The backup may be attempted at a
+     *                                                      later time.
      * @throws com.sleepycat.je.EnvironmentFailureException if an unexpected,
-     * internal or environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if a backup has not been started.
+     *                                                      internal or environment-wide failure occurs.
+     * @throws IllegalStateException                        if a backup has not been started.
      */
     public synchronized void endBackup() {
         checkBackupStarted();
@@ -541,13 +529,13 @@ public class DbBackup {
         envImpl.removeDbBackup(this);
 
         /* If this back up is invalid, throw a LogOverwriteException. */
-        if (invalid) {
+        if(invalid) {
             invalid = false;
             throw envImpl.createLogOverwriteException
-                ("A replication operation has overwritten log files from " +
-                 "file " + rollbackStartedFileNumber + ". Any copied files " +
-                 "should be considered invalid and discarded. The backup " +
-                 "may be attempted at a later time.");
+                    ("A replication operation has overwritten log files from " +
+                            "file " + rollbackStartedFileNumber + ". Any copied files " +
+                            "should be considered invalid and discarded. The backup " +
+                            "may be attempted at a later time.");
         }
     }
 
@@ -557,7 +545,6 @@ public class DbBackup {
      * @return the file number of the last file in the current backup set.
      * Save this value to reduce the number of files that must be copied at
      * the next backup session.
-     *
      * @throws IllegalStateException if a backup has not been started.
      */
     public synchronized long getLastFileInBackupSet() {
@@ -572,7 +559,7 @@ public class DbBackup {
      * session.  When performing a full backup, this consists of the set of all
      * files. Can only be called in backup mode, after startBackup() has been
      * called.
-     *
+     * <p>
      * <p>The file numbers returned are in the range from the constructor
      * parameter {@code lastFileInPrevBackup + 1} to the last log file at the
      * time that {@link #startBackup} was called.</p>
@@ -585,16 +572,14 @@ public class DbBackup {
      * prepended with the associated "dataNNN/" prefix, where "dataNNN/" is
      * the data directory name within the environment home directory and "/"
      * is the relevant file separator for the platform.
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if a backup has not been started.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if a backup has not been started.
      */
     public synchronized String[] getLogFilesInBackupSet() {
         checkBackupStarted();
         return envImpl.getFileManager().listFileNames(firstFileInBackup,
-                                                      lastFileInBackup);
+                lastFileInBackup);
     }
 
     /**
@@ -604,40 +589,35 @@ public class DbBackup {
      * mode, after startBackup() has been called.
      *
      * @param lastFileInPrevBackup file number of last file copied in the last
-     * backup session, obtained from getLastFileInBackupSet().
-     *
+     *                             backup session, obtained from getLastFileInBackupSet().
      * @return the names of all the files to be copied that come after
      * lastFileInPrevBackup.
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if a backup has not been started.
-     *
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if a backup has not been started.
      * @deprecated replaced by {@link #getLogFilesInBackupSet()}; pass
-     * lastFileInPrevBackup to the {@link #DbBackup(Environment,long)}
+     * lastFileInPrevBackup to the {@link #DbBackup(Environment, long)}
      * constructor.
      */
     @Deprecated
-    public synchronized
-        String[] getLogFilesInBackupSet(long lastFileInPrevBackup) {
+    public synchronized String[] getLogFilesInBackupSet(long lastFileInPrevBackup) {
         checkBackupStarted();
         FileManager fileManager = envImpl.getFileManager();
         return fileManager.listFileNames(lastFileInPrevBackup + 1,
-                                         lastFileInBackup);
+                lastFileInBackup);
     }
 
     /**
      * Get the list of all files that are needed for the environment at the
      * point of time when backup mode started, i.e., the current snapshot.  Can
      * only be called in backup mode, after startBackup() has been called.
-     *
+     * <p>
      * <p>When performing an incremental backup, this method is called to
      * determine the files that would needed for a restore.  As described in
      * the examples at the top of this class, this list can be used to avoid
      * unused files after a restore, and may also be used to reduce the size of
      * the backup set.</p>
-     *
+     * <p>
      * <p>When performing a full backup this method is normally not needed,
      * since in that case it returns the same set of files that is returned by
      * {@link #getLogFilesInBackupSet()}.</p>
@@ -650,11 +630,9 @@ public class DbBackup {
      * prepended with the associated "dataNNN/" prefix, where "dataNNN/" is
      * the data directory name within the environment home directory and "/"
      * is the relevant file separator for the platform.
-     *
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     *
-     * @throws IllegalStateException if a backup has not been started.
+     *                                     environment-wide failure occurs.
+     * @throws IllegalStateException       if a backup has not been started.
      */
     public synchronized String[] getLogFilesInSnapshot() {
         checkBackupStarted();
@@ -662,23 +640,20 @@ public class DbBackup {
     }
 
     private void checkBackupStarted() {
-        if (!backupStarted) {
+        if(!backupStarted) {
             throw new IllegalStateException("startBackup was not called");
         }
     }
 
     /**
-     * @hidden
-     * Returns true if a backup has been started and is in progress.
+     * @hidden Returns true if a backup has been started and is in progress.
      */
     public synchronized boolean backupIsOpen() {
         return backupStarted;
     }
 
     /**
-     * @hidden
-     *
-     * Invalidate this backup if replication overwrites the log.
+     * @hidden Invalidate this backup if replication overwrites the log.
      */
     public void invalidate(long fileNumber) {
         invalid = true;
@@ -686,9 +661,7 @@ public class DbBackup {
     }
 
     /**
-     * @hidden
-     *
-     * A test entry point used to simulate the environment is now rolling back,
+     * @hidden A test entry point used to simulate the environment is now rolling back,
      * and this TestHook would invalidate the in progress DbBackups.
      */
     public void setTestHook(TestHook testHook) {

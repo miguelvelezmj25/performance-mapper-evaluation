@@ -12,36 +12,43 @@
  */
 package berkeley.com.sleepycat.je.tree;
 
-import java.util.Arrays;
-
 import berkeley.com.sleepycat.je.dbi.MemoryBudget;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
 
+import java.util.Arrays;
+
 /**
  * Holds an array of non-negative long values, one for each slot in an IN.
- *
+ * <p>
  * Zero is the default value and is returned when no value has been set.
- *
+ * <p>
  * The EMPTY_REP is used at first, and is mutated as necessary as values are
  * set.  A minimum number of bytes per value is used, based on the largest
  * value passed to set().
- *
+ * <p>
  * Optionally, a sparse rep is used when a value is set for EMPTY_REP. Up to 4
  * values are stored along with their indexes. When the 5th values is set, the
  * rep is mutated to the default rep.
- *
+ * <p>
  * This object calls IN.updateMemorySize to track the memory it uses.
  * EMPTY_REP uses no memory because it is a singleton.
  */
 public abstract class INLongRep {
 
     public abstract long get(int idx);
+
     public abstract INLongRep set(int idx, long val, IN parent);
+
     public abstract INLongRep compact(IN parent, EmptyRep emptyRep);
+
     public abstract INLongRep clear(IN parent, EmptyRep emptyRep);
+
     public abstract boolean isEmpty();
+
     public abstract INLongRep copy(int from, int to, int n, IN parent);
+
     public abstract INLongRep resize(int capacity);
+
     public abstract long getMemorySize();
 
     /**
@@ -75,15 +82,16 @@ public abstract class INLongRep {
         @Override
         public INLongRep set(int idx, long val, IN parent) {
 
-            if (val == 0) {
+            if(val == 0) {
                 return this;
             }
 
             final INLongRep newCache;
 
-            if (false /*TODO*/ && allowSparseRep) {
+            if(false /*TODO*/ && allowSparseRep) {
                 newCache = new SparseRep(minLength);
-            } else {
+            }
+            else {
                 newCache = new DefaultRep(parent.getMaxEntries(), minLength);
             }
 
@@ -124,21 +132,22 @@ public abstract class INLongRep {
 
     public static class DefaultRep extends INLongRep {
 
-        /** Maximum value indexed by number of bytes. */
+        /**
+         * Maximum value indexed by number of bytes.
+         */
         private static long[] MAX_VALUE = {
-            0x0L,
-            0xFFL,
-            0xFFFFL,
-            0xFFFFFFL,
-            0xFFFFFFFFL,
-            0xFFFFFFFFFFL,
-            0xFFFFFFFFFFFFL,
-            0xFFFFFFFFFFFFFFL,
-            0x7FFFFFFFFFFFFFFFL,
+                0x0L,
+                0xFFL,
+                0xFFFFL,
+                0xFFFFFFL,
+                0xFFFFFFFFL,
+                0xFFFFFFFFFFL,
+                0xFFFFFFFFFFFFL,
+                0xFFFFFFFFFFFFFFL,
+                0x7FFFFFFFFFFFFFFFL,
         };
-
-        private final byte[] byteArray;
         final int bytesPerValue;
+        private final byte[] byteArray;
 
         public DefaultRep(int capacity, int nBytes) {
             assert capacity >= 1;
@@ -163,8 +172,8 @@ public abstract class INLongRep {
         @Override
         public DefaultRep resize(int capacity) {
             return new DefaultRep(
-                Arrays.copyOfRange(byteArray, 0, capacity * bytesPerValue),
-                bytesPerValue);
+                    Arrays.copyOfRange(byteArray, 0, capacity * bytesPerValue),
+                    bytesPerValue);
         }
 
         @Override
@@ -175,7 +184,7 @@ public abstract class INLongRep {
 
             long val = (byteArray[i] & 0xFF);
 
-            for (i += 1; i < end; i += 1) {
+            for(i += 1; i < end; i += 1) {
                 val <<= 8;
                 val |= (byteArray[i] & 0xFF);
             }
@@ -198,20 +207,21 @@ public abstract class INLongRep {
              * If the value can't be represented using bytesPerValue, mutate
              * to a cache with a larger number of bytes.
              */
-            if (val > MAX_VALUE[bytesPerValue]) {
+            if(val > MAX_VALUE[bytesPerValue]) {
 
                 final int capacity = byteArray.length / bytesPerValue;
 
                 INLongRep newRep;
 
-                if (getClass() == SparseRep.class) {
+                if(getClass() == SparseRep.class) {
                     newRep = new SparseRep(bytesPerValue + 1);
-                } else {
+                }
+                else {
                     newRep = new DefaultRep(capacity, bytesPerValue + 1);
                 }
 
                 parent.updateMemorySize(
-                    getMemorySize(), newRep.getMemorySize());
+                        getMemorySize(), newRep.getMemorySize());
 
                 /*
                  * Set new value in new cache, and copy other values from old
@@ -219,8 +229,8 @@ public abstract class INLongRep {
                  */
                 newRep = newRep.set(idx, val, parent);
 
-                for (int i = 0; i < capacity; i += 1) {
-                    if (i != idx) {
+                for(int i = 0; i < capacity; i += 1) {
+                    if(i != idx) {
                         newRep = newRep.set(i, get(i), parent);
                     }
                 }
@@ -234,7 +244,7 @@ public abstract class INLongRep {
 
             byteArray[i] = (byte) (val & 0xFF);
 
-            for (i -= 1; i > end; i -= 1) {
+            for(i -= 1; i > end; i -= 1) {
                 val >>= 8;
                 byteArray[i] = (byte) (val & 0xFF);
             }
@@ -247,7 +257,7 @@ public abstract class INLongRep {
         @Override
         public INLongRep compact(IN parent, EmptyRep emptyRep) {
 
-            if (isEmpty()) {
+            if(isEmpty()) {
                 return clear(parent, emptyRep);
             }
 
@@ -258,7 +268,7 @@ public abstract class INLongRep {
         public INLongRep clear(IN parent, EmptyRep emptyRep) {
 
             parent.updateMemorySize(
-                getMemorySize(), emptyRep.getMemorySize());
+                    getMemorySize(), emptyRep.getMemorySize());
 
             return emptyRep;
         }
@@ -266,8 +276,8 @@ public abstract class INLongRep {
         @Override
         public boolean isEmpty() {
 
-            for (byte b : byteArray) {
-                if (b != 0) {
+            for(byte b : byteArray) {
+                if(b != 0) {
                     return false;
                 }
             }
@@ -278,17 +288,17 @@ public abstract class INLongRep {
         @Override
         public INLongRep copy(int from, int to, int n, IN parent) {
             System.arraycopy(byteArray,
-                             from * bytesPerValue,
-                             byteArray,
-                             to * bytesPerValue,
-                             n * bytesPerValue);
+                    from * bytesPerValue,
+                    byteArray,
+                    to * bytesPerValue,
+                    n * bytesPerValue);
             return this;
         }
 
         @Override
         public long getMemorySize() {
             return MemoryBudget.DEFAULT_LONG_REP_OVERHEAD +
-                   MemoryBudget.byteArraySize(byteArray.length);
+                    MemoryBudget.byteArraySize(byteArray.length);
         }
     }
 
@@ -320,8 +330,8 @@ public abstract class INLongRep {
         @Override
         public long get(int idx) {
 
-            for (int i = 0; i < idxs.length; i += 1) {
-                if (idxs[i] == idx) {
+            for(int i = 0; i < idxs.length; i += 1) {
+                if(idxs[i] == idx) {
                     return super.get(i);
                 }
             }
@@ -334,38 +344,38 @@ public abstract class INLongRep {
 
             int slot = -1;
 
-            for (int i = 0; i < idxs.length; i++) {
+            for(int i = 0; i < idxs.length; i++) {
 
-                if (idxs[i] == idx) {
-                    if (val == 0) {
+                if(idxs[i] == idx) {
+                    if(val == 0) {
                         idxs[i] = -1;
                     }
                     return super.set(i, val, parent);
                 }
 
-                if (slot < 0 && idxs[i] == -1) {
+                if(slot < 0 && idxs[i] == -1) {
                     slot = i;
                 }
             }
 
-            if (val == 0) {
+            if(val == 0) {
                 return this;
             }
 
             /* Have a free slot, use it. */
-            if (slot >= 0) {
+            if(slot >= 0) {
                 idxs[slot] = (short) idx;
                 return super.set(slot, val, parent);
             }
 
             /* It's full, mutate it. */
             INLongRep newRep =
-                new DefaultRep(parent.getMaxEntries(), bytesPerValue);
+                    new DefaultRep(parent.getMaxEntries(), bytesPerValue);
 
             parent.updateMemorySize(getMemorySize(), newRep.getMemorySize());
 
-            for (int i = 0; i < idxs.length; i++) {
-                if (idxs[i] != -1) {
+            for(int i = 0; i < idxs.length; i++) {
+                if(idxs[i] != -1) {
                     newRep = newRep.set(idxs[i], super.get(i), parent);
                 }
             }
@@ -376,7 +386,7 @@ public abstract class INLongRep {
         @Override
         public INLongRep compact(IN parent, EmptyRep emptyRep) {
 
-            if (isEmpty()) {
+            if(isEmpty()) {
                 return clear(parent, emptyRep);
             }
 
@@ -387,7 +397,7 @@ public abstract class INLongRep {
         public INLongRep clear(IN parent, EmptyRep emptyRep) {
 
             parent.updateMemorySize(
-                getMemorySize(), emptyRep.getMemorySize());
+                    getMemorySize(), emptyRep.getMemorySize());
 
             return emptyRep;
         }
@@ -395,8 +405,8 @@ public abstract class INLongRep {
         @Override
         public boolean isEmpty() {
 
-            for (short idx : idxs) {
-                if (idx != -1) {
+            for(short idx : idxs) {
+                if(idx != -1) {
                     return false;
                 }
             }
@@ -409,18 +419,20 @@ public abstract class INLongRep {
 
             INLongRep target = this;
 
-            if ((to == from) || (n == 0)) {
+            if((to == from) || (n == 0)) {
                 /* Nothing to do */
-            } else if (to < from) {
+            }
+            else if(to < from) {
                 /* Copy ascending */
-                for (int i = 0; i < n; i++) {
+                for(int i = 0; i < n; i++) {
                     target = target.set(to++, get(from++), parent);
                 }
-            } else {
+            }
+            else {
                 /* to > from. Copy descending */
                 from += n;
                 to += n;
-                for (int i = 0; i < n; i++) {
+                for(int i = 0; i < n; i++) {
                     target = target.set(--to, get(--from), parent);
                 }
             }
@@ -431,9 +443,9 @@ public abstract class INLongRep {
         @Override
         public long getMemorySize() {
             return super.getMemorySize() +
-                MemoryBudget.SPARSE_LONG_REP_OVERHEAD -
-                MemoryBudget.DEFAULT_KEYVALS_OVERHEAD +
-                MemoryBudget.shortArraySize(idxs.length);
+                    MemoryBudget.SPARSE_LONG_REP_OVERHEAD -
+                    MemoryBudget.DEFAULT_KEYVALS_OVERHEAD +
+                    MemoryBudget.shortArraySize(idxs.length);
         }
     }
 }

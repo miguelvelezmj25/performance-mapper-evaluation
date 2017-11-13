@@ -13,38 +13,9 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_FEEDERS_CREATED;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_FEEDERS_SHUTDOWN;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_MAX_REPLICA_LAG;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.N_MAX_REPLICA_LAG_NAME;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_DELAY_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_LAST_COMMIT_TIMESTAMP_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_LAST_COMMIT_VLSN_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_VLSN_LAG_MAP;
-import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.REPLICA_VLSN_RATE_MAP;
-import static java.util.concurrent.TimeUnit.MINUTES;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.Durability;
+import berkeley.com.sleepycat.je.*;
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
 import berkeley.com.sleepycat.je.Durability.SyncPolicy;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.StatsConfig;
-import berkeley.com.sleepycat.je.TransactionConfig;
 import berkeley.com.sleepycat.je.rep.NodeType;
 import berkeley.com.sleepycat.je.rep.UnknownMasterException;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
@@ -58,17 +29,20 @@ import berkeley.com.sleepycat.je.rep.utilint.IntRunningTotalStat;
 import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
 import berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMap;
 import berkeley.com.sleepycat.je.rep.utilint.SizeAwaitMap.Predicate;
-import berkeley.com.sleepycat.je.utilint.AtomicLongMapStat;
-import berkeley.com.sleepycat.je.utilint.IntStat;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongAvgRateMapStat;
-import berkeley.com.sleepycat.je.utilint.LongDiffMapStat;
-import berkeley.com.sleepycat.je.utilint.LongMaxZeroStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.StringStat;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.rep.impl.node.FeederManagerStatDefinition.*;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * FeedManager is responsible for the creation and management of the Feeders
@@ -76,12 +50,12 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * central loop that listens for replica connections and manages the lifecycle
  * of individual Feeders. It's re-entered each time the node becomes a Master
  * and is exited when its status changes.
- *
+ * <p>
  * There is a single instance of FeederManager that is created for a
  * replication node. There are many instances of Feeders per FeederManager.
  * Each Feeder instance represents an instance of a connection between the node
  * serving as the feeder and the replica.
- *
+ * <p>
  * Note that the FeederManager and the Replica currently reuse the Replication
  * node's thread of control. When we implement r2r we will need to revisit the
  * thread management to provide for concurrent operation of the FeederManger
@@ -89,29 +63,51 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  */
 final public class FeederManager {
 
-    private final RepNode repNode;
-
-    /*
-     * The queue into which the ServiceDispatcher queues socket channels for
-     * new Feeder instances.
+    /* Identifies the Feeder Service. */
+    public static final String FEEDER_SERVICE = "Feeder";
+    /**
+     * The moving average period in milliseconds
      */
-    private final BlockingQueue<DataChannel> channelQueue =
-        new LinkedBlockingQueue<DataChannel>();
+    private static final long MOVING_AVG_PERIOD_MILLIS = 10000;
 
     /*
      * Feeders are stored in either nascentFeeders or activeFeeders, and not
      * both.  To avoid deadlock, if locking both collections, lock
      * nascentFeeders first and then activeFeeders.
      */
+    /**
+     * A test hook, parameterized by feeder's Name/ID pair, that delays CBVLSN
+     * updates if it throws an IllegalStateException.
+     */
+    private static volatile TestHook<NameIdPair> delayCBVLSNUpdateHook;
+    /**
+     * Convenience constant used by the DTVLSN flusher when committing the null
+     * transaction.
+     */
+    private static TransactionConfig NULL_TXN_CONFIG = new TransactionConfig();
 
+    static {
+        NULL_TXN_CONFIG.setDurability(new Durability(SyncPolicy.WRITE_NO_SYNC,
+                SyncPolicy.WRITE_NO_SYNC,
+                ReplicaAckPolicy.NONE));
+    }
+
+    /* The poll timeout used when accepting feeder connections. */
+    public final long pollTimeoutMs;
+    private final RepNode repNode;
+    /*
+     * The queue into which the ServiceDispatcher queues socket channels for
+     * new Feeder instances.
+     */
+    private final BlockingQueue<DataChannel> channelQueue =
+            new LinkedBlockingQueue<DataChannel>();
     /*
      * Nascent feeders that are starting up and are not yet active. They have
      * network connections but have not synched up or completed handshakes.
      * They are moved into the feeder map, once they become active.
      */
     private final Set<Feeder> nascentFeeders =
-        Collections.synchronizedSet(new HashSet<Feeder>());
-
+            Collections.synchronizedSet(new HashSet<Feeder>());
     /*
      * The collection of active feeders currently feeding replicas. The map is
      * indexed by the Replica's node name. Access to this map must be
@@ -126,42 +122,21 @@ final public class FeederManager {
      * durability decisions.
      */
     private final SizeAwaitMap<String, Feeder> activeFeeders;
-
     /*
      * The number of active ack feeders feeding electable, i.e. acking, nodes.
      */
     private final AtomicInteger ackFeeders = new AtomicInteger(0);
-
     /*
      * The number of arbiter feeders; there can only be one currently. It's
      * Atomic for consistency with ackFeeders.
      */
     private final AtomicInteger arbiterFeeders = new AtomicInteger(0);
-    private String arbiterFeederName;
-
-    /*
-     * A test delay introduced in the feeder loop to simulate a loaded master.
-     * The feeder waits this amount of time after each message is sent.
-     */
-    private int testDelayMs = 0;
-
-    /* Set to true to force a shutdown of the FeederManager. */
-    AtomicBoolean shutdown = new AtomicBoolean(false);
-
-    /*
-     * Non null if the replication node must be shutdown as well. This is
-     * typically the result of an unexpected exception in the feeder.
-     */
-    private RuntimeException repNodeShutdownException;
-
     /**
      * Used to manage the flushing of the DTVLSN via a null TXN commit
      * when appropriate.
      */
     private final DTVLSNFlusher dtvlsnFlusher;
-
     private final Logger logger;
-
     /* FeederManager statistics. */
     private final StatGroup stats;
     private final IntStat nFeedersCreated;
@@ -171,7 +146,6 @@ final public class FeederManager {
     private final AtomicLongMapStat replicaLastCommitVLSNMap;
     private final LongDiffMapStat replicaVLSNLagMap;
     private final LongAvgRateMapStat replicaVLSNRateMap;
-
     /*
      * The maximum lag across all replicas. Atomic values or synchronization
      * are not used for the shared statistic to minimize overheads and the
@@ -180,29 +154,27 @@ final public class FeederManager {
      */
     private final LongMaxZeroStat nMaxReplicaLag;
     private final StringStat nMaxReplicaLagName;
-
-    /* The poll timeout used when accepting feeder connections. */
-    public final long pollTimeoutMs ;
-
-    /* Identifies the Feeder Service. */
-    public static final String FEEDER_SERVICE = "Feeder";
-
-    /** The moving average period in milliseconds */
-    private static final long MOVING_AVG_PERIOD_MILLIS = 10000;
-
-    /**
-     * A test hook, parameterized by feeder's Name/ID pair, that delays CBVLSN
-     * updates if it throws an IllegalStateException.
+    /* Set to true to force a shutdown of the FeederManager. */
+    AtomicBoolean shutdown = new AtomicBoolean(false);
+    private String arbiterFeederName;
+    /*
+     * A test delay introduced in the feeder loop to simulate a loaded master.
+     * The feeder waits this amount of time after each message is sent.
      */
-    private static volatile TestHook<NameIdPair> delayCBVLSNUpdateHook;
+    private int testDelayMs = 0;
+    /*
+     * Non null if the replication node must be shutdown as well. This is
+     * typically the result of an unexpected exception in the feeder.
+     */
+    private RuntimeException repNodeShutdownException;
 
     FeederManager(RepNode repNode) {
         this.repNode = repNode;
         activeFeeders = new SizeAwaitMap<String, Feeder>(
-            repNode.getRepImpl(), new MatchElectableFeeders());
+                repNode.getRepImpl(), new MatchElectableFeeders());
         logger = LoggerUtils.getLogger(getClass());
         stats = new StatGroup(FeederManagerStatDefinition.GROUP_NAME,
-                              FeederManagerStatDefinition.GROUP_DESC);
+                FeederManagerStatDefinition.GROUP_DESC);
         nFeedersCreated = new IntRunningTotalStat(stats, N_FEEDERS_CREATED);
         nFeedersShutdown = new IntRunningTotalStat(stats, N_FEEDERS_SHUTDOWN);
         nMaxReplicaLag = new LongMaxZeroStat(stats, N_MAX_REPLICA_LAG);
@@ -214,34 +186,27 @@ final public class FeederManager {
          */
         final long validityMillis = 2 * repNode.getHeartbeatInterval();
         replicaDelayMap =
-            new LongDiffMapStat(stats, REPLICA_DELAY_MAP, validityMillis);
+                new LongDiffMapStat(stats, REPLICA_DELAY_MAP, validityMillis);
         replicaLastCommitTimestampMap =
-            new AtomicLongMapStat(stats, REPLICA_LAST_COMMIT_TIMESTAMP_MAP);
+                new AtomicLongMapStat(stats, REPLICA_LAST_COMMIT_TIMESTAMP_MAP);
         replicaLastCommitVLSNMap =
-            new AtomicLongMapStat(stats, REPLICA_LAST_COMMIT_VLSN_MAP);
+                new AtomicLongMapStat(stats, REPLICA_LAST_COMMIT_VLSN_MAP);
         replicaVLSNLagMap =
-            new LongDiffMapStat(stats, REPLICA_VLSN_LAG_MAP, validityMillis);
+                new LongDiffMapStat(stats, REPLICA_VLSN_LAG_MAP, validityMillis);
         replicaVLSNRateMap = new LongAvgRateMapStat(
-            stats, REPLICA_VLSN_RATE_MAP, MOVING_AVG_PERIOD_MILLIS, MINUTES);
+                stats, REPLICA_VLSN_RATE_MAP, MOVING_AVG_PERIOD_MILLIS, MINUTES);
 
         pollTimeoutMs = repNode.getConfigManager().
-            getDuration(RepParams.FEEDER_MANAGER_POLL_TIMEOUT);
+                getDuration(RepParams.FEEDER_MANAGER_POLL_TIMEOUT);
         dtvlsnFlusher = new DTVLSNFlusher();
     }
 
     /**
-     * A SizeAwaitMap predicate that matches feeders connected to electable
-     * replicas.
+     * Set a test hook, parameterized by feeder's Name/ID pair, that delays
+     * CBVLSN updates if it throws an IllegalStateException.
      */
-    private class MatchElectableFeeders implements Predicate<Feeder> {
-        @Override
-        public boolean match(final Feeder value) {
-
-            /* The replica node might be null during unit testing */
-            final RepNodeImpl replica = value.getReplicaNode();
-            return (replica != null) &&
-                repNode.getDurabilityQuorum().replicaAcksQualify(replica);
-        }
+    public static void setDelayCBVLSNUpdateHook(TestHook<NameIdPair> hook) {
+        delayCBVLSNUpdateHook = hook;
     }
 
     /**
@@ -251,7 +216,7 @@ final public class FeederManager {
      */
     public StatGroup getFeederManagerStats(StatsConfig config) {
 
-        synchronized (stats) {
+        synchronized(stats) {
             return stats.cloneGroup(config.getClear());
         }
     }
@@ -260,10 +225,10 @@ final public class FeederManager {
     public StatGroup getProtocolStats(StatsConfig config) {
         /* Aggregate stats that have not yet been aggregated. */
         StatGroup protocolStats =
-            new StatGroup(BinaryProtocolStatDefinition.GROUP_NAME,
-                          BinaryProtocolStatDefinition.GROUP_DESC);
-        synchronized (activeFeeders) {
-            for (Feeder feeder : activeFeeders.values()) {
+                new StatGroup(BinaryProtocolStatDefinition.GROUP_NAME,
+                        BinaryProtocolStatDefinition.GROUP_DESC);
+        synchronized(activeFeeders) {
+            for(Feeder feeder : activeFeeders.values()) {
                 protocolStats.addAll(feeder.getProtocolStats(config));
             }
         }
@@ -273,11 +238,11 @@ final public class FeederManager {
 
     /* Reset the feeders' stats of this FeederManager. */
     public void resetStats() {
-        synchronized (stats) {
+        synchronized(stats) {
             stats.clear();
         }
-        synchronized (activeFeeders) {
-            for (Feeder feeder : activeFeeders.values()) {
+        synchronized(activeFeeders) {
+            for(Feeder feeder : activeFeeders.values()) {
                 feeder.resetStats();
             }
         }
@@ -285,10 +250,11 @@ final public class FeederManager {
 
     /**
      * Accumulates statistics from a terminating feeder.
-     * @param feederStats  stats of feeder
+     *
+     * @param feederStats stats of feeder
      */
     void incStats(StatGroup feederStats) {
-        synchronized (stats) {
+        synchronized(stats) {
             stats.addAll(feederStats);
         }
     }
@@ -303,6 +269,7 @@ final public class FeederManager {
 
     /**
      * Returns the RepNode associated with the FeederManager
+     *
      * @return
      */
     RepNode repNode() {
@@ -318,7 +285,7 @@ final public class FeederManager {
     }
 
     public Feeder getArbiterFeeder() {
-        synchronized (activeFeeders) {
+        synchronized(activeFeeders) {
             return activeFeeders.get(arbiterFeederName);
         }
     }
@@ -367,15 +334,6 @@ final public class FeederManager {
         this.repNodeShutdownException = rNSE;
     }
 
-    public static class MinFeederVLSNInfo {
-        MinFeederVLSNInfo(VLSN vlsn, String nodeName) {
-            this.vlsn = vlsn;
-            this.nodeName = nodeName;
-        }
-        public final VLSN vlsn;
-        public final String nodeName;
-    }
-
     /**
      * Returns the minimum value over all feeders of the next VLSN that they
      * will send to their replica, or the null vlsn if no feeders are
@@ -389,22 +347,22 @@ final public class FeederManager {
         VLSN min = VLSN.NULL_VLSN;
         String nodeName = null;
 
-        synchronized (nascentFeeders) {
-            for (Feeder f : nascentFeeders) {
+        synchronized(nascentFeeders) {
+            for(Feeder f : nascentFeeders) {
                 VLSN vlsn = f.getFeederVLSN();
-                if (!vlsn.isNull() &&
-                    (min.isNull() || (vlsn.compareTo(min) < 0))) {
+                if(!vlsn.isNull() &&
+                        (min.isNull() || (vlsn.compareTo(min) < 0))) {
                     min = vlsn;
                     nodeName = f.getReplicaNameIdPair().getName();
                 }
             }
         }
 
-        synchronized (activeFeeders) {
-            for (Feeder f : activeFeeders.values()) {
+        synchronized(activeFeeders) {
+            for(Feeder f : activeFeeders.values()) {
                 VLSN vlsn = f.getFeederVLSN();
-                if (!vlsn.isNull() &&
-                    (min.isNull() || (vlsn.compareTo(min) < 0))) {
+                if(!vlsn.isNull() &&
+                        (min.isNull() || (vlsn.compareTo(min) < 0))) {
                     min = vlsn;
                     nodeName = f.getReplicaNameIdPair().getName();
                 }
@@ -441,7 +399,7 @@ final public class FeederManager {
      * @return the set of replica node names
      */
     public Set<String> activeReplicas() {
-        synchronized (activeFeeders) {
+        synchronized(activeFeeders) {
 
             /*
              * Create a copy to avoid inadvertent concurrency conflicts,
@@ -458,26 +416,25 @@ final public class FeederManager {
      * returned if it's in active arbitration.
      *
      * @param includeArbiters include active arbiters in the list of returned
-     * node names if true; exclude arbiters otherwise.
-     *
+     *                        node names if true; exclude arbiters otherwise.
      * @return the set of replica and if includeArbiters active arbiter node names
      */
-    public  Set<String> activeAckReplicas(boolean includeArbiters) {
+    public Set<String> activeAckReplicas(boolean includeArbiters) {
         final Set<String> nodeNames = new HashSet<String>();
-        synchronized (activeFeeders) {
-            for (final Entry<String, Feeder> entry :
-                activeFeeders.entrySet()) {
+        synchronized(activeFeeders) {
+            for(final Entry<String, Feeder> entry :
+                    activeFeeders.entrySet()) {
                 final Feeder feeder = entry.getValue();
 
                 /* The replica node should be non-null for an active feeder */
                 final RepNodeImpl replica = feeder.getReplicaNode();
-                if (!replica.getType().isElectable()) {
+                if(!replica.getType().isElectable()) {
                     continue;
                 }
 
-                if (replica.getType().isArbiter()) {
-                    if (!includeArbiters ||
-                        !feeder.getRepNode().getArbiter().isActive()) {
+                if(replica.getType().isArbiter()) {
+                    if(!includeArbiters ||
+                            !feeder.getRepNode().getArbiter().isActive()) {
                         /* Skip the arbiter. */
                         continue;
                     }
@@ -490,7 +447,7 @@ final public class FeederManager {
     }
 
     public Map<String, Feeder> activeReplicasMap() {
-        synchronized (activeFeeders){
+        synchronized(activeFeeders) {
             return new HashMap<String, Feeder>(activeFeeders);
         }
     }
@@ -503,35 +460,36 @@ final public class FeederManager {
      * @param feeder the feeder being transitioned.
      */
     void activateFeeder(Feeder feeder) {
-        synchronized (nascentFeeders) {
-            synchronized (activeFeeders) {
+        synchronized(nascentFeeders) {
+            synchronized(activeFeeders) {
                 boolean removed = nascentFeeders.remove(feeder);
-                if (feeder.isShutdown()) {
+                if(feeder.isShutdown()) {
                     return;
                 }
-                assert(removed);
+                assert (removed);
                 String replicaName = feeder.getReplicaNameIdPair().getName();
-                assert(!feeder.getReplicaNameIdPair().equals(NameIdPair.NULL));
+                assert (!feeder.getReplicaNameIdPair().equals(NameIdPair.NULL));
                 Feeder dup = activeFeeders.get(replicaName);
-                if ((dup != null) && !dup.isShutdown()) {
+                if((dup != null) && !dup.isShutdown()) {
                     throw EnvironmentFailureException.
-                        unexpectedState(repNode.getRepImpl(),
-                                        feeder.getReplicaNameIdPair() +
-                                        " is present in both nascent and " +
-                                        "active feeder sets");
+                            unexpectedState(repNode.getRepImpl(),
+                                    feeder.getReplicaNameIdPair() +
+                                            " is present in both nascent and " +
+                                            "active feeder sets");
                 }
                 activeFeeders.put(replicaName, feeder);
-                if (feeder.getReplicaNode().getType().isArbiter()) {
-                    assert(arbiterFeeders.get() == 0);
+                if(feeder.getReplicaNode().getType().isArbiter()) {
+                    assert (arbiterFeeders.get() == 0);
                     arbiterFeeders.incrementAndGet();
                     arbiterFeederName = replicaName;
 
-                } else if (feeder.getReplicaNode().getType().isElectable()) {
+                }
+                else if(feeder.getReplicaNode().getType().isElectable()) {
                     ackFeeders.incrementAndGet();
                 }
 
                 MasterTransfer xfr = repNode.getActiveTransfer();
-                if (xfr != null) {
+                if(xfr != null) {
                     xfr.addFeeder(feeder);
                 }
             }
@@ -545,17 +503,18 @@ final public class FeederManager {
      * @param feeder
      */
     void removeFeeder(Feeder feeder) {
-        assert(feeder.isShutdown());
+        assert (feeder.isShutdown());
         final String replicaName = feeder.getReplicaNameIdPair().getName();
-        synchronized (nascentFeeders) {
-            synchronized (activeFeeders) {
+        synchronized(nascentFeeders) {
+            synchronized(activeFeeders) {
                 nascentFeeders.remove(feeder);
-                if (activeFeeders.remove(replicaName) != null) {
-                    if (arbiterFeederName != null &&
-                        arbiterFeederName.equals(replicaName)) {
+                if(activeFeeders.remove(replicaName) != null) {
+                    if(arbiterFeederName != null &&
+                            arbiterFeederName.equals(replicaName)) {
                         arbiterFeeders.decrementAndGet();
                         arbiterFeederName = null;
-                    } else if (feeder.getReplicaNode().getType().isElectable()) {
+                    }
+                    else if(feeder.getReplicaNode().getType().isElectable()) {
                         ackFeeders.decrementAndGet();
                     }
                 }
@@ -563,7 +522,7 @@ final public class FeederManager {
         }
 
         final RepNodeImpl node = feeder.getReplicaNode();
-        if ((node != null) && node.getType().hasTransientId()) {
+        if((node != null) && node.getType().hasTransientId()) {
             repNode.removeTransientNode(node);
         }
     }
@@ -573,9 +532,9 @@ final public class FeederManager {
      * value into the queue.
      */
     void shutdownQueue() {
-        if (!repNode.isShutdown()) {
+        if(!repNode.isShutdown()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Rep node is still active");
+                    ("Rep node is still active");
         }
         channelQueue.clear();
         /* Add special entry so that the channelQueue.poll operation exits. */
@@ -587,33 +546,33 @@ final public class FeederManager {
      * a Replica that is serving as a Feeder to other Replica nodes. The core
      * loop accepts connections from Replicas as they come in and establishes a
      * Feeder on that connection.
-     *
+     * <p>
      * The loop can be terminated for one of the following reasons:
-     *
-     *  1) A change in Masters.
-     *
-     *  2) A forced shutdown, via a thread interrupt.
-     *
-     *  3) A server socket level exception.
-     *
+     * <p>
+     * 1) A change in Masters.
+     * <p>
+     * 2) A forced shutdown, via a thread interrupt.
+     * <p>
+     * 3) A server socket level exception.
+     * <p>
      * The timeout on the accept is used to ensure that the check is done at
      * least once per timeout period.
      */
     void runFeeders()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (shutdown.get()) {
+        if(shutdown.get()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Feeder manager was shutdown");
+                    ("Feeder manager was shutdown");
         }
         Exception feederShutdownException = null;
         LoggerUtils.info(logger, repNode.getRepImpl(),
-                         "Feeder manager accepting requests.");
+                "Feeder manager accepting requests.");
 
         /* This updater represents the masters's local cbvlsn, which the master
            updates directly. */
         final LocalCBVLSNUpdater updater = new LocalCBVLSNUpdater(
-            repNode.getNameIdPair(), repNode.getNodeType(), repNode);
+                repNode.getNameIdPair(), repNode.getNodeType(), repNode);
         final LocalCBVLSNTracker tracker = repNode.getCBVLSNTracker();
 
         try {
@@ -626,7 +585,7 @@ final public class FeederManager {
             updater.updateForMaster(tracker);
 
             repNode.getServiceDispatcher().
-                register(FEEDER_SERVICE, channelQueue);
+                    register(FEEDER_SERVICE, channelQueue);
 
             /*
              * The Feeder is ready for business, indicate that the node is
@@ -634,22 +593,22 @@ final public class FeederManager {
              */
             repNode.getReadyLatch().countDown();
 
-            while (true) {
+            while(true) {
                 final DataChannel feederReplicaChannel =
-                    channelQueue.poll(pollTimeoutMs, TimeUnit.MILLISECONDS);
+                        channelQueue.poll(pollTimeoutMs, TimeUnit.MILLISECONDS);
 
-                if (feederReplicaChannel == RepUtils.CHANNEL_EOF_MARKER) {
+                if(feederReplicaChannel == RepUtils.CHANNEL_EOF_MARKER) {
                     LoggerUtils.info(logger, repNode.getRepImpl(),
-                                     "Feeder manager soft shutdown.");
+                            "Feeder manager soft shutdown.");
                     return;
                 }
 
                 repNode.getMasterStatus().assertSync();
-                if (feederReplicaChannel == null) {
-                    if (repNode.isShutdownOrInvalid()) {
+                if(feederReplicaChannel == null) {
+                    if(repNode.isShutdownOrInvalid()) {
                         /* Timeout and shutdown request */
                         LoggerUtils.info(logger, repNode.getRepImpl(),
-                                         "Feeder manager forced shutdown.");
+                                "Feeder manager forced shutdown.");
                         return;
                     }
 
@@ -660,8 +619,8 @@ final public class FeederManager {
                      */
                     try {
                         assert TestHookExecute.doHookIfSet(
-                            delayCBVLSNUpdateHook, repNode.getNameIdPair());
-                    } catch (IllegalStateException e) {
+                                delayCBVLSNUpdateHook, repNode.getNameIdPair());
+                    } catch(IllegalStateException e) {
                         continue;
                     }
 
@@ -684,57 +643,57 @@ final public class FeederManager {
                     Feeder feeder = new Feeder(this, feederReplicaChannel);
                     nascentFeeders.add(feeder);
                     feeder.startFeederThreads();
-                } catch (IOException e) {
+                } catch(IOException e) {
 
                     /*
                      * Indicates a feeder socket level exception.
                      */
                     LoggerUtils.fine
-                        (logger, repNode.getRepImpl(),
-                         "Feeder I/O exception: " + e.getMessage());
+                            (logger, repNode.getRepImpl(),
+                                    "Feeder I/O exception: " + e.getMessage());
                     try {
                         feederReplicaChannel.close();
-                    } catch (IOException e1) {
+                    } catch(IOException e1) {
                         LoggerUtils.fine
-                            (logger, repNode.getRepImpl(),
-                             "Exception during cleanup." + e.getMessage());
+                                (logger, repNode.getRepImpl(),
+                                        "Exception during cleanup." + e.getMessage());
                     }
                     continue;
                 }
             }
-        } catch (MasterSyncException e) {
+        } catch(MasterSyncException e) {
             LoggerUtils.info(logger, repNode.getRepImpl(),
-                             "Master change: " + e.getMessage());
+                    "Master change: " + e.getMessage());
 
             feederShutdownException = new UnknownMasterException("Node " +
-                                repNode.getRepImpl().getName() +
-                                " is not a master anymore");
-        } catch (InterruptedException e) {
-            if (this.repNodeShutdownException != null) {
+                    repNode.getRepImpl().getName() +
+                    " is not a master anymore");
+        } catch(InterruptedException e) {
+            if(this.repNodeShutdownException != null) {
 
                 /*
                  * The interrupt was issued to propagate an exception from one
                  * of the Feeder threads. It's not a normal exit.
                  */
                 LoggerUtils.warning(logger, repNode.getRepImpl(),
-                                    "Feeder manager unexpected interrupt");
+                        "Feeder manager unexpected interrupt");
                 throw repNodeShutdownException; /* Terminate the rep node */
             }
-            if (repNode.isShutdown()) {
+            if(repNode.isShutdown()) {
                 LoggerUtils.info(logger, repNode.getRepImpl(),
-                                 "Feeder manager interrupted for shutdown");
+                        "Feeder manager interrupted for shutdown");
                 return;
             }
             feederShutdownException = e;
             LoggerUtils.warning(logger, repNode.getRepImpl(),
-                                "Feeder manager unexpected interrupt");
+                    "Feeder manager unexpected interrupt");
         } finally {
             repNode.resetReadyLatch(feederShutdownException);
             repNode.getServiceDispatcher().cancel(FEEDER_SERVICE);
             shutdownFeeders(feederShutdownException);
             LoggerUtils.info(logger, repNode.getRepImpl(),
-                             "Feeder manager exited. CurrentTxnEnd VLSN: " +
-                             repNode.getCurrentTxnEndVLSN());
+                    "Feeder manager exited. CurrentTxnEnd VLSN: " +
+                            repNode.getCurrentTxnEndVLSN());
         }
     }
 
@@ -745,34 +704,35 @@ final public class FeederManager {
      */
     private void shutdownFeeders(Exception feederShutdownException) {
         boolean changed = shutdown.compareAndSet(false, true);
-        if (!changed) {
+        if(!changed) {
             return;
         }
 
         try {
             /* Copy sets for safe iteration in the presence of deletes.*/
             final Set<Feeder> feederSet;
-            synchronized (nascentFeeders) {
-                synchronized (activeFeeders) {
+            synchronized(nascentFeeders) {
+                synchronized(activeFeeders) {
                     feederSet = new HashSet<Feeder>(activeFeeders.values());
                     feederSet.addAll(nascentFeeders);
                 }
             }
 
-            for (Feeder feeder : feederSet) {
+            for(Feeder feeder : feederSet) {
                 nFeedersShutdown.increment();
                 feeder.shutdown(feederShutdownException);
             }
         } finally {
-            if (feederShutdownException == null) {
+            if(feederShutdownException == null) {
                 feederShutdownException =
-                    new IllegalStateException("FeederManager shutdown");
+                        new IllegalStateException("FeederManager shutdown");
                 /*
                  * Release any threads that may have been waiting, but
                  * don't throw any exception
                  */
                 activeFeeders.clear(null);
-            } else {
+            }
+            else {
                 activeFeeders.clear(feederShutdownException);
             }
             nascentFeeders.clear();
@@ -785,7 +745,7 @@ final public class FeederManager {
      */
     public void shutdownFeeder(RepNodeImpl node) {
         Feeder feeder = activeFeeders.get(node.getName());
-        if (feeder == null) {
+        if(feeder == null) {
             return;
         }
         nFeedersShutdown.increment();
@@ -799,11 +759,11 @@ final public class FeederManager {
      * include the master.
      */
     public boolean awaitFeederReplicaConnections(
-        int requiredReplicaCount, long insufficientReplicasTimeout)
-        throws InterruptedException {
+            int requiredReplicaCount, long insufficientReplicasTimeout)
+            throws InterruptedException {
         return activeFeeders.sizeAwait(requiredReplicaCount,
-                                       insufficientReplicasTimeout,
-                                       TimeUnit.MILLISECONDS);
+                insufficientReplicasTimeout,
+                TimeUnit.MILLISECONDS);
     }
 
     /*
@@ -813,23 +773,24 @@ final public class FeederManager {
      */
     public String dumpState(final boolean acksOnly) {
         StringBuilder sb = new StringBuilder();
-        synchronized (activeFeeders) {
+        synchronized(activeFeeders) {
             Set<Map.Entry<String, Feeder>> feeds = activeFeeders.entrySet();
-            if (feeds.size() == 0) {
+            if(feeds.size() == 0) {
                 sb.append("No feeders.");
-            } else {
+            }
+            else {
                 sb.append("Current feeds:");
-                for (Map.Entry<String, Feeder> feedEntry : feeds) {
+                for(Map.Entry<String, Feeder> feedEntry : feeds) {
                     final Feeder feeder = feedEntry.getValue();
 
                     /*
                      * Ignore secondary and external nodes if only want nodes
                      * that provide acknowledgments
                      */
-                    if (acksOnly) {
+                    if(acksOnly) {
                         final NodeType nodeType =
-                            feeder.getReplicaNode().getType();
-                        if (nodeType.isSecondary() || nodeType.isExternal()) {
+                                feeder.getReplicaNode().getType();
+                        if(nodeType.isSecondary() || nodeType.isExternal()) {
                             continue;
                         }
                     }
@@ -850,12 +811,12 @@ final public class FeederManager {
      */
     public int getNumCurrentAckFeeders(VLSN commitVLSN) {
         final DurabilityQuorum durabilityQuorum =
-            repNode.getDurabilityQuorum();
+                repNode.getDurabilityQuorum();
         int count = 0;
-        synchronized (activeFeeders) {
-            for (Feeder feeder : activeFeeders.values()) {
-                if ((commitVLSN.compareTo(feeder.getReplicaTxnEndVLSN()) <= 0)
-                    && durabilityQuorum.replicaAcksQualify(
+        synchronized(activeFeeders) {
+            for(Feeder feeder : activeFeeders.values()) {
+                if((commitVLSN.compareTo(feeder.getReplicaTxnEndVLSN()) <= 0)
+                        && durabilityQuorum.replicaAcksQualify(
                         feeder.getReplicaNode())) {
                     count++;
                 }
@@ -867,53 +828,53 @@ final public class FeederManager {
     /**
      * Update the Master's DTVLSN if we can conclude based upon the state of
      * the replicas that the DTVLSN needs to be advanced.
-     *
+     * <p>
      * This method is invoked when a replica heartbeat reports a more recent
      * txn VLSN. This (sometimes) redundant form of DTVLS update is useful in
      * circumstances when the value could not be maintained via the usual ack
      * response processing:
-     *
+     * <p>
      * 1) The application is using no ack transactions explicitly.
-     *
+     * <p>
      * 2) There were ack transaction timeouts due to network problems and the
      * acks were never received or were received after the timeout had expired.
      */
     public void updateDTVLSN(long heartbeatVLSN) {
 
         final long currDTVLSN = repNode.getDTVLSN();
-        if (heartbeatVLSN <= currDTVLSN) {
+        if(heartbeatVLSN <= currDTVLSN) {
             /* Nothing to update, a lagging replica that's catching up */
             return;
         }
 
         final DurabilityQuorum durabilityQuorum = repNode.getDurabilityQuorum();
         final int durableAckCount = durabilityQuorum.
-            getCurrentRequiredAckCount(ReplicaAckPolicy.SIMPLE_MAJORITY);
+                getCurrentRequiredAckCount(ReplicaAckPolicy.SIMPLE_MAJORITY);
 
         long min = Long.MAX_VALUE;
 
-        synchronized (activeFeeders) {
+        synchronized(activeFeeders) {
 
             int ackCount = 0;
-            for (Feeder feeder : activeFeeders.values()) {
+            for(Feeder feeder : activeFeeders.values()) {
 
-                if (!durabilityQuorum.
-                    replicaAcksQualify(feeder.getReplicaNode())) {
+                if(!durabilityQuorum.
+                        replicaAcksQualify(feeder.getReplicaNode())) {
                     continue;
                 }
 
                 final long replicaTxnVLSN =
-                    feeder.getReplicaTxnEndVLSN().getSequence();
+                        feeder.getReplicaTxnEndVLSN().getSequence();
 
-                if (replicaTxnVLSN <= currDTVLSN) {
+                if(replicaTxnVLSN <= currDTVLSN) {
                     continue;
                 }
 
-                if (replicaTxnVLSN < min) {
+                if(replicaTxnVLSN < min) {
                     min = replicaTxnVLSN;
                 }
 
-                if (++ackCount >= durableAckCount) {
+                if(++ackCount >= durableAckCount) {
                     /*
                      * If a majority of replicas have vlsns >= durable txn
                      * vlsn, advance the DTVLSN.
@@ -928,29 +889,34 @@ final public class FeederManager {
         }
     }
 
-    /**
-     * Set a test hook, parameterized by feeder's Name/ID pair, that delays
-     * CBVLSN updates if it throws an IllegalStateException.
-     */
-    public static void setDelayCBVLSNUpdateHook(TestHook<NameIdPair> hook) {
-        delayCBVLSNUpdateHook = hook;
+    public static class MinFeederVLSNInfo {
+        public final VLSN vlsn;
+        public final String nodeName;
+        MinFeederVLSNInfo(VLSN vlsn, String nodeName) {
+            this.vlsn = vlsn;
+            this.nodeName = nodeName;
+        }
     }
 
     /**
-     * Convenience constant used by the DTVLSN flusher when committing the null
-     * transaction.
+     * A SizeAwaitMap predicate that matches feeders connected to electable
+     * replicas.
      */
-    private static TransactionConfig NULL_TXN_CONFIG = new TransactionConfig();
-    static {
-       NULL_TXN_CONFIG.setDurability(new Durability(SyncPolicy.WRITE_NO_SYNC,
-                                                    SyncPolicy.WRITE_NO_SYNC,
-                                                    ReplicaAckPolicy.NONE));
+    private class MatchElectableFeeders implements Predicate<Feeder> {
+        @Override
+        public boolean match(final Feeder value) {
+
+            /* The replica node might be null during unit testing */
+            final RepNodeImpl replica = value.getReplicaNode();
+            return (replica != null) &&
+                    repNode.getDurabilityQuorum().replicaAcksQualify(replica);
+        }
     }
 
     /**
      * Writes a null (no modifications) commit record when it detects that the
      * DTVLSN is ahead of the persistent DTVLSN and needs to be updated.
-     *
+     * <p>
      * Note that without this mechanism, the in-memory DTVLSN would always be
      * ahead of the persisted VLSN, since in general DTVLSN(vlsn) < vlsn. That
      * is, the commit or abort log record containing the DTVLSN always has a
@@ -970,29 +936,26 @@ final public class FeederManager {
          * The number of ticks for which the DTVLSN has been stable.
          */
         private int stableTicks = 0;
-
-        public DTVLSNFlusher() {
-            final int heartbeatMs = repNode.getConfigManager().
-                getInt(RepParams.HEARTBEAT_INTERVAL);
-            targetStableTicks =
-                (int) Math.max(1, (2 * heartbeatMs) / pollTimeoutMs);
-        }
-
         /**
          * Used to track whether the DTVLSN has been stable enough to write
          * out. While it's changing application commits and aborts are writing
          * it out, so no need to write it here.
          */
         private long stableDTVLSN = VLSN.NULL_VLSN_SEQUENCE;
-
         /**
          * Update each time we actually persist the DTVLSN via a null txn. It
          * represents the DTVLSN that's been written out.
          */
         private long persistedDTVLSN = VLSN.NULL_VLSN_SEQUENCE;
-
         /* Identifies the Txn that was used to persist the DTVLSN. */
         private long nullTxnVLSN = VLSN.NULL_VLSN_SEQUENCE;
+
+        public DTVLSNFlusher() {
+            final int heartbeatMs = repNode.getConfigManager().
+                    getInt(RepParams.HEARTBEAT_INTERVAL);
+            targetStableTicks =
+                    (int) Math.max(1, (2 * heartbeatMs) / pollTimeoutMs);
+        }
 
         /**
          * Persists the DTVLSN if necessary. The DTVLSN is persisted if the
@@ -1002,12 +965,12 @@ final public class FeederManager {
         void flush() {
             final long dtvlsn = repNode.getDTVLSN();
 
-            if (dtvlsn == nullTxnVLSN) {
+            if(dtvlsn == nullTxnVLSN) {
                 /* Don't save VLSN from null transaction as DTVLSN */
                 return;
             }
 
-            if (dtvlsn > stableDTVLSN) {
+            if(dtvlsn > stableDTVLSN) {
                 stableTicks = 0;
                 stableDTVLSN = dtvlsn;
 
@@ -1015,15 +978,15 @@ final public class FeederManager {
                 return;
             }
 
-            if (dtvlsn < stableDTVLSN) {
+            if(dtvlsn < stableDTVLSN) {
                 /* Enforce the invariant that the DTVLSN cannot decrease. */
                 throw new IllegalStateException("The DTVLSN sequence cannot decrease" +
-                                                "current DTVLSN:" + dtvlsn +
-                                                " previous DTVLSN:" + stableDTVLSN);
+                        "current DTVLSN:" + dtvlsn +
+                        " previous DTVLSN:" + stableDTVLSN);
             }
 
             /* DTVLSN == stableDTVLSN */
-            if (++stableTicks <= targetStableTicks) {
+            if(++stableTicks <= targetStableTicks) {
                 /*
                  * Increase the stable tick counter. it has not been stable
                  * long enough.
@@ -1034,21 +997,21 @@ final public class FeederManager {
             stableTicks = 0;
 
             /* dtvlsn has been stable */
-            if (stableDTVLSN > persistedDTVLSN) {
-                if (repNode.getActiveTransfer() != null) {
+            if(stableDTVLSN > persistedDTVLSN) {
+                if(repNode.getActiveTransfer() != null) {
                     /*
                      * Don't attempt writing a transaction. while a transfer is
                      * in progress and txns will be blocked.
                      */
                     LoggerUtils.info(logger, repNode.getRepImpl(),
-                                     "Skipped null txn updating DTVLSN: " +
-                                     dtvlsn + " Master transfer in progress");
+                            "Skipped null txn updating DTVLSN: " +
+                                    dtvlsn + " Master transfer in progress");
                     return;
                 }
                 final RepImpl repImpl = repNode.getRepImpl();
                 final MasterTxn nullTxn =
-                    MasterTxn.createNullTxn(repImpl, NULL_TXN_CONFIG,
-                                            repImpl.getNameIdPair());
+                        MasterTxn.createNullTxn(repImpl, NULL_TXN_CONFIG,
+                                repImpl.getNameIdPair());
                 /*
                  * We don't want to wait for any reason, if the txn fails,
                  * we can try later.
@@ -1057,17 +1020,17 @@ final public class FeederManager {
                 try {
                     nullTxn.commit();
                     LoggerUtils.fine(logger, repNode.getRepImpl(),
-                                     "Persist DTVLSN: " + dtvlsn +
-                                     " at VLSN: " + nullTxn.getCommitVLSN() +
-                                     " via null transaction:" + nullTxn.getId());
+                            "Persist DTVLSN: " + dtvlsn +
+                                    " at VLSN: " + nullTxn.getCommitVLSN() +
+                                    " via null transaction:" + nullTxn.getId());
                     nullTxnVLSN = nullTxn.getCommitVLSN().getSequence();
                     persistedDTVLSN = dtvlsn;
                     stableDTVLSN = persistedDTVLSN;
-                } catch (Exception e) {
+                } catch(Exception e) {
                     nullTxn.abort();
                     LoggerUtils.warning(logger, repNode.getRepImpl(),
-                               "Failed to write null txn updating DTVLSN; " +
-                               e.getMessage());
+                            "Failed to write null txn updating DTVLSN; " +
+                                    e.getMessage());
                 }
             }
         }

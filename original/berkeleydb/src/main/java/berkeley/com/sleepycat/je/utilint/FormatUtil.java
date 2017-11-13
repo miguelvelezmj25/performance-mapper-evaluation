@@ -28,7 +28,7 @@ public class FormatUtil {
      */
     public static String asString(SortedSet<Long> set) {
 
-        if (set.isEmpty()) {
+        if(set.isEmpty()) {
             return "";
         }
 
@@ -37,9 +37,9 @@ public class FormatUtil {
         long rstart = i.next();
         long rend = rstart;
 
-        while (i.hasNext()) {
-            final long f= i.next();
-            if (f == (rend + 1)) {
+        while(i.hasNext()) {
+            final long f = i.next();
+            if(f == (rend + 1)) {
                 /* Continue the existing range. */
                 rend++;
                 continue;
@@ -48,7 +48,8 @@ public class FormatUtil {
             /* flush and start new range */
             flushRange(sb, rstart, rend);
             rstart = rend = f;
-        };
+        }
+        ;
 
         flushRange(sb, rstart, rend);
         return sb.toString();
@@ -57,16 +58,17 @@ public class FormatUtil {
     private static void flushRange(final StringBuilder sb,
                                    long rstart,
                                    long rend) {
-        if (rstart == -1) {
+        if(rstart == -1) {
             return;
         }
 
-        if (rstart == rend) {
+        if(rstart == rend) {
             sb.append(" 0x").append(Long.toHexString(rstart));
-        } else {
+        }
+        else {
             sb.append(" 0x").append(Long.toHexString(rstart)).
-            append("-").
-            append("0x").append(Long.toHexString(rend));
+                    append("-").
+                    append("0x").append(Long.toHexString(rend));
         }
     }
 }

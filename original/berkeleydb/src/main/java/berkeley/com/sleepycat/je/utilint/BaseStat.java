@@ -32,7 +32,9 @@ public abstract class BaseStat<T> implements Serializable {
      */
     public abstract T get();
 
-    /** Resets the statistic to its initial state. */
+    /**
+     * Resets the statistic to its initial state.
+     */
     public abstract void clear();
 
     /**

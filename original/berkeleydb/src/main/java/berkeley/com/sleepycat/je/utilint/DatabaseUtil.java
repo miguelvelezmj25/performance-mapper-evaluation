@@ -33,7 +33,7 @@ public class DatabaseUtil {
      */
     public static void checkForNullParam(final Object param,
                                          final String name) {
-        if (param == null) {
+        if(param == null) {
             throw new IllegalArgumentException(name + " cannot be null");
         }
     }
@@ -47,9 +47,9 @@ public class DatabaseUtil {
                                                     final String name) {
         checkForNullParam(param, name);
 
-        if (param.length == 0) {
+        if(param.length == 0) {
             throw new IllegalArgumentException(
-                "'" + name + "' param cannot be zero length");
+                    "'" + name + "' param cannot be zero length");
         }
     }
 
@@ -57,20 +57,20 @@ public class DatabaseUtil {
      * Throw an exception if the entry is null or the data field is not set.
      *
      * @throws IllegalArgumentException via any API method that takes a
-     * required DatabaseEntry param
+     *                                  required DatabaseEntry param
      */
     public static void checkForNullDbt(final DatabaseEntry entry,
                                        final String name,
                                        final boolean checkData) {
-        if (entry == null) {
+        if(entry == null) {
             throw new IllegalArgumentException(
-                "'" + name + "' param cannot be null");
+                    "'" + name + "' param cannot be null");
         }
 
-        if (checkData) {
-            if (entry.getData() == null) {
+        if(checkData) {
+            if(entry.getData() == null) {
                 throw new IllegalArgumentException(
-                    "Data field for '" + name + "' param cannot be null");
+                        "Data field for '" + name + "' param cannot be null");
             }
         }
     }
@@ -80,9 +80,9 @@ public class DatabaseUtil {
      */
     public static void checkForPartial(final DatabaseEntry entry,
                                        final String name) {
-        if (entry.getPartial()) {
+        if(entry.getPartial()) {
             throw new IllegalArgumentException(
-                "'" + name + "' param may not be partial");
+                    "'" + name + "' param may not be partial");
         }
     }
 }

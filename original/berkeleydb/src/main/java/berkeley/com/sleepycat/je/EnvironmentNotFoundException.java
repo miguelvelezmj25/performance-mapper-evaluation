@@ -27,27 +27,30 @@ public class EnvironmentNotFoundException extends EnvironmentFailureException {
 
     private static final long serialVersionUID = 1;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public EnvironmentNotFoundException(EnvironmentImpl envImpl,
                                         String message) {
         super(envImpl, EnvironmentFailureReason.ENV_NOT_FOUND, message);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     private EnvironmentNotFoundException(String message,
                                          EnvironmentNotFoundException cause) {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public EnvironmentFailureException wrapSelf(String msg) {

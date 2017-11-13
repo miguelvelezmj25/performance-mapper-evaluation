@@ -17,7 +17,7 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
 /**
  * The root of all BDB JE-defined exceptions.
- *
+ * <p>
  * <p>Exceptions thrown by BDB JE fall into three categories.</p>
  * <ol>
  * <li>When a method is used incorrectly as the result of an application
@@ -37,16 +37,16 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * EnvironmentFailureException} for details.
  * </li>
  * </ol>
- *
+ * <p>
  * <p>{@link OperationFailureException} and {@link EnvironmentFailureException}
  * are the only two direct subclasses of {@code DatabaseException}.</p>
- *
+ * <p>
  * <p>(Actually the above statement is not strictly correct.  {@link
  * EnvironmentFailureException} extends {@link RunRecoveryException} which
  * extends {@code DatabaseException}.  {@link RunRecoveryException} exists for
  * backward compatibility and has been deprecated. {@link
  * EnvironmentFailureException} should be used instead.)</p>
- *
+ * <p>
  * <p>Note that in some cases, certain methods return status values without
  * issuing an exception. This occurs in situations that are not normally
  * considered an error, but when some informational status is returned.  For
@@ -64,10 +64,11 @@ public abstract class DatabaseException extends RuntimeException {
 
     /* Per-thread re-thrown stack traces, see addRethrownStackTrace. */
     private transient ThreadLocal<String> rethrownStackTraces =
-        new ThreadLocal<String>();
+            new ThreadLocal<String>();
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public DatabaseException(Throwable t) {
@@ -76,6 +77,7 @@ public abstract class DatabaseException extends RuntimeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public DatabaseException(String message) {
@@ -84,6 +86,7 @@ public abstract class DatabaseException extends RuntimeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public DatabaseException(String message, Throwable t) {
@@ -92,8 +95,8 @@ public abstract class DatabaseException extends RuntimeException {
 
     /**
      * For internal use only.
-     * @hidden
-     * Utility for generating the version at the start of the exception
+     *
+     * @hidden Utility for generating the version at the start of the exception
      * message. Public for unit tests.
      */
     public static String getVersionHeader() {
@@ -102,30 +105,28 @@ public abstract class DatabaseException extends RuntimeException {
 
     /**
      * For internal use only.
-     * @hidden
      *
-     * Support the addition of extra error information. Use this approach
+     * @param newExtraInfo the message to add, not including separator space.
+     * @hidden Support the addition of extra error information. Use this approach
      * rather than wrapping exceptions whenever possible for two reasons:
      * 1) so the user can catch the original exception class and handle it
      * appropriately, and 2) because the EnvironmentFailureException hierarchy
      * does some intricate things with setting the environment as invalid.
-     *
-     * @param newExtraInfo the message to add, not including separator space.
      */
     public void addErrorMessage(String newExtraInfo) {
 
-        if (extraInfo == null) {
+        if(extraInfo == null) {
             extraInfo = " " + newExtraInfo;
-        } else {
+        }
+        else {
             extraInfo = extraInfo + ' ' + newExtraInfo;
         }
     }
 
     /**
      * For internal use only.
-     * @hidden
      *
-     * Adds the current stack trace to the exception message, before it is
+     * @hidden Adds the current stack trace to the exception message, before it is
      * re-thrown in a different thread.  The full stack trace will then show
      * both where it was generated and where it was re-thrown.  Use this
      * approach rather than wrapping (via wrapSelf) when user code relies on
@@ -135,8 +136,8 @@ public abstract class DatabaseException extends RuntimeException {
     public void addRethrownStackTrace() {
 
         final Exception localEx = new Exception(
-            "Stacktrace where exception below was rethrown (" +
-            getClass().getName() + ")");
+                "Stacktrace where exception below was rethrown (" +
+                        getClass().getName() + ")");
 
         rethrownStackTraces.set(LoggerUtils.getStackTrace(localEx));
     }
@@ -150,11 +151,11 @@ public abstract class DatabaseException extends RuntimeException {
          * may have occurred, and we'd rather not cause another one here.
          */
         final String msg = (extraInfo != null) ?
-            (super.getMessage() + extraInfo) :
-            super.getMessage();
+                (super.getMessage() + extraInfo) :
+                super.getMessage();
 
         final String rethrownStackTrace = rethrownStackTraces.get();
-        if (rethrownStackTrace == null) {
+        if(rethrownStackTrace == null) {
             return msg;
         }
 

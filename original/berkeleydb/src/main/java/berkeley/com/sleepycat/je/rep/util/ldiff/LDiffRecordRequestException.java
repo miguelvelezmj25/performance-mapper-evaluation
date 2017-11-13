@@ -22,9 +22,10 @@ public class LDiffRecordRequestException extends OperationFailureException {
 
     private static final long serialVersionUID = 1925430616L;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public LDiffRecordRequestException(String message) {
         super(null /*locker*/, false /*abortOnly*/, message, null /*cause*/);
@@ -35,9 +36,10 @@ public class LDiffRecordRequestException extends OperationFailureException {
         super(message, cause);
     }
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     @Override
     public OperationFailureException wrapSelf(String msg) {

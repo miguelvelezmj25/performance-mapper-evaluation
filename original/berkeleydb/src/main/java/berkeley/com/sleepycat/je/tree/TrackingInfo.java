@@ -44,8 +44,8 @@ public class TrackingInfo {
     @Override
     public String toString() {
         return "lsn=" + DbLsn.getNoFormatString(lsn) +
-            " node=" + nodeId +
-            " entries=" + entries +
-            " index=" + index;
+                " node=" + nodeId +
+                " entries=" + entries +
+                " index=" + index;
     }
 }

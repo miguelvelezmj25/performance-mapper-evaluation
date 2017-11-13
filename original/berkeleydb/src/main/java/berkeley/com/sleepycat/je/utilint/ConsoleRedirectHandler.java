@@ -13,16 +13,16 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.util.logging.LogRecord;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+
+import java.util.logging.LogRecord;
 
 /**
  * Redirects logging messages to the owning environment's console handler, so
  * that messages can be prefixed with an environment name. See LoggerUtils.java
  * for an explanation of why loggers must be instantiated per-class rather than
  * per-class-instance.
- * 
+ * <p>
  * In rare cases, this ConsoleHandler may be used to actually publish on its
  * own.
  */
@@ -34,8 +34,8 @@ public class ConsoleRedirectHandler extends java.util.logging.ConsoleHandler {
 
     @Override
     public void publish(LogRecord record) {
-        EnvironmentImpl envImpl = 
-            LoggerUtils.envMap.get(Thread.currentThread());
+        EnvironmentImpl envImpl =
+                LoggerUtils.envMap.get(Thread.currentThread());
 
         /* 
          * If the caller forgets to set and release the envImpl so there is no
@@ -44,12 +44,12 @@ public class ConsoleRedirectHandler extends java.util.logging.ConsoleHandler {
          * prefix. That way, we get a message, but don't risk a
          * NullPointerException.
          */
-        if (envImpl == null){
+        if(envImpl == null) {
             super.publish(record);
             return;
         }
 
-        if (envImpl.getConsoleHandler() == null){
+        if(envImpl.getConsoleHandler() == null) {
             super.publish(record);
             return;
         }

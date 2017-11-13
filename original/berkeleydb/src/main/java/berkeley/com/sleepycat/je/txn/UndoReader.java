@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
@@ -26,19 +24,21 @@ import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
 import berkeley.com.sleepycat.je.tree.LN;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.util.Map;
+
 /**
  * Convenience class to package together the different steps and fields needed
- * for reading a log entry for undoing. Is used for both txn aborts and 
+ * for reading a log entry for undoing. Is used for both txn aborts and
  * recovery undos.
  */
 public class UndoReader {
 
     public final LNLogEntry<?> logEntry;
     public final LN ln;
-    private final long lsn;
     public final int logEntrySize;
     public final DatabaseImpl db;
-    
+    private final long lsn;
+
     private UndoReader(LNLogEntry<?> logEntry,
                        LN ln,
                        long lsn,
@@ -59,20 +59,20 @@ public class UndoReader {
      * undoDatabases, or a fatal exception is thrown.
      */
     public static UndoReader create(
-        EnvironmentImpl envImpl,
-        long undoLsn,
-        Map<DatabaseId, DatabaseImpl> undoDatabases) {
+            EnvironmentImpl envImpl,
+            long undoLsn,
+            Map<DatabaseId, DatabaseImpl> undoDatabases) {
 
         final WholeEntry wholeEntry = envImpl.getLogManager().
-            getWholeLogEntryHandleFileNotFound(undoLsn);
+                getWholeLogEntryHandleFileNotFound(undoLsn);
         final int logEntrySize = wholeEntry.getHeader().getEntrySize();
         final LNLogEntry<?> logEntry = (LNLogEntry<?>) wholeEntry.getEntry();
         final DatabaseId dbId = logEntry.getDbId();
         final DatabaseImpl db = undoDatabases.get(dbId);
-        if (db == null) {
+        if(db == null) {
             throw EnvironmentFailureException.unexpectedState
-                (envImpl,
-                 "DB not found during non-recovery undo/rollback, id=" + dbId);
+                    (envImpl,
+                            "DB not found during non-recovery undo/rollback, id=" + dbId);
         }
         logEntry.postFetchInit(db);
         final LN ln = logEntry.getLN();
@@ -96,7 +96,7 @@ public class UndoReader {
         final LNLogEntry<?> logEntry = reader.getLNLogEntry();
         final DatabaseId dbId = logEntry.getDbId();
         final DatabaseImpl db = dbMapTree.getDb(dbId);
-        if (db == null) {
+        if(db == null) {
             return null;
         }
         logEntry.postFetchInit(db);

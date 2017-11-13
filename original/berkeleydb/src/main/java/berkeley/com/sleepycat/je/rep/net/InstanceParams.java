@@ -23,10 +23,11 @@ public class InstanceParams {
 
     /**
      * Creates an InstanceParams instance.
-     * @param context the configuration context from which an instantiation
-     * is being generated.
+     *
+     * @param context     the configuration context from which an instantiation
+     *                    is being generated.
      * @param classParams a class-specific parameter argument, which may
-     * be null
+     *                    be null
      */
     public InstanceParams(InstanceContext context, String classParams) {
         this.context = context;

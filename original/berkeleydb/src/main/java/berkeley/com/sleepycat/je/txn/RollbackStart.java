@@ -13,18 +13,14 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * This class indicates the end of a partial rollback at syncup. This is a
@@ -47,7 +43,7 @@ public class RollbackStart implements Loggable {
     /* For debugging in the field */
     private Timestamp time;
 
-    public RollbackStart(VLSN matchpointVLSN, 
+    public RollbackStart(VLSN matchpointVLSN,
                          long matchpointLSN,
                          Set<Long> activeTxnIds) {
         this.matchpointVLSN = matchpointVLSN;
@@ -69,7 +65,7 @@ public class RollbackStart implements Loggable {
     public Set<Long> getActiveTxnIds() {
         return activeTxnIds;
     }
-    
+
     public VLSN getMatchpointVLSN() {
         return matchpointVLSN;
     }
@@ -79,14 +75,14 @@ public class RollbackStart implements Loggable {
      */
     public int getLogSize() {
         int size = LogUtils.getPackedLongLogSize(matchpointVLSN.getSequence()) +
-            LogUtils.getPackedLongLogSize(matchpointLSN) +
-            LogUtils.getTimestampLogSize(time) +
-            LogUtils.getPackedIntLogSize(activeTxnIds.size());
+                LogUtils.getPackedLongLogSize(matchpointLSN) +
+                LogUtils.getTimestampLogSize(time) +
+                LogUtils.getPackedIntLogSize(activeTxnIds.size());
 
-        for (Long id : activeTxnIds) {
+        for(Long id : activeTxnIds) {
             size += LogUtils.getPackedLongLogSize(id);
         }
-        
+
         return size;
     }
 
@@ -98,12 +94,14 @@ public class RollbackStart implements Loggable {
         LogUtils.writePackedLong(buffer, matchpointLSN);
         LogUtils.writeTimestamp(buffer, time);
         LogUtils.writePackedInt(buffer, activeTxnIds.size());
-        for (Long id : activeTxnIds) {
+        for(Long id : activeTxnIds) {
             LogUtils.writePackedLong(buffer, id);
         }
     }
 
-    /**"
+    /**
+     * "
+     *
      * @see Loggable#readFromLog
      */
     public void readFromLog(ByteBuffer buffer, int entryVersion) {
@@ -113,7 +111,7 @@ public class RollbackStart implements Loggable {
         time = LogUtils.readTimestamp(buffer, false /* unpacked. */);
         int setSize = LogUtils.readPackedInt(buffer);
         activeTxnIds = new HashSet<Long>(setSize);
-        for (int i = 0; i < setSize; i++) {
+        for(int i = 0; i < setSize; i++) {
             activeTxnIds.add(LogUtils.readPackedLong(buffer));
         }
     }
@@ -133,7 +131,7 @@ public class RollbackStart implements Loggable {
          */
         List<Long> displayTxnIds = new ArrayList<Long>(activeTxnIds);
         Collections.sort(displayTxnIds);
-        sb.append(" activeTxnIds=") .append(displayTxnIds);
+        sb.append(" activeTxnIds=").append(displayTxnIds);
         sb.append("\" time=\"").append(time);
     }
 
@@ -149,7 +147,7 @@ public class RollbackStart implements Loggable {
      */
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof RollbackStart)) {
+        if(!(other instanceof RollbackStart)) {
             return false;
         }
 
@@ -162,7 +160,7 @@ public class RollbackStart implements Loggable {
     }
 
     @Override
-        public String toString() {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         dumpLog(sb, true);
         return sb.toString();

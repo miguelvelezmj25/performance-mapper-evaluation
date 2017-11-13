@@ -13,18 +13,18 @@
 
 package berkeley.com.sleepycat.je.latch;
 
-import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import berkeley.com.sleepycat.je.ThreadInterruptedException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.StatGroup;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static berkeley.com.sleepycat.je.EnvironmentFailureException.unexpectedState;
+
 @SuppressWarnings("serial")
 public class SharedLatchImpl extends ReentrantReadWriteLock
-    implements SharedLatch {
+        implements SharedLatch {
 
     private final LatchContext context;
     private OwnerInfo lastOwnerInfo;
@@ -50,34 +50,36 @@ public class SharedLatchImpl extends ReentrantReadWriteLock
     }
 
     private boolean doAcquireExclusive(final boolean noWait) {
-        if (isWriteLockedByCurrentThread() || (getReadHoldCount() > 0)) {
+        if(isWriteLockedByCurrentThread() || (getReadHoldCount() > 0)) {
             throw unexpectedState(
-                context.getEnvImplForFatalException(),
-                "Latch already held: " + debugString());
+                    context.getEnvImplForFatalException(),
+                    "Latch already held: " + debugString());
         }
 
-        if (noWait) {
-            if (!writeLock().tryLock()) {
+        if(noWait) {
+            if(!writeLock().tryLock()) {
                 return false;
             }
-        } else if (LatchSupport.INTERRUPTIBLE_WITH_TIMEOUT) {
+        }
+        else if(LatchSupport.INTERRUPTIBLE_WITH_TIMEOUT) {
             try {
-                if (!writeLock().tryLock(
-                    context.getLatchTimeoutMs(), TimeUnit.MILLISECONDS)) {
+                if(!writeLock().tryLock(
+                        context.getLatchTimeoutMs(), TimeUnit.MILLISECONDS)) {
                     throw LatchSupport.handleTimeout(this, context);
                 }
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 throw new ThreadInterruptedException(
-                    context.getEnvImplForFatalException(), e);
+                        context.getEnvImplForFatalException(), e);
             }
-        } else {
+        }
+        else {
             writeLock().lock();
         }
 
-        if (LatchSupport.TRACK_LATCHES) {
+        if(LatchSupport.TRACK_LATCHES) {
             LatchSupport.trackAcquire(this, context);
         }
-        if (LatchSupport.CAPTURE_OWNER) {
+        if(LatchSupport.CAPTURE_OWNER) {
             lastOwnerInfo = new OwnerInfo(context);
         }
         assert EnvironmentImpl.maybeForceYield();
@@ -86,32 +88,33 @@ public class SharedLatchImpl extends ReentrantReadWriteLock
 
     @Override
     public void acquireShared() {
-        if (isWriteLockedByCurrentThread()) {
+        if(isWriteLockedByCurrentThread()) {
             throw unexpectedState(
-                context.getEnvImplForFatalException(),
-                "Latch already held exclusively: " + debugString());
+                    context.getEnvImplForFatalException(),
+                    "Latch already held exclusively: " + debugString());
         }
 
-        if (getReadHoldCount() > 0) {
+        if(getReadHoldCount() > 0) {
             throw unexpectedState(
-                context.getEnvImplForFatalException(),
-                "Latch already held non-exclusively: " + debugString());
+                    context.getEnvImplForFatalException(),
+                    "Latch already held non-exclusively: " + debugString());
         }
 
-        if (LatchSupport.INTERRUPTIBLE_WITH_TIMEOUT) {
+        if(LatchSupport.INTERRUPTIBLE_WITH_TIMEOUT) {
             try {
-                if (!readLock().tryLock(
-                    context.getLatchTimeoutMs(), TimeUnit.MILLISECONDS)) {
+                if(!readLock().tryLock(
+                        context.getLatchTimeoutMs(), TimeUnit.MILLISECONDS)) {
                     throw LatchSupport.handleTimeout(this, context);
                 }
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 throw new ThreadInterruptedException(
-                    context.getEnvImplForFatalException(), e);
+                        context.getEnvImplForFatalException(), e);
             }
-        } else {
+        }
+        else {
             readLock().lock();
         }
-        if (LatchSupport.TRACK_LATCHES) {
+        if(LatchSupport.TRACK_LATCHES) {
             LatchSupport.trackAcquire(this, context);
         }
         assert EnvironmentImpl.maybeForceYield();
@@ -128,27 +131,27 @@ public class SharedLatchImpl extends ReentrantReadWriteLock
     }
 
     private void doRelease(final boolean ifOwner) {
-        if (getReadHoldCount() > 0) {
-            if (LatchSupport.TRACK_LATCHES) {
+        if(getReadHoldCount() > 0) {
+            if(LatchSupport.TRACK_LATCHES) {
                 LatchSupport.trackRelease(this, context);
             }
             readLock().unlock();
             return;
         }
-        if (isWriteLockedByCurrentThread()) {
-            if (LatchSupport.CAPTURE_OWNER) {
+        if(isWriteLockedByCurrentThread()) {
+            if(LatchSupport.CAPTURE_OWNER) {
                 lastOwnerInfo = null;
             }
-            if (LatchSupport.TRACK_LATCHES) {
+            if(LatchSupport.TRACK_LATCHES) {
                 LatchSupport.trackRelease(this, context);
             }
             writeLock().unlock();
             return;
         }
-        if (!ifOwner) {
+        if(!ifOwner) {
             throw unexpectedState(
-                context.getEnvImplForFatalException(),
-                "Latch not held: " + debugString());
+                    context.getEnvImplForFatalException(),
+                    "Latch not held: " + debugString());
         }
     }
 

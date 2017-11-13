@@ -13,18 +13,17 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.io.File;
-import java.util.Properties;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepGroupImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 
+import java.io.File;
+import java.util.Properties;
+
 /**
- * @hidden
- * For internal use only. It serves to shelter methods that must be public to
+ * @hidden For internal use only. It serves to shelter methods that must be public to
  * be used by other BDBJE packages but that are not part of the public api
  * available to applications.
  */
@@ -32,9 +31,9 @@ public class RepInternal {
 
     /**
      * Proxy to ReplicatedEnvironment.getMaybeNullRepImpl.
-     *
+     * <p>
      * This method does not check whether the env is valid.
-     *
+     * <p>
      * WARNING: This method will be phased out over time and normally
      * getNonNullRepImpl should be called instead.
      *
@@ -47,14 +46,13 @@ public class RepInternal {
 
     /**
      * Proxy to ReplicatedEnvironment.getNonNullEnvImpl
-     *
+     * <p>
      * This method is called to access the underlying RepImpl when an env is
      * expected to be open, to guard against NPE when the env has been closed.
-     *
+     * <p>
      * This method does not check whether the env is valid.
      *
      * @return the non-null, underlying RepImpl.
-     *
      * @throws IllegalStateException if the env has been closed.
      */
     public static RepImpl getNonNullRepImpl(ReplicatedEnvironment rep) {
@@ -66,8 +64,8 @@ public class RepInternal {
     }
 
     public static ReplicationConfig
-        makeReplicationConfig(Properties props, boolean validateParams)
-        throws IllegalArgumentException {
+    makeReplicationConfig(Properties props, boolean validateParams)
+            throws IllegalArgumentException {
 
         return new ReplicationConfig(props, validateParams);
     }
@@ -83,16 +81,16 @@ public class RepInternal {
      * group.
      */
     public static ReplicatedEnvironment
-        createDetachedEnv(File envHome,
-                          ReplicationConfig repConfig,
-                          EnvironmentConfig envConfig)
-        throws DatabaseException {
+    createDetachedEnv(File envHome,
+                      ReplicationConfig repConfig,
+                      EnvironmentConfig envConfig)
+            throws DatabaseException {
 
         return new ReplicatedEnvironment(envHome, repConfig, envConfig,
-                                         null,
-                                         QuorumPolicy.SIMPLE_MAJORITY,
-                                         false,
-                                         null);
+                null,
+                QuorumPolicy.SIMPLE_MAJORITY,
+                false,
+                null);
     }
 
     /*
@@ -100,29 +98,28 @@ public class RepInternal {
      * creation of this handle.
      */
     public static ReplicatedEnvironment
-        createInternalEnvHandle(File envHome,
-                                ReplicationConfig repConfig,
-                                EnvironmentConfig envConfig)
-        throws DatabaseException {
+    createInternalEnvHandle(File envHome,
+                            ReplicationConfig repConfig,
+                            EnvironmentConfig envConfig)
+            throws DatabaseException {
 
         return new ReplicatedEnvironment(envHome, repConfig, envConfig,
-                                         null,
-                                         null,
-                                         false,
-                                         null);
+                null,
+                null,
+                false,
+                null);
     }
 
     /**
      * Proxy to ReplicationMutableConfig.validateParams.
      */
     public static void disableParameterValidation
-        (ReplicationMutableConfig config) {
+    (ReplicationMutableConfig config) {
         config.setOverrideValidateParams(false);
     }
 
-    public static
-        ReplicatedEnvironmentStats makeReplicatedEnvironmentStats
-        (RepImpl repImpl, StatsConfig config) {
+    public static ReplicatedEnvironmentStats makeReplicatedEnvironmentStats
+            (RepImpl repImpl, StatsConfig config) {
 
         return new ReplicatedEnvironmentStats(repImpl, config);
     }

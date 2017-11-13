@@ -13,11 +13,11 @@
 
 package berkeley.com.sleepycat.persist.impl;
 
-import java.util.Set;
-
 import berkeley.com.sleepycat.persist.model.ClassMetadata;
 import berkeley.com.sleepycat.persist.model.EntityMetadata;
 import berkeley.com.sleepycat.persist.model.EntityModel;
+
+import java.util.Set;
 
 /**
  * The EntityModel used when a RawStore is opened.  The metadata and raw type
@@ -50,7 +50,7 @@ class StoredModel extends EntityModel {
     public ClassMetadata getClassMetadata(String className) {
         ClassMetadata metadata = null;
         Format format = catalog.getFormat(className);
-        if (format != null && format.isCurrentVersion()) {
+        if(format != null && format.isCurrentVersion()) {
             metadata = format.getClassMetadata();
         }
         return metadata;
@@ -60,7 +60,7 @@ class StoredModel extends EntityModel {
     public EntityMetadata getEntityMetadata(String className) {
         EntityMetadata metadata = null;
         Format format = catalog.getFormat(className);
-        if (format != null && format.isCurrentVersion()) {
+        if(format != null && format.isCurrentVersion()) {
             metadata = format.getEntityMetadata();
         }
         return metadata;

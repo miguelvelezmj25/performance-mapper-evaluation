@@ -62,6 +62,6 @@ class DummyAllocator implements OffHeapAllocator {
 
     @Override
     public void copy(
-        long fromMemId, int fromMemOff, long toMemId, int toMemOff, int len) {
+            long fromMemId, int fromMemOff, long toMemId, int toMemOff, int len) {
     }
 }

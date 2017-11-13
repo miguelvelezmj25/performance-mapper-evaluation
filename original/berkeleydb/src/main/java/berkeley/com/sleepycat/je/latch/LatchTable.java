@@ -23,18 +23,19 @@ import java.util.Set;
 public class LatchTable {
 
     private ThreadLocal<Set<Object>> latchesByThread;
-            
+
     LatchTable() {
         latchesByThread = new ThreadLocal<Set<Object>>();
     }
 
     /**
      * Adds latch acquired by this thread.
+     *
      * @return true if added, false if already present.
      */
     boolean add(Object latch) {
         Set<Object> threadLatches = latchesByThread.get();
-        if (threadLatches == null) {
+        if(threadLatches == null) {
             threadLatches = new HashSet<Object>();
             latchesByThread.set(threadLatches);
         }
@@ -43,13 +44,15 @@ public class LatchTable {
 
     /**
      * Removes latch acquired by this thread.
+     *
      * @return true if removed, false if not present.
      */
     boolean remove(Object latch) {
         Set<Object> threadLatches = latchesByThread.get();
-        if (threadLatches == null) {
+        if(threadLatches == null) {
             return false;
-        } else {
+        }
+        else {
             return threadLatches.remove(latch);
         }
     }
@@ -59,9 +62,10 @@ public class LatchTable {
      */
     int nLatchesHeld() {
         Set<Object> threadLatches = latchesByThread.get();
-        if (threadLatches != null) {
+        if(threadLatches != null) {
             return threadLatches.size();
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -69,9 +73,9 @@ public class LatchTable {
     String latchesHeldToString() {
         Set<Object> threadLatches = latchesByThread.get();
         StringBuilder sb = new StringBuilder();
-        if (threadLatches != null) {
+        if(threadLatches != null) {
             Iterator<Object> i = threadLatches.iterator();
-            while (i.hasNext()) {
+            while(i.hasNext()) {
                 sb.append(i.next()).append('\n');
             }
         }

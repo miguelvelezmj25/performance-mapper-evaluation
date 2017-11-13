@@ -13,21 +13,21 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.io.File;
-import java.io.RandomAccessFile;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.io.File;
+import java.io.RandomAccessFile;
+
 /**
  * Warm-up the file system cache during startup, for some portion of the log
  * that is not being read by recovery.
- *
+ * <p>
  * This functionality is documented for the most part by {@link
  * EnvironmentConfig#LOG_FILE_WARM_UP_SIZE}.
- *
+ * <p>
  * One thing not mentioned is that cleaner log deletion is disabled during the
  * warm-up. This is necessary to avoid dealing with the possibility of files
  * being deleted while being read for warm-up. Although it is extremely likely
@@ -70,15 +70,15 @@ public class FileCacheWarmer extends Thread {
     public void run() {
         try {
             doRun();
-        } catch (Throwable e) {
+        } catch(Throwable e) {
 
             /*
              * Log error as SEVERE but do not invalidate environment since it
              * perfectly usable.
              */
             LoggerUtils.traceAndLogException(
-                envImpl, FileCacheWarmer.class.getName(), "run",
-                "Unable to warm file system cache due to exception", e);
+                    envImpl, FileCacheWarmer.class.getName(), "run",
+                    "Unable to warm file system cache due to exception", e);
 
         } finally {
             /* Ensure that this thread can be GC'd after it stops. */
@@ -87,16 +87,16 @@ public class FileCacheWarmer extends Thread {
     }
 
     private void doRun()
-        throws Throwable {
+            throws Throwable {
 
         final FileManager fm = envImpl.getFileManager();
 
         final long ONE_MB = 1L << 20;
 
         long remaining = (warmUpSize * ONE_MB) -
-            DbLsn.getTrueDistance(recoveryStartLsn, endOfLogLsn, fm);
+                DbLsn.getTrueDistance(recoveryStartLsn, endOfLogLsn, fm);
 
-        if (remaining <= 0) {
+        if(remaining <= 0) {
             return;
         }
 
@@ -115,18 +115,18 @@ public class FileCacheWarmer extends Thread {
         try {
             raf = new RandomAccessFile(file, "r");
 
-            while (!stop && remaining > 0) {
+            while(!stop && remaining > 0) {
 
-                if (fileOff <= 0) {
+                if(fileOff <= 0) {
                     raf.close();
                     raf = null;
 
                     final Long nextFileNum = fm.getFollowingFileNum(
-                        fileNum, false /*forward*/);
+                            fileNum, false /*forward*/);
 
-                    if (nextFileNum == null) {
+                    if(nextFileNum == null) {
                         throw new RuntimeException(
-                            "No file preceding " + fileNum);
+                                "No file preceding " + fileNum);
                     }
 
                     fileNum = nextFileNum;
@@ -142,9 +142,9 @@ public class FileCacheWarmer extends Thread {
                 final int bytes = (int) (fileOff - pos);
                 final int read = raf.read(buf, 0, bytes);
 
-                if (read != bytes) {
+                if(read != bytes) {
                     throw new IllegalStateException(
-                        "Requested " + bytes + " bytes but read " + read);
+                            "Requested " + bytes + " bytes but read " + read);
                 }
 
                 remaining -= bytes;
@@ -161,10 +161,10 @@ public class FileCacheWarmer extends Thread {
 
             envImpl.getCleaner().removeProtectedFileRange(0L);
 
-            if (raf != null) {
+            if(raf != null) {
                 try {
                     raf.close();
-                } catch (Exception e) {
+                } catch(Exception e) {
                     /* Ignore this. Another exception is in flight. */
                 }
             }

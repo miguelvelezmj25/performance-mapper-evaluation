@@ -13,41 +13,36 @@
 
 package berkeley.com.sleepycat.je.rep.impl.node;
 
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.bind.tuple.TupleInput;
 import berkeley.com.sleepycat.bind.tuple.TupleOutput;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol;
 
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+
 /**
  * The public name and internal id pair used to uniquely identify a node
  * within a replication group.
  */
 public class NameIdPair implements Serializable {
+    /* Constant to denote an unknown NODE_ID */
+    public final static int NULL_NODE_ID = -1;
+    /* The node ID used to bypass group membership checks. */
+    public static final int NOCHECK_NODE_ID = Integer.MIN_VALUE;
+    public static final NameIdPair NULL =
+            new ReadOnlyNameIdPair("NullNode", NameIdPair.NULL_NODE_ID);
+    public static final NameIdPair NOCHECK =
+            new ReadOnlyNameIdPair("NoCheckNode", NOCHECK_NODE_ID);
     private static final long serialVersionUID = 1L;
-
     private final String name;
     private int id;
 
-    /* Constant to denote an unknown NODE_ID */
-    public final static int NULL_NODE_ID = -1;
-
-    /* The node ID used to bypass group membership checks. */
-    public static final int NOCHECK_NODE_ID = Integer.MIN_VALUE;
-
-    public static final NameIdPair NULL =
-        new ReadOnlyNameIdPair("NullNode", NameIdPair.NULL_NODE_ID);
-
-    public static final NameIdPair NOCHECK =
-        new ReadOnlyNameIdPair("NoCheckNode", NOCHECK_NODE_ID);
-
     public NameIdPair(String name, int id) {
-        if (name == null) {
+        if(name == null) {
             throw EnvironmentFailureException.unexpectedState
-                ("name argument was null");
+                    ("name argument was null");
         }
         this.name = name;
         this.id = id;
@@ -60,31 +55,41 @@ public class NameIdPair implements Serializable {
         this(name, NULL.getId());
     }
 
-    /** Serializes from a ByteBuffer for a given protocol. */
+    /**
+     * Serializes from a ByteBuffer for a given protocol.
+     */
     public static NameIdPair deserialize(ByteBuffer buffer,
                                          BinaryProtocol protocol) {
         return new NameIdPair(protocol.getString(buffer),
-                              LogUtils.readInt(buffer));
+                LogUtils.readInt(buffer));
     }
 
-    /** Serializes from a TupleInput after retrieving from storage. */
+    /**
+     * Serializes from a TupleInput after retrieving from storage.
+     */
     public static NameIdPair deserialize(TupleInput buffer) {
         return new NameIdPair(buffer.readString(), buffer.readInt());
     }
 
-    /** Serializes into a ByteBuffer for a given protocol. */
+    /**
+     * Serializes into a ByteBuffer for a given protocol.
+     */
     public void serialize(ByteBuffer buffer, BinaryProtocol protocol) {
         protocol.putString(name, buffer);
         LogUtils.writeInt(buffer, id);
     }
 
-    /** Serializes into a TupleOutput before storing. */
+    /**
+     * Serializes into a TupleOutput before storing.
+     */
     public void serialize(TupleOutput buffer) {
         buffer.writeString(name);
         buffer.writeInt(id);
     }
 
-    /** Returns serialized for a given protocol. */
+    /**
+     * Returns serialized for a given protocol.
+     */
     public int serializedSize(BinaryProtocol protocol) {
         return protocol.stringSize(name) + 4;
     }
@@ -108,18 +113,18 @@ public class NameIdPair implements Serializable {
         return id;
     }
 
-    public boolean hasNullId() {
-        return this.id == NameIdPair.NULL_NODE_ID;
-    }
-
     public void setId(int id) {
         setId(id, true);
     }
 
+    public boolean hasNullId() {
+        return this.id == NameIdPair.NULL_NODE_ID;
+    }
+
     public void setId(int id, boolean checkId) {
-        if (checkId && (id != this.id) && ! hasNullId()) {
+        if(checkId && (id != this.id) && !hasNullId()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Id was already not null: " + this.id);
+                    ("Id was already not null: " + this.id);
         }
         this.id = id;
     }
@@ -129,9 +134,9 @@ public class NameIdPair implements Serializable {
     }
 
     public void update(NameIdPair other) {
-        if (!name.equals(other.getName())) {
+        if(!name.equals(other.getName())) {
             throw EnvironmentFailureException.unexpectedState
-                ("Pair name mismatch: " + name + " <> " + other.getName());
+                    ("Pair name mismatch: " + name + " <> " + other.getName());
         }
         setId(other.getId());
     }
@@ -147,23 +152,23 @@ public class NameIdPair implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (!(obj instanceof NameIdPair)) {
+        if(!(obj instanceof NameIdPair)) {
             return false;
         }
         NameIdPair other = (NameIdPair) obj;
-        if (id != other.id) {
+        if(id != other.id) {
             return false;
         }
-        if (!name.equals(other.name)) {
+        if(!name.equals(other.name)) {
             throw EnvironmentFailureException.unexpectedState
-                ("Ids: " + id + " were equal." + " But names: " + name + ", " +
-                 other.name + " weren't!");
+                    ("Ids: " + id + " were equal." + " But names: " + name + ", " +
+                            other.name + " weren't!");
         }
         return true;
     }
@@ -178,7 +183,7 @@ public class NameIdPair implements Serializable {
         @Override
         public void setId(int id) {
             throw EnvironmentFailureException.unexpectedState
-                ("Read only NameIdPair");
+                    ("Read only NameIdPair");
         }
     }
 }

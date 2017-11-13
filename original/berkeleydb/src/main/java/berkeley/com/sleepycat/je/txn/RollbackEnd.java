@@ -13,12 +13,12 @@
 
 package berkeley.com.sleepycat.je.txn;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.log.Loggable;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.Timestamp;
+
+import java.nio.ByteBuffer;
 
 /**
  * This class indicates the end of a partial rollback at syncup. This is a
@@ -57,9 +57,9 @@ public class RollbackEnd implements Loggable {
      * @see Loggable#getLogSize
      */
     public int getLogSize() {
-        return  LogUtils.getPackedLongLogSize(matchpointLSN) +
-            LogUtils.getPackedLongLogSize(rollbackStartLSN) +
-            LogUtils.getTimestampLogSize(time);
+        return LogUtils.getPackedLongLogSize(matchpointLSN) +
+                LogUtils.getPackedLongLogSize(rollbackStartLSN) +
+                LogUtils.getTimestampLogSize(time);
 
     }
 
@@ -107,14 +107,14 @@ public class RollbackEnd implements Loggable {
      */
     public boolean logicalEquals(Loggable other) {
 
-        if (!(other instanceof RollbackEnd)) {
+        if(!(other instanceof RollbackEnd)) {
             return false;
         }
 
         RollbackEnd otherRE = (RollbackEnd) other;
         return (rollbackStartLSN == otherRE.rollbackStartLSN) &&
-            (matchpointLSN == otherRE.matchpointLSN) &&
-            (time.equals(otherRE.time));
+                (matchpointLSN == otherRE.matchpointLSN) &&
+                (time.equals(otherRE.time));
     }
 
     @Override

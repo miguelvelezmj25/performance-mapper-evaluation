@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.util.Enumeration;
-import java.util.Properties;
-
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.config.ConfigParam;
@@ -24,6 +21,9 @@ import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.RepConfigProxy;
 import berkeley.com.sleepycat.je.rep.RepInternal;
 import berkeley.com.sleepycat.je.rep.ReplicationConfig;
+
+import java.util.Enumeration;
+import java.util.Properties;
 
 public class RepConfigManager extends DbConfigManager {
 
@@ -49,21 +49,20 @@ public class RepConfigManager extends DbConfigManager {
      * environment.
      *
      * @param envConfig the environment config being checked.
-     *
      * @throws IllegalArgumentException via ReplicatedEnvironment ctor.
      */
     private static void checkEnvConfig(EnvironmentConfig envConfig)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (!envConfig.getTransactional()) {
+        if(!envConfig.getTransactional()) {
             throw new IllegalArgumentException
-                ("A replicated environment must be transactional");
+                    ("A replicated environment must be transactional");
         }
         String logMemOnly = envConfig.getConfigParam
-                            (EnvironmentParams.LOG_MEMORY_ONLY.getName());
-        if (Boolean.parseBoolean(logMemOnly)) {
+                (EnvironmentParams.LOG_MEMORY_ONLY.getName());
+        if(Boolean.parseBoolean(logMemOnly)) {
             throw new IllegalArgumentException
-                ("A replicated environment must not log to memory");
+                    ("A replicated environment must not log to memory");
         }
     }
 
@@ -84,29 +83,29 @@ public class RepConfigManager extends DbConfigManager {
 
         /* Check that the properties have valid names and values. */
         Enumeration<?> propNames = props.propertyNames();
-        while (propNames.hasMoreElements()) {
+        while(propNames.hasMoreElements()) {
             String name = (String) propNames.nextElement();
             /* Is this a valid property name? */
             ConfigParam param =
-                EnvironmentParams.SUPPORTED_PARAMS.get(name);
+                    EnvironmentParams.SUPPORTED_PARAMS.get(name);
 
-            if (param == null) {
+            if(param == null) {
                 /* See if the parameter is an multi-value parameter. */
                 String mvParamName = ConfigParam.multiValueParamName(name);
                 param = EnvironmentParams.SUPPORTED_PARAMS.get(mvParamName);
-                if (param == null) {
+                if(param == null) {
                     throw EnvironmentFailureException.unexpectedState
-                        (name +
-                         " is not a valid BDBJE environment configuration");
+                            (name +
+                                    " is not a valid BDBJE environment configuration");
                 }
             }
 
-            if (param.isForReplication()) {
+            if(param.isForReplication()) {
                 repProperties.setProperty(name, props.getProperty(name));
             }
         }
 
         return RepInternal.makeReplicationConfig
-            (repProperties, validateParams);
+                (repProperties, validateParams);
     }
 }

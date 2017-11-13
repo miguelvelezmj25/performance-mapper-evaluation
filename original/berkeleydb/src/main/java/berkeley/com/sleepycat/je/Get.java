@@ -23,27 +23,27 @@ public enum Get {
 
     /**
      * Searches using an exact match by key.
-     *
+     * <p>
      * <p>Returns, or moves the cursor to, the record having a key exactly
      * matching the given key parameter.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, the record with the matching key
      * and lowest data value (or the lowest primary key, for secondary
      * databases) is selected.</p>
-     *
+     * <p>
      * <p>The operation does not succeed if no record matches.</p>
      */
     SEARCH(SearchMode.SET),
 
     /**
      * Searches using an exact match by key and data (or pKey).
-     *
+     * <p>
      * <p>Returns, or moves the cursor to, the record having a key exactly
      * matching the given key parameter, and having a data value (or primary
      * key) exactly matching the given data (or pKey) parameter. The data is
      * matched for Database and Cursor operations, while the primary key is
      * matched for SecondaryDatabase and SecondaryCursor operations.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, the search is performed by key
      * and data (or pKey) using the database Btree. If the database has does
      * not have duplicate keys, the search is performed by key alone using the
@@ -51,7 +51,7 @@ public enum Get {
      * simply compared to the data (pKey) parameter. In other words, using
      * this operation has no performance advantage over {@link #SEARCH} when
      * the database does not have duplicates.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if no record
      * matches.</p>
      */
@@ -59,14 +59,14 @@ public enum Get {
 
     /**
      * Searches using a GTE match by key.
-     *
+     * <p>
      * <p>Returns, or moves the cursor to, the record with a key that is
      * greater than or equal to (GTE) the given key parameter.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, the record with the lowest data
      * value (or the lowest primary key, for a secondary database) is selected
      * among the duplicates with the matching key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if no record
      * matches.</p>
      */
@@ -74,18 +74,18 @@ public enum Get {
 
     /**
      * Searches using an exact match by key and a GTE match by data (or pKey).
-     *
+     * <p>
      * <p>Returns, or moves the cursor to, the record with a key exactly
      * matching the given key parameter, and having a data value (or primary
      * key) that is greater than or equal to (GTE) the given data (or pKey)
      * parameter. The data is matched for Database and Cursor operations, while
      * the primary key is matched for SecondaryDatabase and SecondaryCursor
      * operations.</p>
-     *
+     * <p>
      * <p>If the database does not have duplicate keys, the data (or pKey) is
      * matched exactly and this operation is equivalent to {@link
      * #SEARCH_BOTH}.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if no record
      * matches.</p>
      */
@@ -93,11 +93,11 @@ public enum Get {
 
     /**
      * Accesses the current record.
-     *
+     * <p>
      * <p>Accesses the record at the current cursor position. If the cursor is
      * uninitialized (not positioned on a record), {@link
      * IllegalStateException} is thrown.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if the record at
      * the current position has been deleted. This can occur in two cases: 1.
      * If the record was deleted using this cursor and then accessed. 2. If the
@@ -109,14 +109,14 @@ public enum Get {
 
     /**
      * Finds the first record in the database.
-     *
+     * <p>
      * <p>Moves the cursor to the record in the database with the lowest valued
      * key.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, the record with the lowest data
      * value (or the lowest primary key, for a secondary database) is selected
      * among the duplicates for the lowest key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if the database is
      * empty.</p>
      */
@@ -124,14 +124,14 @@ public enum Get {
 
     /**
      * Finds the last record in the database.
-     *
+     * <p>
      * <p>Moves the cursor to the record in the database with the highest
      * valued key.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, the record with the highest data
      * value (or the highest primary key, for a secondary database) is selected
      * among the duplicates for the highest key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if the database is
      * empty.</p>
      */
@@ -139,12 +139,12 @@ public enum Get {
 
     /**
      * Moves to the next record.
-     *
+     * <p>
      * <p>Moves the cursor to the record following the record at the current
      * cursor position. If the cursor is uninitialized (not positioned on a
      * record), moves to the first record and this operation is equivalent to
      * {@link #FIRST}.</p>
-     *
+     * <p>
      * <p>If the database does not have duplicate keys, the following record is
      * defined as the record with the next highest key. If the database does
      * have duplicate keys, the following record is defined as the record with
@@ -154,7 +154,7 @@ public enum Get {
      * record is the record with the next highest key and the lowest data value
      * (or the lowest primary key, for a secondary database) among the
      * duplicates for that key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if the record at
      * the cursor position is the last record in the database.</p>
      */
@@ -162,16 +162,16 @@ public enum Get {
 
     /**
      * Moves to the next record with the same key.
-     *
+     * <p>
      * <p>Moves the cursor to the record following the record at the current
      * cursor position and having the same key. If the cursor is uninitialized
      * (not positioned on a record), {@link IllegalStateException} is
      * thrown.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, moves to the record with the same
      * key and the next highest data value (or the next highest primary key,
      * for a secondary database) among the duplicates for that key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if there are no
      * following records with the same key. This is always the case when
      * database does not have duplicate keys.</p>
@@ -180,19 +180,19 @@ public enum Get {
 
     /**
      * Moves to the next record with a different key.
-     *
+     * <p>
      * <p>Moves the cursor to the record following the record at the current
      * cursor position and having the next highest key. If the cursor is
      * uninitialized (not positioned on a record), moves to the first record
      * and this operation is equivalent to {@link #FIRST}.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, moves to the record with the next
      * highest key and the lowest data value (or the lowest primary key, for a
      * secondary database) among the duplicates for that key; this effectively
      * skips over records having the same key and a higher data value (or a
      * higher primary key, for a secondary database). If the database does not
      * have duplicate keys, this operation is equivalent to {@link #NEXT}.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if there are no
      * following records with a different key.</p>
      */
@@ -200,12 +200,12 @@ public enum Get {
 
     /**
      * Moves to the previous record.
-     *
+     * <p>
      * <p>Moves the cursor to the record preceding the record at the current
      * cursor position. If the cursor is uninitialized (not positioned on a
      * record), moves to the last record and this operation is equivalent to
      * {@link #LAST}.</p>
-     *
+     * <p>
      * <p>If the database does not have duplicate keys, the preceding record is
      * defined as the record with the next lowest key. If the database does
      * have duplicate keys, the preceding record is defined as the record with
@@ -215,7 +215,7 @@ public enum Get {
      * is the record with the next lowest key and the highest data value (or
      * the highest primary key, for a secondary database) among the duplicates
      * for that key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if the record at
      * the cursor position is the first record in the database.</p>
      */
@@ -223,16 +223,16 @@ public enum Get {
 
     /**
      * Moves to the previous record with the same key.
-     *
+     * <p>
      * <p>Moves the cursor to the record preceding the record at the current
      * cursor position and having the same key. If the cursor is uninitialized
      * (not positioned on a record), {@link IllegalStateException} is
      * thrown.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, moves to the record with the same
      * key and the next lowest data value (or the next lowest primary key, for
      * a secondary database) among the duplicates for that key.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if there are no
      * preceding records with the same key. This is always the case when
      * database does not have duplicate keys.</p>
@@ -241,19 +241,19 @@ public enum Get {
 
     /**
      * Moves to the previous record with a different key.
-     *
+     * <p>
      * <p>Moves the cursor to the record preceding the record at the current
      * cursor position and having the next lowest key. If the cursor is
      * uninitialized (not positioned on a record), moves to the last record
      * and this operation is equivalent to {@link #LAST}.</p>
-     *
+     * <p>
      * <p>If the database has duplicate keys, moves to the record with the next
      * lowest key and the highest data value (or the highest primary key, for a
      * secondary database) among the duplicates for that key; this effectively
      * skips over records having the same key and a lower data value (or a
      * lower primary key, for a secondary database). If the database does not
      * have duplicate keys, this operation is equivalent to {@link #PREV}.</p>
-     *
+     * <p>
      * <p>The operation does not succeed (null is returned) if there are no
      * preceding records with a different key.</p>
      */

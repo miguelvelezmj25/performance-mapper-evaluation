@@ -19,7 +19,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>EntryBinding</code> that uses the <code>TupleInput</code>
  * object as the key or data object.
- *
+ * <p>
  * A concrete tuple binding for key or data entries which are {@link
  * TupleInput} objects.  This binding is used when tuples themselves are the
  * objects, rather than using application defined objects. A {@link TupleInput}

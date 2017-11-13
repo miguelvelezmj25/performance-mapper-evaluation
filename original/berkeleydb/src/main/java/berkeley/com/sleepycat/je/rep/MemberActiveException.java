@@ -17,7 +17,7 @@ import berkeley.com.sleepycat.je.OperationFailureException;
 
 /**
  * @hidden internal, for use in disaster recovery [#23447]
- *
+ * <p>
  * Thrown when an operation is performed on an active replication group member
  * but it requires that the member not be active.
  */
@@ -26,6 +26,7 @@ public class MemberActiveException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public MemberActiveException(String message) {
@@ -34,6 +35,7 @@ public class MemberActiveException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     private MemberActiveException(String message,
@@ -43,6 +45,7 @@ public class MemberActiveException extends OperationFailureException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

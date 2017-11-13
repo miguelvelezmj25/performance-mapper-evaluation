@@ -13,17 +13,6 @@
 
 package berkeley.com.sleepycat.je.statcap;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.CustomStats;
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
@@ -32,12 +21,14 @@ import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.EnvConfigObserver;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.utilint.DaemonThread;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.Stat;
-import berkeley.com.sleepycat.je.utilint.StatDefinition;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
+import berkeley.com.sleepycat.je.utilint.*;
 import berkeley.com.sleepycat.utilint.StatLogger;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
@@ -54,17 +45,13 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
     private final StatsConfig clearingFastConfig;
 
     private final Integer statKey;
-
-    private volatile StatLogger stlog = null;
     private final StringBuffer values = new StringBuffer();
-    private String currentHeader = null;
-
     private final JvmStats jvmstats = new JvmStats();
     private final CustomStats customStats;
     private final String[] customStatHeader;
-
     private final Logger logger;
-
+    private volatile StatLogger stlog = null;
+    private String currentHeader = null;
     /*
      * Exception of last outputStats() call or null if call was successful.
      * Used to limit the number of errors logged.
@@ -96,15 +83,16 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
         /* Add jvm and custom statistics to the projection list. */
         jvmstats.addVMStatDefs(statProjection);
 
-        if (customStats != null) {
+        if(customStats != null) {
             final String[] customFldNames = customStats.getFieldNames();
             customStatHeader = new String[customFldNames.length];
-            for (int i = 0; i < customFldNames.length; i++) {
+            for(int i = 0; i < customFldNames.length; i++) {
                 customStatHeader[i] =
-                    CUSTOMGROUPNAME + ":" + customFldNames[i];
+                        CUSTOMGROUPNAME + ":" + customFldNames[i];
                 statProjection.add(customStatHeader[i]);
             }
-        } else {
+        }
+        else {
             customStatHeader = null;
         }
 
@@ -121,7 +109,7 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
     @Override
     protected void onWakeup() {
 
-        if (!envImpl.isValid() || !collectStats()) {
+        if(!envImpl.isValid() || !collectStats()) {
             return;
         }
 
@@ -139,7 +127,7 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
          * thread is holding the lock for this object and waiting for
          * this thread to shutdown.
          */
-        if (!collectStats() || !envImpl.isValid()) {
+        if(!collectStats() || !envImpl.isValid()) {
             return;
         }
         outputStats();
@@ -147,20 +135,20 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
     private synchronized void outputStats() {
 
-        if (!collectStats() || !envImpl.isValid()) {
+        if(!collectStats() || !envImpl.isValid()) {
             return;
         }
 
         try {
             SortedMap<String, String> stats = getStats();
 
-            if (stats != null) {
-                if (currentHeader == null) {
+            if(stats != null) {
+                if(currentHeader == null) {
                     values.setLength(0);
                     values.append("time");
 
-                    for (Iterator<String> nameit = statProjection.iterator();
-                        nameit.hasNext();) {
+                    for(Iterator<String> nameit = statProjection.iterator();
+                        nameit.hasNext(); ) {
                         String statname = nameit.next();
                         values.append(DELIMITER + statname);
                     }
@@ -170,13 +158,14 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
                 values.setLength(0);
                 values.append(StatUtils.getDate(System.currentTimeMillis()));
 
-                for (Iterator<String> nameit = statProjection.iterator();
-                    nameit.hasNext();) {
+                for(Iterator<String> nameit = statProjection.iterator();
+                    nameit.hasNext(); ) {
                     String statname = nameit.next();
                     String val = stats.get(statname);
-                    if (val != null) {
+                    if(val != null) {
                         values.append(DELIMITER + val);
-                    } else {
+                    }
+                    else {
                         values.append(DELIMITERANDSPACE);
                     }
                 }
@@ -184,22 +173,20 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
                 values.setLength(0);
                 lastCallException = null;
             }
-        }
-        catch (IOException e) {
-            if (lastCallException == null) {
+        } catch(IOException e) {
+            if(lastCallException == null) {
                 LoggerUtils.warning(logger, envImpl,
-                    "Error accessing statistics capture file " +
-                    STATFILENAME + "." + STATFILEEXT +
-                    " IO Exception: " + e.getMessage());
+                        "Error accessing statistics capture file " +
+                                STATFILENAME + "." + STATFILEEXT +
+                                " IO Exception: " + e.getMessage());
             }
             lastCallException = e;
-        }
-        catch (Exception e) {
-            if (lastCallException == null) {
+        } catch(Exception e) {
+            if(lastCallException == null) {
                 LoggerUtils.warning(logger, envImpl,
-                    "Error accessing or writing statistics capture file  " +
-                    STATFILENAME + "." + STATFILEEXT + e + "\n" +
-                    LoggerUtils.getStackTrace(e));
+                        "Error accessing or writing statistics capture file  " +
+                                STATFILENAME + "." + STATFILEEXT + e + "\n" +
+                                LoggerUtils.getStackTrace(e));
             }
             lastCallException = e;
         }
@@ -207,12 +194,12 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
     private SortedMap<String, String> getStats() {
         final Collection<StatGroup> envStats = new ArrayList<StatGroup>(
-            statMgr.loadStats(clearingFastConfig, statKey).getStatGroups());
+                statMgr.loadStats(clearingFastConfig, statKey).getStatGroups());
 
-        if (envImpl.isReplicated()) {
+        if(envImpl.isReplicated()) {
             Collection<StatGroup> rsg =
-                envImpl.getRepStatGroups(clearingFastConfig, statKey);
-            if (rsg != null) {
+                    envImpl.getRepStatGroups(clearingFastConfig, statKey);
+            if(rsg != null) {
                 envStats.addAll(rsg);
             }
         }
@@ -221,15 +208,15 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
         SortedMap<String, String> statsMap = new TreeMap<String, String>();
 
-        for (StatGroup sg : envStats) {
+        for(StatGroup sg : envStats) {
 
-            for (Entry<StatDefinition, Stat<?>> e :
-                 sg.getStats().entrySet()) {
+            for(Entry<StatDefinition, Stat<?>> e :
+                    sg.getStats().entrySet()) {
 
                 final String mapName =
-                    (sg.getName() + ":" + e.getKey().getName()).intern();
+                        (sg.getName() + ":" + e.getKey().getName()).intern();
                 final Stat<?> stat = e.getValue();
-                if (stat.isNotSet()) {
+                if(stat.isNotSet()) {
                     statsMap.put(mapName, " ");
                     continue;
                 }
@@ -238,22 +225,25 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
                 /* get stats back as strings. */
                 final String str;
-                if ((val instanceof Float) || (val instanceof Double)) {
+                if((val instanceof Float) || (val instanceof Double)) {
                     str = String.format("%.2f", val);
-                } else if (val instanceof Number) {
+                }
+                else if(val instanceof Number) {
                     str = Long.toString(((Number) val).longValue());
-                } else if (val != null) {
+                }
+                else if(val != null) {
                     str = String.valueOf(val);
-                } else {
+                }
+                else {
                     str = " ";
                 }
                 statsMap.put(mapName, str);
             }
         }
 
-        if (customStats != null) {
+        if(customStats != null) {
             String vals[] = customStats.getFieldValues();
-            for (int i = 0; i < vals.length; i++) {
+            for(int i = 0; i < vals.length; i++) {
                 statsMap.put(customStatHeader[i], vals[i]);
             }
         }
@@ -262,57 +252,60 @@ public class StatCapture extends DaemonThread implements EnvConfigObserver {
 
     public void envConfigUpdate(DbConfigManager configMgr,
                                 EnvironmentMutableConfig unused)
-                                throws DatabaseException {
+            throws DatabaseException {
 
         setWaitTime(configMgr.getDuration(
-            EnvironmentParams.STATS_COLLECT_INTERVAL));
+                EnvironmentParams.STATS_COLLECT_INTERVAL));
 
-        if (envImpl.isReadOnly() || envImpl.isMemOnly() ||
-            !configMgr.getBoolean(EnvironmentParams.STATS_COLLECT)) {
+        if(envImpl.isReadOnly() || envImpl.isMemOnly() ||
+                !configMgr.getBoolean(EnvironmentParams.STATS_COLLECT)) {
             stlog = null;
             return;
         }
 
         final int maxFiles =
-            configMgr.getInt(EnvironmentParams.STATS_MAX_FILES);
+                configMgr.getInt(EnvironmentParams.STATS_MAX_FILES);
 
         final int fileRowCount =
-            configMgr.getInt(EnvironmentParams.STATS_FILE_ROW_COUNT);
+                configMgr.getInt(EnvironmentParams.STATS_FILE_ROW_COUNT);
 
-        if (stlog == null) {
+        if(stlog == null) {
 
             final String statdir =
-                configMgr.get(EnvironmentParams.STATS_FILE_DIRECTORY);
+                    configMgr.get(EnvironmentParams.STATS_FILE_DIRECTORY);
 
             final File statDir;
 
-            if (statdir == null || statdir.equals("")) {
+            if(statdir == null || statdir.equals("")) {
                 statDir = envImpl.getEnvironmentHome();
-            } else {
+            }
+            else {
                 statDir = new File(statdir);
 
-                if (!statDir.exists()) {
+                if(!statDir.exists()) {
                     /* TODO: require the user to create the directory. */
                     statDir.mkdirs();
-                } else if (!statDir.isDirectory()) {
+                }
+                else if(!statDir.isDirectory()) {
                     throw new IllegalArgumentException(
-                        "Specified statistic log directory " +
-                        statDir.getAbsolutePath() + " is not a directory.");
+                            "Specified statistic log directory " +
+                                    statDir.getAbsolutePath() + " is not a directory.");
                 }
             }
 
             try {
                 stlog = new StatLogger(
-                    statDir, STATFILENAME, STATFILEEXT,
-                    maxFiles, fileRowCount);
+                        statDir, STATFILENAME, STATFILEEXT,
+                        maxFiles, fileRowCount);
 
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw new IllegalStateException(
-                    " Error accessing statistics capture file " +
-                    STATFILENAME + "." + STATFILEEXT +
-                    " IO Exception: " + e.getMessage());
+                        " Error accessing statistics capture file " +
+                                STATFILENAME + "." + STATFILEEXT +
+                                " IO Exception: " + e.getMessage());
             }
-        } else {
+        }
+        else {
             stlog.setFileCount(maxFiles);
             stlog.setRowCount(fileRowCount);
         }

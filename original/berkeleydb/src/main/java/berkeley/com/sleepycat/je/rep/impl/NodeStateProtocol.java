@@ -18,9 +18,9 @@ import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
 
 /**
  * Defines the protocol used in support of node state querying.
- *
+ * <p>
  * The message request sequence:
- *    NODE_STATE_REQ -> NODE_STATE_RESP
+ * NODE_STATE_REQ -> NODE_STATE_RESP
  */
 public class NodeStateProtocol extends TextProtocol {
 
@@ -28,9 +28,9 @@ public class NodeStateProtocol extends TextProtocol {
 
     /* The messages defined by this class. */
     public final MessageOp NODE_STATE_REQ =
-        new MessageOp("STATEREQ", NodeStateRequest.class);
+            new MessageOp("STATEREQ", NodeStateRequest.class);
     public final MessageOp NODE_STATE_RESP =
-        new MessageOp("STATERESP", NodeStateResponse.class);
+            new MessageOp("STATERESP", NodeStateResponse.class);
 
     public NodeStateProtocol(String groupName,
                              NameIdPair nameIdPair,
@@ -39,14 +39,14 @@ public class NodeStateProtocol extends TextProtocol {
 
         super(VERSION, groupName, nameIdPair, repImpl, channelFactory);
 
-        this.initializeMessageOps(new MessageOp[] {
+        this.initializeMessageOps(new MessageOp[]{
                 NODE_STATE_REQ,
                 NODE_STATE_RESP
         });
 
         setTimeouts(repImpl,
-                    RepParams.REP_GROUP_OPEN_TIMEOUT,
-                    RepParams.REP_GROUP_READ_TIMEOUT);
+                RepParams.REP_GROUP_OPEN_TIMEOUT,
+                RepParams.REP_GROUP_READ_TIMEOUT);
     }
 
     /* Message request the state of the specified node. */
@@ -58,7 +58,7 @@ public class NodeStateProtocol extends TextProtocol {
         }
 
         public NodeStateRequest(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             nodeName = nextPayloadToken();
@@ -80,7 +80,7 @@ public class NodeStateProtocol extends TextProtocol {
 
         @Override
         public String wireFormat() {
-           return  wireFormatPrefix() + SEPARATOR + nodeName;
+            return wireFormatPrefix() + SEPARATOR + nodeName;
         }
     }
 
@@ -102,7 +102,7 @@ public class NodeStateProtocol extends TextProtocol {
         }
 
         public NodeStateResponse(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             nodeName = nextPayloadToken();
@@ -140,10 +140,10 @@ public class NodeStateProtocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR +
-                   nodeName + SEPARATOR +
-                   masterName + SEPARATOR +
-                   Long.toString(joinTime) + SEPARATOR +
-                   nodeState.toString();
+                    nodeName + SEPARATOR +
+                    masterName + SEPARATOR +
+                    Long.toString(joinTime) + SEPARATOR +
+                    nodeState.toString();
         }
     }
 }

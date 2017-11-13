@@ -91,7 +91,7 @@ public abstract class RunTransaction {
                 txn.commit();
                 success = true;
                 return;
-            } catch (InsufficientReplicasException insufficientReplicas) {
+            } catch(InsufficientReplicasException insufficientReplicas) {
 
                 /*
                  * Retry the transaction.  Give Replicas a chance to contact
@@ -114,7 +114,7 @@ public abstract class RunTransaction {
                     txnConfig = lowerDurability(txnConfig);
                 }
                 continue;
-            } catch (InsufficientAcksException insufficientReplicas) {
+            } catch(InsufficientAcksException insufficientReplicas) {
 
                 /*
                  * Transaction has been committed at this node. The other
@@ -132,7 +132,7 @@ public abstract class RunTransaction {
                 out.println(insufficientReplicas.toString());
                 txn = null;
                 return;
-            } catch (ReplicaWriteException replicaWrite) {
+            } catch(ReplicaWriteException replicaWrite) {
 
                 /*
                  * Attempted a modification while in the Replica state.
@@ -145,7 +145,7 @@ public abstract class RunTransaction {
                  */
                 onReplicaWrite(replicaWrite);
                 return;
-            } catch (LockConflictException lockConflict) {
+            } catch(LockConflictException lockConflict) {
 
                 /*
                  * Retry the transaction.  Note that LockConflictException
@@ -155,7 +155,7 @@ public abstract class RunTransaction {
                 out.println(lockConflict.toString() + "\n  Retrying ...");
                 sleepMillis = LOCK_CONFLICT_RETRY_SEC * 1000;
                 continue;
-            } catch (ReplicaConsistencyException replicaConsistency) {
+            } catch(ReplicaConsistencyException replicaConsistency) {
 
                 /*
                  * Retry the transaction to see if the replica becomes

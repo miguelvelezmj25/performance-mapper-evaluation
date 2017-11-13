@@ -32,7 +32,7 @@ package berkeley.com.sleepycat.asm;
 
 /**
  * Information about a class being parsed in a {@link ClassReader}.
- * 
+ *
  * @author Eric Bruneton
  */
 class Context {

@@ -13,22 +13,23 @@
 
 package berkeley.com.sleepycat.collections;
 
-import java.util.Comparator;
-import java.util.SortedMap;
-
 import berkeley.com.sleepycat.bind.EntityBinding;
 import berkeley.com.sleepycat.bind.EntryBinding;
 import berkeley.com.sleepycat.je.Database;
-/* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
-/* <!-- end JE only --> */
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
 import berkeley.com.sleepycat.je.OperationStatus;
 import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
+import java.util.Comparator;
+import java.util.SortedMap;
+
+/* <!-- begin JE only --> */
+/* <!-- end JE only --> */
+
 /**
  * A SortedMap view of a {@link Database}.
- *
+ * <p>
  * <p>In addition to the standard SortedMap methods, this class provides the
  * following methods for stored sorted maps only.  Note that the use of these
  * methods is not compatible with the standard Java collections interface.</p>
@@ -41,28 +42,23 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class StoredSortedMap<K, V>
-    extends StoredMap<K, V>
-    implements SortedMap<K, V> {
+        extends StoredMap<K, V>
+        implements SortedMap<K, V> {
 
     /**
      * Creates a sorted map view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param valueBinding is the binding used to translate between value
-     * buffers and value objects.
-     *
+     *                     buffers and value objects.
      * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                     to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedMap(Database database,
                            EntryBinding<K> keyBinding,
@@ -70,29 +66,24 @@ public class StoredSortedMap<K, V>
                            boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, valueBinding, null,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     /**
      * Creates a sorted map view of a {@link Database} with a {@link
      * PrimaryKeyAssigner}.  Writing is allowed for the created map.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param valueBinding is the binding used to translate between value
-     * buffers and value objects.
-     *
-     * @param keyAssigner is used by the {@link #append} method to assign
-     * primary keys.
-     *
+     *                     buffers and value objects.
+     * @param keyAssigner  is used by the {@link #append} method to assign
+     *                     primary keys.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedMap(Database database,
                            EntryBinding<K> keyBinding,
@@ -100,28 +91,23 @@ public class StoredSortedMap<K, V>
                            PrimaryKeyAssigner keyAssigner) {
 
         super(new DataView(database, keyBinding, valueBinding, null,
-                           true, keyAssigner));
+                true, keyAssigner));
     }
 
     /**
      * Creates a sorted map entity view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database           is the Database underlying the new collection.
+     * @param keyBinding         is the binding used to translate between key buffers
+     *                           and key objects.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param writeAllowed       is true to create a read-write collection or false
+     *                           to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedMap(Database database,
                            EntryBinding<K> keyBinding,
@@ -129,29 +115,24 @@ public class StoredSortedMap<K, V>
                            boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, null, valueEntityBinding,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     /**
      * Creates a sorted map entity view of a {@link Database} with a {@link
      * PrimaryKeyAssigner}.  Writing is allowed for the created map.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database           is the Database underlying the new collection.
+     * @param keyBinding         is the binding used to translate between key buffers
+     *                           and key objects.
      * @param valueEntityBinding is the binding used to translate between
-     * key/value buffers and entity value objects.
-     *
-     * @param keyAssigner is used by the {@link #append} method to assign
-     * primary keys.
-     *
+     *                           key/value buffers and entity value objects.
+     * @param keyAssigner        is used by the {@link #append} method to assign
+     *                           primary keys.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedMap(Database database,
                            EntryBinding<K> keyBinding,
@@ -159,7 +140,7 @@ public class StoredSortedMap<K, V>
                            PrimaryKeyAssigner keyAssigner) {
 
         super(new DataView(database, keyBinding, null, valueEntityBinding,
-                           true, keyAssigner));
+                true, keyAssigner));
     }
 
     StoredSortedMap(DataView mapView) {
@@ -186,18 +167,16 @@ public class StoredSortedMap<K, V>
      * This method conforms to the {@link SortedMap#firstKey} interface.
      *
      * @return the first key.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public K firstKey() {
 
@@ -209,18 +188,16 @@ public class StoredSortedMap<K, V>
      * This method conforms to the {@link SortedMap#lastKey} interface.
      *
      * @return the last key.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public K lastKey() {
 
@@ -233,15 +210,16 @@ public class StoredSortedMap<K, V>
         try {
             cursor = new DataCursor(view, false);
             OperationStatus status;
-            if (doGetFirst) {
+            if(doGetFirst) {
                 status = cursor.getFirst(false);
-            } else {
+            }
+            else {
                 status = cursor.getLast(false);
             }
             return (K) ((status == OperationStatus.SUCCESS) ?
-                cursor.getCurrentKey() :
-                null);
-        } catch (Exception e) {
+                    cursor.getCurrentKey() :
+                    null);
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         } finally {
             closeCursor(cursor);
@@ -252,16 +230,14 @@ public class StoredSortedMap<K, V>
      * Returns a view of the portion of this sorted set whose keys are
      * strictly less than toKey.
      * This method conforms to the {@link SortedMap#headMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param toKey is the upper bound.
-     *
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> headMap(K toKey) {
 
@@ -272,18 +248,15 @@ public class StoredSortedMap<K, V>
      * Returns a view of the portion of this sorted map whose elements are
      * strictly less than toKey, optionally including toKey.
      * This method does not exist in the standard {@link SortedMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param toKey is the upper bound.
-     *
+     * @param toKey       is the upper bound.
      * @param toInclusive is true to include toKey.
-     *
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> headMap(K toKey, boolean toInclusive) {
 
@@ -294,16 +267,14 @@ public class StoredSortedMap<K, V>
      * Returns a view of the portion of this sorted map whose elements are
      * greater than or equal to fromKey.
      * This method conforms to the {@link SortedMap#tailMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromKey is the lower bound.
-     *
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> tailMap(K fromKey) {
 
@@ -314,18 +285,15 @@ public class StoredSortedMap<K, V>
      * Returns a view of the portion of this sorted map whose elements are
      * strictly greater than fromKey, optionally including fromKey.
      * This method does not exist in the standard {@link SortedMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromKey is the lower bound.
-     *
+     * @param fromKey       is the lower bound.
      * @param fromInclusive is true to include fromKey.
-     *
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> tailMap(K fromKey, boolean fromInclusive) {
 
@@ -336,18 +304,15 @@ public class StoredSortedMap<K, V>
      * Returns a view of the portion of this sorted map whose elements range
      * from fromKey, inclusive, to toKey, exclusive.
      * This method conforms to the {@link SortedMap#subMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromKey is the lower bound.
-     *
-     * @param toKey is the upper bound.
-     *
+     * @param toKey   is the upper bound.
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> subMap(K fromKey, K toKey) {
 
@@ -359,22 +324,17 @@ public class StoredSortedMap<K, V>
      * strictly greater than fromKey and strictly less than toKey,
      * optionally including fromKey and toKey.
      * This method does not exist in the standard {@link SortedMap} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredStoredMap and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromKey is the lower bound.
-     *
+     * @param fromKey       is the lower bound.
      * @param fromInclusive is true to include fromKey.
-     *
-     * @param toKey is the upper bound.
-     *
-     * @param toInclusive is true to include toKey.
-     *
+     * @param toKey         is the upper bound.
+     * @param toInclusive   is true to include toKey.
      * @return the submap.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedMap<K, V> subMap(K fromKey,
                                   boolean fromInclusive,
@@ -382,8 +342,8 @@ public class StoredSortedMap<K, V>
                                   boolean toInclusive) {
         try {
             return new StoredSortedMap(
-               view.subView(fromKey, fromInclusive, toKey, toInclusive, null));
-        } catch (Exception e) {
+                    view.subView(fromKey, fromInclusive, toKey, toInclusive, null));
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }

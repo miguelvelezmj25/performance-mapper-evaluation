@@ -13,10 +13,10 @@
 
 package berkeley.com.sleepycat.je.rep.utilint.net;
 
+import berkeley.com.sleepycat.je.rep.net.InstanceParams;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-
-import berkeley.com.sleepycat.je.rep.net.InstanceParams;
 
 /**
  * This is an implementation of HostnameVerifier, which is intended to verify
@@ -33,18 +33,29 @@ import berkeley.com.sleepycat.je.rep.net.InstanceParams;
  */
 
 public class SSLDNHostVerifier
-    extends SSLDNMatcher
-    implements HostnameVerifier {
+        extends SSLDNMatcher
+        implements HostnameVerifier {
 
     /**
      * Construct an SSLDNHostVerifier
      *
      * @param params The parameter for authentication creation.  This class
-     *        requires a Java regular expression to be applied to the subject
-     *        common name.
+     *               requires a Java regular expression to be applied to the subject
+     *               common name.
      */
     public SSLDNHostVerifier(InstanceParams params) {
         super(params);
+    }
+
+    /**
+     * Verify that the string is a valid pattern.
+     *
+     * @throws IllegalArgumentException if not a valid pattern.
+     */
+    public static void validate(String regex)
+            throws IllegalArgumentException {
+
+        validateRegex(regex);
     }
 
     /**
@@ -52,7 +63,7 @@ public class SSLDNHostVerifier
      * This should be called only after the SSL handshake has completed.
      *
      * @param targetHost the intended target of a network connection
-     *   This parameter is not used by this implementation.
+     *                   This parameter is not used by this implementation.
      * @param sslSession the SSLSession that has been set up for the connection
      * @return true if sslSession indicates that the connection has been made
      * to the correct host
@@ -60,15 +71,5 @@ public class SSLDNHostVerifier
     @Override
     public boolean verify(String targetHost, SSLSession sslSession) {
         return peerMatches(sslSession);
-    }
-
-    /**
-     * Verify that the string is a valid pattern.
-     * @throws IllegalArgumentException if not a valid pattern.
-     */
-    public static void validate(String regex)
-        throws IllegalArgumentException {
-
-        validateRegex(regex);
     }
 }

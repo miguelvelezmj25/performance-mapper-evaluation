@@ -13,26 +13,16 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_FSYNCS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_FSYNC_REQUESTS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.FSYNCMGR_TIMEOUTS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_N_GROUP_COMMIT_REQUESTS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_N_GROUP_COMMIT_WAITS;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_N_LOG_INTERVAL_EXCEEDED;
-import static berkeley.com.sleepycat.je.log.LogStatDefinition.GRPCMGR_N_LOG_MAX_GROUP_COMMIT;
-
-import java.util.concurrent.CountDownLatch;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.StatsConfig;
 import berkeley.com.sleepycat.je.ThreadInterruptedException;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.utilint.AtomicLongStat;
-import berkeley.com.sleepycat.je.utilint.LongStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
+import berkeley.com.sleepycat.je.utilint.*;
+
+import java.util.concurrent.CountDownLatch;
+
+import static berkeley.com.sleepycat.je.log.LogStatDefinition.*;
 
 /*
  * The FsyncManager ensures that only one file fsync is issued at a time, for
@@ -102,16 +92,10 @@ class FSyncManager {
 
     /* Use as the target for a synchronization block. */
     private final Object mgrMutex;
-
-    private volatile boolean workInProgress;
-    private FSyncGroup nextFSyncWaiters;
-    private int numNextWaiters;
-    private long startNextWait;
     /* Number of waiters that prevents a group commit wait */
     private final int grpcThreshold;
     private final long grpcInterval;
     private final boolean grpWaitOn;
-
     /* stats */
     private final StatGroup stats;
     private final LongStat nFSyncRequests;
@@ -121,21 +105,25 @@ class FSyncManager {
     private final LongStat nWaitersExceeded;
     private final LongStat nTimeExceeded;
     private final LongStat nWaits;
-
+    private volatile boolean workInProgress;
+    private FSyncGroup nextFSyncWaiters;
+    private int numNextWaiters;
+    private long startNextWait;
     /* For unit tests. */
     private TestHook<CountDownLatch> flushHook;
 
     FSyncManager(EnvironmentImpl envImpl) {
         timeout = envImpl.getConfigManager().getDuration
-            (EnvironmentParams.LOG_FSYNC_TIMEOUT);
+                (EnvironmentParams.LOG_FSYNC_TIMEOUT);
         grpcInterval = envImpl.getConfigManager().getDurationNS(
-            EnvironmentParams.LOG_GROUP_COMMIT_INTERVAL);
+                EnvironmentParams.LOG_GROUP_COMMIT_INTERVAL);
         grpcThreshold =
-            envImpl.getConfigManager().getInt(
-                EnvironmentParams.LOG_GROUP_COMMIT_THRESHOLD);
-        if (grpcInterval == 0 || grpcThreshold == 0) {
+                envImpl.getConfigManager().getInt(
+                        EnvironmentParams.LOG_GROUP_COMMIT_THRESHOLD);
+        if(grpcInterval == 0 || grpcThreshold == 0) {
             grpWaitOn = false;
-        } else {
+        }
+        else {
             grpWaitOn = true;
         }
 
@@ -146,17 +134,17 @@ class FSyncManager {
         nextFSyncWaiters = new FSyncGroup(timeout, envImpl);
 
         stats = new StatGroup(LogStatDefinition.FSYNCMGR_GROUP_NAME,
-                              LogStatDefinition.FSYNCMGR_GROUP_DESC);
+                LogStatDefinition.FSYNCMGR_GROUP_DESC);
         nFSyncRequests = new LongStat(stats, FSYNCMGR_FSYNC_REQUESTS);
         nFSyncs = new AtomicLongStat(stats, FSYNCMGR_FSYNCS);
         nTimeouts = new LongStat(stats, FSYNCMGR_TIMEOUTS);
         nRequests = new LongStat(stats, GRPCMGR_N_GROUP_COMMIT_REQUESTS);
         nTimeExceeded =
-            new LongStat(stats, GRPCMGR_N_LOG_INTERVAL_EXCEEDED);
+                new LongStat(stats, GRPCMGR_N_LOG_INTERVAL_EXCEEDED);
         nWaitersExceeded =
-            new LongStat(stats, GRPCMGR_N_LOG_MAX_GROUP_COMMIT);
+                new LongStat(stats, GRPCMGR_N_LOG_MAX_GROUP_COMMIT);
         nWaits =
-            new LongStat(stats, GRPCMGR_N_GROUP_COMMIT_WAITS);
+                new LongStat(stats, GRPCMGR_N_GROUP_COMMIT_WAITS);
         numNextWaiters = 0;
     }
 
@@ -167,25 +155,25 @@ class FSyncManager {
      * issued and executed on behalf of its write. There is a timeout period
      * specified by EnvironmentParam.LOG_FSYNC_TIMEOUT that ensures that no
      * thread gets stuck here indefinitely.
-     *
+     * <p>
      * When a thread comes in, it will find one of two things.
      * 1. There is no work going on right now. This thread should go
-     *    ahead and become the group leader. The leader may wait and
-     *    executes the flush/fsync.
+     * ahead and become the group leader. The leader may wait and
+     * executes the flush/fsync.
      * 2. There is work going on, wait on the next group commit.
-     *
+     * <p>
      * When a work is going on, all those threads that come along are grouped
      * together as the nextFsyncWaiters. When the current work is finished,
      * one of those nextFsyncWaiters will be selected as a leader to issue the
      * next flush/fsync. The other members of the group will merely wait until
      * the flush/fsync done on their behalf is finished.
-     *
+     * <p>
      * When a thread finishes a flush/fsync, it has to:
      * 1. wake up all the threads that were waiting in the group.
      * 2. wake up one member of the next group of waiting threads (the
-     *    nextFsyncWaiters) so that thread can become the new leader
-     *    and issue the next flush/fysnc call.
-     *
+     * nextFsyncWaiters) so that thread can become the new leader
+     * and issue the next flush/fysnc call.
+     * <p>
      * If a non-leader member of the nextFsyncWaiters times out, it will issue
      * its own flush/fsync anyway, in case something happened to the leader.
      *
@@ -193,7 +181,7 @@ class FSyncManager {
      * @throws DatabaseException
      */
     void flushAndSync(boolean fsyncRequired)
-        throws DatabaseException {
+            throws DatabaseException {
 
         long interval;
         boolean doWork = false;
@@ -202,43 +190,45 @@ class FSyncManager {
         FSyncGroup inProgressGroup = null;
         FSyncGroup myGroup = null;
 
-        synchronized (mgrMutex) {
+        synchronized(mgrMutex) {
             nRequests.increment();
-            if (fsyncRequired) {
+            if(fsyncRequired) {
                 nFSyncRequests.increment();
             }
             myGroup = nextFSyncWaiters;
             myGroup.setDoFsync(fsyncRequired);
 
             /* Figure out if we're calling fsync or waiting. */
-            if (workInProgress) {
+            if(workInProgress) {
                 needToWait = true;
                 numNextWaiters++;
-                if (grpWaitOn && numNextWaiters == 1) {
+                if(grpWaitOn && numNextWaiters == 1) {
                     startNextWait = System.nanoTime();
                 }
-            } else {
+            }
+            else {
                 isLeader = true;
                 doWork = true;
                 workInProgress = true;
-                if (grpWaitOn) {
-                    if (numNextWaiters < grpcThreshold) {
+                if(grpWaitOn) {
+                    if(numNextWaiters < grpcThreshold) {
                         interval = System.nanoTime() - startNextWait;
-                        if (interval < grpcInterval) {
+                        if(interval < grpcInterval) {
                             try {
                                 nWaits.increment();
-                                mgrMutex.wait(interval/1000000,
-                                              (int) interval%1000000);
-                            } catch (InterruptedException e) {
+                                mgrMutex.wait(interval / 1000000,
+                                        (int) interval % 1000000);
+                            } catch(InterruptedException e) {
                                 throw new ThreadInterruptedException(
-                                    envImpl,
-                                    "Unexpected interrupt while " +
-                                    "waiting for write or fsync",
-                                    e);
+                                        envImpl,
+                                        "Unexpected interrupt while " +
+                                                "waiting for write or fsync",
+                                        e);
                             }
                         }
                         nTimeExceeded.increment();
-                    } else {
+                    }
+                    else {
                         nWaitersExceeded.increment();
                     }
                 }
@@ -248,7 +238,7 @@ class FSyncManager {
             }
         }
 
-        if (needToWait) {
+        if(needToWait) {
 
             /*
              * Note that there's no problem if we miss the notify on this set
@@ -261,8 +251,8 @@ class FSyncManager {
              */
             int waitStatus = myGroup.waitForEvent();
 
-            if (waitStatus == FSyncGroup.DO_LEADER_FSYNC) {
-                synchronized (mgrMutex) {
+            if(waitStatus == FSyncGroup.DO_LEADER_FSYNC) {
+                synchronized(mgrMutex) {
 
                     /*
                      * Check if there's a fsync in progress; this might happen
@@ -271,36 +261,38 @@ class FSyncManager {
                      * up and now. This new thread may have found that there
                      * was no fsync in progress, and may have started a fsync.
                      */
-                    if (workInProgress) {
+                    if(workInProgress) {
 
                         /*
                          * Ensure that an fsync is done before returning by
                          * forcing an fsync in this thread. [#20717]
                          */
                         doWork = true;
-                    } else {
+                    }
+                    else {
                         isLeader = true;
                         doWork = true;
                         workInProgress = true;
 
-                        if (grpWaitOn) {
-                            if (numNextWaiters < grpcThreshold) {
+                        if(grpWaitOn) {
+                            if(numNextWaiters < grpcThreshold) {
                                 interval = System.nanoTime() - startNextWait;
-                                if (interval < grpcInterval) {
+                                if(interval < grpcInterval) {
                                     try {
                                         nWaits.increment();
-                                        mgrMutex.wait(interval/1000000,
-                                                      (int) interval%1000000);
-                                    } catch (InterruptedException e) {
+                                        mgrMutex.wait(interval / 1000000,
+                                                (int) interval % 1000000);
+                                    } catch(InterruptedException e) {
                                         throw new ThreadInterruptedException(
-                                            envImpl,
-                                            "Unexpected interrupt while " +
-                                            "waiting for write or fsync",
-                                            e);
+                                                envImpl,
+                                                "Unexpected interrupt while " +
+                                                        "waiting for write or fsync",
+                                                e);
                                     }
                                 }
                                 nTimeExceeded.increment();
-                            } else {
+                            }
+                            else {
                                 nWaitersExceeded.increment();
                             }
                         }
@@ -309,15 +301,16 @@ class FSyncManager {
                         numNextWaiters = 0;
                     }
                 }
-            } else if (waitStatus == FSyncGroup.DO_TIMEOUT_FSYNC) {
+            }
+            else if(waitStatus == FSyncGroup.DO_TIMEOUT_FSYNC) {
                 doWork = true;
-                synchronized (mgrMutex) {
+                synchronized(mgrMutex) {
                     nTimeouts.increment();
                 }
             }
         }
 
-        if (doWork) {
+        if(doWork) {
 
             /*
              * There are 3 ways that this fsync gets called:
@@ -336,22 +329,23 @@ class FSyncManager {
              */
 
             /* flush the log buffer */
-            if (myGroup.getDoFsync()) {
+            if(myGroup.getDoFsync()) {
                 envImpl.getLogManager().flushBeforeSync();
-            } else {
+            }
+            else {
                 envImpl.getLogManager().flushNoSync();
             }
 
             TestHookExecute.doHookIfSet(flushHook);
 
             /* execute fsync */
-            if (myGroup.getDoFsync()) {
+            if(myGroup.getDoFsync()) {
                 executeFSync();
                 nFSyncs.increment();
             }
 
-            synchronized (mgrMutex) {
-                if (isLeader) {
+            synchronized(mgrMutex) {
+                if(isLeader) {
 
                     /*
                      * Wake up the group that requested the fsync before you
@@ -394,7 +388,7 @@ class FSyncManager {
      * testing purposes.
      */
     protected void executeFSync()
-        throws DatabaseException {
+            throws DatabaseException {
 
         envImpl.getFileManager().syncLogEnd();
     }
@@ -413,12 +407,11 @@ class FSyncManager {
         static int DO_TIMEOUT_FSYNC = 0;
         static int DO_LEADER_FSYNC = 1;
         static int NO_FSYNC_NEEDED = 2;
-
+        private final long fsyncTimeout;
+        private final EnvironmentImpl envImpl;
         private volatile boolean doFsync = false;
         private volatile boolean workDone;
-        private final long fsyncTimeout;
         private boolean leaderExists;
-        private final EnvironmentImpl envImpl;
 
         FSyncGroup(long fsyncTimeout, EnvironmentImpl envImpl) {
             this.fsyncTimeout = fsyncTimeout;
@@ -428,12 +421,14 @@ class FSyncManager {
         }
 
         synchronized boolean getLeader() {
-            if (workDone) {
+            if(workDone) {
                 return false;
-            } else {
-                if (leaderExists) {
+            }
+            else {
+                if(leaderExists) {
                     return false;
-                } else {
+                }
+                else {
                     leaderExists = true;
                     return true;
                 }
@@ -449,48 +444,50 @@ class FSyncManager {
          * leader of its group, or because the wait timed out.
          */
         synchronized int waitForEvent()
-            throws ThreadInterruptedException {
+                throws ThreadInterruptedException {
 
             int status = NO_FSYNC_NEEDED;
 
-            if (!workDone) {
+            if(!workDone) {
                 long startTime = System.currentTimeMillis();
-                while (true) {
+                while(true) {
 
                     try {
                         wait(fsyncTimeout);
-                    } catch (InterruptedException e) {
+                    } catch(InterruptedException e) {
                         throw new ThreadInterruptedException(envImpl,
-                           "Unexpected interrupt while waiting "+
-                           "for write or fsync", e);
+                                "Unexpected interrupt while waiting " +
+                                        "for write or fsync", e);
                     }
 
                     /*
                      * This thread was awoken either by a timeout, by a notify,
                      * or by an interrupt. Is the fsync done?
                      */
-                    if (workDone) {
+                    if(workDone) {
                         /* The fsync we're waiting on is done, leave. */
                         status = NO_FSYNC_NEEDED;
                         break;
-                    } else {
+                    }
+                    else {
 
                         /*
                          * The fsync is not done -- were we woken up to become
                          * the leader?
                          */
-                        if (!leaderExists) {
+                        if(!leaderExists) {
                             leaderExists = true;
                             status = DO_LEADER_FSYNC;
                             break;
-                        } else {
+                        }
+                        else {
 
                             /*
                              * We're just a waiter. See if we're timed out or
                              * have more to wait.
                              */
                             long now = System.currentTimeMillis();
-                            if ((now - startTime) > fsyncTimeout) {
+                            if((now - startTime) > fsyncTimeout) {
                                 /* we timed out. */
                                 status = DO_TIMEOUT_FSYNC;
                                 break;
@@ -503,12 +500,12 @@ class FSyncManager {
             return status;
         }
 
-        synchronized void setDoFsync(boolean doSync) {
-            this.doFsync |= doSync;
-        }
-
         synchronized boolean getDoFsync() {
             return doFsync;
+        }
+
+        synchronized void setDoFsync(boolean doSync) {
+            this.doFsync |= doSync;
         }
 
         synchronized void wakeupAll() {

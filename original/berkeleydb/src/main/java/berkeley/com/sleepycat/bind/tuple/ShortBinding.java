@@ -18,7 +18,7 @@ import berkeley.com.sleepycat.je.DatabaseEntry;
 /**
  * A concrete <code>TupleBinding</code> for a <code>Short</code> primitive
  * wrapper or a <code>short</code> primitive.
- *
+ * <p>
  * <p>There are two ways to use this class:</p>
  * <ol>
  * <li>When using the {@link com.sleepycat.je} package directly, the static
@@ -36,6 +36,37 @@ public class ShortBinding extends TupleBinding<Short> {
 
     private static final int SHORT_SIZE = 2;
 
+    /**
+     * Converts an entry buffer into a simple <code>short</code> value.
+     *
+     * @param entry is the source entry buffer.
+     * @return the resulting value.
+     */
+    public static short entryToShort(DatabaseEntry entry) {
+
+        return entryToInput(entry).readShort();
+    }
+
+    /**
+     * Converts a simple <code>short</code> value into an entry buffer.
+     *
+     * @param val   is the source value.
+     * @param entry is the destination entry buffer.
+     */
+    public static void shortToEntry(short val, DatabaseEntry entry) {
+
+        outputToEntry(sizedOutput().writeShort(val), entry);
+    }
+
+    /**
+     * Returns a tuple output object of the exact size needed, to avoid
+     * wasting space when a single primitive is output.
+     */
+    private static TupleOutput sizedOutput() {
+
+        return new TupleOutput(new byte[SHORT_SIZE]);
+    }
+
     // javadoc is inherited
     public Short entryToObject(TupleInput input) {
 
@@ -52,38 +83,5 @@ public class ShortBinding extends TupleBinding<Short> {
     protected TupleOutput getTupleOutput(Short object) {
 
         return sizedOutput();
-    }
-
-    /**
-     * Converts an entry buffer into a simple <code>short</code> value.
-     *
-     * @param entry is the source entry buffer.
-     *
-     * @return the resulting value.
-     */
-    public static short entryToShort(DatabaseEntry entry) {
-
-        return entryToInput(entry).readShort();
-    }
-
-    /**
-     * Converts a simple <code>short</code> value into an entry buffer.
-     *
-     * @param val is the source value.
-     *
-     * @param entry is the destination entry buffer.
-     */
-    public static void shortToEntry(short val, DatabaseEntry entry) {
-
-        outputToEntry(sizedOutput().writeShort(val), entry);
-    }
-
-    /**
-     * Returns a tuple output object of the exact size needed, to avoid
-     * wasting space when a single primitive is output.
-     */
-    private static TupleOutput sizedOutput() {
-
-        return new TupleOutput(new byte[SHORT_SIZE]);
     }
 }

@@ -12,27 +12,27 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.ChecksumException;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex;
-import berkeley.com.sleepycat.je.rep.vlsn.VLSNRange;
 import berkeley.com.sleepycat.je.rep.vlsn.VLSNIndex.BackwardVLSNScanner;
+import berkeley.com.sleepycat.je.rep.vlsn.VLSNRange;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
 
 /**
  * The FeederSyncupReader scans the log backwards for requested log entries.
  * It uses the vlsnIndex to optimize its search, repositioning when a concrete
  * vlsn->lsn mapping is available.
- *
+ * <p>
  * The FeederSyncupReader is not thread safe, and can only be used serially. It
  * will stop at the finishLsn, which should be set using the GlobalCBVLSN.
  */
@@ -47,19 +47,19 @@ public class FeederSyncupReader extends VLSNReader {
                               NameIdPair nameIdPair,
                               VLSN startVLSN,
                               long finishLsn)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         /*
          * If we go backwards, endOfFileLsn and startLsn must not be null.
          * Make them the same, so we always start at the same very end.
          */
         super(envImpl,
-              vlsnIndex,
-              false,           // forward
-              endOfLogLsn,
-              readBufferSize,
-              nameIdPair,
-              finishLsn);
+                vlsnIndex,
+                false,           // forward
+                endOfLogLsn,
+                readBufferSize,
+                nameIdPair,
+                finishLsn);
         scanner = new BackwardVLSNScanner(vlsnIndex);
         initScan(startVLSN);
     }
@@ -74,11 +74,11 @@ public class FeederSyncupReader extends VLSNReader {
      * @throws DatabaseException
      */
     private void initScan(VLSN startVLSN)
-        throws DatabaseException, IOException {
+            throws DatabaseException, IOException {
 
-        if (startVLSN.equals(VLSN.NULL_VLSN)) {
+        if(startVLSN.equals(VLSN.NULL_VLSN)) {
             throw EnvironmentFailureException.unexpectedState
-                ("FeederSyncupReader start can't be NULL_VLSN");
+                    ("FeederSyncupReader start can't be NULL_VLSN");
         }
 
         VLSN startPoint = startVLSN;
@@ -101,14 +101,15 @@ public class FeederSyncupReader extends VLSNReader {
 
     /**
      * Backward scanning for records for the feeder's part in syncup.
-     * @throws ChecksumException 
-     * @throws FileNotFoundException 
+     *
+     * @throws ChecksumException
+     * @throws FileNotFoundException
      */
     public OutputWireRecord scanBackwards(VLSN vlsn)
-        throws FileNotFoundException, ChecksumException {
+            throws FileNotFoundException, ChecksumException {
 
         VLSNRange range = vlsnIndex.getRange();
-        if (vlsn.compareTo(range.getFirst()) < 0) {
+        if(vlsn.compareTo(range.getFirst()) < 0) {
             /*
              * The requested VLSN is before the start of our range, we don't
              * have this record.
@@ -126,7 +127,7 @@ public class FeederSyncupReader extends VLSNReader {
         long repositionLsn = scanner.getPreciseLsn(vlsn);
         setPosition(repositionLsn);
 
-        if (readNextEntry()) {
+        if(readNextEntry()) {
             return currentFeedRecord;
         }
 
@@ -139,29 +140,29 @@ public class FeederSyncupReader extends VLSNReader {
      */
     private void checkForPassingTarget(int compareResult) {
 
-        if (compareResult < 0) {
+        if(compareResult < 0) {
             /* Hey, we passed the VLSN we wanted. */
             throw EnvironmentFailureException.unexpectedState
-                ("want to read " + currentVLSN + " but reader at " +
-                 currentEntryHeader.getVLSN());
+                    ("want to read " + currentVLSN + " but reader at " +
+                            currentEntryHeader.getVLSN());
         }
     }
 
     @Override
     protected boolean isTargetEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
         nScanned++;
 
         /* Skip invisible entries. */
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
             return false;
         }
 
         /* 
          * Return true if this entry is replicated and its VLSN is currentVLSN.
          */
-        if (entryIsReplicated()) {
+        if(entryIsReplicated()) {
             VLSN entryVLSN = currentEntryHeader.getVLSN();
             int compareResult = entryVLSN.compareTo(currentVLSN);
             checkForPassingTarget(compareResult);
@@ -182,10 +183,10 @@ public class FeederSyncupReader extends VLSNReader {
         ByteBuffer buffer = entryBuffer.slice();
         buffer.limit(currentEntryHeader.getItemSize());
         currentFeedRecord =
-            new OutputWireRecord(envImpl, currentEntryHeader, buffer);
+                new OutputWireRecord(envImpl, currentEntryHeader, buffer);
 
         entryBuffer.position(entryBuffer.position() +
-                             currentEntryHeader.getItemSize());
+                currentEntryHeader.getItemSize());
         return true;
     }
 }

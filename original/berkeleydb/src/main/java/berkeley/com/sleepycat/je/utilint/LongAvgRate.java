@@ -13,30 +13,32 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * A long JE stat component generated from an exponential moving average over a
  * specified time period of the rate of change in a long value over time.
  */
 public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
-    private static final long serialVersionUID = 1L;
-
     /**
      * The minimum number of milliseconds for computing rate changes, to avoid
      * quantizing errors.
      */
     public static final long MIN_PERIOD = 200;
-
-    /** The time unit for reporting the result. */
+    private static final long serialVersionUID = 1L;
+    /**
+     * The time unit for reporting the result.
+     */
     private final TimeUnit reportTimeUnit;
 
-    /** The average of the rate values. */
+    /**
+     * The average of the rate values.
+     */
     private final DoubleExpMovingAvg avg;
 
     /**
@@ -54,8 +56,8 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
     /**
      * Creates an instance of this class.
      *
-     * @param name the name of this stat
-     * @param periodMillis the averaging period in milliseconds
+     * @param name           the name of this stat
+     * @param periodMillis   the averaging period in milliseconds
      * @param reportTimeUnit the time unit for reporting the result
      */
     public LongAvgRate(String name,
@@ -74,8 +76,8 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
     private LongAvgRate(LongAvgRate other) {
         avg = new DoubleExpMovingAvg(other.avg.copy());
         reportTimeUnit = other.reportTimeUnit;
-        synchronized (this) {
-            synchronized (other) {
+        synchronized(this) {
+            synchronized(other) {
                 prevValue = other.prevValue;
                 prevTime = other.prevTime;
             }
@@ -96,13 +98,13 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
      * {@link #MIN_PERIOD} milliseconds older than the last entry.
      *
      * @param value the new value
-     * @param time the current time in milliseconds
+     * @param time  the current time in milliseconds
      */
     public synchronized void add(long value, long time) {
         assert time > 0;
-        if (prevTime != 0) {
+        if(prevTime != 0) {
             final long deltaTime = time - prevTime;
-            if (deltaTime < MIN_PERIOD) {
+            if(deltaTime < MIN_PERIOD) {
                 return;
             }
             avg.add(((double) (value - prevValue)) / ((double) deltaTime),
@@ -119,8 +121,8 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
      */
     public void add(LongAvgRate other) {
         final LongAvgRate copyOther = other.copy();
-        synchronized (this) {
-            synchronized (copyOther) {
+        synchronized(this) {
+            synchronized(copyOther) {
                 addInternal(copyOther);
             }
         }
@@ -131,14 +133,14 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
      * and the argument safely.
      */
     private void addInternal(LongAvgRate other) {
-        assert(Thread.holdsLock(this));
-        assert(Thread.holdsLock(other));
+        assert (Thread.holdsLock(this));
+        assert (Thread.holdsLock(other));
 
         /*
          * Only use the other values if they are newer by more than the
          * minimum
          */
-        if ((other.prevTime - prevTime) > MIN_PERIOD) {
+        if((other.prevTime - prevTime) > MIN_PERIOD) {
             avg.add(other.avg);
             prevValue = other.prevValue;
             prevTime = other.prevTime;
@@ -154,14 +156,14 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
      */
     public LongAvgRate copyLatest(LongAvgRate other) {
         final LongAvgRate otherCopy = other.copy();
-        synchronized (this) {
-            synchronized (otherCopy) {
-                if (prevTime > otherCopy.prevTime) {
+        synchronized(this) {
+            synchronized(otherCopy) {
+                if(prevTime > otherCopy.prevTime) {
                     otherCopy.addInternal(this);
                     return otherCopy;
                 }
                 final LongAvgRate result = copy();
-                synchronized (result) {
+                synchronized(result) {
                     result.addInternal(otherCopy);
                     return result;
                 }
@@ -187,15 +189,19 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
         return getPrimitive();
     }
 
-    /** Returns the current average rate as a primitive value. */
+    /**
+     * Returns the current average rate as a primitive value.
+     */
     private long getPrimitive() {
         final double inMillis = avg.getPrimitive();
-        if (reportTimeUnit == MILLISECONDS) {
+        if(reportTimeUnit == MILLISECONDS) {
             return Math.round(inMillis);
-        } else if (reportTimeUnit.compareTo(MILLISECONDS) < 0) {
+        }
+        else if(reportTimeUnit.compareTo(MILLISECONDS) < 0) {
             return Math.round(
-                inMillis / reportTimeUnit.convert(1, MILLISECONDS));
-        } else {
+                    inMillis / reportTimeUnit.convert(1, MILLISECONDS));
+        }
+        else {
             return Math.round(inMillis * reportTimeUnit.toMillis(1));
         }
     }
@@ -214,13 +220,14 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
 
     @Override
     protected String getFormattedValue(boolean useCommas) {
-        if (isNotSet()) {
+        if(isNotSet()) {
             return "unknown";
         }
         final long val = getPrimitive();
-        if (useCommas) {
+        if(useCommas) {
             return Stat.FORMAT.format(val);
-        } else {
+        }
+        else {
             return Long.toString(val);
         }
     }
@@ -233,19 +240,23 @@ public class LongAvgRate extends MapStatComponent<Long, LongAvgRate> {
     @Override
     public synchronized String toString() {
         return "LongAvgRate[" + avg + ", prevValue=" + prevValue +
-            ", prevTime=" + prevTime + "]";
+                ", prevTime=" + prevTime + "]";
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void writeObject(ObjectOutputStream out)
-        throws IOException {
+            throws IOException {
 
         out.defaultWriteObject();
     }

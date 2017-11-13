@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.persist.model;
 /**
  * The metadata for a secondary key field.  A secondary key may be specified
  * with the {@link SecondaryKey} annotation.
- *
+ * <p>
  * <p>{@code SecondaryKeyMetadata} objects are thread-safe.  Multiple threads
  * may safely call the methods of a shared {@code SecondaryKeyMetadata}
  * object.</p>
@@ -36,15 +36,15 @@ public class SecondaryKeyMetadata extends FieldMetadata {
     /**
      * Used by an {@code EntityModel} to construct secondary key metadata.
      *
-     * @param name the field name.
-     * @param className the class name.
+     * @param name               the field name.
+     * @param className          the class name.
      * @param declaringClassName the name of the class where the field is
-     * declared.
-     * @param elementClassName the element class name.
-     * @param keyName the key name.
-     * @param relationship the Relationship.
-     * @param relatedEntity the class name of the related (foreign) entity.
-     * @param deleteAction the DeleteAction.
+     *                           declared.
+     * @param elementClassName   the element class name.
+     * @param keyName            the key name.
+     * @param relationship       the Relationship.
+     * @param relatedEntity      the class name of the related (foreign) entity.
+     * @param deleteAction       the DeleteAction.
      */
     public SecondaryKeyMetadata(String name,
                                 String className,
@@ -120,16 +120,17 @@ public class SecondaryKeyMetadata extends FieldMetadata {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof SecondaryKeyMetadata) {
+        if(other instanceof SecondaryKeyMetadata) {
             SecondaryKeyMetadata o = (SecondaryKeyMetadata) other;
             return super.equals(o) &&
-                   relationship == o.relationship &&
-                   ClassMetadata.nullOrEqual(deleteAction, o.deleteAction) &&
-                   ClassMetadata.nullOrEqual(keyName, o.keyName) &&
-                   ClassMetadata.nullOrEqual(elementClassName,
-                                             o.elementClassName) &&
-                   ClassMetadata.nullOrEqual(relatedEntity, o.relatedEntity);
-        } else {
+                    relationship == o.relationship &&
+                    ClassMetadata.nullOrEqual(deleteAction, o.deleteAction) &&
+                    ClassMetadata.nullOrEqual(keyName, o.keyName) &&
+                    ClassMetadata.nullOrEqual(elementClassName,
+                            o.elementClassName) &&
+                    ClassMetadata.nullOrEqual(relatedEntity, o.relatedEntity);
+        }
+        else {
             return false;
         }
     }
@@ -137,10 +138,10 @@ public class SecondaryKeyMetadata extends FieldMetadata {
     @Override
     public int hashCode() {
         return super.hashCode() +
-               relationship.hashCode() +
-               ClassMetadata.hashCode(deleteAction) +
-               ClassMetadata.hashCode(keyName) +
-               ClassMetadata.hashCode(elementClassName) +
-               ClassMetadata.hashCode(relatedEntity);
+                relationship.hashCode() +
+                ClassMetadata.hashCode(deleteAction) +
+                ClassMetadata.hashCode(keyName) +
+                ClassMetadata.hashCode(elementClassName) +
+                ClassMetadata.hashCode(relatedEntity);
     }
 }

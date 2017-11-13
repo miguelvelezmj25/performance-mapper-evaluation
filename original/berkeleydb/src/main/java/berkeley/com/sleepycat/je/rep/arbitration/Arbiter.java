@@ -13,19 +13,19 @@
 
 package berkeley.com.sleepycat.je.rep.arbitration;
 
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.Durability.ReplicaAckPolicy;
 import berkeley.com.sleepycat.je.rep.QuorumPolicy;
 import berkeley.com.sleepycat.je.rep.ReplicationMutableConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.util.logging.Logger;
+
 /**
  * The locus for management of this node's active arbitration state, and of the
  * mechanisms available to this node for doing arbitration.
  * <p>
- * A node is in active arbitration state if 
+ * A node is in active arbitration state if
  * <ul>
  * <li> is the master
  * <li> is lacking the required durability quorum
@@ -38,15 +38,13 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  */
 public class Arbiter {
 
+    private final ArbiterProvider provider;
+    private final RepImpl repImpl;
+    private final Logger logger;
     /**
      * True if this node is in active arbitration.
      */
     private volatile boolean active;
-
-    private final ArbiterProvider provider;
-
-    private final RepImpl repImpl;
-    private final Logger logger;
 
     /**
      * Examine environment configuration and rep group membership to figure out
@@ -60,31 +58,33 @@ public class Arbiter {
 
     /**
      * The replication node knows that it has lost its durability quorum, and
-     * wants to try to enter active arbitration mode. 
+     * wants to try to enter active arbitration mode.
+     *
      * @return true if the node successfully transitions to active arbitration,
      * or was already in active arbitration.
      */
     public synchronized boolean activateArbitration() {
-        if (provider.attemptActivation()) {
+        if(provider.attemptActivation()) {
             active = true;
-        } else {
+        }
+        else {
             active = false;
         }
         return active;
     }
 
     /**
-     * The node has determined that it need not be in active arbitration. 
+     * The node has determined that it need not be in active arbitration.
      * End the active arbitration state. If the node was not in active
      * arbitration, do nothing.
      */
     public void endArbitration() {
         synchronized(this) {
-            if (!active) {
+            if(!active) {
                 return;
             }
-        
-            provider.endArbitration(); 
+
+            provider.endArbitration();
             active = false;
         }
 
@@ -94,7 +94,7 @@ public class Arbiter {
     /**
      * Return true if it's possible that this node can switch into active
      * arbitration. The criteria for activation depend on the type of
-     * arbitration enabled for this node. 
+     * arbitration enabled for this node.
      * <p>
      * For example, if designated primary arbitration is used, then it's only
      * possible to move into active arbitration if the Designated Primary
@@ -122,7 +122,7 @@ public class Arbiter {
     }
 
     /**
-     * Return the arbitration-influenced election quorum size. Arbitration 
+     * Return the arbitration-influenced election quorum size. Arbitration
      * may reduce the value that would usually be indicated by the quorum
      * policy.
      */
@@ -146,14 +146,14 @@ public class Arbiter {
      * primary configuration parameter may affect whether this node can stay in
      * active arbitration.
      */
-    public synchronized void 
-        processConfigChange (ReplicationMutableConfig newConfig) {
+    public synchronized void
+    processConfigChange(ReplicationMutableConfig newConfig) {
 
-        if (!active) {
+        if(!active) {
             return;
         }
 
-        if (provider.shouldEndArbitration(newConfig)) {
+        if(provider.shouldEndArbitration(newConfig)) {
             endArbitration();
         }
     }

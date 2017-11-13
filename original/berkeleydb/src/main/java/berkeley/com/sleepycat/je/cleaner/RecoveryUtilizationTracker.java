@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
@@ -23,16 +20,19 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.LogEntryType;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Accumulates changes to the utilization profile during recovery.
- *
+ * <p>
  * <p>Per-database information is keyed by DatabaseId because the DatabaseImpl
  * is not always available during recovery.  In fact this is the only reason
  * that a "local" tracker is used during recovery -- to avoid requiring that
  * the DatabaseImpl is available, which is necessary to use the "global"
  * UtilizationTracker.  There is no requirement to accumulate totals locally,
  * since recovery is single threaded.</p>
- *
+ * <p>
  * <p>When finished with this object, its information should be added to the
  * Environment's UtilizationTracker and DatabaseImpl objects by calling
  * transferToUtilizationTracker.  This is done at the end of recovery, just
@@ -48,7 +48,7 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
     private final Map<DatabaseId, Long> databaseLsns;
 
     public RecoveryUtilizationTracker(EnvironmentImpl env) {
-        super(env, new HashMap<Object,DbFileSummaryMap>());
+        super(env, new HashMap<Object, DbFileSummaryMap>());
         fileSummaryLsns = new HashMap<Long, Long>();
         databaseLsns = new HashMap<DatabaseId, Long>();
     }
@@ -71,40 +71,40 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
      * Counts the addition of all new log entries including LNs.
      */
     public void countNewLogEntry(
-        long lsn,
-        LogEntryType type,
-        int size,
-        DatabaseId dbId) {
-        
+            long lsn,
+            LogEntryType type,
+            int size,
+            DatabaseId dbId) {
+
         countNew(lsn, dbId, type, size);
     }
 
     /**
      * Counts the LSN of a node obsolete unconditionally.
-     *
+     * <p>
      * Even when trackOffset is true, duplicate offsets are not checked (no
      * assertion is fired) because recovery is known to count the same LSN
      * offset twice in certain circumstances.
      */
     public void countObsoleteUnconditional(
-        long lsn,
-        LogEntryType type,
-        int size,
-        DatabaseId dbId,
-        boolean trackOffset) {
+            long lsn,
+            LogEntryType type,
+            int size,
+            DatabaseId dbId,
+            boolean trackOffset) {
 
         countObsolete(
-            lsn, dbId, type, size,
-            true,       // countPerFile
-            true,       // countPerDb
-            trackOffset,
-            false);     // checkDupOffsets
+                lsn, dbId, type, size,
+                true,       // countPerFile
+                true,       // countPerDb
+                trackOffset,
+                false);     // checkDupOffsets
     }
 
     /**
      * Counts the oldLsn of a node obsolete if it has not already been counted
      * at the point of lsn in the log.
-     *
+     * <p>
      * Even when trackOffset is true, duplicate offsets are not checked (no
      * assertion is fired) because recovery is known to count the same LSN
      * offset twice in certain circumstances.
@@ -112,24 +112,24 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
      * @return whether the file was previously uncounted.
      */
     public boolean countObsoleteIfUncounted(
-        long oldLsn,
-        long newLsn,
-        LogEntryType type,
-        int size,
-        DatabaseId dbId,
-        boolean trackOffset) {
-        
+            long oldLsn,
+            long newLsn,
+            LogEntryType type,
+            int size,
+            DatabaseId dbId,
+            boolean trackOffset) {
+
         Long fileNum = Long.valueOf(DbLsn.getFileNumber(oldLsn));
 
         boolean fileUncounted = isFileUncounted(fileNum, newLsn);
         boolean dbUncounted = isDbUncounted(dbId, newLsn);
 
         countObsolete(
-            oldLsn, dbId, type, size,
-            fileUncounted, // countPerFile
-            dbUncounted,   // countPerDb
-            trackOffset,
-            false);        // checkDupOffsets
+                oldLsn, dbId, type, size,
+                fileUncounted, // countPerFile
+                dbUncounted,   // countPerDb
+                trackOffset,
+                false);        // checkDupOffsets
 
         return fileUncounted;
     }
@@ -144,7 +144,7 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
         long fsLsn = DbLsn.longToLsn(fileSummaryLsns.get(fileNum));
 
         int cmpFsLsnToNewLsn = (fsLsn != DbLsn.NULL_LSN ?
-                                DbLsn.compareTo(fsLsn, lsn) : -1);
+                DbLsn.compareTo(fsLsn, lsn) : -1);
 
         return cmpFsLsnToNewLsn < 0;
     }
@@ -156,7 +156,7 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
     private boolean isDbUncounted(DatabaseId dbId, long lsn) {
         long dbLsn = DbLsn.longToLsn(databaseLsns.get(dbId));
         int cmpDbLsnToLsn = (dbLsn != DbLsn.NULL_LSN) ?
-            DbLsn.compareTo(dbLsn, lsn) : -1;
+                DbLsn.compareTo(dbLsn, lsn) : -1;
         return cmpDbLsnToLsn < 0;
     }
 
@@ -165,7 +165,7 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
      */
     public void resetFileInfo(long fileNum) {
         TrackedFileSummary trackedSummary = getTrackedFile(fileNum);
-        if (trackedSummary != null) {
+        if(trackedSummary != null) {
             trackedSummary.reset();
         }
     }
@@ -183,7 +183,7 @@ public class RecoveryUtilizationTracker extends BaseLocalUtilizationTracker {
      */
     @Override
     DatabaseImpl databaseKeyToDatabaseImpl(Object databaseKey)
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseId dbId = (DatabaseId) databaseKey;
         return env.getDbTree().getDb(dbId);

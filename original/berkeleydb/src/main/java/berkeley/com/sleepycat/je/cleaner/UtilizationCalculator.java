@@ -13,26 +13,26 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
+import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
+import berkeley.com.sleepycat.je.config.EnvironmentParams;
+import berkeley.com.sleepycat.je.dbi.DbConfigManager;
+import berkeley.com.sleepycat.je.dbi.EnvConfigObserver;
+import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
+import berkeley.com.sleepycat.je.dbi.TTL;
+import berkeley.com.sleepycat.je.utilint.DbLsn;
+import berkeley.com.sleepycat.je.utilint.LoggerUtils;
+import berkeley.com.sleepycat.je.utilint.Pair;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import berkeley.com.sleepycat.je.config.EnvironmentParams;
-import berkeley.com.sleepycat.je.dbi.DbConfigManager;
-import berkeley.com.sleepycat.je.dbi.EnvConfigObserver;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.TTL;
-import berkeley.com.sleepycat.je.EnvironmentMutableConfig;
-import berkeley.com.sleepycat.je.utilint.DbLsn;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.Pair;
-
 /**
  * Contains methods for calculating utilization and for selecting files to
  * clean.
- *
+ * <p>
  * Note that we do clean files that are protected from deletion by HA/DataSync.
  * If we did not clean them and a large number of files were to become
  * unprotected at once, a large amount of log cleaning may suddenly be
@@ -40,7 +40,7 @@ import berkeley.com.sleepycat.je.utilint.Pair;
  * the metadata, but that would require writing a log entry to indicate the
  * file is ready to be deleted, to avoid cleaning from scratch after a crash.
  * [#16643] [#19221]
- *
+ * <p>
  * Historical note: Prior to JE 6.0, LN utilization adjustments were needed
  * because the LN last logged size was not stored in the BIN [#18633].
  * Originally in JE 5, the corrected average LN size was used to adjust
@@ -51,29 +51,29 @@ import berkeley.com.sleepycat.je.utilint.Pair;
  * changed to false and a warning was added that the feature will be removed in
  * the future [#22275]. Finally in JE 6.3 the LN adjustment code and data in
  * CheckpointEnd were removed and the parameter was deprecated [#24090].
- *
+ * <p>
  * Unlike with LNs, we do not store the last logged size of INs, so their
  * obsolete size is computed as an average and this has the potential to cause
  * over/under-cleaning. This problem is not known to occur, but if there are
  * over/under-cleaning problems we should examine the recalculated info that is
  * output as part of the CleanerRun INFO message.
- *
+ * <p>
  * === Expired Data and Utilization ===
- *
+ * <p>
  * Per-file histograms are calculated by the {@link ExpirationTracker} and
  * stored in an internal database and cache by the {@link ExpirationProfile}.
  * The histograms are used to calculate the expired bytes for a file at a
  * particular time. Since obsolete (not expired) data can overlap with expired
  * data, upper and lower bounds for overall utilization are determined. When
  * the lower bound is below minUtilization, cleaning occurs.
- *
+ * <p>
  * The file that has the lowest average utilization (midway between its upper
  * and lower bounds) is selected for cleaning. If the file's upper and lower
  * bounds are not close together (or the same), and the upper bound is above a
  * threshold, then two-pass cleaning is performed. See
  * {@link EnvironmentParams#CLEANER_TWO_PASS_GAP} and
  * {@link EnvironmentParams#CLEANER_TWO_PASS_THRESHOLD}.
- *
+ * <p>
  * The first pass of two-pass cleaning reads the file but doesn't do any real
  * cleaning (no side effects). If this pass finds that the true utilization of
  * the file is above the threshold (the same threshold as above), then cleaning
@@ -84,11 +84,11 @@ import berkeley.com.sleepycat.je.utilint.Pair;
  * accuracy. If the first pass finds that true utilization is below the
  * threshold, then normal cleaning (pass two) occurs. Two-pass cleaning
  * protects against "over cleaning".
- *
+ * <p>
  * The use of the overall utilization lower bound to drive cleaning is
  * considered sufficient to protect against "under cleaning". Therefore, a disk
  * space threshold is unnecessary.
- *
+ * <p>
  * Gradual expiration is used to prevent cleaning spikes on day or hour
  * boundaries. For purposes of driving cleaning, the utilization lower bound is
  * calculated by distributing the bytes that expired in the current day/hour
@@ -132,26 +132,24 @@ public class UtilizationCalculator implements EnvConfigObserver {
     /**
      * Returns the best file that qualifies for cleaning or probing, or null
      * if no file qualifies.
-     *
+     * <p>
      * This method is called by FileSelector and synchronization order is:
      * 1-FileSelector, 2-UtilizationCalculator, 3-ExpirationProfile.
      *
      * @param fileSummaryMap the map containing file summary info.
-     *
-     * @param forceCleaning is true to always select a file, even if its
-     * utilization is above the minimum utilization threshold.
-     *
+     * @param forceCleaning  is true to always select a file, even if its
+     *                       utilization is above the minimum utilization threshold.
      * @return {file number, required utilization for 2-pass cleaning},
      * or null if no file qualifies for cleaning.
      */
     synchronized Pair<Long, Integer> getBestFile(
-        final SortedMap<Long, FileSummary> fileSummaryMap,
-        final boolean forceCleaning) {
+            final SortedMap<Long, FileSummary> fileSummaryMap,
+            final boolean forceCleaning) {
 
         /* Paranoia.  There should always be 1 file. */
-        if (fileSummaryMap.size() == 0) {
+        if(fileSummaryMap.size() == 0) {
             LoggerUtils.logMsg(logger, env, Level.SEVERE,
-                               "Can't clean, map is empty.");
+                    "Can't clean, map is empty.");
             return null;
         }
 
@@ -208,12 +206,12 @@ public class UtilizationCalculator implements EnvConfigObserver {
         long firstActiveFile = fileSummaryMap.lastKey();
         final long firstActiveTxnLsn = env.getTxnManager().getFirstActiveLsn();
 
-        if (firstActiveTxnLsn != DbLsn.NULL_LSN) {
+        if(firstActiveTxnLsn != DbLsn.NULL_LSN) {
 
             long firstActiveTxnFile =
-                DbLsn.getFileNumber(firstActiveTxnLsn);
+                    DbLsn.getFileNumber(firstActiveTxnLsn);
 
-            if (firstActiveFile > firstActiveTxnFile) {
+            if(firstActiveFile > firstActiveTxnFile) {
                 firstActiveFile = firstActiveTxnFile;
             }
         }
@@ -262,8 +260,8 @@ public class UtilizationCalculator implements EnvConfigObserver {
         long predictedMinObsoleteSize = 0;
         long predictedMaxObsoleteSize = 0;
 
-        for (final Map.Entry<Long, FileSummary> entry :
-             fileSummaryMap.entrySet()) {
+        for(final Map.Entry<Long, FileSummary> entry :
+                fileSummaryMap.entrySet()) {
 
             final Long file = entry.getKey();
             final long fileNum = file;
@@ -273,19 +271,20 @@ public class UtilizationCalculator implements EnvConfigObserver {
             final int expiredSize;
             final int expiredGradualSize;
 
-            if (expirationEnabled) {
+            if(expirationEnabled) {
 
                 final Pair<Integer, Integer> expiredSizes =
-                    expProfile.getExpiredBytes(fileNum, currentTime);
+                        expProfile.getExpiredBytes(fileNum, currentTime);
 
                 expiredSize = Math.min(
-                    expiredSizes.first(), summary.totalSize);
+                        expiredSizes.first(), summary.totalSize);
 
                 expiredGradualSize = gradualExpiration ?
-                    Math.min(expiredSizes.second(), summary.totalSize) :
-                    expiredSize;
+                        Math.min(expiredSizes.second(), summary.totalSize) :
+                        expiredSize;
 
-            } else {
+            }
+            else {
                 expiredSize = 0;
                 expiredGradualSize = 0;
             }
@@ -299,27 +298,28 @@ public class UtilizationCalculator implements EnvConfigObserver {
             final int minGradualObsoleteSize;
             final int maxGradualObsoleteSize;
 
-            if (safeToDeleteFiles.contains(file)) {
+            if(safeToDeleteFiles.contains(file)) {
                 minObsoleteSize = summary.totalSize;
                 maxObsoleteSize = summary.totalSize;
                 minGradualObsoleteSize = summary.totalSize;
                 maxGradualObsoleteSize = summary.totalSize;
-            } else {
+            }
+            else {
                 final int obsoleteSize = summary.getObsoleteSize();
 
                 minObsoleteSize = Math.max(
-                    obsoleteSize, expiredSize);
+                        obsoleteSize, expiredSize);
 
                 maxObsoleteSize = Math.min(
-                    obsoleteSize + expiredSize,
-                    summary.totalSize);
+                        obsoleteSize + expiredSize,
+                        summary.totalSize);
 
                 minGradualObsoleteSize = Math.max(
-                    obsoleteSize, expiredGradualSize);
+                        obsoleteSize, expiredGradualSize);
 
                 maxGradualObsoleteSize = Math.min(
-                    obsoleteSize + expiredGradualSize,
-                    summary.totalSize);
+                        obsoleteSize + expiredGradualSize,
+                        summary.totalSize);
             }
 
             currentTotalSize += summary.totalSize;
@@ -334,7 +334,7 @@ public class UtilizationCalculator implements EnvConfigObserver {
              * cleaning, and is used to prevent over-cleaning, especially one
              * due to a backlog created using inaccurate predictions.
              */
-            if (inProgressFiles.contains(file)) {
+            if(inProgressFiles.contains(file)) {
                 final int utilizedSize = summary.totalSize - minObsoleteSize;
                 predictedTotalSize += utilizedSize;
                 continue;
@@ -345,7 +345,7 @@ public class UtilizationCalculator implements EnvConfigObserver {
             predictedMaxObsoleteSize += maxGradualObsoleteSize;
 
             /* Skip files that are too young to be cleaned. */
-            if (fileNum > lastFileToClean) {
+            if(fileNum > lastFileToClean) {
                 continue;
             }
 
@@ -354,14 +354,14 @@ public class UtilizationCalculator implements EnvConfigObserver {
              * utilization so far.
              */
             final int thisMinUtil = FileSummary.utilization(
-                maxObsoleteSize, summary.totalSize);
+                    maxObsoleteSize, summary.totalSize);
 
             final int thisMaxUtil = FileSummary.utilization(
-                minObsoleteSize, summary.totalSize);
+                    minObsoleteSize, summary.totalSize);
 
             final int thisAvgUtil = (thisMinUtil + thisMaxUtil) / 2;
 
-            if (bestFile == null || thisAvgUtil < bestFileAvgUtil) {
+            if(bestFile == null || thisAvgUtil < bestFileAvgUtil) {
                 bestFile = file;
                 bestFileAvgUtil = thisAvgUtil;
                 bestFileMinUtil = thisMinUtil;
@@ -373,10 +373,10 @@ public class UtilizationCalculator implements EnvConfigObserver {
              * gradual utilization so far.
              */
             final int thisGradualMaxUtil = FileSummary.utilization(
-                minGradualObsoleteSize, summary.totalSize);
+                    minGradualObsoleteSize, summary.totalSize);
 
-            if (bestGradualFile == null ||
-                thisGradualMaxUtil < bestGradualFileMaxUtil) {
+            if(bestGradualFile == null ||
+                    thisGradualMaxUtil < bestGradualFileMaxUtil) {
 
                 bestGradualFile = file;
                 bestGradualFileMaxUtil = thisGradualMaxUtil;
@@ -384,16 +384,16 @@ public class UtilizationCalculator implements EnvConfigObserver {
         }
 
         final int currentMinUtil = FileSummary.utilization(
-            currentMaxObsoleteSize, currentTotalSize);
+                currentMaxObsoleteSize, currentTotalSize);
 
         final int currentMaxUtil = FileSummary.utilization(
-            currentMinObsoleteSize, currentTotalSize);
+                currentMinObsoleteSize, currentTotalSize);
 
         final int predictedMinUtil = FileSummary.utilization(
-            predictedMaxObsoleteSize, predictedTotalSize);
+                predictedMaxObsoleteSize, predictedTotalSize);
 
         final int predictedMaxUtil = FileSummary.utilization(
-            predictedMinObsoleteSize, predictedTotalSize);
+                predictedMinObsoleteSize, predictedTotalSize);
 
         currentMinUtilization = currentMinUtil;
         currentMaxUtilization = currentMaxUtil;
@@ -415,27 +415,31 @@ public class UtilizationCalculator implements EnvConfigObserver {
         final Long fileChosen;
         final String reason;
 
-        if (predictedMinUtil < totalThreshold) {
+        if(predictedMinUtil < totalThreshold) {
 
             fileChosen = bestFile;
             reason = "predicted min util is below minUtilization";
 
-        } else if (bestGradualFileMaxUtil < fileThreshold) {
+        }
+        else if(bestGradualFileMaxUtil < fileThreshold) {
 
             fileChosen = bestGradualFile;
             reason = "file has avg util below minFileUtilization";
 
-        } else if (filesToMigrate.hasNext(fileSummaryMap)) {
+        }
+        else if(filesToMigrate.hasNext(fileSummaryMap)) {
 
             fileChosen = filesToMigrate.next(fileSummaryMap);
             reason = "there are more forceCleanFiles";
 
-        } else if (forceCleaning) {
+        }
+        else if(forceCleaning) {
 
             fileChosen = bestFile;
             reason = "forced for testing";
 
-        } else {
+        }
+        else {
             fileChosen = null;
             reason = "no file selected";
         }
@@ -444,12 +448,12 @@ public class UtilizationCalculator implements EnvConfigObserver {
         String twoPassMsg = "";
         int pass1RequiredUtil = -1;
 
-        if (fileChosen != null && fileChosen.equals(bestFile)) {
+        if(fileChosen != null && fileChosen.equals(bestFile)) {
 
             bestFileMsg =
-                ", chose file with util min: " + bestFileMinUtil +
-                " max: " + bestFileMaxUtil +
-                " avg: " + bestFileAvgUtil;
+                    ", chose file with util min: " + bestFileMinUtil +
+                            " max: " + bestFileMaxUtil +
+                            " avg: " + bestFileAvgUtil;
 
             /*
              * If the difference between the file's min and max utilization is
@@ -459,8 +463,8 @@ public class UtilizationCalculator implements EnvConfigObserver {
              * is higher than twoPassThreshold. In other words, if the benefit
              * of cleaning is low, don't actually clean it.
              */
-            if (bestFileMaxUtil > twoPassThreshold &&
-                bestFileMaxUtil - bestFileMinUtil >= twoPassGap) {
+            if(bestFileMaxUtil > twoPassThreshold &&
+                    bestFileMaxUtil - bestFileMinUtil >= twoPassGap) {
 
                 pass1RequiredUtil = twoPassThreshold;
                 twoPassMsg = ", 2-pass cleaning";
@@ -469,35 +473,35 @@ public class UtilizationCalculator implements EnvConfigObserver {
 
         final Level logLevel = (fileChosen != null) ? Level.INFO : Level.FINE;
 
-        if (logger.isLoggable(logLevel)) {
+        if(logger.isLoggable(logLevel)) {
 
             LoggerUtils.logMsg(
-                logger, env, logLevel,
-                "Clean file " +
-                ((fileChosen != null) ?
-                    ("0x" + Long.toHexString(fileChosen)) : "none") +
-                ": " + reason + twoPassMsg +
-                ", current util min: " + currentMinUtil +
-                " max: " + currentMaxUtil +
-                ", predicted util min: " + predictedMinUtil +
-                " max: " + predictedMaxUtil +
-                bestFileMsg);
+                    logger, env, logLevel,
+                    "Clean file " +
+                            ((fileChosen != null) ?
+                                    ("0x" + Long.toHexString(fileChosen)) : "none") +
+                            ": " + reason + twoPassMsg +
+                            ", current util min: " + currentMinUtil +
+                            " max: " + currentMaxUtil +
+                            ", predicted util min: " + predictedMinUtil +
+                            " max: " + predictedMaxUtil +
+                            bestFileMsg);
         }
 
         return (fileChosen != null) ?
-            new Pair<>(fileChosen, pass1RequiredUtil) :
-            null;
+                new Pair<>(fileChosen, pass1RequiredUtil) :
+                null;
     }
 
     /**
      * Process notifications of mutable property changes.
      *
      * @throws IllegalArgumentException via FilesToMigrate ctor and
-     * parseForceCleanFiles.
+     *                                  parseForceCleanFiles.
      */
 
     public synchronized void envConfigUpdate(DbConfigManager cm,
-                                EnvironmentMutableConfig ignore) {
+                                             EnvironmentMutableConfig ignore) {
 
         filesToMigrate = new FilesToMigrate(env);
     }

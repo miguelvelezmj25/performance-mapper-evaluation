@@ -23,6 +23,7 @@ public class ReplicaStateException extends StateChangeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     public ReplicaStateException(String message) {
@@ -36,6 +37,7 @@ public class ReplicaStateException extends StateChangeException {
 
     /**
      * For internal use only.
+     *
      * @hidden
      */
     @Override

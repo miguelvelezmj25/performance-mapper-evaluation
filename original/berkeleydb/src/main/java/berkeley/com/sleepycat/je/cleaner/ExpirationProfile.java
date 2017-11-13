@@ -13,41 +13,25 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import berkeley.com.sleepycat.bind.tuple.SortedPackedLongBinding;
-import berkeley.com.sleepycat.je.Cursor;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.Get;
-import berkeley.com.sleepycat.je.LockMode;
-import berkeley.com.sleepycat.je.ProgressListener;
-import berkeley.com.sleepycat.je.Put;
-import berkeley.com.sleepycat.je.RecoveryProgress;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbType;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.StartupTracker;
-import berkeley.com.sleepycat.je.dbi.TTL;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.txn.BasicLocker;
 import berkeley.com.sleepycat.je.txn.Locker;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.Pair;
 
+import java.util.*;
+
 /**
  * A cache of the histograms for all files, except for the last file. Also
  * caches the number of bytes expired in the current interval.
- *
+ * <p>
  * No memory budgeting is performed because the size of these data structures
  * is small compared to the Btree they represent. The serialized form of the
  * histogram is cached, which is a small number of bytes per file. If no data
  * in a file expires, it will not have a cache entry.
- *
+ * <p>
  * Possible future optimization: If there is contention on this data structure,
  * the refresh method could create a read-only map containing the current number
  * of expired bytes, for access by getExpiredBytes without synchronization.
@@ -65,21 +49,6 @@ public class ExpirationProfile {
      * must be acquired in that order.
      */
     private final Map<Long, ExpInfo> map;
-
-    /*
-     * The the expiration times in days and hours of last refresh, i.e, the
-     * cached bytes in each Histogram are those that were expired on this
-     * day/hour. Both fields are protected by the 'map' mutex.
-     */
-    private int lastRefreshHour = -1;
-    private int lastRefreshDay = -1;
-
-    /*
-     * Whether any expiration times are in hours. If false, all intervals are
-     * in days. Protected by the 'map' mutex.
-     */
-    private boolean anyExpirationInHours;
-
     /*
      * Map of file number to completed tracker. Protected by its own mutex.
      *
@@ -87,7 +56,18 @@ public class ExpirationProfile {
      * must be acquired in that order.
      */
     private final Map<Long, ExpirationTracker> completedTrackers;
-
+    /*
+     * The the expiration times in days and hours of last refresh, i.e, the
+     * cached bytes in each Histogram are those that were expired on this
+     * day/hour. Both fields are protected by the 'map' mutex.
+     */
+    private int lastRefreshHour = -1;
+    private int lastRefreshDay = -1;
+    /*
+     * Whether any expiration times are in hours. If false, all intervals are
+     * in days. Protected by the 'map' mutex.
+     */
+    private boolean anyExpirationInHours;
     /*
      * The expiration summary DB. Its key is the file number, a long. Its data
      * is the serialized form of the histogram, or is empty (zero length) if
@@ -102,11 +82,13 @@ public class ExpirationProfile {
         completedTrackers = new HashMap<>();
     }
 
-    /** Make a copy for used in utilities, etc. */
+    /**
+     * Make a copy for used in utilities, etc.
+     */
     public ExpirationProfile(final ExpirationProfile other) {
         env = other.env;
         db = other.db;
-        synchronized (other.map) {
+        synchronized(other.map) {
             map = new HashMap<>(other.map);
         }
         completedTrackers = Collections.emptyMap();
@@ -115,25 +97,25 @@ public class ExpirationProfile {
     /**
      * Called at the end of recovery to open the expiration DB, and cache its
      * records in the profile's map.
-     *
+     * <p>
      * Also collects expiration info for any complete file having expiration
      * info that was not written to the DB earlier, due to a crash for example.
-     *
+     * <p>
      * Also initializes the tracker for the current file in the log manager,
      * reading/tracking the existing entries in that file.
      */
     public void populateCache(
-        final StartupTracker.Counter counter,
-        final ProgressListener<RecoveryProgress> listener) {
+            final StartupTracker.Counter counter,
+            final ProgressListener<RecoveryProgress> listener) {
 
-        synchronized (map) {
+        synchronized(map) {
 
             assert db == null;
             assert completedTrackers.isEmpty();
 
             db = env.getDbTree().openNonRepInternalDB(DbType.EXPIRATION);
 
-            if (db == null) {
+            if(db == null) {
                 /* Read-only env with no expiration summary DB. */
                 return;
             }
@@ -143,11 +125,11 @@ public class ExpirationProfile {
 
             /* Ordered array of file numbers. */
             final Long[] existingFiles =
-                env.getFileManager().getAllFileNumbers();
+                    env.getFileManager().getAllFileNumbers();
 
             /* Parallel array to existingFiles. */
             final boolean[] filesHaveRecords =
-                new boolean[existingFiles.length];
+                    new boolean[existingFiles.length];
 
             /*
              * For the last file we must always get its expiration info and
@@ -157,19 +139,20 @@ public class ExpirationProfile {
             final FileProcessor processor = env.getCleaner().createProcessor();
             final long lastFileNum = env.getFileManager().getCurrentFileNum();
 
-            if (!env.isReadOnly()) {
-                if (existingFiles.length > 0) {
+            if(!env.isReadOnly()) {
+                if(existingFiles.length > 0) {
 
                     /* Flush to ensure the cleaner can read all entries. */
                     env.flushLog(false /*fsync*/);
 
                     final ExpirationTracker tracker =
-                        processor.countExpiration(lastFileNum);
+                            processor.countExpiration(lastFileNum);
 
                     env.getLogManager().initExpirationTracker(tracker);
-                } else {
+                }
+                else {
                     env.getLogManager().initExpirationTracker(
-                        new ExpirationTracker(0));
+                            new ExpirationTracker(0));
                 }
             }
 
@@ -180,33 +163,34 @@ public class ExpirationProfile {
              * record for the last file, if it exists.
              */
             final Locker locker = BasicLocker.createBasicLocker(
-                env, false /*noWait*/);
+                    env, false /*noWait*/);
 
-            try (final Cursor cursor =
-                 DbInternal.makeCursor(db, locker, null)) {
+            try(final Cursor cursor =
+                        DbInternal.makeCursor(db, locker, null)) {
 
-                while (cursor.get(key, data, Get.NEXT, null) != null) {
+                while(cursor.get(key, data, Get.NEXT, null) != null) {
 
                     counter.incNumRead();
 
                     final long fileNum =
-                        SortedPackedLongBinding.entryToLong(key);
+                            SortedPackedLongBinding.entryToLong(key);
 
                     final int i = Arrays.binarySearch(existingFiles, fileNum);
 
-                    if (i >= 0 && existingFiles[i] < lastFileNum) {
+                    if(i >= 0 && existingFiles[i] < lastFileNum) {
 
                         filesHaveRecords[i] = true;
 
                         final byte[] serializedForm = data.getData();
 
-                        if (serializedForm.length > 0) {
+                        if(serializedForm.length > 0) {
                             counter.incNumProcessed();
                             map.put(
-                                fileNum,
-                                new ExpInfo(serializedForm, 0));
+                                    fileNum,
+                                    new ExpInfo(serializedForm, 0));
                         }
-                    } else if (!env.isReadOnly()) {
+                    }
+                    else if(!env.isReadOnly()) {
                         counter.incNumDeleted();
                         cursor.delete();
                     }
@@ -220,11 +204,11 @@ public class ExpirationProfile {
              * get the expiration info for the file, and then add a record to
              * the DB and to the map. Note that the last file is not processed.
              */
-            for (int i = 0;
-                 i < existingFiles.length && existingFiles[i] < lastFileNum;
-                 i += 1) {
+            for(int i = 0;
+                i < existingFiles.length && existingFiles[i] < lastFileNum;
+                i += 1) {
 
-                if (filesHaveRecords[i]) {
+                if(filesHaveRecords[i]) {
                     continue;
                 }
 
@@ -232,21 +216,21 @@ public class ExpirationProfile {
 
                 counter.incNumAux();
 
-                if (listener != null) {
+                if(listener != null) {
                     listener.progress(
-                        RecoveryProgress.POPULATE_EXPIRATION_PROFILE,
-                        1, -1);
+                            RecoveryProgress.POPULATE_EXPIRATION_PROFILE,
+                            1, -1);
                 }
 
                 final ExpirationTracker tracker =
-                    processor.countExpiration(fileNum);
+                        processor.countExpiration(fileNum);
 
                 putFile(tracker, 0);
 
                 LoggerUtils.info(
-                    env.getLogger(), env,
-                    "Loaded missing expiration data from file 0x" +
-                        Long.toHexString(fileNum));
+                        env.getLogger(), env,
+                        "Loaded missing expiration data from file 0x" +
+                                Long.toHexString(fileNum));
             }
         }
     }
@@ -254,7 +238,7 @@ public class ExpirationProfile {
     /**
      * Writes a record in the expiration summary DB for the given tracker,
      * and (if there is any data with an expiration time) adds it to the map.
-     *
+     * <p>
      * Because this method and {@link #removeFile} perform Btree operations
      * while synchronized on the 'map', it is important that an IN is not
      * latched when calling these methods, which could cause a deadlock. Also,
@@ -268,9 +252,9 @@ public class ExpirationProfile {
         final long fileNum = tracker.getFileNum();
         final byte[] serializedForm = tracker.serialize();
 
-        synchronized (map) {
+        synchronized(map) {
 
-            if (db != null && !env.isReadOnly()) {
+            if(db != null && !env.isReadOnly()) {
                 final DatabaseEntry key = new DatabaseEntry();
                 final DatabaseEntry data = new DatabaseEntry();
 
@@ -279,10 +263,10 @@ public class ExpirationProfile {
                 data.setData(serializedForm);
 
                 final Locker locker = BasicLocker.createBasicLocker(
-                    env, false /*noWait*/);
+                        env, false /*noWait*/);
 
-                try (final Cursor cursor =
-                         DbInternal.makeCursor(db, locker, null)) {
+                try(final Cursor cursor =
+                            DbInternal.makeCursor(db, locker, null)) {
 
                     cursor.put(key, data, Put.OVERWRITE, null);
 
@@ -291,10 +275,10 @@ public class ExpirationProfile {
                 }
             }
 
-            if (serializedForm.length > 0) {
+            if(serializedForm.length > 0) {
                 map.put(
-                    fileNum,
-                    new ExpInfo(serializedForm, expiredSize));
+                        fileNum,
+                        new ExpInfo(serializedForm, expiredSize));
             }
         }
     }
@@ -304,11 +288,11 @@ public class ExpirationProfile {
      */
     void removeFile(final long fileNum) {
 
-        if (db == null || env.isReadOnly()) {
+        if(db == null || env.isReadOnly()) {
             return;
         }
 
-        synchronized (map) {
+        synchronized(map) {
 
             map.remove(fileNum);
 
@@ -316,14 +300,14 @@ public class ExpirationProfile {
             SortedPackedLongBinding.longToEntry(fileNum, key);
 
             final Locker locker = BasicLocker.createBasicLocker(
-                env, false /*noWait*/);
+                    env, false /*noWait*/);
 
-            try (final Cursor cursor =
-                 DbInternal.makeCursor(db, locker, null)) {
+            try(final Cursor cursor =
+                        DbInternal.makeCursor(db, locker, null)) {
 
-                if (cursor.get(
-                    key, null, Get.SEARCH,
-                    LockMode.RMW.toReadOptions()) != null) {
+                if(cursor.get(
+                        key, null, Get.SEARCH,
+                        LockMode.RMW.toReadOptions()) != null) {
 
                     cursor.delete(null);
                 }
@@ -341,13 +325,13 @@ public class ExpirationProfile {
      */
     public void addCompletedTracker(final ExpirationTracker tracker) {
 
-        if (db == null) {
+        if(db == null) {
             return;
         }
 
         final long fileNum = tracker.getFileNum();
 
-        synchronized (completedTrackers) {
+        synchronized(completedTrackers) {
             assert !completedTrackers.containsKey(fileNum);
 
             completedTrackers.put(fileNum, tracker);
@@ -362,7 +346,7 @@ public class ExpirationProfile {
     void processCompletedTrackers() {
 
         /* Only one thread at a time should process them. */
-        synchronized (map) {
+        synchronized(map) {
 
             /*
              * Make a copy in order to process them without holding their
@@ -371,20 +355,20 @@ public class ExpirationProfile {
              */
             final List<ExpirationTracker> trackers;
 
-            synchronized (completedTrackers) {
+            synchronized(completedTrackers) {
                 trackers = new ArrayList<>(completedTrackers.values());
             }
 
-            for (final ExpirationTracker tracker : trackers) {
+            for(final ExpirationTracker tracker : trackers) {
 
-                if (tracker.hasPendingTrackCalls()) {
+                if(tracker.hasPendingTrackCalls()) {
                     /* Not quite completed. */
                     continue;
                 }
 
                 putFile(tracker, 0);
 
-                synchronized (completedTrackers) {
+                synchronized(completedTrackers) {
                     completedTrackers.remove(tracker.getFileNum());
                 }
             }
@@ -395,21 +379,21 @@ public class ExpirationProfile {
      * Updates the expired bytes in the expiration profile according to the
      * data that has expired at the given time. Should be called periodically,
      * and before calling {@link #getExpiredBytes}.
-     *
+     * <p>
      * Also processes any completed trackers by adding them to the DB and to
      * the histogram map.
-     *
+     * <p>
      * This method only does any real work once per hour, on hour boundaries,
      * since data expires on (at most) hour boundaries.
      */
     public void refresh(final long time) {
 
-        if (db == null) {
+        if(db == null) {
             return;
         }
 
         /* Synchronize to protect map and the lastRefreshXxx fields. */
-        synchronized (map) {
+        synchronized(map) {
 
             /*
              * Get last hour boundary, rounding down to the closest hour. If
@@ -417,9 +401,9 @@ public class ExpirationProfile {
              * then return and expect that we'll try again later.
              */
             final int hourLimit =
-                (int) (time / TTL.MILLIS_PER_HOUR);
+                    (int) (time / TTL.MILLIS_PER_HOUR);
 
-            if (hourLimit == lastRefreshHour) {
+            if(hourLimit == lastRefreshHour) {
                 return;
             }
 
@@ -432,9 +416,9 @@ public class ExpirationProfile {
             lastRefreshDay = dayLimit;
             anyExpirationInHours = false;
 
-            for (final ExpInfo info : map.values()) {
-                if (ExpirationTracker.isExpirationInHours(
-                    info.serializedForm)) {
+            for(final ExpInfo info : map.values()) {
+                if(ExpirationTracker.isExpirationInHours(
+                        info.serializedForm)) {
                     anyExpirationInHours = true;
                     break;
                 }
@@ -444,7 +428,7 @@ public class ExpirationProfile {
              * If all expiration times are on day boundaries, and we have not
              * started a new day, there is nothing more to do.
              */
-            if (!newDayLimit && !anyExpirationInHours) {
+            if(!newDayLimit && !anyExpirationInHours) {
                 return;
             }
 
@@ -452,12 +436,12 @@ public class ExpirationProfile {
              * Recalculate expired bytes for the current day/hour, saving the
              * previous value.
              */
-            for (final ExpInfo info : map.values()) {
+            for(final ExpInfo info : map.values()) {
 
                 info.previousExpiredBytes = info.currentExpiredBytes;
 
                 info.currentExpiredBytes = ExpirationTracker.getExpiredBytes(
-                    info.serializedForm, dayLimit, hourLimit);
+                        info.serializedForm, dayLimit, hourLimit);
             }
         }
     }
@@ -467,7 +451,7 @@ public class ExpirationProfile {
      * calculated by the last call to {@link #refresh}.
      */
     public int getExpiredBytes(final long fileNum) {
-        synchronized (map) {
+        synchronized(map) {
             final ExpInfo info = map.get(fileNum);
             return (info != null) ? info.currentExpiredBytes : 0;
         }
@@ -478,7 +462,7 @@ public class ExpirationProfile {
      * returned: the total expired at the given time, and a potentially smaller
      * amount that gradually expires over the current hour or day interval.
      * Uses the values calculated by the last call to {@link #refresh}.
-     *
+     * <p>
      * The amount that gradually expires is the amount that expires in the
      * current time interval, which is one day if all data in the profile
      * expires on day boundaries, and otherwise is one hour. If this is the
@@ -489,39 +473,39 @@ public class ExpirationProfile {
      * @return pair of {allExpiredBytes, gradualExpiredBytes}.
      */
     public Pair<Integer, Integer> getExpiredBytes(
-        final long fileNum,
-        final long time) {
+            final long fileNum,
+            final long time) {
 
-        synchronized (map) {
+        synchronized(map) {
 
             final ExpInfo info = map.get(fileNum);
 
-            if (info == null) {
+            if(info == null) {
                 return PAIR_OF_ZEROS;
             }
 
             final int newlyExpiredBytes =
-                info.currentExpiredBytes - info.previousExpiredBytes;
+                    info.currentExpiredBytes - info.previousExpiredBytes;
 
-            if (newlyExpiredBytes == 0) {
+            if(newlyExpiredBytes == 0) {
                 return new Pair<>(
-                    info.currentExpiredBytes, info.currentExpiredBytes);
+                        info.currentExpiredBytes, info.currentExpiredBytes);
             }
 
             final long intervalMs = anyExpirationInHours ?
-                TTL.MILLIS_PER_HOUR : TTL.MILLIS_PER_DAY;
+                    TTL.MILLIS_PER_HOUR : TTL.MILLIS_PER_DAY;
 
             final long currentMs = time % intervalMs;
 
             final int gradualBytes = info.previousExpiredBytes +
-                ((int) ((newlyExpiredBytes * currentMs) / intervalMs));
+                    ((int) ((newlyExpiredBytes * currentMs) / intervalMs));
 
             return new Pair<>(info.currentExpiredBytes, gradualBytes);
         }
     }
 
     public String toString(final long fileNum) {
-        synchronized (map) {
+        synchronized(map) {
             final ExpInfo info = map.get(fileNum);
             return (info != null) ? info.toString() : "NoExpInfo";
         }
@@ -560,7 +544,7 @@ public class ExpirationProfile {
         @Override
         public String toString() {
             return "{ExpInfo currentBytes = " + currentExpiredBytes +
-                " " + ExpirationTracker.toString(serializedForm) + '}';
+                    " " + ExpirationTracker.toString(serializedForm) + '}';
         }
     }
 }

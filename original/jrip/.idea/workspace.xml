@@ -13,6 +13,47 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="JRip.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/rules/JRip.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="626">
+              <caret line="478" column="46" lean-forward="false" selection-start-line="444" selection-start-column="6" selection-end-line="478" selection-end-column="46" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#13485#13493#0" expanded="true" />
+                <element signature="e#17006#17014#0" expanded="true" />
+                <element signature="e#17739#17747#0" expanded="true" />
+                <element signature="e#20874#20875#0" expanded="true" />
+                <element signature="e#20906#20907#0" expanded="true" />
+                <element signature="e#54612#54618#0" expanded="true" />
+                <element signature="e#62475#62481#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractClassifier.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/AbstractClassifier.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="400">
+              <caret line="338" column="0" lean-forward="false" selection-start-line="338" selection-start-column="0" selection-end-line="338" selection-end-column="0" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OptionHandler.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/weka/core/OptionHandler.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="160">
+              <caret line="51" column="7" lean-forward="false" selection-start-line="51" selection-start-column="7" selection-end-line="51" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Source.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -26,14 +67,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Test.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Test.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/weka/Test.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="123" column="9" lean-forward="true" selection-start-line="123" selection-start-column="9" selection-end-line="123" selection-end-column="9" />
+            <state relative-caret-position="275">
+              <caret line="67" column="0" lean-forward="false" selection-start-line="67" selection-start-column="0" selection-end-line="68" selection-end-column="29" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Sink.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="43" lean-forward="false" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="43" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="400">
+              <caret line="83" column="10" lean-forward="false" selection-start-line="16" selection-start-column="2" selection-end-line="83" selection-end-column="10" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -171,37 +232,7 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="weka" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jrip" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jrip" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="weka" type="462c0819:PsiDirectoryNode" />
-              <item name="classifiers" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jrip" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jrip" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="weka" type="462c0819:PsiDirectoryNode" />
-              <item name="classifiers" type="462c0819:PsiDirectoryNode" />
-              <item name="rules" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jrip" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jrip" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="weka" type="462c0819:PsiDirectoryNode" />
-              <item name="classifiers" type="462c0819:PsiDirectoryNode" />
-              <item name="rules" type="462c0819:PsiDirectoryNode" />
-              <item name="part" type="462c0819:PsiDirectoryNode" />
+              <item name="option" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="jrip" type="b2602c69:ProjectViewProjectNode" />
@@ -405,12 +436,12 @@
       <workItem from="1509369919439" duration="2069000" />
       <workItem from="1509395950215" duration="1360000" />
       <workItem from="1509405697212" duration="300000" />
-      <workItem from="1509539606648" duration="7881000" />
+      <workItem from="1509539606648" duration="11138000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11610000" />
+    <option name="totallyTimeSpent" value="14867000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="873" extended-state="6" />
@@ -424,9 +455,9 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32847682" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32847682" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32980132" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19742489" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -479,13 +510,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/weka/knowledgeflow/steps/WekaAlgorithmWrapper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="24" column="15" lean-forward="false" selection-start-line="24" selection-start-column="15" selection-end-line="24" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/Sourcable.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
@@ -504,14 +528,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="30" column="17" lean-forward="false" selection-start-line="30" selection-start-column="17" selection-end-line="30" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="146">
-          <caret line="45" column="47" lean-forward="false" selection-start-line="45" selection-start-column="47" selection-end-line="45" selection-end-column="47" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -746,13 +762,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="42" lean-forward="true" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/weka/core/Attribute.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="160">
@@ -816,120 +825,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/AbstractClassifier.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="425" column="15" lean-forward="false" selection-start-line="425" selection-start-column="15" selection-end-line="425" selection-end-column="15" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#13290#13291#0" expanded="true" />
-            <element signature="e#13324#13325#0" expanded="true" />
-            <element signature="e#13942#13943#0" expanded="true" />
-            <element signature="e#13970#13971#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/rules/part/JRip.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/rules/JRip.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-33305">
-          <caret line="49" column="3" lean-forward="true" selection-start-line="49" selection-start-column="3" selection-end-line="49" selection-end-column="3" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#13485#13493#0" expanded="true" />
-            <element signature="e#16936#16944#0" expanded="true" />
-            <element signature="e#17669#17677#0" expanded="true" />
-            <element signature="e#18795#18796#0" expanded="true" />
-            <element signature="e#18819#18820#0" expanded="true" />
-            <element signature="e#18927#18928#0" expanded="true" />
-            <element signature="e#18951#18952#0" expanded="true" />
-            <element signature="e#19157#19158#0" expanded="true" />
-            <element signature="e#19228#19229#0" expanded="true" />
-            <element signature="e#19410#19411#0" expanded="true" />
-            <element signature="e#19431#19432#0" expanded="true" />
-            <element signature="e#19606#19607#0" expanded="true" />
-            <element signature="e#19630#19631#0" expanded="true" />
-            <element signature="e#19835#19836#0" expanded="true" />
-            <element signature="e#19893#19894#0" expanded="true" />
-            <element signature="e#20033#20034#0" expanded="true" />
-            <element signature="e#20053#20054#0" expanded="true" />
-            <element signature="e#20190#20191#0" expanded="true" />
-            <element signature="e#20213#20214#0" expanded="true" />
-            <element signature="e#20427#20428#0" expanded="true" />
-            <element signature="e#20478#20479#0" expanded="true" />
-            <element signature="e#20629#20630#0" expanded="true" />
-            <element signature="e#20660#20661#0" expanded="true" />
-            <element signature="e#20804#20805#0" expanded="true" />
-            <element signature="e#20836#20837#0" expanded="true" />
-            <element signature="e#21054#21055#0" expanded="true" />
-            <element signature="e#21124#21125#0" expanded="true" />
-            <element signature="e#21317#21318#0" expanded="true" />
-            <element signature="e#21338#21339#0" expanded="true" />
-            <element signature="e#21524#21525#0" expanded="true" />
-            <element signature="e#21548#21549#0" expanded="true" />
-            <element signature="e#22065#22066#0" expanded="true" />
-            <element signature="e#22089#22090#0" expanded="true" />
-            <element signature="e#22284#22285#0" expanded="true" />
-            <element signature="e#22311#22312#0" expanded="true" />
-            <element signature="e#22522#22523#0" expanded="true" />
-            <element signature="e#22570#22571#0" expanded="true" />
-            <element signature="e#22712#22713#0" expanded="true" />
-            <element signature="e#22738#22739#0" expanded="true" />
-            <element signature="e#22873#22874#0" expanded="true" />
-            <element signature="e#22902#22903#0" expanded="true" />
-            <element signature="e#23027#23028#0" expanded="true" />
-            <element signature="e#23053#23054#0" expanded="true" />
-            <element signature="e#23301#23302#0" expanded="true" />
-            <element signature="e#23341#23342#0" expanded="true" />
-            <element signature="e#25156#25157#0" expanded="true" />
-            <element signature="e#25180#25181#0" expanded="true" />
-            <element signature="e#25216#25217#0" expanded="true" />
-            <element signature="e#25242#25243#0" expanded="true" />
-            <element signature="e#25280#25281#0" expanded="true" />
-            <element signature="e#25312#25313#0" expanded="true" />
-            <element signature="e#25347#25348#0" expanded="true" />
-            <element signature="e#25376#25377#0" expanded="true" />
-            <element signature="e#25407#25408#0" expanded="true" />
-            <element signature="e#25432#25433#0" expanded="true" />
-            <element signature="e#25464#25465#0" expanded="true" />
-            <element signature="e#25490#25491#0" expanded="true" />
-            <element signature="e#25627#25628#0" expanded="true" />
-            <element signature="e#25691#25692#0" expanded="true" />
-            <element signature="e#26269#26270#0" expanded="true" />
-            <element signature="e#26300#26301#0" expanded="true" />
-            <element signature="e#31742#31743#0" expanded="true" />
-            <element signature="e#31806#31807#0" expanded="true" />
-            <element signature="e#34891#34892#0" expanded="true" />
-            <element signature="e#34957#34958#0" expanded="true" />
-            <element signature="e#35094#35095#0" expanded="true" />
-            <element signature="e#35158#35159#0" expanded="true" />
-            <element signature="e#35990#35991#0" expanded="true" />
-            <element signature="e#36035#36036#0" expanded="true" />
-            <element signature="e#37371#37372#0" expanded="true" />
-            <element signature="e#37402#37403#0" expanded="true" />
-            <element signature="e#37630#37631#0" expanded="true" />
-            <element signature="e#37663#37664#0" expanded="true" />
-            <element signature="e#39052#39053#0" expanded="true" />
-            <element signature="e#39080#39081#0" expanded="true" />
-            <element signature="e#39228#39229#0" expanded="true" />
-            <element signature="e#39263#39264#0" expanded="true" />
-            <element signature="e#48159#48160#0" expanded="true" />
-            <element signature="e#48223#48224#0" expanded="true" />
-            <element signature="e#54542#54548#0" expanded="true" />
-            <element signature="e#62405#62411#0" expanded="true" />
-            <element signature="e#70412#70413#0" expanded="true" />
-            <element signature="e#70472#70473#0" expanded="true" />
-            <element signature="e#70600#70601#0" expanded="true" />
-            <element signature="e#70641#70642#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -944,13 +844,64 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/weka/Test.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/rules/JRip.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="123" column="9" lean-forward="true" selection-start-line="123" selection-start-column="9" selection-end-line="123" selection-end-column="9" />
+        <state relative-caret-position="626">
+          <caret line="478" column="46" lean-forward="false" selection-start-line="444" selection-start-column="6" selection-end-line="478" selection-end-column="46" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#13485#13493#0" expanded="true" />
+            <element signature="e#17006#17014#0" expanded="true" />
+            <element signature="e#17739#17747#0" expanded="true" />
+            <element signature="e#20874#20875#0" expanded="true" />
+            <element signature="e#20906#20907#0" expanded="true" />
+            <element signature="e#54612#54618#0" expanded="true" />
+            <element signature="e#62475#62481#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/weka/core/OptionHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="51" column="7" lean-forward="false" selection-start-line="51" selection-start-column="7" selection-end-line="51" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/weka/classifiers/AbstractClassifier.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="338" column="0" lean-forward="false" selection-start-line="338" selection-start-column="0" selection-end-line="338" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="83" column="10" lean-forward="false" selection-start-line="16" selection-start-column="2" selection-end-line="83" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/weka/Test.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="67" column="0" lean-forward="false" selection-start-line="67" selection-start-column="0" selection-end-line="68" selection-end-column="29" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="43" lean-forward="false" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="43" />
+          <folding />
         </state>
       </provider>
     </entry>

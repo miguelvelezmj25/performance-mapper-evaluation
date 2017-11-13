@@ -14,8 +14,6 @@
 package berkeley.com.sleepycat.je.log;
 
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * A basic implementation of {@link VersionedWriteLoggable} that provides for
@@ -43,7 +41,7 @@ public abstract class BasicVersionedWriteLoggable
     @Override
     public void writeToLog(final ByteBuffer logBuffer) {
         writeToLog(
-            logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
+                logBuffer, LogEntryType.LOG_VERSION, false /*forReplication*/);
     }
 
     @Override

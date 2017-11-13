@@ -13,9 +13,9 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.DatabaseException;
+
+import java.nio.ByteBuffer;
 
 /**
  * A class that implements LogSource can return portions of the log.
@@ -39,7 +39,7 @@ public interface LogSource {
      * offset indicates the absolute position in the log file.
      */
     ByteBuffer getBytes(long fileOffset, int numBytes)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /**
      * Returns the log version of the log entries from this source.

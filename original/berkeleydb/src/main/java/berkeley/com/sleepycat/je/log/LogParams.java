@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.util.Collection;
-
 import berkeley.com.sleepycat.je.cleaner.ExpirationTracker;
 import berkeley.com.sleepycat.je.cleaner.PackedObsoleteInfo;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
@@ -22,9 +20,11 @@ import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.txn.WriteLockInfo;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.util.Collection;
+
 /**
  * Parameters passed when an item is logged.
- *
+ * <p>
  * This class is used as a simple struct for passing multiple params, and does
  * not need getters and setters.
  */
@@ -79,19 +79,19 @@ public class LogParams {
      * of any IN or LN is alive, so that logging a new version requires making
      * the last version obsolete. Utilization tracking generally asserts
      * that this last version is not already obsolete.
-     *
+     * <p>
      * When partial rollbacks are used, some of the original intermediate
      * versions may have been pruned away, leaving a current previous that
      * was already marked obsolete. For example, a transaction might have
      * done:
-     *
+     * <p>
      * LNA (version 1)
      * LNA (version 2)
-     *  -- now version 1 is obsolete
-     *  -- if we do a partial rollback to version1, verison 2 is removed
-     *  -- we start retransmitting
+     * -- now version 1 is obsolete
+     * -- if we do a partial rollback to version1, verison 2 is removed
+     * -- we start retransmitting
      * LNA (version 2)
-     *
+     * <p>
      * When we log this LNA/version2, this previous LNA (version1) is
      * already obsolete. obsoleteDupsAllowed supports this case.
      */

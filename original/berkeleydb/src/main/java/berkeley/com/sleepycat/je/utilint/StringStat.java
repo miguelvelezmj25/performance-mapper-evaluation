@@ -51,7 +51,7 @@ public class StringStat extends Stat<String> {
 
     @Override
     public Stat<String> computeInterval(Stat<String> base) {
-       return copy();
+        return copy();
     }
 
     @Override

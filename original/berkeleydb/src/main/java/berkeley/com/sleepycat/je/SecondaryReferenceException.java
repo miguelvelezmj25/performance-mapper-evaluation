@@ -21,17 +21,16 @@ import berkeley.com.sleepycat.je.txn.Locker;
  * because of a secondary constraint or integrity problem.  Provides accessors
  * for getting further information about the database and keys involved in the
  * failure.  See subclasses for more information.
- *
+ * <p>
  * <p>The {@link Transaction} handle is invalidated as a result of this
  * exception.</p>
  *
  * @see <a href="SecondaryDatabase.html#transactions">Special considerations
  * for using Secondary Databases with and without Transactions</a>
- *
  * @since 4.0
  */
 public abstract class SecondaryReferenceException
-    extends OperationFailureException {
+        extends OperationFailureException {
 
     private static final long serialVersionUID = 1;
 
@@ -40,9 +39,10 @@ public abstract class SecondaryReferenceException
     private final DatabaseEntry priKey;
     private final long expirationTime;
 
-    /** 
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     public SecondaryReferenceException(Locker locker,
                                        String message,
@@ -58,25 +58,29 @@ public abstract class SecondaryReferenceException
 
         String expirationTimeMsg = "expiration: ";
 
-        if (expirationTime != 0) {
+        if(expirationTime != 0) {
             expirationTimeMsg += TTL.formatExpirationTime(expirationTime);
-        } else {
+        }
+        else {
             expirationTimeMsg += "none";
         }
 
         addErrorMessage(expirationTimeMsg);
 
-        if (locker.getEnvironment().getExposeUserData()) {
+        if(locker.getEnvironment().getExposeUserData()) {
             addErrorMessage(
-                "secDbName=" + secDbName +
-                " secKey=" + secKey +
-                " priKey=" + priKey);
+                    "secDbName=" + secDbName +
+                            " secKey=" + secKey +
+                            " priKey=" + priKey);
         }
-    };
+    }
 
-    /** 
+    ;
+
+    /**
      * For internal use only.
-     * @hidden 
+     *
+     * @hidden
      */
     SecondaryReferenceException(String message,
                                 SecondaryReferenceException cause) {

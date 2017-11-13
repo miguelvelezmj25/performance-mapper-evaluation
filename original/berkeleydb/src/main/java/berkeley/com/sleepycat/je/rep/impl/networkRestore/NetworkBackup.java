@@ -13,14 +13,23 @@
 
 package berkeley.com.sleepycat.je.rep.impl.networkRestore;
 
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.BACKUP_FILE_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.DISPOSED_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.EXPECTED_BYTES;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.FETCH_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.SKIP_COUNT;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.TRANSFERRED_BYTES;
-import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.TRANSFER_RATE;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import berkeley.com.sleepycat.je.DatabaseException;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.log.FileManager;
+import berkeley.com.sleepycat.je.log.LogManager;
+import berkeley.com.sleepycat.je.log.RestoreMarker;
+import berkeley.com.sleepycat.je.log.entry.RestoreRequired;
+import berkeley.com.sleepycat.je.rep.impl.RepImpl;
+import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.*;
+import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
+import berkeley.com.sleepycat.je.rep.net.DataChannel;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
+import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
+import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
+import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ServerVersion;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
+import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
+import berkeley.com.sleepycat.je.utilint.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,46 +39,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.log.FileManager;
-import berkeley.com.sleepycat.je.log.LogManager;
-import berkeley.com.sleepycat.je.log.RestoreMarker;
-import berkeley.com.sleepycat.je.log.entry.RestoreRequired;
-import berkeley.com.sleepycat.je.rep.impl.RepImpl;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.FeederInfoResp;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.FileEnd;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.FileInfoResp;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.FileListResp;
-import berkeley.com.sleepycat.je.rep.impl.networkRestore.Protocol.FileStart;
-import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
-import berkeley.com.sleepycat.je.rep.net.DataChannel;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
-import berkeley.com.sleepycat.je.rep.net.DataChannelFactory.ConnectOptions;
-import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ProtocolException;
-import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol.ServerVersion;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher;
-import berkeley.com.sleepycat.je.rep.utilint.ServiceDispatcher.ServiceConnectFailedException;
-import berkeley.com.sleepycat.je.utilint.AtomicIntStat;
-import berkeley.com.sleepycat.je.utilint.AtomicLongStat;
-import berkeley.com.sleepycat.je.utilint.LoggerUtils;
-import berkeley.com.sleepycat.je.utilint.LongAvgRateStat;
-import berkeley.com.sleepycat.je.utilint.StatGroup;
-import berkeley.com.sleepycat.je.utilint.TestHook;
-import berkeley.com.sleepycat.je.utilint.TestHookExecute;
-import berkeley.com.sleepycat.je.utilint.VLSN;
+import static berkeley.com.sleepycat.je.rep.impl.networkRestore.NetworkBackupStatDefinition.*;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * This class implements a hot network backup that permits it to obtain a
@@ -86,9 +63,9 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * configured.
  * <p>
  * Renamed backup files have the following syntax:
- *
+ * <p>
  * NNNNNNNN.bup.<backup number>
- *
+ * <p>
  * where the backup number is the number associated with the backup attempt,
  * rather than with an individual file. That is, the backup number is increased
  * by one each time a backup is repeated in the same directory and log files
@@ -102,22 +79,38 @@ import berkeley.com.sleepycat.je.utilint.VLSN;
  * the case?]
  */
 public class NetworkBackup {
+    /**
+     * Time to wait for a request from the client.
+     */
+    private static final int SOCKET_TIMEOUT_MS = 10000;
+    /**
+     * The number of times to retry on a digest exception. That is, when the
+     * SHA1 hash as computed by the server for the file does not match the hash
+     * as computed by the client for the same file.
+     */
+    private static final int DIGEST_RETRIES = 5;
+    /*
+     * The client abandons a backup attempt if the server is loaded beyond this
+     * threshold
+     */
+    final int serverLoadThreshold;
+    /*
+     * The message digest used to compute the digest as each log file is pulled
+     * over the network.
+     */
+    final MessageDigest messageDigest;
     /* The server that was chosen to supply the log files. */
     private final InetSocketAddress serverAddress;
-
     /* The environment directory into which the log files will be backed up */
     private final File envDir;
-
     /* The id used during logging to identify a node. */
     private final NameIdPair clientNameId;
-
     /*
      * Determines whether any existing log files in the envDir should be
      * retained under a different name (with a BUP_SUFFIX), or whether it
      * should be deleted.
      */
     private final boolean retainLogfiles;
-
     /*
      * The minimal VLSN that the backup must cover. Used to ensure that the
      * backup is sufficient to permit replay of a replication stream from a
@@ -125,33 +118,11 @@ public class NetworkBackup {
      * backup for a standalone environment.
      */
     private final VLSN minVLSN;
-
-    /*
-     * The client abandons a backup attempt if the server is loaded beyond this
-     * threshold
-     */
-    final int serverLoadThreshold;
-
     /* The RepImpl instance used in Protocol. */
     private final RepImpl repImpl;
-
     private final FileManager fileManager;
-
     /* The factory for creating new channels */
     private final DataChannelFactory channelFactory;
-
-    /* The protocol used to communicate with the server. */
-    private Protocol protocol;
-
-    /* The channel connecting this client to the server. */
-    private DataChannel channel;
-
-    /*
-     * The message digest used to compute the digest as each log file is pulled
-     * over the network.
-     */
-    final MessageDigest messageDigest;
-
     /* Statistics on number of files actually fetched and skipped */
     private final StatGroup statistics;
     private final AtomicIntStat backupFileCount;
@@ -163,39 +134,26 @@ public class NetworkBackup {
     private final LongAvgRateStat transferRate;
 
     private final Logger logger;
-
-    private CyclicBarrier testBarrier = null;
-
     /**
      * The receive buffer size associated with the socket used for the log file
      * transfers
      */
     private final int receiveBufferSize;
-
-    /**
-     * Time to wait for a request from the client.
-     */
-    private static final int SOCKET_TIMEOUT_MS = 10000;
-
-    /**
-     * The number of times to retry on a digest exception. That is, when the
-     * SHA1 hash as computed by the server for the file does not match the hash
-     * as computed by the client for the same file.
-     */
-    private static final int DIGEST_RETRIES = 5;
-
     /*
      * Save the properties from the instigating InsufficientLogException in
      * order to persist the exception into a RestoreRequired entry.
      */
     private final Properties exceptionProperties;
-
     /*
      * Be prepared to create a marker file saying that the log can't be
      * recovered.
      */
     private final RestoreMarker restoreMarker;
-
+    /* The protocol used to communicate with the server. */
+    private Protocol protocol;
+    /* The channel connecting this client to the server. */
+    private DataChannel channel;
+    private CyclicBarrier testBarrier = null;
     /* For testing */
     private TestHook<File> interruptHook;
 
@@ -203,23 +161,23 @@ public class NetworkBackup {
      * Creates a configured backup instance which when executed will backup the
      * files to the environment directory.
      *
-     * @param serverSocket the socket on which to contact the server
-     * @param receiveBufferSize the receive buffer size to be associated with
-     * the socket used for the log file transfers.
-     * @param envDir the directory in which to place the log files
-     * @param clientNameId the id used to identify this client
-     * @param retainLogfiles determines whether obsolete log files should be
-     * retained by renaming them, instead of deleting them.
+     * @param serverSocket        the socket on which to contact the server
+     * @param receiveBufferSize   the receive buffer size to be associated with
+     *                            the socket used for the log file transfers.
+     * @param envDir              the directory in which to place the log files
+     * @param clientNameId        the id used to identify this client
+     * @param retainLogfiles      determines whether obsolete log files should be
+     *                            retained by renaming them, instead of deleting them.
      * @param serverLoadThreshold only backup from this server if it has fewer
-     * than this number of feeders active.
-     * @param repImpl is passed in as a distinct field from the log manager and
-     * file manager because it is used only for logging and environment
-     * invalidation. A network backup may be invoked by unit tests without
-     * an enclosing environment.
-     * @param minVLSN the VLSN that should be covered by the server. It ensures
-     * that the log files are sufficiently current for this client's needs.
+     *                            than this number of feeders active.
+     * @param repImpl             is passed in as a distinct field from the log manager and
+     *                            file manager because it is used only for logging and environment
+     *                            invalidation. A network backup may be invoked by unit tests without
+     *                            an enclosing environment.
+     * @param minVLSN             the VLSN that should be covered by the server. It ensures
+     *                            that the log files are sufficiently current for this client's needs.
      * @throws IllegalArgumentException if the environment directory is not
-     * valid. When used internally, this should be caught appropriately.
+     *                                  valid. When used internally, this should be caught appropriately.
      */
     public NetworkBackup(InetSocketAddress serverSocket,
                          int receiveBufferSize,
@@ -233,15 +191,15 @@ public class NetworkBackup {
                          LogManager logManager,
                          DataChannelFactory channelFactory,
                          Properties exceptionProperties)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super();
         this.serverAddress = serverSocket;
         this.receiveBufferSize = receiveBufferSize;
 
-        if (!envDir.exists()) {
+        if(!envDir.exists()) {
             throw new IllegalArgumentException("Environment directory: " +
-                                               envDir + " not found");
+                    envDir + " not found");
         }
         this.envDir = envDir;
         this.clientNameId = clientNameId;
@@ -254,25 +212,25 @@ public class NetworkBackup {
 
         try {
             messageDigest = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
+        } catch(NoSuchAlgorithmException e) {
             // Should not happen -- if it does it's a JDK config issue
             throw EnvironmentFailureException.unexpectedException(e);
         }
 
         logger = LoggerUtils.getLoggerFixedPrefix(getClass(),
-                                                  clientNameId.toString(),
-                                                  repImpl);
+                clientNameId.toString(),
+                repImpl);
         statistics = new StatGroup(NetworkBackupStatDefinition.GROUP_NAME,
-                                   NetworkBackupStatDefinition.GROUP_DESC);
+                NetworkBackupStatDefinition.GROUP_DESC);
         backupFileCount = new AtomicIntStat(statistics, BACKUP_FILE_COUNT);
         disposedCount = new AtomicIntStat(statistics, DISPOSED_COUNT);
         fetchCount = new AtomicIntStat(statistics, FETCH_COUNT);
         skipCount = new AtomicIntStat(statistics, SKIP_COUNT);
         expectedBytes = new AtomicLongStat(statistics, EXPECTED_BYTES);
         transferredBytes = new AtomicLongStat(
-            statistics, TRANSFERRED_BYTES);
+                statistics, TRANSFERRED_BYTES);
         transferRate = new LongAvgRateStat(
-            statistics, TRANSFER_RATE, 10000, MINUTES);
+                statistics, TRANSFER_RATE, 10000, MINUTES);
 
         this.exceptionProperties = exceptionProperties;
         restoreMarker = new RestoreMarker(fileManager, logManager);
@@ -291,20 +249,20 @@ public class NetworkBackup {
                          FileManager fileManager,
                          LogManager logManager,
                          DataChannelFactory channelFactory)
-        throws DatabaseException {
+            throws DatabaseException {
 
         this(serverSocket,
-             0,
-             envDir,
-             clientNameId,
-             retainLogfiles,
-             Integer.MAX_VALUE,
-             VLSN.NULL_VLSN,
-             null,
-             fileManager,
-             logManager,
-             channelFactory,
-             new Properties());
+                0,
+                envDir,
+                clientNameId,
+                retainLogfiles,
+                Integer.MAX_VALUE,
+                VLSN.NULL_VLSN,
+                null,
+                fileManager,
+                logManager,
+                channelFactory,
+                new Properties());
     }
 
     /**
@@ -322,43 +280,43 @@ public class NetworkBackup {
      * @throws InsufficientVLSNRangeException
      */
     public String[] execute()
-        throws IOException,
-               DatabaseException,
-               ServiceConnectFailedException,
-               LoadThresholdExceededException,
-               InsufficientVLSNRangeException {
+            throws IOException,
+            DatabaseException,
+            ServiceConnectFailedException,
+            LoadThresholdExceededException,
+            InsufficientVLSNRangeException {
 
-         try {
+        try {
             channel = channelFactory.
-                connect(serverAddress,
-                        new ConnectOptions().
-                        setTcpNoDelay(true).
-                        setReceiveBufferSize(receiveBufferSize).
-                        setOpenTimeout(SOCKET_TIMEOUT_MS).
-                        setReadTimeout(SOCKET_TIMEOUT_MS));
+                    connect(serverAddress,
+                            new ConnectOptions().
+                                    setTcpNoDelay(true).
+                                    setReceiveBufferSize(receiveBufferSize).
+                                    setOpenTimeout(SOCKET_TIMEOUT_MS).
+                                    setReadTimeout(SOCKET_TIMEOUT_MS));
             ServiceDispatcher.doServiceHandshake
-                (channel, FeederManager.FEEDER_SERVICE);
+                    (channel, FeederManager.FEEDER_SERVICE);
 
             protocol = checkProtocol(new Protocol(clientNameId,
-                                                  Protocol.VERSION,
-                                                  repImpl));
+                    Protocol.VERSION,
+                    repImpl));
             checkServer();
             final String[] fileNames = getFileList();
 
             LoggerUtils.info(logger, repImpl,
-                "Restoring from:" + serverAddress +
-                " Allocated network receive buffer size:" +
-                channel.getSocketChannel().socket().
-                getReceiveBufferSize() +
-                "(" + receiveBufferSize + ")" +
-                " candidate log file count:" + fileNames.length);
+                    "Restoring from:" + serverAddress +
+                            " Allocated network receive buffer size:" +
+                            channel.getSocketChannel().socket().
+                                    getReceiveBufferSize() +
+                            "(" + receiveBufferSize + ")" +
+                            " candidate log file count:" + fileNames.length);
 
             getFiles(fileNames);
             cleanup(fileNames);
             assert fileManager.listJDBFiles().length == fileNames.length :
-                "envDir=" + envDir + " list=" +
-                Arrays.asList(fileManager.listJDBFiles()) +
-                " fileNames=" + Arrays.asList(fileNames);
+                    "envDir=" + envDir + " list=" +
+                            Arrays.asList(fileManager.listJDBFiles()) +
+                            " fileNames=" + Arrays.asList(fileNames);
 
             /*
              * The fileNames array is sorted in getFileList method, so we can
@@ -367,11 +325,11 @@ public class NetworkBackup {
              */
             final long fileBegin = fileManager.getNumFromName(fileNames[0]);
             final long fileEnd =
-                fileManager.getNumFromName(fileNames[fileNames.length - 1]);
+                    fileManager.getNumFromName(fileNames[fileNames.length - 1]);
             /* Return file names with sub directories' names if exists. */
             return fileManager.listFileNames(fileBegin, fileEnd);
         } finally {
-            if (channel != null) {
+            if(channel != null) {
                 /*
                  * Closing the socket directly is not correct.  Let the channel
                  * do the work (necessary for correct TLS operation).
@@ -379,14 +337,14 @@ public class NetworkBackup {
                 channel.close();
             }
             LoggerUtils.info(logger, repImpl,
-                "Backup file total: " +
-                backupFileCount.get() +
-                ".  Files actually fetched: " +
-                fetchCount.get() +
-                ".  Files skipped(available locally): " +
-                skipCount.get() +
-                ".  Local files renamed/deleted: " +
-                disposedCount.get());
+                    "Backup file total: " +
+                            backupFileCount.get() +
+                            ".  Files actually fetched: " +
+                            fetchCount.get() +
+                            ".  Files skipped(available locally): " +
+                            skipCount.get() +
+                            ".  Local files renamed/deleted: " +
+                            disposedCount.get());
         }
     }
 
@@ -395,24 +353,24 @@ public class NetworkBackup {
      * The feeder must cover the VLSN if it's not null and must not be too busy.
      */
     private void checkServer()
-        throws IOException,
-               ProtocolException,
-               LoadThresholdExceededException,
-               InsufficientVLSNRangeException {
+            throws IOException,
+            ProtocolException,
+            LoadThresholdExceededException,
+            InsufficientVLSNRangeException {
 
         protocol.write(protocol.new FeederInfoReq(), channel);
         FeederInfoResp resp = protocol.read(channel, FeederInfoResp.class);
-        if ((!VLSN.NULL_VLSN.equals(minVLSN)) &&
-            ((resp.getRangeFirst().compareTo(minVLSN) > 0) ||
-             (resp.getRangeLast().compareTo(minVLSN)) < 0)) {
+        if((!VLSN.NULL_VLSN.equals(minVLSN)) &&
+                ((resp.getRangeFirst().compareTo(minVLSN) > 0) ||
+                        (resp.getRangeLast().compareTo(minVLSN)) < 0)) {
             throw new InsufficientVLSNRangeException(minVLSN,
-                                                     resp.getRangeFirst(),
-                                                     resp.getRangeLast());
+                    resp.getRangeFirst(),
+                    resp.getRangeLast());
         }
-        if (resp.getActiveFeeders() > serverLoadThreshold) {
+        if(resp.getActiveFeeders() > serverLoadThreshold) {
             LoadThresholdExceededException exception
-                = new LoadThresholdExceededException(serverLoadThreshold,
-                                                     resp.getActiveFeeders());
+                    = new LoadThresholdExceededException(serverLoadThreshold,
+                    resp.getActiveFeeders());
             throw exception;
         }
     }
@@ -425,73 +383,74 @@ public class NetworkBackup {
      * @throws IOException
      */
     private void cleanup(String[] fileNames)
-        throws IOException {
+            throws IOException {
 
         LoggerUtils.fine(logger, repImpl, "Cleaning up");
 
         Set<String> logFileSet = new HashSet<String>(Arrays.asList(fileNames));
-        for (File file : fileManager.listJDBFiles()) {
-            if (!logFileSet.contains(file.getName())) {
+        for(File file : fileManager.listJDBFiles()) {
+            if(!logFileSet.contains(file.getName())) {
                 disposeFile(file);
             }
         }
 
         StringBuilder logFiles = new StringBuilder();
-        for (String string : logFileSet) {
+        for(String string : logFileSet) {
 
             /*
              * Use the full path of this file in case the environment uses
              * multiple data directories.
              */
             File file = new File(fileManager.getFullFileName(string));
-            if (!file.exists()) {
+            if(!file.exists()) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Missing file: " + file);
+                        ("Missing file: " + file);
             }
             logFiles.append(file.getCanonicalPath()).append(", ");
         }
 
         String names = logFiles.toString();
-        if (names.length() > 0) {
-            names = names.substring(0, names.length()-2);
+        if(names.length() > 0) {
+            names = names.substring(0, names.length() - 2);
         }
         LoggerUtils.fine(logger, repImpl, "Log file set: " + names);
     }
 
     /**
      * Retrieves all the files in the list, that are not already in the envDir.
+     *
      * @throws DatabaseException
      */
     private void getFiles(String[] fileNames)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         LoggerUtils.info(logger, repImpl,
-            fileNames.length + " files in backup set");
+                fileNames.length + " files in backup set");
 
         /* Get all file transfer lengths first, so we can track progress */
         final List<FileAndLength> fileTransferLengths =
-            getFileTransferLengths(fileNames);
+                getFileTransferLengths(fileNames);
 
-        for (final FileAndLength entry : fileTransferLengths) {
-            if (testBarrier != null) {
+        for(final FileAndLength entry : fileTransferLengths) {
+            if(testBarrier != null) {
                 try {
                     testBarrier.await();
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
                     // Ignore just a test mechanism
-                } catch (BrokenBarrierException e) {
+                } catch(BrokenBarrierException e) {
                     throw EnvironmentFailureException.unexpectedException(e);
                 }
             }
 
-            for (int i = 0; i < DIGEST_RETRIES; i++) {
+            for(int i = 0; i < DIGEST_RETRIES; i++) {
                 try {
                     getFile(entry.file);
                     fetchCount.increment();
                     break;
-                } catch (DigestException e) {
-                    if ((i + 1) == DIGEST_RETRIES) {
+                } catch(DigestException e) {
+                    if((i + 1) == DIGEST_RETRIES) {
                         throw new IOException("Digest mismatch despite "
-                                              + DIGEST_RETRIES + " attempts");
+                                + DIGEST_RETRIES + " attempts");
                     }
 
                     /* Account for the additional transfer */
@@ -507,16 +466,6 @@ public class NetworkBackup {
         protocol.write(protocol.new Done(), channel);
     }
 
-    /** Store File and file length pair. */
-    private static class FileAndLength {
-        FileAndLength(File file, long length) {
-            this.file = file;
-            this.length = length;
-        }
-        final File file;
-        final long length;
-    }
-
     /**
      * Returns information about files that need to be transferred, and updates
      * expectedBytes and skipCount accordingly.  This method tries to avoid
@@ -526,10 +475,10 @@ public class NetworkBackup {
      * has it cached.
      */
     private List<FileAndLength> getFileTransferLengths(String[] fileNames)
-        throws IOException, DatabaseException {
+            throws IOException, DatabaseException {
 
         final List<FileAndLength> fileTransferLengths = new ArrayList<>();
-        for (final String fileName : fileNames) {
+        for(final String fileName : fileNames) {
 
             /*
              * Use the full path of this file in case the environment uses
@@ -538,28 +487,28 @@ public class NetworkBackup {
             final File file = new File(fileManager.getFullFileName(fileName));
             protocol.write(protocol.new FileInfoReq(fileName, false), channel);
             FileInfoResp statResp =
-                protocol.read(channel, Protocol.FileInfoResp.class);
+                    protocol.read(channel, Protocol.FileInfoResp.class);
             final long fileLength = statResp.getFileLength();
 
             /*
              * See if we can skip the file if it is present with correct length
              */
-            if (file.exists() && (fileLength == file.length())) {
+            if(file.exists() && (fileLength == file.length())) {
 
                 /* Make sure we have the message digest */
-                if (statResp.getDigestSHA1().length == 0) {
+                if(statResp.getDigestSHA1().length == 0) {
                     protocol.write(
-                        protocol.new FileInfoReq(fileName, true), channel);
+                            protocol.new FileInfoReq(fileName, true), channel);
                     statResp =
-                        protocol.read(channel, Protocol.FileInfoResp.class);
+                            protocol.read(channel, Protocol.FileInfoResp.class);
                 }
                 final byte digest[] =
-                    LogFileFeeder.getSHA1Digest(file, fileLength).digest();
-                if (Arrays.equals(digest, statResp.getDigestSHA1())) {
+                        LogFileFeeder.getSHA1Digest(file, fileLength).digest();
+                if(Arrays.equals(digest, statResp.getDigestSHA1())) {
                     LoggerUtils.info(logger, repImpl,
-                        "File: " + file.getCanonicalPath() +
-                        " length: " + fileLength +
-                        " available with matching SHA1, copy skipped");
+                            "File: " + file.getCanonicalPath() +
+                                    " length: " + fileLength +
+                                    " available with matching SHA1, copy skipped");
                     skipCount.increment();
                     continue;
                 }
@@ -574,11 +523,11 @@ public class NetworkBackup {
      * Requests and obtains the specific log file from the server. The file is
      * first created under a name with the .tmp suffix and is renamed to its
      * true name only after its digest has been verified.
-     *
+     * <p>
      * This method is protected to facilitate error testing.
      */
     protected void getFile(File file)
-        throws IOException, ProtocolException, DigestException {
+            throws IOException, ProtocolException, DigestException {
 
         LoggerUtils.fine(logger, repImpl, "Requesting file: " + file);
         protocol.write(protocol.new FileReq(file.getName()), channel);
@@ -591,12 +540,12 @@ public class NetworkBackup {
          * data directories.
          */
         File tmpFile = new File(fileManager.getFullFileName(file.getName()) +
-                                FileManager.TMP_SUFFIX);
-        if (tmpFile.exists()) {
+                FileManager.TMP_SUFFIX);
+        if(tmpFile.exists()) {
             boolean deleted = tmpFile.delete();
-            if (!deleted) {
+            if(!deleted) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Could not delete file: " + tmpFile);
+                        ("Could not delete file: " + tmpFile);
             }
         }
 
@@ -618,15 +567,15 @@ public class NetworkBackup {
             int count = 0;
 
             /* Copy over the file contents. */
-            for (long bytes = fileResp.getFileLength(); bytes > 0;) {
+            for(long bytes = fileResp.getFileLength(); bytes > 0; ) {
                 int readSize =
-                    (int) Math.min(LogFileFeeder.TRANSFER_BYTES, bytes);
+                        (int) Math.min(LogFileFeeder.TRANSFER_BYTES, bytes);
                 buffer.clear();
                 buffer.limit(readSize);
                 int actualBytes = channel.read(buffer);
-                if (actualBytes == -1) {
+                if(actualBytes == -1) {
                     throw new IOException("Premature EOF. Was expecting:"
-                                          + readSize);
+                            + readSize);
                 }
                 bytes -= actualBytes;
 
@@ -638,24 +587,24 @@ public class NetworkBackup {
                 transferredBytes.add(actualBytes);
 
                 /* Update the transfer rate at interval and last time */
-                if (((++count % rateInterval) == 0) || (bytes <= 0)) {
+                if(((++count % rateInterval) == 0) || (bytes <= 0)) {
                     transferRate.add(
-                        transferredBytes.get(), System.currentTimeMillis());
+                            transferredBytes.get(), System.currentTimeMillis());
                 }
             }
 
-            if (logger.isLoggable(Level.INFO)) {
+            if(logger.isLoggable(Level.INFO)) {
                 LoggerUtils.info(logger, repImpl,
-                    String.format(
-                        "Fetched log file: %s, size: %,d bytes," +
-                        " %s bytes," +
-                        " %s bytes," +
-                        " %s bytes/second",
-                        file.getName(),
-                        fileResp.getFileLength(),
-                        transferredBytes,
-                        expectedBytes,
-                        transferRate));
+                        String.format(
+                                "Fetched log file: %s, size: %,d bytes," +
+                                        " %s bytes," +
+                                        " %s bytes," +
+                                        " %s bytes/second",
+                                file.getName(),
+                                fileResp.getFileLength(),
+                                transferredBytes,
+                                expectedBytes,
+                                transferRate));
             }
         } finally {
             fileStream.close();
@@ -664,9 +613,9 @@ public class NetworkBackup {
         final FileEnd fileEnd = protocol.read(channel, Protocol.FileEnd.class);
 
         /* Check that the read is successful. */
-        if (!Arrays.equals(messageDigest.digest(), fileEnd.getDigestSHA1())) {
+        if(!Arrays.equals(messageDigest.digest(), fileEnd.getDigestSHA1())) {
             LoggerUtils.warning(logger, repImpl,
-                "digest mismatch on file: " + file);
+                    "digest mismatch on file: " + file);
             throw new DigestException();
         }
 
@@ -679,13 +628,13 @@ public class NetworkBackup {
          * only be created the first time.
          */
         restoreMarker.createMarkerFile
-            (RestoreRequired.FailureType.NETWORK_RESTORE,
-             exceptionProperties);
+                (RestoreRequired.FailureType.NETWORK_RESTORE,
+                        exceptionProperties);
 
         TestHookExecute.doHookIfSet(interruptHook, file);
 
         /* Now that we know it's good, move the file into place. */
-        if (file.exists()) {
+        if(file.exists()) {
             /*
              * Delete or back up this and all subsequent obsolete files,
              * excluding the marker file. The marker file will be explicitly
@@ -697,16 +646,16 @@ public class NetworkBackup {
         /* Rename the tmp file. */
         LoggerUtils.fine(logger, repImpl, "Renamed " + tmpFile + " to " + file);
         boolean renamed = tmpFile.renameTo(file);
-        if (!renamed) {
+        if(!renamed) {
             throw EnvironmentFailureException.unexpectedState
-                ("Rename from: " + tmpFile + " to " + file + " failed");
+                    ("Rename from: " + tmpFile + " to " + file + " failed");
         }
 
         /* Retain last modified time, to leave an audit trail. */
-        if (!file.setLastModified(fileResp.getLastModifiedTime())) {
+        if(!file.setLastModified(fileResp.getLastModifiedTime())) {
             throw EnvironmentFailureException.unexpectedState
-                ("File.setlastModifiedTime() for:" + file + " and time " +
-                 new Date(fileResp.getLastModifiedTime()) + " failed.");
+                    ("File.setlastModifiedTime() for:" + file + " and time " +
+                            new Date(fileResp.getLastModifiedTime()) + " failed.");
         }
     }
 
@@ -726,15 +675,15 @@ public class NetworkBackup {
         Arrays.sort(dirFiles); // sorts in ascending order
 
         /* Start with highest numbered file to be robust in case of failure. */
-        for (int i = dirFiles.length - 1; i >= 0; i--) {
+        for(int i = dirFiles.length - 1; i >= 0; i--) {
             File file = dirFiles[i];
 
             /* Skip the marker file, wait until the whole backup is done */
-            if (file.getName().equals(RestoreMarker.getMarkerFileName())) {
+            if(file.getName().equals(RestoreMarker.getMarkerFileName())) {
                 continue;
             }
             disposeFile(file);
-            if (startFile.equals(file)) {
+            if(startFile.equals(file)) {
                 break;
             }
         }
@@ -742,58 +691,61 @@ public class NetworkBackup {
 
     /**
      * Remove the file from the current set of log files in the directory.
+     *
      * @param file
      */
     private void disposeFile(File file) {
         disposedCount.increment();
         final long fileNumber = fileManager.getNumFromName(file.getName());
-        if (retainLogfiles) {
+        if(retainLogfiles) {
             boolean renamed = false;
             try {
                 renamed =
-                    fileManager.renameFile(fileNumber, FileManager.BUP_SUFFIX);
-            } catch (IOException e) {
+                        fileManager.renameFile(fileNumber, FileManager.BUP_SUFFIX);
+            } catch(IOException e) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Could not rename log file " + file.getPath() +
-                     " because of exception: " + e.getMessage());
+                        ("Could not rename log file " + file.getPath() +
+                                " because of exception: " + e.getMessage());
             }
 
-            if (!renamed) {
+            if(!renamed) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Could not rename log file " +  file.getPath());
+                        ("Could not rename log file " + file.getPath());
             }
             LoggerUtils.fine(logger, repImpl,
-                "Renamed log file: " + file.getPath());
-        } else {
+                    "Renamed log file: " + file.getPath());
+        }
+        else {
             boolean deleted = false;
             try {
                 deleted = fileManager.deleteFile(fileNumber);
-            } catch (IOException e) {
+            } catch(IOException e) {
                 throw EnvironmentFailureException.unexpectedException
-                    ("Could not delete log file " + file.getPath() +
-                     " during network restore.", e);
+                        ("Could not delete log file " + file.getPath() +
+                                " during network restore.", e);
             }
-            if (!deleted) {
+            if(!deleted) {
                 throw EnvironmentFailureException.unexpectedState
-                    ("Could not delete log file " +  file.getPath());
+                        ("Could not delete log file " + file.getPath());
             }
             LoggerUtils.fine(logger, repImpl,
-                "deleted log file: " + file.getPath());
+                    "deleted log file: " + file.getPath());
         }
     }
 
     /**
      * Carries out the message exchange to obtain the list of backup files.
+     *
      * @return
      * @throws IOException
      * @throws ProtocolException
      */
     private String[] getFileList()
-        throws IOException, ProtocolException {
+            throws IOException, ProtocolException {
 
         protocol.write(protocol.new FileListReq(), channel);
         FileListResp fileListResp = protocol.read(channel,
-                                                  Protocol.FileListResp.class);
+                Protocol.FileListResp.class);
         String[] fileList = fileListResp.getFileNames();
         Arrays.sort(fileList); //sort the file names in ascending order
         backupFileCount.set(fileList.length);
@@ -807,14 +759,14 @@ public class NetworkBackup {
      * @throws DatabaseException
      */
     private Protocol checkProtocol(Protocol candidateProtocol)
-        throws IOException, ProtocolException {
+            throws IOException, ProtocolException {
 
         candidateProtocol.write
-            (candidateProtocol.new ClientVersion(), channel);
+                (candidateProtocol.new ClientVersion(), channel);
         ServerVersion serverVersion =
-            candidateProtocol.read(channel, Protocol.ServerVersion.class);
+                candidateProtocol.read(channel, Protocol.ServerVersion.class);
 
-        if (serverVersion.getVersion() != candidateProtocol.getVersion()) {
+        if(serverVersion.getVersion() != candidateProtocol.getVersion()) {
             String message = "Server requested protocol version:"
                     + serverVersion.getVersion()
                     + " but the client version is " +
@@ -835,13 +787,25 @@ public class NetworkBackup {
      *
      * A test entry point used to simulate a slow network restore.
      */
-    public void setTestBarrier(CyclicBarrier  testBarrier) {
+    public void setTestBarrier(CyclicBarrier testBarrier) {
         this.testBarrier = testBarrier;
     }
 
     /* For unit testing only */
     public void setInterruptHook(TestHook<File> hook) {
         interruptHook = hook;
+    }
+
+    /**
+     * Store File and file length pair.
+     */
+    private static class FileAndLength {
+        final File file;
+        final long length;
+        FileAndLength(File file, long length) {
+            this.file = file;
+            this.length = length;
+        }
     }
 
     /**
@@ -885,8 +849,8 @@ public class NetworkBackup {
         @Override
         public String getMessage() {
             return "Insufficient VLSN range. Needed VLSN: " + minVLSN +
-                   " Available range: " +
-                   "[" + rangeFirst + ", " + rangeLast + "]";
+                    " Available range: " +
+                    "[" + rangeFirst + ", " + rangeLast + "]";
         }
     }
 
@@ -897,7 +861,7 @@ public class NetworkBackup {
 
         LoadThresholdExceededException(int threshold,
                                        int activeServers) {
-            assert(activeServers > threshold);
+            assert (activeServers > threshold);
             this.threshold = threshold;
             this.activeServers = activeServers;
         }
@@ -913,7 +877,7 @@ public class NetworkBackup {
         @Override
         public String getMessage() {
             return "Active server threshold: " + threshold + " exceeded. " +
-            "Active servers: " + activeServers;
+                    "Active servers: " + activeServers;
         }
     }
 }

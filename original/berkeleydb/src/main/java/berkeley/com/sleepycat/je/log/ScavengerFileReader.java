@@ -13,11 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentFailureReason;
@@ -25,15 +20,20 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.log.entry.LogEntry;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 
+import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * A ScavengerFileReader reads the log backwards.  If it encounters a checksum
  * error, it goes to the start of that log file and reads forward until it
  * encounters a checksum error.  It then continues the reading backwards in the
  * log.
- *
+ * <p>
  * The caller may set "dumpCorruptedBounds" to true if information about the
  * start and finish of the corrupted portion should be displayed on stderr.
- *
+ * <p>
  * The caller is expected to implement processEntryCallback. This method is
  * called once for each entry that the ScavengerFileReader finds in the log.
  */
@@ -55,15 +55,15 @@ abstract public class ScavengerFileReader extends FileReader {
                                long startLsn,
                                long finishLsn,
                                long endOfFileLsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         super(env,
-              readBufferSize,
-              false,
-              startLsn,
-              null, // single file number
-              endOfFileLsn,
-              finishLsn);
+                readBufferSize,
+                false,
+                startLsn,
+                null, // single file number
+                endOfFileLsn,
+                finishLsn);
 
         this.readBufferSize = readBufferSize;
 
@@ -93,10 +93,10 @@ abstract public class ScavengerFileReader extends FileReader {
      * For each entry that is selected, just call processEntryCallback.
      */
     protected boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LogEntryType lastEntryType =
-            LogEntryType.findType(currentEntryHeader.getType());
+                LogEntryType.findType(currentEntryHeader.getType());
         LogEntry entry = lastEntryType.getSharedLogEntry();
         entry.readEntry(envImpl, currentEntryHeader, entryBuffer);
         processEntryCallback(entry, lastEntryType);
@@ -109,7 +109,7 @@ abstract public class ScavengerFileReader extends FileReader {
      */
     abstract protected void processEntryCallback(LogEntry entry,
                                                  LogEntryType entryType)
-        throws DatabaseException;
+            throws DatabaseException;
 
     /*
      * Read the next entry.  If a checksum exception is encountered, attempt
@@ -121,13 +121,13 @@ abstract public class ScavengerFileReader extends FileReader {
         long saveCurrentEntryOffset = currentEntryOffset;
         try {
             return super.readNextEntryAllowExceptions();
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new EnvironmentFailureException
-                (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
-        } catch (ChecksumException e) {
+                    (envImpl, EnvironmentFailureReason.LOG_FILE_NOT_FOUND, e);
+        } catch(ChecksumException e) {
             resyncReader(DbLsn.makeLsn(window.currentFileNum(),
-                                       saveCurrentEntryOffset),
-                         dumpCorruptedBounds);
+                    saveCurrentEntryOffset),
+                    dumpCorruptedBounds);
             return super.readNextEntry();
         }
     }
@@ -139,36 +139,36 @@ abstract public class ScavengerFileReader extends FileReader {
      */
 
     /**
-     *  TBW
+     * TBW
      */
     @Override
     protected void handleGapInBackwardsScan(long prevFileNum) {
-        if (!resyncReader(DbLsn.makeLsn(prevFileNum, DbLsn.MAX_FILE_OFFSET),
-                          false)) {
+        if(!resyncReader(DbLsn.makeLsn(prevFileNum, DbLsn.MAX_FILE_OFFSET),
+                false)) {
             throw new EnvironmentFailureException
-                (envImpl,
-                 EnvironmentFailureReason.LOG_INTEGRITY,
-                 "Cannot read backward over cleaned file" +
-                 " from " + window.currentFileNum() +
-                 " to " + prevFileNum);
+                    (envImpl,
+                            EnvironmentFailureReason.LOG_INTEGRITY,
+                            "Cannot read backward over cleaned file" +
+                                    " from " + window.currentFileNum() +
+                                    " to " + prevFileNum);
         }
     }
 
     protected boolean resyncReader(long nextGoodRecordPostCorruption,
                                    boolean showCorruptedBounds)
-        throws DatabaseException {
+            throws DatabaseException {
 
         LastFileReader reader = null;
         long tryReadBufferFileNum =
-            DbLsn.getFileNumber(nextGoodRecordPostCorruption);
+                DbLsn.getFileNumber(nextGoodRecordPostCorruption);
 
-        while (tryReadBufferFileNum >= 0) {
+        while(tryReadBufferFileNum >= 0) {
             try {
                 reader =
-                    new LastFileReader(envImpl, readBufferSize,
-                                       Long.valueOf(tryReadBufferFileNum));
+                        new LastFileReader(envImpl, readBufferSize,
+                                Long.valueOf(tryReadBufferFileNum));
                 break;
-            } catch (ChecksumException e) {
+            } catch(ChecksumException e) {
 
                 /*
                  * We encountered a problem opening this file so skip to an
@@ -180,37 +180,37 @@ abstract public class ScavengerFileReader extends FileReader {
         }
 
         boolean switchedFiles = tryReadBufferFileNum !=
-            DbLsn.getFileNumber(nextGoodRecordPostCorruption);
+                DbLsn.getFileNumber(nextGoodRecordPostCorruption);
 
-        if (!switchedFiles) {
+        if(!switchedFiles) {
 
             /*
              * Read forward until a checksum fails.  This reader will not throw
              * an exception if a checksum error is hit -- it will just return
              * false.
              */
-            while (reader.readNextEntry()) {
+            while(reader.readNextEntry()) {
             }
         }
 
         long lastUsedLsn = reader.getLastValidLsn();
         long nextAvailableLsn = reader.getEndOfLog();
-        if (showCorruptedBounds) {
+        if(showCorruptedBounds) {
             System.err.println("A checksum error was found in the log.");
             System.err.println
-                ("Corruption begins at LSN:\n   " +
-                 DbLsn.toString(nextAvailableLsn));
+                    ("Corruption begins at LSN:\n   " +
+                            DbLsn.toString(nextAvailableLsn));
             System.err.println
-                ("Last known good record before corruption is at LSN:\n   " +
-                 DbLsn.toString(lastUsedLsn));
+                    ("Last known good record before corruption is at LSN:\n   " +
+                            DbLsn.toString(lastUsedLsn));
             System.err.println
-                ("Next known good record after corruption is at LSN:\n   " +
-                 DbLsn.toString(nextGoodRecordPostCorruption));
+                    ("Next known good record after corruption is at LSN:\n   " +
+                            DbLsn.toString(nextGoodRecordPostCorruption));
         }
 
         startLsn = lastUsedLsn;
         initStartingPosition(nextAvailableLsn, null);
-        if (switchedFiles) {
+        if(switchedFiles) {
             currentEntryPrevOffset = 0;
         }
         /* Indicate resync is permitted so don't throw exception. */
@@ -223,7 +223,7 @@ abstract public class ScavengerFileReader extends FileReader {
      */
     @Override
     protected boolean isTargetEntry() {
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
 
             /* 
              * This log entry is supposed to be effectivly truncated, so we
@@ -232,12 +232,13 @@ abstract public class ScavengerFileReader extends FileReader {
             return false;
         }
 
-        if (targetEntryTypes.size() == 0) {
+        if(targetEntryTypes.size() == 0) {
             /* We want to dump all entry types. */
             return true;
-        } else {
+        }
+        else {
             return targetEntryTypes.contains
-                (Byte.valueOf(currentEntryHeader.getType()));
+                    (Byte.valueOf(currentEntryHeader.getType()));
         }
     }
 }

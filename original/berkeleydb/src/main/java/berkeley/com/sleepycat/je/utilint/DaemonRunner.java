@@ -19,7 +19,10 @@ package berkeley.com.sleepycat.je.utilint;
  */
 public interface DaemonRunner {
     void runOrPause(boolean run);
+
     void requestShutdown();
+
     void shutdown();
+
     int getNWakeupRequests();
 }

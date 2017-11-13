@@ -13,10 +13,6 @@
 
 package berkeley.com.sleepycat.je.log;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.cleaner.BaseUtilizationTracker;
 import berkeley.com.sleepycat.je.cleaner.ExpirationTracker;
@@ -25,16 +21,16 @@ import berkeley.com.sleepycat.je.cleaner.INSummary;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.log.entry.BINDeltaLogEntry;
-import berkeley.com.sleepycat.je.log.entry.OldBINDeltaLogEntry;
-import berkeley.com.sleepycat.je.log.entry.INLogEntry;
-import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
-import berkeley.com.sleepycat.je.log.entry.LogEntry;
+import berkeley.com.sleepycat.je.log.entry.*;
 import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.OldBINDelta;
 import berkeley.com.sleepycat.je.tree.IN;
+import berkeley.com.sleepycat.je.tree.OldBINDelta;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.VLSN;
+
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * CleanerFileReader scans log files for INs and LNs.
@@ -48,26 +44,28 @@ public class CleanerFileReader extends FileReader {
     private static final byte IS_FILEHEADER = 5;
 
     private final Map<LogEntryType, EntryInfo> targetEntryMap;
-    private LogEntry targetLogEntry;
-    private byte targetCategory;
     private final FileSummary fileSummary;
     private final INSummary inSummary;
     private final ExpirationTracker expTracker;
-
-    /** The first VLSN, or null if none has been found */
+    private LogEntry targetLogEntry;
+    private byte targetCategory;
+    /**
+     * The first VLSN, or null if none has been found
+     */
     private VLSN firstVLSN = null;
 
     private VLSN lastVLSN = VLSN.NULL_VLSN;
 
     /**
      * Create this reader to start at a given LSN.
-     * @param env The relevant EnvironmentImpl.
+     *
+     * @param env            The relevant EnvironmentImpl.
      * @param readBufferSize buffer size in bytes for reading in log.
-     * @param startLsn where to start in the log, or null for the beginning.
-     * @param fileNum single file number.
-     * @param fileSummary returns true utilization.
-     * @param inSummary returns IN utilization.
-     * @param expTracker returns expiration info, if non-null.
+     * @param startLsn       where to start in the log, or null for the beginning.
+     * @param fileNum        single file number.
+     * @param fileSummary    returns true utilization.
+     * @param inSummary      returns IN utilization.
+     * @param expTracker     returns expiration info, if non-null.
      */
     public CleanerFileReader(EnvironmentImpl env,
                              int readBufferSize,
@@ -77,12 +75,12 @@ public class CleanerFileReader extends FileReader {
                              INSummary inSummary,
                              ExpirationTracker expTracker) {
         super(env,
-              readBufferSize,
-              true,                     // forward
-              startLsn,
-              fileNum,                  // single file number
-              DbLsn.NULL_LSN,           // endOfFileLsn
-              DbLsn.NULL_LSN);          // finishLsn
+                readBufferSize,
+                true,                     // forward
+                startLsn,
+                fileNum,                  // single file number
+                DbLsn.NULL_LSN,           // endOfFileLsn
+                DbLsn.NULL_LSN);          // finishLsn
 
         this.fileSummary = fileSummary;
         this.inSummary = inSummary;
@@ -90,8 +88,8 @@ public class CleanerFileReader extends FileReader {
 
         targetEntryMap = new HashMap<LogEntryType, EntryInfo>();
 
-        for (LogEntryType entryType : LogEntryType.getAllTypes()) {
-            if (entryType.isLNType()) {
+        for(LogEntryType entryType : LogEntryType.getAllTypes()) {
+            if(entryType.isLNType()) {
                 addTargetType(IS_LN, entryType);
             }
 
@@ -99,7 +97,7 @@ public class CleanerFileReader extends FileReader {
              * Note that DBIN/DIN are not included because they are
              * automatically considered obsolete.
              */
-            if (entryType.isINType()) {
+            if(entryType.isINType()) {
                 addTargetType(IS_IN, entryType);
             }
         }
@@ -110,47 +108,48 @@ public class CleanerFileReader extends FileReader {
     }
 
     private void addTargetType(byte category, LogEntryType entryType)
-        throws DatabaseException {
+            throws DatabaseException {
 
         targetEntryMap.put(entryType,
-                           new EntryInfo(entryType.getNewLogEntry(),
-                                         category));
+                new EntryInfo(entryType.getNewLogEntry(),
+                        category));
     }
 
     /**
      * Process the header to track the last VLSN and count true utilization.
      * Then read the entry and return true if the LogEntryType is of interest.
-     *
+     * <p>
      * We don't override isTargetEntry so it always returns true and we can
      * count utilization correctly here in processEntry.  We call getLastLsn to
      * count utilization and this is not allowed from isTargetEntry.
      */
     @Override
     protected boolean processEntry(ByteBuffer entryBuffer)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogEntryType type =
-            LogEntryType.findType(currentEntryHeader.getType());
+                LogEntryType.findType(currentEntryHeader.getType());
         final int size = getLastEntrySize();
 
         /* Count true utilization for new log entries. */
-        if (currentEntryHeader.getType() !=
-            LogEntryType.LOG_FILE_HEADER.getTypeNum()) {
+        if(currentEntryHeader.getType() !=
+                LogEntryType.LOG_FILE_HEADER.getTypeNum()) {
             fileSummary.totalCount += 1;
             fileSummary.totalSize += size;
-            if (BaseUtilizationTracker.trackObsoleteInfo(type)) {
-                if (BaseUtilizationTracker.isLNType(type)) {
+            if(BaseUtilizationTracker.trackObsoleteInfo(type)) {
+                if(BaseUtilizationTracker.isLNType(type)) {
                     fileSummary.totalLNCount += 1;
                     fileSummary.totalLNSize += size;
-                } else {
+                }
+                else {
                     fileSummary.totalINCount += 1;
                     fileSummary.totalINSize += size;
-                    if (type.isINType()) {
+                    if(type.isINType()) {
                         inSummary.totalINCount += 1;
                         inSummary.totalINSize += size;
                     }
-                    if (type.equals(LogEntryType.LOG_BIN_DELTA) ||
-                        type.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
+                    if(type.equals(LogEntryType.LOG_BIN_DELTA) ||
+                            type.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
                         inSummary.totalBINDeltaCount += 1;
                         inSummary.totalBINDeltaSize += size;
                     }
@@ -159,24 +158,24 @@ public class CleanerFileReader extends FileReader {
         }
 
         /* Invisible entries should not be processed further. */
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
             skipEntry(entryBuffer);
             countObsolete();
             return false;
         }
 
         /* Maintain first and last VLSN encountered. */
-        if (currentEntryHeader.getReplicated()) {
+        if(currentEntryHeader.getReplicated()) {
             final VLSN vlsn = currentEntryHeader.getVLSN();
-            if (vlsn != null) {
+            if(vlsn != null) {
 
                 /* Use a null comparison in this inner loop, for speed */
-                if (firstVLSN == null) {
+                if(firstVLSN == null) {
                     firstVLSN = vlsn;
                 }
                 assert (vlsn.compareTo(lastVLSN) > 0) :
-                    "vlsns out of order, last=" + lastVLSN +
-                     " current=" + vlsn;
+                        "vlsns out of order, last=" + lastVLSN +
+                                " current=" + vlsn;
                 lastVLSN = vlsn;
             }
         }
@@ -186,7 +185,7 @@ public class CleanerFileReader extends FileReader {
          * interest.
          */
         final EntryInfo info = targetEntryMap.get(type);
-        if (info == null) {
+        if(info == null) {
             skipEntry(entryBuffer);
             countObsolete();
             return false;
@@ -203,23 +202,24 @@ public class CleanerFileReader extends FileReader {
      */
     public void countObsolete() {
         final LogEntryType type =
-            LogEntryType.findType(currentEntryHeader.getType());
-        if (!BaseUtilizationTracker.trackObsoleteInfo(type)) {
+                LogEntryType.findType(currentEntryHeader.getType());
+        if(!BaseUtilizationTracker.trackObsoleteInfo(type)) {
             return;
         }
         final int size = getLastEntrySize();
-        if (BaseUtilizationTracker.isLNType(type)) {
+        if(BaseUtilizationTracker.isLNType(type)) {
             fileSummary.obsoleteLNCount += 1;
             fileSummary.obsoleteLNSize += size;
             fileSummary.obsoleteLNSizeCounted += 1;
-        } else {
+        }
+        else {
             fileSummary.obsoleteINCount += 1;
-            if (type.isINType()) {
+            if(type.isINType()) {
                 inSummary.obsoleteINCount += 1;
                 inSummary.obsoleteINSize += size;
             }
-            if (type.equals(LogEntryType.LOG_BIN_DELTA) ||
-                type.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
+            if(type.equals(LogEntryType.LOG_BIN_DELTA) ||
+                    type.equals(LogEntryType.LOG_OLD_BIN_DELTA)) {
                 inSummary.obsoleteBINDeltaCount += 1;
                 inSummary.obsoleteBINDeltaSize += size;
             }
@@ -227,7 +227,7 @@ public class CleanerFileReader extends FileReader {
     }
 
     public void countExpired() {
-        if (expTracker != null) {
+        if(expTracker != null) {
             expTracker.track(targetLogEntry, getLastEntrySize());
         }
     }
@@ -303,14 +303,17 @@ public class CleanerFileReader extends FileReader {
      * Get the last databaseId seen by the reader.
      */
     public DatabaseId getDatabaseId() {
-        if (targetCategory == IS_LN) {
+        if(targetCategory == IS_LN) {
             return ((LNLogEntry<?>) targetLogEntry).getDbId();
-        } else if ((targetCategory == IS_IN) ||
-            (targetCategory == IS_BIN_DELTA)) {
+        }
+        else if((targetCategory == IS_IN) ||
+                (targetCategory == IS_BIN_DELTA)) {
             return ((INLogEntry<?>) targetLogEntry).getDbId();
-        } else if (targetCategory == IS_OLD_BIN_DELTA) {
+        }
+        else if(targetCategory == IS_OLD_BIN_DELTA) {
             return ((OldBINDeltaLogEntry) targetLogEntry).getDbId();
-        } else {
+        }
+        else {
             return null;
         }
     }

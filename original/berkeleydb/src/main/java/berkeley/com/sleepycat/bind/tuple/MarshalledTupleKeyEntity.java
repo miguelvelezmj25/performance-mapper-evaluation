@@ -18,7 +18,7 @@ package berkeley.com.sleepycat.bind.tuple;
  * tuples. Since <code>MarshalledTupleKeyEntity</code> objects are instantiated
  * using Java deserialization, no particular constructor is required by classes
  * that implement this interface.
- *
+ * <p>
  * <p>Note that a marshalled tuple key extractor is somewhat less efficient
  * than a non-marshalled key tuple extractor because more conversions are
  * needed.  A marshalled key extractor must convert the entry to an object in
@@ -49,10 +49,8 @@ public interface MarshalledTupleKeyEntity {
     /**
      * Extracts the entity's secondary key and writes it to the key output.
      *
-     * @param keyName identifies the secondary key.
-     *
+     * @param keyName   identifies the secondary key.
      * @param keyOutput is the output tuple.
-     *
      * @return true if a key was created, or false to indicate that the key is
      * not present.
      */
@@ -60,11 +58,11 @@ public interface MarshalledTupleKeyEntity {
 
     /**
      * Clears the entity's secondary key fields for the given key name.
-     *
+     * <p>
      * <p>The specified index key should be changed by this method such that
      * {@link #marshalSecondaryKey} for the same key name will return false.
      * Other fields in the data object should remain unchanged.</p>
-     *
+     * <p>
      * <p>If {@link com.sleepycat.je.ForeignKeyDeleteAction#NULLIFY} was
      * specified when opening the secondary database, this method is called
      * when the entity for this foreign key is deleted.  If NULLIFY was not
@@ -72,7 +70,6 @@ public interface MarshalledTupleKeyEntity {
      * false.</p>
      *
      * @param keyName identifies the secondary key.
-     *
      * @return true if the key was cleared, or false to indicate that the key
      * is not present and no change is necessary.
      */

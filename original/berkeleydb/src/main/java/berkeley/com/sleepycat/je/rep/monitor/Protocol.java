@@ -22,37 +22,42 @@ import berkeley.com.sleepycat.je.rep.monitor.LeaveGroupEvent.LeaveReason;
 import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
 
 /**
- * @hidden
- * For internal use only.
- *
+ * @hidden For internal use only.
+ * <p>
  * Defines the protocol used by the Monitor to keep informed about group
  * changes, and a node joins/leaves the group. The Master uses the protocol to
  * inform all Monitors about group change and node join/leave change.
- *
+ * <p>
  * GCHG -> no response expected from the monitor.
  * JoinGroup -> no response expected from the monitor.
  * LeaveGroup -> no response expected from the monitor.
  */
 public class Protocol extends TextProtocol {
 
-    /** The latest protocol version. */
+    /**
+     * The latest protocol version.
+     */
     public static final String VERSION = "2.0";
 
-    /** The protocol version introduced to support RepGroupImpl version 3. */
+    /**
+     * The protocol version introduced to support RepGroupImpl version 3.
+     */
     static final String REP_GROUP_V3_VERSION = "2.0";
 
-    /** The protocol version used with RepGroupImpl version 2. */
+    /**
+     * The protocol version used with RepGroupImpl version 2.
+     */
     static final String REP_GROUP_V2_VERSION = "1.0";
 
     /* The messages defined by this class. */
     public final MessageOp GROUP_CHANGE_REQ =
-        new MessageOp("GCHG", GroupChange.class);
+            new MessageOp("GCHG", GroupChange.class);
 
     public final MessageOp JOIN_GROUP_REQ =
-        new MessageOp("JG", JoinGroup.class);
+            new MessageOp("JG", JoinGroup.class);
 
     public final MessageOp LEAVE_GROUP_REQ =
-        new MessageOp("LG", LeaveGroup.class);
+            new MessageOp("LG", LeaveGroup.class);
 
     /**
      * Creates an instance of this class using the current protocol version.
@@ -73,15 +78,15 @@ public class Protocol extends TextProtocol {
 
         super(version, groupName, nameIdPair, repImpl, channelFactory);
 
-        initializeMessageOps(new MessageOp[] {
-            GROUP_CHANGE_REQ,
-            JOIN_GROUP_REQ,
-            LEAVE_GROUP_REQ
+        initializeMessageOps(new MessageOp[]{
+                GROUP_CHANGE_REQ,
+                JOIN_GROUP_REQ,
+                LEAVE_GROUP_REQ
         });
 
         setTimeouts(repImpl,
-                    RepParams.MONITOR_OPEN_TIMEOUT,
-                    RepParams.MONITOR_READ_TIMEOUT);
+                RepParams.MONITOR_OPEN_TIMEOUT,
+                RepParams.MONITOR_READ_TIMEOUT);
     }
 
     private abstract class ChangeEvent extends RequestMessage {
@@ -93,7 +98,7 @@ public class Protocol extends TextProtocol {
         }
 
         public ChangeEvent(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             nodeName = nextPayloadToken();
@@ -128,12 +133,12 @@ public class Protocol extends TextProtocol {
         }
 
         public GroupChange(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             opType = GroupChangeType.valueOf(nextPayloadToken());
             group = RepGroupImpl.deserializeHex
-                (tokens, getCurrentTokenPosition());
+                    (tokens, getCurrentTokenPosition());
         }
 
         public RepGroupImpl getGroup() {
@@ -152,13 +157,13 @@ public class Protocol extends TextProtocol {
         @Override
         public String wireFormat() {
             final int repGroupVersion =
-                (Double.parseDouble(sendVersion) <=
-                 Double.parseDouble(REP_GROUP_V2_VERSION)) ?
-                RepGroupImpl.FORMAT_VERSION_2 :
-                RepGroupImpl.MAX_FORMAT_VERSION;
+                    (Double.parseDouble(sendVersion) <=
+                            Double.parseDouble(REP_GROUP_V2_VERSION)) ?
+                            RepGroupImpl.FORMAT_VERSION_2 :
+                            RepGroupImpl.MAX_FORMAT_VERSION;
             return super.wireFormat() +
-                   opType.toString() + SEPARATOR +
-                   group.serializeHex(repGroupVersion);
+                    opType.toString() + SEPARATOR +
+                    group.serializeHex(repGroupVersion);
         }
     }
 
@@ -173,7 +178,7 @@ public class Protocol extends TextProtocol {
         }
 
         public MemberEvent(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             masterName = nextPayloadToken();
@@ -191,8 +196,8 @@ public class Protocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return super.wireFormat() +
-                   masterName + SEPARATOR +
-                   Long.toString(joinTime);
+                    masterName + SEPARATOR +
+                    Long.toString(joinTime);
         }
     }
 
@@ -203,7 +208,7 @@ public class Protocol extends TextProtocol {
         }
 
         public JoinGroup(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
         }
@@ -230,7 +235,7 @@ public class Protocol extends TextProtocol {
         }
 
         public LeaveGroup(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             leaveReason = LeaveReason.valueOf(nextPayloadToken());
@@ -253,8 +258,8 @@ public class Protocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return super.wireFormat() + SEPARATOR +
-                   leaveReason.toString() + SEPARATOR +
-                   Long.toString(leaveTime);
+                    leaveReason.toString() + SEPARATOR +
+                    Long.toString(leaveTime);
         }
     }
 }

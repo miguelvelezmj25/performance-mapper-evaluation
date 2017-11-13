@@ -16,7 +16,7 @@ package berkeley.com.sleepycat.persist.model;
 /**
  * The metadata for a primary key field.  A primary key may be specified with
  * the {@link PrimaryKey} annotation.
- *
+ * <p>
  * <p>{@code PrimaryKeyMetadata} objects are thread-safe.  Multiple threads may
  * safely call the methods of a shared {@code PrimaryKeyMetadata} object.</p>
  *
@@ -31,11 +31,11 @@ public class PrimaryKeyMetadata extends FieldMetadata {
     /**
      * Used by an {@code EntityModel} to construct primary key metadata.
      *
-     * @param name the field name.
-     * @param className the class name.
+     * @param name               the field name.
+     * @param className          the class name.
      * @param declaringClassName the name of the class where the field is
-     * declared.
-     * @param sequenceName the sequence name.
+     *                           declared.
+     * @param sequenceName       the sequence name.
      */
     public PrimaryKeyMetadata(String name,
                               String className,
@@ -57,11 +57,12 @@ public class PrimaryKeyMetadata extends FieldMetadata {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof PrimaryKeyMetadata) {
+        if(other instanceof PrimaryKeyMetadata) {
             PrimaryKeyMetadata o = (PrimaryKeyMetadata) other;
             return super.equals(o) &&
-                   ClassMetadata.nullOrEqual(sequenceName, o.sequenceName);
-        } else {
+                    ClassMetadata.nullOrEqual(sequenceName, o.sequenceName);
+        }
+        else {
             return false;
         }
     }

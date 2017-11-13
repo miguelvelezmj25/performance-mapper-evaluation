@@ -23,15 +23,23 @@ import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
  */
 public interface LatchContext {
 
-    /** Returns EnvironmentParams.ENV_LATCH_TIMEOUT */
+    /**
+     * Returns EnvironmentParams.ENV_LATCH_TIMEOUT
+     */
     int getLatchTimeoutMs();
 
-    /** Returns the latch name for debugging. */
+    /**
+     * Returns the latch name for debugging.
+     */
     String getLatchName();
 
-    /** Returns LatchTable for debug/test tracking. */
+    /**
+     * Returns LatchTable for debug/test tracking.
+     */
     LatchTable getLatchTable();
 
-    /** Returns envImpl, or may throw another exception in unit tests. */
+    /**
+     * Returns envImpl, or may throw another exception in unit tests.
+     */
     EnvironmentImpl getEnvImplForFatalException();
 }

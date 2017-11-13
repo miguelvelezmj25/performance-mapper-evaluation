@@ -13,15 +13,14 @@
 
 package berkeley.com.sleepycat.je.jca.ra;
 
-import java.io.File;
+import berkeley.com.sleepycat.je.EnvironmentConfig;
+import berkeley.com.sleepycat.je.TransactionConfig;
 
 import javax.naming.Reference;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ManagedConnectionFactory;
-
-import berkeley.com.sleepycat.je.EnvironmentConfig;
-import berkeley.com.sleepycat.je.TransactionConfig;
+import java.io.File;
 
 public class JEConnectionFactoryImpl implements JEConnectionFactory {
 
@@ -37,14 +36,14 @@ public class JEConnectionFactoryImpl implements JEConnectionFactory {
 
     /* Make the constructor public for serializability testing. */
     public JEConnectionFactoryImpl(ConnectionManager manager,
-                            ManagedConnectionFactory factory) {
+                                   ManagedConnectionFactory factory) {
         this.manager = manager;
         this.factory = factory;
     }
 
     public JEConnection getConnection(String jeRootDir,
                                       EnvironmentConfig envConfig)
-        throws JEException {
+            throws JEException {
 
         return getConnection(jeRootDir, envConfig, null);
     }
@@ -52,25 +51,25 @@ public class JEConnectionFactoryImpl implements JEConnectionFactory {
     public JEConnection getConnection(String jeRootDir,
                                       EnvironmentConfig envConfig,
                                       TransactionConfig transConfig)
-        throws JEException {
+            throws JEException {
 
         JEConnection dc = null;
-         JERequestInfo jeInfo =
-             new JERequestInfo(new File(jeRootDir), envConfig, transConfig);
+        JERequestInfo jeInfo =
+                new JERequestInfo(new File(jeRootDir), envConfig, transConfig);
         try {
             dc = (JEConnection) manager.allocateConnection(factory, jeInfo);
-        } catch (ResourceException e) {
+        } catch(ResourceException e) {
             throw new JEException("Unable to get Connection: " + e);
         }
 
         return dc;
     }
 
-    public void setReference(Reference reference) {
-        this.reference = reference;
-    }
-
     public Reference getReference() {
         return reference;
+    }
+
+    public void setReference(Reference reference) {
+        this.reference = reference;
     }
 }

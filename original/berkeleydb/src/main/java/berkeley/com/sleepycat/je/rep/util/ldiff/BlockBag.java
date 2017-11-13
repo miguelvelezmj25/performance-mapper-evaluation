@@ -53,7 +53,7 @@ public class BlockBag implements Iterable<Block> {
         final Integer indx = blocks.size();
         blocks.add(b);
         List<Integer> indices = chksums.get(chksum);
-        if (indices == null) {
+        if(indices == null) {
             indices = new ArrayList<Integer>();
         }
         indices.add(indx);
@@ -73,16 +73,17 @@ public class BlockBag implements Iterable<Block> {
 
         ret = new ArrayList<Block>();
         indices = chksums.get(new Long(chksum));
-        if (indices == null) {
+        if(indices == null) {
             return null;
         }
-        for (Integer indx : indices) {
+        for(Integer indx : indices) {
             int i = indx.intValue();
-            if (i >= blockIndex)
+            if(i >= blockIndex) {
                 ret.add(blocks.get(i));
+            }
         }
 
-        if (ret.size() == 0) {
+        if(ret.size() == 0) {
             return null;
         }
         return ret;
@@ -107,10 +108,10 @@ public class BlockBag implements Iterable<Block> {
      */
     public List<Block> remove(Block b) {
         final int startIndex = blockIndex;
-        while (blockIndex < blocks.size()) {
+        while(blockIndex < blocks.size()) {
             Block b2 = blocks.get(blockIndex);
             blockIndex++;
-            if (b == b2) {
+            if(b == b2) {
                 break;
             }
         }
@@ -129,13 +130,13 @@ public class BlockBag implements Iterable<Block> {
         List<Block> ret;
 
         ret = new ArrayList<Block>();
-        while (blockIndex < blocks.size()) {
+        while(blockIndex < blocks.size()) {
             Block b = blocks.get(blockIndex);
             blockIndex++;
             ret.add(b);
         }
 
-        if (ret.size() == 0) {
+        if(ret.size() == 0) {
             return null;
         }
         return ret;

@@ -25,14 +25,12 @@ import java.util.StringTokenizer;
  */
 public class JEVersion implements Comparable<JEVersion>, Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     /**
      * Release version.
      */
     public static final JEVersion CURRENT_VERSION =
-        new JEVersion(7, 4, 5, null);
-
+            new JEVersion(7, 4, 5, null);
+    private static final long serialVersionUID = 1L;
     private final int majorNum;
     private final int minorNum;
     private final int patchNum;
@@ -51,9 +49,10 @@ public class JEVersion implements Comparable<JEVersion>, Serializable {
         majorNum = Integer.parseInt(st.nextToken());
         minorNum = Integer.parseInt(st.nextToken());
         patchNum = Integer.parseInt(st.nextToken());
-        if (st.hasMoreTokens()) {
+        if(st.hasMoreTokens()) {
             name = st.nextToken();
-        } else {
+        }
+        else {
             name = null;
         }
     }
@@ -113,7 +112,7 @@ public class JEVersion implements Comparable<JEVersion>, Serializable {
         version.append(majorNum).append(".");
         version.append(minorNum).append(".");
         version.append(patchNum);
-        if (name != null) {
+        if(name != null) {
             version.append(".");
             version.append(name);
         }
@@ -128,21 +127,26 @@ public class JEVersion implements Comparable<JEVersion>, Serializable {
     public int compareTo(JEVersion comparedVersion) {
         int result = 0;
 
-        if (majorNum == comparedVersion.getMajor()) {
-            if (minorNum == comparedVersion.getMinor()) {
-                if (patchNum > comparedVersion.getPatch()) {
+        if(majorNum == comparedVersion.getMajor()) {
+            if(minorNum == comparedVersion.getMinor()) {
+                if(patchNum > comparedVersion.getPatch()) {
                     result = 1;
-                } else if (patchNum < comparedVersion.getPatch()) {
+                }
+                else if(patchNum < comparedVersion.getPatch()) {
                     result = -1;
                 }
-            } else if (minorNum > comparedVersion.getMinor()) {
+            }
+            else if(minorNum > comparedVersion.getMinor()) {
                 result = 1;
-            } else {
+            }
+            else {
                 result = -1;
             }
-        } else if (majorNum > comparedVersion.getMajor()) {
+        }
+        else if(majorNum > comparedVersion.getMajor()) {
             result = 1;
-        } else {
+        }
+        else {
             result = -1;
         }
 

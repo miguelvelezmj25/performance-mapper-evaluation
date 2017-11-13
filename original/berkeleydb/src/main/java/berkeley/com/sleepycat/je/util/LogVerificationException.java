@@ -18,7 +18,7 @@ import java.io.IOException;
 /**
  * Thrown during log verification if a checksum cannot be verified or a log
  * entry is determined to be invalid by examining its contents.
- *
+ * <p>
  * <p>This class extends {@code IOException} so that it can be thrown by the
  * {@code InputStream} methods of {@link LogVerificationInputStream}.</p>
  */

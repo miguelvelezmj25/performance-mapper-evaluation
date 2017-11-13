@@ -4,7 +4,7 @@ import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
 /**
- *  Removing regions. 2 regions are left
+ *  Removing regions. 2 regions left
  */
 public class Regions9 {
 

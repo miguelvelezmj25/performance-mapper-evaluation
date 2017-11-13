@@ -40,29 +40,7 @@ public class VerifyConfig implements Cloneable {
     }
 
     /**
-     * Configures {@link com.sleepycat.je.Environment#verify
-     * Environment.verify} and {@link com.sleepycat.je.Database#verify
-     * Database.verify} to propagate exceptions found during verification.
-     *
-     * <p>By default this is false and exception information is printed to
-     * System.out for notification but does not stop the verification activity,
-     * which continues on for as long as possible.</p>
-     *
-     * @param propagate If set to true, configure {@link
-     * com.sleepycat.je.Environment#verify Environment.verify} and {@link
-     * com.sleepycat.je.Database#verify Database.verify} to propagate
-     * exceptions found during verification.
-     *
-     * @return this
-     */
-    public VerifyConfig setPropagateExceptions(boolean propagate) {
-        setPropagateExceptionsVoid(propagate);
-        return this;
-    }
-    
-    /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setPropagateExceptionsVoid(boolean propagate) {
         propagateExceptions = propagate;
@@ -73,7 +51,7 @@ public class VerifyConfig implements Cloneable {
      * Environment.verify} and {@link com.sleepycat.je.Database#verify
      * Database.verify} are configured to propagate exceptions found during
      * verification.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -89,30 +67,25 @@ public class VerifyConfig implements Cloneable {
     /**
      * Configures {@link com.sleepycat.je.Environment#verify
      * Environment.verify} and {@link com.sleepycat.je.Database#verify
-     * Database.verify} to perform fine granularity consistency checking that
-     * includes verifying in memory constructs.
+     * Database.verify} to propagate exceptions found during verification.
+     * <p>
+     * <p>By default this is false and exception information is printed to
+     * System.out for notification but does not stop the verification activity,
+     * which continues on for as long as possible.</p>
      *
-     * <p>This level of checking should only be performed while the database
-     * environment is quiescent.</p>
-     *
-     * <p>By default this is false.</p>
-     *
-     * @param aggressive If set to true, configure {@link
-     * com.sleepycat.je.Environment#verify Environment.verify} and {@link
-     * com.sleepycat.je.Database#verify Database.verify} to perform fine
-     * granularity consistency checking that includes verifying in memory
-     * constructs.
-     *
+     * @param propagate If set to true, configure {@link
+     *                  com.sleepycat.je.Environment#verify Environment.verify} and {@link
+     *                  com.sleepycat.je.Database#verify Database.verify} to propagate
+     *                  exceptions found during verification.
      * @return this
      */
-    public VerifyConfig setAggressive(boolean aggressive) {
-        setAggressiveVoid(aggressive);
+    public VerifyConfig setPropagateExceptions(boolean propagate) {
+        setPropagateExceptionsVoid(propagate);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setAggressiveVoid(boolean aggressive) {
         this.aggressive = aggressive;
@@ -123,7 +96,7 @@ public class VerifyConfig implements Cloneable {
      * Environment.verify} and {@link com.sleepycat.je.Database#verify
      * Database.verify} are configured to perform fine granularity consistency
      * checking that includes verifying in memory constructs.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -139,25 +112,28 @@ public class VerifyConfig implements Cloneable {
     /**
      * Configures {@link com.sleepycat.je.Environment#verify
      * Environment.verify} and {@link com.sleepycat.je.Database#verify
-     * Database.verify} to print basic verification information to System.out.
-     *
+     * Database.verify} to perform fine granularity consistency checking that
+     * includes verifying in memory constructs.
+     * <p>
+     * <p>This level of checking should only be performed while the database
+     * environment is quiescent.</p>
+     * <p>
      * <p>By default this is false.</p>
      *
-     * @param printInfo If set to true, configure {@link
-     * com.sleepycat.je.Environment#verify Environment.verify} and {@link
-     * com.sleepycat.je.Database#verify Database.verify} to print basic
-     * verification information to System.out.
-     *
+     * @param aggressive If set to true, configure {@link
+     *                   com.sleepycat.je.Environment#verify Environment.verify} and {@link
+     *                   com.sleepycat.je.Database#verify Database.verify} to perform fine
+     *                   granularity consistency checking that includes verifying in memory
+     *                   constructs.
      * @return this
      */
-    public VerifyConfig setPrintInfo(boolean printInfo) {
-        setPrintInfoVoid(printInfo);
+    public VerifyConfig setAggressive(boolean aggressive) {
+        setAggressiveVoid(aggressive);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setPrintInfoVoid(boolean printInfo) {
         this.printInfo = printInfo;
@@ -168,7 +144,7 @@ public class VerifyConfig implements Cloneable {
      * Environment.verify} and {@link com.sleepycat.je.Database#verify
      * Database.verify} are configured to print basic verification information
      * to System.out.
-     *
+     * <p>
      * <p>This method may be called at any time during the life of the
      * application.</p>
      *
@@ -182,20 +158,25 @@ public class VerifyConfig implements Cloneable {
     }
 
     /**
-     * Configures the verify operation to display progress to the PrintStream
-     * argument.  The accumulated statistics will be displayed every N records,
-     * where N is the value of showProgressInterval.
+     * Configures {@link com.sleepycat.je.Environment#verify
+     * Environment.verify} and {@link com.sleepycat.je.Database#verify
+     * Database.verify} to print basic verification information to System.out.
+     * <p>
+     * <p>By default this is false.</p>
      *
+     * @param printInfo If set to true, configure {@link
+     *                  com.sleepycat.je.Environment#verify Environment.verify} and {@link
+     *                  com.sleepycat.je.Database#verify Database.verify} to print basic
+     *                  verification information to System.out.
      * @return this
      */
-    public VerifyConfig setShowProgressStream(PrintStream showProgressStream) {
-        setShowProgressStreamVoid(showProgressStream);
+    public VerifyConfig setPrintInfo(boolean printInfo) {
+        setPrintInfoVoid(printInfo);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setShowProgressStreamVoid(PrintStream showProgressStream) {
         this.showProgressStream = showProgressStream;
@@ -210,19 +191,19 @@ public class VerifyConfig implements Cloneable {
     }
 
     /**
-     * When the verify operation is configured to display progress the
-     * showProgressInterval is the number of LNs between each progress report.
+     * Configures the verify operation to display progress to the PrintStream
+     * argument.  The accumulated statistics will be displayed every N records,
+     * where N is the value of showProgressInterval.
      *
      * @return this
      */
-    public VerifyConfig setShowProgressInterval(int showProgressInterval) {
-        setShowProgressIntervalVoid(showProgressInterval);
+    public VerifyConfig setShowProgressStream(PrintStream showProgressStream) {
+        setShowProgressStreamVoid(showProgressStream);
         return this;
     }
-    
+
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setShowProgressIntervalVoid(int showProgressInterval) {
         this.showProgressInterval = showProgressInterval;
@@ -236,13 +217,24 @@ public class VerifyConfig implements Cloneable {
     }
 
     /**
+     * When the verify operation is configured to display progress the
+     * showProgressInterval is the number of LNs between each progress report.
+     *
+     * @return this
+     */
+    public VerifyConfig setShowProgressInterval(int showProgressInterval) {
+        setShowProgressIntervalVoid(showProgressInterval);
+        return this;
+    }
+
+    /**
      * Returns a copy of this configuration object.
      */
     @Override
     public VerifyConfig clone() {
         try {
             return (VerifyConfig) super.clone();
-        } catch (CloneNotSupportedException willNeverOccur) {
+        } catch(CloneNotSupportedException willNeverOccur) {
             return null;
         }
     }

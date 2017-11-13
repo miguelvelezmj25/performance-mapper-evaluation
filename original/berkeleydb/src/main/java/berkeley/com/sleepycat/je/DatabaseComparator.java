@@ -20,6 +20,7 @@ import java.util.Comparator;
  * Implemented by btree and duplicate comparators that need to be initialized
  * before they are used or need access to the environment's ClassLoader
  * property.
+ *
  * @since 5.0
  */
 public interface DatabaseComparator extends Comparator<byte[]>, Serializable {

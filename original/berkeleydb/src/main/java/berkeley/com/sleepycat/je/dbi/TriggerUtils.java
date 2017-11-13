@@ -12,16 +12,15 @@
  */
 package berkeley.com.sleepycat.je.dbi;
 
+import berkeley.com.sleepycat.je.log.LogUtils;
+import berkeley.com.sleepycat.je.trigger.Trigger;
+
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import berkeley.com.sleepycat.je.log.LogUtils;
-import berkeley.com.sleepycat.je.trigger.Trigger;
-
 /**
  * Utility functions used by the trigger implementation.
- *
  */
 public class TriggerUtils {
 
@@ -31,18 +30,17 @@ public class TriggerUtils {
      * {@link #writeTriggers(ByteBuffer, byte[][])}
      *
      * @param triggerBytes the triggers whose size is to be estimated.
-     *
      * @return the size in bytes
      */
     static int logSize(byte[][] triggerBytes) {
 
-        if (triggerBytes == null) {
+        if(triggerBytes == null) {
             return LogUtils.getPackedIntLogSize(0);
         }
 
         /* Add up the individual trigger sizes */
         int size = LogUtils.getPackedIntLogSize(triggerBytes.length);
-        for (byte[] trigger : triggerBytes) {
+        for(byte[] trigger : triggerBytes) {
             size += LogUtils.getByteArrayLogSize(trigger);
         }
         return size;
@@ -51,18 +49,18 @@ public class TriggerUtils {
     /**
      * Writes the triggers out to the log buffer.
      *
-     * @param logBuffer the buffer in which the bytes are assembled.
-     *
+     * @param logBuffer    the buffer in which the bytes are assembled.
      * @param triggerBytes the trigger bytes to be written.
      */
     static void writeTriggers(ByteBuffer logBuffer,
                               byte[][] triggerBytes) {
-        if (triggerBytes == null) {
+        if(triggerBytes == null) {
             LogUtils.writePackedInt(logBuffer, 0);
-        } else {
+        }
+        else {
             /* Write out the triggers. */
             LogUtils.writePackedInt(logBuffer, triggerBytes.length);
-            for (byte[] triggerByte : triggerBytes) {
+            for(byte[] triggerByte : triggerBytes) {
                 LogUtils.writeByteArray(logBuffer, triggerByte);
             }
         }
@@ -72,23 +70,22 @@ public class TriggerUtils {
      * Reads the triggers from a log buffer and returns then in their
      * serialized byte array form.
      *
-     * @param logBuffer the buffer from which to read the triggers.
+     * @param logBuffer    the buffer from which to read the triggers.
      * @param entryVersion the version associated with the current log
-     *
      * @return the trigger bytes
      */
     static byte[][] readTriggers(ByteBuffer logBuffer,
                                  int entryVersion) {
 
         final int triggerCount = LogUtils.readPackedInt(logBuffer);
-        if (triggerCount == 0) {
+        if(triggerCount == 0) {
             return null;
         }
 
         byte[][] triggerBytes = new byte[triggerCount][];
-        for (int i = 0; i < triggerBytes.length; i++) {
+        for(int i = 0; i < triggerBytes.length; i++) {
             triggerBytes[i] =
-                LogUtils.readByteArray(logBuffer, false /* unpacked */);
+                    LogUtils.readByteArray(logBuffer, false /* unpacked */);
         }
         return triggerBytes;
     }
@@ -97,26 +94,24 @@ public class TriggerUtils {
      * Deserializes the trigger representation to yield the trigger object
      * instance.
      *
-     * @param dbName the name to be associated with the de-serialized triggers
-     *
+     * @param dbName       the name to be associated with the de-serialized triggers
      * @param triggerBytes the serialized representation of the trigger
-     *
      * @return the list of trigger instances
      */
     static LinkedList<Trigger> unmarshallTriggers(String dbName,
                                                   byte[][] triggerBytes,
                                                   ClassLoader loader) {
 
-        if (triggerBytes == null) {
+        if(triggerBytes == null) {
             return null;
         }
 
         final LinkedList<Trigger> triggers = new LinkedList<Trigger>();
-        for (int i = 0; i < triggerBytes.length; i++) {
+        for(int i = 0; i < triggerBytes.length; i++) {
             final Trigger trigger =
-                (Trigger)DatabaseImpl.bytesToObject(triggerBytes[i],
-                                                    "trigger:" + i,
-                                                    loader);
+                    (Trigger) DatabaseImpl.bytesToObject(triggerBytes[i],
+                            "trigger:" + i,
+                            loader);
             trigger.setDatabaseName(dbName);
             triggers.add(trigger);
         }
@@ -128,36 +123,37 @@ public class TriggerUtils {
      * gives preference to the instance representation if it's readily
      * available.
      *
-     * @param sb the string buffer that will contain the XML representation
+     * @param sb           the string buffer that will contain the XML representation
      * @param triggerBytes the bytes representing the trigger
-     * @param triggers the trigger instances corresponding to triggerBytes
+     * @param triggers     the trigger instances corresponding to triggerBytes
      */
     static void dumpTriggers(StringBuilder sb,
-                            byte[][] triggerBytes,
-                            List<Trigger> triggers) {
+                             byte[][] triggerBytes,
+                             List<Trigger> triggers) {
 
-        if ((triggerBytes == null) || triggerBytes.length == 0) {
+        if((triggerBytes == null) || triggerBytes.length == 0) {
             return;
         }
 
         /* Use trigger instances if available, otherwise fallback to
          * using the byte arrays.
          */
-        if ((triggers != null) && (triggers.size() != 0)) {
-            for (Trigger trigger : triggers) {
+        if((triggers != null) && (triggers.size() != 0)) {
+            for(Trigger trigger : triggers) {
                 sb.append("<trigger name=\"" + trigger.getName() + "\"" +
-                          " database name=\"" +
-                          ((trigger.getDatabaseName() == null) ?
-                          "null" : trigger.getDatabaseName()) + "\"" +
-                          " className=\"" + trigger.getClass().getName() +
-                "\">");
+                        " database name=\"" +
+                        ((trigger.getDatabaseName() == null) ?
+                                "null" : trigger.getDatabaseName()) + "\"" +
+                        " className=\"" + trigger.getClass().getName() +
+                        "\">");
             }
-        } else {
+        }
+        else {
             /* Use the byte array */
-            for (int i=0; i < triggerBytes.length; i++) {
+            for(int i = 0; i < triggerBytes.length; i++) {
                 sb.append("<trigger name=\"" + "?" + i + "\"" +
-                          " className=\"" + "?" +
-                "\">");
+                        " className=\"" + "?" +
+                        "\">");
             }
         }
     }

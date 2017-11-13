@@ -13,15 +13,15 @@
 
 package berkeley.com.sleepycat.je.rep.util;
 
-import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
-
-import java.io.File;
-
 import berkeley.com.sleepycat.je.Durability;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment;
 import berkeley.com.sleepycat.je.rep.ReplicationConfig;
 import berkeley.com.sleepycat.je.rep.impl.RepParams;
+
+import java.io.File;
+
+import static berkeley.com.sleepycat.je.rep.impl.RepParams.NODE_HOST_PORT;
 
 /**
  * A utility to reset the members of a replication group, replacing the group
@@ -67,7 +67,7 @@ import berkeley.com.sleepycat.je.rep.impl.RepParams;
  * </ol>
  * <p>
  * For example:
- *
+ * <p>
  * <pre class="code">
  * // Run the utility on a copy of an existing replicated environment. Usually
  * // this environment will have originated on a different node and its
@@ -75,60 +75,82 @@ import berkeley.com.sleepycat.je.rep.impl.RepParams;
  * // previous host. The utility will reset this metadata so that it has a
  * // rep group (UniversalRepGroup) with a single node named nodeMars. The node
  * // is associated with the machine mars and will communicate on port 5001.
- *
+ * <p>
  * DbResetRepGroup resetUtility =
- *     new DbResetRepGroup(envDirMars,          // env home dir
- *                         "UniversalRepGroup", // group name
- *                         "nodeMars",          // node name
- *                         "mars:5001");        // node host,port
+ * new DbResetRepGroup(envDirMars,          // env home dir
+ * "UniversalRepGroup", // group name
+ * "nodeMars",          // node name
+ * "mars:5001");        // node host,port
  * resetUtility.reset();
- *
+ * <p>
  * // Open the reset environment; it will take on the role of master.
  * ReplicatedEnvironment nodeMars = new ReplicatedEnvironment(envDirMars, ...);
  * ...
  * // Bring up additional nodes, which will be initialized from
  * // nodeMars. For example, from the machine venus you can now add a new
  * // member to the group(UniversalRepGroup) as below.
- *
+ * <p>
  * ReplicationConfig repConfig = null;
  * try {
- *     repConfig = new ReplicationConfig("UniversalRepGroup", // groupName
- *                                       "nodeVenus",         // nodeName
- *                                       "venus:5008");       // nodeHostPort
- *     repConfig.setHelperHosts("mars:5001");
- *
- *     nodeVenus = new ReplicatedEnvironment(envDirB, repConfig, envConfig);
+ * repConfig = new ReplicationConfig("UniversalRepGroup", // groupName
+ * "nodeVenus",         // nodeName
+ * "venus:5008");       // nodeHostPort
+ * repConfig.setHelperHosts("mars:5001");
+ * <p>
+ * nodeVenus = new ReplicatedEnvironment(envDirB, repConfig, envConfig);
  * } catch (InsufficientLogException insufficientLogEx) {
- *
- *     // log files will be copied from another node in the group
- *     NetworkRestore restore = new NetworkRestore();
- *     restore.execute(insufficientLogEx, new NetworkRestoreConfig());
- *
- *     // try opening the node now that the environment files have been
- *     // restored on this machine.
- *     nodeVenus = new ReplicatedEnvironment(envDirVenus,
- *                                           repConfig,
- *                                           envConfig);
+ * <p>
+ * // log files will be copied from another node in the group
+ * NetworkRestore restore = new NetworkRestore();
+ * restore.execute(insufficientLogEx, new NetworkRestoreConfig());
+ * <p>
+ * // try opening the node now that the environment files have been
+ * // restored on this machine.
+ * nodeVenus = new ReplicatedEnvironment(envDirVenus,
+ * repConfig,
+ * envConfig);
  * }
  * ...
  * </pre>
  */
 public class DbResetRepGroup {
 
+    private static final String usageString =
+            "usage: java -cp je.jar " +
+                    "com.sleepycat.je.rep.util.DbResetRepGroup\n" +
+                    " -h <dir>                              # environment home directory\n" +
+                    " -groupName <group name>               # replication group name\n" +
+                    " -nodeName <node name>                 # replicated node name\n" +
+                    " -nodeHostPort <host name:port number> # host name or IP address\n" +
+                    "                                          and port number to use\n" +
+                    "                                          for this node\n";
     private File envHome;
     private String groupName;
     private String nodeName;
     private String nodeHostPort;
 
-    private static final String usageString =
-        "usage: java -cp je.jar " +
-        "com.sleepycat.je.rep.util.DbResetRepGroup\n" +
-        " -h <dir>                              # environment home directory\n" +
-        " -groupName <group name>               # replication group name\n" +
-        " -nodeName <node name>                 # replicated node name\n" +
-        " -nodeHostPort <host name:port number> # host name or IP address\n" +
-        "                                          and port number to use\n" +
-        "                                          for this node\n";
+    private DbResetRepGroup() {
+    }
+
+    /**
+     * Create a DbResetRepGroup object for this node.
+     *
+     * @param envHome      The node's replicated environment directory. The
+     *                     directory must be accessible on this host.
+     * @param groupName    The name of the new replication group
+     * @param nodeName     The node's name
+     * @param nodeHostPort The host and port for this node. The utility
+     *                     must be executed on this host.
+     */
+    public DbResetRepGroup(File envHome,
+                           String groupName,
+                           String nodeName,
+                           String nodeHostPort) {
+        this.envHome = envHome;
+        this.groupName = groupName;
+        this.nodeName = nodeName;
+        this.nodeHostPort = nodeHostPort;
+    }
 
     /**
      * Usage:
@@ -158,79 +180,63 @@ public class DbResetRepGroup {
         int argc = 0;
         int nArgs = args.length;
 
-        while (argc < nArgs) {
+        while(argc < nArgs) {
             String thisArg = args[argc++].trim();
-            if (thisArg.equals("-h")) {
-                if (argc < nArgs) {
+            if(thisArg.equals("-h")) {
+                if(argc < nArgs) {
                     envHome = new File(args[argc++]);
-                } else {
+                }
+                else {
                     printUsage("-h requires an argument");
                 }
-            } else if (thisArg.equals("-groupName")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-groupName")) {
+                if(argc < nArgs) {
                     groupName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage("-groupName requires an argument");
                 }
-            } else if (thisArg.equals("-nodeName")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-nodeName")) {
+                if(argc < nArgs) {
                     nodeName = args[argc++];
-                } else {
+                }
+                else {
                     printUsage("-nodeName requires an argument");
                 }
-            } else if (thisArg.equals("-nodeHostPort")) {
-                if (argc < nArgs) {
+            }
+            else if(thisArg.equals("-nodeHostPort")) {
+                if(argc < nArgs) {
                     nodeHostPort = args[argc++];
                     try {
                         NODE_HOST_PORT.validateValue(nodeHostPort);
-                    } catch (IllegalArgumentException e) {
+                    } catch(IllegalArgumentException e) {
                         e.printStackTrace();
                         printUsage("-nodeHostPort is illegal!");
                     }
-                } else {
+                }
+                else {
                     printUsage("-nodeHostPort requires an argument");
                 }
             }
         }
 
-        if (envHome == null) {
+        if(envHome == null) {
             printUsage("-h is a required argument.");
         }
 
-        if (groupName == null) {
+        if(groupName == null) {
             printUsage("-groupName is a required argument.");
         }
 
-        if (nodeName == null) {
+        if(nodeName == null) {
             printUsage("-nodeName is a required argument.");
         }
 
-        if (nodeHostPort == null) {
+        if(nodeHostPort == null) {
             printUsage("-nodeHostPort is a required argument.");
         }
-    }
-
-    private DbResetRepGroup() {
-    }
-
-    /**
-     * Create a DbResetRepGroup object for this node.
-     *
-     * @param envHome The node's replicated environment directory. The
-     * directory must be accessible on this host.
-     * @param groupName The name of the new replication group
-     * @param nodeName The node's name
-     * @param nodeHostPort The host and port for this node. The utility
-     * must be executed on this host.
-     */
-    public DbResetRepGroup(File envHome,
-                           String groupName,
-                           String nodeName,
-                           String nodeHostPort) {
-        this.envHome = envHome;
-        this.groupName = groupName;
-        this.nodeName = nodeName;
-        this.nodeHostPort = nodeHostPort;
     }
 
     /**
@@ -239,12 +245,12 @@ public class DbResetRepGroup {
      *
      * @see DbResetRepGroup
      */
-     public void reset() {
+    public void reset() {
 
         Durability durability =
-            new Durability(Durability.SyncPolicy.SYNC,
-                           Durability.SyncPolicy.SYNC,
-                           Durability.ReplicaAckPolicy.NONE);
+                new Durability(Durability.SyncPolicy.SYNC,
+                        Durability.SyncPolicy.SYNC,
+                        Durability.ReplicaAckPolicy.NONE);
 
         EnvironmentConfig envConfig = new EnvironmentConfig();
         envConfig.setAllowCreate(true);
@@ -252,7 +258,7 @@ public class DbResetRepGroup {
         envConfig.setDurability(durability);
 
         ReplicationConfig repConfig =
-            new ReplicationConfig(groupName, nodeName, nodeHostPort);
+                new ReplicationConfig(groupName, nodeName, nodeHostPort);
         repConfig.setHelperHosts(repConfig.getNodeHostPort());
 
         /* Force the re-initialization upon open. */
@@ -260,7 +266,7 @@ public class DbResetRepGroup {
 
         /* Open the environment, thus replacing the group. */
         ReplicatedEnvironment repEnv =
-            new ReplicatedEnvironment(envHome, repConfig, envConfig);
+                new ReplicatedEnvironment(envHome, repConfig, envConfig);
 
         repEnv.close();
     }

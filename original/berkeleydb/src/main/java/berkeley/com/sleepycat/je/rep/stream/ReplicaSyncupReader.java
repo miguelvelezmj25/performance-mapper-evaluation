@@ -12,12 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.stream;
 
-import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
-
-import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.DatabaseException;
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
@@ -32,39 +26,40 @@ import berkeley.com.sleepycat.je.txn.TxnCommit;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static berkeley.com.sleepycat.je.utilint.DbLsn.NULL_LSN;
+
 /**
  * The ReplicaSyncupReader scans the log backwards for requested log entries.
  * The reader must track whether it has passed a checkpoint, and therefore
  * can not used the vlsn index to skip over entries.
- *
+ * <p>
  * The ReplicaSyncupReader is not thread safe, and can only be used
  * serially. It will stop at the finishLsn, which should be set using the
  * GlobalCBVLSN.
  */
 public class ReplicaSyncupReader extends VLSNReader {
 
-    /*
-     * True if this particular record retrieval is for a syncable record.
-     * False if the reader is looking for a specific VLSN
-     */
-    private boolean syncableSearch;
-
     private final LogEntry ckptEndLogEntry =
-        LogEntryType.LOG_CKPT_END.getNewLogEntry();
-
+            LogEntryType.LOG_CKPT_END.getNewLogEntry();
     private final LogEntry commitLogEntry =
-        LogEntryType.LOG_TXN_COMMIT.getNewLogEntry();
-
+            LogEntryType.LOG_TXN_COMMIT.getNewLogEntry();
     private final LogEntry abortLogEntry =
-        LogEntryType.LOG_TXN_ABORT.getNewLogEntry();
-
+            LogEntryType.LOG_TXN_ABORT.getNewLogEntry();
     /*
      * SearchResults retains the information as to whether the found
      * matchpoint is valid.
      */
     private final MatchpointSearchResults searchResults;
-
     private final Logger logger1;
+    /*
+     * True if this particular record retrieval is for a syncable record.
+     * False if the reader is looking for a specific VLSN
+     */
+    private boolean syncableSearch;
 
 
     public ReplicaSyncupReader(EnvironmentImpl envImpl,
@@ -75,19 +70,19 @@ public class ReplicaSyncupReader extends VLSNReader {
                                VLSN startVLSN,
                                long finishLsn,
                                MatchpointSearchResults searchResults)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /*
          * If we go backwards, endOfFileLsn and startLsn must not be null.
          * Make them the same, so we always start at the same very end.
          */
         super(envImpl,
-              vlsnIndex,
-              false,           // forward
-              endOfLogLsn,
-              readBufferSize,
-              nameIdPair,
-              finishLsn);
+                vlsnIndex,
+                false,           // forward
+                endOfLogLsn,
+                readBufferSize,
+                nameIdPair,
+                finishLsn);
 
         initScan(startVLSN, endOfLogLsn);
         this.searchResults = searchResults;
@@ -99,9 +94,9 @@ public class ReplicaSyncupReader extends VLSNReader {
      */
     private void initScan(VLSN startVLSN, long endOfLogLsn) {
 
-        if (startVLSN.equals(VLSN.NULL_VLSN)) {
+        if(startVLSN.equals(VLSN.NULL_VLSN)) {
             throw EnvironmentFailureException.unexpectedState
-                ("ReplicaSyncupReader start can't be NULL_VLSN");
+                    ("ReplicaSyncupReader start can't be NULL_VLSN");
         }
 
         startLsn = endOfLogLsn;
@@ -125,11 +120,11 @@ public class ReplicaSyncupReader extends VLSNReader {
      * Backward scanning for the replica's part in syncup.
      */
     public OutputWireRecord scanBackwards(VLSN vlsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         syncableSearch = false;
         VLSNRange range = vlsnIndex.getRange();
-        if (vlsn.compareTo(range.getFirst()) < 0) {
+        if(vlsn.compareTo(range.getFirst()) < 0) {
             /*
              * The requested VLSN is before the start of our range, we don't
              * have this record.
@@ -139,7 +134,7 @@ public class ReplicaSyncupReader extends VLSNReader {
 
         currentVLSN = vlsn;
 
-        if (readNextEntry()) {
+        if(readNextEntry()) {
             return currentFeedRecord;
         }
 
@@ -150,22 +145,23 @@ public class ReplicaSyncupReader extends VLSNReader {
      * Backward scanning for finding an earlier candidate syncup matchpoint.
      */
     public OutputWireRecord findPrevSyncEntry(boolean startAtPrev)
-        throws DatabaseException {
+            throws DatabaseException {
 
         currentFeedRecord = null;
         syncableSearch = true;
 
-        if (startAtPrev) {
+        if(startAtPrev) {
             /* Start by looking at the entry before the current record. */
             currentVLSN = currentVLSN.getPrev();
-        } else {
+        }
+        else {
             LoggerUtils.info(logger1, envImpl,
-                             "Restart ReplicaSyncupReader at " +
-                             "vlsn " + currentVLSN);
+                    "Restart ReplicaSyncupReader at " +
+                            "vlsn " + currentVLSN);
         }
 
         VLSNRange range = vlsnIndex.getRange();
-        if (currentVLSN.compareTo(range.getFirst()) < 0) {
+        if(currentVLSN.compareTo(range.getFirst()) < 0) {
 
             /*
              * We've walked off the end of the contiguous VLSN range.
@@ -173,7 +169,7 @@ public class ReplicaSyncupReader extends VLSNReader {
             return null;
         }
 
-        if (readNextEntry() == false) {
+        if(readNextEntry() == false) {
             /*
              * We scanned all the way to the front of the log, no
              * other sync-able entry found.
@@ -182,7 +178,7 @@ public class ReplicaSyncupReader extends VLSNReader {
         }
 
         assert LogEntryType.isSyncPoint(currentFeedRecord.getEntryType()) :
-        "Unexpected log type= " + currentFeedRecord;
+                "Unexpected log type= " + currentFeedRecord;
 
         return currentFeedRecord;
     }
@@ -193,11 +189,11 @@ public class ReplicaSyncupReader extends VLSNReader {
      */
     private void checkForPassingTarget(int compareResult) {
 
-        if (compareResult < 0) {
+        if(compareResult < 0) {
             /* Hey, we passed the VLSN we wanted. */
             throw EnvironmentFailureException.unexpectedState
-                ("want to read " + currentVLSN + " but reader at " +
-                 currentEntryHeader.getVLSN());
+                    ("want to read " + currentVLSN + " but reader at " +
+                            currentEntryHeader.getVLSN());
         }
     }
 
@@ -208,17 +204,17 @@ public class ReplicaSyncupReader extends VLSNReader {
      */
     @Override
     protected boolean isTargetEntry()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (logger1.isLoggable(Level.FINEST)) {
+        if(logger1.isLoggable(Level.FINEST)) {
             LoggerUtils.finest(logger1, envImpl,
-                               " isTargetEntry " +  currentEntryHeader);
+                    " isTargetEntry " + currentEntryHeader);
         }
 
         nScanned++;
 
         /* Skip invisible entries. */
-        if (currentEntryHeader.isInvisible()) {
+        if(currentEntryHeader.isInvisible()) {
             return false;
         }
 
@@ -234,13 +230,14 @@ public class ReplicaSyncupReader extends VLSNReader {
          * sync entry at that vlsn.
          *  (b) We need to note passed commits in processEntry.
          */
-        if (entryIsReplicated()) {
-            if (syncableSearch) {
-                if (LogEntryType.isSyncPoint(currentType)) {
+        if(entryIsReplicated()) {
+            if(syncableSearch) {
+                if(LogEntryType.isSyncPoint(currentType)) {
                     return true;
                 }
                 currentVLSN = currentEntryHeader.getVLSN().getPrev();
-            } else {
+            }
+            else {
                 return true;
             }
         }
@@ -249,7 +246,7 @@ public class ReplicaSyncupReader extends VLSNReader {
          * We'll also need to read checkpoint end records to record their
          * presence.
          */
-        if (LogEntryType.LOG_CKPT_END.equalsType(currentType)) {
+        if(LogEntryType.LOG_CKPT_END.equalsType(currentType)) {
             return true;
         }
 
@@ -259,26 +256,26 @@ public class ReplicaSyncupReader extends VLSNReader {
     /**
      * ProcessEntry does additional filtering before deciding whether to
      * return an entry as a candidate for matching.
-     *
+     * <p>
      * If this is a record we are submitting as a matchpoint candidate,
      * instantiate a WireRecord to house this log entry. If this is a
      * non-replicated entry or a txn end that follows the candidate matchpoint,
      * record whatever status we need to, but don't use it for comparisons.
-     *
+     * <p>
      * For example, suppose the log is like this:
-     *
+     * <p>
      * VLSN  entry
      * 10    LN
      * 11    commit
      * 12    LN
-     *  --   ckpt end
+     * --   ckpt end
      * 13    commit
      * 14    abort
-     *
+     * <p>
      * And that the master only has VLSNs 1-12. The replica will suggest vlsn
      * 14 as the first matchpoint. The feeder will counter with a suggestion
      * of vlsn 11, since it does not have vlsn 14.
-     *
+     * <p>
      * At that point, the ReplicaSyncupReader will scan backwards in the log,
      * looking for vlsn 11. Although the reader should only return an entry
      * when it gets to vlsn 11. The reader must process commits and ckpts that
@@ -288,9 +285,9 @@ public class ReplicaSyncupReader extends VLSNReader {
     @Override
     protected boolean processEntry(ByteBuffer entryBuffer) {
 
-        if (logger1.isLoggable(Level.FINEST)) {
+        if(logger1.isLoggable(Level.FINEST)) {
             LoggerUtils.finest(logger1, envImpl,
-                               " syncup reader saw " +  currentEntryHeader);
+                    " syncup reader saw " + currentEntryHeader);
         }
         byte currentType = currentEntryHeader.getType();
 
@@ -299,23 +296,23 @@ public class ReplicaSyncupReader extends VLSNReader {
          * CheckpointEnd entries are tracked in order to see if a rollback
          * must be done, but are not returned as possible matchpoints.
          */
-        if (LogEntryType.LOG_CKPT_END.equalsType(currentType)) {
+        if(LogEntryType.LOG_CKPT_END.equalsType(currentType)) {
 
             /*
              * Read the entry, which both lets us decipher its contents and
              * also advances the file reader position.
              */
             ckptEndLogEntry.readEntry(envImpl, currentEntryHeader,
-                                      entryBuffer);
+                    entryBuffer);
 
-            if (logger1.isLoggable(Level.FINEST)) {
+            if(logger1.isLoggable(Level.FINEST)) {
                 LoggerUtils.finest(logger1, envImpl,
-                                   " syncup reader read " +
-                                   currentEntryHeader + ckptEndLogEntry);
+                        " syncup reader read " +
+                                currentEntryHeader + ckptEndLogEntry);
             }
 
-            if (((CheckpointEnd) ckptEndLogEntry.getMainItem()).
-                getCleanedFilesToDelete()) {
+            if(((CheckpointEnd) ckptEndLogEntry.getMainItem()).
+                    getCleanedFilesToDelete()) {
                 searchResults.notePassedCheckpointEnd();
             }
 
@@ -330,7 +327,7 @@ public class ReplicaSyncupReader extends VLSNReader {
         ByteBuffer buffer = entryBuffer.slice();
         buffer.limit(currentEntryHeader.getItemSize());
         currentFeedRecord =
-            new OutputWireRecord(envImpl, currentEntryHeader, buffer);
+                new OutputWireRecord(envImpl, currentEntryHeader, buffer);
 
         /*
          * All commit records must be tracked to figure out if we've exceeded
@@ -338,36 +335,38 @@ public class ReplicaSyncupReader extends VLSNReader {
          * unmarshal the log entry, so we can read the timestamp in the commit
          * record.
          */
-        if (LogEntryType.LOG_TXN_COMMIT.equalsType(currentType)) {
+        if(LogEntryType.LOG_TXN_COMMIT.equalsType(currentType)) {
 
             commitLogEntry.readEntry(envImpl, currentEntryHeader, entryBuffer);
             final TxnCommit commit = (TxnCommit) commitLogEntry.getMainItem();
             searchResults.notePassedCommits(commit,
-                                            currentEntryHeader.getVLSN(),
-                                            getLastLsn());
+                    currentEntryHeader.getVLSN(),
+                    getLastLsn());
 
-            if (logger1.isLoggable(Level.FINEST)) {
+            if(logger1.isLoggable(Level.FINEST)) {
                 LoggerUtils.finest(logger1, envImpl,
-                                   "syncup reader read " +
-                                   currentEntryHeader + commitLogEntry);
+                        "syncup reader read " +
+                                currentEntryHeader + commitLogEntry);
             }
-        } else if (LogEntryType.LOG_TXN_ABORT.equalsType(currentType)) {
+        }
+        else if(LogEntryType.LOG_TXN_ABORT.equalsType(currentType)) {
             abortLogEntry.readEntry(envImpl, currentEntryHeader, entryBuffer);
             final TxnAbort abort = (TxnAbort) abortLogEntry.getMainItem();
 
             searchResults.notePassedAborts(abort,
-                                           currentEntryHeader.getVLSN());
-            if (logger1.isLoggable(Level.FINEST)) {
+                    currentEntryHeader.getVLSN());
+            if(logger1.isLoggable(Level.FINEST)) {
                 LoggerUtils.finest(logger1, envImpl,
-                                   "syncup reader read " +
-                                   currentEntryHeader + abortLogEntry);
+                        "syncup reader read " +
+                                currentEntryHeader + abortLogEntry);
             }
-        } else {
+        }
+        else {
             entryBuffer.position(entryBuffer.position() +
-                                 currentEntryHeader.getItemSize());
+                    currentEntryHeader.getItemSize());
         }
 
-        if (syncableSearch) {
+        if(syncableSearch) {
             return true;
         }
 
@@ -385,8 +384,8 @@ public class ReplicaSyncupReader extends VLSNReader {
     @Override
     protected void handleGapInBackwardsScan(long prevFileNum) {
         SkipGapException e = new SkipGapException(window.currentFileNum(),
-                                                  prevFileNum,
-                                                  currentVLSN);
+                prevFileNum,
+                currentVLSN);
         LoggerUtils.info(logger1, envImpl, e.getMessage());
         throw e;
     }
@@ -399,13 +398,14 @@ public class ReplicaSyncupReader extends VLSNReader {
 
         private static final long serialVersionUID = 1L;
         private final VLSN currentVLSN;
+
         public SkipGapException(long currentFileNum,
                                 long nextFileNum,
                                 VLSN currentVLSN) {
             super("Restarting reader in order to read backwards across gap " +
-                  "from file 0x" + Long.toHexString(currentFileNum) +
-                  " to file 0x" + Long.toHexString(nextFileNum) +
-                  ". Reset position to vlsn " + currentVLSN);
+                    "from file 0x" + Long.toHexString(currentFileNum) +
+                    " to file 0x" + Long.toHexString(nextFileNum) +
+                    ". Reset position to vlsn " + currentVLSN);
             this.currentVLSN = currentVLSN;
         }
 

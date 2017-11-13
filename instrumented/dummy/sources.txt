@@ -1,6 +1,8 @@
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/A.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/analysis/option/Noop.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/analysis/option/Sink.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/analysis/option/Source.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/B.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Dummy.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Dummy2.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Dummy3.java
@@ -28,6 +30,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Graph7.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Graph8.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Graph9.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/I.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Interactions.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Interactions1.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Praktomat.java
@@ -43,7 +46,13 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions14.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions15.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions16.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions17.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions18.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions19.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions2.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions20.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions21.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions22.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions3.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions4.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/dummy/src/edu/cmu/cs/mvelezce/Regions5.java

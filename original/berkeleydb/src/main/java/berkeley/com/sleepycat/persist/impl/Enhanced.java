@@ -15,17 +15,17 @@ package berkeley.com.sleepycat.persist.impl;
 
 /**
  * Interface implemented by a persistent class via bytecode enhancement.
- *
+ * <p>
  * <p>See {@link Accessor} for method documentation.  {@link EnhancedAccessor}
  * implements Accessor and forwards all calls to methods in the Enhanced
  * class.</p>
- *
+ * <p>
  * <p>Each class that implements this interface (including its subclasses and
  * superclasses except for Object) must also implement a static block that
  * registers a prototype instance by calling
  * EnhancedAccessor.registerPrototype.  Other instances are created from the
  * protype instance using {@link #bdbNewInstance}.</p>
- *
+ * <p>
  * <pre>static { EnhancedAccessor.registerPrototype(new Xxx()); }</pre>
  *
  * <p>An example of the generated code for reading and writing fields is shown
@@ -98,7 +98,7 @@ public interface Enhanced {
      * @see Accessor#writePriKeyField
      */
     void bdbWritePriKeyField(EntityOutput output, Format format)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * Calls the super class method if this class does not contain the primary
@@ -107,13 +107,13 @@ public interface Enhanced {
      * @see Accessor#readPriKeyField
      */
     void bdbReadPriKeyField(EntityInput input, Format format)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#writeSecKeyFields
      */
     void bdbWriteSecKeyFields(EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#readSecKeyFields
@@ -122,13 +122,13 @@ public interface Enhanced {
                              int startField,
                              int endField,
                              int superLevel)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#writeNonKeyFields
      */
     void bdbWriteNonKeyFields(EntityOutput output)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#readNonKeyFields
@@ -137,19 +137,19 @@ public interface Enhanced {
                              int startField,
                              int endField,
                              int superLevel)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#writeCompositeKeyFields
      */
     void bdbWriteCompositeKeyFields(EntityOutput output, Format[] formats)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#readCompositeKeyFields
      */
     void bdbReadCompositeKeyFields(EntityInput input, Format[] formats)
-        throws RefreshException;
+            throws RefreshException;
 
     /**
      * @see Accessor#getField
@@ -167,7 +167,7 @@ public interface Enhanced {
                      int superLevel,
                      boolean isSecField,
                      Object value);
-    
+
     /**
      * @see Accessor#setPriField
      */

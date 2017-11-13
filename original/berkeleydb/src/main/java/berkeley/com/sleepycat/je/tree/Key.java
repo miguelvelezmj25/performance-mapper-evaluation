@@ -13,96 +13,34 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.util.Comparator;
-
 import berkeley.com.sleepycat.je.DatabaseEntry;
 import berkeley.com.sleepycat.utilint.StringUtils;
+
+import java.util.Comparator;
 
 /**
  * Key represents a JE B-Tree Key.  Keys are immutable.  Within JE, keys are
  * usually represented as byte arrays rather than as Key instances in order to
  * reduce the in-memory footprint. The static methods of this class are used to
  * operate on the byte arrays.
- *
+ * <p>
  * One exception is when keys are held within a collection. In that case, Key
  * objects are instantiated so that keys are hashed and compared by value.
  */
 public final class Key implements Comparable<Key> {
 
-    public abstract static class DumpType {
-
-        private String name;
-
-        private DumpType(String name) {
-            this.name = name;
-        }
-
-        public static final DumpType BINARY = new DumpType("BINARY") {
-                @Override
-                void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
-                    for (int i = 0; i < b.length; i++) {
-                        sb.append(b[i] & 0xFF).append(" ");
-                    }
-                }
-            };
-
-        public static final DumpType HEX = new DumpType("HEX") {
-                @Override
-                void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
-                    for (int i = 0; i < b.length; i++) {
-                        sb.append(Integer.toHexString(b[i] & 0xFF)).
-                            append(" ");
-                    }
-                }
-            };
-
-        public static final DumpType TEXT = new DumpType("TEXT") {
-                @Override
-                void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
-                    sb.append(StringUtils.fromUTF8(b));
-                }
-            };
-
-        public static final DumpType OBFUSCATE = new DumpType("OBFUSCATE") {
-                @Override
-                void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
-                    int len = b.length;
-                    sb.append("[").append(len).
-                        append(len == 1 ? " byte]" : " bytes]");
-                }
-            };
-
-        public String dumpByteArray(byte[] b) {
-            StringBuilder sb = new StringBuilder();
-            if (b != null) {
-                dumpByteArrayInternal(sb, b);
-            } else {
-                sb.append("null");
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-
-        abstract void dumpByteArrayInternal(StringBuilder sb, byte[] b);
-    }
-
-    public static DumpType DUMP_TYPE = DumpType.BINARY;
-
     public static final byte[] EMPTY_KEY = new byte[0];
-
+    public static DumpType DUMP_TYPE = DumpType.BINARY;
     private byte[] key;
 
     /**
      * Construct a new key from a byte array.
      */
     public Key(byte[] key) {
-        if (key == null) {
+        if(key == null) {
             this.key = null;
-        } else {
+        }
+        else {
             this.key = new byte[key.length];
             System.arraycopy(key, 0, this.key, 0, key.length);
         }
@@ -110,52 +48,15 @@ public final class Key implements Comparable<Key> {
 
     public static byte[] makeKey(DatabaseEntry dbt) {
         byte[] entryKey = dbt.getData();
-        if (entryKey == null) {
+        if(entryKey == null) {
             return EMPTY_KEY;
-        } else {
+        }
+        else {
             byte[] newKey = new byte[dbt.getSize()];
             System.arraycopy(entryKey, dbt.getOffset(), newKey,
-                             0, dbt.getSize());
+                    0, dbt.getSize());
             return newKey;
         }
-    }
-
-    /**
-     * Get the byte array for the key.
-     */
-    public byte[] getKey() {
-        return key;
-    }
-
-    /**
-     * Compare two keys.  Standard compareTo function and returns.
-     *
-     * Note that any configured user comparison function is not used, and
-     * therefore this method should not be used for comparison of keys during
-     * Btree operations.
-     */
-    public int compareTo(Key argKey) {
-        return compareUnsignedBytes(this.key, argKey.key);
-    }
-
-    /**
-     * Support Set of Key in BINReference.
-     */
-    @Override
-    public boolean equals(Object o) {
-        return (o instanceof Key) && (compareTo((Key)o) == 0);
-    }
-
-    /**
-     * Support HashSet of Key in BINReference.
-     */
-    @Override
-    public int hashCode() {
-        int code = 0;
-        for (int i = 0; i < key.length; i += 1) {
-            code += key[i];
-        }
-        return code;
     }
 
     /**
@@ -168,16 +69,16 @@ public final class Key implements Comparable<Key> {
                                   int off2,
                                   int len2,
                                   Comparator<byte[]> comparator) {
-        if (comparator == null) {
+        if(comparator == null) {
             return compareUnsignedBytes(key1, off1, len1,
-                                        key2, off2, len2);
+                    key2, off2, len2);
         }
-        if (off1 != 0 || len1 != key1.length) {
+        if(off1 != 0 || len1 != key1.length) {
             final byte[] b = new byte[len1];
             System.arraycopy(key1, off1, b, 0, len1);
             key1 = b;
         }
-        if (off2 != 0 || len2 != key2.length) {
+        if(off2 != 0 || len2 != key2.length) {
             final byte[] b = new byte[len2];
             System.arraycopy(key2, off2, b, 0, len2);
             key2 = b;
@@ -191,9 +92,10 @@ public final class Key implements Comparable<Key> {
     public static int compareKeys(byte[] key1,
                                   byte[] key2,
                                   Comparator<byte[]> comparator) {
-        if (comparator != null) {
+        if(comparator != null) {
             return comparator.compare(key1, key2);
-        } else {
+        }
+        else {
             return compareUnsignedBytes(key1, key2);
         }
     }
@@ -206,9 +108,10 @@ public final class Key implements Comparable<Key> {
                                   Comparator<byte[]> comparator) {
         byte[] key1 = Key.makeKey(entry1);
         byte[] key2 = Key.makeKey(entry2);
-        if (comparator != null) {
+        if(comparator != null) {
             return comparator.compare(key1, key2);
-        } else {
+        }
+        else {
             return compareUnsignedBytes(key1, key2);
         }
     }
@@ -218,7 +121,7 @@ public final class Key implements Comparable<Key> {
      */
     private static int compareUnsignedBytes(byte[] key1, byte[] key2) {
         return compareUnsignedBytes(key1, 0, key1.length,
-                                    key2, 0, key2.length);
+                key2, 0, key2.length);
     }
 
     /**
@@ -232,14 +135,15 @@ public final class Key implements Comparable<Key> {
                                            int len2) {
         int limit = Math.min(len1, len2);
 
-        for (int i = 0; i < limit; i++) {
+        for(int i = 0; i < limit; i++) {
             byte b1 = key1[i + off1];
             byte b2 = key2[i + off2];
-            if (b1 == b2) {
+            if(b1 == b2) {
                 continue;
-            } else {
+            }
+            else {
 
-                /* 
+                /*
                  * Remember, bytes are signed, so convert to shorts so that we
                  * effectively do an unsigned byte comparison.
                  */
@@ -262,10 +166,10 @@ public final class Key implements Comparable<Key> {
 
         int limit = Math.min(a1Len, a2Len);
 
-        for (int i = 0; i < limit; i++) {
+        for(int i = 0; i < limit; i++) {
             byte b1 = key1[i];
             byte b2 = key2[i];
-            if (b1 != b2) {
+            if(b1 != b2) {
                 return i;
             }
         }
@@ -280,7 +184,7 @@ public final class Key implements Comparable<Key> {
     public static byte[] createKeyPrefix(byte[] key1, byte[] key2) {
 
         int len = getKeyPrefixLength(key1, key1.length, key2);
-        if (len == 0) {
+        if(len == 0) {
             return null;
         }
 
@@ -316,19 +220,23 @@ public final class Key implements Comparable<Key> {
 
         StringBuilder sb = new StringBuilder();
 
-        if (DUMP_TYPE == DumpType.BINARY ||
-            DUMP_TYPE == DumpType.HEX) {
-            if (key == null) {
+        if(DUMP_TYPE == DumpType.BINARY ||
+                DUMP_TYPE == DumpType.HEX) {
+            if(key == null) {
                 sb.append("<null>");
-            } else {
+            }
+            else {
                 sb.append(DUMP_TYPE.dumpByteArray(key));
             }
-        } else if (DUMP_TYPE == DumpType.TEXT) {
+        }
+        else if(DUMP_TYPE == DumpType.TEXT) {
             sb.append(key == null ? "" : StringUtils.fromUTF8(key));
-        } else if (DUMP_TYPE == DumpType.OBFUSCATE) {
-            if (key == null) {
+        }
+        else if(DUMP_TYPE == DumpType.OBFUSCATE) {
+            if(key == null) {
                 sb.append("<null>");
-            } else {
+            }
+            else {
                 int len = key.length;
                 sb.append("[").append(len);
                 sb.append(len == 1 ? " byte]" : " bytes]");
@@ -336,5 +244,101 @@ public final class Key implements Comparable<Key> {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Get the byte array for the key.
+     */
+    public byte[] getKey() {
+        return key;
+    }
+
+    /**
+     * Compare two keys.  Standard compareTo function and returns.
+     * <p>
+     * Note that any configured user comparison function is not used, and
+     * therefore this method should not be used for comparison of keys during
+     * Btree operations.
+     */
+    public int compareTo(Key argKey) {
+        return compareUnsignedBytes(this.key, argKey.key);
+    }
+
+    /**
+     * Support Set of Key in BINReference.
+     */
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Key) && (compareTo((Key) o) == 0);
+    }
+
+    /**
+     * Support HashSet of Key in BINReference.
+     */
+    @Override
+    public int hashCode() {
+        int code = 0;
+        for(int i = 0; i < key.length; i += 1) {
+            code += key[i];
+        }
+        return code;
+    }
+
+    public abstract static class DumpType {
+
+        public static final DumpType BINARY = new DumpType("BINARY") {
+            @Override
+            void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
+                for(int i = 0; i < b.length; i++) {
+                    sb.append(b[i] & 0xFF).append(" ");
+                }
+            }
+        };
+        public static final DumpType HEX = new DumpType("HEX") {
+            @Override
+            void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
+                for(int i = 0; i < b.length; i++) {
+                    sb.append(Integer.toHexString(b[i] & 0xFF)).
+                            append(" ");
+                }
+            }
+        };
+        public static final DumpType TEXT = new DumpType("TEXT") {
+            @Override
+            void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
+                sb.append(StringUtils.fromUTF8(b));
+            }
+        };
+        public static final DumpType OBFUSCATE = new DumpType("OBFUSCATE") {
+            @Override
+            void dumpByteArrayInternal(StringBuilder sb, byte[] b) {
+                int len = b.length;
+                sb.append("[").append(len).
+                        append(len == 1 ? " byte]" : " bytes]");
+            }
+        };
+        private String name;
+
+        private DumpType(String name) {
+            this.name = name;
+        }
+
+        public String dumpByteArray(byte[] b) {
+            StringBuilder sb = new StringBuilder();
+            if(b != null) {
+                dumpByteArrayInternal(sb, b);
+            }
+            else {
+                sb.append("null");
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        abstract void dumpByteArrayInternal(StringBuilder sb, byte[] b);
     }
 }

@@ -13,16 +13,17 @@
 
 package berkeley.com.sleepycat.collections;
 
+import berkeley.com.sleepycat.bind.EntryBinding;
+import berkeley.com.sleepycat.je.Database;
+import berkeley.com.sleepycat.je.EnvironmentFailureException;
+import berkeley.com.sleepycat.je.OperationFailureException;
+import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
+
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import berkeley.com.sleepycat.bind.EntryBinding;
-import berkeley.com.sleepycat.je.Database;
 /* <!-- begin JE only --> */
-import berkeley.com.sleepycat.je.EnvironmentFailureException; // for javadoc
-import berkeley.com.sleepycat.je.OperationFailureException; // for javadoc
 /* <!-- end JE only --> */
-import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
 
 /**
  * The SortedSet returned by Map.keySet() and which can also be constructed
@@ -31,7 +32,7 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * even when duplicates are allowed.  Key set iterators are therefore
  * particularly useful for enumerating the unique keys of a store or index that
  * allows duplicates.
- *
+ * <p>
  * <p>In addition to the standard SortedSet methods, this class provides the
  * following methods for stored sorted sets only.  Note that the use of these
  * methods is not compatible with the standard Java collections interface.</p>
@@ -44,32 +45,28 @@ import berkeley.com.sleepycat.util.RuntimeExceptionWrapper;
  * @author Mark Hayes
  */
 public class StoredSortedKeySet<K>
-    extends StoredKeySet<K>
-    implements SortedSet<K> {
+        extends StoredKeySet<K>
+        implements SortedSet<K> {
 
     /**
      * Creates a sorted key set view of a {@link Database}.
      *
-     * @param database is the Database underlying the new collection.
-     *
-     * @param keyBinding is the binding used to translate between key buffers
-     * and key objects.
-     *
+     * @param database     is the Database underlying the new collection.
+     * @param keyBinding   is the binding used to translate between key buffers
+     *                     and key objects.
      * @param writeAllowed is true to create a read-write collection or false
-     * to create a read-only collection.
-     *
+     *                     to create a read-only collection.
      * @throws IllegalArgumentException if formats are not consistently
-     * defined or a parameter is invalid.
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                  defined or a parameter is invalid.
+     * @throws RuntimeExceptionWrapper  if a checked exception is thrown,
+     *                                  including a {@code DatabaseException} on BDB (C edition).
      */
     public StoredSortedKeySet(Database database,
                               EntryBinding<K> keyBinding,
                               boolean writeAllowed) {
 
         super(new DataView(database, keyBinding, null, null,
-                           writeAllowed, null));
+                writeAllowed, null));
     }
 
     StoredSortedKeySet(DataView keySetView) {
@@ -96,18 +93,16 @@ public class StoredSortedKeySet<K>
      * This method conforms to the {@link SortedSet#first} interface.
      *
      * @return the first element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public K first() {
 
@@ -119,18 +114,16 @@ public class StoredSortedKeySet<K>
      * This method conforms to the {@link SortedSet#last} interface.
      *
      * @return the last element.
-     *
+     * <p>
      * <!-- begin JE only -->
-     * @throws OperationFailureException if one of the <a
-     * href="../je/OperationFailureException.html#readFailures">Read Operation
-     * Failures</a> occurs.
-     *
+     * @throws OperationFailureException   if one of the <a
+     *                                     href="../je/OperationFailureException.html#readFailures">Read Operation
+     *                                     Failures</a> occurs.
      * @throws EnvironmentFailureException if an unexpected, internal or
-     * environment-wide failure occurs.
-     * <!-- end JE only -->
-     *
-     * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                     environment-wide failure occurs.
+     *                                     <!-- end JE only -->
+     * @throws RuntimeExceptionWrapper     if a checked exception is thrown,
+     *                                     including a {@code DatabaseException} on BDB (C edition).
      */
     public K last() {
 
@@ -141,16 +134,14 @@ public class StoredSortedKeySet<K>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly less than toKey.
      * This method conforms to the {@link SortedSet#headSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param toKey is the upper bound.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> headSet(K toKey) {
 
@@ -161,18 +152,15 @@ public class StoredSortedKeySet<K>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly less than toKey, optionally including toKey.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param toKey is the upper bound.
-     *
+     * @param toKey       is the upper bound.
      * @param toInclusive is true to include toKey.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> headSet(K toKey, boolean toInclusive) {
 
@@ -183,16 +171,14 @@ public class StoredSortedKeySet<K>
      * Returns a view of the portion of this sorted set whose elements are
      * greater than or equal to fromKey.
      * This method conforms to the {@link SortedSet#tailSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromKey is the lower bound.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> tailSet(K fromKey) {
 
@@ -203,18 +189,15 @@ public class StoredSortedKeySet<K>
      * Returns a view of the portion of this sorted set whose elements are
      * strictly greater than fromKey, optionally including fromKey.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromKey is the lower bound.
-     *
+     * @param fromKey       is the lower bound.
      * @param fromInclusive is true to include fromKey.
-     *
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> tailSet(K fromKey, boolean fromInclusive) {
 
@@ -225,18 +208,15 @@ public class StoredSortedKeySet<K>
      * Returns a view of the portion of this sorted set whose elements range
      * from fromKey, inclusive, to toKey, exclusive.
      * This method conforms to the {@link SortedSet#subSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
      * @param fromKey is the lower bound.
-     *
-     * @param toKey is the upper bound.
-     *
+     * @param toKey   is the upper bound.
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> subSet(K fromKey, K toKey) {
 
@@ -248,22 +228,17 @@ public class StoredSortedKeySet<K>
      * strictly greater than fromKey and strictly less than toKey,
      * optionally including fromKey and toKey.
      * This method does not exist in the standard {@link SortedSet} interface.
-     *
+     * <p>
      * <p>Note that the return value is a StoredCollection and must be treated
      * as such; for example, its iterators must be explicitly closed.</p>
      *
-     * @param fromKey is the lower bound.
-     *
+     * @param fromKey       is the lower bound.
      * @param fromInclusive is true to include fromKey.
-     *
-     * @param toKey is the upper bound.
-     *
-     * @param toInclusive is true to include toKey.
-     *
+     * @param toKey         is the upper bound.
+     * @param toInclusive   is true to include toKey.
      * @return the subset.
-     *
      * @throws RuntimeExceptionWrapper if a checked exception is thrown,
-     * including a {@code DatabaseException} on BDB (C edition).
+     *                                 including a {@code DatabaseException} on BDB (C edition).
      */
     public SortedSet<K> subSet(K fromKey,
                                boolean fromInclusive,
@@ -271,8 +246,8 @@ public class StoredSortedKeySet<K>
                                boolean toInclusive) {
         try {
             return new StoredSortedKeySet(
-               view.subView(fromKey, fromInclusive, toKey, toInclusive, null));
-        } catch (Exception e) {
+                    view.subView(fromKey, fromInclusive, toKey, toInclusive, null));
+        } catch(Exception e) {
             throw StoredContainer.convertException(e);
         }
     }

@@ -31,7 +31,9 @@ import java.io.ObjectOutputStream;
 public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
     private static final long serialVersionUID = 1L;
 
-    /** The stat that supplies the base value for computing differences. */
+    /**
+     * The stat that supplies the base value for computing differences.
+     */
     private final Stat<Long> base;
 
     /**
@@ -61,9 +63,9 @@ public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
     /**
      * Creates an instance of this class.
      *
-     * @param base the base stat used for computing differences
+     * @param base           the base stat used for computing differences
      * @param validityMillis the amount of time, in milliseconds, which a
-     * computed difference remains valid
+     *                       computed difference remains valid
      */
     public LongDiffStat(Stat<Long> base, long validityMillis) {
         assert base != null;
@@ -75,8 +77,8 @@ public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
     private LongDiffStat(LongDiffStat other) {
         base = other.base.copy();
         validityMillis = other.validityMillis;
-        synchronized (this) {
-            synchronized (other) {
+        synchronized(this) {
+            synchronized(other) {
                 prevValue = other.prevValue;
                 prevTime = other.prevTime;
                 diff = other.diff;
@@ -92,16 +94,16 @@ public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
      */
     public long get(long time) {
         assert time > 0;
-        synchronized (this) {
-            if (prevTime == 0) {
+        synchronized(this) {
+            if(prevTime == 0) {
                 return 0;
             }
-            if (time < (prevTime + validityMillis)) {
+            if(time < (prevTime + validityMillis)) {
                 return diff;
             }
         }
         final long baseValue = base.get();
-        synchronized (this) {
+        synchronized(this) {
             return Math.max(baseValue - prevValue, 0);
         }
     }
@@ -119,12 +121,12 @@ public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
      * Specifies a new value for the specified time.
      *
      * @param newValue the new value
-     * @param time the time
+     * @param time     the time
      */
     public void set(long newValue, long time) {
         assert time > 0;
         final long baseValue = base.get();
-        synchronized (this) {
+        synchronized(this) {
             prevValue = newValue;
             prevTime = time;
             diff = Math.max(baseValue - newValue, 0);
@@ -153,36 +155,42 @@ public class LongDiffStat extends MapStatComponent<Long, LongDiffStat> {
 
     @Override
     protected synchronized String getFormattedValue(boolean useCommas) {
-        if (isNotSet()) {
+        if(isNotSet()) {
             return "Unknown";
-        } else if (useCommas) {
+        }
+        else if(useCommas) {
             return Stat.FORMAT.format(get(System.currentTimeMillis()));
-        } else {
+        }
+        else {
             return String.valueOf(get(System.currentTimeMillis()));
         }
     }
 
     @Override
     public synchronized boolean isNotSet() {
-       return prevTime == 0;
+        return prevTime == 0;
     }
 
     @Override
     public synchronized String toString() {
         return "LongDiffStat[prevValue=" + prevValue +
-            ", prevTime=" + prevTime + ", diff=" + diff + "]";
+                ", prevTime=" + prevTime + ", diff=" + diff + "]";
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
     }
 
-    /** Synchronize access to fields. */
+    /**
+     * Synchronize access to fields.
+     */
     private synchronized void writeObject(ObjectOutputStream out)
-        throws IOException {
+            throws IOException {
 
         out.defaultWriteObject();
     }

@@ -173,7 +173,7 @@ public class StockQuotesRMIForwarding extends StockQuotes {
                     quote.stockSymbol + " update to " +
                     masterInfo.name);
 
-        } catch (RemoteException e) {
+        } catch(RemoteException e) {
 
             if(e.getCause() instanceof ReplicaWriteException) {
                 forwardStockUpdate(quote);
@@ -209,7 +209,7 @@ public class StockQuotesRMIForwarding extends StockQuotes {
             UnicastRemoteObject.unexportObject(writeServices, true);
             nodeRegistry.unbind(RMI_NAME);
             UnicastRemoteObject.unexportObject(nodeRegistry, true);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new IllegalStateException(e);
         }
     }
@@ -237,7 +237,7 @@ public class StockQuotesRMIForwarding extends StockQuotes {
                 throws RuntimeException {
 
 
-            switch (stateChangeEvent.getState()) {
+            switch(stateChangeEvent.getState()) {
 
                 case MASTER:
                 case REPLICA:
@@ -306,11 +306,11 @@ public class StockQuotesRMIForwarding extends StockQuotes {
                         throw rwe;
                     }
                 }.run(false /*readOnly*/);
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 throw new RemoteException("Update for stock:" +
                         quote.stockSymbol +
                         " interrupted.", e);
-            } catch (ReplicaWriteException e) {
+            } catch(ReplicaWriteException e) {
                 String errorMessage = repEnv.getNodeName() +
                         " is not currently the master. Perform the update at" +
                         " the node that's currently the master:" + masterInfo.name;
@@ -342,9 +342,9 @@ public class StockQuotesRMIForwarding extends StockQuotes {
                                 masterNode.getPort() + RMI_PORT_DISPLACEMENT);
                 reference = (WriteServices) currentMasterRegistry.
                         lookup(RMI_NAME);
-            } catch (RemoteException e) {
+            } catch(RemoteException e) {
                 throw new RuntimeException(e);
-            } catch (NotBoundException e) {
+            } catch(NotBoundException e) {
                 throw new RuntimeException(e);
             }
         }

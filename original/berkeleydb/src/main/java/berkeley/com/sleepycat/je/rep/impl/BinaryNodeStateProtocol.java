@@ -12,8 +12,6 @@
  */
 package berkeley.com.sleepycat.je.rep.impl;
 
-import java.nio.ByteBuffer;
-
 import berkeley.com.sleepycat.je.JEVersion;
 import berkeley.com.sleepycat.je.log.LogUtils;
 import berkeley.com.sleepycat.je.rep.NodeState;
@@ -21,17 +19,19 @@ import berkeley.com.sleepycat.je.rep.ReplicatedEnvironment.State;
 import berkeley.com.sleepycat.je.rep.impl.node.NameIdPair;
 import berkeley.com.sleepycat.je.rep.utilint.BinaryProtocol;
 
+import java.nio.ByteBuffer;
+
 /**
  * Defines the protocol used in support of node state querying.
- *
+ * <p>
  * Because this protocol has to transfer byte array between two nodes, so
  * instead of using the former NodeStateProtocol, we introduce this new
  * protocol which inherits from BinaryProtocol.
- *
+ * <p>
  * Note: once we support active version update, we can use one protocol only.
- *
+ * <p>
  * The message request sequence:
- *    NODE_STATE_REQ -> NODE_STATE_RESP
+ * NODE_STATE_REQ -> NODE_STATE_RESP
  */
 public class BinaryNodeStateProtocol extends BinaryProtocol {
 
@@ -39,16 +39,16 @@ public class BinaryNodeStateProtocol extends BinaryProtocol {
 
     /* The messages defined by this class. */
     public final static MessageOp BIN_NODE_STATE_REQ =
-        new MessageOp((short) 1, BinaryNodeStateRequest.class);
+            new MessageOp((short) 1, BinaryNodeStateRequest.class);
     public final static MessageOp BIN_NODE_STATE_RESP =
-        new MessageOp((short) 2, BinaryNodeStateResponse.class);
+            new MessageOp((short) 2, BinaryNodeStateResponse.class);
 
     public BinaryNodeStateProtocol(NameIdPair nameIdPair,
                                    RepImpl repImpl) {
 
         super(nameIdPair, VERSION, VERSION, repImpl);
 
-        this.initializeMessageOps(new MessageOp[] {
+        this.initializeMessageOps(new MessageOp[]{
                 BIN_NODE_STATE_REQ,
                 BIN_NODE_STATE_RESP
         });
@@ -88,7 +88,7 @@ public class BinaryNodeStateProtocol extends BinaryProtocol {
 
         @Override
         public ByteBuffer wireFormat() {
-           return wireFormat(nodeName, groupName);
+            return wireFormat(nodeName, groupName);
         }
     }
 
@@ -211,7 +211,7 @@ public class BinaryNodeStateProtocol extends BinaryProtocol {
         }
 
         public byte[] getAppState() {
-            if (appState.length == 0) {
+            if(appState.length == 0) {
                 return null;
             }
 
@@ -237,33 +237,33 @@ public class BinaryNodeStateProtocol extends BinaryProtocol {
              */
             byte[] realAppState = (appState == null ? new byte[0] : appState);
             return wireFormat(nodeName,
-                              groupName,
-                              masterName,
-                              jeVersion.toString(),
-                              joinTime,
-                              nodeState,
-                              commitVLSN,
-                              masterCommitVLSN,
-                              activeFeeders,
-                              logVersion,
-                              realAppState,
-                              systemLoad);
+                    groupName,
+                    masterName,
+                    jeVersion.toString(),
+                    joinTime,
+                    nodeState,
+                    commitVLSN,
+                    masterCommitVLSN,
+                    activeFeeders,
+                    logVersion,
+                    realAppState,
+                    systemLoad);
         }
 
         /* Convert the response to the NodeState. */
         public NodeState convertToNodeState() {
             return new NodeState(nodeName,
-                                 groupName,
-                                 nodeState,
-                                 masterName,
-                                 jeVersion,
-                                 joinTime,
-                                 commitVLSN,
-                                 masterCommitVLSN,
-                                 activeFeeders,
-                                 logVersion,
-                                 getAppState(),
-                                 systemLoad);
+                    groupName,
+                    nodeState,
+                    masterName,
+                    jeVersion,
+                    joinTime,
+                    commitVLSN,
+                    masterCommitVLSN,
+                    activeFeeders,
+                    logVersion,
+                    getAppState(),
+                    systemLoad);
         }
     }
 }

@@ -13,8 +13,6 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.io.File;
-
 import berkeley.com.sleepycat.je.DbInternal;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.EnvironmentLockedException;
@@ -23,20 +21,27 @@ import berkeley.com.sleepycat.je.config.EnvironmentParams;
 import berkeley.com.sleepycat.je.dbi.DbConfigManager;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 
+import java.io.File;
+
 /**
  * Convenience methods for command line utilities.
  */
 public class CmdUtil {
 
+    private static final String printableChars =
+            "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                    "[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
     /**
      * @throws IllegalArgumentException via main
      */
     public static String getArg(String[] argv, int whichArg)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
-        if (whichArg < argv.length) {
+        if(whichArg < argv.length) {
             return argv[whichArg];
-        } else {
+        }
+        else {
             throw new IllegalArgumentException();
         }
     }
@@ -46,9 +51,10 @@ public class CmdUtil {
      * number, else it's decimal.
      */
     public static long readLongNumber(String longVal) {
-        if (longVal.startsWith("0x")) {
+        if(longVal.startsWith("0x")) {
             return Long.parseLong(longVal.substring(2), 16);
-        } else {
+        }
+        else {
             return Long.parseLong(longVal);
         }
     }
@@ -58,43 +64,42 @@ public class CmdUtil {
      */
     public static long readLsn(String lsnVal) {
         int slashOff = lsnVal.indexOf("/");
-        if (slashOff < 0) {
+        if(slashOff < 0) {
             long fileNum = readLongNumber(lsnVal);
             return DbLsn.makeLsn(fileNum, 0);
-        } else {
+        }
+        else {
             long fileNum = readLongNumber(lsnVal.substring(0, slashOff));
             long offset = CmdUtil.readLongNumber
-                (lsnVal.substring(slashOff + 1));
+                    (lsnVal.substring(slashOff + 1));
             return DbLsn.makeLsn(fileNum, offset);
         }
     }
 
-    private static final String printableChars =
-        "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        "[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-
     public static void formatEntry(StringBuilder sb,
                                    byte[] entryData,
                                    boolean formatUsingPrintable) {
-        for (byte element : entryData) {
+        for(byte element : entryData) {
             int b = element & 0xff;
-            if (formatUsingPrintable) {
-                if (isPrint(b)) {
-                    if (b == 0134) {  /* backslash */
+            if(formatUsingPrintable) {
+                if(isPrint(b)) {
+                    if(b == 0134) {  /* backslash */
                         sb.append('\\');
                     }
                     sb.append(printableChars.charAt(b - 33));
-                } else {
+                }
+                else {
                     sb.append('\\');
                     String hex = Integer.toHexString(b);
-                    if (b < 16) {
+                    if(b < 16) {
                         sb.append('0');
                     }
                     sb.append(hex);
                 }
-            } else {
+            }
+            else {
                 String hex = Integer.toHexString(b);
-                if (b < 16) {
+                if(b < 16) {
                     sb.append('0');
                 }
                 sb.append(hex);
@@ -112,27 +117,27 @@ public class CmdUtil {
      */
     public static EnvironmentImpl makeUtilityEnvironment(File envHome,
                                                          boolean readOnly)
-        throws EnvironmentNotFoundException, EnvironmentLockedException {
+            throws EnvironmentNotFoundException, EnvironmentLockedException {
 
         EnvironmentConfig config = new EnvironmentConfig();
         config.setReadOnly(readOnly);
 
         /* Don't debug log to the database log. */
         config.setConfigParam(EnvironmentParams.JE_LOGGING_DBLOG.getName(),
-                              "false");
+                "false");
 
         /* Don't run recovery. */
         config.setConfigParam(EnvironmentParams.ENV_RECOVERY.getName(),
-                              "false");
+                "false");
 
         /* Apply the configuration in the je.properties file. */
         DbConfigManager.applyFileConfig
-            (envHome, DbInternal.getProps(config), false);
+                (envHome, DbInternal.getProps(config), false);
 
         EnvironmentImpl envImpl =
-            new EnvironmentImpl(envHome,
-                                config,
-                                null);
+                new EnvironmentImpl(envHome,
+                        config,
+                        null);
         envImpl.finishInit(config);
 
         return envImpl;

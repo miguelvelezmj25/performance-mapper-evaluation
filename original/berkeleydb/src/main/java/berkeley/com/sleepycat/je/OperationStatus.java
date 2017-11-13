@@ -42,7 +42,9 @@ public enum OperationStatus {
      */
     NOTFOUND;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "OperationStatus." + name();

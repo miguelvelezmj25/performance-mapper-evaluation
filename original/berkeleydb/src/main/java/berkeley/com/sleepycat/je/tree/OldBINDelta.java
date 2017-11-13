@@ -13,9 +13,6 @@
 
 package berkeley.com.sleepycat.je.tree;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-
 import berkeley.com.sleepycat.je.CacheMode;
 import berkeley.com.sleepycat.je.dbi.DatabaseId;
 import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
@@ -27,20 +24,23 @@ import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.SizeofMarker;
 import berkeley.com.sleepycat.je.utilint.VLSN;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+
 /**
  * An OldBINDelta contains the information needed to create a partial (delta)
  * BIN log entry. It also knows how to combine a full BIN log entry and a delta
  * to generate a new BIN.
- *
+ * <p>
  * An OldBINDelta is no longer written by this version of JE, but it may be
  * read from a log file written by earlier versions.
  */
 public class OldBINDelta implements Loggable {
 
     private final DatabaseId dbId;    // owning db for this bin.
+    private final ArrayList<DeltaInfo> deltas;  // list of key/action changes
     private long lastFullLsn;   // location of last full version
     private long prevDeltaLsn;  // location of previous delta version
-    private final ArrayList<DeltaInfo> deltas;  // list of key/action changes
 
     /**
      * For instantiating from the log.
@@ -96,7 +96,7 @@ public class OldBINDelta implements Loggable {
         final EnvironmentImpl envImpl = dbImpl.getEnv();
 
         final BIN fullBIN = (BIN)
-            envImpl.getLogManager().getEntryHandleFileNotFound(lastFullLsn);
+                envImpl.getLogManager().getEntryHandleFileNotFound(lastFullLsn);
 
         reconstituteBIN(dbImpl, fullBIN);
 
@@ -119,13 +119,13 @@ public class OldBINDelta implements Loggable {
             fullBIN.setLastFullLsn(lastFullLsn);
 
             /* Process each delta. */
-            for (int i = 0; i < deltas.size(); i++) {
+            for(int i = 0; i < deltas.size(); i++) {
                 final DeltaInfo info = deltas.get(i);
                 fullBIN.applyDelta(
-                    info.getKey(), null/*data*/, info.getLsn(),
-                    info.getState(), 0 /*lastLoggedSize*/, 0 /*memId*/,
-                    VLSN.NULL_VLSN_SEQUENCE, null /*child*/,
-                    0 /*expiration*/, false /*expirationInHours*/);
+                        info.getKey(), null/*data*/, info.getLsn(),
+                        info.getState(), 0 /*lastLoggedSize*/, 0 /*memId*/,
+                        VLSN.NULL_VLSN_SEQUENCE, null /*child*/,
+                        0 /*expiration*/, false /*expirationInHours*/);
             }
 
             /*
@@ -157,12 +157,12 @@ public class OldBINDelta implements Loggable {
     public void readFromLog(ByteBuffer itemBuffer, int entryVersion) {
         dbId.readFromLog(itemBuffer, entryVersion);
         lastFullLsn = LogUtils.readLong(itemBuffer, (entryVersion < 6));
-        if (entryVersion >= 8) {
+        if(entryVersion >= 8) {
             prevDeltaLsn = LogUtils.readPackedLong(itemBuffer);
         }
         int numDeltas = LogUtils.readInt(itemBuffer, (entryVersion < 6));
 
-        for (int i=0; i < numDeltas; i++) {
+        for(int i = 0; i < numDeltas; i++) {
             DeltaInfo info = new DeltaInfo();
             info.readFromLog(itemBuffer, entryVersion);
             deltas.add(info);
@@ -181,7 +181,7 @@ public class OldBINDelta implements Loggable {
         sb.append(DbLsn.getNoFormatString(prevDeltaLsn));
         sb.append("</prevDeltaLsn>");
         sb.append("<deltas size=\"").append(deltas.size()).append("\"/>");
-        for (int i = 0; i < deltas.size(); i++) {
+        for(int i = 0; i < deltas.size(); i++) {
             DeltaInfo info = deltas.get(i);
             info.dumpLog(sb, verbose);
         }
@@ -205,9 +205,9 @@ public class OldBINDelta implements Loggable {
      */
     public long getMemorySize() {
         long size = MemoryBudget.BINDELTA_OVERHEAD +
-                    MemoryBudget.ARRAYLIST_OVERHEAD +
-                    MemoryBudget.objectArraySize(deltas.size());
-        for (DeltaInfo info : deltas) {
+                MemoryBudget.ARRAYLIST_OVERHEAD +
+                MemoryBudget.objectArraySize(deltas.size());
+        for(DeltaInfo info : deltas) {
             size += info.getMemorySize();
         }
         return size;

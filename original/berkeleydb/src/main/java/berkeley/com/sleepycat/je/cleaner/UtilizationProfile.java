@@ -13,48 +13,25 @@
 
 package berkeley.com.sleepycat.je.cleaner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import berkeley.com.sleepycat.je.CacheMode;
-import berkeley.com.sleepycat.je.DatabaseEntry;
-import berkeley.com.sleepycat.je.DatabaseException;
-import berkeley.com.sleepycat.je.DbInternal;
-import berkeley.com.sleepycat.je.EnvironmentFailureException;
-import berkeley.com.sleepycat.je.OperationResult;
-import berkeley.com.sleepycat.je.dbi.CursorImpl;
-import berkeley.com.sleepycat.je.dbi.DatabaseId;
-import berkeley.com.sleepycat.je.dbi.DatabaseImpl;
-import berkeley.com.sleepycat.je.dbi.DbTree;
-import berkeley.com.sleepycat.je.dbi.DbType;
-import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
-import berkeley.com.sleepycat.je.dbi.MemoryBudget;
-import berkeley.com.sleepycat.je.dbi.StartupTracker;
+import berkeley.com.sleepycat.je.*;
+import berkeley.com.sleepycat.je.dbi.*;
 import berkeley.com.sleepycat.je.log.LogManager;
 import berkeley.com.sleepycat.je.log.ReplicationContext;
 import berkeley.com.sleepycat.je.log.entry.LNLogEntry;
-import berkeley.com.sleepycat.je.tree.BIN;
-import berkeley.com.sleepycat.je.tree.FileSummaryLN;
-import berkeley.com.sleepycat.je.tree.MapLN;
-import berkeley.com.sleepycat.je.tree.Tree;
-import berkeley.com.sleepycat.je.tree.TreeLocation;
+import berkeley.com.sleepycat.je.tree.*;
 import berkeley.com.sleepycat.je.txn.BasicLocker;
 import berkeley.com.sleepycat.je.txn.LockType;
 import berkeley.com.sleepycat.je.txn.Locker;
 import berkeley.com.sleepycat.je.utilint.DbLsn;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * The UP tracks utilization summary information for all log files.
- *
+ * <p>
  * <p>Unlike the UtilizationTracker, the UP is not accessed under the log write
  * latch and is instead synchronized on itself for protecting the cache.  It is
  * not accessed during the primary data access path, except for when flushing
@@ -69,17 +46,17 @@ import berkeley.com.sleepycat.je.utilint.LoggerUtils;
  * <li>The evictor will ask the UtilizationTracker to flush the largest summary
  * if the memory taken by the tracker exeeds its budget.</li>
  * </ol>
- *
+ * <p>
  * <p>The cache is populated by the RecoveryManager just before performing the
  * initial checkpoint.  The UP must be open and populated in order to respond
  * to requests to flush summaries and to evict tracked detail, even if the
  * cleaner is disabled.</p>
- *
+ * <p>
  * <p>WARNING: While synchronized on this object, eviction is not permitted.
  * If it were, this could cause deadlocks because the order of locking would be
  * the UP object and then the evictor.  During normal eviction the order is to
  * first lock the evictor and then the UP, when evicting tracked detail.</p>
- *
+ * <p>
  * <p>The methods in this class synchronize to protect the cached summary
  * information.  Some methods also access the UP database.  However, because
  * eviction must not occur while synchronized, UP database access is not
@@ -91,10 +68,10 @@ public class UtilizationProfile {
 
     private final EnvironmentImpl env;
     private final UtilizationTracker tracker;
+    private final Logger logger;
     private DatabaseImpl fileSummaryDb;
     private SortedMap<Long, FileSummary> fileSummaryMap;
     private boolean cachePopulated;
-    private final Logger logger;
 
     /**
      * Creates an empty UP.
@@ -115,8 +92,8 @@ public class UtilizationProfile {
 
         /* Start with the size from the profile. */
         long size = 0;
-        synchronized (this) {
-            for (FileSummary summary : fileSummaryMap.values()) {
+        synchronized(this) {
+            for(FileSummary summary : fileSummaryMap.values()) {
                 size += summary.totalSize;
             }
         }
@@ -128,7 +105,7 @@ public class UtilizationProfile {
          * will have a delta, but previous files may also not have been added
          * to the profile yet.
          */
-        for (TrackedFileSummary summary : tracker.getTrackedFiles()) {
+        for(TrackedFileSummary summary : tracker.getTrackedFiles()) {
             size += summary.totalSize;
         }
 
@@ -147,7 +124,7 @@ public class UtilizationProfile {
 
         /* Add tracked summary */
         TrackedFileSummary trackedSummary = tracker.getTrackedFile(file);
-        if (trackedSummary != null) {
+        if(trackedSummary != null) {
             FileSummary totals = new FileSummary();
             totals.add(summary);
             totals.add(trackedSummary);
@@ -162,7 +139,7 @@ public class UtilizationProfile {
      * and database info.
      */
     public void flushLocalTracker(LocalUtilizationTracker localTracker)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Count tracked info under the log write latch. */
         env.getLogManager().transferToUtilizationTracker(localTracker);
@@ -176,20 +153,20 @@ public class UtilizationProfile {
      * Flush a FileSummaryLN node for each given TrackedFileSummary.
      */
     public void flushFileUtilization
-        (Collection<TrackedFileSummary> activeFiles)
-        throws DatabaseException {
+    (Collection<TrackedFileSummary> activeFiles)
+            throws DatabaseException {
 
         /* Utilization flushing may be disabled for unittests. */
-        if (!DbInternal.getCheckpointUP
-            (env.getConfigManager().getEnvironmentConfig())) {
+        if(!DbInternal.getCheckpointUP
+                (env.getConfigManager().getEnvironmentConfig())) {
             return;
         }
 
         /* Write out the modified file summaries. */
-        for (TrackedFileSummary activeFile : activeFiles) {
+        for(TrackedFileSummary activeFile : activeFiles) {
             long fileNum = activeFile.getFileNumber();
             TrackedFileSummary tfs = tracker.getTrackedFile(fileNum);
-            if (tfs != null) {
+            if(tfs != null) {
                 flushFileSummary(tfs);
             }
         }
@@ -200,18 +177,18 @@ public class UtilizationProfile {
      * tracker.
      */
     private void flushDbUtilization(LocalUtilizationTracker localTracker)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Utilization flushing may be disabled for unittests. */
-        if (!DbInternal.getCheckpointUP
-            (env.getConfigManager().getEnvironmentConfig())) {
+        if(!DbInternal.getCheckpointUP
+                (env.getConfigManager().getEnvironmentConfig())) {
             return;
         }
 
         /* Write out the modified MapLNs. */
-        for (Object o : localTracker.getTrackedDbs()) {
+        for(Object o : localTracker.getTrackedDbs()) {
             DatabaseImpl db = (DatabaseImpl) o;
-            if (!db.isDeleted() && db.isDirty()) {
+            if(!db.isDeleted() && db.isDirty()) {
                 env.getDbTree().modifyDbRoot(db);
             }
         }
@@ -224,31 +201,32 @@ public class UtilizationProfile {
      * FileSummary.
      */
     public synchronized SortedMap<Long, FileSummary>
-        getFileSummaryMap(boolean includeTrackedFiles) {
+    getFileSummaryMap(boolean includeTrackedFiles) {
 
         assert cachePopulated;
 
-        if (includeTrackedFiles) {
+        if(includeTrackedFiles) {
 
             /*
              * Copy the fileSummaryMap to a new map, adding in the tracked
              * summary information for each entry.
              */
             TreeMap<Long, FileSummary> map = new TreeMap<>();
-            for (Long file : fileSummaryMap.keySet()) {
+            for(Long file : fileSummaryMap.keySet()) {
                 FileSummary summary = getFileSummary(file);
                 map.put(file, summary);
             }
 
             /* Add tracked files that are not in fileSummaryMap yet. */
-            for (TrackedFileSummary summary : tracker.getTrackedFiles()) {
+            for(TrackedFileSummary summary : tracker.getTrackedFiles()) {
                 Long fileNum = summary.getFileNumber();
-                if (!map.containsKey(fileNum)) {
+                if(!map.containsKey(fileNum)) {
                     map.put(fileNum, summary);
                 }
             }
             return map;
-        } else {
+        }
+        else {
             return new TreeMap<>(fileSummaryMap);
         }
     }
@@ -260,7 +238,7 @@ public class UtilizationProfile {
     private synchronized void clearCache() {
 
         int memorySize = fileSummaryMap.size() *
-            MemoryBudget.UTILIZATION_PROFILE_ENTRY;
+                MemoryBudget.UTILIZATION_PROFILE_ENTRY;
         MemoryBudget mb = env.getMemoryBudget();
         mb.updateAdminMemoryUsage(0 - memorySize);
 
@@ -274,7 +252,7 @@ public class UtilizationProfile {
      * exist.
      */
     void removeFile(Long fileNum, Set<DatabaseId> databases)
-        throws DatabaseException {
+            throws DatabaseException {
 
         removePerDbMetadata(Collections.singleton(fileNum), databases);
         removePerFileMetadata(fileNum);
@@ -282,7 +260,7 @@ public class UtilizationProfile {
 
     /**
      * Removes a file from the utilization database and the profile.
-     *
+     * <p>
      * For a given file, this method should be called after calling
      * removePerDbMetadata.  We update the MapLNs before deleting
      * FileSummaryLNs in case there is an error during this process.  If a
@@ -290,18 +268,18 @@ public class UtilizationProfile {
      * (populateCache).
      */
     void removePerFileMetadata(Long fileNum)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Synchronize to update the cache. */
-        synchronized (this) {
+        synchronized(this) {
             assert cachePopulated;
 
             /* Remove from the cache. */
             FileSummary oldSummary = fileSummaryMap.remove(fileNum);
-            if (oldSummary != null) {
+            if(oldSummary != null) {
                 MemoryBudget mb = env.getMemoryBudget();
                 mb.updateAdminMemoryUsage
-                    (0 - MemoryBudget.UTILIZATION_PROFILE_ENTRY);
+                        (0 - MemoryBudget.UTILIZATION_PROFILE_ENTRY);
             }
         }
 
@@ -312,12 +290,12 @@ public class UtilizationProfile {
     /**
      * Updates all MapLNs to remove the DbFileSummary for the given set of
      * file.  This method performs eviction and is not synchronized.
-     *
+     * <p>
      * This method is optimally called with a set of files that will
      * subsequently be passed to removePerFileMetadata.  When a set of files is
      * being deleted, this prevents writing a MapLN more than once when more
      * than one file contains entries for that database.
-     *
+     * <p>
      * For a given file, this method should be called before calling
      * removePerFileMetadata.  We update the MapLNs before deleting
      * FileSummaryLNs in case there is an error during this process.  If a
@@ -326,7 +304,7 @@ public class UtilizationProfile {
      */
     void removePerDbMetadata(final Collection<Long> fileNums,
                              final Set<DatabaseId> databases)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final LogManager logManager = env.getLogManager();
         final DbTree dbTree = env.getDbTree();
@@ -334,24 +312,24 @@ public class UtilizationProfile {
         DatabaseImpl idDatabase = dbTree.getDb(DbTree.ID_DB_ID);
         DatabaseImpl nameDatabase = dbTree.getDb(DbTree.NAME_DB_ID);
         boolean logRoot = false;
-        if (logManager.removeDbFileSummaries(idDatabase, fileNums)) {
+        if(logManager.removeDbFileSummaries(idDatabase, fileNums)) {
             logRoot = true;
         }
-        if (logManager.removeDbFileSummaries(nameDatabase, fileNums)) {
+        if(logManager.removeDbFileSummaries(nameDatabase, fileNums)) {
             logRoot = true;
         }
-        if (logRoot) {
+        if(logRoot) {
             env.logMapTreeRoot();
         }
         /* Use DB ID set if available to avoid full scan of ID DB. */
-        if (databases != null) {
-            for (DatabaseId dbId : databases) {
-                if (!dbId.equals(DbTree.ID_DB_ID) &&
-                    !dbId.equals(DbTree.NAME_DB_ID)) {
+        if(databases != null) {
+            for(DatabaseId dbId : databases) {
+                if(!dbId.equals(DbTree.ID_DB_ID) &&
+                        !dbId.equals(DbTree.NAME_DB_ID)) {
                     DatabaseImpl db = dbTree.getDb(dbId);
                     try {
-                        if (db != null &&
-                            logManager.removeDbFileSummaries(db, fileNums)) {
+                        if(db != null &&
+                                logManager.removeDbFileSummaries(db, fileNums)) {
                             dbTree.modifyDbRoot(db);
                         }
                     } finally {
@@ -359,7 +337,8 @@ public class UtilizationProfile {
                     }
                 }
             }
-        } else {
+        }
+        else {
 
             /*
              * Use LockType.NONE for traversing the ID DB so that a lock is not
@@ -367,34 +346,34 @@ public class UtilizationProfile {
              * handle deadlocks.
              */
             CursorImpl.traverseDbWithCursor(idDatabase,
-                                            LockType.NONE,
-                                            true /*allowEviction*/,
-                                            new CursorImpl.WithCursor() {
-                public boolean withCursor(CursorImpl cursor,
-                                          DatabaseEntry key,
-                                          DatabaseEntry data)
-                    throws DatabaseException {
+                    LockType.NONE,
+                    true /*allowEviction*/,
+                    new CursorImpl.WithCursor() {
+                        public boolean withCursor(CursorImpl cursor,
+                                                  DatabaseEntry key,
+                                                  DatabaseEntry data)
+                                throws DatabaseException {
 
-                    MapLN mapLN =
-                        (MapLN) cursor.lockAndGetCurrentLN(LockType.NONE);
+                            MapLN mapLN =
+                                    (MapLN) cursor.lockAndGetCurrentLN(LockType.NONE);
 
-                    if (mapLN != null) {
-                        DatabaseImpl db = mapLN.getDatabase();
-                        if (logManager.removeDbFileSummaries(db, fileNums)) {
+                            if(mapLN != null) {
+                                DatabaseImpl db = mapLN.getDatabase();
+                                if(logManager.removeDbFileSummaries(db, fileNums)) {
 
                             /*
                              * Because we're using dirty-read, silently do
                              * nothing if the DB does not exist
                              * (mustExist=false).
                              */
-                            dbTree.modifyDbRoot
-                                (db, DbLsn.NULL_LSN /*ifBeforeLsn*/,
-                                 false /*mustExist*/);
+                                    dbTree.modifyDbRoot
+                                            (db, DbLsn.NULL_LSN /*ifBeforeLsn*/,
+                                                    false /*mustExist*/);
+                                }
+                            }
+                            return true;
                         }
-                    }
-                    return true;
-                }
-            });
+                    });
         }
     }
 
@@ -403,7 +382,7 @@ public class UtilizationProfile {
      * and is not synchronized.
      */
     private void deleteFileSummary(final Long fileNum)
-        throws DatabaseException {
+            throws DatabaseException {
 
         Locker locker = null;
         CursorImpl cursor = null;
@@ -421,15 +400,15 @@ public class UtilizationProfile {
 
             /* Search by file number. */
             OperationResult result = null;
-            if (getFirstFSLN(
-                cursor, fileNum, keyEntry, dataEntry, LockType.WRITE)) {
+            if(getFirstFSLN(
+                    cursor, fileNum, keyEntry, dataEntry, LockType.WRITE)) {
                 result = DbInternal.DEFAULT_RESULT;
             }
 
             /* Delete all LNs for this file number. */
-            while (result != null &&
-                   fileNum ==
-                   FileSummaryLN.getFileNumber(keyEntry.getData())) {
+            while(result != null &&
+                    fileNum ==
+                            FileSummaryLN.getFileNumber(keyEntry.getData())) {
 
                 /* Perform eviction once per operation. */
                 env.daemonEviction(true /*backgroundIO*/);
@@ -441,22 +420,22 @@ public class UtilizationProfile {
                 cursor.deleteCurrentRecord(ReplicationContext.NO_REPLICATE);
 
                 result = cursor.getNext(
-                    keyEntry, dataEntry, LockType.WRITE,
-                    false /*dirtyReadAll*/, true /*forward*/,
-                    false /*isLatched*/, null /*rangeConstraint*/);
+                        keyEntry, dataEntry, LockType.WRITE,
+                        false /*dirtyReadAll*/, true /*forward*/,
+                        false /*isLatched*/, null /*rangeConstraint*/);
             }
         } finally {
-            if (cursor != null) {
+            if(cursor != null) {
                 cursor.close();
             }
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd();
             }
         }
 
         /* Explicitly remove the file from the tracker.  */
         TrackedFileSummary tfs = tracker.getTrackedFile(fileNum);
-        if (tfs != null) {
+        if(tfs != null) {
             env.getLogManager().removeTrackedFile(tfs);
         }
     }
@@ -466,9 +445,9 @@ public class UtilizationProfile {
      * of the summary is allowed.
      */
     public void flushFileSummary(TrackedFileSummary tfs)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (tfs.getAllowFlush()) {
+        if(tfs.getAllowFlush()) {
             putFileSummary(tfs);
         }
     }
@@ -478,18 +457,18 @@ public class UtilizationProfile {
      * method is synchronized and may not perform eviction.
      */
     private synchronized PackedOffsets putFileSummary(TrackedFileSummary tfs)
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (env.isReadOnly()) {
+        if(env.isReadOnly()) {
             throw EnvironmentFailureException.unexpectedState
-                ("Cannot write file summary in a read-only environment");
+                    ("Cannot write file summary in a read-only environment");
         }
 
-        if (tfs.isEmpty()) {
+        if(tfs.isEmpty()) {
             return null; // no delta
         }
 
-        if (!cachePopulated) {
+        if(!cachePopulated) {
             /* Db does not exist and this is a read-only environment. */
             return null;
         }
@@ -499,7 +478,7 @@ public class UtilizationProfile {
 
         /* Get existing file summary or create an empty one. */
         FileSummary summary = fileSummaryMap.get(fileNumLong);
-        if (summary == null) {
+        if(summary == null) {
 
             /*
              * An obsolete node may have been counted after its file was
@@ -509,9 +488,9 @@ public class UtilizationProfile {
              * new file that has been buffered but not yet flushed to disk; in
              * that case we should insert a new profile record.
              */
-            if (!fileSummaryMap.isEmpty() &&
-                fileNum < fileSummaryMap.lastKey() &&
-                !env.getFileManager().isFileValid(fileNum)) {
+            if(!fileSummaryMap.isEmpty() &&
+                    fileNum < fileSummaryMap.lastKey() &&
+                    !env.getFileManager().isFileValid(fileNum)) {
 
                 /*
                  * File was deleted by the cleaner.  Remove it from the
@@ -544,7 +523,7 @@ public class UtilizationProfile {
         /* Cache the updated summary object.  */
         summary = ln.getBaseSummary();
 
-        if (fileSummaryMap.put(fileNumLong, summary) == null) {
+        if(fileSummaryMap.put(fileNumLong, summary) == null) {
             MemoryBudget mb = env.getMemoryBudget();
             mb.updateAdminMemoryUsage(MemoryBudget.UTILIZATION_PROFILE_ENTRY);
         }
@@ -556,15 +535,15 @@ public class UtilizationProfile {
      * Returns the stored/packed obsolete offsets offsets for the given file.
      *
      * @param logUpdate if true, log any updates to the utilization profile. If
-     * false, only retrieve the new information.
+     *                  false, only retrieve the new information.
      */
     PackedOffsets getObsoleteDetail(Long fileNum, boolean logUpdate)
-        throws DatabaseException {
+            throws DatabaseException {
 
         final PackedOffsets packedOffsets = new PackedOffsets();
 
         /* Return if no detail is being tracked. */
-        if (!env.getCleaner().trackDetail) {
+        if(!env.getCleaner().trackDetail) {
             return packedOffsets;
         }
 
@@ -578,11 +557,11 @@ public class UtilizationProfile {
          * gather obsolete offsets.
          */
         final TrackedFileSummary tfs =
-            env.getLogManager().getUnflushableTrackedSummary(fileNumVal);
+                env.getLogManager().getUnflushableTrackedSummary(fileNumVal);
         try {
             /* Read the summary db. */
             final Locker locker =
-                BasicLocker.createBasicLocker(env, false /*noWait*/);
+                    BasicLocker.createBasicLocker(env, false /*noWait*/);
             final CursorImpl cursor = new CursorImpl(fileSummaryDb, locker);
             try {
                 /* Perform eviction in unsynchronized methods. */
@@ -593,29 +572,29 @@ public class UtilizationProfile {
 
                 /* Search by file number. */
                 OperationResult result = null;
-                if (getFirstFSLN(cursor, fileNumVal, keyEntry, dataEntry,
-                                  LockType.NONE)) {
+                if(getFirstFSLN(cursor, fileNumVal, keyEntry, dataEntry,
+                        LockType.NONE)) {
                     result = DbInternal.DEFAULT_RESULT;
                 }
 
                 /* Read all LNs for this file number. */
-                while (result != null) {
+                while(result != null) {
 
                     /* Perform eviction once per operation. */
                     env.daemonEviction(true /*backgroundIO*/);
 
                     final FileSummaryLN ln = (FileSummaryLN)
-                        cursor.lockAndGetCurrentLN(LockType.NONE);
+                            cursor.lockAndGetCurrentLN(LockType.NONE);
 
-                    if (ln != null) {
+                    if(ln != null) {
                         /* Stop if the file number changes. */
-                        if (fileNumVal !=
-                            FileSummaryLN.getFileNumber(keyEntry.getData())) {
+                        if(fileNumVal !=
+                                FileSummaryLN.getFileNumber(keyEntry.getData())) {
                             break;
                         }
 
                         final PackedOffsets offsets = ln.getObsoleteOffsets();
-                        if (offsets != null) {
+                        if(offsets != null) {
                             list.add(offsets.toArray());
                         }
 
@@ -624,9 +603,9 @@ public class UtilizationProfile {
                     }
 
                     result = cursor.getNext(
-                        keyEntry, dataEntry, LockType.NONE,
-                        false /*dirtyReadAll*/, true /*forward*/,
-                        false /*isLatched*/, null /*rangeConstraint*/);
+                            keyEntry, dataEntry, LockType.NONE,
+                            false /*dirtyReadAll*/, true /*forward*/,
+                            false /*isLatched*/, null /*rangeConstraint*/);
                 }
             } finally {
                 cursor.close();
@@ -637,15 +616,16 @@ public class UtilizationProfile {
              * Write out tracked detail, if any, and add its offsets to the
              * list.
              */
-            if (!tfs.isEmpty()) {
-                if (logUpdate) {
+            if(!tfs.isEmpty()) {
+                if(logUpdate) {
                     final PackedOffsets offsets = putFileSummary(tfs);
-                    if (offsets != null) {
+                    if(offsets != null) {
                         list.add(offsets.toArray());
                     }
-                } else {
+                }
+                else {
                     final long[] offsetList = tfs.getObsoleteOffsets();
-                    if (offsetList != null) {
+                    if(offsetList != null) {
                         list.add(offsetList);
                     }
                 }
@@ -657,12 +637,12 @@ public class UtilizationProfile {
 
         /* Merge all offsets into a single array and pack the result. */
         int size = 0;
-        for (final long[] a : list) {
+        for(final long[] a : list) {
             size += a.length;
         }
         final long[] offsets = new long[size];
         int index = 0;
-        for (long[] a : list) {
+        for(long[] a : list) {
             System.arraycopy(a, 0, offsets, index, a.length);
             index += a.length;
         }
@@ -680,18 +660,18 @@ public class UtilizationProfile {
      * information.
      */
     public boolean populateCache(StartupTracker.Counter counter)
-        throws DatabaseException {
+            throws DatabaseException {
 
         assert !cachePopulated;
 
         /* Open the file summary db on first use. */
-        if (!openFileSummaryDatabase()) {
+        if(!openFileSummaryDatabase()) {
             /* Db does not exist and this is a read-only environment. */
             return false;
         }
 
         int oldMemorySize = fileSummaryMap.size() *
-            MemoryBudget.UTILIZATION_PROFILE_ENTRY;
+                MemoryBudget.UTILIZATION_PROFILE_ENTRY;
 
         /*
          * It is possible to have an undeleted FileSummaryLN in the database
@@ -712,23 +692,23 @@ public class UtilizationProfile {
             DatabaseEntry keyEntry = new DatabaseEntry();
             DatabaseEntry dataEntry = new DatabaseEntry();
 
-            if (cursor.positionFirstOrLast(true)) {
+            if(cursor.positionFirstOrLast(true)) {
 
                 /* Retrieve the first record. */
                 OperationResult result = cursor.lockAndGetCurrent(
-                    keyEntry, dataEntry, LockType.NONE,
-                    false /*dirtyReadAll*/,
-                    true /*isLatched*/, true /*unlatch*/);
+                        keyEntry, dataEntry, LockType.NONE,
+                        false /*dirtyReadAll*/,
+                        true /*isLatched*/, true /*unlatch*/);
 
-                if (result == null) {
+                if(result == null) {
                     /* The record we're pointing at may be deleted. */
                     result = cursor.getNext(
-                        keyEntry, dataEntry, LockType.NONE,
-                        false /*dirtyReadAll*/, true /*forward*/,
-                        false /*isLatched*/, null /*rangeConstraint*/);
+                            keyEntry, dataEntry, LockType.NONE,
+                            false /*dirtyReadAll*/, true /*forward*/,
+                            false /*isLatched*/, null /*rangeConstraint*/);
                 }
 
-                while (result != null) {
+                while(result != null) {
                     counter.incNumRead();
 
                     /*
@@ -739,15 +719,15 @@ public class UtilizationProfile {
                     env.daemonEviction(false /*backgroundIO*/);
 
                     FileSummaryLN ln = (FileSummaryLN)
-                        cursor.lockAndGetCurrentLN(LockType.NONE);
+                            cursor.lockAndGetCurrentLN(LockType.NONE);
 
-                    if (ln == null) {
+                    if(ln == null) {
                         /* Advance past a cleaned record. */
                         result = cursor.getNext(
-                            keyEntry, dataEntry, LockType.NONE,
-                            false /*dirtyReadAll*/,
-                            true /*forward*/, false /*isLatched*/,
-                            null /*rangeConstraint*/);
+                                keyEntry, dataEntry, LockType.NONE,
+                                false /*dirtyReadAll*/,
+                                true /*forward*/, false /*isLatched*/,
+                                null /*rangeConstraint*/);
                         continue;
                     }
 
@@ -756,7 +736,7 @@ public class UtilizationProfile {
                     long fileNum = FileSummaryLN.getFileNumber(keyBytes);
                     Long fileNumLong = fileNum;
 
-                    if (Arrays.binarySearch(existingFiles, fileNumLong) >= 0) {
+                    if(Arrays.binarySearch(existingFiles, fileNumLong) >= 0) {
                         counter.incNumProcessed();
 
                         /* File exists, cache the FileSummaryLN. */
@@ -769,15 +749,17 @@ public class UtilizationProfile {
                          * converted records and to ensure that later records
                          * will have a greater sequence number.
                          */
-                        if (isOldVersion && !env.isReadOnly()) {
+                        if(isOldVersion && !env.isReadOnly()) {
                             insertFileSummary(ln, fileNum, 0);
                             cursor.deleteCurrentRecord(
-                                ReplicationContext.NO_REPLICATE);
-                        } else {
+                                    ReplicationContext.NO_REPLICATE);
+                        }
+                        else {
                             /* Always evict after using a file summary LN. */
                             cursor.evictLN();
                         }
-                    } else {
+                    }
+                    else {
 
                         /*
                          * File does not exist, remove the summary from the map
@@ -787,15 +769,16 @@ public class UtilizationProfile {
 
                         fileSummaryMap.remove(fileNumLong);
 
-                        if (!env.isReadOnly()) {
+                        if(!env.isReadOnly()) {
                             removePerDbMetadata
-                                (Collections.singleton(fileNumLong),
-                                 null /*databases*/);
-                            if (isOldVersion) {
+                                    (Collections.singleton(fileNumLong),
+                                            null /*databases*/);
+                            if(isOldVersion) {
                                 cursor.latchBIN();
                                 cursor.deleteCurrentRecord(
-                                    ReplicationContext.NO_REPLICATE);
-                            } else {
+                                        ReplicationContext.NO_REPLICATE);
+                            }
+                            else {
                                 deleteFileSummary(fileNumLong);
                             }
                         }
@@ -807,41 +790,42 @@ public class UtilizationProfile {
                     }
 
                     /* Go on to the next entry. */
-                    if (isOldVersion) {
+                    if(isOldVersion) {
 
                         /* Advance past the single old version record. */
                         result = cursor.getNext(
-                            keyEntry, dataEntry, LockType.NONE,
-                            false /*dirtyReadAll*/,
-                            true /*forward*/, false /*isLatched*/,
-                            null /*rangeConstraint*/);
-                    } else {
+                                keyEntry, dataEntry, LockType.NONE,
+                                false /*dirtyReadAll*/,
+                                true /*forward*/, false /*isLatched*/,
+                                null /*rangeConstraint*/);
+                    }
+                    else {
 
                         /*
                          * Skip over other records for this file by adding one
                          * to the file number and doing a range search.
                          */
-                        if (!getFirstFSLN
-                            (cursor,
-                             fileNum + 1,
-                             keyEntry, dataEntry,
-                             LockType.NONE)) {
+                        if(!getFirstFSLN
+                                (cursor,
+                                        fileNum + 1,
+                                        keyEntry, dataEntry,
+                                        LockType.NONE)) {
                             result = null;
                         }
                     }
                 }
             }
         } finally {
-            if (cursor != null) {
+            if(cursor != null) {
                 /* positionFirstOrLast may leave BIN latched. */
                 cursor.close();
             }
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd();
             }
 
             int newMemorySize = fileSummaryMap.size() *
-                MemoryBudget.UTILIZATION_PROFILE_ENTRY;
+                    MemoryBudget.UTILIZATION_PROFILE_ENTRY;
             MemoryBudget mb = env.getMemoryBudget();
             mb.updateAdminMemoryUsage(newMemorySize - oldMemorySize);
         }
@@ -858,7 +842,7 @@ public class UtilizationProfile {
                                  DatabaseEntry keyEntry,
                                  DatabaseEntry dataEntry,
                                  LockType lockType)
-        throws DatabaseException {
+            throws DatabaseException {
 
         byte[] keyBytes = FileSummaryLN.makePartialKey(fileNum);
         keyEntry.setData(keyBytes);
@@ -868,16 +852,16 @@ public class UtilizationProfile {
         try {
             int result = cursor.searchRange(keyEntry, null /*comparator*/);
 
-            if ((result & CursorImpl.FOUND) == 0) {
+            if((result & CursorImpl.FOUND) == 0) {
                 return false;
             }
 
             boolean exactKeyMatch = ((result & CursorImpl.EXACT_KEY) != 0);
 
-            if (exactKeyMatch &&
-                cursor.lockAndGetCurrent(
-                    keyEntry, dataEntry, lockType, false /*dirtyReadAll*/,
-                    true /*isLatched*/, false /*unlatch*/) != null) {
+            if(exactKeyMatch &&
+                    cursor.lockAndGetCurrent(
+                            keyEntry, dataEntry, lockType, false /*dirtyReadAll*/,
+                            true /*isLatched*/, false /*unlatch*/) != null) {
                 return true;
             }
         } finally {
@@ -888,8 +872,8 @@ public class UtilizationProfile {
         cursor.evictLN();
 
         OperationResult result = cursor.getNext(
-            keyEntry, dataEntry, lockType, false /*dirtyReadAll*/,
-            true /*forward*/, false /*isLatched*/, null /*rangeConstraint*/);
+                keyEntry, dataEntry, lockType, false /*dirtyReadAll*/,
+                true /*forward*/, false /*isLatched*/, null /*rangeConstraint*/);
 
         return result != null;
     }
@@ -901,14 +885,14 @@ public class UtilizationProfile {
      * be created if it doesn't exist.
      */
     private boolean openFileSummaryDatabase()
-        throws DatabaseException {
+            throws DatabaseException {
 
-        if (fileSummaryDb != null) {
+        if(fileSummaryDb != null) {
             return true;
         }
 
         fileSummaryDb =
-            env.getDbTree().openNonRepInternalDB(DbType.UTILIZATION);
+                env.getDbTree().openNonRepInternalDB(DbType.UTILIZATION);
 
         return (fileSummaryDb != null);
     }
@@ -923,14 +907,14 @@ public class UtilizationProfile {
     /**
      * Insert the given LN with the given key values.  This method is
      * synchronized and may not perform eviction.
-     * 
+     * <p>
      * Is public only for unit testing.
      */
     synchronized boolean insertFileSummary(
-        FileSummaryLN ln,
-        long fileNum,
-        int sequence)
-        throws DatabaseException {
+            FileSummaryLN ln,
+            long fileNum,
+            int sequence)
+            throws DatabaseException {
 
         byte[] keyBytes = FileSummaryLN.makeFullKey(fileNum, sequence);
 
@@ -942,15 +926,15 @@ public class UtilizationProfile {
 
             /* Insert the LN. */
             boolean inserted = cursor.insertRecord(
-                keyBytes, ln, false /*blindInsertion*/,
-                ReplicationContext.NO_REPLICATE);
+                    keyBytes, ln, false /*blindInsertion*/,
+                    ReplicationContext.NO_REPLICATE);
 
-            if (!inserted) {
+            if(!inserted) {
                 LoggerUtils.traceAndLog
-                    (logger, env, Level.SEVERE,
-                     "Cleaner duplicate key sequence file=0x" +
-                     Long.toHexString(fileNum) + " sequence=0x" +
-                     Long.toHexString(sequence));
+                        (logger, env, Level.SEVERE,
+                                "Cleaner duplicate key sequence file=0x" +
+                                        Long.toHexString(fileNum) + " sequence=0x" +
+                                        Long.toHexString(sequence));
                 return false;
             }
 
@@ -958,10 +942,10 @@ public class UtilizationProfile {
             cursor.evictLN();
             return true;
         } finally {
-            if (cursor != null) {
+            if(cursor != null) {
                 cursor.close();
             }
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd();
             }
         }
@@ -975,7 +959,7 @@ public class UtilizationProfile {
      * @return true if no verification failures.
      */
     public boolean verifyFileSummaryDatabase()
-        throws DatabaseException {
+            throws DatabaseException {
 
         DatabaseEntry key = new DatabaseEntry();
         DatabaseEntry data = new DatabaseEntry();
@@ -990,35 +974,35 @@ public class UtilizationProfile {
             cursor = new CursorImpl(fileSummaryDb, locker);
             cursor.setAllowEviction(true);
 
-            if (cursor.positionFirstOrLast(true)) {
+            if(cursor.positionFirstOrLast(true)) {
 
                 OperationResult result = cursor.lockAndGetCurrent(
-                    key, data, LockType.NONE, false /*dirtyReadAll*/,
-                    true /*isLatched*/, true /*unlatch*/);
+                        key, data, LockType.NONE, false /*dirtyReadAll*/,
+                        true /*isLatched*/, true /*unlatch*/);
 
                 /* Iterate over all file summary lns. */
-                while (result != null) {
+                while(result != null) {
 
                     /* Perform eviction once per operation. */
                     env.daemonEviction(true /*backgroundIO*/);
 
                     FileSummaryLN ln = (FileSummaryLN)
-                        cursor.lockAndGetCurrentLN(LockType.NONE);
+                            cursor.lockAndGetCurrentLN(LockType.NONE);
 
-                    if (ln != null) {
+                    if(ln != null) {
                         long fileNumVal =
-                            FileSummaryLN.getFileNumber(key.getData());
+                                FileSummaryLN.getFileNumber(key.getData());
                         PackedOffsets offsets = ln.getObsoleteOffsets();
 
                         /*
                          * Check every offset in the fsln to make sure it's
                          * truly obsolete.
                          */
-                        if (offsets != null) {
+                        if(offsets != null) {
                             long[] vals = offsets.toArray();
-                            for (long val : vals) {
+                            for(long val : vals) {
                                 long lsn = DbLsn.makeLsn(fileNumVal, val);
-                                if (!verifyLsnIsObsolete(lsn)) {
+                                if(!verifyLsnIsObsolete(lsn)) {
                                     ok = false;
                                 }
                             }
@@ -1028,16 +1012,16 @@ public class UtilizationProfile {
                     }
 
                     result = cursor.getNext(
-                        key, data, LockType.NONE, false /*dirtyReadAll*/,
-                        true /*forward*/, false /*isLatched*/,
-                        null /*rangeConstraint*/);
+                            key, data, LockType.NONE, false /*dirtyReadAll*/,
+                            true /*forward*/, false /*isLatched*/,
+                            null /*rangeConstraint*/);
                 }
             }
         } finally {
-            if (cursor != null) {
+            if(cursor != null) {
                 cursor.close();
             }
-            if (locker != null) {
+            if(locker != null) {
                 locker.operationEnd();
             }
         }
@@ -1049,11 +1033,11 @@ public class UtilizationProfile {
      * Return true if the LN at this lsn is obsolete.
      */
     private boolean verifyLsnIsObsolete(long lsn)
-        throws DatabaseException {
+            throws DatabaseException {
 
         /* Read the whole entry out of the log. */
         Object o = env.getLogManager().getLogEntryHandleFileNotFound(lsn);
-        if (!(o instanceof LNLogEntry)) {
+        if(!(o instanceof LNLogEntry)) {
             return true;
         }
         LNLogEntry<?> entry = (LNLogEntry<?>) o;
@@ -1072,11 +1056,11 @@ public class UtilizationProfile {
              * to worry about delete cleanup; this is just verification and
              * no cleaning is done.
              */
-            if (db == null || db.isDeleted()) {
+            if(db == null || db.isDeleted()) {
                 return true;
             }
 
-            if (entry.isImmediatelyObsolete(db)) {
+            if(entry.isImmediatelyObsolete(db)) {
                 return true;
             }
 
@@ -1085,14 +1069,14 @@ public class UtilizationProfile {
             Tree tree = db.getTree();
             TreeLocation location = new TreeLocation();
             boolean parentFound = tree.getParentBINForChildLN(
-                location, entry.getKey(), false /*splitsAllowed*/,
-                false /*blindDeltaOps*/, CacheMode.UNCHANGED);
+                    location, entry.getKey(), false /*splitsAllowed*/,
+                    false /*blindDeltaOps*/, CacheMode.UNCHANGED);
 
             bin = location.bin;
             int index = location.index;
 
             /* Is bin latched ? */
-            if (!parentFound) {
+            if(!parentFound) {
                 return true;
             }
 
@@ -1100,22 +1084,22 @@ public class UtilizationProfile {
              * Now we're at the BIN parent for this LN.  If knownDeleted, LN is
              * deleted and can be purged.
              */
-            if (bin.isEntryKnownDeleted(index)) {
+            if(bin.isEntryKnownDeleted(index)) {
                 return true;
             }
 
-            if (bin.getLsn(index) != lsn) {
+            if(bin.getLsn(index) != lsn) {
                 return true;
             }
 
             /* Oh no -- this lsn is in the tree. */
             /* should print, or trace? */
-            System.err.println("lsn " + DbLsn.getNoFormatString(lsn)+
-                               " was found in tree.");
+            System.err.println("lsn " + DbLsn.getNoFormatString(lsn) +
+                    " was found in tree.");
             return false;
         } finally {
             env.getDbTree().releaseDb(db);
-            if (bin != null) {
+            if(bin != null) {
                 bin.releaseLatch();
             }
         }
@@ -1127,7 +1111,7 @@ public class UtilizationProfile {
      */
     void close() {
         clearCache();
-        if (fileSummaryDb != null) {
+        if(fileSummaryDb != null) {
             fileSummaryDb.releaseTreeAdminMemory();
         }
     }

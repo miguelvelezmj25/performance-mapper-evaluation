@@ -13,26 +13,24 @@
 
 package berkeley.com.sleepycat.je.utilint;
 
-import java.text.DecimalFormat;
-
 import berkeley.com.sleepycat.je.EnvironmentFailureException;
+
+import java.text.DecimalFormat;
 
 /**
  * Base class for all JE statistics. A single Stat embodies a value and
  * definition. See StatGroup for a description of how to create and display
  * statistics.
- *
+ * <p>
  * Note that Stat intentionally does not contain the statistics value itself.
  * Instead, the concrete subclass will implement the value as the appropriate
  * primitive type. That's done to avoid wrapper classes like Integer and Long,
  * and to  keep the overhead of statistics low.
  */
 public abstract class Stat<T> extends BaseStat<T> implements Cloneable {
-    private static final long serialVersionUID = 1L;
-
     public static final DecimalFormat FORMAT =
-        new DecimalFormat("###,###,###,###,###,###,###");
-
+            new DecimalFormat("###,###,###,###,###,###,###");
+    private static final long serialVersionUID = 1L;
     protected final StatDefinition definition;
 
     /**
@@ -74,11 +72,10 @@ public abstract class Stat<T> extends BaseStat<T> implements Cloneable {
 
     @Override
     public Stat<T> copy() {
-        @SuppressWarnings("unchecked")
-        final Stat<T> copy;
+        @SuppressWarnings("unchecked") final Stat<T> copy;
         try {
             copy = (Stat<T>) super.clone();
-        } catch (CloneNotSupportedException unexpected) {
+        } catch(CloneNotSupportedException unexpected) {
             throw EnvironmentFailureException.unexpectedException(unexpected);
         }
         return copy;
@@ -116,6 +113,6 @@ public abstract class Stat<T> extends BaseStat<T> implements Cloneable {
      */
     public String toStringVerbose() {
         return definition.getName() + "=" + getFormattedValue() +
-            "\n\t\t" + definition.getDescription();
+                "\n\t\t" + definition.getDescription();
     }
 }

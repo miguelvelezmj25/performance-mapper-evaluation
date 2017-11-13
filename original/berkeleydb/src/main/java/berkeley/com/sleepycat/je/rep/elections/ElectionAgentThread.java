@@ -13,11 +13,6 @@
 
 package berkeley.com.sleepycat.je.rep.elections;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Formatter;
-import java.util.logging.Logger;
-
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.RepNode;
 import berkeley.com.sleepycat.je.rep.net.DataChannel;
@@ -25,6 +20,11 @@ import berkeley.com.sleepycat.je.rep.utilint.RepUtils;
 import berkeley.com.sleepycat.je.rep.utilint.ReplicationFormatter;
 import berkeley.com.sleepycat.je.utilint.LoggerUtils;
 import berkeley.com.sleepycat.je.utilint.StoppableThread;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Formatter;
+import java.util.logging.Logger;
 
 /**
  * ElectionAgentThread is the base class for the election agent threads
@@ -48,7 +48,7 @@ public class ElectionAgentThread extends StoppableThread {
      * new Feeder instances.
      */
     protected final BlockingQueue<DataChannel> channelQueue =
-        new LinkedBlockingQueue<DataChannel>();
+            new LinkedBlockingQueue<DataChannel>();
 
     protected ElectionAgentThread(RepNode repNode,
                                   Protocol protocol,
@@ -57,24 +57,24 @@ public class ElectionAgentThread extends StoppableThread {
         this.protocol = protocol;
 
         logger = (envImpl != null) ?
-            LoggerUtils.getLogger(getClass()) :
-            LoggerUtils.getLoggerFormatterNeeded(getClass());
+                LoggerUtils.getLogger(getClass()) :
+                LoggerUtils.getLoggerFormatterNeeded(getClass());
 
         formatter = new ReplicationFormatter(protocol.getNameIdPair());
     }
 
     protected ElectionAgentThread(EnvironmentImpl envImpl,
-            Protocol protocol,
-            String threadName) {
+                                  Protocol protocol,
+                                  String threadName) {
         super(envImpl, threadName);
         this.protocol = protocol;
 
         logger = (envImpl != null) ?
-           LoggerUtils.getLogger(getClass()) :
-           LoggerUtils.getLoggerFormatterNeeded(getClass());
+                LoggerUtils.getLogger(getClass()) :
+                LoggerUtils.getLoggerFormatterNeeded(getClass());
 
         formatter = new ReplicationFormatter(protocol.getNameIdPair());
-     }
+    }
 
     @Override
     protected Logger getLogger() {
@@ -83,12 +83,13 @@ public class ElectionAgentThread extends StoppableThread {
 
     /**
      * Shuts down the Agent.
+     *
      * @throws InterruptedException
      */
     public void shutdown()
-        throws InterruptedException{
+            throws InterruptedException {
 
-        if (shutdownDone(logger)) {
+        if(shutdownDone(logger)) {
             return;
         }
         shutdownThread(logger);

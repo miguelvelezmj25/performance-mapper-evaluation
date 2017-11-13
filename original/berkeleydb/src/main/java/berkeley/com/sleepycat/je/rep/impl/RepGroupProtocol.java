@@ -17,25 +17,31 @@ import berkeley.com.sleepycat.je.rep.net.DataChannelFactory;
 
 /**
  * Defines the protocol used in support of group membership.
- *
+ * <p>
  * API to Master
- *   ENSURE_NODE -> ENSURE_OK | FAIL
- *   REMOVE_MEMBER -> OK | FAIL
- *   TRANSFER_MASTER -> TRANSFER_OK | FAIL
- *   DELETE_MEMBER -> OK | FAIL
- *
+ * ENSURE_NODE -> ENSURE_OK | FAIL
+ * REMOVE_MEMBER -> OK | FAIL
+ * TRANSFER_MASTER -> TRANSFER_OK | FAIL
+ * DELETE_MEMBER -> OK | FAIL
+ * <p>
  * Monitor to Master
- *   GROUP_REQ -> GROUP | FAIL
+ * GROUP_REQ -> GROUP | FAIL
  */
 public class RepGroupProtocol extends TextProtocol {
 
-    /** The current protocol version. */
+    /**
+     * The current protocol version.
+     */
     public static final String VERSION = "4";
 
-    /** The protocol version introduced to support RepGroupImpl version 3. */
+    /**
+     * The protocol version introduced to support RepGroupImpl version 3.
+     */
     public static final String REP_GROUP_V3_VERSION = "4";
 
-    /** The protocol version used with RepGroupImpl version 2. */
+    /**
+     * The protocol version used with RepGroupImpl version 2.
+     */
     public static final String REP_GROUP_V2_VERSION = "3";
 
     /**
@@ -43,35 +49,28 @@ public class RepGroupProtocol extends TextProtocol {
      * version.
      */
     private static volatile String testCurrentVersion = null;
-
-    public static enum FailReason {
-        DEFAULT, MEMBER_NOT_FOUND, IS_MASTER, IS_REPLICA, TRANSFER_FAIL,
-        MEMBER_ACTIVE;
-    }
+    public final MessageOp ENSURE_NODE =
+            new MessageOp("ENREQ", EnsureNode.class);
 
     /* The messages defined by this class. */
-
-    public final MessageOp ENSURE_NODE =
-        new MessageOp("ENREQ", EnsureNode.class);
     public final MessageOp ENSURE_OK =
-        new MessageOp("ENRESP", EnsureOK.class);
+            new MessageOp("ENRESP", EnsureOK.class);
     public final MessageOp REMOVE_MEMBER =
-        new MessageOp("RMREQ", RemoveMember.class);
+            new MessageOp("RMREQ", RemoveMember.class);
     public final MessageOp GROUP_REQ =
-        new MessageOp("GREQ", GroupRequest.class);
+            new MessageOp("GREQ", GroupRequest.class);
     public final MessageOp GROUP_RESP =
-        new MessageOp("GRESP", GroupResponse.class);
+            new MessageOp("GRESP", GroupResponse.class);
     public final MessageOp RGFAIL_RESP =
-        new MessageOp("GRFAIL", Fail.class);
+            new MessageOp("GRFAIL", Fail.class);
     public final MessageOp UPDATE_ADDRESS =
-        new MessageOp("UPDADDR", UpdateAddress.class);
+            new MessageOp("UPDADDR", UpdateAddress.class);
     public final MessageOp TRANSFER_MASTER =
-        new MessageOp("TMASTER", TransferMaster.class);
+            new MessageOp("TMASTER", TransferMaster.class);
     public final MessageOp TRANSFER_OK =
-        new MessageOp("TMRESP", TransferOK.class);
+            new MessageOp("TMRESP", TransferOK.class);
     public final MessageOp DELETE_MEMBER =
-        new MessageOp("DLREQ", DeleteMember.class);
-
+            new MessageOp("DLREQ", DeleteMember.class);
     /**
      * Creates an instance of this class using the current protocol version.
      */
@@ -81,7 +80,7 @@ public class RepGroupProtocol extends TextProtocol {
                             DataChannelFactory channelFactory) {
 
         this(getCurrentVersion(), groupName, nameIdPair, repImpl,
-             channelFactory);
+                channelFactory);
     }
 
     /**
@@ -95,7 +94,7 @@ public class RepGroupProtocol extends TextProtocol {
 
         super(version, groupName, nameIdPair, repImpl, channelFactory);
 
-        this.initializeMessageOps(new MessageOp[] {
+        this.initializeMessageOps(new MessageOp[]{
                 ENSURE_NODE,
                 ENSURE_OK,
                 REMOVE_MEMBER,
@@ -109,11 +108,13 @@ public class RepGroupProtocol extends TextProtocol {
         });
 
         setTimeouts(repImpl,
-                    RepParams.REP_GROUP_OPEN_TIMEOUT,
-                    RepParams.REP_GROUP_READ_TIMEOUT);
+                RepParams.REP_GROUP_OPEN_TIMEOUT,
+                RepParams.REP_GROUP_READ_TIMEOUT);
     }
 
-    /** Get the current version, supporting a test override. */
+    /**
+     * Get the current version, supporting a test override.
+     */
     public static String getCurrentVersion() {
         return (testCurrentVersion != null) ? testCurrentVersion : VERSION;
     }
@@ -133,8 +134,13 @@ public class RepGroupProtocol extends TextProtocol {
     private static int getGroupFormatVersion(final String protocolVersion) {
         return (Double.parseDouble(protocolVersion) <=
                 Double.parseDouble(REP_GROUP_V2_VERSION)) ?
-            RepGroupImpl.FORMAT_VERSION_2 :
-            RepGroupImpl.MAX_FORMAT_VERSION;
+                RepGroupImpl.FORMAT_VERSION_2 :
+                RepGroupImpl.MAX_FORMAT_VERSION;
+    }
+
+    public static enum FailReason {
+        DEFAULT, MEMBER_NOT_FOUND, IS_MASTER, IS_REPLICA, TRANSFER_FAIL,
+        MEMBER_ACTIVE;
     }
 
     private abstract class CommonRequest extends RequestMessage {
@@ -145,7 +151,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public CommonRequest(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
             nodeName = nextPayloadToken();
@@ -172,7 +178,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public RemoveMember(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
         }
@@ -193,7 +199,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public DeleteMember(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
         }
@@ -219,7 +225,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public TransferMaster(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
             this.nodeNameList = nextPayloadToken();
@@ -230,7 +236,7 @@ public class RepGroupProtocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR + nodeNameList +
-                SEPARATOR + timeout + SEPARATOR + force;
+                    SEPARATOR + timeout + SEPARATOR + force;
         }
 
         @Override
@@ -257,13 +263,13 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public GroupRequest(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(line, tokens);
         }
 
         @Override
         public MessageOp getOp() {
-           return GROUP_REQ;
+            return GROUP_REQ;
         }
 
         @Override
@@ -273,7 +279,7 @@ public class RepGroupProtocol extends TextProtocol {
 
         @Override
         public String wireFormat() {
-           return wireFormatPrefix();
+            return wireFormatPrefix();
         }
     }
 
@@ -290,7 +296,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public UpdateAddress(String requestLine, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(requestLine, tokens);
             this.newHostName = nextPayloadToken();
@@ -313,7 +319,7 @@ public class RepGroupProtocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return super.wireFormat() + SEPARATOR + newHostName + SEPARATOR +
-                   newPort;
+                    newPort;
         }
     }
 
@@ -326,11 +332,11 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public EnsureNode(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             node = RepGroupImpl.hexDeserializeNode(
-                nextPayloadToken(), getGroupFormatVersion(sendVersion));
+                    nextPayloadToken(), getGroupFormatVersion(sendVersion));
         }
 
         public RepNodeImpl getNode() {
@@ -350,8 +356,8 @@ public class RepGroupProtocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR +
-                   RepGroupImpl.serializeHex(
-                       node, getGroupFormatVersion(sendVersion));
+                    RepGroupImpl.serializeHex(
+                            node, getGroupFormatVersion(sendVersion));
         }
     }
 
@@ -364,10 +370,10 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public EnsureOK(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(line, tokens);
             nameIdPair = new NameIdPair(nextPayloadToken(),
-                                        Integer.parseInt(nextPayloadToken()));
+                    Integer.parseInt(nextPayloadToken()));
         }
 
         public NameIdPair getNameIdPair() {
@@ -382,8 +388,8 @@ public class RepGroupProtocol extends TextProtocol {
         @Override
         public String wireFormat() {
             return wireFormatPrefix() + SEPARATOR +
-                   nameIdPair.getName() + SEPARATOR +
-                   Integer.toString(nameIdPair.getId());
+                    nameIdPair.getName() + SEPARATOR +
+                    Integer.toString(nameIdPair.getId());
         }
     }
 
@@ -396,7 +402,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public TransferOK(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
             super(line, tokens);
             winner = nextPayloadToken();
         }
@@ -425,11 +431,11 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public GroupResponse(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             group = RepGroupImpl.deserializeHex
-                (tokens, getCurrentTokenPosition());
+                    (tokens, getCurrentTokenPosition());
         }
 
         public RepGroupImpl getGroup() {
@@ -454,11 +460,11 @@ public class RepGroupProtocol extends TextProtocol {
              * current group version.
              */
             int groupFormatVersion = getGroupFormatVersion(sendVersion);
-            if (group.getFormatVersion() < groupFormatVersion) {
+            if(group.getFormatVersion() < groupFormatVersion) {
                 groupFormatVersion = group.getFormatVersion();
             }
             return wireFormatPrefix() + SEPARATOR +
-                group.serializeHex(groupFormatVersion);
+                    group.serializeHex(groupFormatVersion);
         }
     }
 
@@ -483,7 +489,7 @@ public class RepGroupProtocol extends TextProtocol {
         }
 
         public Fail(String line, String[] tokens)
-            throws InvalidMessageException {
+                throws InvalidMessageException {
 
             super(line, tokens);
             reason = FailReason.valueOf(nextPayloadToken());

@@ -42,15 +42,16 @@ public class TreeLocation {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("<TreeLocation bin=\"");
-        if (bin == null) {
+        if(bin == null) {
             sb.append("null");
-        } else {
+        }
+        else {
             sb.append(bin.getNodeId());
         }
         sb.append("\" index=\"");
         sb.append(index);
         sb.append("\" lnKey=\"");
-        sb.append(Key.dumpString(lnKey,0));
+        sb.append(Key.dumpString(lnKey, 0));
         sb.append("\" childLsn=\"");
         sb.append(DbLsn.toString(childLsn));
         sb.append("\" childLoggedSize=\"");

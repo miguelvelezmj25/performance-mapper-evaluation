@@ -13,14 +13,14 @@
 
 package berkeley.com.sleepycat.je.rep;
 
-import java.util.concurrent.TimeUnit;
-
 import berkeley.com.sleepycat.je.CommitToken;
 import berkeley.com.sleepycat.je.ReplicaConsistencyPolicy;
 import berkeley.com.sleepycat.je.dbi.EnvironmentImpl;
 import berkeley.com.sleepycat.je.rep.impl.RepImpl;
 import berkeley.com.sleepycat.je.rep.impl.node.Replica;
 import berkeley.com.sleepycat.je.utilint.PropUtil;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A consistency policy which ensures that the environment on a Replica node is
@@ -88,26 +88,23 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
      * after the transaction identified by the <code>commitToken</code> has
      * been committed on the Replica. The {@link
      * com.sleepycat.je.Environment#beginTransaction(
-     * com.sleepycat.je.Transaction, com.sleepycat.je.TransactionConfig)
+     *com.sleepycat.je.Transaction, com.sleepycat.je.TransactionConfig)
      * Environment.beginTransaction()} will wait for at most
      * <code>timeout</code> for the Replica to catch up. If the Replica has
      * not caught up in this period, the <code>beginTransaction()</code>
      * method will throw a {@link ReplicaConsistencyException}.
      *
      * @param commitToken the token identifying the transaction
-     *
-     * @param timeout the maximum amount of time that the transaction start
-     * will wait to allow the Replica to catch up.
-     *
+     * @param timeout     the maximum amount of time that the transaction start
+     *                    will wait to allow the Replica to catch up.
      * @param timeoutUnit the {@code TimeUnit} for the timeout parameter.
-     *
      * @throws IllegalArgumentException if the commitToken or timeoutUnit is
-     * null.
+     *                                  null.
      */
     public CommitPointConsistencyPolicy(CommitToken commitToken,
                                         long timeout,
                                         TimeUnit timeoutUnit) {
-        if (commitToken == null) {
+        if(commitToken == null) {
             throw new IllegalArgumentException("commitToken must not be null");
         }
         this.commitToken = commitToken;
@@ -116,6 +113,7 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
 
     /**
      * Returns the name:{@value #NAME}, associated with this policy.
+     *
      * @see #NAME
      */
     @Override
@@ -124,8 +122,7 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
     }
 
     /**
-     * @hidden
-     * For internal use only.
+     * @hidden For internal use only.
      * Ensures that the replica has replayed the replication stream to the
      * point identified by the commit token or past it. If it has not, the
      * method waits until the constraint is satisfied, or the timeout period
@@ -133,31 +130,32 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
      */
     @Override
     public void ensureConsistency(EnvironmentImpl envImpl)
-        throws InterruptedException,
-               ReplicaConsistencyException {
+            throws InterruptedException,
+            ReplicaConsistencyException {
 
         /*
          * Cast is done to preserve replication/non replication code
          * boundaries.
          */
         RepImpl repImpl = (RepImpl) envImpl;
-        if (!commitToken.getRepenvUUID().equals
+        if(!commitToken.getRepenvUUID().equals
                 (repImpl.getRepNode().getUUID())) {
             throw new IllegalArgumentException
-                ("Replication environment mismatch. " +
-                 "The UUID associated with the commit token is: " +
-                 commitToken.getRepenvUUID() +
-                 " but this replica environment has the UUID: " +
-                 repImpl.getRepNode().getUUID());
+                    ("Replication environment mismatch. " +
+                            "The UUID associated with the commit token is: " +
+                            commitToken.getRepenvUUID() +
+                            " but this replica environment has the UUID: " +
+                            repImpl.getRepNode().getUUID());
         }
         Replica replica = repImpl.getRepNode().replica();
         replica.getConsistencyTracker().awaitVLSN
-            (commitToken.getVLSN(), this);
+                (commitToken.getVLSN(), this);
     }
 
     /**
      * Return the <code>CommitToken</code> used to create this consistency
      * policy.
+     *
      * @return the <code>CommitToken</code> used to create this consistency
      * policy.
      */
@@ -169,7 +167,6 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
      * Return the timeout specified when creating this consistency policy.
      *
      * @param unit the {@code TimeUnit} of the returned value.
-     *
      * @return the timeout specified when creating this consistency policy
      */
     @Override
@@ -195,25 +192,26 @@ public class CommitPointConsistencyPolicy implements ReplicaConsistencyPolicy {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if(this == obj) {
             return true;
         }
-        if (obj == null) {
+        if(obj == null) {
             return false;
         }
-        if (!(obj instanceof CommitPointConsistencyPolicy)) {
+        if(!(obj instanceof CommitPointConsistencyPolicy)) {
             return false;
         }
         CommitPointConsistencyPolicy other =
-            (CommitPointConsistencyPolicy) obj;
-        if (commitToken == null) {
-            if (other.commitToken != null) {
+                (CommitPointConsistencyPolicy) obj;
+        if(commitToken == null) {
+            if(other.commitToken != null) {
                 return false;
             }
-        } else if (!commitToken.equals(other.commitToken)) {
+        }
+        else if(!commitToken.equals(other.commitToken)) {
             return false;
         }
-        if (timeout != other.timeout) {
+        if(timeout != other.timeout) {
             return false;
         }
         return true;

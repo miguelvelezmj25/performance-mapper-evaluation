@@ -14,10 +14,6 @@
 package berkeley.com.sleepycat.je.rep;
 
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
 import berkeley.com.sleepycat.je.EnvironmentConfig;
 import berkeley.com.sleepycat.je.config.ConfigParam;
 import berkeley.com.sleepycat.je.config.EnvironmentParams;
@@ -26,6 +22,11 @@ import berkeley.com.sleepycat.je.rep.impl.RepParams;
 import berkeley.com.sleepycat.je.rep.net.InstanceParams;
 import berkeley.com.sleepycat.je.rep.net.PasswordSource;
 import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @hidden SSL deferred
@@ -51,13 +52,29 @@ import berkeley.com.sleepycat.je.rep.net.SSLAuthenticator;
  * <li>Any configuration parameters not set by the application are set to
  * system defaults, described along with the parameter name String constants
  * in this class.</li>
- *</ol>
+ * </ol>
  * <p>
- *
  */
 public class ReplicationSSLConfig extends ReplicationNetworkConfig {
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * The path to the Java keystore file for SSL data channnel factories.
+     * The specified path must be absolute.
+     * If this parameter is not set or has an empty value, the Java system
+     * property <code>javax.net.ssl.keyStore</code> is used.
+     * <p>
+     * <p><table border="1">
+     * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
+     * <tr>
+     * <td>{@value}</td>
+     * <td>String</td>
+     * <td>No</td>
+     * <td>""</td>
+     * </tr>
+     * </table></p>
+     */
+    public static final String SSL_KEYSTORE_FILE =
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStoreFile";
 
     /*
      * Note: all replicated parameters should start with
@@ -106,31 +123,11 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      *   {@link #SSL_HOST_VERIFIER_PARAMS je.rep.ssl.hostVerifierParams}
      * </pre>
      */
-
-    /**
-     * The path to the Java keystore file for SSL data channnel factories.
-     * The specified path must be absolute.
-     * If this parameter is not set or has an empty value, the Java system
-     * property <code>javax.net.ssl.keyStore</code> is used.
-     *
-     * <p><table border="1">
-     * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
-     * <tr>
-     * <td>{@value}</td>
-     * <td>String</td>
-     * <td>No</td>
-     * <td>""</td>
-     * </tr>
-     * </table></p>
-     */
-    public static final String SSL_KEYSTORE_FILE =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStoreFile";
-
     /**
      * The password for accessing the Java keystore file for SSL data channnel
      * factories. If this parameter is not set or has an empty value, the Java
      * system property <code>javax.net.ssl.keyStorePassword</code> is used.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -142,13 +139,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_KEYSTORE_PASSWORD =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePassword";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePassword";
     /**
      * A class that will be instantiated in order to retrieve a password that
      * allows access to the keystore file. The class must implement the
      * <code>com.sleepycat.je.rep.net.PasswordSource</code> interface.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -160,11 +156,10 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_KEYSTORE_PASSWORD_CLASS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePasswordClass";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePasswordClass";
     /**
      * A string encoding the parameters for configuring the password class.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -176,15 +171,14 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_KEYSTORE_PASSWORD_PARAMS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePasswordParams";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStorePasswordParams";
     /**
      * The type of the Java keystore file. This is used to determine what
      * keystore implementation should be used to manipulate the named
      * keystore file. If set to a non-empty value, the value must be a valid
      * keystore type for the Java environment. If this parameter is not set to
      * a non-empty value, the default Java keystore type is assumed.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -196,14 +190,13 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_KEYSTORE_TYPE =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStoreType";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.keyStoreType";
     /**
      * The alias name of the preferred key for use by the service dispatcher
      * acting in SSL server mode.  When not set to a non-empty value and the
      * keystore contains multiple key options, the key selection algorithm is
      * unspecified.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -215,14 +208,13 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_SERVER_KEY_ALIAS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.serverKeyAlias";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.serverKeyAlias";
     /**
      * The alias name of the preferred key for use by a client connecting
      * to the service dispatcher.  When not set to a non-empty value and the
      * keystore contains multiple key options, the key selection algorithm is
      * unspecified.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -234,14 +226,13 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_CLIENT_KEY_ALIAS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.clientKeyAlias";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.clientKeyAlias";
     /**
      * The path to the Java truststore file for SSL data channel factories.
      * The specified path must be absolute.
      * If this parameter is not set to a non-empty value, the Java system
      * property <code>javax.net.ssl.trustStore</code> is used.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -253,15 +244,14 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_TRUSTSTORE_FILE =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.trustStoreFile";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.trustStoreFile";
     /**
      * The type of the Java truststore file. This is used to determine what
      * keystore implementation should be used to manipulate the named
      * keystore file. If set to a non-empty value, the value must be a valid
      * keystore type for the Java environment. If this parameter is not set to
      * a non-empty value, the default Java keystore type is assumed.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -273,14 +263,13 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_TRUSTSTORE_TYPE =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.trustStoreType";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.trustStoreType";
     /**
      * The list of SSL cipher suites that are acceptable for SSL data channel
      * factories.  The cipher suite list must be in comma-delimited form.
      * If this parameter is not set to a non-empty value, the Java default
      * set of enabled cipher suites is allowed.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -292,13 +281,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_CIPHER_SUITES =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.cipherSuites";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.cipherSuites";
     /**
      * The list of SSL protocols that are acceptable for SSL data channel
      * factories.  The protocol list must be in comma-delimited form.
      * If not specified, the default type selected is TBD: TLSv1.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -310,29 +298,28 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_PROTOCOLS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.protocols";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.protocols";
     /**
      * The specification for an SSL authenicator.
      * The authenticator can be configured in one of the following ways:
      * <ul>
-     *   <li><code>mirror</code></li>
-     *   <li><code>dnmatch(</code>&lt;Regular Expression&gt;<code>)</code></li>
+     * <li><code>mirror</code></li>
+     * <li><code>dnmatch(</code>&lt;Regular Expression&gt;<code>)</code></li>
      * </ul>
-     *
+     * <p>
      * The <code>mirror</code> option causes the authenticator to check that the
      * Distinguished Name(DN) in the certificate of the incoming client
      * connection matches the DN of the certificate that this server presents
      * when connecting as a client to another server.
-     *
+     * <p>
      * The <code>dnmatch()</code> option causes the authenticator to check that
      * the DN in the certificate of the incoming client connection matches the
      * regular expression provided in the dnmatch() specification.
-     *
+     * <p>
      * Do not configure both the SSL authenticator and the SSL authenticator
      * class, or an exception will be thrown during DataChannelFactory
      * instantiation.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -344,8 +331,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_AUTHENTICATOR =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticator";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticator";
     /**
      * The string identifying a class to be instantiated to check whether
      * incoming client SSL connections are to be trusted. If specified, the
@@ -353,12 +339,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * implements the {@link SSLAuthenticator}
      * interface and provides a public constructor with an argument list of
      * the form
-     *   ( {@link InstanceParams} ).
+     * ( {@link InstanceParams} ).
      * <p>
      * Do not configure both the SSL authenticator and the SSL authenticator
      * class, or an exception will be thrown during DataChannelFactory
      * instantiation.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -370,11 +356,10 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_AUTHENTICATOR_CLASS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticatorClass";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticatorClass";
     /**
      * A string encoding the parameters for configuring the authenticator class.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -386,17 +371,16 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_AUTHENTICATOR_PARAMS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticatorParams";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.authenticatorParams";
     /**
      * The configuration to be used for verifying the certificate of
      * a server when a connection is made.
-     *
+     * <p>
      * The verifier can be configured in one of the following ways:
      * <ul>
-     *   <li><code>hostname</code></li>
-     *   <li><code>mirror</code></li>
-     *   <li><code>dnmatch(</code>&lt;Regular Expression&gt;<code>)</code></li>
+     * <li><code>hostname</code></li>
+     * <li><code>mirror</code></li>
+     * <li><code>dnmatch(</code>&lt;Regular Expression&gt;<code>)</code></li>
      * </ul>
      * <p>
      * The <code>hostname</code> option causes the verifier to check that the
@@ -404,20 +388,20 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * certificate presented by the server contains the hostname that
      * was the target of the connection attempt.  This assumes that server
      * certificates are unique per server.
-     *  <p>
+     * <p>
      * The <code>mirror</code> option causes the verifier to check that the
      * Distinguished Name(DN) in the certificate of the server matches the DN
      * of the certificate that this server presents to incoming client
      * connections.  This assumes that all servers have equivalent certificates.
-     *  <p>
+     * <p>
      * The <code>dnmatch()</code> option causes the verifier to check that
      * the DN in the certificate of the server matches the regular expression
      * string provided in the dnmatch() specification.
-     *  <p>
+     * <p>
      * Do not configure both the SSL host verifier and the SSL host verifier
      * class, or an exception will be thrown during DataChannelFactory
      * instantiation.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -429,20 +413,19 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_HOST_VERIFIER =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifier";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifier";
     /**
      * The class to be instantiated to check whether the target host of a
      * connection initiated by a client is to be trusted. If specified, the
      * string must be a fully qualified Java class name for a class that
      * implements the <code>javax.net.ssl.HostnameVerifier</code> interface
      * and provides a public constructor with an argument list of the form
-     *   ({@link InstanceParams}).
+     * ({@link InstanceParams}).
      * <p>
      * Do not configure both the SSL host verifier and the SSL host verifier
      * class, or an exception will be thrown during DataChannelFactory
      * instantiation.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -454,12 +437,11 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_HOST_VERIFIER_CLASS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifierClass";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifierClass";
     /**
      * A string encoding the parameters for configuring the host verifier
      * class, if needed.
-     *
+     * <p>
      * <p><table border="1">
      * <tr><td>Name</td><td>Type</td><td>Mutable</td><td>Default</td></tr>
      * <tr>
@@ -471,10 +453,11 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * </table></p>
      */
     public static final String SSL_HOST_VERIFIER_PARAMS =
-        EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifierParams";
-
+            EnvironmentParams.REP_PARAM_PREFIX + "ssl.hostVerifierParams";
+    private static final long serialVersionUID = 1L;
     /* The set of Replication properties specific to this class */
     private static Set<String> repSSLProperties;
+
     static {
         repSSLProperties = new HashSet<String>();
         repSSLProperties.add(SSL_KEYSTORE_FILE);
@@ -504,8 +487,16 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
          * Force loading when a ReplicationNetworkConfig is used and an
          * environment has not been created.
          */
-        @SuppressWarnings("unused")
-        final ConfigParam forceLoad = RepParams.CHANNEL_TYPE;
+        @SuppressWarnings("unused") final ConfigParam forceLoad = RepParams.CHANNEL_TYPE;
+    }
+
+    static {
+
+        /*
+         * Force loading when a ReplicationNetworkConfig is used and an
+         * environment has not been created.
+         */
+        @SuppressWarnings("unused") final ConfigParam forceLoad = RepParams.CHANNEL_TYPE;
     }
 
     /* The possibly null password source for keystore access */
@@ -524,15 +515,23 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * specified in the properties parameter.
      *
      * @param properties Supported properties are described as the string
-     * constants in this class.
-     *
+     *                   constants in this class.
      * @throws IllegalArgumentException If any properties read from the
-     * properties parameter are invalid.
+     *                                  properties parameter are invalid.
      */
     public ReplicationSSLConfig(Properties properties)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         super(properties);
+    }
+
+    /**
+     * @hidden Enumerate the subset of configuration properties that are intended to
+     * control network access.
+     */
+    static Set<String> getRepSSLPropertySet() {
+
+        return repSSLProperties;
     }
 
     /**
@@ -560,7 +559,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL connections.
      *
      * @param filename the KeyStore filename
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLKeyStore(String filename) {
@@ -570,13 +568,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLKeyStoreVoid(String filename) {
 
         DbConfigManager.setVal(props, RepParams.SSL_KEYSTORE_FILE, filename,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -594,7 +591,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL connections.
      *
      * @param keyStoreType the Keystore type
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLKeyStoreType(String keyStoreType) {
@@ -604,13 +600,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLKeyStoreTypeVoid(String keyStoreType) {
 
         DbConfigManager.setVal(props, RepParams.SSL_KEYSTORE_TYPE,
-                               keyStoreType, validateParams);
+                keyStoreType, validateParams);
     }
 
     /**
@@ -628,7 +623,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL connections.
      *
      * @param password the KeyStore password
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLKeyStorePassword(String password) {
@@ -638,13 +632,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLKeyStorePasswordVoid(String password) {
 
         DbConfigManager.setVal(props, RepParams.SSL_KEYSTORE_PASSWORD, password,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -656,7 +649,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLKeyStorePasswordClass() {
 
         return DbConfigManager.getVal(props,
-                                      RepParams.SSL_KEYSTORE_PASSWORD_CLASS);
+                RepParams.SSL_KEYSTORE_PASSWORD_CLASS);
     }
 
     /**
@@ -664,24 +657,22 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * password for the Java KeyStore file.
      *
      * @param className the name of the class
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLKeyStorePasswordClass(
-        String className) {
+            String className) {
 
         setSSLKeyStorePasswordClassVoid(className);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLKeyStorePasswordClassVoid(String className) {
 
         DbConfigManager.setVal(props, RepParams.SSL_KEYSTORE_PASSWORD_CLASS,
-                               className, validateParams);
+                className, validateParams);
     }
 
     /**
@@ -693,7 +684,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLKeyStorePasswordParams() {
 
         return DbConfigManager.getVal(props,
-                                      RepParams.SSL_KEYSTORE_PASSWORD_PARAMS);
+                RepParams.SSL_KEYSTORE_PASSWORD_PARAMS);
     }
 
     /**
@@ -701,24 +692,22 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * source instance.
      *
      * @param params a string that is to be passed to the constructor
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLKeyStorePasswordParams(
-        String params) {
+            String params) {
 
         setSSLKeyStorePasswordParamsVoid(params);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLKeyStorePasswordParamsVoid(String params) {
 
         DbConfigManager.setVal(props, RepParams.SSL_KEYSTORE_PASSWORD_PARAMS,
-                               params, validateParams);
+                params, validateParams);
     }
 
     /**
@@ -736,7 +725,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * used when accepting incoming SSL connections.
      *
      * @param alias the KeyStore alias
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLServerKeyAlias(String alias) {
@@ -746,13 +734,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLServerKeyAliasVoid(String alias) {
 
         DbConfigManager.setVal(props, RepParams.SSL_SERVER_KEY_ALIAS, alias,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -770,7 +757,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * used when initiating SSL connections.
      *
      * @param alias the KeyStore alias
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLClientKeyAlias(String alias) {
@@ -780,13 +766,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLClientKeyAliasVoid(String alias) {
 
         DbConfigManager.setVal(props, RepParams.SSL_CLIENT_KEY_ALIAS, alias,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -804,7 +789,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL certificates.
      *
      * @param filename the TrustStore filename
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLTrustStore(String filename) {
@@ -814,13 +798,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLTrustStoreVoid(String filename) {
 
         DbConfigManager.setVal(props, RepParams.SSL_TRUSTSTORE_FILE, filename,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -838,7 +821,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL connections.
      *
      * @param trustStoreType the Truststore type
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLTrustStoreType(String trustStoreType) {
@@ -848,13 +830,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLTrustStoreTypeVoid(String trustStoreType) {
 
         DbConfigManager.setVal(props, RepParams.SSL_TRUSTSTORE_TYPE,
-                               trustStoreType, validateParams);
+                trustStoreType, validateParams);
     }
 
     /**
@@ -870,7 +851,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * Sets the list of SSL cipher suites that are acceptable
      *
      * @param cipherSuites a comma-delimited list of SSL cipher suites
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLCipherSuites(String cipherSuites) {
@@ -880,13 +860,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLCipherSuitesVoid(String cipherSuites) {
 
         DbConfigManager.setVal(props, RepParams.SSL_CIPHER_SUITES, cipherSuites,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -902,7 +881,6 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * Sets the list of SSL protocols that are acceptable
      *
      * @param protocols a comma-delimited list of SSL protocols
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLProtocols(String protocols) {
@@ -912,13 +890,12 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLProtocolsVoid(String protocols) {
 
         DbConfigManager.setVal(props, RepParams.SSL_PROTOCOLS, protocols,
-                               validateParams);
+                validateParams);
     }
 
     /**
@@ -935,33 +912,30 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     /**
      * Sets the authenticator configuration to be used for authenticating
      * incoming client connections.
-     *
+     * <p>
      * See {@link #SSL_AUTHENTICATOR} for a complete description of this
      * parameter.
      *
      * @param authenticator the authentication configuration to use
-     *
      * @return this
-     *
      * @throws IllegalArgumentException if the authenticator specification
-     * is not syntactically valid
+     *                                  is not syntactically valid
      */
     public ReplicationNetworkConfig setSSLAuthenticator(String authenticator)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         setSSLAuthenticatorVoid(authenticator);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLAuthenticatorVoid(String authenticator)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, RepParams.SSL_AUTHENTICATOR,
-                               authenticator, validateParams);
+                authenticator, validateParams);
     }
 
     /**
@@ -973,7 +947,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLAuthenticatorClass() {
 
         return DbConfigManager.getVal(
-            props, RepParams.SSL_AUTHENTICATOR_CLASS);
+                props, RepParams.SSL_AUTHENTICATOR_CLASS);
     }
 
     /**
@@ -981,25 +955,23 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * new SSL Authenticator instances.
      *
      * @param authenticatorClass the class name to use
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLAuthenticatorClass(
-        String authenticatorClass) {
+            String authenticatorClass) {
 
         setSSLAuthenticatorClassVoid(authenticatorClass);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLAuthenticatorClassVoid(String authenticatorClass)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, RepParams.SSL_AUTHENTICATOR_CLASS,
-                               authenticatorClass, validateParams);
+                authenticatorClass, validateParams);
     }
 
     /**
@@ -1011,7 +983,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLAuthenticatorParams() {
 
         return DbConfigManager.getVal(
-            props, RepParams.SSL_AUTHENTICATOR_PARAMS);
+                props, RepParams.SSL_AUTHENTICATOR_PARAMS);
     }
 
     /**
@@ -1019,24 +991,22 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * SSL server Authenticator class when instantiated.
      *
      * @param authenticatorParams the parameter value to use
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLAuthenticatorParams(
-        String authenticatorParams) {
+            String authenticatorParams) {
 
         setSSLAuthenticatorParamsVoid(authenticatorParams);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLAuthenticatorParamsVoid(String authenticatorParams) {
 
         DbConfigManager.setVal(props, RepParams.SSL_AUTHENTICATOR_PARAMS,
-                               authenticatorParams, validateParams);
+                authenticatorParams, validateParams);
     }
 
     /**
@@ -1048,39 +1018,36 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLHostVerifier() {
 
         return DbConfigManager.getVal(
-            props, RepParams.SSL_HOST_VERIFIER);
+                props, RepParams.SSL_HOST_VERIFIER);
     }
 
     /**
      * Sets the configuration to be used for verifying the certificate of
      * a server when a connection is made.
-     *
+     * <p>
      * See {@link #SSL_HOST_VERIFIER} for a complete description of this
      * parameter.
      *
      * @param hostVerifier the verifier configuration to use
-     *
      * @return this
-     *
      * @throws IllegalArgumentException if the authenticator specification
-     * is not syntactically valid
+     *                                  is not syntactically valid
      */
     public ReplicationNetworkConfig setSSLHostVerifier(String hostVerifier)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         setSSLHostVerifierVoid(hostVerifier);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLHostVerifierVoid(String hostVerifier)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         DbConfigManager.setVal(props, RepParams.SSL_HOST_VERIFIER,
-                               hostVerifier, validateParams);
+                hostVerifier, validateParams);
     }
 
     /**
@@ -1092,7 +1059,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLHostVerifierClass() {
 
         return DbConfigManager.getVal(
-            props, RepParams.SSL_HOST_VERIFIER_CLASS);
+                props, RepParams.SSL_HOST_VERIFIER_CLASS);
     }
 
     /**
@@ -1100,24 +1067,22 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * new SSL host verifier instances.
      *
      * @param hostVerifierClass the class name to use
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLHostVerifierClass(
-        String hostVerifierClass) {
+            String hostVerifierClass) {
 
         setSSLHostVerifierClassVoid(hostVerifierClass);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLHostVerifierClassVoid(String hostVerifierClass) {
 
         DbConfigManager.setVal(props, RepParams.SSL_HOST_VERIFIER_CLASS,
-                               hostVerifierClass, validateParams);
+                hostVerifierClass, validateParams);
     }
 
     /**
@@ -1129,7 +1094,7 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
     public String getSSLHostVerifierParams() {
 
         return DbConfigManager.getVal(
-            props, RepParams.SSL_HOST_VERIFIER_PARAMS);
+                props, RepParams.SSL_HOST_VERIFIER_PARAMS);
     }
 
     /**
@@ -1137,24 +1102,22 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * class when instantiated.
      *
      * @param hostVerifierParams the parameter value to use
-     *
      * @return this
      */
     public ReplicationNetworkConfig setSSLHostVerifierParams(
-        String hostVerifierParams) {
+            String hostVerifierParams) {
 
         setSSLHostVerifierParamsVoid(hostVerifierParams);
         return this;
     }
 
     /**
-     * @hidden
-     * The void return setter for use by Bean editors.
+     * @hidden The void return setter for use by Bean editors.
      */
     public void setSSLHostVerifierParamsVoid(String hostVerifierParams) {
 
         DbConfigManager.setVal(props, RepParams.SSL_HOST_VERIFIER_PARAMS,
-                               hostVerifierParams, validateParams);
+                hostVerifierParams, validateParams);
     }
 
     /**
@@ -1181,52 +1144,32 @@ public class ReplicationSSLConfig extends ReplicationNetworkConfig {
      * This setting is not included in the serialized representation.
      */
     public ReplicationNetworkConfig
-        setSSLKeyStorePasswordSource(PasswordSource passwordSource) {
+    setSSLKeyStorePasswordSource(PasswordSource passwordSource) {
 
         setSSLKeyStorePasswordSourceVoid(passwordSource);
         return this;
     }
 
     /**
-     * @hidden
-     * For bean editors.
+     * @hidden For bean editors.
      */
     public void setSSLKeyStorePasswordSourceVoid(
-        PasswordSource passwordSource) {
+            PasswordSource passwordSource) {
         sslKeyStorePasswordSource = passwordSource;
     }
 
     /**
-     * @hidden
-     * Enumerate the subset of configuration properties that are intended to
-     * control network access.
-     */
-    static Set<String> getRepSSLPropertySet() {
-
-        return repSSLProperties;
-    }
-
-    /**
      * Checks whether the named parameter is valid for this configuration type.
+     *
      * @param paramName the configuration parameter name, one of the String
-     * constants in this class
+     *                  constants in this class
      * @return true if the named parameter is a valid parameter name
      */
     protected boolean isValidConfigParam(String paramName) {
-        if (repSSLProperties.contains(paramName)) {
+        if(repSSLProperties.contains(paramName)) {
             return true;
         }
         return super.isValidConfigParam(paramName);
-    }
-
-    static {
-
-        /*
-         * Force loading when a ReplicationNetworkConfig is used and an
-         * environment has not been created.
-         */
-        @SuppressWarnings("unused")
-        final ConfigParam forceLoad = RepParams.CHANNEL_TYPE;
     }
 
 }

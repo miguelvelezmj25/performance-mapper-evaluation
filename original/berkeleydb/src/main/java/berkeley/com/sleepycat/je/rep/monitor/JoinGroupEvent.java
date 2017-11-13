@@ -16,9 +16,9 @@ package berkeley.com.sleepycat.je.rep.monitor;
 import java.util.Date;
 
 /**
- * The event generated when a node joins the group. A new instance of this 
+ * The event generated when a node joins the group. A new instance of this
  * event is generated each time a node joins the group.
- *
+ * <p>
  * The event is generated on a "best effort" basis. It may not be generated,
  * for example, if the joining node was unable to communicate with the monitor
  * due to a network problem. The application must be resilient in the face of
@@ -27,7 +27,7 @@ import java.util.Date;
 public class JoinGroupEvent extends MemberChangeEvent {
 
     /**
-     * The time when this node joins the group. 
+     * The time when this node joins the group.
      */
     private final long joinTime;
 
@@ -42,7 +42,7 @@ public class JoinGroupEvent extends MemberChangeEvent {
     public Date getJoinTime() {
         return new Date(joinTime);
     }
-    
+
     @Override
     public String toString() {
         return "Node " + getNodeName() + " joined at " + getJoinTime();

@@ -17,18 +17,17 @@ import berkeley.com.sleepycat.persist.impl.PersistCatalog;
 
 /**
  * <!-- begin JE only -->
- * @hidden
- * <!-- end JE only -->
- * Internal access class that should not be used by applications.
  *
  * @author Mark Hayes
+ * @hidden <!-- end JE only -->
+ * Internal access class that should not be used by applications.
  */
 public class ModelInternal {
 
     /**
      * Internal access method that should not be used by applications.
      *
-     * @param model the EntityModel.
+     * @param model   the EntityModel.
      * @param catalog the PersistCatalog.
      */
     public static void setCatalog(EntityModel model, PersistCatalog catalog) {
@@ -38,12 +37,12 @@ public class ModelInternal {
     /**
      * Internal access method that should not be used by applications.
      *
-     * @param model the EntityModel.
+     * @param model  the EntityModel.
      * @param loader the ClassLoader.
      */
     public static void setClassLoader(EntityModel model, ClassLoader loader) {
         /* Do not overwrite loader with null value. */
-        if (loader != null) {
+        if(loader != null) {
             model.setClassLoader(loader);
         }
     }

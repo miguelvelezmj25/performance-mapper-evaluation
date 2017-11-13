@@ -72,7 +72,7 @@ public class MeasureInsertSize {
                 }
                 try {
                     records = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
                 if(records <= 0) {
@@ -85,7 +85,7 @@ public class MeasureInsertSize {
                 }
                 try {
                     keySize = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
                 if(keySize < 4) {
@@ -98,7 +98,7 @@ public class MeasureInsertSize {
                 }
                 try {
                     dataSize = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
                 if(dataSize < 0) {
@@ -111,7 +111,7 @@ public class MeasureInsertSize {
                 }
                 try {
                     insertsPerTxn = Integer.parseInt(val);
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     usage(val + " is not a number");
                 }
             }
@@ -147,7 +147,7 @@ public class MeasureInsertSize {
             example.doInserts();
             example.close();
             System.exit(0);
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
