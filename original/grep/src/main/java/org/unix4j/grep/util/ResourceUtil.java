@@ -32,7 +32,7 @@ public class ResourceUtil {
         }
         try {
             return new FileInputStream(name);
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new IllegalArgumentException("resource '" + name + "' not found");
         }
     }

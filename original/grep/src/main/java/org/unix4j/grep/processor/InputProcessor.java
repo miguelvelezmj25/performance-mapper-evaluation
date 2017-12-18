@@ -34,6 +34,8 @@ public interface InputProcessor {
      */
     boolean processLine(Input input, Line line, LineProcessor output);
 
+    boolean processLine(Line line);
+
     /**
      * Indicates that this line processing task is complete for the specified
      * {@code input} device and can finished.

@@ -34,7 +34,7 @@ public class CompositeInput extends AbstractInput {
 
     @Override
     public boolean hasMoreLines() {
-        while (index < inputs.size()) {
+        while(index < inputs.size()) {
             if(inputs.get(index).hasMoreLines()) {
                 return true;
             }

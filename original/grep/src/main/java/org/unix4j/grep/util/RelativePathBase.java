@@ -237,7 +237,7 @@ public class RelativePathBase {
 
         final int len = Math.min(baseParts.size(), fileParts.size());
         int common = 0;
-        while (common < len && baseParts.get(common).equals(fileParts.get(common))) {
+        while(common < len && baseParts.get(common).equals(fileParts.get(common))) {
             common++;
         }
         if(common == 0) {

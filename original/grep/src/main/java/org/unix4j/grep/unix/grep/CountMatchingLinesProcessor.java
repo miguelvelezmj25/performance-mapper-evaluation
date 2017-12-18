@@ -21,7 +21,7 @@ final class CountMatchingLinesProcessor extends DefaultInputProcessor implements
     private final Counter counter = new Counter();
     private final LineProcessor output;
 
-    public CountMatchingLinesProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
+    public CountMatchingLinesProcessor(ExecutionContext context, LineProcessor output, LineMatcher matcher) {
         this.context = context;
         this.matcher = matcher;
         this.output = output;

@@ -10,8 +10,8 @@ import org.unix4j.grep.processor.LineProcessor;
  */
 final class WriteMatchingLinesProcessor extends AbstractGrepProcessor {
 
-    public WriteMatchingLinesProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
-        super(command, context, output, matcher);
+    public WriteMatchingLinesProcessor(ExecutionContext context, LineProcessor output, LineMatcher matcher) {
+        super(context, output, matcher);
     }
 
     @Override

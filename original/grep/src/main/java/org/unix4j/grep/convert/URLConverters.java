@@ -11,7 +11,7 @@ public class URLConverters {
             if(value instanceof URI) {
                 try {
                     return ((URI) value).toURL();
-                } catch (Exception E) {
+                } catch(Exception E) {
                     return null;
                 }
             }
@@ -24,7 +24,7 @@ public class URLConverters {
             if(value != null) {
                 try {
                     return new URL(value.toString());
-                } catch (MalformedURLException e) {
+                } catch(MalformedURLException e) {
                     return null;
                 }
             }

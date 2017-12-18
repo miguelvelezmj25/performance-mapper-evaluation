@@ -103,7 +103,7 @@ public class Arg {
         if(name.startsWith(PREFIX)) {
             try {
                 return Integer.parseInt(name.substring(PREFIX.length()));
-            } catch (NumberFormatException e) {
+            } catch(NumberFormatException e) {
                 return -1;
             }
         }
@@ -124,7 +124,7 @@ public class Arg {
         if(name.startsWith(FROM_PREFIX)) {
             try {
                 return Integer.parseInt(name.substring(FROM_PREFIX.length()));
-            } catch (NumberFormatException e) {
+            } catch(NumberFormatException e) {
                 return -1;
             }
         }

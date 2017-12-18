@@ -31,7 +31,7 @@ public class LongConverters {
             if(value != null) {
                 try {
                     return Long.parseLong(value.toString());
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     return null;
                 }
             }

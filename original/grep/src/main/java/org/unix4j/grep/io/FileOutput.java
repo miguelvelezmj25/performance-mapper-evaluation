@@ -35,7 +35,7 @@ public class FileOutput extends WriterOutput {
     private static FileWriter createFileWriter(File file) {
         try {
             return new FileWriter(file);
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

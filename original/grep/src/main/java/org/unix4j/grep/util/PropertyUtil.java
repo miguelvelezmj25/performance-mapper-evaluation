@@ -43,7 +43,7 @@ public class PropertyUtil {
             InputStream userPropertiesStream = null;
             try {
                 userPropertiesStream = ResourceUtil.getResource(PropertyUtil.class, userPropertiesFile);
-            } catch (IllegalArgumentException e) {
+            } catch(IllegalArgumentException e) {
                 System.err.println("WARN: user properties file not found : " + userPropertiesFile);
                 System.err.println("WARN: using default properties file  : " + defaultPropertiesFile);
             }
@@ -53,7 +53,7 @@ public class PropertyUtil {
                 properties.putAll(userProperties);//replaces default properties
             }
             return properties;
-        } catch (IOException e) {
+        } catch(IOException e) {
             return null;
         }
     }

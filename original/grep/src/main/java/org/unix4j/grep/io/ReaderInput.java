@@ -48,7 +48,7 @@ public class ReaderInput extends AbstractInput {
         int len = length;
         int index = offset;
         do {
-            while (index < len) {
+            while(index < len) {
                 final char ch0 = buffer[index];
                 if(ch0 == '\n' || ch0 == '\r') {
                     int contentEnd = index;
@@ -87,7 +87,7 @@ public class ReaderInput extends AbstractInput {
             readBuffer();
             index = offset;
             len = length;
-        } while (index < len);
+        } while(index < len);
 
         // eof, no newline, return rest as a line if there is something to
         // return
@@ -114,7 +114,7 @@ public class ReaderInput extends AbstractInput {
         try {
             this.length = reader.read(buffer);
             this.offset = 0;
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -41,7 +41,7 @@ public class WriterOutput implements Output {
                 writer.write(lastTerminatedLine.getLineEnding());
             }
             writer.write(line.getContent());
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
         lastLine = line;
@@ -59,7 +59,7 @@ public class WriterOutput implements Output {
             }
             writer.flush();
             init();
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

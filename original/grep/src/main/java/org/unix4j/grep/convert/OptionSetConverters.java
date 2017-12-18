@@ -69,7 +69,7 @@ public class OptionSetConverters {
                     final O option;
                     try {
                         option = Enum.valueOf(optionEnumClass, optionName);
-                    } catch (IllegalArgumentException e) {
+                    } catch(IllegalArgumentException e) {
                         return null;
                     }
                     return toSingletonSet(option);

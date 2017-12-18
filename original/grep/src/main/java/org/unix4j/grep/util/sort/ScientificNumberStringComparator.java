@@ -28,7 +28,7 @@ public class ScientificNumberStringComparator implements Comparator<CharSequence
     private static double parseDouble(String s) {
         try {
             return Double.parseDouble(s);
-        } catch (NumberFormatException e) {
+        } catch(NumberFormatException e) {
             return Double.NaN;
         }
     }

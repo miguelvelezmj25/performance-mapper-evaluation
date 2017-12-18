@@ -154,7 +154,7 @@ public class StringUtil {
         final List<Line> lines = new ArrayList<Line>();
         int start = 0;
         int index = 0;
-        while (index < s.length()) {
+        while(index < s.length()) {
             final char ch = s.charAt(index);
             if(ch == Line.LF || ch == Line.CR) {
                 final int lineEndingStart = index;
@@ -409,11 +409,11 @@ public class StringUtil {
             final char ch = source.charAt(i);
             /* Look for first character. */
             if(!equalsIgnoreCase(ch, first)) {
-                while (++i <= max && !equalsIgnoreCase(ch, first))
+                while(++i <= max && !equalsIgnoreCase(ch, first))
                     ;
             }
 
-			/* Found first character, now look at the rest of v2 */
+            /* Found first character, now look at the rest of v2 */
             if(i <= max) {
                 int j = i + 1;
                 int end = j + targetCount - 1;

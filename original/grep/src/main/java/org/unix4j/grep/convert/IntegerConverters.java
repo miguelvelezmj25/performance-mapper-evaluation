@@ -31,7 +31,7 @@ public class IntegerConverters {
             if(value != null) {
                 try {
                     return Integer.parseInt(value.toString());
-                } catch (NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     return null;
                 }
             }

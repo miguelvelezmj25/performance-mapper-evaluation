@@ -58,7 +58,7 @@ public class CloneUtil {
     public static <T> T cloneReflective(T value) {
         try {
             return (T) value.getClass().getMethod("clone").invoke(value);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new IllegalArgumentException("clone failed for value type " + value.getClass().getName() + ", e=" + e, e);
         }
     }

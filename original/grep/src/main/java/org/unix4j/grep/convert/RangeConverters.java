@@ -34,7 +34,7 @@ public class RangeConverters {
                                 indices.add(Integer.parseInt(s.substring(dashIndex)));//include minus
                             }
                         }
-                    } catch (Exception e) {
+                    } catch(Exception e) {
                         //we cannot parse range value, return null
                         return null;
                     }

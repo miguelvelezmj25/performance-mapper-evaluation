@@ -51,7 +51,6 @@ public class ListConverters {
             return null;
         }
     };
-
     public static final ValueConverter<List<?>> COLLECTION_TO_FLAT_LIST = new ValueConverter<List<?>>() {
         @Override
         public List<?> convert(Object value) throws IllegalArgumentException {
@@ -72,10 +71,8 @@ public class ListConverters {
             return null;
         }
     };
-
     public static final ValueConverter<List<?>> ARRAY_TO_FLAT_LIST = new ConcatenatedConverter<List<?>>(ARRAY_TO_LIST, COLLECTION_TO_FLAT_LIST);
     public static final ValueConverter<List<?>> COLLECTION_OR_ARRAY_TO_FLAT_LIST = new CompositeValueConverter<List<?>>().add(COLLECTION_TO_FLAT_LIST).add(ARRAY_TO_FLAT_LIST);
-
     public static final ValueConverter<List<?>> DEFAULT = new CompositeValueConverter<List<?>>().add(COLLECTION_TO_LIST).add(ARRAY_TO_LIST).add(OBJECT_TO_SINGLETON_LIST);
     public static final ValueConverter<List<?>> FLATTEN = new CompositeValueConverter<List<?>>().add(COLLECTION_OR_ARRAY_TO_FLAT_LIST).add(OBJECT_TO_SINGLETON_LIST);
 }

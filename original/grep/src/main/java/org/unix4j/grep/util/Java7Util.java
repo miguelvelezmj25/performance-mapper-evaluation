@@ -37,7 +37,7 @@ public class Java7Util {
         final Class<? extends T> clazz = loadClass(baseClass);
         try {
             return clazz.newInstance();
-        } catch (Exception e) {
+        } catch(Exception e) {
             return defaultInstance;
         }
     }
@@ -71,7 +71,7 @@ public class Java7Util {
         final Class<?> java7Class;
         try {
             java7Class = Class.forName(baseClass.getName() + JAVA7_CLASS_NAME_SUFFIX);
-        } catch (ClassNotFoundException e) {
+        } catch(ClassNotFoundException e) {
             return baseClass;
         }
         if(baseClass.isAssignableFrom(java7Class)) {

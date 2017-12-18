@@ -1,34 +1,22 @@
 package org.unix4j.grep.unix.grep;
 
-import org.unix4j.grep.command.Arguments;
-import org.unix4j.grep.context.ExecutionContext;
-import org.unix4j.grep.convert.ValueConverter;
-import org.unix4j.grep.option.DefaultOptionSet;
-import org.unix4j.grep.unix.Grep;
-import org.unix4j.grep.util.ArgsUtil;
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.grep.util.ArrayUtil;
-import org.unix4j.grep.variable.Arg;
-import org.unix4j.grep.variable.VariableContext;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
- * Arguments and options for the {@link Grep grep} command.
  */
-public final class GrepArguments implements Arguments<GrepArguments> {
+public final class GrepArguments {
 
-    boolean isIgnoreCase = false;
-    boolean isInvertMatch = false;
-    boolean isFixedStrings = false;
-    boolean isLineNumber = false;
-    boolean isCount = false;
-    boolean isMatchingFiles = false;
-    boolean isWholeLine = false;
+    private boolean isIgnoreCase = false;
+    private boolean isInvertMatch = false;
+    private boolean isFixedStrings = false;
+    private boolean isLineNumber = false;
+    private boolean isCount = false;
+    private boolean isMatchingFiles = false;
+    private boolean isWholeLine = false;
 
 
-    private final GrepOptions options;
+//    private final GrepOptions options;
 
 
     // operand: <regexp>
@@ -54,26 +42,24 @@ public final class GrepArguments implements Arguments<GrepArguments> {
     /**
      * Constructor to use if no options are specified.
      */
-    public GrepArguments() {
-        this.options = GrepOptions.EMPTY;
-    }
+//    public GrepArguments() {
+//        this.options = GrepOptions.EMPTY;
+//    }
 
-    /**
-     * Constructor with option set containing the selected command options.
-     *
-     * @param options the selected options
-     * @throws NullPointerException if the argument is null
-     */
-    public GrepArguments(GrepOptions options) {
-        if(options == null) {
-            throw new NullPointerException("options argument cannot be null");
-        }
-        this.options = options;
-    }
-
+//    /**
+//     * Constructor with option set containing the selected command options.
+//     *
+//     * @param options the selected options
+//     * @throws NullPointerException if the argument is null
+//     */
+//    public GrepArguments(GrepOptions options) {
+//        if(options == null) {
+//            throw new NullPointerException("options argument cannot be null");
+//        }
+//        this.options = options;
+//    }
     public GrepArguments(boolean isIgnoreCase, boolean isInvertMatch, boolean isFixedStrings, boolean isLineNumber,
                          boolean isCount, boolean isMatchingFiles, boolean isWholeLine) {
-        this.options = null;
         this.isIgnoreCase = isIgnoreCase;
         this.isInvertMatch = isInvertMatch;
         this.isFixedStrings = isFixedStrings;
@@ -82,20 +68,29 @@ public final class GrepArguments implements Arguments<GrepArguments> {
         this.isMatchingFiles = isMatchingFiles;
         this.isWholeLine = isWholeLine;
 
+
+        Sink.sink(this.isIgnoreCase);
+        Sink.sink(this.isInvertMatch);
+        Sink.sink(this.isFixedStrings);
+        Sink.sink(this.isLineNumber);
+        Sink.sink(this.isCount);
+        Sink.sink(this.isMatchingFiles);
+        Sink.sink(this.isWholeLine);
+
     }
 
-    /**
-     * Constructor string arguments encoding options and arguments, possibly
-     * also containing variable expressions.
-     *
-     * @param args string arguments for the command
-     * @throws NullPointerException if args is null
-     */
-    public GrepArguments(String... args) {
-        this();
-        this.args = args;
-        this.argsIsSet = true;
-    }
+//    /**
+//     * Constructor string arguments encoding options and arguments, possibly
+//     * also containing variable expressions.
+//     *
+//     * @param args string arguments for the command
+//     * @throws NullPointerException if args is null
+//     */
+//    public GrepArguments(String... args) {
+//        this();
+//        this.args = args;
+//        this.argsIsSet = true;
+//    }
 
     private static String toString(Object value) {
         if(value != null && value.getClass().isArray()) {
@@ -104,130 +99,15 @@ public final class GrepArguments implements Arguments<GrepArguments> {
         return String.valueOf(value);
     }
 
-    /**
-     * Returns the options set containing the selected command options. Returns
-     * an empty options set if no option has been selected.
-     *
-     * @return set with the selected options
-     */
-    public GrepOptions getOptions() {
-        return options;
-    }
-
-    private Object[] resolveVariables(VariableContext context, String... unresolved) {
-        final Object[] resolved = new Object[unresolved.length];
-        for(int i = 0; i < resolved.length; i++) {
-            final String expression = unresolved[i];
-            if(Arg.isVariable(expression)) {
-                resolved[i] = resolveVariable(context, expression);
-            }
-            else {
-                resolved[i] = expression;
-            }
-        }
-        return resolved;
-    }
-
-    private <V> V convertList(ExecutionContext context, String operandName, Class<V> operandType, List<Object> values) {
-        if(values.size() == 1) {
-            final Object value = values.get(0);
-            return convert(context, operandName, operandType, value);
-        }
-        return convert(context, operandName, operandType, values);
-    }
-
-    private Object resolveVariable(VariableContext context, String variable) {
-        final Object value = context.getValue(variable);
-        if(value != null) {
-            return value;
-        }
-        throw new IllegalArgumentException("cannot resolve variable " + variable +
-                " in command: grep " + this);
-    }
-
-    private <V> V convert(ExecutionContext context, String operandName, Class<V> operandType, Object value) {
-        final ValueConverter<V> converter = context.getValueConverterFor(operandType);
-        final V convertedValue;
-        if(converter != null) {
-            convertedValue = converter.convert(value);
-        }
-        else {
-            if(GrepOptions.class.equals(operandType)) {
-                convertedValue = operandType.cast(GrepOptions.CONVERTER.convert(value));
-            }
-            else {
-                convertedValue = null;
-            }
-        }
-        if(convertedValue != null) {
-            return convertedValue;
-        }
-        throw new IllegalArgumentException("cannot convert --" + operandName +
-                " value '" + value + "' into the type " + operandType.getName() +
-                " for grep command");
-    }
-
-    @Override
-    public GrepArguments getForContext(ExecutionContext context) {
-        if(context == null) {
-            throw new NullPointerException("context cannot be null");
-        }
-        if(!argsIsSet || args.length == 0) {
-            //nothing to resolve
-            return this;
-        }
-
-        //check if there is at least one variable
-        boolean hasVariable = false;
-        for(final String arg : args) {
-            if(arg != null && arg.startsWith("$")) {
-                hasVariable = true;
-                break;
-            }
-        }
-        //resolve variables
-        final Object[] resolvedArgs = hasVariable ? resolveVariables(context.getVariableContext(), this.args) : this.args;
-
-        //convert now
-        final List<String> defaultOperands = Arrays.asList("regexp", "paths");
-        final Map<String, List<Object>> map = ArgsUtil.parseArgs("options", defaultOperands, resolvedArgs);
-        final GrepOptions.Default options = new GrepOptions.Default();
-        final GrepArguments argsForContext = new GrepArguments(options);
-        for(final Map.Entry<String, List<Object>> e : map.entrySet()) {
-            if("regexp".equals(e.getKey())) {
-
-                final String value = convertList(context, "regexp", String.class, e.getValue());
-                argsForContext.setRegexp(value);
-            }
-            else if("pattern".equals(e.getKey())) {
-
-                final java.util.regex.Pattern value = convertList(context, "pattern", java.util.regex.Pattern.class, e.getValue());
-                argsForContext.setPattern(value);
-            }
-            else if("paths".equals(e.getKey())) {
-
-                final String[] value = convertList(context, "paths", String[].class, e.getValue());
-                argsForContext.setPaths(value);
-            }
-            else if("files".equals(e.getKey())) {
-
-                final java.io.File[] value = convertList(context, "files", java.io.File[].class, e.getValue());
-                argsForContext.setFiles(value);
-            }
-            else if("args".equals(e.getKey())) {
-                throw new IllegalStateException("invalid operand '" + e.getKey() + "' in grep command args: " + Arrays.toString(args));
-            }
-            else if("options".equals(e.getKey())) {
-
-                final GrepOptions value = convertList(context, "options", GrepOptions.class, e.getValue());
-                options.setAll(value);
-            }
-            else {
-                throw new IllegalStateException("invalid operand '" + e.getKey() + "' in grep command args: " + Arrays.toString(args));
-            }
-        }
-        return argsForContext;
-    }
+//    /**
+//     * Returns the options set containing the selected command options. Returns
+//     * an empty options set if no option has been selected.
+//     *
+//     * @return set with the selected options
+//     */
+//    public GrepOptions getOptions() {
+//        return options;
+//    }
 
     /**
      * Returns the {@code <regexp>} operand value (variables are NOT resolved): Lines will be printed which match the given regular expression. The
@@ -238,7 +118,6 @@ public final class GrepArguments implements Arguments<GrepArguments> {
      *
      * @return the {@code <regexp>} operand value (variables are not resolved)
      * @throws IllegalStateException if this operand has never been set
-     * @see #getRegexp(ExecutionContext)
      */
     public String getRegexp() {
         if(regexpIsSet) {
@@ -259,28 +138,6 @@ public final class GrepArguments implements Arguments<GrepArguments> {
     public void setRegexp(String regexp) {
         this.regexp = regexp;
         this.regexpIsSet = true;
-    }
-
-    /**
-     * Returns the {@code <regexp>} (variables are resolved): Lines will be printed which match the given regular expression. The
-     * {@code regexp} string is surrounded with ".*" on both sides unless
-     * the {@code --wholeLine} option is specified. If the
-     * {@code --fixedStrings} option is used, plain string comparison is
-     * used instead of regular expression matching.
-     *
-     * @param context the execution context used to resolve variables
-     * @return the {@code <regexp>} operand value after resolving variables
-     * @throws IllegalStateException if this operand has never been set
-     * @see #getRegexp()
-     */
-    public String getRegexp(ExecutionContext context) {
-        final String value = getRegexp();
-        if(Arg.isVariable(value)) {
-            final Object resolved = resolveVariable(context.getVariableContext(), value);
-            final String converted = convert(context, "regexp", String.class, resolved);
-            return converted;
-        }
-        return value;
     }
 
     /**
@@ -572,67 +429,67 @@ public final class GrepArguments implements Arguments<GrepArguments> {
         return this.isWholeLine;
     }
 
-    @Override
-    public String toString() {
-        // ok, we have options or arguments or both
-        final StringBuilder sb = new StringBuilder();
-
-        if(argsIsSet) {
-            for(String arg : args) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append(arg);
-            }
-        }
-        else {
-
-            // first the options
-            if(options.size() > 0) {
-                sb.append(DefaultOptionSet.toString(options));
-            }
-            // operand: <regexp>
-            if(regexpIsSet) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append("--").append("regexp");
-                sb.append(" ").append(toString(getRegexp()));
-            }
-            // operand: <pattern>
-            if(patternIsSet) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append("--").append("pattern");
-                sb.append(" ").append(toString(getPattern()));
-            }
-            // operand: <paths>
-            if(pathsIsSet) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append("--").append("paths");
-                sb.append(" ").append(toString(getPaths()));
-            }
-            // operand: <files>
-            if(filesIsSet) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append("--").append("files");
-                sb.append(" ").append(toString(getFiles()));
-            }
-            // operand: <args>
-            if(argsIsSet) {
-                if(sb.length() > 0) {
-                    sb.append(' ');
-                }
-                sb.append("--").append("args");
-                sb.append(" ").append(toString(getArgs()));
-            }
-        }
-
-        return sb.toString();
-    }
+//    @Override
+//    public String toString() {
+//        // ok, we have options or arguments or both
+//        final StringBuilder sb = new StringBuilder();
+//
+//        if(argsIsSet) {
+//            for(String arg : args) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append(arg);
+//            }
+//        }
+//        else {
+//
+////            // first the options
+////            if(options.size() > 0) {
+////                sb.append(DefaultOptionSet.toString(options));
+////            }
+//            // operand: <regexp>
+//            if(regexpIsSet) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append("--").append("regexp");
+//                sb.append(" ").append(toString(getRegexp()));
+//            }
+//            // operand: <pattern>
+//            if(patternIsSet) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append("--").append("pattern");
+//                sb.append(" ").append(toString(getPattern()));
+//            }
+//            // operand: <paths>
+//            if(pathsIsSet) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append("--").append("paths");
+//                sb.append(" ").append(toString(getPaths()));
+//            }
+//            // operand: <files>
+//            if(filesIsSet) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append("--").append("files");
+//                sb.append(" ").append(toString(getFiles()));
+//            }
+//            // operand: <args>
+//            if(argsIsSet) {
+//                if(sb.length() > 0) {
+//                    sb.append(' ');
+//                }
+//                sb.append("--").append("args");
+//                sb.append(" ").append(toString(getArgs()));
+//            }
+//        }
+//
+//        return sb.toString();
+//    }
 }

@@ -13,7 +13,7 @@ public class InputStreamConverters {
             if(value instanceof URL) {
                 try {
                     return ((URL) value).openStream();
-                } catch (IOException e) {
+                } catch(IOException e) {
                     return null;
                 }
             }
@@ -28,7 +28,7 @@ public class InputStreamConverters {
             if(value instanceof File) {
                 try {
                     return new FileInputStream((File) value);
-                } catch (IOException e) {
+                } catch(IOException e) {
                     return null;
                 }
             }

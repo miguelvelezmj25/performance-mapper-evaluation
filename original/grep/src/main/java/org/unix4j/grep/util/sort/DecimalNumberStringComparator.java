@@ -75,7 +75,7 @@ public class DecimalNumberStringComparator implements Comparator<CharSequence> {
         int cmp = 0;
         boolean isZero1 = true;
         boolean isZero2 = true;
-        while (index1 < end1 || index2 < end2) {
+        while(index1 < end1 || index2 < end2) {
             index1 = skipGroupingSeparatorChars(s1, index1, end1, groupingSeparator);
             index2 = skipGroupingSeparatorChars(s2, index2, end2, groupingSeparator);
             final char ch1 = index1 < end1 ? s1.charAt(index1) : '\n';
@@ -137,7 +137,7 @@ public class DecimalNumberStringComparator implements Comparator<CharSequence> {
         if(isDecimal2) {
             index2++;
         }
-        while (cmp == 0 && (index1 < end1 || index2 < end2)) {
+        while(cmp == 0 && (index1 < end1 || index2 < end2)) {
             ch1 = index1 < end1 ? s1.charAt(index1) : '\n';
             ch2 = index2 < end2 ? s2.charAt(index2) : '\n';
             isDigit1 = Character.isDigit(ch1);
@@ -186,7 +186,7 @@ public class DecimalNumberStringComparator implements Comparator<CharSequence> {
     }
 
     private int skipLeadingZeroChars(CharSequence s, int index, int end, char zeroDigit) {
-        while (index < end) {
+        while(index < end) {
             final char ch = s.charAt(index);
             if(ch == zeroDigit) {
                 index++;

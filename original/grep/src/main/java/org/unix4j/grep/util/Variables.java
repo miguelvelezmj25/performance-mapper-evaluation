@@ -1,12 +1,10 @@
 package org.unix4j.grep.util;
 
-import org.unix4j.grep.command.Command;
-
 import java.util.Map;
 
 /**
  * Variables contains static utility methods related to variables or place
- * holders used as {@link Command} arguments. Variables are represented as
+ * holders used as arguments. Variables are represented as
  * string of the form <tt>"{varname}"</tt>, where {@code varname} refers to the
  * name of the variable.
  */

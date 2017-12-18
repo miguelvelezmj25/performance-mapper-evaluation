@@ -14,7 +14,7 @@ public class EnumConverters {
                 final String name = value.toString();
                 try {
                     return Enum.valueOf(enumClass, name);
-                } catch (IllegalArgumentException e) {
+                } catch(IllegalArgumentException e) {
                     return null;
                 }
             }

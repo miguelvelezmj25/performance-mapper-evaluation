@@ -1,9 +1,7 @@
 package org.unix4j.grep.context;
 
-import org.unix4j.grep.command.Command;
 import org.unix4j.grep.convert.ConverterRegistry;
 import org.unix4j.grep.convert.ValueConverter;
-import org.unix4j.grep.processor.LineProcessor;
 import org.unix4j.grep.variable.VariableContext;
 
 import java.io.File;
@@ -13,8 +11,7 @@ import java.util.Properties;
 
 /**
  * The execution context encapsulates all information relevant during the
- * execution of a {@link Command} or chain of joined commands. It is passed to
- * the {@link Command#execute(ExecutionContext, LineProcessor) execute(..)}
+ * execution of a execute(..)}
  * method providing access to the current directory, environment variables and
  * other information useful for the commands during their execution.
  */

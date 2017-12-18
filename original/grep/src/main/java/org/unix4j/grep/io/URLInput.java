@@ -16,7 +16,7 @@ public class URLInput extends StreamInput {
     private static InputStream openStream(URL url) {
         try {
             return url.openStream();
-        } catch (IOException e) {
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }

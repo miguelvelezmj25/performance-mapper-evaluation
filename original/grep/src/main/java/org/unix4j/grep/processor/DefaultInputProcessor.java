@@ -23,6 +23,11 @@ public class DefaultInputProcessor implements InputProcessor {
     }
 
     @Override
+    public boolean processLine(Line line) {
+        return true;
+    }
+
+    @Override
     public void finish(Input input, LineProcessor output) {
         //default: no op
     }

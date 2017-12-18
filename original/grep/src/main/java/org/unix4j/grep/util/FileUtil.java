@@ -137,7 +137,7 @@ public class FileUtil {
         do {
             elements.add(0, file.getName());
             file = file.getParentFile();
-        } while (file != null);
+        } while(file != null);
         elements.remove(0);
         return elements;
     }
@@ -185,7 +185,7 @@ public class FileUtil {
                 parts.add(0, f.getName());
                 p = f;
                 f = f.getParentFile();
-            } while (f != null);
+            } while(f != null);
             if(p.isDirectory()) {
                 // we pass p (the first directory) as starting directory
                 parts.remove(0);
@@ -197,7 +197,7 @@ public class FileUtil {
             }
 
             // descend again until first wildcard part is found
-            while (!parts.isEmpty() && !isWildcardFileName(parts.get(0))) {
+            while(!parts.isEmpty() && !isWildcardFileName(parts.get(0))) {
                 p = new File(p, parts.remove(0));
             }
             if(!p.isDirectory()) {

@@ -1,5 +1,6 @@
 package org.unix4j.grep.processor;
 
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.unix4j.grep.command.ExitValueException;
 import org.unix4j.grep.io.Input;
 import org.unix4j.grep.line.Line;
@@ -19,9 +20,9 @@ import java.util.List;
  */
 public class MultipleInputLineProcessor implements LineProcessor {
 
-    private final List<? extends Input> inputs;
-    private final InputProcessor processor;
-    private final LineProcessor output;
+    final List<? extends Input> inputs;
+    final InputProcessor processor;
+    final LineProcessor output;
 
     /**
      * Constructor with input objects (usually file operands of the command) and
@@ -35,6 +36,10 @@ public class MultipleInputLineProcessor implements LineProcessor {
         this.inputs = inputs;
         this.processor = processor;
         this.output = output;
+
+        Sink.sink(this.inputs);
+        Sink.sink(this.processor);
+        Sink.sink(this.output);
     }
 
     @Override
@@ -59,17 +64,20 @@ public class MultipleInputLineProcessor implements LineProcessor {
     @Override
     public void finish() {
         beginMultiple(inputs, output);
+
         for(int i = 0; i < inputs.size(); i++) {
             final Input input = inputs.get(i);
+
             try {
                 processor.begin(input, output);
+
                 for(final Line line : input) {
-                    if(!processor.processLine(input, line, output)) {
+                    if(!processor.processLine(line)) {
                         break;// wants no more lines
                     }
                 }
                 processor.finish(input, output);
-            } catch (ExitValueException e) {
+            } catch(ExitValueException e) {
                 e.setInput(input);
                 throw e;
             }

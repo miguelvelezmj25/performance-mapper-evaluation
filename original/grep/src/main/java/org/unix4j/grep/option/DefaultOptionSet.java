@@ -196,7 +196,7 @@ public class DefaultOptionSet<E extends Enum<E> & Option> implements OptionSet<E
             clone.options = clone.options.clone();
             clone.useAcronym = clone.useAcronym.clone();
             return clone;
-        } catch (CloneNotSupportedException e) {
+        } catch(CloneNotSupportedException e) {
             throw new RuntimeException("should be cloneable", e);
         }
     }

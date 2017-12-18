@@ -34,7 +34,7 @@ public class DateConverters {
             if(value != null) {
                 try {
                     return format.parse(value.toString());
-                } catch (ParseException e) {
+                } catch(ParseException e) {
                     return null;
                 }
             }

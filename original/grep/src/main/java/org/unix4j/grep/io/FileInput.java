@@ -111,7 +111,7 @@ public class FileInput extends ReaderInput {
     private static FileReader createFileReader(File file) {
         try {
             return new FileReader(file);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -120,7 +120,7 @@ public class FileInput extends ReaderInput {
         try {
             final File file = FileUtil.toAbsoluteFile(currentDirectory, path);
             return new FileReader(file);
-        } catch (FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -148,7 +148,7 @@ public class FileInput extends ReaderInput {
     public String getFileInfo(File relativeRoot) {
         try {
             return FileUtil.getRelativePath(relativeRoot, new File(fileInfo));
-        } catch (Exception e) {
+        } catch(Exception e) {
             return getFileInfo();
         }
     }

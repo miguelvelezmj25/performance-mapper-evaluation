@@ -5,12 +5,12 @@ import org.unix4j.grep.line.Line;
 import org.unix4j.grep.processor.AbstractLineProcessor;
 import org.unix4j.grep.processor.LineProcessor;
 
-abstract class AbstractGrepProcessor extends AbstractLineProcessor<GrepArguments> {
+abstract class AbstractGrepProcessor extends AbstractLineProcessor {
 
     private final LineMatcher matcher;
 
-    public AbstractGrepProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
-        super(command, context, output);
+    public AbstractGrepProcessor(ExecutionContext context, LineProcessor output, LineMatcher matcher) {
+        super(context, output);
         this.matcher = matcher;
     }
 

@@ -10,7 +10,7 @@ public class PatternConverters {
             if(value != null) {
                 try {
                     return Pattern.compile(value.toString());
-                } catch (PatternSyntaxException e) {
+                } catch(PatternSyntaxException e) {
                     //ignore, we just can't convert this string
                 }
             }

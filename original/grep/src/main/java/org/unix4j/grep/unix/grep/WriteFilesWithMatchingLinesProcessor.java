@@ -20,7 +20,7 @@ final class WriteFilesWithMatchingLinesProcessor extends DefaultInputProcessor i
     private final LineProcessor output;
     private boolean matches = false;
 
-    public WriteFilesWithMatchingLinesProcessor(GrepCommand command, ExecutionContext context, LineProcessor output, LineMatcher matcher) {
+    public WriteFilesWithMatchingLinesProcessor(ExecutionContext context, LineProcessor output, LineMatcher matcher) {
         this.context = context;
         this.matcher = matcher;
         this.output = output;
