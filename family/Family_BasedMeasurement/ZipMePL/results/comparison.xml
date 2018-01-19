@@ -1,0 +1,82 @@
+<results>
+  <row>
+    <data columnname="Configuration">0</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, </data>
+    <data columnname="Estimated Value">39137</data>
+    <data columnname="Measured Value">39608</data>
+    <data columnname="Difference Absolut">471</data>
+    <data columnname="Difference in %">1,18915370632196</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, ArchiveCheck, </data>
+    <data columnname="Estimated Value">39137</data>
+    <data columnname="Measured Value">39057</data>
+    <data columnname="Difference Absolut">-80</data>
+    <data columnname="Difference in %">-0,204828839900657</data>
+  </row>
+  <row>
+    <data columnname="Configuration">2</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, </data>
+    <data columnname="Estimated Value">39152</data>
+    <data columnname="Measured Value">39311</data>
+    <data columnname="Difference Absolut">159</data>
+    <data columnname="Difference in %">0,404466943094803</data>
+  </row>
+  <row>
+    <data columnname="Configuration">3</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, ArchiveCheck, </data>
+    <data columnname="Estimated Value">39152</data>
+    <data columnname="Measured Value">39380,5</data>
+    <data columnname="Difference Absolut">228,5</data>
+    <data columnname="Difference in %">0,580236411421893</data>
+  </row>
+  <row>
+    <data columnname="Configuration">4</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, </data>
+    <data columnname="Estimated Value">39525</data>
+    <data columnname="Measured Value">39658</data>
+    <data columnname="Difference Absolut">133</data>
+    <data columnname="Difference in %">0,335367391194708</data>
+  </row>
+  <row>
+    <data columnname="Configuration">5</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, </data>
+    <data columnname="Estimated Value">39525</data>
+    <data columnname="Measured Value">40105,5</data>
+    <data columnname="Difference Absolut">580,5</data>
+    <data columnname="Difference in %">1,44743239705278</data>
+  </row>
+  <row>
+    <data columnname="Configuration">6</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeExtractCRC, </data>
+    <data columnname="Estimated Value">39165</data>
+    <data columnname="Measured Value">41518</data>
+    <data columnname="Difference Absolut">2353</data>
+    <data columnname="Difference in %">5,66742135941038</data>
+  </row>
+  <row>
+    <data columnname="Configuration">7</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeExtractCRC, ArchiveCheck, </data>
+    <data columnname="Estimated Value">39165</data>
+    <data columnname="Measured Value">41872</data>
+    <data columnname="Difference Absolut">2707</data>
+    <data columnname="Difference in %">6,4649407718762</data>
+  </row>
+  <row>
+    <data columnname="Configuration">8</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, </data>
+    <data columnname="Estimated Value">39557</data>
+    <data columnname="Measured Value">42554,5</data>
+    <data columnname="Difference Absolut">2997,5</data>
+    <data columnname="Difference in %">7,0439083998167</data>
+  </row>
+  <row>
+    <data columnname="Configuration">9</data>
+    <data columnname="Elements">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, </data>
+    <data columnname="Estimated Value">39557</data>
+    <data columnname="Measured Value">42073,5</data>
+    <data columnname="Difference Absolut">2516,5</data>
+    <data columnname="Difference in %">5,98119956742367</data>
+  </row>
+</results>

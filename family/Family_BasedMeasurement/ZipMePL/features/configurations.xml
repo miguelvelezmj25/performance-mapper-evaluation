@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<configurations type="Pairwise">
+  <configuration features="14" measuredValue="40196,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>GZIP</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>Adler32Checksum</Element>
+    <Element>DerivativeCompressAdler32Checksum</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeCompressGZIP</Element>
+    <Element>DerivativeExtractCRC</Element>
+    <Element>DerivativeCompressGZIPCRC</Element>
+    <Element>DerivativeGZIPCRC</Element>
+  </configuration>
+  <configuration features="15" measuredValue="40487,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>GZIP</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>Adler32Checksum</Element>
+    <Element>DerivativeCompressAdler32Checksum</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeCompressGZIP</Element>
+    <Element>DerivativeExtractCRC</Element>
+    <Element>DerivativeCompressGZIPCRC</Element>
+    <Element>DerivativeGZIPCRC</Element>
+    <Element>ArchiveCheck</Element>
+  </configuration>
+  <configuration features="8" measuredValue="38881,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeExtractCRC</Element>
+  </configuration>
+  <configuration features="12" measuredValue="38897,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>GZIP</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeCompressGZIP</Element>
+    <Element>DerivativeExtractCRC</Element>
+    <Element>DerivativeCompressGZIPCRC</Element>
+    <Element>DerivativeGZIPCRC</Element>
+  </configuration>
+  <configuration features="7" measuredValue="39089,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>Check</Element>
+    <Element>Adler32Checksum</Element>
+    <Element>DerivativeCompressAdler32Checksum</Element>
+  </configuration>
+  <configuration features="9" measuredValue="39057">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeExtractCRC</Element>
+    <Element>ArchiveCheck</Element>
+  </configuration>
+  <configuration features="13" measuredValue="40105,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>GZIP</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeCompressGZIP</Element>
+    <Element>DerivativeExtractCRC</Element>
+    <Element>DerivativeCompressGZIPCRC</Element>
+    <Element>DerivativeGZIPCRC</Element>
+    <Element>ArchiveCheck</Element>
+  </configuration>
+  <configuration features="10" measuredValue="41872">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>CRC</Element>
+    <Element>Check</Element>
+    <Element>Adler32Checksum</Element>
+    <Element>DerivativeCompressAdler32Checksum</Element>
+    <Element>DerivativeCompressCRC</Element>
+    <Element>DerivativeExtractCRC</Element>
+  </configuration>
+  <configuration features="8" measuredValue="42554,5">
+    <Element>Base</Element>
+    <Element>ZipMeTest</Element>
+    <Element>Compress</Element>
+    <Element>Extract</Element>
+    <Element>Check</Element>
+    <Element>Adler32Checksum</Element>
+    <Element>DerivativeCompressAdler32Checksum</Element>
+    <Element>ArchiveCheck</Element>
+  </configuration>
+</configurations>

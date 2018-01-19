@@ -1,0 +1,39 @@
+0;base, ;23;23;0;0
+1;base, encrypt, decrypt, keys, ;15020,5;15020,5;0;0
+2;base, keys, ;4023;4023;0;0
+3;base, keys, sign, verify, ;9037,5;9037,5;0;0
+4;base, autoresponder, ;5025;5025;0;0
+5;base, addressbook, ;2027;2027;0;0
+6;base, forward, ;11022,5;11022,5;0;0
+7;base, autoresponder, addressbook, derivative_autoresponder_addressbook, ;8028,5;8028,5;0;0
+8;base, addressbook, forward, derivative_addressbook_forward, ;15026,5;15026,5;0;0
+9;base, autoresponder, forward, derivative_autoresponder_forward, ;19525;19525;0;0
+10;base, autoresponder, addressbook, forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, ;24528,5;24532,5;4;0,0163049016610586
+11;base, keys, autoresponder, ;9025;9025;0;0
+12;base, keys, forward, ;15022,5;15068,5;46;0,305272588512466
+13;base, keys, autoresponder, forward, derivative_autoresponder_forward, ;23525;23534;9;0,0382425427041682
+14;base, keys, addressbook, ;6027;6038;11;0,18217952964558
+15;base, keys, addressbook, forward, derivative_addressbook_forward, ;19026,5;19028;1,5;0,00788311961319721
+16;base, keys, autoresponder, addressbook, derivative_autoresponder_addressbook, ;12028,5;12028;-0,5;-0,004156967076824
+17;base, keys, autoresponder, addressbook, forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, ;28528,5;28537,5;9;0,0315374507227375
+18;base, encrypt, decrypt, keys, addressbook, derivative_encrypt_addressbook, ;20033;20033;0;0
+19;base, encrypt, decrypt, keys, autoresponder, derivative_encrypt_autoresponder, ;23034;23034;0;0
+20;base, encrypt, decrypt, keys, autoresponder, addressbook, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_autoresponder_addressbook, ;29046;29033,5;-12,5;-0,0430537138133502
+21;base, encrypt, decrypt, keys, forward, derivative_encrypt_forward, ;33529;33529;0;0
+22;base, encrypt, decrypt, keys, autoresponder, forward, derivative_encrypt_autoresponder, derivative_encrypt_forward, derivative_autoresponder_forward, ;45043;45034;-9;-0,0199849002975583
+23;base, encrypt, decrypt, keys, addressbook, forward, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_addressbook_forward, ;40541,5;40541;-0,5;-0,00123331935571969
+24;base, encrypt, decrypt, keys, autoresponder, addressbook, forward, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, ;53055;53036;-19;-0,0358247228297728
+25;base, keys, sign, verify, addressbook, derivative_sign_addressbook, ;12036;12036;0;0
+26;base, keys, sign, verify, forward, derivative_sign_forward, ;20542,5;20542,5;0;0
+27;base, keys, sign, verify, addressbook, forward, derivative_sign_addressbook, derivative_sign_forward, derivative_addressbook_forward, ;25541;25554;13;0,0508726618141964
+28;base, keys, sign, verify, autoresponder, derivative_sign_autoresponder, ;15569,5;15569,5;0;0
+29;base, keys, sign, verify, autoresponder, forward, derivative_sign_autoresponder, derivative_sign_forward, derivative_autoresponder_forward, ;30575;30561;-14;-0,0458100193056481
+30;base, keys, sign, verify, autoresponder, addressbook, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_autoresponder_addressbook, ;19567,5;19549,5;-18;-0,0920739660860903
+31;base, keys, sign, verify, autoresponder, addressbook, forward, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_sign_forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, ;36573;36578;5;0,0136694187763169
+32;base, encrypt, decrypt, keys, sign, verify, ;20035;20052;17;0,0847795731099126
+33;base, encrypt, decrypt, keys, sign, verify, addressbook, derivative_encrypt_addressbook, derivative_sign_addressbook, ;26042;26083;41;0,157190507226929
+34;base, encrypt, decrypt, keys, sign, verify, autoresponder, derivative_encrypt_autoresponder, derivative_sign_autoresponder, ;29578,5;29523;-55,5;-0,187989025505544
+35;base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_autoresponder_addressbook, ;36585;36544;-41;-0,11219352014011
+36;base, encrypt, decrypt, keys, sign, verify, forward, derivative_encrypt_forward, derivative_sign_forward, ;39049;39035,5;-13,5;-0,0345839043947223
+37;base, encrypt, decrypt, keys, sign, verify, autoresponder, forward, derivative_encrypt_autoresponder, derivative_encrypt_forward, derivative_sign_autoresponder, derivative_sign_forward, derivative_autoresponder_forward, ;52093;52055;-38;-0,0729997118432379
+38;base, encrypt, decrypt, keys, sign, verify, addressbook, forward, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_sign_addressbook, derivative_sign_forward, derivative_addressbook_forward, ;47056;47038,5;-17,5;-0,0372035672906179

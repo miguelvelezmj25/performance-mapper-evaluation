@@ -1,0 +1,21 @@
+<NfpModel>
+  <DirectlyAssigned />
+  <Inferred />
+  <Runtime>
+    <Performance>
+      <measurement name="Benchmark" type="runtime">
+        <appFile>C:\Workspace\FamilyBasedMeasurement\MicroBenchSimulator\features\MeasurePerformanceJava.exe</appFile>
+        <envVariables>
+        </envVariables>
+        <startArgs>$generated_folder\Run</startArgs>
+        <execProcedurePerFeature>False</execProcedurePerFeature>
+        <inclFiles />
+        <outputPattern outputType="XML-based" waitForOutput="False">
+          <XmlFile>result.xml</XmlFile>
+          <XpathExpr>//result</XpathExpr>
+        </outputPattern>
+      </measurement>
+      <feature_functions />
+    </Performance>
+  </Runtime>
+</NfpModel>

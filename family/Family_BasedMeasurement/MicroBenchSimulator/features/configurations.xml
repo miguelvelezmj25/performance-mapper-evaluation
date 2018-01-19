@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<configurations type="per Feature">
+  <configuration features="1" measuredValue="2508">
+    <Element>base</Element>
+  </configuration>
+  <configuration features="2" measuredValue="3509,5">
+    <Element>base</Element>
+    <Element>f1</Element>
+  </configuration>
+  <configuration features="2" measuredValue="8619">
+    <Element>base</Element>
+    <Element>f2</Element>
+  </configuration>
+  <configuration features="2" measuredValue="4617">
+    <Element>base</Element>
+    <Element>f3</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2707,5">
+    <Element>base</Element>
+    <Element>f4</Element>
+  </configuration>
+  <configuration features="2" measuredValue="3107">
+    <Element>base</Element>
+    <Element>f5</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2907,5">
+    <Element>base</Element>
+    <Element>f6</Element>
+  </configuration>
+  <configuration features="2" measuredValue="4607,5">
+    <Element>base</Element>
+    <Element>f7</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2728">
+    <Element>base</Element>
+    <Element>f8</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2557">
+    <Element>base</Element>
+    <Element>f9</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2587,5">
+    <Element>base</Element>
+    <Element>f10</Element>
+  </configuration>
+</configurations>

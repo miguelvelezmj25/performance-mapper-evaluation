@@ -1,0 +1,69 @@
+<verificationClasses.Tree>
+  <root>
+    <data class="verificationClasses.Path">
+      <visited>false</visited>
+      <allChildsVisited>false</allChildsVisited>
+      <splitID>26</splitID>
+      <visitedFeature>verify</visitedFeature>
+      <methodsOnPath>
+        <string>setupSpecifications</string>
+        <string>setupSpecifications__role__verify</string>
+      </methodsOnPath>
+      <thenFeature>verify</thenFeature>
+      <elseFeature>featureSwitch</elseFeature>
+    </data>
+    <children>
+      <verificationClasses.Node>
+        <data class="verificationClasses.Path">
+          <visited>false</visited>
+          <allChildsVisited>false</allChildsVisited>
+          <splitID>21</splitID>
+          <visitedFeature>sign</visitedFeature>
+          <methodsOnPath>
+            <string>setupSpecifications__before__verify</string>
+            <string>setupSpecifications__role__sign</string>
+          </methodsOnPath>
+          <thenFeature>sign</thenFeature>
+          <elseFeature>featureSwitch</elseFeature>
+        </data>
+        <parent reference="../../.."/>
+        <children>
+          <verificationClasses.Node>
+            <data class="verificationClasses.Path">
+              <visited>false</visited>
+              <allChildsVisited>false</allChildsVisited>
+              <splitID>16</splitID>
+              <visitedFeature>autoresponder</visitedFeature>
+              <methodsOnPath>
+                <string>setupSpecifications__before__sign</string>
+                <string>setupSpecifications__role__autoresponder</string>
+              </methodsOnPath>
+              <thenFeature>autoresponder</thenFeature>
+              <elseFeature>featureSwitch</elseFeature>
+            </data>
+            <parent reference="../../.."/>
+            <children>
+              <verificationClasses.Node>
+                <data class="verificationClasses.Path">
+                  <visited>false</visited>
+                  <allChildsVisited>false</allChildsVisited>
+                  <splitID>11</splitID>
+                  <visitedFeature>encrypt</visitedFeature>
+                  <methodsOnPath>
+                    <string>setupSpecifications__before__autoresponder</string>
+                    <string>setupSpecifications__role__encrypt</string>
+                    <string>setupSpecifications__before__encrypt</string>
+                  </methodsOnPath>
+                  <thenFeature>encrypt</thenFeature>
+                  <elseFeature>base</elseFeature>
+                </data>
+                <parent reference="../../.."/>
+                <children/>
+              </verificationClasses.Node>
+            </children>
+          </verificationClasses.Node>
+        </children>
+      </verificationClasses.Node>
+    </children>
+  </root>
+</verificationClasses.Tree>

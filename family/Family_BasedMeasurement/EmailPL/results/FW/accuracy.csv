@@ -1,0 +1,20 @@
+0;base, ;23;23;0;0
+2;base, keys, ;4023;4023;0;0
+4;base, autoresponder, ;5025;5025;0;0
+6;base, forward, ;11022,5;11022,5;0;0
+8;base, addressbook, forward, ;13026,5;15026,5;2000;13,3098193192027
+10;base, autoresponder, addressbook, forward, ;18028,5;24532,5;6504;26,5117701008866
+12;base, keys, forward, ;15022,5;15068,5;46;0,305272588512466
+14;base, keys, addressbook, ;6027;6038;11;0,18217952964558
+16;base, keys, autoresponder, addressbook, ;11029;12028;999;8,30562021948786
+18;base, encrypt, decrypt, keys, addressbook, ;17024,5;20033;3008,5;15,0177207607448
+20;base, encrypt, decrypt, keys, autoresponder, addressbook, ;22026,5;29033,5;7007;24,1341898152135
+22;base, encrypt, decrypt, keys, autoresponder, forward, ;31022;45034;14012;31,1142692188125
+24;base, encrypt, decrypt, keys, autoresponder, addressbook, forward, ;33026;53036;20010;37,7290896749378
+26;base, keys, sign, verify, forward, ;20037;20542,5;505,5;2,46075209930632
+28;base, keys, sign, verify, autoresponder, ;14039,5;15569,5;1530;9,82690516715373
+30;base, keys, sign, verify, autoresponder, addressbook, ;16043,5;19549,5;3506;17,9339625054349
+32;base, encrypt, decrypt, keys, sign, verify, ;20035;20052;17;0,0847795731099126
+34;base, encrypt, decrypt, keys, sign, verify, autoresponder, ;25037;29523;4486;15,1949327642855
+36;base, encrypt, decrypt, keys, sign, verify, forward, ;31034,5;39035,5;8001;20,496727337936
+38;base, encrypt, decrypt, keys, sign, verify, addressbook, forward, ;33038,5;47038,5;14000;29,7628538324989

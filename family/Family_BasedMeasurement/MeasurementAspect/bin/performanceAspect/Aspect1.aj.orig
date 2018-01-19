@@ -1,0 +1,439 @@
+package performanceAspect;
+import java.util.*;
+import java.util.Map.Entry;
+import org.aspectj.lang.reflect.*;
+import org.aspectj.lang.*;
+import org.aspectj.lang.annotation.*;
+import verificationClasses.*;
+
+@Aspect
+public class Aspect1 {
+	Stack<String> features = new Stack<String>();
+	HashMap<String,Long> times = new HashMap<String,Long>();
+	StringBuilder sb = new StringBuilder("0");
+	StringBuilder sb2 = new StringBuilder("");
+	String method = "";
+	String previousFeature = "";
+	String lastAction = "";
+	int i = 0;
+	Stack<String> abbauStack = new Stack<String>();
+	Stack<Long> abbaubstackTimes = new Stack<Long>();
+	Tree<Measurement> callTree = null; 
+	
+	String n_currentA = "";
+	Node<Measurement> lastNode = null;
+	public HashMap<String,Double> feature_Values = new HashMap<String,Double>();
+	
+	@Around("@annotation(featureAnnotation)")
+	public Object logAnnotatedMethods(ProceedingJoinPoint pjp, featureHouse.FeatureAnnotation featureAnnotation) throws Throwable {
+		System.out.println("Executing: " + pjp.getSignature().toString());
+		Object returnObject = null;
+		MethodSignature sig = null;
+		boolean hasReturnType = false;
+<<<<<<< local
+		if(pjp.getSignature() instanceof org.aspectj.lang.reflect.MethodSignature)//org.aspectj.runtime.reflect.ConstructorSignatureImpl)
+		{
+			 sig =(MethodSignature)pjp.getSignature();
+			 if(sig.getReturnType() == Void.TYPE)
+					hasReturnType = true;
+		}
+		else
+		{//constructor
+			hasReturnType = false;
+		}
+		
+=======
+		if (pjp.getSignature() instanceof MethodSignature &&
+				((MethodSignature)pjp.getSignature()).getReturnType() == Void.TYPE)
+			hasReturnType = true;
+>>>>>>> other
+		if(method.equals(pjp.getSignature().getName()))
+		{
+			if(hasReturnType)
+			{
+				returnObject = pjp.proceed();
+				return returnObject;
+			}
+			else
+			{
+				 pjp.proceed();
+				 return null;
+			}
+		}
+		else
+			method = pjp.getSignature().getName();
+		String currentFeature = featureAnnotation.name();
+		if(featureAnnotation.name().equals("featureSwitch"))
+		{
+			currentFeature = previousFeature;
+		}
+		//if(lastNode != null)
+		//	System.out.println(lastNode.data.feature);
+		//init tree?
+		Node currentNode = new Node<Measurement>();
+		n_currentA = "call";
+		if(pjp.getSignature().getName().contains("__role__") || pjp.getSignature().getName().contains("__before__")) // && currentFeature != featureSwitches
+		{
+			n_currentA = "refines";
+			//pjp.proceed();
+			//return;
+		}
+		if(callTree == null)
+		{
+			Measurement m = new Measurement(currentFeature, "call");
+			currentNode.data = m;
+			callTree = new Tree<Measurement>(m);
+			callTree.root = currentNode;
+		}
+		else
+		{	
+			Measurement m = new Measurement(currentFeature,  n_currentA);
+			if(lastNode.getData().prefix.length() > 0)
+			{
+				//System.out.println(lastNode.getData().prefix + " and action " + n_currentA + " and current syntax: " +  currentFeature + "#");
+				if(n_currentA.equals("call"))
+					if(lastNode.getData().prefix.endsWith(currentFeature + "#"))//simplification a#a# > a#
+					{
+						m.prefix = lastNode.getData().prefix;
+						//System.out.println("same");
+					}
+					else
+					{
+						m.prefix = lastNode.getData().prefix + currentFeature + "#";
+					//	System.out.println("diff");
+					}
+						
+				else
+					m.prefix = lastNode.getData().prefix;
+			}
+			else
+			{
+				if(n_currentA.equals("call"))
+					m.prefix = currentFeature + "#";
+			}
+			currentNode.data = m;
+		}
+		if(lastNode!=null)
+			lastNode.addChild(currentNode);
+		lastNode = currentNode;
+		previousFeature = currentFeature;
+		//printTreeSize();
+		if(hasReturnType)
+		{
+			long start = System.nanoTime() / 1000000;
+			returnObject = pjp.proceed();
+			long featureTime = (System.nanoTime()/1000000) - start;
+			n_currentA = "leaving";
+			previousFeature = currentFeature;
+			currentNode.getData().value = featureTime;
+			lastNode = currentNode;
+			return returnObject;
+		}
+		else
+		{
+			long start = System.nanoTime() / 1000000;
+			pjp.proceed();
+			long featureTime = (System.nanoTime()/1000000) - start;
+			n_currentA = "leaving";
+			previousFeature = currentFeature;
+			currentNode.getData().value = featureTime;
+			lastNode = currentNode;
+		}
+return null;
+	}
+	
+	public int printTreeSize(Node<Measurement> n, int depth)
+	{
+		int max = 0;
+		for(int i = 0; i < n.children.size();i++)
+		{
+			int dep = printTreeSize(n.children.get(i), depth);
+			if(dep > max)
+				max = dep;
+		}
+		return max+1;
+	}
+	public void printTreeSize()
+	{
+		int size =  printTreeSize(callTree.root, 0);
+		System.out.println(size);
+	}
+	/*@Around("@annotation(featureAnnotation)")
+	public void logAnnotatedMethods(ProceedingJoinPoint pjp, featureHouse.FeatureAnnotation featureAnnotation) throws Throwable {
+		if(method.equals(pjp.getSignature().getName()))
+		{
+			pjp.proceed();
+			return;
+		}
+		else
+			method = pjp.getSignature().getName();
+		i++;
+		String currentFeature = featureAnnotation.name()+"_"+i;
+		String action = "";
+		if(featureAnnotation.name().equals("featureSwitch"))
+		{
+			currentFeature = previousFeature.substring(0,previousFeature.indexOf('_'))+"_"+i;
+			action = "call";
+			if(lastAction.equals("refines"))
+				sb.append( " + " + currentFeature);
+			else
+				sb.append( " - " + currentFeature);
+			pjp.proceed();
+			sb.append( "<"+ currentFeature + ":0>");
+			lastAction = "leaving";
+			previousFeature = currentFeature;
+			return;
+		}
+		previousFeature = currentFeature;
+		
+		if(pjp.getSignature().getName().contains("__role__") || pjp.getSignature().getName().contains("__before__"))
+			{
+			action = "refines";
+			if(lastAction.equals("refines"))
+				sb.append(" - (" + currentFeature);
+			else
+				sb.append(" (" + currentFeature);
+			}
+		else
+		{
+			action = "call";
+			if(lastAction.equals("leaving"))
+				sb.append( " + " + currentFeature);
+			else
+				sb.append( " - " + currentFeature);
+		}
+		lastAction = action;
+		features.push(featureAnnotation.name());
+		long start = System.nanoTime() / 1000000;
+		pjp.proceed();
+		long featureTime = (System.nanoTime()/1000000) - start;
+		if(action.equals("refines"))
+		{
+			//sb.insert(0,"<"+featureTime+">");
+			//sb.append(")");
+			if(lastAction.equals("refines"))
+				sb.append("<"+ currentFeature + ":" +featureTime+">) ");
+			else
+				sb.append("<"+  currentFeature + ":" + featureTime+">)");
+			
+			////////abbau
+			if(abbauStack.size() == 0)
+			{
+				abbauStack.push("#"+currentFeature.substring(0,previousFeature.indexOf('_'))); 
+				abbaubstackTimes.push(featureTime);
+			}
+			if(lastAction.equals("call"))
+			{
+				sb2.append(currentFeature.substring(0,previousFeature.indexOf('_')));
+				while(abbauStack.size() > 0)
+					sb2.append(abbauStack.pop());
+			}
+			/////////
+		}
+		else
+		{
+			sb.append("<"+  currentFeature + ":" +featureTime+">");
+			//sb.insert(0,currentFeature+"<"+featureTime+"> + ");
+			/////////abbau
+			
+			////////
+		}
+		lastAction = "leaving";
+		//System.out.println("ns passed: "+featureTime);
+		Long timeBefore = times.get(currentFeature);
+		if (timeBefore == null) timeBefore = Long.valueOf(0);
+		times.put(currentFeature, timeBefore + featureTime);
+		System.out.println("On stack: " + getStack() + " measured time: " + (timeBefore + featureTime));
+		//System.out.println("adding time to: "+featureAnnotation.name());
+		System.out.println("Feature: " + currentFeature + " +=" +  (timeBefore + featureTime));
+		features.pop();
+		if (! features.isEmpty()) {
+			//substract time from calling feature
+			timeBefore = times.get(features.peek());
+			System.out.println("Subtract: " + timeBefore);
+			if (timeBefore == null) timeBefore = Long.valueOf(0);
+			times.put(features.peek(), timeBefore - featureTime);
+		}
+		
+	}*/
+/*	@Around("@annotation(featureAnnotation)")
+	//public void logAnnotatedMethods(ProceedingJoinPoint pjp, featureHouse.FeatureAnnotation featureAnnotation) throws Throwable {
+		/*String currentFeature = featureAnnotation.name();
+		if(method.equals(pjp.getSignature().getName()))
+		{
+			pjp.proceed();
+			return;
+		}
+		else
+			method = pjp.getSignature().getName();
+		if(currentFeature.equals("featureSwitch"))
+			currentFeature = previousFeature;
+		previousFeature = currentFeature;
+		verificationClasses.PerformanceProfiler.enteringFeature(currentFeature);
+		long start = System.nanoTime() / 1000000;
+		pjp.proceed();
+		long featureTime = (System.nanoTime()/1000000) - start;
+		verificationClasses.PerformanceProfiler.add(currentFeature, featureTime);*/
+		
+		
+		//System.out.println("started in "+featureAnnotation.name());
+	/*	String currentFeature = featureAnnotation.name();
+		if(method.equals(pjp.getSignature().getName()))
+		{
+			pjp.proceed();
+			return;
+		}
+		else
+			method = pjp.getSignature().getName();
+		if(currentFeature.equals("featureSwitch"))
+		{
+			currentFeature = previousFeature;
+			//sb.append(pjp.getSignature().getName() + "-o->;");
+			//pjp.proceed();
+			//sb.append("<-o-" + pjp.getSignature().getName() +";");
+			//sb.append(")");
+			//return;
+		}
+		previousFeature = currentFeature;
+		if(pjp.getSignature().getName().contains("__role__") || pjp.getSignature().getName().contains("__before__"))
+			sb.append("-o->;" + currentFeature + "[" + pjp.getSignature().getName() +"]");
+		else
+			sb.append( "-c->;" + currentFeature + "[" + pjp.getSignature().getName() +"]");
+		features.push(featureAnnotation.name());
+		long start = System.nanoTime() / 1000000;
+		pjp.proceed();
+		long featureTime = (System.nanoTime()/1000000) - start;
+		sb.append("<-("+featureTime+")" + pjp.getSignature().getName() +";");
+		//System.out.println("ns passed: "+featureTime);
+		Long timeBefore = times.get(currentFeature);
+		if (timeBefore == null) timeBefore = Long.valueOf(0);
+		times.put(currentFeature, timeBefore + featureTime);
+		System.out.println("On stack: " + getStack() + " measured time: " + (timeBefore + featureTime));
+		//System.out.println("adding time to: "+featureAnnotation.name());
+		System.out.println("Feature: " + currentFeature + " +=" +  (timeBefore + featureTime));
+		features.pop();
+		if (! features.isEmpty()) {
+			//substract time from calling feature
+			timeBefore = times.get(features.peek());
+			System.out.println("Subtract: " + timeBefore);
+			if (timeBefore == null) timeBefore = Long.valueOf(0);
+			times.put(features.peek(), timeBefore - featureTime);
+		}
+	}*/
+	
+	public String getStack()
+	{
+		String result = "";
+		for(int i = 0; i < features.size(); i++){
+			result += features.get(i) + ", ";
+		}
+		return result;
+	}
+	
+	// hook to print the gathered times
+	//@After("execution(public void end())")
+	@After("execution(public static void main(String[]))")
+	public void printResults() {
+		//verificationClasses.PerformanceProfiler.printChoiceCalculus("C:\\Workspace\\newTest.txt");
+		for (Entry<String, Long> e : times.entrySet()) {
+			System.out.println(e.getKey() + "  " + e.getValue());
+		}
+		//System.out.println(sb);		
+		traverseTree();
+		//traverseTree2();
+	}
+	
+
+	
+	private void traverseTree2() {
+		Node<Measurement> n = callTree.root;
+		for(int i = 0; i < callTree.root.children.size(); i++)
+		{
+			findInteractions(callTree.root.children.get(i), "");
+		}
+	}
+	
+	public String findInteractions(Node<Measurement> n, String s)
+	{
+		//if(n.data.prefix.length() > 0)
+			//n.data.formula = n.data.prefix 
+		return "";
+	}
+	
+	private void traverseTree() {
+		if(callTree == null)
+		{
+			System.out.println("Error: Tree is empty.");
+			return;
+		}
+		Node<Measurement> n = callTree.root;
+		double sub = 0;
+		for(int i = 0; i < callTree.root.children.size(); i++)
+			sub += traverse(callTree.root.children.get(i), "");
+		n.data.clearedValue = n.data.value - sub;
+		String feature = n.data.feature;
+		if(feature_Values.containsKey(feature))
+			feature_Values.put(feature, feature_Values.get(feature)+ (n.data.clearedValue));
+		else
+			feature_Values.put(feature,n.data.clearedValue);
+		//feature_Values.put(feature, n.data.clearedValue);
+		
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> iter = feature_Values.keySet().iterator();
+		while(iter.hasNext())
+		{
+			String feature2 = iter.next();
+			Double time2 = feature_Values.get(feature2); // in ms
+			sb.append(feature2 + "<" + time2.intValue() + ",0>, ");
+		}
+		System.out.println(sb);
+	}
+	
+	public double traverse(Node<Measurement> node, String featureNamesOnPath)
+	{
+		double currentValue = 0;
+		String feature = "";
+		/*if(featureNamesOnPath.length() == 0)
+			feature = node.data.feature;
+		else
+			feature = featureNamesOnPath+"#"+node.data.feature;*/
+		feature = node.data.feature;
+		for (int i = 0; i < node.children.size(); i++) {
+			currentValue += traverse(node.children.get(i),feature);
+		}
+		
+		currentValue = node.data.value - currentValue;
+		
+		//if(node == currentTree.root)
+			//feature = node.data.feature;
+		//Eintragen des Featurewertes
+		String eintrag =  "";
+		String prefix = node.data.prefix;
+		/*prefix.replace("base#", "");
+		String[] interacting_features = new String(prefix + feature).split("#");
+		List<String> clearedList = new ArrayList<String>();
+		for(int k = 0; k < interacting_features.length; k++){
+			if(!clearedList.contains(interacting_features[k]))
+			{
+				clearedList.add(interacting_features[k]);
+			}
+		}
+		for (int l = 0; l < clearedList.size(); l++) {
+			eintrag += clearedList.get(l) + "#";
+		}
+		if(eintrag.equals("base#"))
+			eintrag = "base";*/
+		//if(prefix.endsWith(feature + "#"))
+			//eintrag = prefix.substring(0,prefix.length()-1);
+		//else
+			eintrag = prefix+feature;
+		if(feature_Values.containsKey(eintrag))
+			feature_Values.put(eintrag, feature_Values.get(eintrag)+ (currentValue));
+		else
+			feature_Values.put(eintrag, currentValue);
+		//System.out.println(node.data.prefix +" : " + currentValue);
+		return node.data.value;
+	}
+}
+
+

@@ -1,0 +1,42 @@
+<results>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, </data>
+    <data columnname="Measured Value">39608</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, ArchiveCheck, </data>
+    <data columnname="Measured Value">39057</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, </data>
+    <data columnname="Measured Value">39311</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, ArchiveCheck, </data>
+    <data columnname="Measured Value">39380,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, </data>
+    <data columnname="Measured Value">39658</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, </data>
+    <data columnname="Measured Value">40105,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeExtractCRC, </data>
+    <data columnname="Measured Value">41518</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeExtractCRC, ArchiveCheck, </data>
+    <data columnname="Measured Value">41872</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, </data>
+    <data columnname="Measured Value">42554,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, </data>
+    <data columnname="Measured Value">42073,5</data>
+  </row>
+</results>

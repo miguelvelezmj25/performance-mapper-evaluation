@@ -1,0 +1,165 @@
+<plm name="Mail" canReuseInstance="true">
+  <element id="1" name="base" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>base</generationParameter>
+  </element>
+  <element id="2" name="encrypt" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires">
+        <constraint_element>
+          <id>3</id>
+          <name>decrypt</name>
+        </constraint_element>
+        <constraint_element>
+          <id>4</id>
+          <name>keys</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>encrypt</generationParameter>
+  </element>
+  <element id="3" name="decrypt" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires">
+        <constraint_element>
+          <id>2</id>
+          <name>encrypt</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>decrypt</generationParameter>
+  </element>
+  <element id="4" name="keys" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>keys</generationParameter>
+  </element>
+  <element id="5" name="sign" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires">
+        <constraint_element>
+          <id>6</id>
+          <name>verify</name>
+        </constraint_element>
+        <constraint_element>
+          <id>4</id>
+          <name>keys</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>sign</generationParameter>
+  </element>
+  <element id="6" name="verify" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires">
+        <constraint_element>
+          <id>5</id>
+          <name>sign</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>verify</generationParameter>
+  </element>
+  <element id="7" name="autoresponder" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>autoresponder</generationParameter>
+  </element>
+  <element id="8" name="addressbook" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>addressbook</generationParameter>
+  </element>
+  <element id="9" name="forward" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>forward</generationParameter>
+  </element>
+</plm>

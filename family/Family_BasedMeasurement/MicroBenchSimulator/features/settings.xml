@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<VariantGenerationSettings>
+  <generationType>FH</generationType>
+  <PreprocessorType>define</PreprocessorType>
+  <progLanguage compilerArgs="./../jpf-bdd-annotations.jar;./../jpf-classes.jar;./../junit-4.11.jar">Java</progLanguage>
+  <customGenFile customFile="no" />
+  <ExecutionSettings>
+    <JavaMainFile>C:\Workspace\FamilyBasedMeasurement\MicroBenchSimulator\features\PL_Interface_impl.java</JavaMainFile>
+  </ExecutionSettings>
+</VariantGenerationSettings>

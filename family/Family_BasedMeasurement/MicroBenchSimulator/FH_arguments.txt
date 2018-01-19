@@ -1,0 +1,1 @@
+--expression allFeatures.exp --base-directory ./features/ --liftJava --featureAnnotationJava

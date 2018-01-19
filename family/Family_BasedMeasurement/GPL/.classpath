@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Base"/>
+	<classpathentry kind="src" path="BFS"/>
+	<classpathentry kind="src" path="Connected"/>
+	<classpathentry kind="src" path="Cycle"/>
+	<classpathentry kind="src" path="DFS"/>
+	<classpathentry kind="src" path="DirectedOnlyVertices"/>
+	<classpathentry kind="src" path="DirectedWithEdges"/>
+	<classpathentry kind="src" path="DirectedWithNeighbors"/>
+	<classpathentry kind="src" path="MSTKruskal"/>
+	<classpathentry kind="src" path="MSTPrim"/>
+	<classpathentry kind="src" path="Number"/>
+	<classpathentry kind="src" path="StronglyConnected"/>
+	<classpathentry kind="src" path="TestProg"/>
+	<classpathentry kind="src" path="Transpose"/>
+	<classpathentry kind="src" path="UndirectedOnlyVertices"/>
+	<classpathentry kind="src" path="UndirectedWithEdges"/>
+	<classpathentry kind="src" path="UndirectedWithNeighbors"/>
+	<classpathentry kind="src" path="WeightedOnlyVertices"/>
+	<classpathentry kind="src" path="WeightedWithEdges"/>
+	<classpathentry excluding="GPL/" kind="src" path="WeightedWithNeighbors"/>
+	<classpathentry kind="src" path="WeightedWithNeighbors/GPL"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

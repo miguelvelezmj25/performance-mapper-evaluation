@@ -1,1 +1,0 @@
-Maven project using Prevayler with a simple singleton service.

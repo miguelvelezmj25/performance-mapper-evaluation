@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jpf-bdd-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/jpf-classes.jar"/>
+	<classpathentry kind="lib" path="lib/xstream-1.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/choco-solver-2.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/java-cup-11a.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="C:/Workspace/FamilyBasedMeasurement/ElevatorPL/features/jpf-classes.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

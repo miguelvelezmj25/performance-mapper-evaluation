@@ -1,0 +1,9 @@
+0;Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ;40196,5;40196,5;0;0
+1;Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, dPair_GZIP_ArchiveCheck, ;41404,5;40487,5;-917;-2,26489657301636
+2;Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, ;38881,5;38881,5;0;0
+3;Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ;38897,5;38897,5;0;0
+4;Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, ;40180,5;39089,5;-1091;-2,79103083948375
+5;Base, ZipMeTest, Compress, Extract, CRC, Check, DerivativeCompressCRC, DerivativeExtractCRC, ArchiveCheck, ;40089,5;39057;-1032,5;-2,64357221496786
+6;Base, ZipMeTest, Compress, Extract, GZIP, CRC, Check, DerivativeCompressCRC, DerivativeCompressGZIP, DerivativeExtractCRC, DerivativeCompressGZIPCRC, DerivativeGZIPCRC, ArchiveCheck, dPair_GZIP_ArchiveCheck, ;40105,5;40105,5;0;0
+7;Base, ZipMeTest, Compress, Extract, CRC, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, DerivativeCompressCRC, DerivativeExtractCRC, ;40180,5;41872;1691,5;4,03969239587313
+8;Base, ZipMeTest, Compress, Extract, Check, Adler32Checksum, DerivativeCompressAdler32Checksum, ArchiveCheck, ;41388,5;42554,5;1166;2,74001574451586

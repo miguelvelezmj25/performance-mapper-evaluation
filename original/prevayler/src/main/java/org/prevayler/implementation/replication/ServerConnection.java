@@ -36,22 +36,23 @@ class ServerConnection extends Thread implements TransactionSubscriber {
 
 
     public void run() {
-        try {
-            long initialTransaction = ((Long) _remote.readObject()).longValue();
-
-            POBox poBox = new POBox(this);
-            _publisher.subscribe(poBox, initialTransaction);
-            poBox.waitToEmpty();
-
-            send(SUBSCRIBER_UP_TO_DATE);
-
-            startSendingClockTicks();
-            while (true) publishRemoteTransaction();
-        } catch (IOException ex) {
-            close();
-        } catch (ClassNotFoundException ex) {
-            close();
-        }
+        throw new RuntimeException("There was an error in this code that should execute");
+//        try {
+//            long initialTransaction = ((Long) _remote.readObject()).longValue();
+//
+//            POBox poBox = new POBox(this);
+//            _publisher.subscribe(poBox, initialTransaction);
+//            poBox.waitToEmpty();
+//
+//            send(SUBSCRIBER_UP_TO_DATE);
+//
+//            startSendingClockTicks();
+//            while (true) publishRemoteTransaction();
+//        } catch (IOException ex) {
+//            close();
+//        } catch (ClassNotFoundException ex) {
+//            close();
+//        }
     }
 
 

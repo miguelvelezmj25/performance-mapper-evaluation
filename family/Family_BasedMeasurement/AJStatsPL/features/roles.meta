@@ -1,0 +1,27 @@
+{
+	"features" : [
+		"Base",
+		"Aspects",
+		"States",
+		"AspectMethods",
+		"Advice",
+		"Base"
+	],
+	"roles": {
+		"print": {
+			"Base": "print__wrappee__Base",
+			"Aspects": "print__wrappee__States",
+			"States": "print__wrappee__States",
+			"AspectMethods": "print__wrappee__AspectMethods",
+			"Advice": "print"
+		},
+		"AspectBody": {
+			"States": "AspectBody"
+		},
+		"Block": {
+			"AspectMethods": "Block",
+			"Advice": "Block"
+		}
+	}
+
+}

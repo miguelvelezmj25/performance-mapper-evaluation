@@ -1,0 +1,314 @@
+<results>
+  <row>
+    <data columnname="Configuration">0</data>
+    <data columnname="Elements">base, </data>
+    <data columnname="Estimated Value">23</data>
+    <data columnname="Measured Value">23</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, </data>
+    <data columnname="Estimated Value">15020,5</data>
+    <data columnname="Measured Value">15020,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">2</data>
+    <data columnname="Elements">base, keys, </data>
+    <data columnname="Estimated Value">4023</data>
+    <data columnname="Measured Value">4023</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">3</data>
+    <data columnname="Elements">base, keys, sign, verify, </data>
+    <data columnname="Estimated Value">9037,5</data>
+    <data columnname="Measured Value">9037,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">4</data>
+    <data columnname="Elements">base, autoresponder, </data>
+    <data columnname="Estimated Value">5025</data>
+    <data columnname="Measured Value">5025</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">5</data>
+    <data columnname="Elements">base, addressbook, </data>
+    <data columnname="Estimated Value">2027</data>
+    <data columnname="Measured Value">2027</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">6</data>
+    <data columnname="Elements">base, forward, </data>
+    <data columnname="Estimated Value">11022,5</data>
+    <data columnname="Measured Value">11022,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">7</data>
+    <data columnname="Elements">base, autoresponder, addressbook, derivative_autoresponder_addressbook, </data>
+    <data columnname="Estimated Value">8028,5</data>
+    <data columnname="Measured Value">8028,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">8</data>
+    <data columnname="Elements">base, addressbook, forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">15026,5</data>
+    <data columnname="Measured Value">15026,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">9</data>
+    <data columnname="Elements">base, autoresponder, forward, derivative_autoresponder_forward, </data>
+    <data columnname="Estimated Value">19525</data>
+    <data columnname="Measured Value">19525</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">10</data>
+    <data columnname="Elements">base, autoresponder, addressbook, forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">24528,5</data>
+    <data columnname="Measured Value">24532,5</data>
+    <data columnname="Difference Absolut">4</data>
+    <data columnname="Difference in %">0,0163049016610586</data>
+  </row>
+  <row>
+    <data columnname="Configuration">11</data>
+    <data columnname="Elements">base, keys, autoresponder, </data>
+    <data columnname="Estimated Value">9025</data>
+    <data columnname="Measured Value">9025</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">12</data>
+    <data columnname="Elements">base, keys, forward, </data>
+    <data columnname="Estimated Value">15022,5</data>
+    <data columnname="Measured Value">15068,5</data>
+    <data columnname="Difference Absolut">46</data>
+    <data columnname="Difference in %">0,305272588512466</data>
+  </row>
+  <row>
+    <data columnname="Configuration">13</data>
+    <data columnname="Elements">base, keys, autoresponder, forward, derivative_autoresponder_forward, </data>
+    <data columnname="Estimated Value">23525</data>
+    <data columnname="Measured Value">23534</data>
+    <data columnname="Difference Absolut">9</data>
+    <data columnname="Difference in %">0,0382425427041682</data>
+  </row>
+  <row>
+    <data columnname="Configuration">14</data>
+    <data columnname="Elements">base, keys, addressbook, </data>
+    <data columnname="Estimated Value">6027</data>
+    <data columnname="Measured Value">6038</data>
+    <data columnname="Difference Absolut">11</data>
+    <data columnname="Difference in %">0,18217952964558</data>
+  </row>
+  <row>
+    <data columnname="Configuration">15</data>
+    <data columnname="Elements">base, keys, addressbook, forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">19026,5</data>
+    <data columnname="Measured Value">19028</data>
+    <data columnname="Difference Absolut">1,5</data>
+    <data columnname="Difference in %">0,00788311961319721</data>
+  </row>
+  <row>
+    <data columnname="Configuration">16</data>
+    <data columnname="Elements">base, keys, autoresponder, addressbook, derivative_autoresponder_addressbook, </data>
+    <data columnname="Estimated Value">12028,5</data>
+    <data columnname="Measured Value">12028</data>
+    <data columnname="Difference Absolut">-0,5</data>
+    <data columnname="Difference in %">-0,004156967076824</data>
+  </row>
+  <row>
+    <data columnname="Configuration">17</data>
+    <data columnname="Elements">base, keys, autoresponder, addressbook, forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">28528,5</data>
+    <data columnname="Measured Value">28537,5</data>
+    <data columnname="Difference Absolut">9</data>
+    <data columnname="Difference in %">0,0315374507227375</data>
+  </row>
+  <row>
+    <data columnname="Configuration">18</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, addressbook, derivative_encrypt_addressbook, </data>
+    <data columnname="Estimated Value">20033</data>
+    <data columnname="Measured Value">20033</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">19</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, autoresponder, derivative_encrypt_autoresponder, </data>
+    <data columnname="Estimated Value">23034</data>
+    <data columnname="Measured Value">23034</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">20</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, autoresponder, addressbook, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_autoresponder_addressbook, </data>
+    <data columnname="Estimated Value">29046</data>
+    <data columnname="Measured Value">29033,5</data>
+    <data columnname="Difference Absolut">-12,5</data>
+    <data columnname="Difference in %">-0,0430537138133502</data>
+  </row>
+  <row>
+    <data columnname="Configuration">21</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, forward, derivative_encrypt_forward, </data>
+    <data columnname="Estimated Value">33529</data>
+    <data columnname="Measured Value">33529</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">22</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, autoresponder, forward, derivative_encrypt_autoresponder, derivative_encrypt_forward, derivative_autoresponder_forward, </data>
+    <data columnname="Estimated Value">45043</data>
+    <data columnname="Measured Value">45034</data>
+    <data columnname="Difference Absolut">-9</data>
+    <data columnname="Difference in %">-0,0199849002975583</data>
+  </row>
+  <row>
+    <data columnname="Configuration">23</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, addressbook, forward, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">40541,5</data>
+    <data columnname="Measured Value">40541</data>
+    <data columnname="Difference Absolut">-0,5</data>
+    <data columnname="Difference in %">-0,00123331935571969</data>
+  </row>
+  <row>
+    <data columnname="Configuration">24</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, autoresponder, addressbook, forward, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">53055</data>
+    <data columnname="Measured Value">53036</data>
+    <data columnname="Difference Absolut">-19</data>
+    <data columnname="Difference in %">-0,0358247228297728</data>
+  </row>
+  <row>
+    <data columnname="Configuration">25</data>
+    <data columnname="Elements">base, keys, sign, verify, addressbook, derivative_sign_addressbook, </data>
+    <data columnname="Estimated Value">12036</data>
+    <data columnname="Measured Value">12036</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">26</data>
+    <data columnname="Elements">base, keys, sign, verify, forward, derivative_sign_forward, </data>
+    <data columnname="Estimated Value">20542,5</data>
+    <data columnname="Measured Value">20542,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">27</data>
+    <data columnname="Elements">base, keys, sign, verify, addressbook, forward, derivative_sign_addressbook, derivative_sign_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">25541</data>
+    <data columnname="Measured Value">25554</data>
+    <data columnname="Difference Absolut">13</data>
+    <data columnname="Difference in %">0,0508726618141964</data>
+  </row>
+  <row>
+    <data columnname="Configuration">28</data>
+    <data columnname="Elements">base, keys, sign, verify, autoresponder, derivative_sign_autoresponder, </data>
+    <data columnname="Estimated Value">15569,5</data>
+    <data columnname="Measured Value">15569,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">29</data>
+    <data columnname="Elements">base, keys, sign, verify, autoresponder, forward, derivative_sign_autoresponder, derivative_sign_forward, derivative_autoresponder_forward, </data>
+    <data columnname="Estimated Value">30575</data>
+    <data columnname="Measured Value">30561</data>
+    <data columnname="Difference Absolut">-14</data>
+    <data columnname="Difference in %">-0,0458100193056481</data>
+  </row>
+  <row>
+    <data columnname="Configuration">30</data>
+    <data columnname="Elements">base, keys, sign, verify, autoresponder, addressbook, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_autoresponder_addressbook, </data>
+    <data columnname="Estimated Value">19567,5</data>
+    <data columnname="Measured Value">19549,5</data>
+    <data columnname="Difference Absolut">-18</data>
+    <data columnname="Difference in %">-0,0920739660860903</data>
+  </row>
+  <row>
+    <data columnname="Configuration">31</data>
+    <data columnname="Elements">base, keys, sign, verify, autoresponder, addressbook, forward, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_sign_forward, derivative_autoresponder_addressbook, derivative_autoresponder_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">36573</data>
+    <data columnname="Measured Value">36578</data>
+    <data columnname="Difference Absolut">5</data>
+    <data columnname="Difference in %">0,0136694187763169</data>
+  </row>
+  <row>
+    <data columnname="Configuration">32</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, </data>
+    <data columnname="Estimated Value">20035</data>
+    <data columnname="Measured Value">20052</data>
+    <data columnname="Difference Absolut">17</data>
+    <data columnname="Difference in %">0,0847795731099126</data>
+  </row>
+  <row>
+    <data columnname="Configuration">33</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, addressbook, derivative_encrypt_addressbook, derivative_sign_addressbook, </data>
+    <data columnname="Estimated Value">26042</data>
+    <data columnname="Measured Value">26083</data>
+    <data columnname="Difference Absolut">41</data>
+    <data columnname="Difference in %">0,157190507226929</data>
+  </row>
+  <row>
+    <data columnname="Configuration">34</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, autoresponder, derivative_encrypt_autoresponder, derivative_sign_autoresponder, </data>
+    <data columnname="Estimated Value">29578,5</data>
+    <data columnname="Measured Value">29523</data>
+    <data columnname="Difference Absolut">-55,5</data>
+    <data columnname="Difference in %">-0,187989025505544</data>
+  </row>
+  <row>
+    <data columnname="Configuration">35</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, derivative_encrypt_autoresponder, derivative_encrypt_addressbook, derivative_sign_autoresponder, derivative_sign_addressbook, derivative_autoresponder_addressbook, </data>
+    <data columnname="Estimated Value">36585</data>
+    <data columnname="Measured Value">36544</data>
+    <data columnname="Difference Absolut">-41</data>
+    <data columnname="Difference in %">-0,11219352014011</data>
+  </row>
+  <row>
+    <data columnname="Configuration">36</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, forward, derivative_encrypt_forward, derivative_sign_forward, </data>
+    <data columnname="Estimated Value">39049</data>
+    <data columnname="Measured Value">39035,5</data>
+    <data columnname="Difference Absolut">-13,5</data>
+    <data columnname="Difference in %">-0,0345839043947223</data>
+  </row>
+  <row>
+    <data columnname="Configuration">37</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, autoresponder, forward, derivative_encrypt_autoresponder, derivative_encrypt_forward, derivative_sign_autoresponder, derivative_sign_forward, derivative_autoresponder_forward, </data>
+    <data columnname="Estimated Value">52093</data>
+    <data columnname="Measured Value">52055</data>
+    <data columnname="Difference Absolut">-38</data>
+    <data columnname="Difference in %">-0,0729997118432379</data>
+  </row>
+  <row>
+    <data columnname="Configuration">38</data>
+    <data columnname="Elements">base, encrypt, decrypt, keys, sign, verify, addressbook, forward, derivative_encrypt_addressbook, derivative_encrypt_forward, derivative_sign_addressbook, derivative_sign_forward, derivative_addressbook_forward, </data>
+    <data columnname="Estimated Value">47056</data>
+    <data columnname="Measured Value">47038,5</data>
+    <data columnname="Difference Absolut">-17,5</data>
+    <data columnname="Difference in %">-0,0372035672906179</data>
+  </row>
+</results>

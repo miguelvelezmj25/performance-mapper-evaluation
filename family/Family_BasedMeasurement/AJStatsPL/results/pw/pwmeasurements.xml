@@ -1,0 +1,690 @@
+<results>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, </data>
+    <data columnname="Measured Value">11404,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, </data>
+    <data columnname="Measured Value">14607,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, </data>
+    <data columnname="Measured Value">11459,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, </data>
+    <data columnname="Measured Value">11405,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, </data>
+    <data columnname="Measured Value">11372</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, </data>
+    <data columnname="Measured Value">11348,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, </data>
+    <data columnname="Measured Value">11479</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, </data>
+    <data columnname="Measured Value">11427,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, </data>
+    <data columnname="Measured Value">11396</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, </data>
+    <data columnname="Measured Value">11815</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, </data>
+    <data columnname="Measured Value">11801,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, </data>
+    <data columnname="Measured Value">11547</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, </data>
+    <data columnname="Measured Value">11520,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, </data>
+    <data columnname="Measured Value">11882,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeMethods, </data>
+    <data columnname="Measured Value">11470,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11507</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeFields, </data>
+    <data columnname="Measured Value">11557</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11631,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, </data>
+    <data columnname="Measured Value">14620</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, </data>
+    <data columnname="Measured Value">11460,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, </data>
+    <data columnname="Measured Value">11568</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, </data>
+    <data columnname="Measured Value">12056,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, </data>
+    <data columnname="Measured Value">11598,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, </data>
+    <data columnname="Measured Value">11420</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, </data>
+    <data columnname="Measured Value">11345,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, </data>
+    <data columnname="Measured Value">11452</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, </data>
+    <data columnname="Measured Value">11505</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, </data>
+    <data columnname="Measured Value">11591,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, </data>
+    <data columnname="Measured Value">11479</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, </data>
+    <data columnname="Measured Value">11578</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, </data>
+    <data columnname="Measured Value">12144,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, </data>
+    <data columnname="Measured Value">11664,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeMethods, </data>
+    <data columnname="Measured Value">11557,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11440</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeFields, </data>
+    <data columnname="Measured Value">11749,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11490</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Classes, Aspects, States, </data>
+    <data columnname="Measured Value">14589,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Interfaces, Aspects, States, </data>
+    <data columnname="Measured Value">14873</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, ClassMethods, </data>
+    <data columnname="Measured Value">14702,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, ClassConstructors, </data>
+    <data columnname="Measured Value">14565,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterfaceMethods, </data>
+    <data columnname="Measured Value">14661,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, AspectMethods, </data>
+    <data columnname="Measured Value">14813,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, AspectConstructors, </data>
+    <data columnname="Measured Value">14713,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, ClassFields, </data>
+    <data columnname="Measured Value">14959,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterfaceFields, </data>
+    <data columnname="Measured Value">15247</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, AspectFields, </data>
+    <data columnname="Measured Value">14586,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, Advice, </data>
+    <data columnname="Measured Value">14711,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, Pointcuts, </data>
+    <data columnname="Measured Value">15166</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterTypeMethods, </data>
+    <data columnname="Measured Value">14751,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterTypeConstructors, </data>
+    <data columnname="Measured Value">14785</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterTypeFields, </data>
+    <data columnname="Measured Value">14677</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, CodeFormatter, Aspects, States, InterTypeDeclare, </data>
+    <data columnname="Measured Value">14942</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Interfaces, Aspects, States, </data>
+    <data columnname="Measured Value">11424,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, ClassMethods, </data>
+    <data columnname="Measured Value">11516</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, ClassConstructors, </data>
+    <data columnname="Measured Value">11653,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterfaceMethods, </data>
+    <data columnname="Measured Value">11525,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, AspectMethods, </data>
+    <data columnname="Measured Value">11821,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, AspectConstructors, </data>
+    <data columnname="Measured Value">11523</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, ClassFields, </data>
+    <data columnname="Measured Value">11761</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterfaceFields, </data>
+    <data columnname="Measured Value">11789,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, AspectFields, </data>
+    <data columnname="Measured Value">11717,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, Advice, </data>
+    <data columnname="Measured Value">11761,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, Pointcuts, </data>
+    <data columnname="Measured Value">11699,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterTypeMethods, </data>
+    <data columnname="Measured Value">11633,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11587</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterTypeFields, </data>
+    <data columnname="Measured Value">11669</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Classes, Aspects, States, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11491</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, ClassMethods, </data>
+    <data columnname="Measured Value">11617,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, ClassConstructors, </data>
+    <data columnname="Measured Value">11910</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterfaceMethods, </data>
+    <data columnname="Measured Value">11817</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, AspectMethods, </data>
+    <data columnname="Measured Value">11792</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, AspectConstructors, </data>
+    <data columnname="Measured Value">11845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, ClassFields, </data>
+    <data columnname="Measured Value">11447</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterfaceFields, </data>
+    <data columnname="Measured Value">11501</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, AspectFields, </data>
+    <data columnname="Measured Value">11734,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, Advice, </data>
+    <data columnname="Measured Value">11638,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, Pointcuts, </data>
+    <data columnname="Measured Value">12029,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterTypeMethods, </data>
+    <data columnname="Measured Value">11968,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11801</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterTypeFields, </data>
+    <data columnname="Measured Value">11862</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Interfaces, Aspects, States, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11558,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, ClassConstructors, </data>
+    <data columnname="Measured Value">11897</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterfaceMethods, </data>
+    <data columnname="Measured Value">11713,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, AspectMethods, </data>
+    <data columnname="Measured Value">11774,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, AspectConstructors, </data>
+    <data columnname="Measured Value">12374,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, ClassFields, </data>
+    <data columnname="Measured Value">11744</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterfaceFields, </data>
+    <data columnname="Measured Value">11658,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, AspectFields, </data>
+    <data columnname="Measured Value">11675</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, Advice, </data>
+    <data columnname="Measured Value">11708,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, Pointcuts, </data>
+    <data columnname="Measured Value">12181,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterTypeMethods, </data>
+    <data columnname="Measured Value">11804,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11561,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterTypeFields, </data>
+    <data columnname="Measured Value">11501,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassMethods, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11607,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterfaceMethods, </data>
+    <data columnname="Measured Value">11590,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, AspectMethods, </data>
+    <data columnname="Measured Value">11624,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, AspectConstructors, </data>
+    <data columnname="Measured Value">11659</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, ClassFields, </data>
+    <data columnname="Measured Value">11639,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterfaceFields, </data>
+    <data columnname="Measured Value">11674</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, AspectFields, </data>
+    <data columnname="Measured Value">11812,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, Advice, </data>
+    <data columnname="Measured Value">11883,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, Pointcuts, </data>
+    <data columnname="Measured Value">11936,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterTypeMethods, </data>
+    <data columnname="Measured Value">12356,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11644,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterTypeFields, </data>
+    <data columnname="Measured Value">11789,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassConstructors, InterTypeDeclare, </data>
+    <data columnname="Measured Value">12094</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, AspectMethods, </data>
+    <data columnname="Measured Value">11810</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, AspectConstructors, </data>
+    <data columnname="Measured Value">11525,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, ClassFields, </data>
+    <data columnname="Measured Value">11878</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, InterfaceFields, </data>
+    <data columnname="Measured Value">11660</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, AspectFields, </data>
+    <data columnname="Measured Value">11958,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, Advice, </data>
+    <data columnname="Measured Value">11905,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, Pointcuts, </data>
+    <data columnname="Measured Value">11505,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, InterTypeMethods, </data>
+    <data columnname="Measured Value">11831,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, InterTypeFields, </data>
+    <data columnname="Measured Value">11730</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceMethods, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11802</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, AspectConstructors, </data>
+    <data columnname="Measured Value">11634</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, ClassFields, </data>
+    <data columnname="Measured Value">11353</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, InterfaceFields, </data>
+    <data columnname="Measured Value">11361,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, AspectFields, </data>
+    <data columnname="Measured Value">11431</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, Advice, </data>
+    <data columnname="Measured Value">11228</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, Pointcuts, </data>
+    <data columnname="Measured Value">11275</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, InterTypeMethods, </data>
+    <data columnname="Measured Value">11353</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11275,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, InterTypeFields, </data>
+    <data columnname="Measured Value">11353,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectMethods, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11275,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, ClassFields, </data>
+    <data columnname="Measured Value">11361</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, InterfaceFields, </data>
+    <data columnname="Measured Value">11766,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, AspectFields, </data>
+    <data columnname="Measured Value">11423,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, Advice, </data>
+    <data columnname="Measured Value">11564</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, Pointcuts, </data>
+    <data columnname="Measured Value">11400</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, InterTypeMethods, </data>
+    <data columnname="Measured Value">11298,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11501,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, InterTypeFields, </data>
+    <data columnname="Measured Value">11329,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectConstructors, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11361</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, InterfaceFields, </data>
+    <data columnname="Measured Value">11345</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, AspectFields, </data>
+    <data columnname="Measured Value">11447</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, Advice, </data>
+    <data columnname="Measured Value">11431,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, Pointcuts, </data>
+    <data columnname="Measured Value">11291</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, InterTypeMethods, </data>
+    <data columnname="Measured Value">11369</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11478</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, InterTypeFields, </data>
+    <data columnname="Measured Value">11454,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, ClassFields, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11618,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, AspectFields, </data>
+    <data columnname="Measured Value">11455</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, Advice, </data>
+    <data columnname="Measured Value">11556</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, Pointcuts, </data>
+    <data columnname="Measured Value">11704</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, InterTypeMethods, </data>
+    <data columnname="Measured Value">11634</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11493,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, InterTypeFields, </data>
+    <data columnname="Measured Value">11525</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterfaceFields, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11806</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, Advice, </data>
+    <data columnname="Measured Value">11283</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, Pointcuts, </data>
+    <data columnname="Measured Value">11431</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, InterTypeMethods, </data>
+    <data columnname="Measured Value">11299</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11376,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, InterTypeFields, </data>
+    <data columnname="Measured Value">11392,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, AspectFields, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11423,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, Pointcuts, </data>
+    <data columnname="Measured Value">11431</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, InterTypeMethods, </data>
+    <data columnname="Measured Value">11439</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11462,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, InterTypeFields, </data>
+    <data columnname="Measured Value">11532,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Advice, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11275</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, InterTypeMethods, </data>
+    <data columnname="Measured Value">11345,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11517</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, InterTypeFields, </data>
+    <data columnname="Measured Value">11439</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, Pointcuts, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11329,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeMethods, InterTypeConstructors, </data>
+    <data columnname="Measured Value">11579</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeMethods, InterTypeFields, </data>
+    <data columnname="Measured Value">11290,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeMethods, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11829</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeConstructors, InterTypeFields, </data>
+    <data columnname="Measured Value">11291</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeConstructors, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11345,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">Base, Aspects, States, InterTypeFields, InterTypeDeclare, </data>
+    <data columnname="Measured Value">11548</data>
+  </row>
+</results>

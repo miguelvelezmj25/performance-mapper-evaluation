@@ -1,0 +1,10 @@
+Base; ZipMeTest; Compress; Extract; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; 
+Base; ZipMeTest; Compress; Extract; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; ArchiveCheck; 
+Base; ZipMeTest; Compress; Extract; CRC; Check; DerivativeCompressCRC; DerivativeExtractCRC; 
+Base; ZipMeTest; Compress; Extract; CRC; Check; DerivativeCompressCRC; DerivativeExtractCRC; ArchiveCheck; 
+Base; ZipMeTest; Compress; Extract; GZIP; CRC; Check; DerivativeCompressCRC; DerivativeCompressGZIP; DerivativeExtractCRC; DerivativeCompressGZIPCRC; DerivativeGZIPCRC; 
+Base; ZipMeTest; Compress; Extract; GZIP; CRC; Check; DerivativeCompressCRC; DerivativeCompressGZIP; DerivativeExtractCRC; DerivativeCompressGZIPCRC; DerivativeGZIPCRC; ArchiveCheck; 
+Base; ZipMeTest; Compress; Extract; CRC; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; DerivativeCompressCRC; DerivativeExtractCRC; 
+Base; ZipMeTest; Compress; Extract; CRC; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; DerivativeCompressCRC; DerivativeExtractCRC; ArchiveCheck; 
+Base; ZipMeTest; Compress; Extract; GZIP; CRC; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; DerivativeCompressCRC; DerivativeCompressGZIP; DerivativeExtractCRC; DerivativeCompressGZIPCRC; DerivativeGZIPCRC; 
+Base; ZipMeTest; Compress; Extract; GZIP; CRC; Check; Adler32Checksum; DerivativeCompressAdler32Checksum; DerivativeCompressCRC; DerivativeCompressGZIP; DerivativeExtractCRC; DerivativeCompressGZIPCRC; DerivativeGZIPCRC; ArchiveCheck; 

@@ -32,19 +32,19 @@ public class Example {
         boolean x = false;
 
         if(a) {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             Example.moo(c);
             x = true;
         }
 
         if(b && x) {
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         }
     }
 
     private static void moo(boolean c) throws InterruptedException {
         if(c) {
-            Thread.sleep(4000);
+            Thread.sleep(7000);
         }
     }
 }

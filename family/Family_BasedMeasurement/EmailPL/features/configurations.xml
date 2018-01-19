@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<configurations type="per Feature">
+  <configuration features="1" measuredValue="23">
+    <Element>base</Element>
+  </configuration>
+  <configuration features="4" measuredValue="15020,5">
+    <Element>base</Element>
+    <Element>encrypt</Element>
+    <Element>decrypt</Element>
+    <Element>keys</Element>
+  </configuration>
+  <configuration features="2" measuredValue="4023">
+    <Element>base</Element>
+    <Element>keys</Element>
+  </configuration>
+  <configuration features="4" measuredValue="9037,5">
+    <Element>base</Element>
+    <Element>keys</Element>
+    <Element>sign</Element>
+    <Element>verify</Element>
+  </configuration>
+  <configuration features="2" measuredValue="5025">
+    <Element>base</Element>
+    <Element>autoresponder</Element>
+  </configuration>
+  <configuration features="2" measuredValue="2027">
+    <Element>base</Element>
+    <Element>addressbook</Element>
+  </configuration>
+  <configuration features="2" measuredValue="11022,5">
+    <Element>base</Element>
+    <Element>forward</Element>
+  </configuration>
+</configurations>

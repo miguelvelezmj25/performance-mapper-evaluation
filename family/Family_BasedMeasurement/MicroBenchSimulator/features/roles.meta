@@ -1,0 +1,17 @@
+{
+	"features" : [
+		"base",
+		"f10"
+	],
+	"roles": {
+		"domore": {
+			"base": "domore__wrappee__base",
+			"f10": "domore"
+		},
+		"print": {
+			"base": "print__wrappee__base",
+			"f10": "print"
+		}
+	}
+
+}

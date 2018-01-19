@@ -1,0 +1,10 @@
+0;base, ;37,5;37,5;0;0
+1;base, weight, ;20030,5;20029;-1,5;-0,00748914074591767
+2;base, weight, twothirdsfull, ;20031;20031;0;0
+3;base, weight, overloaded, ;22429;22429;0;0
+4;base, empty, ;10039,5;10060;20,5;0,2037773359841
+5;base, weight, empty, ;30032,5;30042;9,5;0,0316223953132351
+6;base, weight, overloaded, empty, ;32431;32427,5;-3,5;-0,0107933081489477
+7;base, weight, twothirdsfull, empty, ;30033;30030;-3;-0,00999000999000543
+8;base, weight, twothirdsfull, overloaded, ;22429,5;22429,5;0;0
+9;base, weight, twothirdsfull, overloaded, empty, ;32431,5;32431,5;0;0

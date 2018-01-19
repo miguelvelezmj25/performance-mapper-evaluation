@@ -1,0 +1,40 @@
+base, ;34
+base, autoresponder, ;5012,5
+base, addressbook, ;2026
+base, autoresponder, addressbook, ;8028,5
+base, forward, ;11023
+base, addressbook, forward, ;15026,5
+base, autoresponder, forward, ;19525
+base, autoresponder, addressbook, forward, ;24532,5
+base, keys, ;4023
+base, keys, autoresponder, ;9025
+base, keys, forward, ;15068,5
+base, keys, autoresponder, forward, ;23534
+base, keys, addressbook, ;6038
+base, keys, addressbook, forward, ;19028
+base, keys, autoresponder, addressbook, ;12028
+base, keys, autoresponder, addressbook, forward, ;28537,5
+base, encrypt, decrypt, keys, ;15030,5
+base, encrypt, decrypt, keys, addressbook, ;20033
+base, encrypt, decrypt, keys, autoresponder, ;23034
+base, encrypt, decrypt, keys, autoresponder, addressbook, ;29033,5
+base, encrypt, decrypt, keys, forward, ;33529
+base, encrypt, decrypt, keys, autoresponder, forward, ;45034
+base, encrypt, decrypt, keys, addressbook, forward, ;40541
+base, encrypt, decrypt, keys, autoresponder, addressbook, forward, ;53036
+base, keys, sign, verify, ;9029,5
+base, keys, sign, verify, addressbook, ;12036
+base, keys, sign, verify, forward, ;20542,5
+base, keys, sign, verify, addressbook, forward, ;25554
+base, keys, sign, verify, autoresponder, ;15569,5
+base, keys, sign, verify, autoresponder, forward, ;30561
+base, keys, sign, verify, autoresponder, addressbook, ;19549,5
+base, keys, sign, verify, autoresponder, addressbook, forward, ;36578
+base, encrypt, decrypt, keys, sign, verify, ;20052
+base, encrypt, decrypt, keys, sign, verify, addressbook, ;26083
+base, encrypt, decrypt, keys, sign, verify, autoresponder, ;29523
+base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, ;36544
+base, encrypt, decrypt, keys, sign, verify, forward, ;39035,5
+base, encrypt, decrypt, keys, sign, verify, autoresponder, forward, ;52055
+base, encrypt, decrypt, keys, sign, verify, addressbook, forward, ;47038,5
+base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, forward, ;1043

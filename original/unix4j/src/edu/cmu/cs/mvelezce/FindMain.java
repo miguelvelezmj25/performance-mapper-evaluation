@@ -31,7 +31,7 @@ public class FindMain {
 
     public static void main(String[] args) {
         Unix4jCommandBuilder r = new DefaultUnix4jCommandBuilder();
-        Unix4jCommandBuilder u = Unix4j.grep("type", "unix4j.iml");
+        Unix4jCommandBuilder u = Unix4j.find("cash");
         u.toStdOut();
 
 //        D = Source.getOptionD(Boolean.valueOf(args[0]));

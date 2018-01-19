@@ -1,0 +1,167 @@
+<plm name="Benchmark" canReuseInstance="true">
+  <element id="1" name="base" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>base</generationParameter>
+  </element>
+  <element id="2" name="f1" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f1</generationParameter>
+  </element>
+  <element id="3" name="f2" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f2Alternative</generationParameter>
+  </element>
+  <element id="4" name="f3" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f3</generationParameter>
+  </element>
+  <element id="5" name="f4" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f4</generationParameter>
+  </element>
+  <element id="6" name="f5" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f5</generationParameter>
+  </element>
+  <element id="7" name="f6" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f6</generationParameter>
+  </element>
+  <element id="8" name="f7" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f7</generationParameter>
+  </element>
+  <element id="9" name="f8" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f8</generationParameter>
+  </element>
+  <element id="10" name="f9" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f9</generationParameter>
+  </element>
+  <element id="11" name="f10" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>f10</generationParameter>
+  </element>
+</plm>

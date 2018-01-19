@@ -1,0 +1,162 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">34</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, autoresponder, </data>
+    <data columnname="Measured Value">5012,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, addressbook, </data>
+    <data columnname="Measured Value">2026</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, autoresponder, addressbook, </data>
+    <data columnname="Measured Value">8028,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, forward, </data>
+    <data columnname="Measured Value">11023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, addressbook, forward, </data>
+    <data columnname="Measured Value">15026,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, autoresponder, forward, </data>
+    <data columnname="Measured Value">19525</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, autoresponder, addressbook, forward, </data>
+    <data columnname="Measured Value">24532,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, </data>
+    <data columnname="Measured Value">4023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, autoresponder, </data>
+    <data columnname="Measured Value">9025</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, forward, </data>
+    <data columnname="Measured Value">15068,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, autoresponder, forward, </data>
+    <data columnname="Measured Value">23534</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, addressbook, </data>
+    <data columnname="Measured Value">6038</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, addressbook, forward, </data>
+    <data columnname="Measured Value">19028</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, autoresponder, addressbook, </data>
+    <data columnname="Measured Value">12028</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, autoresponder, addressbook, forward, </data>
+    <data columnname="Measured Value">28537,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, </data>
+    <data columnname="Measured Value">15030,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, addressbook, </data>
+    <data columnname="Measured Value">20033</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, autoresponder, </data>
+    <data columnname="Measured Value">23034</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, autoresponder, addressbook, </data>
+    <data columnname="Measured Value">29033,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, forward, </data>
+    <data columnname="Measured Value">33529</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, autoresponder, forward, </data>
+    <data columnname="Measured Value">45034</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, addressbook, forward, </data>
+    <data columnname="Measured Value">40541</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, autoresponder, addressbook, forward, </data>
+    <data columnname="Measured Value">53036</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, </data>
+    <data columnname="Measured Value">9029,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, addressbook, </data>
+    <data columnname="Measured Value">12036</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, forward, </data>
+    <data columnname="Measured Value">20542,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, addressbook, forward, </data>
+    <data columnname="Measured Value">25554</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, autoresponder, </data>
+    <data columnname="Measured Value">15569,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, autoresponder, forward, </data>
+    <data columnname="Measured Value">30561</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, autoresponder, addressbook, </data>
+    <data columnname="Measured Value">19549,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, autoresponder, addressbook, forward, </data>
+    <data columnname="Measured Value">36578</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, </data>
+    <data columnname="Measured Value">20052</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, addressbook, </data>
+    <data columnname="Measured Value">26083</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, autoresponder, </data>
+    <data columnname="Measured Value">29523</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, </data>
+    <data columnname="Measured Value">36544</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, forward, </data>
+    <data columnname="Measured Value">39035,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, autoresponder, forward, </data>
+    <data columnname="Measured Value">52055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, addressbook, forward, </data>
+    <data columnname="Measured Value">47038,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, sign, verify, autoresponder, addressbook, forward, </data>
+    <data columnname="Measured Value">1043</data>
+  </row>
+</results>

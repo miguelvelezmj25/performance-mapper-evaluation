@@ -1,0 +1,282 @@
+<plm name="ZipMe" canReuseInstance="true">
+  <element id="1" name="Base" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>Base</generationParameter>
+  </element>
+  <element id="2" name="ZipMeTest" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>ZipMeTest</generationParameter>
+  </element>
+  <element id="3" name="Compress" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>Compress</generationParameter>
+  </element>
+  <element id="4" name="Extract" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>Extract</generationParameter>
+  </element>
+  <element id="5" name="GZIP" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires">
+        <constraint_element>
+          <id>6</id>
+          <name>CRC</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="excludes" />
+    </constraints>
+    <childElements>
+      <child optional="false">
+        <id>11</id>
+      </child>
+    </childElements>
+    <order />
+    <description>no description</description>
+    <generationParameter>GZIP</generationParameter>
+  </element>
+  <element id="6" name="CRC" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>7</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative">
+        <constraint_element>
+          <id>8</id>
+          <name>Adler32Checksum</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements>
+      <child optional="false">
+        <id>10</id>
+      </child>
+      <child optional="false">
+        <id>12</id>
+      </child>
+    </childElements>
+    <order />
+    <description>no description</description>
+    <generationParameter>CRC</generationParameter>
+  </element>
+  <element id="7" name="Check" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements>
+      <child optional="false">
+        <id>6</id>
+      </child>
+      <child optional="false">
+        <id>8</id>
+      </child>
+    </childElements>
+    <order />
+    <description>no description</description>
+    <generationParameter>Check</generationParameter>
+  </element>
+  <element id="8" name="Adler32Checksum" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>7</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative">
+        <constraint_element>
+          <id>6</id>
+          <name>CRC</name>
+        </constraint_element>
+      </constraint>
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements>
+      <child optional="false">
+        <id>9</id>
+      </child>
+    </childElements>
+    <order />
+    <description>no description</description>
+    <generationParameter>Adler32Checksum</generationParameter>
+  </element>
+  <element id="9" name="DerivativeCompressAdler32Checksum" type="derivative" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>8</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeCompressAdler32Checksum</generationParameter>
+  </element>
+  <element id="10" name="DerivativeCompressCRC" type="derivative" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>6</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeCompressCRC</generationParameter>
+  </element>
+  <element id="11" name="DerivativeCompressGZIP" type="derivative" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>5</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeCompressGZIP</generationParameter>
+  </element>
+  <element id="12" name="DerivativeExtractCRC" type="derivative" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>6</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeExtractCRC</generationParameter>
+  </element>
+  <element id="13" name="DerivativeCompressGZIPCRC" type="derivative" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>5</id>
+      <id>6</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeCompressGZIPCRC</generationParameter>
+  </element>
+  <element id="14" name="DerivativeGZIPCRC" type="derivative" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>5</id>
+      <id>6</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>DerivativeGZIPCRC</generationParameter>
+  </element>
+  <element id="15" name="ArchiveCheck" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>ArchiveCheck</generationParameter>
+  </element>
+</plm>

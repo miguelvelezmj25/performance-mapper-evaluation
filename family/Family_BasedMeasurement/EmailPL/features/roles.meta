@@ -1,0 +1,16 @@
+{
+	"features" : [
+		"base",
+		"forward"
+	],
+	"roles": {
+		"rjhEnableForwarding": {
+			"forward": "rjhEnableForwarding"
+		},
+		"incoming": {
+			"base": "incoming__wrappee__base",
+			"forward": "incoming"
+		}
+	}
+
+}

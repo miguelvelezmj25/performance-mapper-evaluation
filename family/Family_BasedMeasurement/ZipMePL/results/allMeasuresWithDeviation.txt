@@ -1,0 +1,10 @@
+Measure: 39608 Std Dev.: 28 Features: Base;ZipMeTest;Compress;Extract;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;
+Measure: 39057 Std Dev.: 79 Features: Base;ZipMeTest;Compress;Extract;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;ArchiveCheck;
+Measure: 39311 Std Dev.: 385 Features: Base;ZipMeTest;Compress;Extract;CRC;Check;DerivativeCompressCRC;DerivativeExtractCRC;
+Measure: 39380,5 Std Dev.: 292,5 Features: Base;ZipMeTest;Compress;Extract;CRC;Check;DerivativeCompressCRC;DerivativeExtractCRC;ArchiveCheck;
+Measure: 39658 Std Dev.: 304 Features: Base;ZipMeTest;Compress;Extract;GZIP;CRC;Check;DerivativeCompressCRC;DerivativeCompressGZIP;DerivativeExtractCRC;DerivativeCompressGZIPCRC;DerivativeGZIPCRC;
+Measure: 40105,5 Std Dev.: 101,5 Features: Base;ZipMeTest;Compress;Extract;GZIP;CRC;Check;DerivativeCompressCRC;DerivativeCompressGZIP;DerivativeExtractCRC;DerivativeCompressGZIPCRC;DerivativeGZIPCRC;ArchiveCheck;
+Measure: 41518 Std Dev.: 384 Features: Base;ZipMeTest;Compress;Extract;CRC;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;DerivativeCompressCRC;DerivativeExtractCRC;
+Measure: 41872 Std Dev.: 470 Features: Base;ZipMeTest;Compress;Extract;CRC;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;DerivativeCompressCRC;DerivativeExtractCRC;ArchiveCheck;
+Measure: 42554,5 Std Dev.: 83,5 Features: Base;ZipMeTest;Compress;Extract;GZIP;CRC;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;DerivativeCompressCRC;DerivativeCompressGZIP;DerivativeExtractCRC;DerivativeCompressGZIPCRC;DerivativeGZIPCRC;
+Measure: 42073,5 Std Dev.: 129,5 Features: Base;ZipMeTest;Compress;Extract;GZIP;CRC;Check;Adler32Checksum;DerivativeCompressAdler32Checksum;DerivativeCompressCRC;DerivativeCompressGZIP;DerivativeExtractCRC;DerivativeCompressGZIPCRC;DerivativeGZIPCRC;ArchiveCheck;

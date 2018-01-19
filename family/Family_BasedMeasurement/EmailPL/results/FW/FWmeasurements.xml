@@ -1,0 +1,30 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">23</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, encrypt, decrypt, keys, </data>
+    <data columnname="Measured Value">15020,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, </data>
+    <data columnname="Measured Value">4023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, keys, sign, verify, </data>
+    <data columnname="Measured Value">9037,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, autoresponder, </data>
+    <data columnname="Measured Value">5025</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, addressbook, </data>
+    <data columnname="Measured Value">2027</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, forward, </data>
+    <data columnname="Measured Value">11022,5</data>
+  </row>
+</results>

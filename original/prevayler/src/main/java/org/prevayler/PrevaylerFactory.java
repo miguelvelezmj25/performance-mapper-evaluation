@@ -326,9 +326,9 @@ public class PrevaylerFactory<P> {
     public Prevayler<P> create() throws Exception {
         GenericSnapshotManager<P> snapshotManager = snapshotManager();
         TransactionPublisher publisher = publisher(snapshotManager);
-        if(_serverPort != -1) {
-            new ServerListener(publisher, new OldNetworkImpl(), _serverPort);
-        }
+//        if(_serverPort != -1) {
+//            new ServerListener(publisher, new OldNetworkImpl(), _serverPort);
+//        }
         return new PrevaylerImpl<P>(snapshotManager, publisher, journalSerializer(), _transactionDeepCopyMode);
     }
 

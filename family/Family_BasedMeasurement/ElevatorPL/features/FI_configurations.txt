@@ -1,0 +1,19 @@
+#Configurations: 9
+base,
+value: 37,5
+base,weight,
+value: 20029
+base,weight,twothirdsfull,
+value: 20031
+base,weight,overloaded,
+value: 22429
+base,empty,
+value: 10060
+base,weight,overloaded,empty,
+value: 32431,5
+base,weight,overloaded,empty,
+value: 32427,5
+base,weight,twothirdsfull,empty,
+value: 30030
+base,weight,twothirdsfull,overloaded,
+value: 22429,5

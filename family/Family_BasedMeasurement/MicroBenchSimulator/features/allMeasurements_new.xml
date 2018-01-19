@@ -1,0 +1,4098 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">2524</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f9, </data>
+    <data columnname="Measured Value">2594</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f8, </data>
+    <data columnname="Measured Value">2765,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f8, f9, </data>
+    <data columnname="Measured Value">2828</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, </data>
+    <data columnname="Measured Value">4754,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f8, </data>
+    <data columnname="Measured Value">4973</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f9, </data>
+    <data columnname="Measured Value">4801</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f8, f9, </data>
+    <data columnname="Measured Value">5051</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, </data>
+    <data columnname="Measured Value">2937</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f9, </data>
+    <data columnname="Measured Value">2999,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, </data>
+    <data columnname="Measured Value">6767</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f9, </data>
+    <data columnname="Measured Value">6837</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f8, </data>
+    <data columnname="Measured Value">3163</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f8, </data>
+    <data columnname="Measured Value">7008,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f8, f9, </data>
+    <data columnname="Measured Value">3226</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">7071</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, </data>
+    <data columnname="Measured Value">3155,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f9, </data>
+    <data columnname="Measured Value">3210</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f8, </data>
+    <data columnname="Measured Value">3389,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f8, f9, </data>
+    <data columnname="Measured Value">3452</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, </data>
+    <data columnname="Measured Value">3561</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f8, </data>
+    <data columnname="Measured Value">3795</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f9, </data>
+    <data columnname="Measured Value">3623,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">3850</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, </data>
+    <data columnname="Measured Value">6611</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f9, </data>
+    <data columnname="Measured Value">6689</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, </data>
+    <data columnname="Measured Value">8646,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">8709</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f8, </data>
+    <data columnname="Measured Value">6845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">8880,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">6915</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">8950,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, </data>
+    <data columnname="Measured Value">2726</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f9, </data>
+    <data columnname="Measured Value">2804</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f8, </data>
+    <data columnname="Measured Value">2968</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f8, f9, </data>
+    <data columnname="Measured Value">3030,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, </data>
+    <data columnname="Measured Value">5753</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f8, </data>
+    <data columnname="Measured Value">5994,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f9, </data>
+    <data columnname="Measured Value">5823</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">6049</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, </data>
+    <data columnname="Measured Value">3358</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f9, </data>
+    <data columnname="Measured Value">3413</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, </data>
+    <data columnname="Measured Value">7625</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">7687</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f8, </data>
+    <data columnname="Measured Value">3584</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">7866,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">3647</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">7929</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, </data>
+    <data columnname="Measured Value">3140</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f9, </data>
+    <data columnname="Measured Value">3194</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f8, </data>
+    <data columnname="Measured Value">3374</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">3428</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, </data>
+    <data columnname="Measured Value">3764</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">3998</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">3818</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">4060</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, </data>
+    <data columnname="Measured Value">7788,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">7851</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">9653</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">9723</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">8022,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">9894,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">8085</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">9965</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, </data>
+    <data columnname="Measured Value">4643</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f9, </data>
+    <data columnname="Measured Value">4705,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f8, </data>
+    <data columnname="Measured Value">4892,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f8, f9, </data>
+    <data columnname="Measured Value">4947</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, </data>
+    <data columnname="Measured Value">6858</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f8, </data>
+    <data columnname="Measured Value">7100</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f9, </data>
+    <data columnname="Measured Value">6920,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f8, f9, </data>
+    <data columnname="Measured Value">7170</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, </data>
+    <data columnname="Measured Value">6117</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f9, </data>
+    <data columnname="Measured Value">6250</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, </data>
+    <data columnname="Measured Value">13808,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f9, </data>
+    <data columnname="Measured Value">13933</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f8, </data>
+    <data columnname="Measured Value">6562</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f8, </data>
+    <data columnname="Measured Value">14245</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f8, f9, </data>
+    <data columnname="Measured Value">6686,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">14370</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, </data>
+    <data columnname="Measured Value">4846</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f9, </data>
+    <data columnname="Measured Value">4908</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f8, </data>
+    <data columnname="Measured Value">5095,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f8, f9, </data>
+    <data columnname="Measured Value">5158</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, </data>
+    <data columnname="Measured Value">6534</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f8, </data>
+    <data columnname="Measured Value">6960</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f9, </data>
+    <data columnname="Measured Value">6648</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">7084</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, </data>
+    <data columnname="Measured Value">7864</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f9, </data>
+    <data columnname="Measured Value">7934,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, </data>
+    <data columnname="Measured Value">15828</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">15961</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f8, </data>
+    <data columnname="Measured Value">8130</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">16273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">8184</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">16398</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, </data>
+    <data columnname="Measured Value">5282,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f9, </data>
+    <data columnname="Measured Value">5337</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f8, </data>
+    <data columnname="Measured Value">5524</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f8, f9, </data>
+    <data columnname="Measured Value">5571</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, </data>
+    <data columnname="Measured Value">8738</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f8, </data>
+    <data columnname="Measured Value">8983,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f9, </data>
+    <data columnname="Measured Value">8808</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">9042</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, </data>
+    <data columnname="Measured Value">5485,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f9, </data>
+    <data columnname="Measured Value">5548</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, </data>
+    <data columnname="Measured Value">9768</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">9822</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f8, </data>
+    <data columnname="Measured Value">5719,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">9986</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">5774</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">10056</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, </data>
+    <data columnname="Measured Value">7061</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f9, </data>
+    <data columnname="Measured Value">7194</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f8, </data>
+    <data columnname="Measured Value">7498</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">7630,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, </data>
+    <data columnname="Measured Value">7459</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">7903,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">7591,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">8020</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, </data>
+    <data columnname="Measured Value">17248</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">17365</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">19252</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">19385,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">17677</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">19705</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">17802</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">19837,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, </data>
+    <data columnname="Measured Value">8636,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f9, </data>
+    <data columnname="Measured Value">8699</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f8, </data>
+    <data columnname="Measured Value">8878</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f8, f9, </data>
+    <data columnname="Measured Value">8941</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, </data>
+    <data columnname="Measured Value">10852</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f8, </data>
+    <data columnname="Measured Value">11109</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f9, </data>
+    <data columnname="Measured Value">10922</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f8, f9, </data>
+    <data columnname="Measured Value">11156</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, </data>
+    <data columnname="Measured Value">10118,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f9, </data>
+    <data columnname="Measured Value">10243,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, </data>
+    <data columnname="Measured Value">17802</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f9, </data>
+    <data columnname="Measured Value">17918,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f8, </data>
+    <data columnname="Measured Value">10555,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f8, </data>
+    <data columnname="Measured Value">18238</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f8, f9, </data>
+    <data columnname="Measured Value">10680</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">18371</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, </data>
+    <data columnname="Measured Value">9276</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f9, </data>
+    <data columnname="Measured Value">9338,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f8, </data>
+    <data columnname="Measured Value">9510</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f8, f9, </data>
+    <data columnname="Measured Value">9572,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, </data>
+    <data columnname="Measured Value">11054,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f8, </data>
+    <data columnname="Measured Value">11492,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f9, </data>
+    <data columnname="Measured Value">11179,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">11608</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, </data>
+    <data columnname="Measured Value">12732</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f9, </data>
+    <data columnname="Measured Value">12802</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, </data>
+    <data columnname="Measured Value">21242,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">21358</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f8, </data>
+    <data columnname="Measured Value">12981,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">21670,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">13020,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">21803</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, </data>
+    <data columnname="Measured Value">10761,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f9, </data>
+    <data columnname="Measured Value">10832</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f8, </data>
+    <data columnname="Measured Value">11003</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f8, f9, </data>
+    <data columnname="Measured Value">11073,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, </data>
+    <data columnname="Measured Value">12977</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f8, </data>
+    <data columnname="Measured Value">13219</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f9, </data>
+    <data columnname="Measured Value">13039</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f8, f9, </data>
+    <data columnname="Measured Value">13283,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, </data>
+    <data columnname="Measured Value">11401</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f9, </data>
+    <data columnname="Measured Value">11463,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, </data>
+    <data columnname="Measured Value">14857</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f9, </data>
+    <data columnname="Measured Value">14935</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f8, </data>
+    <data columnname="Measured Value">11639,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f8, </data>
+    <data columnname="Measured Value">15098,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f8, f9, </data>
+    <data columnname="Measured Value">11690</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">15161</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, </data>
+    <data columnname="Measured Value">13306,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f9, </data>
+    <data columnname="Measured Value">13487</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f8, </data>
+    <data columnname="Measured Value">13946</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f8, f9, </data>
+    <data columnname="Measured Value">14141</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, </data>
+    <data columnname="Measured Value">14570</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f8, </data>
+    <data columnname="Measured Value">15194</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f9, </data>
+    <data columnname="Measured Value">14742</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">15389</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, </data>
+    <data columnname="Measured Value">24835</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f9, </data>
+    <data columnname="Measured Value">25022</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, </data>
+    <data columnname="Measured Value">29831,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">30006,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f8, </data>
+    <data columnname="Measured Value">25477,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">30467</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">25654</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">30661,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, </data>
+    <data columnname="Measured Value">8840</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f9, </data>
+    <data columnname="Measured Value">8894</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f8, </data>
+    <data columnname="Measured Value">9089</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f8, f9, </data>
+    <data columnname="Measured Value">9151,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, </data>
+    <data columnname="Measured Value">11866,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f8, </data>
+    <data columnname="Measured Value">12115,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f9, </data>
+    <data columnname="Measured Value">11928</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">12178</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, </data>
+    <data columnname="Measured Value">10524</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f9, </data>
+    <data columnname="Measured Value">10649</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, </data>
+    <data columnname="Measured Value">19829,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">19954,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f8, </data>
+    <data columnname="Measured Value">10961</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">20274</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">11086</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">20391</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, </data>
+    <data columnname="Measured Value">10964,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f9, </data>
+    <data columnname="Measured Value">11019</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f8, </data>
+    <data columnname="Measured Value">11214</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f8, f9, </data>
+    <data columnname="Measured Value">11276,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, </data>
+    <data columnname="Measured Value">13915</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f8, </data>
+    <data columnname="Measured Value">14547</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f9, </data>
+    <data columnname="Measured Value">14094</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">14742</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, </data>
+    <data columnname="Measured Value">13983</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f9, </data>
+    <data columnname="Measured Value">14045</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, </data>
+    <data columnname="Measured Value">27869,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">28072</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f8, </data>
+    <data columnname="Measured Value">14225,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">28508,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">14311</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">28704</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, </data>
+    <data columnname="Measured Value">9479</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f9, </data>
+    <data columnname="Measured Value">9541,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f8, </data>
+    <data columnname="Measured Value">9721</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">9775,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, </data>
+    <data columnname="Measured Value">13746</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">13980</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">13817,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">14050</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, </data>
+    <data columnname="Measured Value">11596</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f9, </data>
+    <data columnname="Measured Value">11659</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, </data>
+    <data columnname="Measured Value">15878,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">15942,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f8, </data>
+    <data columnname="Measured Value">11838</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">16105</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">11893</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">16175</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, </data>
+    <data columnname="Measured Value">11468</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">11585</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">11897</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">12022</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, </data>
+    <data columnname="Measured Value">15163</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">15802,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">15350</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">15990</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">23262</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">23386</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">32869</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">33057</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">23690,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">33508,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">23823,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">33711,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, </data>
+    <data columnname="Measured Value">3553</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f9, </data>
+    <data columnname="Measured Value">3608</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f8, </data>
+    <data columnname="Measured Value">3779,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f8, f9, </data>
+    <data columnname="Measured Value">3842</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, </data>
+    <data columnname="Measured Value">5753</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f8, </data>
+    <data columnname="Measured Value">5994,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f9, </data>
+    <data columnname="Measured Value">5815</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f8, f9, </data>
+    <data columnname="Measured Value">6057</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, </data>
+    <data columnname="Measured Value">3951</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f9, </data>
+    <data columnname="Measured Value">4006</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, </data>
+    <data columnname="Measured Value">7788,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f9, </data>
+    <data columnname="Measured Value">7851</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f8, </data>
+    <data columnname="Measured Value">4177</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f8, </data>
+    <data columnname="Measured Value">8015</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f8, f9, </data>
+    <data columnname="Measured Value">4247,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">8085</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, </data>
+    <data columnname="Measured Value">4169,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f9, </data>
+    <data columnname="Measured Value">4232</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f8, </data>
+    <data columnname="Measured Value">4403,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f8, f9, </data>
+    <data columnname="Measured Value">4458</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, </data>
+    <data columnname="Measured Value">4567</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f8, </data>
+    <data columnname="Measured Value">4801</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f9, </data>
+    <data columnname="Measured Value">4645,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">4871,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, </data>
+    <data columnname="Measured Value">7632,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f9, </data>
+    <data columnname="Measured Value">7695</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, </data>
+    <data columnname="Measured Value">9660,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">9723</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f8, </data>
+    <data columnname="Measured Value">7859</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">9902</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">7929</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">9949</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, </data>
+    <data columnname="Measured Value">3740</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f9, </data>
+    <data columnname="Measured Value">3803</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f8, </data>
+    <data columnname="Measured Value">3982</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f8, f9, </data>
+    <data columnname="Measured Value">4044,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, </data>
+    <data columnname="Measured Value">6774,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f8, </data>
+    <data columnname="Measured Value">7008,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f9, </data>
+    <data columnname="Measured Value">6837</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">7063</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, </data>
+    <data columnname="Measured Value">4372</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f9, </data>
+    <data columnname="Measured Value">4434,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, </data>
+    <data columnname="Measured Value">8646,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">8709</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f8, </data>
+    <data columnname="Measured Value">4606</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">8880,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">4661</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">8943</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, </data>
+    <data columnname="Measured Value">4154</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f9, </data>
+    <data columnname="Measured Value">4224</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f8, </data>
+    <data columnname="Measured Value">4388</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">4450</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, </data>
+    <data columnname="Measured Value">4778</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">5012</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">4840</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">5074,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, </data>
+    <data columnname="Measured Value">8795</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">8865</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">10667</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">10737</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">9036,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">10901</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">9099</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">10979</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, </data>
+    <data columnname="Measured Value">10205,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f9, </data>
+    <data columnname="Measured Value">10268</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f8, </data>
+    <data columnname="Measured Value">10447</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f8, f9, </data>
+    <data columnname="Measured Value">10511,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, </data>
+    <data columnname="Measured Value">12421,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f8, </data>
+    <data columnname="Measured Value">12678</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f9, </data>
+    <data columnname="Measured Value">12483</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f8, f9, </data>
+    <data columnname="Measured Value">12736,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, </data>
+    <data columnname="Measured Value">11687,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f9, </data>
+    <data columnname="Measured Value">11812,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, </data>
+    <data columnname="Measured Value">19378,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f9, </data>
+    <data columnname="Measured Value">19495,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f8, </data>
+    <data columnname="Measured Value">12117</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f8, </data>
+    <data columnname="Measured Value">19807,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f8, f9, </data>
+    <data columnname="Measured Value">12249</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">19932</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, </data>
+    <data columnname="Measured Value">10408,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f9, </data>
+    <data columnname="Measured Value">10471</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f8, </data>
+    <data columnname="Measured Value">10666</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f8, f9, </data>
+    <data columnname="Measured Value">10720,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, </data>
+    <data columnname="Measured Value">12093,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f8, </data>
+    <data columnname="Measured Value">12537,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f9, </data>
+    <data columnname="Measured Value">12221,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">12663</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, </data>
+    <data columnname="Measured Value">13435</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f9, </data>
+    <data columnname="Measured Value">13497</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, </data>
+    <data columnname="Measured Value">21406,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">21524</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f8, </data>
+    <data columnname="Measured Value">13684,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">21843</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">13739</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">21960</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, </data>
+    <data columnname="Measured Value">10845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f9, </data>
+    <data columnname="Measured Value">10907,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f8, </data>
+    <data columnname="Measured Value">11071</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f8, f9, </data>
+    <data columnname="Measured Value">11149</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, </data>
+    <data columnname="Measured Value">14301</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f8, </data>
+    <data columnname="Measured Value">14535</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f9, </data>
+    <data columnname="Measured Value">14363</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">14605</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, </data>
+    <data columnname="Measured Value">11048</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f9, </data>
+    <data columnname="Measured Value">11110,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, </data>
+    <data columnname="Measured Value">15315</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">15377,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f8, </data>
+    <data columnname="Measured Value">11290</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">15556,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">11344,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">15619</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, </data>
+    <data columnname="Measured Value">12616</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f9, </data>
+    <data columnname="Measured Value">12741</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f8, </data>
+    <data columnname="Measured Value">13060,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">13177</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, </data>
+    <data columnname="Measured Value">13029</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">13474</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">13155,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">13591</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, </data>
+    <data columnname="Measured Value">22810,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">22935</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">24838,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">24948</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">23247</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">25267</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">23364,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">25400</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, </data>
+    <data columnname="Measured Value">6212</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f9, </data>
+    <data columnname="Measured Value">6274,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f8, </data>
+    <data columnname="Measured Value">6454</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f8, f9, </data>
+    <data columnname="Measured Value">6539,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, </data>
+    <data columnname="Measured Value">8427</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f8, </data>
+    <data columnname="Measured Value">8669</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f9, </data>
+    <data columnname="Measured Value">8482</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f8, f9, </data>
+    <data columnname="Measured Value">8739</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, </data>
+    <data columnname="Measured Value">7694</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f9, </data>
+    <data columnname="Measured Value">7811</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, </data>
+    <data columnname="Measured Value">15385</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f9, </data>
+    <data columnname="Measured Value">15501,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f8, </data>
+    <data columnname="Measured Value">8123</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f8, </data>
+    <data columnname="Measured Value">15821,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f8, f9, </data>
+    <data columnname="Measured Value">8248</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">15946,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, </data>
+    <data columnname="Measured Value">6844</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f9, </data>
+    <data columnname="Measured Value">6914</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f8, </data>
+    <data columnname="Measured Value">7085,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f8, f9, </data>
+    <data columnname="Measured Value">7140</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, </data>
+    <data columnname="Measured Value">8630</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f8, </data>
+    <data columnname="Measured Value">9059</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f9, </data>
+    <data columnname="Measured Value">8755</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">9200,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, </data>
+    <data columnname="Measured Value">10315</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f9, </data>
+    <data columnname="Measured Value">10369</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, </data>
+    <data columnname="Measured Value">18801</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">18941,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f8, </data>
+    <data columnname="Measured Value">10549</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">19245,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">10611</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">19378,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, </data>
+    <data columnname="Measured Value">12886</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f9, </data>
+    <data columnname="Measured Value">12940</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f8, </data>
+    <data columnname="Measured Value">13136,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f8, f9, </data>
+    <data columnname="Measured Value">13199</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, </data>
+    <data columnname="Measured Value">15093</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f8, </data>
+    <data columnname="Measured Value">15350,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f9, </data>
+    <data columnname="Measured Value">15156</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f8, f9, </data>
+    <data columnname="Measured Value">15413</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, </data>
+    <data columnname="Measured Value">13518</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f9, </data>
+    <data columnname="Measured Value">13596</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, </data>
+    <data columnname="Measured Value">16988,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f9, </data>
+    <data columnname="Measured Value">17051</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f8, </data>
+    <data columnname="Measured Value">13752</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f8, </data>
+    <data columnname="Measured Value">17215</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f8, f9, </data>
+    <data columnname="Measured Value">13822</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">17285</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, </data>
+    <data columnname="Measured Value">15423</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f9, </data>
+    <data columnname="Measured Value">15618</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f8, </data>
+    <data columnname="Measured Value">16063</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f8, f9, </data>
+    <data columnname="Measured Value">16257,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, </data>
+    <data columnname="Measured Value">16679</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f8, </data>
+    <data columnname="Measured Value">17318,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f9, </data>
+    <data columnname="Measured Value">16866</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">17513,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, </data>
+    <data columnname="Measured Value">26960,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f9, </data>
+    <data columnname="Measured Value">27154,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, </data>
+    <data columnname="Measured Value">31951,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">32131,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f8, </data>
+    <data columnname="Measured Value">27606,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">32591</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">27786</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">32770,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, </data>
+    <data columnname="Measured Value">6415</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f9, </data>
+    <data columnname="Measured Value">6477</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f8, </data>
+    <data columnname="Measured Value">6664,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f8, f9, </data>
+    <data columnname="Measured Value">6727</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, </data>
+    <data columnname="Measured Value">9441</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f8, </data>
+    <data columnname="Measured Value">9683</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f9, </data>
+    <data columnname="Measured Value">9503,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">9753</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, </data>
+    <data columnname="Measured Value">8099,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f9, </data>
+    <data columnname="Measured Value">8217</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, </data>
+    <data columnname="Measured Value">17397</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">17522</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f8, </data>
+    <data columnname="Measured Value">8536,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">17834</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">8653</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">17959</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, </data>
+    <data columnname="Measured Value">13081</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f9, </data>
+    <data columnname="Measured Value">13229</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f8, </data>
+    <data columnname="Measured Value">13338</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f8, f9, </data>
+    <data columnname="Measured Value">13400,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, </data>
+    <data columnname="Measured Value">16055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f8, </data>
+    <data columnname="Measured Value">16687</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f9, </data>
+    <data columnname="Measured Value">16226,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f8, f9, </data>
+    <data columnname="Measured Value">16866</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, </data>
+    <data columnname="Measured Value">16115</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f9, </data>
+    <data columnname="Measured Value">16177,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, </data>
+    <data columnname="Measured Value">30001</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f9, </data>
+    <data columnname="Measured Value">30189</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f8, </data>
+    <data columnname="Measured Value">16364,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f8, </data>
+    <data columnname="Measured Value">30685</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f8, f9, </data>
+    <data columnname="Measured Value">16427</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">30835,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, </data>
+    <data columnname="Measured Value">7054,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f9, </data>
+    <data columnname="Measured Value">7117</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f8, </data>
+    <data columnname="Measured Value">7281</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">7343</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, </data>
+    <data columnname="Measured Value">11330</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">11563</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">11383</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">11620,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, </data>
+    <data columnname="Measured Value">13720</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f9, </data>
+    <data columnname="Measured Value">13786</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, </data>
+    <data columnname="Measured Value">17998</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f9, </data>
+    <data columnname="Measured Value">18065</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f8, </data>
+    <data columnname="Measured Value">13962</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f8, </data>
+    <data columnname="Measured Value">18236,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f8, f9, </data>
+    <data columnname="Measured Value">14025</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Measured Value">18300</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, </data>
+    <data columnname="Measured Value">9035,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">9160,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">9473</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">9597,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, </data>
+    <data columnname="Measured Value">17287</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f8, </data>
+    <data columnname="Measured Value">17928,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f9, </data>
+    <data columnname="Measured Value">17471,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Measured Value">18106</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">20837</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">20970</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, </data>
+    <data columnname="Measured Value">35001</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Measured Value">35188,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">21274</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Measured Value">35640,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">21399</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Measured Value">35820</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f10, </data>
+    <data columnname="Measured Value">2625</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f9, f10, </data>
+    <data columnname="Measured Value">2687,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f8, f10, </data>
+    <data columnname="Measured Value">2851</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f8, f9, f10, </data>
+    <data columnname="Measured Value">2921,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f10, </data>
+    <data columnname="Measured Value">4840</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f8, f10, </data>
+    <data columnname="Measured Value">5066</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f9, f10, </data>
+    <data columnname="Measured Value">4902,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">5136,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f10, </data>
+    <data columnname="Measured Value">3023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f9, f10, </data>
+    <data columnname="Measured Value">3085</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f10, </data>
+    <data columnname="Measured Value">6868</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">6930,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f8, f10, </data>
+    <data columnname="Measured Value">3264,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">7102</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">3327</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">7164,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f10, </data>
+    <data columnname="Measured Value">3249</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f9, f10, </data>
+    <data columnname="Measured Value">3304</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f8, f10, </data>
+    <data columnname="Measured Value">3475</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">3545,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f10, </data>
+    <data columnname="Measured Value">3654,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">3896</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">3717</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">3951</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f10, </data>
+    <data columnname="Measured Value">6712</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">6774,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">8732</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">8802,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">6946</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">8974</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">7001</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">9036,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f10, </data>
+    <data columnname="Measured Value">2828</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f9, f10, </data>
+    <data columnname="Measured Value">2890</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f8, f10, </data>
+    <data columnname="Measured Value">3062</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">3116</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f10, </data>
+    <data columnname="Measured Value">5846</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">6088</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">5916,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">6150,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f10, </data>
+    <data columnname="Measured Value">3452</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">3514</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">7726</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">7788,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">3678</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">7960</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">3748</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">8022,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f10, </data>
+    <data columnname="Measured Value">3233,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">3296</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">3467,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">3522</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">3850</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">4091,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">3920</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">4154,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">7882</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">7944,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">9754</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">9824</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">8108</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">9996</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">8178,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">10058</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f10, </data>
+    <data columnname="Measured Value">5345</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f9, f10, </data>
+    <data columnname="Measured Value">5470</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f8, f10, </data>
+    <data columnname="Measured Value">5797,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f8, f9, f10, </data>
+    <data columnname="Measured Value">5922</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f10, </data>
+    <data columnname="Measured Value">9775,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f8, f10, </data>
+    <data columnname="Measured Value">10229</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f9, f10, </data>
+    <data columnname="Measured Value">9900</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">10353</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f10, </data>
+    <data columnname="Measured Value">7326</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f9, f10, </data>
+    <data columnname="Measured Value">7513,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f10, </data>
+    <data columnname="Measured Value">18847</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">19034</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f8, f10, </data>
+    <data columnname="Measured Value">7966</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">19494</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">8145</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">19673,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f10, </data>
+    <data columnname="Measured Value">5758</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f9, f10, </data>
+    <data columnname="Measured Value">5883,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f8, f10, </data>
+    <data columnname="Measured Value">6203</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">6329</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f10, </data>
+    <data columnname="Measured Value">7934,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">8574</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">8114</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">8765</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f10, </data>
+    <data columnname="Measured Value">11819</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">11936</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">21889</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">22084</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">12256</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">22536</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">12380,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">22724,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f10, </data>
+    <data columnname="Measured Value">6296,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f9, f10, </data>
+    <data columnname="Measured Value">6429,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f8, f10, </data>
+    <data columnname="Measured Value">6733,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">6850</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f10, </data>
+    <data columnname="Measured Value">13231,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">13660,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">13348</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">13792</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f10, </data>
+    <data columnname="Measured Value">6694</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">6827</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">15243</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">15384</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">7139</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">15688</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">7265,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">15812,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f10, </data>
+    <data columnname="Measured Value">8574</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">8761,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">9206</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">9401</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">9182,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">9814</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">9378</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">10009,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">23838,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">24026</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">26881</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">27084</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">24486</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">27528</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">24665,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">27715,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f10, </data>
+    <data columnname="Measured Value">3639</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f9, f10, </data>
+    <data columnname="Measured Value">3701,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f8, f10, </data>
+    <data columnname="Measured Value">3873</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f8, f9, f10, </data>
+    <data columnname="Measured Value">3935,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f10, </data>
+    <data columnname="Measured Value">5846</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f8, f10, </data>
+    <data columnname="Measured Value">6080</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f9, f10, </data>
+    <data columnname="Measured Value">5924</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">6150,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f10, </data>
+    <data columnname="Measured Value">4044,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f9, f10, </data>
+    <data columnname="Measured Value">4107</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f10, </data>
+    <data columnname="Measured Value">7874,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">7937</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f8, f10, </data>
+    <data columnname="Measured Value">4278,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">8116</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">4341</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">8171</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f10, </data>
+    <data columnname="Measured Value">4263</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f9, f10, </data>
+    <data columnname="Measured Value">4325,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f8, f10, </data>
+    <data columnname="Measured Value">4489</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">4559,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f10, </data>
+    <data columnname="Measured Value">4661</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">4895</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">4723</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">4965</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f10, </data>
+    <data columnname="Measured Value">7726</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">7788,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">9762</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">9809</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">7960</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">9988</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">8022,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">10043</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f10, </data>
+    <data columnname="Measured Value">6914</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f9, f10, </data>
+    <data columnname="Measured Value">7039</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f8, f10, </data>
+    <data columnname="Measured Value">7359</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f8, f9, f10, </data>
+    <data columnname="Measured Value">7505,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f10, </data>
+    <data columnname="Measured Value">11352</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f8, f10, </data>
+    <data columnname="Measured Value">11797</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f9, f10, </data>
+    <data columnname="Measured Value">11477</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">11929</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f10, </data>
+    <data columnname="Measured Value">7865,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f9, f10, </data>
+    <data columnname="Measured Value">7990,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f10, </data>
+    <data columnname="Measured Value">14792</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">14925</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f8, f10, </data>
+    <data columnname="Measured Value">8302,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">15221</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">8427</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">15361</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f10, </data>
+    <data columnname="Measured Value">8887</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f9, f10, </data>
+    <data columnname="Measured Value">9082,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f8, f10, </data>
+    <data columnname="Measured Value">9535</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">9722</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f10, </data>
+    <data columnname="Measured Value">10135</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">10783</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">10330,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">10970</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f10, </data>
+    <data columnname="Measured Value">20431</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">20611</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">25408</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">25588</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">21055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">26047</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">21250,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">26242,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f10, </data>
+    <data columnname="Measured Value">3842</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f9, f10, </data>
+    <data columnname="Measured Value">3896</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f8, f10, </data>
+    <data columnname="Measured Value">4076</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">4130</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f10, </data>
+    <data columnname="Measured Value">6868</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">7094</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">6930,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">7164,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f10, </data>
+    <data columnname="Measured Value">4240</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">4310</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">8896</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">8958,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">4474</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">9130</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">4544</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">9192,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f10, </data>
+    <data columnname="Measured Value">7319,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f9, f10, </data>
+    <data columnname="Measured Value">7452,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f8, f10, </data>
+    <data columnname="Measured Value">7772</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">7889</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f10, </data>
+    <data columnname="Measured Value">9504</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">10135</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">9683</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">10330,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f10, </data>
+    <data columnname="Measured Value">13388</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">13513</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">23458</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">23645</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">13825</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">24089,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">13953</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">24284,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f10, </data>
+    <data columnname="Measured Value">4458</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">4528</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">4700</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">4754</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">8740</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">8966</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">8802,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">9029,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f10, </data>
+    <data columnname="Measured Value">8279</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">8404</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">16835,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">16953,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">8700</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">17265</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">8833</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">17381,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">4871,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">4934</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">5098</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">5168</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">10759</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">11395</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">10939</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">11578,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">10768</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">10830,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">28457,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">28649</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">11010</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">29097</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">11072</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f3, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">29277</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f10, </data>
+    <data columnname="Measured Value">9338,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f9, f10, </data>
+    <data columnname="Measured Value">9463,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f8, f10, </data>
+    <data columnname="Measured Value">9791</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f8, f9, f10, </data>
+    <data columnname="Measured Value">9916</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f10, </data>
+    <data columnname="Measured Value">13784,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f8, f10, </data>
+    <data columnname="Measured Value">14221,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f9, f10, </data>
+    <data columnname="Measured Value">13894</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">14338</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f10, </data>
+    <data columnname="Measured Value">11320</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f9, f10, </data>
+    <data columnname="Measured Value">11507</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f10, </data>
+    <data columnname="Measured Value">22825,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">23028</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f8, f10, </data>
+    <data columnname="Measured Value">11967</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">23488</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">12146,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">23662,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f10, </data>
+    <data columnname="Measured Value">10282</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f9, f10, </data>
+    <data columnname="Measured Value">10407</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f8, f10, </data>
+    <data columnname="Measured Value">10727</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">10852</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f10, </data>
+    <data columnname="Measured Value">12568</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">13217,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">12747</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">13394,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f10, </data>
+    <data columnname="Measured Value">17209</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">17349</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">27840</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">28027,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">17653,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">28472</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">17770</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">28667</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f10, </data>
+    <data columnname="Measured Value">9744</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f9, f10, </data>
+    <data columnname="Measured Value">9869</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f8, f10, </data>
+    <data columnname="Measured Value">10196,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">10321,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f10, </data>
+    <data columnname="Measured Value">15797</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">16258</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">15930</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">16374</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f10, </data>
+    <data columnname="Measured Value">10688,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">10820,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">19252</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">19377</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">11132,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">19681,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">11250</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">19814</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f10, </data>
+    <data columnname="Measured Value">11924</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">12108</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">12568</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">12755</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">13168</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">13824</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">13363,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">13995</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">25890</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">26070</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">30874,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">31069,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">26522</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">31530</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">26709</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">31717</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f10, </data>
+    <data columnname="Measured Value">10900</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f9, f10, </data>
+    <data columnname="Measured Value">11032,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f8, f10, </data>
+    <data columnname="Measured Value">11361,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f8, f9, f10, </data>
+    <data columnname="Measured Value">11485</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f10, </data>
+    <data columnname="Measured Value">15346</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f8, f10, </data>
+    <data columnname="Measured Value">15783</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f9, f10, </data>
+    <data columnname="Measured Value">15471</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">15907</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f10, </data>
+    <data columnname="Measured Value">12889</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f9, f10, </data>
+    <data columnname="Measured Value">13076</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f10, </data>
+    <data columnname="Measured Value">24409</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">24597</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f8, f10, </data>
+    <data columnname="Measured Value">13531</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">25060</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">13715,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">25244</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f10, </data>
+    <data columnname="Measured Value">11313</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f9, f10, </data>
+    <data columnname="Measured Value">11438</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f8, f10, </data>
+    <data columnname="Measured Value">11765,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">11890,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f10, </data>
+    <data columnname="Measured Value">13497</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">14137</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">13684,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">14324</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f10, </data>
+    <data columnname="Measured Value">17381,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">17499</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">27459</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">27646,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">17830,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">28083</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">17935</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">28278,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f10, </data>
+    <data columnname="Measured Value">11859</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f9, f10, </data>
+    <data columnname="Measured Value">11992</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f8, f10, </data>
+    <data columnname="Measured Value">12296</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">12421</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f10, </data>
+    <data columnname="Measured Value">18793</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">19230</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">18910,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">19339</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f10, </data>
+    <data columnname="Measured Value">12257</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">12389,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">20813,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">21064</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">12709</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">21243</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">12819</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">21367</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f10, </data>
+    <data columnname="Measured Value">14129</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">14324</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">14782</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">14956</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">14737</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">15377</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">14933</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">15572</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">29409</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">29588,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">32436</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">32638,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">30041</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">33099</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">30236</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">33270</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f10, </data>
+    <data columnname="Measured Value">12058,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f9, f10, </data>
+    <data columnname="Measured Value">12246</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f8, f10, </data>
+    <data columnname="Measured Value">12714</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f8, f9, f10, </data>
+    <data columnname="Measured Value">12893</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f10, </data>
+    <data columnname="Measured Value">18727,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f8, f10, </data>
+    <data columnname="Measured Value">19375</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f9, f10, </data>
+    <data columnname="Measured Value">18899,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">19554</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f10, </data>
+    <data columnname="Measured Value">15608</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f9, f10, </data>
+    <data columnname="Measured Value">15927,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f10, </data>
+    <data columnname="Measured Value">34834,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">35146,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f8, f10, </data>
+    <data columnname="Measured Value">16660,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">35880</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">16980</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">36184,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f10, </data>
+    <data columnname="Measured Value">13330</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f9, f10, </data>
+    <data columnname="Measured Value">13509,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f8, f10, </data>
+    <data columnname="Measured Value">13962</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">14149</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f10, </data>
+    <data columnname="Measured Value">17487,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">18540</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">17799,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">18852</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f10, </data>
+    <data columnname="Measured Value">23719,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">23899</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">42938,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">43250,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">24367</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">43984</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">24554</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">31477,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f10, </data>
+    <data columnname="Measured Value">14222</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f9, f10, </data>
+    <data columnname="Measured Value">14393,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f8, f10, </data>
+    <data columnname="Measured Value">14854</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f8, f9, f10, </data>
+    <data columnname="Measured Value">15033</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f10, </data>
+    <data columnname="Measured Value">20844</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f8, f10, </data>
+    <data columnname="Measured Value">21491,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f9, f10, </data>
+    <data columnname="Measured Value">21031</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">21686,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f10, </data>
+    <data columnname="Measured Value">15446,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f9, f10, </data>
+    <data columnname="Measured Value">15630,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f10, </data>
+    <data columnname="Measured Value">25859</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">26039</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f8, f10, </data>
+    <data columnname="Measured Value">16094</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">26488</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">16273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">26670,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f10, </data>
+    <data columnname="Measured Value">17739,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f9, f10, </data>
+    <data columnname="Measured Value">18051,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f8, f10, </data>
+    <data columnname="Measured Value">18793</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">19097</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f10, </data>
+    <data columnname="Measured Value">19612</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">20665</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">19923,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">20977</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f10, </data>
+    <data columnname="Measured Value">36951</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">37272,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">45072,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">45378,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">37991</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">46104</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">38278,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">46429,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f10, </data>
+    <data columnname="Measured Value">12667</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f9, f10, </data>
+    <data columnname="Measured Value">12854</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f8, f10, </data>
+    <data columnname="Measured Value">13330</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">13509,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f10, </data>
+    <data columnname="Measured Value">21762</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">22404</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">21965</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">22593,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f10, </data>
+    <data columnname="Measured Value">16629,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">16941,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">39904,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">40204</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">17682,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">40942</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">17990</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">41255,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f10, </data>
+    <data columnname="Measured Value">14791</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f9, f10, </data>
+    <data columnname="Measured Value">14986,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f8, f10, </data>
+    <data columnname="Measured Value">15446,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f8, f9, f10, </data>
+    <data columnname="Measured Value">15626</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f10, </data>
+    <data columnname="Measured Value">18753,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f8, f10, </data>
+    <data columnname="Measured Value">19799</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f9, f10, </data>
+    <data columnname="Measured Value">19073</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">20119</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f10, </data>
+    <data columnname="Measured Value">23883</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f9, f10, </data>
+    <data columnname="Measured Value">24080</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f10, </data>
+    <data columnname="Measured Value">42023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">42333</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f8, f10, </data>
+    <data columnname="Measured Value">24541</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">43068,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">24724</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">43381,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f10, </data>
+    <data columnname="Measured Value">13928</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">14112,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">14570,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">14757,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">26769,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">27401</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">26953</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">27596</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f10, </data>
+    <data columnname="Measured Value">16055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f9, f10, </data>
+    <data columnname="Measured Value">16234</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f10, </data>
+    <data columnname="Measured Value">28883</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f9, f10, </data>
+    <data columnname="Measured Value">29081,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f8, f10, </data>
+    <data columnname="Measured Value">16703</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f8, f10, </data>
+    <data columnname="Measured Value">29525,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Measured Value">16874</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">29723</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">18495</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">18813,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">19547</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">19864</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f10, </data>
+    <data columnname="Measured Value">20625,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f8, f10, </data>
+    <data columnname="Measured Value">21687,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Measured Value">20937,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f8, f9, f10, </data>
+    <data columnname="Measured Value">21983</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">48009</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">48329</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Measured Value">50130</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f9, f10, </data>
+    <data columnname="Measured Value">50455,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">49055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Measured Value">51179</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, f3, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">49382</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Measured Value">51498</data>
+  </row>
+</results>

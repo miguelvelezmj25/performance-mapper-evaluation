@@ -1,0 +1,4098 @@
+<results>
+  <row>
+    <data columnname="Configuration">0</data>
+    <data columnname="Elements">base, </data>
+    <data columnname="Estimated Value">2508</data>
+    <data columnname="Measured Value">2508</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">2</data>
+    <data columnname="Elements">base, f2, </data>
+    <data columnname="Estimated Value">8619</data>
+    <data columnname="Measured Value">8619</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">4</data>
+    <data columnname="Elements">base, f4, </data>
+    <data columnname="Estimated Value">2707,5</data>
+    <data columnname="Measured Value">2707,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">6</data>
+    <data columnname="Elements">base, f6, </data>
+    <data columnname="Estimated Value">2907,5</data>
+    <data columnname="Measured Value">2907,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">8</data>
+    <data columnname="Elements">base, f8, </data>
+    <data columnname="Estimated Value">2728</data>
+    <data columnname="Measured Value">2728</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">10</data>
+    <data columnname="Elements">base, f10, </data>
+    <data columnname="Estimated Value">2587,5</data>
+    <data columnname="Measured Value">2587,5</data>
+    <data columnname="Difference Absolut">0</data>
+    <data columnname="Difference in %">0</data>
+  </row>
+  <row>
+    <data columnname="Configuration">12</data>
+    <data columnname="Elements">base, f7, f8, </data>
+    <data columnname="Estimated Value">4827,5</data>
+    <data columnname="Measured Value">4973</data>
+    <data columnname="Difference Absolut">145,5</data>
+    <data columnname="Difference in %">2,92579931630806</data>
+  </row>
+  <row>
+    <data columnname="Configuration">14</data>
+    <data columnname="Elements">base, f7, f8, f9, </data>
+    <data columnname="Estimated Value">4876,5</data>
+    <data columnname="Measured Value">5051</data>
+    <data columnname="Difference Absolut">174,5</data>
+    <data columnname="Difference in %">3,45476143337953</data>
+  </row>
+  <row>
+    <data columnname="Configuration">16</data>
+    <data columnname="Elements">base, f6, f7, </data>
+    <data columnname="Estimated Value">5007</data>
+    <data columnname="Measured Value">6767</data>
+    <data columnname="Difference Absolut">1760</data>
+    <data columnname="Difference in %">26,0085710063544</data>
+  </row>
+  <row>
+    <data columnname="Configuration">18</data>
+    <data columnname="Elements">base, f6, f8, </data>
+    <data columnname="Estimated Value">3127,5</data>
+    <data columnname="Measured Value">3163</data>
+    <data columnname="Difference Absolut">35,5</data>
+    <data columnname="Difference in %">1,12235219728106</data>
+  </row>
+  <row>
+    <data columnname="Configuration">20</data>
+    <data columnname="Elements">base, f6, f8, f9, </data>
+    <data columnname="Estimated Value">3176,5</data>
+    <data columnname="Measured Value">3226</data>
+    <data columnname="Difference Absolut">49,5</data>
+    <data columnname="Difference in %">1,53440793552387</data>
+  </row>
+  <row>
+    <data columnname="Configuration">22</data>
+    <data columnname="Elements">base, f5, f9, </data>
+    <data columnname="Estimated Value">3156</data>
+    <data columnname="Measured Value">3210</data>
+    <data columnname="Difference Absolut">54</data>
+    <data columnname="Difference in %">1,6822429906542</data>
+  </row>
+  <row>
+    <data columnname="Configuration">24</data>
+    <data columnname="Elements">base, f5, f8, f9, </data>
+    <data columnname="Estimated Value">3376</data>
+    <data columnname="Measured Value">3452</data>
+    <data columnname="Difference Absolut">76</data>
+    <data columnname="Difference in %">2,2016222479722</data>
+  </row>
+  <row>
+    <data columnname="Configuration">26</data>
+    <data columnname="Elements">base, f5, f6, f8, </data>
+    <data columnname="Estimated Value">3726,5</data>
+    <data columnname="Measured Value">3795</data>
+    <data columnname="Difference Absolut">68,5</data>
+    <data columnname="Difference in %">1,80500658761528</data>
+  </row>
+  <row>
+    <data columnname="Configuration">28</data>
+    <data columnname="Elements">base, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">3775,5</data>
+    <data columnname="Measured Value">3850</data>
+    <data columnname="Difference Absolut">74,5</data>
+    <data columnname="Difference in %">1,93506493506493</data>
+  </row>
+  <row>
+    <data columnname="Configuration">30</data>
+    <data columnname="Elements">base, f5, f7, f9, </data>
+    <data columnname="Estimated Value">5255,5</data>
+    <data columnname="Measured Value">6689</data>
+    <data columnname="Difference Absolut">1433,5</data>
+    <data columnname="Difference in %">21,4307071311108</data>
+  </row>
+  <row>
+    <data columnname="Configuration">32</data>
+    <data columnname="Elements">base, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">5655</data>
+    <data columnname="Measured Value">8709</data>
+    <data columnname="Difference Absolut">3054</data>
+    <data columnname="Difference in %">35,0671718911471</data>
+  </row>
+  <row>
+    <data columnname="Configuration">34</data>
+    <data columnname="Elements">base, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">5826</data>
+    <data columnname="Measured Value">8880,5</data>
+    <data columnname="Difference Absolut">3054,5</data>
+    <data columnname="Difference in %">34,395585834131</data>
+  </row>
+  <row>
+    <data columnname="Configuration">36</data>
+    <data columnname="Elements">base, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">5875</data>
+    <data columnname="Measured Value">8950,5</data>
+    <data columnname="Difference Absolut">3075,5</data>
+    <data columnname="Difference in %">34,3612088710128</data>
+  </row>
+  <row>
+    <data columnname="Configuration">38</data>
+    <data columnname="Elements">base, f4, f8, </data>
+    <data columnname="Estimated Value">2927,5</data>
+    <data columnname="Measured Value">2968</data>
+    <data columnname="Difference Absolut">40,5</data>
+    <data columnname="Difference in %">1,36455525606469</data>
+  </row>
+  <row>
+    <data columnname="Configuration">40</data>
+    <data columnname="Elements">base, f4, f7, </data>
+    <data columnname="Estimated Value">4807</data>
+    <data columnname="Measured Value">5753</data>
+    <data columnname="Difference Absolut">946</data>
+    <data columnname="Difference in %">16,4435946462715</data>
+  </row>
+  <row>
+    <data columnname="Configuration">42</data>
+    <data columnname="Elements">base, f4, f7, f9, </data>
+    <data columnname="Estimated Value">4856</data>
+    <data columnname="Measured Value">5823</data>
+    <data columnname="Difference Absolut">967</data>
+    <data columnname="Difference in %">16,6065601923407</data>
+  </row>
+  <row>
+    <data columnname="Configuration">44</data>
+    <data columnname="Elements">base, f4, f5, </data>
+    <data columnname="Estimated Value">3306,5</data>
+    <data columnname="Measured Value">3358</data>
+    <data columnname="Difference Absolut">51,5</data>
+    <data columnname="Difference in %">1,53365098272782</data>
+  </row>
+  <row>
+    <data columnname="Configuration">46</data>
+    <data columnname="Elements">base, f4, f5, f7, </data>
+    <data columnname="Estimated Value">5406</data>
+    <data columnname="Measured Value">7625</data>
+    <data columnname="Difference Absolut">2219</data>
+    <data columnname="Difference in %">29,1016393442623</data>
+  </row>
+  <row>
+    <data columnname="Configuration">48</data>
+    <data columnname="Elements">base, f4, f5, f8, </data>
+    <data columnname="Estimated Value">3526,5</data>
+    <data columnname="Measured Value">3584</data>
+    <data columnname="Difference Absolut">57,5</data>
+    <data columnname="Difference in %">1,60435267857143</data>
+  </row>
+  <row>
+    <data columnname="Configuration">50</data>
+    <data columnname="Elements">base, f4, f5, f8, f9, </data>
+    <data columnname="Estimated Value">3575,5</data>
+    <data columnname="Measured Value">3647</data>
+    <data columnname="Difference Absolut">71,5</data>
+    <data columnname="Difference in %">1,96051549218535</data>
+  </row>
+  <row>
+    <data columnname="Configuration">52</data>
+    <data columnname="Elements">base, f4, f6, </data>
+    <data columnname="Estimated Value">3107</data>
+    <data columnname="Measured Value">3140</data>
+    <data columnname="Difference Absolut">33</data>
+    <data columnname="Difference in %">1,05095541401273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">54</data>
+    <data columnname="Elements">base, f4, f6, f8, </data>
+    <data columnname="Estimated Value">3327</data>
+    <data columnname="Measured Value">3374</data>
+    <data columnname="Difference Absolut">47</data>
+    <data columnname="Difference in %">1,39300533491405</data>
+  </row>
+  <row>
+    <data columnname="Configuration">56</data>
+    <data columnname="Elements">base, f4, f5, f6, </data>
+    <data columnname="Estimated Value">3706</data>
+    <data columnname="Measured Value">3764</data>
+    <data columnname="Difference Absolut">58</data>
+    <data columnname="Difference in %">1,54091392136026</data>
+  </row>
+  <row>
+    <data columnname="Configuration">58</data>
+    <data columnname="Elements">base, f4, f5, f6, f9, </data>
+    <data columnname="Estimated Value">3755</data>
+    <data columnname="Measured Value">3818</data>
+    <data columnname="Difference Absolut">63</data>
+    <data columnname="Difference in %">1,65007857517024</data>
+  </row>
+  <row>
+    <data columnname="Configuration">60</data>
+    <data columnname="Elements">base, f4, f6, f7, </data>
+    <data columnname="Estimated Value">5206,5</data>
+    <data columnname="Measured Value">7788,5</data>
+    <data columnname="Difference Absolut">2582</data>
+    <data columnname="Difference in %">33,1514412274507</data>
+  </row>
+  <row>
+    <data columnname="Configuration">62</data>
+    <data columnname="Elements">base, f4, f5, f6, f7, </data>
+    <data columnname="Estimated Value">5805,5</data>
+    <data columnname="Measured Value">9653</data>
+    <data columnname="Difference Absolut">3847,5</data>
+    <data columnname="Difference in %">39,8580752097793</data>
+  </row>
+  <row>
+    <data columnname="Configuration">64</data>
+    <data columnname="Elements">base, f4, f6, f7, f8, </data>
+    <data columnname="Estimated Value">5426,5</data>
+    <data columnname="Measured Value">8022,5</data>
+    <data columnname="Difference Absolut">2596</data>
+    <data columnname="Difference in %">32,3589903396697</data>
+  </row>
+  <row>
+    <data columnname="Configuration">66</data>
+    <data columnname="Elements">base, f4, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">5475,5</data>
+    <data columnname="Measured Value">8085</data>
+    <data columnname="Difference Absolut">2609,5</data>
+    <data columnname="Difference in %">32,2758194186766</data>
+  </row>
+  <row>
+    <data columnname="Configuration">68</data>
+    <data columnname="Elements">base, f3, f9, </data>
+    <data columnname="Estimated Value">4666</data>
+    <data columnname="Measured Value">4705,5</data>
+    <data columnname="Difference Absolut">39,5</data>
+    <data columnname="Difference in %">0,839443204760386</data>
+  </row>
+  <row>
+    <data columnname="Configuration">70</data>
+    <data columnname="Elements">base, f3, f8, f9, </data>
+    <data columnname="Estimated Value">4886</data>
+    <data columnname="Measured Value">4947</data>
+    <data columnname="Difference Absolut">61</data>
+    <data columnname="Difference in %">1,23307054780675</data>
+  </row>
+  <row>
+    <data columnname="Configuration">72</data>
+    <data columnname="Elements">base, f3, f7, f8, </data>
+    <data columnname="Estimated Value">6936,5</data>
+    <data columnname="Measured Value">7100</data>
+    <data columnname="Difference Absolut">163,5</data>
+    <data columnname="Difference in %">2,30281690140845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">74</data>
+    <data columnname="Elements">base, f3, f7, f8, f9, </data>
+    <data columnname="Estimated Value">6985,5</data>
+    <data columnname="Measured Value">7170</data>
+    <data columnname="Difference Absolut">184,5</data>
+    <data columnname="Difference in %">2,57322175732217</data>
+  </row>
+  <row>
+    <data columnname="Configuration">76</data>
+    <data columnname="Elements">base, f3, f6, f9, </data>
+    <data columnname="Estimated Value">5065,5</data>
+    <data columnname="Measured Value">6250</data>
+    <data columnname="Difference Absolut">1184,5</data>
+    <data columnname="Difference in %">18,952</data>
+  </row>
+  <row>
+    <data columnname="Configuration">78</data>
+    <data columnname="Elements">base, f3, f6, f7, f9, </data>
+    <data columnname="Estimated Value">7165</data>
+    <data columnname="Measured Value">13933</data>
+    <data columnname="Difference Absolut">6768</data>
+    <data columnname="Difference in %">48,5753247685351</data>
+  </row>
+  <row>
+    <data columnname="Configuration">80</data>
+    <data columnname="Elements">base, f3, f6, f7, f8, </data>
+    <data columnname="Estimated Value">7336</data>
+    <data columnname="Measured Value">14245</data>
+    <data columnname="Difference Absolut">6909</data>
+    <data columnname="Difference in %">48,5012285012285</data>
+  </row>
+  <row>
+    <data columnname="Configuration">82</data>
+    <data columnname="Elements">base, f3, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7385</data>
+    <data columnname="Measured Value">14370</data>
+    <data columnname="Difference Absolut">6985</data>
+    <data columnname="Difference in %">48,6082115518441</data>
+  </row>
+  <row>
+    <data columnname="Configuration">84</data>
+    <data columnname="Elements">base, f3, f4, f9, </data>
+    <data columnname="Estimated Value">4865,5</data>
+    <data columnname="Measured Value">4908</data>
+    <data columnname="Difference Absolut">42,5</data>
+    <data columnname="Difference in %">0,865933170334145</data>
+  </row>
+  <row>
+    <data columnname="Configuration">86</data>
+    <data columnname="Elements">base, f3, f4, f8, f9, </data>
+    <data columnname="Estimated Value">5085,5</data>
+    <data columnname="Measured Value">5158</data>
+    <data columnname="Difference Absolut">72,5</data>
+    <data columnname="Difference in %">1,40558355951919</data>
+  </row>
+  <row>
+    <data columnname="Configuration">88</data>
+    <data columnname="Elements">base, f3, f4, f6, f8, </data>
+    <data columnname="Estimated Value">5436</data>
+    <data columnname="Measured Value">6960</data>
+    <data columnname="Difference Absolut">1524</data>
+    <data columnname="Difference in %">21,8965517241379</data>
+  </row>
+  <row>
+    <data columnname="Configuration">90</data>
+    <data columnname="Elements">base, f3, f4, f6, f8, f9, </data>
+    <data columnname="Estimated Value">5485</data>
+    <data columnname="Measured Value">7084</data>
+    <data columnname="Difference Absolut">1599</data>
+    <data columnname="Difference in %">22,5719932241671</data>
+  </row>
+  <row>
+    <data columnname="Configuration">92</data>
+    <data columnname="Elements">base, f3, f4, f7, f9, </data>
+    <data columnname="Estimated Value">6965</data>
+    <data columnname="Measured Value">7934,5</data>
+    <data columnname="Difference Absolut">969,5</data>
+    <data columnname="Difference in %">12,2187913542126</data>
+  </row>
+  <row>
+    <data columnname="Configuration">94</data>
+    <data columnname="Elements">base, f3, f4, f6, f7, f9, </data>
+    <data columnname="Estimated Value">7364,5</data>
+    <data columnname="Measured Value">15961</data>
+    <data columnname="Difference Absolut">8596,5</data>
+    <data columnname="Difference in %">53,8594073053067</data>
+  </row>
+  <row>
+    <data columnname="Configuration">96</data>
+    <data columnname="Elements">base, f3, f4, f6, f7, f8, </data>
+    <data columnname="Estimated Value">7535,5</data>
+    <data columnname="Measured Value">16273</data>
+    <data columnname="Difference Absolut">8737,5</data>
+    <data columnname="Difference in %">53,6932341916057</data>
+  </row>
+  <row>
+    <data columnname="Configuration">98</data>
+    <data columnname="Elements">base, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7584,5</data>
+    <data columnname="Measured Value">16398</data>
+    <data columnname="Difference Absolut">8813,5</data>
+    <data columnname="Difference in %">53,7474082205147</data>
+  </row>
+  <row>
+    <data columnname="Configuration">100</data>
+    <data columnname="Elements">base, f3, f5, f9, </data>
+    <data columnname="Estimated Value">5265</data>
+    <data columnname="Measured Value">5337</data>
+    <data columnname="Difference Absolut">72</data>
+    <data columnname="Difference in %">1,34907251264755</data>
+  </row>
+  <row>
+    <data columnname="Configuration">102</data>
+    <data columnname="Elements">base, f3, f5, f8, f9, </data>
+    <data columnname="Estimated Value">5485</data>
+    <data columnname="Measured Value">5571</data>
+    <data columnname="Difference Absolut">86</data>
+    <data columnname="Difference in %">1,5437084903967</data>
+  </row>
+  <row>
+    <data columnname="Configuration">104</data>
+    <data columnname="Elements">base, f3, f5, f7, f8, </data>
+    <data columnname="Estimated Value">7535,5</data>
+    <data columnname="Measured Value">8983,5</data>
+    <data columnname="Difference Absolut">1448</data>
+    <data columnname="Difference in %">16,1184393610508</data>
+  </row>
+  <row>
+    <data columnname="Configuration">106</data>
+    <data columnname="Elements">base, f3, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7584,5</data>
+    <data columnname="Measured Value">9042</data>
+    <data columnname="Difference Absolut">1457,5</data>
+    <data columnname="Difference in %">16,1192214111922</data>
+  </row>
+  <row>
+    <data columnname="Configuration">108</data>
+    <data columnname="Elements">base, f3, f4, f5, f9, </data>
+    <data columnname="Estimated Value">5464,5</data>
+    <data columnname="Measured Value">5548</data>
+    <data columnname="Difference Absolut">83,5</data>
+    <data columnname="Difference in %">1,50504686373468</data>
+  </row>
+  <row>
+    <data columnname="Configuration">110</data>
+    <data columnname="Elements">base, f3, f4, f5, f7, f9, </data>
+    <data columnname="Estimated Value">7564</data>
+    <data columnname="Measured Value">9822</data>
+    <data columnname="Difference Absolut">2258</data>
+    <data columnname="Difference in %">22,9892079006312</data>
+  </row>
+  <row>
+    <data columnname="Configuration">112</data>
+    <data columnname="Elements">base, f3, f4, f5, f7, f8, </data>
+    <data columnname="Estimated Value">7735</data>
+    <data columnname="Measured Value">9986</data>
+    <data columnname="Difference Absolut">2251</data>
+    <data columnname="Difference in %">22,541558181454</data>
+  </row>
+  <row>
+    <data columnname="Configuration">114</data>
+    <data columnname="Elements">base, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7784</data>
+    <data columnname="Measured Value">10056</data>
+    <data columnname="Difference Absolut">2272</data>
+    <data columnname="Difference in %">22,593476531424</data>
+  </row>
+  <row>
+    <data columnname="Configuration">116</data>
+    <data columnname="Elements">base, f3, f5, f6, f9, </data>
+    <data columnname="Estimated Value">5664,5</data>
+    <data columnname="Measured Value">7194</data>
+    <data columnname="Difference Absolut">1529,5</data>
+    <data columnname="Difference in %">21,2607728662774</data>
+  </row>
+  <row>
+    <data columnname="Configuration">118</data>
+    <data columnname="Elements">base, f3, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">5884,5</data>
+    <data columnname="Measured Value">7630,5</data>
+    <data columnname="Difference Absolut">1746</data>
+    <data columnname="Difference in %">22,881855710635</data>
+  </row>
+  <row>
+    <data columnname="Configuration">120</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f8, </data>
+    <data columnname="Estimated Value">6035</data>
+    <data columnname="Measured Value">7903,5</data>
+    <data columnname="Difference Absolut">1868,5</data>
+    <data columnname="Difference in %">23,641424685266</data>
+  </row>
+  <row>
+    <data columnname="Configuration">122</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">6084</data>
+    <data columnname="Measured Value">8020</data>
+    <data columnname="Difference Absolut">1936</data>
+    <data columnname="Difference in %">24,139650872818</data>
+  </row>
+  <row>
+    <data columnname="Configuration">124</data>
+    <data columnname="Elements">base, f3, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">7764</data>
+    <data columnname="Measured Value">17365</data>
+    <data columnname="Difference Absolut">9601</data>
+    <data columnname="Difference in %">55,2893751799597</data>
+  </row>
+  <row>
+    <data columnname="Configuration">126</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">7963,5</data>
+    <data columnname="Measured Value">19385,5</data>
+    <data columnname="Difference Absolut">11422</data>
+    <data columnname="Difference in %">58,9203270485672</data>
+  </row>
+  <row>
+    <data columnname="Configuration">128</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">8134,5</data>
+    <data columnname="Measured Value">19705</data>
+    <data columnname="Difference Absolut">11570,5</data>
+    <data columnname="Difference in %">58,718599340269</data>
+  </row>
+  <row>
+    <data columnname="Configuration">130</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8183,5</data>
+    <data columnname="Measured Value">19837,5</data>
+    <data columnname="Difference Absolut">11654</data>
+    <data columnname="Difference in %">58,7473219911783</data>
+  </row>
+  <row>
+    <data columnname="Configuration">132</data>
+    <data columnname="Elements">base, f2, f8, </data>
+    <data columnname="Estimated Value">8839</data>
+    <data columnname="Measured Value">8878</data>
+    <data columnname="Difference Absolut">39</data>
+    <data columnname="Difference in %">0,439288127956743</data>
+  </row>
+  <row>
+    <data columnname="Configuration">134</data>
+    <data columnname="Elements">base, f2, f7, </data>
+    <data columnname="Estimated Value">10718,5</data>
+    <data columnname="Measured Value">10852</data>
+    <data columnname="Difference Absolut">133,5</data>
+    <data columnname="Difference in %">1,23018798378179</data>
+  </row>
+  <row>
+    <data columnname="Configuration">136</data>
+    <data columnname="Elements">base, f2, f7, f9, </data>
+    <data columnname="Estimated Value">10767,5</data>
+    <data columnname="Measured Value">10922</data>
+    <data columnname="Difference Absolut">154,5</data>
+    <data columnname="Difference in %">1,41457608496613</data>
+  </row>
+  <row>
+    <data columnname="Configuration">138</data>
+    <data columnname="Elements">base, f2, f6, </data>
+    <data columnname="Estimated Value">9018,5</data>
+    <data columnname="Measured Value">10118,5</data>
+    <data columnname="Difference Absolut">1100</data>
+    <data columnname="Difference in %">10,8711765577902</data>
+  </row>
+  <row>
+    <data columnname="Configuration">140</data>
+    <data columnname="Elements">base, f2, f6, f7, </data>
+    <data columnname="Estimated Value">11118</data>
+    <data columnname="Measured Value">17802</data>
+    <data columnname="Difference Absolut">6684</data>
+    <data columnname="Difference in %">37,546343107516</data>
+  </row>
+  <row>
+    <data columnname="Configuration">142</data>
+    <data columnname="Elements">base, f2, f6, f8, </data>
+    <data columnname="Estimated Value">9238,5</data>
+    <data columnname="Measured Value">10555,5</data>
+    <data columnname="Difference Absolut">1317</data>
+    <data columnname="Difference in %">12,4769077731988</data>
+  </row>
+  <row>
+    <data columnname="Configuration">144</data>
+    <data columnname="Elements">base, f2, f6, f8, f9, </data>
+    <data columnname="Estimated Value">9287,5</data>
+    <data columnname="Measured Value">10680</data>
+    <data columnname="Difference Absolut">1392,5</data>
+    <data columnname="Difference in %">13,0383895131086</data>
+  </row>
+  <row>
+    <data columnname="Configuration">146</data>
+    <data columnname="Elements">base, f2, f5, </data>
+    <data columnname="Estimated Value">9218</data>
+    <data columnname="Measured Value">9276</data>
+    <data columnname="Difference Absolut">58</data>
+    <data columnname="Difference in %">0,625269512721005</data>
+  </row>
+  <row>
+    <data columnname="Configuration">148</data>
+    <data columnname="Elements">base, f2, f5, f8, </data>
+    <data columnname="Estimated Value">9438</data>
+    <data columnname="Measured Value">9510</data>
+    <data columnname="Difference Absolut">72</data>
+    <data columnname="Difference in %">0,757097791798103</data>
+  </row>
+  <row>
+    <data columnname="Configuration">150</data>
+    <data columnname="Elements">base, f2, f5, f6, </data>
+    <data columnname="Estimated Value">9617,5</data>
+    <data columnname="Measured Value">11054,5</data>
+    <data columnname="Difference Absolut">1437</data>
+    <data columnname="Difference in %">12,9992310823646</data>
+  </row>
+  <row>
+    <data columnname="Configuration">152</data>
+    <data columnname="Elements">base, f2, f5, f6, f9, </data>
+    <data columnname="Estimated Value">9666,5</data>
+    <data columnname="Measured Value">11179,5</data>
+    <data columnname="Difference Absolut">1513</data>
+    <data columnname="Difference in %">13,533700076032</data>
+  </row>
+  <row>
+    <data columnname="Configuration">154</data>
+    <data columnname="Elements">base, f2, f5, f7, </data>
+    <data columnname="Estimated Value">11317,5</data>
+    <data columnname="Measured Value">12732</data>
+    <data columnname="Difference Absolut">1414,5</data>
+    <data columnname="Difference in %">11,1098020735156</data>
+  </row>
+  <row>
+    <data columnname="Configuration">156</data>
+    <data columnname="Elements">base, f2, f5, f6, f7, </data>
+    <data columnname="Estimated Value">11717</data>
+    <data columnname="Measured Value">21242,5</data>
+    <data columnname="Difference Absolut">9525,5</data>
+    <data columnname="Difference in %">44,8417088384136</data>
+  </row>
+  <row>
+    <data columnname="Configuration">158</data>
+    <data columnname="Elements">base, f2, f5, f7, f8, </data>
+    <data columnname="Estimated Value">11537,5</data>
+    <data columnname="Measured Value">12981,5</data>
+    <data columnname="Difference Absolut">1444</data>
+    <data columnname="Difference in %">11,1235219350614</data>
+  </row>
+  <row>
+    <data columnname="Configuration">160</data>
+    <data columnname="Elements">base, f2, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">11586,5</data>
+    <data columnname="Measured Value">13020,5</data>
+    <data columnname="Difference Absolut">1434</data>
+    <data columnname="Difference in %">11,0134019430897</data>
+  </row>
+  <row>
+    <data columnname="Configuration">162</data>
+    <data columnname="Elements">base, f2, f3, </data>
+    <data columnname="Estimated Value">10728</data>
+    <data columnname="Measured Value">10761,5</data>
+    <data columnname="Difference Absolut">33,5</data>
+    <data columnname="Difference in %">0,3112948938345</data>
+  </row>
+  <row>
+    <data columnname="Configuration">164</data>
+    <data columnname="Elements">base, f2, f3, f8, </data>
+    <data columnname="Estimated Value">10948</data>
+    <data columnname="Measured Value">11003</data>
+    <data columnname="Difference Absolut">55</data>
+    <data columnname="Difference in %">0,499863673543572</data>
+  </row>
+  <row>
+    <data columnname="Configuration">166</data>
+    <data columnname="Elements">base, f2, f3, f7, </data>
+    <data columnname="Estimated Value">12827,5</data>
+    <data columnname="Measured Value">12977</data>
+    <data columnname="Difference Absolut">149,5</data>
+    <data columnname="Difference in %">1,15203822146876</data>
+  </row>
+  <row>
+    <data columnname="Configuration">168</data>
+    <data columnname="Elements">base, f2, f3, f7, f9, </data>
+    <data columnname="Estimated Value">12876,5</data>
+    <data columnname="Measured Value">13039</data>
+    <data columnname="Difference Absolut">162,5</data>
+    <data columnname="Difference in %">1,24626121635094</data>
+  </row>
+  <row>
+    <data columnname="Configuration">170</data>
+    <data columnname="Elements">base, f2, f3, f5, </data>
+    <data columnname="Estimated Value">11327</data>
+    <data columnname="Measured Value">11401</data>
+    <data columnname="Difference Absolut">74</data>
+    <data columnname="Difference in %">0,649065871414791</data>
+  </row>
+  <row>
+    <data columnname="Configuration">172</data>
+    <data columnname="Elements">base, f2, f3, f5, f7, </data>
+    <data columnname="Estimated Value">13426,5</data>
+    <data columnname="Measured Value">14857</data>
+    <data columnname="Difference Absolut">1430,5</data>
+    <data columnname="Difference in %">9,62845796594198</data>
+  </row>
+  <row>
+    <data columnname="Configuration">174</data>
+    <data columnname="Elements">base, f2, f3, f5, f8, </data>
+    <data columnname="Estimated Value">11547</data>
+    <data columnname="Measured Value">11639,5</data>
+    <data columnname="Difference Absolut">92,5</data>
+    <data columnname="Difference in %">0,794707676446578</data>
+  </row>
+  <row>
+    <data columnname="Configuration">176</data>
+    <data columnname="Elements">base, f2, f3, f5, f8, f9, </data>
+    <data columnname="Estimated Value">11596</data>
+    <data columnname="Measured Value">11690</data>
+    <data columnname="Difference Absolut">94</data>
+    <data columnname="Difference in %">0,804106073567155</data>
+  </row>
+  <row>
+    <data columnname="Configuration">178</data>
+    <data columnname="Elements">base, f2, f3, f6, </data>
+    <data columnname="Estimated Value">11127,5</data>
+    <data columnname="Measured Value">13306,5</data>
+    <data columnname="Difference Absolut">2179</data>
+    <data columnname="Difference in %">16,3754556044039</data>
+  </row>
+  <row>
+    <data columnname="Configuration">180</data>
+    <data columnname="Elements">base, f2, f3, f6, f8, </data>
+    <data columnname="Estimated Value">11347,5</data>
+    <data columnname="Measured Value">13946</data>
+    <data columnname="Difference Absolut">2598,5</data>
+    <data columnname="Difference in %">18,6325828194464</data>
+  </row>
+  <row>
+    <data columnname="Configuration">182</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, </data>
+    <data columnname="Estimated Value">11726,5</data>
+    <data columnname="Measured Value">14570</data>
+    <data columnname="Difference Absolut">2843,5</data>
+    <data columnname="Difference in %">19,5161290322581</data>
+  </row>
+  <row>
+    <data columnname="Configuration">184</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, f9, </data>
+    <data columnname="Estimated Value">11775,5</data>
+    <data columnname="Measured Value">14742</data>
+    <data columnname="Difference Absolut">2966,5</data>
+    <data columnname="Difference in %">20,1227784561118</data>
+  </row>
+  <row>
+    <data columnname="Configuration">186</data>
+    <data columnname="Elements">base, f2, f3, f6, f7, </data>
+    <data columnname="Estimated Value">13227</data>
+    <data columnname="Measured Value">24835</data>
+    <data columnname="Difference Absolut">11608</data>
+    <data columnname="Difference in %">46,7404872156231</data>
+  </row>
+  <row>
+    <data columnname="Configuration">188</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, f7, </data>
+    <data columnname="Estimated Value">13826</data>
+    <data columnname="Measured Value">29831,5</data>
+    <data columnname="Difference Absolut">16005,5</data>
+    <data columnname="Difference in %">53,6530177832157</data>
+  </row>
+  <row>
+    <data columnname="Configuration">190</data>
+    <data columnname="Elements">base, f2, f3, f6, f7, f8, </data>
+    <data columnname="Estimated Value">13447</data>
+    <data columnname="Measured Value">25477,5</data>
+    <data columnname="Difference Absolut">12030,5</data>
+    <data columnname="Difference in %">47,2200961632813</data>
+  </row>
+  <row>
+    <data columnname="Configuration">192</data>
+    <data columnname="Elements">base, f2, f3, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">13496</data>
+    <data columnname="Measured Value">25654</data>
+    <data columnname="Difference Absolut">12158</data>
+    <data columnname="Difference in %">47,3922195369143</data>
+  </row>
+  <row>
+    <data columnname="Configuration">194</data>
+    <data columnname="Elements">base, f2, f4, </data>
+    <data columnname="Estimated Value">8818,5</data>
+    <data columnname="Measured Value">8840</data>
+    <data columnname="Difference Absolut">21,5</data>
+    <data columnname="Difference in %">0,24321266968326</data>
+  </row>
+  <row>
+    <data columnname="Configuration">196</data>
+    <data columnname="Elements">base, f2, f4, f8, </data>
+    <data columnname="Estimated Value">9038,5</data>
+    <data columnname="Measured Value">9089</data>
+    <data columnname="Difference Absolut">50,5</data>
+    <data columnname="Difference in %">0,555616679502691</data>
+  </row>
+  <row>
+    <data columnname="Configuration">198</data>
+    <data columnname="Elements">base, f2, f4, f7, </data>
+    <data columnname="Estimated Value">10918</data>
+    <data columnname="Measured Value">11866,5</data>
+    <data columnname="Difference Absolut">948,5</data>
+    <data columnname="Difference in %">7,99308979058695</data>
+  </row>
+  <row>
+    <data columnname="Configuration">200</data>
+    <data columnname="Elements">base, f2, f4, f7, f9, </data>
+    <data columnname="Estimated Value">10967</data>
+    <data columnname="Measured Value">11928</data>
+    <data columnname="Difference Absolut">961</data>
+    <data columnname="Difference in %">8,05667337357478</data>
+  </row>
+  <row>
+    <data columnname="Configuration">202</data>
+    <data columnname="Elements">base, f2, f4, f6, </data>
+    <data columnname="Estimated Value">9218</data>
+    <data columnname="Measured Value">10524</data>
+    <data columnname="Difference Absolut">1306</data>
+    <data columnname="Difference in %">12,4097301406309</data>
+  </row>
+  <row>
+    <data columnname="Configuration">204</data>
+    <data columnname="Elements">base, f2, f4, f6, f7, </data>
+    <data columnname="Estimated Value">11317,5</data>
+    <data columnname="Measured Value">19829,5</data>
+    <data columnname="Difference Absolut">8512</data>
+    <data columnname="Difference in %">42,9259436697849</data>
+  </row>
+  <row>
+    <data columnname="Configuration">206</data>
+    <data columnname="Elements">base, f2, f4, f6, f8, </data>
+    <data columnname="Estimated Value">9438</data>
+    <data columnname="Measured Value">10961</data>
+    <data columnname="Difference Absolut">1523</data>
+    <data columnname="Difference in %">13,8947176352523</data>
+  </row>
+  <row>
+    <data columnname="Configuration">208</data>
+    <data columnname="Elements">base, f2, f4, f6, f8, f9, </data>
+    <data columnname="Estimated Value">9487</data>
+    <data columnname="Measured Value">11086</data>
+    <data columnname="Difference Absolut">1599</data>
+    <data columnname="Difference in %">14,4235973299657</data>
+  </row>
+  <row>
+    <data columnname="Configuration">210</data>
+    <data columnname="Elements">base, f2, f3, f4, </data>
+    <data columnname="Estimated Value">10927,5</data>
+    <data columnname="Measured Value">10964,5</data>
+    <data columnname="Difference Absolut">37</data>
+    <data columnname="Difference in %">0,337452688221077</data>
+  </row>
+  <row>
+    <data columnname="Configuration">212</data>
+    <data columnname="Elements">base, f2, f3, f4, f8, </data>
+    <data columnname="Estimated Value">11147,5</data>
+    <data columnname="Measured Value">11214</data>
+    <data columnname="Difference Absolut">66,5</data>
+    <data columnname="Difference in %">0,593008739076154</data>
+  </row>
+  <row>
+    <data columnname="Configuration">214</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, </data>
+    <data columnname="Estimated Value">11327</data>
+    <data columnname="Measured Value">13915</data>
+    <data columnname="Difference Absolut">2588</data>
+    <data columnname="Difference in %">18,598634567014</data>
+  </row>
+  <row>
+    <data columnname="Configuration">216</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f9, </data>
+    <data columnname="Estimated Value">11376</data>
+    <data columnname="Measured Value">14094</data>
+    <data columnname="Difference Absolut">2718</data>
+    <data columnname="Difference in %">19,2848020434227</data>
+  </row>
+  <row>
+    <data columnname="Configuration">218</data>
+    <data columnname="Elements">base, f2, f3, f4, f7, </data>
+    <data columnname="Estimated Value">13027</data>
+    <data columnname="Measured Value">13983</data>
+    <data columnname="Difference Absolut">956</data>
+    <data columnname="Difference in %">6,8368733462061</data>
+  </row>
+  <row>
+    <data columnname="Configuration">220</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f7, </data>
+    <data columnname="Estimated Value">13426,5</data>
+    <data columnname="Measured Value">27869,5</data>
+    <data columnname="Difference Absolut">14443</data>
+    <data columnname="Difference in %">51,8236782145356</data>
+  </row>
+  <row>
+    <data columnname="Configuration">222</data>
+    <data columnname="Elements">base, f2, f3, f4, f7, f8, </data>
+    <data columnname="Estimated Value">13247</data>
+    <data columnname="Measured Value">14225,5</data>
+    <data columnname="Difference Absolut">978,5</data>
+    <data columnname="Difference in %">6,87849284735158</data>
+  </row>
+  <row>
+    <data columnname="Configuration">224</data>
+    <data columnname="Elements">base, f2, f3, f4, f7, f8, f9, </data>
+    <data columnname="Estimated Value">13296</data>
+    <data columnname="Measured Value">14311</data>
+    <data columnname="Difference Absolut">1015</data>
+    <data columnname="Difference in %">7,09244636992523</data>
+  </row>
+  <row>
+    <data columnname="Configuration">226</data>
+    <data columnname="Elements">base, f2, f4, f5, </data>
+    <data columnname="Estimated Value">9417,5</data>
+    <data columnname="Measured Value">9479</data>
+    <data columnname="Difference Absolut">61,5</data>
+    <data columnname="Difference in %">0,648802616309737</data>
+  </row>
+  <row>
+    <data columnname="Configuration">228</data>
+    <data columnname="Elements">base, f2, f4, f5, f8, </data>
+    <data columnname="Estimated Value">9637,5</data>
+    <data columnname="Measured Value">9721</data>
+    <data columnname="Difference Absolut">83,5</data>
+    <data columnname="Difference in %">0,858965127044542</data>
+  </row>
+  <row>
+    <data columnname="Configuration">230</data>
+    <data columnname="Elements">base, f2, f4, f5, f7, </data>
+    <data columnname="Estimated Value">11517</data>
+    <data columnname="Measured Value">13746</data>
+    <data columnname="Difference Absolut">2229</data>
+    <data columnname="Difference in %">16,2156263640332</data>
+  </row>
+  <row>
+    <data columnname="Configuration">232</data>
+    <data columnname="Elements">base, f2, f4, f5, f7, f9, </data>
+    <data columnname="Estimated Value">11566</data>
+    <data columnname="Measured Value">13817,5</data>
+    <data columnname="Difference Absolut">2251,5</data>
+    <data columnname="Difference in %">16,2945540075991</data>
+  </row>
+  <row>
+    <data columnname="Configuration">234</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, </data>
+    <data columnname="Estimated Value">11526,5</data>
+    <data columnname="Measured Value">11596</data>
+    <data columnname="Difference Absolut">69,5</data>
+    <data columnname="Difference in %">0,599344601586751</data>
+  </row>
+  <row>
+    <data columnname="Configuration">236</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f7, </data>
+    <data columnname="Estimated Value">13626</data>
+    <data columnname="Measured Value">15878,5</data>
+    <data columnname="Difference Absolut">2252,5</data>
+    <data columnname="Difference in %">14,1858487892433</data>
+  </row>
+  <row>
+    <data columnname="Configuration">238</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f8, </data>
+    <data columnname="Estimated Value">11746,5</data>
+    <data columnname="Measured Value">11838</data>
+    <data columnname="Difference Absolut">91,5</data>
+    <data columnname="Difference in %">0,772934617334016</data>
+  </row>
+  <row>
+    <data columnname="Configuration">240</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f8, f9, </data>
+    <data columnname="Estimated Value">11795,5</data>
+    <data columnname="Measured Value">11893</data>
+    <data columnname="Difference Absolut">97,5</data>
+    <data columnname="Difference in %">0,819809972252585</data>
+  </row>
+  <row>
+    <data columnname="Configuration">242</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, </data>
+    <data columnname="Estimated Value">9817</data>
+    <data columnname="Measured Value">11468</data>
+    <data columnname="Difference Absolut">1651</data>
+    <data columnname="Difference in %">14,3965817928148</data>
+  </row>
+  <row>
+    <data columnname="Configuration">244</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f8, </data>
+    <data columnname="Estimated Value">10037</data>
+    <data columnname="Measured Value">11897</data>
+    <data columnname="Difference Absolut">1860</data>
+    <data columnname="Difference in %">15,6341934941582</data>
+  </row>
+  <row>
+    <data columnname="Configuration">246</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, </data>
+    <data columnname="Estimated Value">11926</data>
+    <data columnname="Measured Value">15163</data>
+    <data columnname="Difference Absolut">3237</data>
+    <data columnname="Difference in %">21,3480182022027</data>
+  </row>
+  <row>
+    <data columnname="Configuration">248</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f9, </data>
+    <data columnname="Estimated Value">11975</data>
+    <data columnname="Measured Value">15350</data>
+    <data columnname="Difference Absolut">3375</data>
+    <data columnname="Difference in %">21,9869706840391</data>
+  </row>
+  <row>
+    <data columnname="Configuration">250</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f7, </data>
+    <data columnname="Estimated Value">11916,5</data>
+    <data columnname="Measured Value">23262</data>
+    <data columnname="Difference Absolut">11345,5</data>
+    <data columnname="Difference in %">48,7726764680595</data>
+  </row>
+  <row>
+    <data columnname="Configuration">252</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f7, </data>
+    <data columnname="Estimated Value">14025,5</data>
+    <data columnname="Measured Value">32869</data>
+    <data columnname="Difference Absolut">18843,5</data>
+    <data columnname="Difference in %">57,3290942833673</data>
+  </row>
+  <row>
+    <data columnname="Configuration">254</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">12136,5</data>
+    <data columnname="Measured Value">23690,5</data>
+    <data columnname="Difference Absolut">11554</data>
+    <data columnname="Difference in %">48,770604250649</data>
+  </row>
+  <row>
+    <data columnname="Configuration">256</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">12185,5</data>
+    <data columnname="Measured Value">23823,5</data>
+    <data columnname="Difference Absolut">11638</data>
+    <data columnname="Difference in %">48,8509245073142</data>
+  </row>
+  <row>
+    <data columnname="Configuration">258</data>
+    <data columnname="Elements">base, f1, f9, </data>
+    <data columnname="Estimated Value">3558,5</data>
+    <data columnname="Measured Value">3608</data>
+    <data columnname="Difference Absolut">49,5</data>
+    <data columnname="Difference in %">1,3719512195122</data>
+  </row>
+  <row>
+    <data columnname="Configuration">260</data>
+    <data columnname="Elements">base, f1, f8, f9, </data>
+    <data columnname="Estimated Value">3778,5</data>
+    <data columnname="Measured Value">3842</data>
+    <data columnname="Difference Absolut">63,5</data>
+    <data columnname="Difference in %">1,65278500780843</data>
+  </row>
+  <row>
+    <data columnname="Configuration">262</data>
+    <data columnname="Elements">base, f1, f7, f8, </data>
+    <data columnname="Estimated Value">5829</data>
+    <data columnname="Measured Value">5994,5</data>
+    <data columnname="Difference Absolut">165,5</data>
+    <data columnname="Difference in %">2,76086412544832</data>
+  </row>
+  <row>
+    <data columnname="Configuration">264</data>
+    <data columnname="Elements">base, f1, f7, f8, f9, </data>
+    <data columnname="Estimated Value">5878</data>
+    <data columnname="Measured Value">6057</data>
+    <data columnname="Difference Absolut">179</data>
+    <data columnname="Difference in %">2,95525837873535</data>
+  </row>
+  <row>
+    <data columnname="Configuration">266</data>
+    <data columnname="Elements">base, f1, f6, f9, </data>
+    <data columnname="Estimated Value">3958</data>
+    <data columnname="Measured Value">4006</data>
+    <data columnname="Difference Absolut">48</data>
+    <data columnname="Difference in %">1,19820269595607</data>
+  </row>
+  <row>
+    <data columnname="Configuration">268</data>
+    <data columnname="Elements">base, f1, f6, f7, f9, </data>
+    <data columnname="Estimated Value">6057,5</data>
+    <data columnname="Measured Value">7851</data>
+    <data columnname="Difference Absolut">1793,5</data>
+    <data columnname="Difference in %">22,8442236657751</data>
+  </row>
+  <row>
+    <data columnname="Configuration">270</data>
+    <data columnname="Elements">base, f1, f6, f7, f8, </data>
+    <data columnname="Estimated Value">6228,5</data>
+    <data columnname="Measured Value">8015</data>
+    <data columnname="Difference Absolut">1786,5</data>
+    <data columnname="Difference in %">22,2894572676232</data>
+  </row>
+  <row>
+    <data columnname="Configuration">272</data>
+    <data columnname="Elements">base, f1, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">6277,5</data>
+    <data columnname="Measured Value">8085</data>
+    <data columnname="Difference Absolut">1807,5</data>
+    <data columnname="Difference in %">22,3562152133581</data>
+  </row>
+  <row>
+    <data columnname="Configuration">274</data>
+    <data columnname="Elements">base, f1, f5, f9, </data>
+    <data columnname="Estimated Value">4157,5</data>
+    <data columnname="Measured Value">4232</data>
+    <data columnname="Difference Absolut">74,5</data>
+    <data columnname="Difference in %">1,76039697542534</data>
+  </row>
+  <row>
+    <data columnname="Configuration">276</data>
+    <data columnname="Elements">base, f1, f5, f8, f9, </data>
+    <data columnname="Estimated Value">4377,5</data>
+    <data columnname="Measured Value">4458</data>
+    <data columnname="Difference Absolut">80,5</data>
+    <data columnname="Difference in %">1,80574248541947</data>
+  </row>
+  <row>
+    <data columnname="Configuration">278</data>
+    <data columnname="Elements">base, f1, f5, f6, f8, </data>
+    <data columnname="Estimated Value">4728</data>
+    <data columnname="Measured Value">4801</data>
+    <data columnname="Difference Absolut">73</data>
+    <data columnname="Difference in %">1,52051655905019</data>
+  </row>
+  <row>
+    <data columnname="Configuration">280</data>
+    <data columnname="Elements">base, f1, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">4777</data>
+    <data columnname="Measured Value">4871,5</data>
+    <data columnname="Difference Absolut">94,5</data>
+    <data columnname="Difference in %">1,93985425433645</data>
+  </row>
+  <row>
+    <data columnname="Configuration">282</data>
+    <data columnname="Elements">base, f1, f5, f7, f9, </data>
+    <data columnname="Estimated Value">6257</data>
+    <data columnname="Measured Value">7695</data>
+    <data columnname="Difference Absolut">1438</data>
+    <data columnname="Difference in %">18,6874593892138</data>
+  </row>
+  <row>
+    <data columnname="Configuration">284</data>
+    <data columnname="Elements">base, f1, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">6656,5</data>
+    <data columnname="Measured Value">9723</data>
+    <data columnname="Difference Absolut">3066,5</data>
+    <data columnname="Difference in %">31,5386197675615</data>
+  </row>
+  <row>
+    <data columnname="Configuration">286</data>
+    <data columnname="Elements">base, f1, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">6827,5</data>
+    <data columnname="Measured Value">9902</data>
+    <data columnname="Difference Absolut">3074,5</data>
+    <data columnname="Difference in %">31,0492829731367</data>
+  </row>
+  <row>
+    <data columnname="Configuration">288</data>
+    <data columnname="Elements">base, f1, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">6876,5</data>
+    <data columnname="Measured Value">9949</data>
+    <data columnname="Difference Absolut">3072,5</data>
+    <data columnname="Difference in %">30,8825007538446</data>
+  </row>
+  <row>
+    <data columnname="Configuration">290</data>
+    <data columnname="Elements">base, f1, f4, f9, </data>
+    <data columnname="Estimated Value">3758</data>
+    <data columnname="Measured Value">3803</data>
+    <data columnname="Difference Absolut">45</data>
+    <data columnname="Difference in %">1,18327636076782</data>
+  </row>
+  <row>
+    <data columnname="Configuration">292</data>
+    <data columnname="Elements">base, f1, f4, f8, f9, </data>
+    <data columnname="Estimated Value">3978</data>
+    <data columnname="Measured Value">4044,5</data>
+    <data columnname="Difference Absolut">66,5</data>
+    <data columnname="Difference in %">1,64420818395352</data>
+  </row>
+  <row>
+    <data columnname="Configuration">294</data>
+    <data columnname="Elements">base, f1, f4, f7, f8, </data>
+    <data columnname="Estimated Value">6028,5</data>
+    <data columnname="Measured Value">7008,5</data>
+    <data columnname="Difference Absolut">980</data>
+    <data columnname="Difference in %">13,9830206178212</data>
+  </row>
+  <row>
+    <data columnname="Configuration">296</data>
+    <data columnname="Elements">base, f1, f4, f7, f8, f9, </data>
+    <data columnname="Estimated Value">6077,5</data>
+    <data columnname="Measured Value">7063</data>
+    <data columnname="Difference Absolut">985,5</data>
+    <data columnname="Difference in %">13,952994478267</data>
+  </row>
+  <row>
+    <data columnname="Configuration">298</data>
+    <data columnname="Elements">base, f1, f4, f5, f9, </data>
+    <data columnname="Estimated Value">4357</data>
+    <data columnname="Measured Value">4434,5</data>
+    <data columnname="Difference Absolut">77,5</data>
+    <data columnname="Difference in %">1,7476603901229</data>
+  </row>
+  <row>
+    <data columnname="Configuration">300</data>
+    <data columnname="Elements">base, f1, f4, f5, f7, f9, </data>
+    <data columnname="Estimated Value">6456,5</data>
+    <data columnname="Measured Value">8709</data>
+    <data columnname="Difference Absolut">2252,5</data>
+    <data columnname="Difference in %">25,8640486852681</data>
+  </row>
+  <row>
+    <data columnname="Configuration">302</data>
+    <data columnname="Elements">base, f1, f4, f5, f7, f8, </data>
+    <data columnname="Estimated Value">6627,5</data>
+    <data columnname="Measured Value">8880,5</data>
+    <data columnname="Difference Absolut">2253</data>
+    <data columnname="Difference in %">25,3701931197568</data>
+  </row>
+  <row>
+    <data columnname="Configuration">304</data>
+    <data columnname="Elements">base, f1, f4, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">6676,5</data>
+    <data columnname="Measured Value">8943</data>
+    <data columnname="Difference Absolut">2266,5</data>
+    <data columnname="Difference in %">25,3438443475344</data>
+  </row>
+  <row>
+    <data columnname="Configuration">306</data>
+    <data columnname="Elements">base, f1, f4, f6, f9, </data>
+    <data columnname="Estimated Value">4157,5</data>
+    <data columnname="Measured Value">4224</data>
+    <data columnname="Difference Absolut">66,5</data>
+    <data columnname="Difference in %">1,57433712121212</data>
+  </row>
+  <row>
+    <data columnname="Configuration">308</data>
+    <data columnname="Elements">base, f1, f4, f6, f8, f9, </data>
+    <data columnname="Estimated Value">4377,5</data>
+    <data columnname="Measured Value">4450</data>
+    <data columnname="Difference Absolut">72,5</data>
+    <data columnname="Difference in %">1,62921348314607</data>
+  </row>
+  <row>
+    <data columnname="Configuration">310</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f8, </data>
+    <data columnname="Estimated Value">4927,5</data>
+    <data columnname="Measured Value">5012</data>
+    <data columnname="Difference Absolut">84,5</data>
+    <data columnname="Difference in %">1,68595371109338</data>
+  </row>
+  <row>
+    <data columnname="Configuration">312</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">4976,5</data>
+    <data columnname="Measured Value">5074,5</data>
+    <data columnname="Difference Absolut">98</data>
+    <data columnname="Difference in %">1,93122475120701</data>
+  </row>
+  <row>
+    <data columnname="Configuration">314</data>
+    <data columnname="Elements">base, f1, f4, f6, f7, f9, </data>
+    <data columnname="Estimated Value">6257</data>
+    <data columnname="Measured Value">8865</data>
+    <data columnname="Difference Absolut">2608</data>
+    <data columnname="Difference in %">29,4190637337845</data>
+  </row>
+  <row>
+    <data columnname="Configuration">316</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">6856</data>
+    <data columnname="Measured Value">10737</data>
+    <data columnname="Difference Absolut">3881</data>
+    <data columnname="Difference in %">36,1460370680823</data>
+  </row>
+  <row>
+    <data columnname="Configuration">318</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">7027</data>
+    <data columnname="Measured Value">10901</data>
+    <data columnname="Difference Absolut">3874</data>
+    <data columnname="Difference in %">35,5380240344923</data>
+  </row>
+  <row>
+    <data columnname="Configuration">320</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7076</data>
+    <data columnname="Measured Value">10979</data>
+    <data columnname="Difference Absolut">3903</data>
+    <data columnname="Difference in %">35,5496857637308</data>
+  </row>
+  <row>
+    <data columnname="Configuration">322</data>
+    <data columnname="Elements">base, f1, f2, f9, </data>
+    <data columnname="Estimated Value">9669,5</data>
+    <data columnname="Measured Value">10268</data>
+    <data columnname="Difference Absolut">598,5</data>
+    <data columnname="Difference in %">5,82878846903</data>
+  </row>
+  <row>
+    <data columnname="Configuration">324</data>
+    <data columnname="Elements">base, f1, f2, f8, f9, </data>
+    <data columnname="Estimated Value">9889,5</data>
+    <data columnname="Measured Value">10511,5</data>
+    <data columnname="Difference Absolut">622</data>
+    <data columnname="Difference in %">5,91732864006089</data>
+  </row>
+  <row>
+    <data columnname="Configuration">326</data>
+    <data columnname="Elements">base, f1, f2, f7, f8, </data>
+    <data columnname="Estimated Value">11940</data>
+    <data columnname="Measured Value">12678</data>
+    <data columnname="Difference Absolut">738</data>
+    <data columnname="Difference in %">5,82110743019403</data>
+  </row>
+  <row>
+    <data columnname="Configuration">328</data>
+    <data columnname="Elements">base, f1, f2, f7, f8, f9, </data>
+    <data columnname="Estimated Value">11989</data>
+    <data columnname="Measured Value">12736,5</data>
+    <data columnname="Difference Absolut">747,5</data>
+    <data columnname="Difference in %">5,86895929022887</data>
+  </row>
+  <row>
+    <data columnname="Configuration">330</data>
+    <data columnname="Elements">base, f1, f2, f6, f9, </data>
+    <data columnname="Estimated Value">10069</data>
+    <data columnname="Measured Value">11812,5</data>
+    <data columnname="Difference Absolut">1743,5</data>
+    <data columnname="Difference in %">14,7597883597884</data>
+  </row>
+  <row>
+    <data columnname="Configuration">332</data>
+    <data columnname="Elements">base, f1, f2, f6, f7, f9, </data>
+    <data columnname="Estimated Value">12168,5</data>
+    <data columnname="Measured Value">19495,5</data>
+    <data columnname="Difference Absolut">7327</data>
+    <data columnname="Difference in %">37,5830319817394</data>
+  </row>
+  <row>
+    <data columnname="Configuration">334</data>
+    <data columnname="Elements">base, f1, f2, f6, f7, f8, </data>
+    <data columnname="Estimated Value">12339,5</data>
+    <data columnname="Measured Value">19807,5</data>
+    <data columnname="Difference Absolut">7468</data>
+    <data columnname="Difference in %">37,7028903193235</data>
+  </row>
+  <row>
+    <data columnname="Configuration">336</data>
+    <data columnname="Elements">base, f1, f2, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">12388,5</data>
+    <data columnname="Measured Value">19932</data>
+    <data columnname="Difference Absolut">7543,5</data>
+    <data columnname="Difference in %">37,8461770018061</data>
+  </row>
+  <row>
+    <data columnname="Configuration">338</data>
+    <data columnname="Elements">base, f1, f2, f4, f9, </data>
+    <data columnname="Estimated Value">9869</data>
+    <data columnname="Measured Value">10471</data>
+    <data columnname="Difference Absolut">602</data>
+    <data columnname="Difference in %">5,74921210963613</data>
+  </row>
+  <row>
+    <data columnname="Configuration">340</data>
+    <data columnname="Elements">base, f1, f2, f4, f8, f9, </data>
+    <data columnname="Estimated Value">10089</data>
+    <data columnname="Measured Value">10720,5</data>
+    <data columnname="Difference Absolut">631,5</data>
+    <data columnname="Difference in %">5,89058346159227</data>
+  </row>
+  <row>
+    <data columnname="Configuration">342</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f8, </data>
+    <data columnname="Estimated Value">10439,5</data>
+    <data columnname="Measured Value">12537,5</data>
+    <data columnname="Difference Absolut">2098</data>
+    <data columnname="Difference in %">16,7337986041874</data>
+  </row>
+  <row>
+    <data columnname="Configuration">344</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f8, f9, </data>
+    <data columnname="Estimated Value">10488,5</data>
+    <data columnname="Measured Value">12663</data>
+    <data columnname="Difference Absolut">2174,5</data>
+    <data columnname="Difference in %">17,1720761273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">346</data>
+    <data columnname="Elements">base, f1, f2, f4, f7, f9, </data>
+    <data columnname="Estimated Value">11968,5</data>
+    <data columnname="Measured Value">13497</data>
+    <data columnname="Difference Absolut">1528,5</data>
+    <data columnname="Difference in %">11,3247388308513</data>
+  </row>
+  <row>
+    <data columnname="Configuration">348</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f7, f9, </data>
+    <data columnname="Estimated Value">12368</data>
+    <data columnname="Measured Value">21524</data>
+    <data columnname="Difference Absolut">9156</data>
+    <data columnname="Difference in %">42,5385616056495</data>
+  </row>
+  <row>
+    <data columnname="Configuration">350</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f7, f8, </data>
+    <data columnname="Estimated Value">12539</data>
+    <data columnname="Measured Value">21843</data>
+    <data columnname="Difference Absolut">9304</data>
+    <data columnname="Difference in %">42,5948816554503</data>
+  </row>
+  <row>
+    <data columnname="Configuration">352</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">12588</data>
+    <data columnname="Measured Value">21960</data>
+    <data columnname="Difference Absolut">9372</data>
+    <data columnname="Difference in %">42,6775956284153</data>
+  </row>
+  <row>
+    <data columnname="Configuration">354</data>
+    <data columnname="Elements">base, f1, f2, f5, f9, </data>
+    <data columnname="Estimated Value">10268,5</data>
+    <data columnname="Measured Value">10907,5</data>
+    <data columnname="Difference Absolut">639</data>
+    <data columnname="Difference in %">5,85835434334173</data>
+  </row>
+  <row>
+    <data columnname="Configuration">356</data>
+    <data columnname="Elements">base, f1, f2, f5, f8, f9, </data>
+    <data columnname="Estimated Value">10488,5</data>
+    <data columnname="Measured Value">11149</data>
+    <data columnname="Difference Absolut">660,5</data>
+    <data columnname="Difference in %">5,92429814333124</data>
+  </row>
+  <row>
+    <data columnname="Configuration">358</data>
+    <data columnname="Elements">base, f1, f2, f5, f7, f8, </data>
+    <data columnname="Estimated Value">12539</data>
+    <data columnname="Measured Value">14535</data>
+    <data columnname="Difference Absolut">1996</data>
+    <data columnname="Difference in %">13,7323701410389</data>
+  </row>
+  <row>
+    <data columnname="Configuration">360</data>
+    <data columnname="Elements">base, f1, f2, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">12588</data>
+    <data columnname="Measured Value">14605</data>
+    <data columnname="Difference Absolut">2017</data>
+    <data columnname="Difference in %">13,8103389250257</data>
+  </row>
+  <row>
+    <data columnname="Configuration">362</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f9, </data>
+    <data columnname="Estimated Value">10468</data>
+    <data columnname="Measured Value">11110,5</data>
+    <data columnname="Difference Absolut">642,5</data>
+    <data columnname="Difference in %">5,78281805499303</data>
+  </row>
+  <row>
+    <data columnname="Configuration">364</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f7, f9, </data>
+    <data columnname="Estimated Value">12567,5</data>
+    <data columnname="Measured Value">15377,5</data>
+    <data columnname="Difference Absolut">2810</data>
+    <data columnname="Difference in %">18,2734514713055</data>
+  </row>
+  <row>
+    <data columnname="Configuration">366</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f7, f8, </data>
+    <data columnname="Estimated Value">12738,5</data>
+    <data columnname="Measured Value">15556,5</data>
+    <data columnname="Difference Absolut">2818</data>
+    <data columnname="Difference in %">18,1146144698358</data>
+  </row>
+  <row>
+    <data columnname="Configuration">368</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">12787,5</data>
+    <data columnname="Measured Value">15619</data>
+    <data columnname="Difference Absolut">2831,5</data>
+    <data columnname="Difference in %">18,1285613675651</data>
+  </row>
+  <row>
+    <data columnname="Configuration">370</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f9, </data>
+    <data columnname="Estimated Value">10668</data>
+    <data columnname="Measured Value">12741</data>
+    <data columnname="Difference Absolut">2073</data>
+    <data columnname="Difference in %">16,2703084530257</data>
+  </row>
+  <row>
+    <data columnname="Configuration">372</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">10888</data>
+    <data columnname="Measured Value">13177</data>
+    <data columnname="Difference Absolut">2289</data>
+    <data columnname="Difference in %">17,3711770509221</data>
+  </row>
+  <row>
+    <data columnname="Configuration">374</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f8, </data>
+    <data columnname="Estimated Value">11038,5</data>
+    <data columnname="Measured Value">13474</data>
+    <data columnname="Difference Absolut">2435,5</data>
+    <data columnname="Difference in %">18,0755529167285</data>
+  </row>
+  <row>
+    <data columnname="Configuration">376</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">11087,5</data>
+    <data columnname="Measured Value">13591</data>
+    <data columnname="Difference Absolut">2503,5</data>
+    <data columnname="Difference in %">18,4202781252299</data>
+  </row>
+  <row>
+    <data columnname="Configuration">378</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">12767,5</data>
+    <data columnname="Measured Value">22935</data>
+    <data columnname="Difference Absolut">10167,5</data>
+    <data columnname="Difference in %">44,3318072814476</data>
+  </row>
+  <row>
+    <data columnname="Configuration">380</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">12967</data>
+    <data columnname="Measured Value">24948</data>
+    <data columnname="Difference Absolut">11981</data>
+    <data columnname="Difference in %">48,0238896905564</data>
+  </row>
+  <row>
+    <data columnname="Configuration">382</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">13138</data>
+    <data columnname="Measured Value">25267</data>
+    <data columnname="Difference Absolut">12129</data>
+    <data columnname="Difference in %">48,0033244943998</data>
+  </row>
+  <row>
+    <data columnname="Configuration">384</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">13187</data>
+    <data columnname="Measured Value">25400</data>
+    <data columnname="Difference Absolut">12213</data>
+    <data columnname="Difference in %">48,0826771653543</data>
+  </row>
+  <row>
+    <data columnname="Configuration">386</data>
+    <data columnname="Elements">base, f1, f3, f9, </data>
+    <data columnname="Estimated Value">5667,5</data>
+    <data columnname="Measured Value">6274,5</data>
+    <data columnname="Difference Absolut">607</data>
+    <data columnname="Difference in %">9,67407761574627</data>
+  </row>
+  <row>
+    <data columnname="Configuration">388</data>
+    <data columnname="Elements">base, f1, f3, f8, f9, </data>
+    <data columnname="Estimated Value">5887,5</data>
+    <data columnname="Measured Value">6539,5</data>
+    <data columnname="Difference Absolut">652</data>
+    <data columnname="Difference in %">9,97018120651425</data>
+  </row>
+  <row>
+    <data columnname="Configuration">390</data>
+    <data columnname="Elements">base, f1, f3, f7, f8, </data>
+    <data columnname="Estimated Value">7938</data>
+    <data columnname="Measured Value">8669</data>
+    <data columnname="Difference Absolut">731</data>
+    <data columnname="Difference in %">8,43234513784751</data>
+  </row>
+  <row>
+    <data columnname="Configuration">392</data>
+    <data columnname="Elements">base, f1, f3, f7, f8, f9, </data>
+    <data columnname="Estimated Value">7987</data>
+    <data columnname="Measured Value">8739</data>
+    <data columnname="Difference Absolut">752</data>
+    <data columnname="Difference in %">8,60510355875958</data>
+  </row>
+  <row>
+    <data columnname="Configuration">394</data>
+    <data columnname="Elements">base, f1, f3, f6, f9, </data>
+    <data columnname="Estimated Value">6067</data>
+    <data columnname="Measured Value">7811</data>
+    <data columnname="Difference Absolut">1744</data>
+    <data columnname="Difference in %">22,3274868774805</data>
+  </row>
+  <row>
+    <data columnname="Configuration">396</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f9, </data>
+    <data columnname="Estimated Value">8166,5</data>
+    <data columnname="Measured Value">15501,5</data>
+    <data columnname="Difference Absolut">7335</data>
+    <data columnname="Difference in %">47,3180014837274</data>
+  </row>
+  <row>
+    <data columnname="Configuration">398</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f8, </data>
+    <data columnname="Estimated Value">8337,5</data>
+    <data columnname="Measured Value">15821,5</data>
+    <data columnname="Difference Absolut">7484</data>
+    <data columnname="Difference in %">47,3027209809437</data>
+  </row>
+  <row>
+    <data columnname="Configuration">400</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8386,5</data>
+    <data columnname="Measured Value">15946,5</data>
+    <data columnname="Difference Absolut">7560</data>
+    <data columnname="Difference in %">47,4085222462609</data>
+  </row>
+  <row>
+    <data columnname="Configuration">402</data>
+    <data columnname="Elements">base, f1, f3, f5, f9, </data>
+    <data columnname="Estimated Value">6266,5</data>
+    <data columnname="Measured Value">6914</data>
+    <data columnname="Difference Absolut">647,5</data>
+    <data columnname="Difference in %">9,36505640728956</data>
+  </row>
+  <row>
+    <data columnname="Configuration">404</data>
+    <data columnname="Elements">base, f1, f3, f5, f8, f9, </data>
+    <data columnname="Estimated Value">6486,5</data>
+    <data columnname="Measured Value">7140</data>
+    <data columnname="Difference Absolut">653,5</data>
+    <data columnname="Difference in %">9,15266106442577</data>
+  </row>
+  <row>
+    <data columnname="Configuration">406</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f8, </data>
+    <data columnname="Estimated Value">6837</data>
+    <data columnname="Measured Value">9059</data>
+    <data columnname="Difference Absolut">2222</data>
+    <data columnname="Difference in %">24,5280936085661</data>
+  </row>
+  <row>
+    <data columnname="Configuration">408</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">6886</data>
+    <data columnname="Measured Value">9200,5</data>
+    <data columnname="Difference Absolut">2314,5</data>
+    <data columnname="Difference in %">25,1562415086137</data>
+  </row>
+  <row>
+    <data columnname="Configuration">410</data>
+    <data columnname="Elements">base, f1, f3, f5, f7, f9, </data>
+    <data columnname="Estimated Value">8366</data>
+    <data columnname="Measured Value">10369</data>
+    <data columnname="Difference Absolut">2003</data>
+    <data columnname="Difference in %">19,3171954865464</data>
+  </row>
+  <row>
+    <data columnname="Configuration">412</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">8765,5</data>
+    <data columnname="Measured Value">18941,5</data>
+    <data columnname="Difference Absolut">10176</data>
+    <data columnname="Difference in %">53,7233059683763</data>
+  </row>
+  <row>
+    <data columnname="Configuration">414</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">8936,5</data>
+    <data columnname="Measured Value">19245,5</data>
+    <data columnname="Difference Absolut">10309</data>
+    <data columnname="Difference in %">53,5657686212361</data>
+  </row>
+  <row>
+    <data columnname="Configuration">416</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8985,5</data>
+    <data columnname="Measured Value">19378,5</data>
+    <data columnname="Difference Absolut">10393</data>
+    <data columnname="Difference in %">53,6316020331811</data>
+  </row>
+  <row>
+    <data columnname="Configuration">418</data>
+    <data columnname="Elements">base, f1, f2, f3, f9, </data>
+    <data columnname="Estimated Value">11778,5</data>
+    <data columnname="Measured Value">12940</data>
+    <data columnname="Difference Absolut">1161,5</data>
+    <data columnname="Difference in %">8,97604327666151</data>
+  </row>
+  <row>
+    <data columnname="Configuration">420</data>
+    <data columnname="Elements">base, f1, f2, f3, f8, f9, </data>
+    <data columnname="Estimated Value">11998,5</data>
+    <data columnname="Measured Value">13199</data>
+    <data columnname="Difference Absolut">1200,5</data>
+    <data columnname="Difference in %">9,09538601409197</data>
+  </row>
+  <row>
+    <data columnname="Configuration">422</data>
+    <data columnname="Elements">base, f1, f2, f3, f7, f8, </data>
+    <data columnname="Estimated Value">14049</data>
+    <data columnname="Measured Value">15350,5</data>
+    <data columnname="Difference Absolut">1301,5</data>
+    <data columnname="Difference in %">8,47855118725775</data>
+  </row>
+  <row>
+    <data columnname="Configuration">424</data>
+    <data columnname="Elements">base, f1, f2, f3, f7, f8, f9, </data>
+    <data columnname="Estimated Value">14098</data>
+    <data columnname="Measured Value">15413</data>
+    <data columnname="Difference Absolut">1315</data>
+    <data columnname="Difference in %">8,53175890482061</data>
+  </row>
+  <row>
+    <data columnname="Configuration">426</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f9, </data>
+    <data columnname="Estimated Value">12377,5</data>
+    <data columnname="Measured Value">13596</data>
+    <data columnname="Difference Absolut">1218,5</data>
+    <data columnname="Difference in %">8,96219476316564</data>
+  </row>
+  <row>
+    <data columnname="Configuration">428</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f7, f9, </data>
+    <data columnname="Estimated Value">14477</data>
+    <data columnname="Measured Value">17051</data>
+    <data columnname="Difference Absolut">2574</data>
+    <data columnname="Difference in %">15,0958888041757</data>
+  </row>
+  <row>
+    <data columnname="Configuration">430</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f7, f8, </data>
+    <data columnname="Estimated Value">14648</data>
+    <data columnname="Measured Value">17215</data>
+    <data columnname="Difference Absolut">2567</data>
+    <data columnname="Difference in %">14,9114144641301</data>
+  </row>
+  <row>
+    <data columnname="Configuration">432</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">14697</data>
+    <data columnname="Measured Value">17285</data>
+    <data columnname="Difference Absolut">2588</data>
+    <data columnname="Difference in %">14,9725195256002</data>
+  </row>
+  <row>
+    <data columnname="Configuration">434</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f9, </data>
+    <data columnname="Estimated Value">12178</data>
+    <data columnname="Measured Value">15618</data>
+    <data columnname="Difference Absolut">3440</data>
+    <data columnname="Difference in %">22,0258675886797</data>
+  </row>
+  <row>
+    <data columnname="Configuration">436</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f8, f9, </data>
+    <data columnname="Estimated Value">12398</data>
+    <data columnname="Measured Value">16257,5</data>
+    <data columnname="Difference Absolut">3859,5</data>
+    <data columnname="Difference in %">23,7398123942796</data>
+  </row>
+  <row>
+    <data columnname="Configuration">438</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f8, </data>
+    <data columnname="Estimated Value">12948</data>
+    <data columnname="Measured Value">17318,5</data>
+    <data columnname="Difference Absolut">4370,5</data>
+    <data columnname="Difference in %">25,2360192857349</data>
+  </row>
+  <row>
+    <data columnname="Configuration">440</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">12997</data>
+    <data columnname="Measured Value">17513,5</data>
+    <data columnname="Difference Absolut">4516,5</data>
+    <data columnname="Difference in %">25,7886773060782</data>
+  </row>
+  <row>
+    <data columnname="Configuration">442</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f7, f9, </data>
+    <data columnname="Estimated Value">14277,5</data>
+    <data columnname="Measured Value">27154,5</data>
+    <data columnname="Difference Absolut">12877</data>
+    <data columnname="Difference in %">47,4212377322359</data>
+  </row>
+  <row>
+    <data columnname="Configuration">444</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">14876,5</data>
+    <data columnname="Measured Value">32131,5</data>
+    <data columnname="Difference Absolut">17255</data>
+    <data columnname="Difference in %">53,7011966450368</data>
+  </row>
+  <row>
+    <data columnname="Configuration">446</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">15047,5</data>
+    <data columnname="Measured Value">32591</data>
+    <data columnname="Difference Absolut">17543,5</data>
+    <data columnname="Difference in %">53,8292780215397</data>
+  </row>
+  <row>
+    <data columnname="Configuration">448</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">15096,5</data>
+    <data columnname="Measured Value">32770,5</data>
+    <data columnname="Difference Absolut">17674</data>
+    <data columnname="Difference in %">53,9326528432584</data>
+  </row>
+  <row>
+    <data columnname="Configuration">450</data>
+    <data columnname="Elements">base, f1, f3, f4, f9, </data>
+    <data columnname="Estimated Value">5867</data>
+    <data columnname="Measured Value">6477</data>
+    <data columnname="Difference Absolut">610</data>
+    <data columnname="Difference in %">9,41794040450826</data>
+  </row>
+  <row>
+    <data columnname="Configuration">452</data>
+    <data columnname="Elements">base, f1, f3, f4, f8, f9, </data>
+    <data columnname="Estimated Value">6087</data>
+    <data columnname="Measured Value">6727</data>
+    <data columnname="Difference Absolut">640</data>
+    <data columnname="Difference in %">9,51389921213023</data>
+  </row>
+  <row>
+    <data columnname="Configuration">454</data>
+    <data columnname="Elements">base, f1, f3, f4, f7, f8, </data>
+    <data columnname="Estimated Value">8137,5</data>
+    <data columnname="Measured Value">9683</data>
+    <data columnname="Difference Absolut">1545,5</data>
+    <data columnname="Difference in %">15,9609625116183</data>
+  </row>
+  <row>
+    <data columnname="Configuration">456</data>
+    <data columnname="Elements">base, f1, f3, f4, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8186,5</data>
+    <data columnname="Measured Value">9753</data>
+    <data columnname="Difference Absolut">1566,5</data>
+    <data columnname="Difference in %">16,0617245975597</data>
+  </row>
+  <row>
+    <data columnname="Configuration">458</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f9, </data>
+    <data columnname="Estimated Value">6266,5</data>
+    <data columnname="Measured Value">8217</data>
+    <data columnname="Difference Absolut">1950,5</data>
+    <data columnname="Difference in %">23,7373737373737</data>
+  </row>
+  <row>
+    <data columnname="Configuration">460</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f7, f9, </data>
+    <data columnname="Estimated Value">8366</data>
+    <data columnname="Measured Value">17522</data>
+    <data columnname="Difference Absolut">9156</data>
+    <data columnname="Difference in %">52,2543088688506</data>
+  </row>
+  <row>
+    <data columnname="Configuration">462</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f7, f8, </data>
+    <data columnname="Estimated Value">8537</data>
+    <data columnname="Measured Value">17834</data>
+    <data columnname="Difference Absolut">9297</data>
+    <data columnname="Difference in %">52,1307614668611</data>
+  </row>
+  <row>
+    <data columnname="Configuration">464</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8586</data>
+    <data columnname="Measured Value">17959</data>
+    <data columnname="Difference Absolut">9373</data>
+    <data columnname="Difference in %">52,1911019544518</data>
+  </row>
+  <row>
+    <data columnname="Configuration">466</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f9, </data>
+    <data columnname="Estimated Value">11978</data>
+    <data columnname="Measured Value">13229</data>
+    <data columnname="Difference Absolut">1251</data>
+    <data columnname="Difference in %">9,45649708972711</data>
+  </row>
+  <row>
+    <data columnname="Configuration">468</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f8, f9, </data>
+    <data columnname="Estimated Value">12198</data>
+    <data columnname="Measured Value">13400,5</data>
+    <data columnname="Difference Absolut">1202,5</data>
+    <data columnname="Difference in %">8,97354576321779</data>
+  </row>
+  <row>
+    <data columnname="Configuration">470</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f8, </data>
+    <data columnname="Estimated Value">12548,5</data>
+    <data columnname="Measured Value">16687</data>
+    <data columnname="Difference Absolut">4138,5</data>
+    <data columnname="Difference in %">24,800743093426</data>
+  </row>
+  <row>
+    <data columnname="Configuration">472</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f8, f9, </data>
+    <data columnname="Estimated Value">12597,5</data>
+    <data columnname="Measured Value">16866</data>
+    <data columnname="Difference Absolut">4268,5</data>
+    <data columnname="Difference in %">25,308312581525</data>
+  </row>
+  <row>
+    <data columnname="Configuration">474</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f7, f9, </data>
+    <data columnname="Estimated Value">14077,5</data>
+    <data columnname="Measured Value">16177,5</data>
+    <data columnname="Difference Absolut">2100</data>
+    <data columnname="Difference in %">12,9809921186834</data>
+  </row>
+  <row>
+    <data columnname="Configuration">476</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f7, f9, </data>
+    <data columnname="Estimated Value">14477</data>
+    <data columnname="Measured Value">30189</data>
+    <data columnname="Difference Absolut">15712</data>
+    <data columnname="Difference in %">52,0454470171254</data>
+  </row>
+  <row>
+    <data columnname="Configuration">478</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f7, f8, </data>
+    <data columnname="Estimated Value">14648</data>
+    <data columnname="Measured Value">30685</data>
+    <data columnname="Difference Absolut">16037</data>
+    <data columnname="Difference in %">52,2633208408017</data>
+  </row>
+  <row>
+    <data columnname="Configuration">480</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">14697</data>
+    <data columnname="Measured Value">30835,5</data>
+    <data columnname="Difference Absolut">16138,5</data>
+    <data columnname="Difference in %">52,3374033176047</data>
+  </row>
+  <row>
+    <data columnname="Configuration">482</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f9, </data>
+    <data columnname="Estimated Value">6466</data>
+    <data columnname="Measured Value">7117</data>
+    <data columnname="Difference Absolut">651</data>
+    <data columnname="Difference in %">9,14711254742167</data>
+  </row>
+  <row>
+    <data columnname="Configuration">484</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f8, f9, </data>
+    <data columnname="Estimated Value">6686</data>
+    <data columnname="Measured Value">7343</data>
+    <data columnname="Difference Absolut">657</data>
+    <data columnname="Difference in %">8,94729674519951</data>
+  </row>
+  <row>
+    <data columnname="Configuration">486</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f7, f8, </data>
+    <data columnname="Estimated Value">8736,5</data>
+    <data columnname="Measured Value">11563</data>
+    <data columnname="Difference Absolut">2826,5</data>
+    <data columnname="Difference in %">24,4443483525037</data>
+  </row>
+  <row>
+    <data columnname="Configuration">488</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">8785,5</data>
+    <data columnname="Measured Value">11620,5</data>
+    <data columnname="Difference Absolut">2835</data>
+    <data columnname="Difference in %">24,3965405963599</data>
+  </row>
+  <row>
+    <data columnname="Configuration">490</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f9, </data>
+    <data columnname="Estimated Value">12577</data>
+    <data columnname="Measured Value">13786</data>
+    <data columnname="Difference Absolut">1209</data>
+    <data columnname="Difference in %">8,7697664297113</data>
+  </row>
+  <row>
+    <data columnname="Configuration">492</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f7, f9, </data>
+    <data columnname="Estimated Value">14676,5</data>
+    <data columnname="Measured Value">18065</data>
+    <data columnname="Difference Absolut">3388,5</data>
+    <data columnname="Difference in %">18,7572654303903</data>
+  </row>
+  <row>
+    <data columnname="Configuration">494</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f7, f8, </data>
+    <data columnname="Estimated Value">14847,5</data>
+    <data columnname="Measured Value">18236,5</data>
+    <data columnname="Difference Absolut">3389</data>
+    <data columnname="Difference in %">18,5836097935459</data>
+  </row>
+  <row>
+    <data columnname="Configuration">496</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f7, f8, f9, </data>
+    <data columnname="Estimated Value">14896,5</data>
+    <data columnname="Measured Value">18300</data>
+    <data columnname="Difference Absolut">3403,5</data>
+    <data columnname="Difference in %">18,5983606557377</data>
+  </row>
+  <row>
+    <data columnname="Configuration">498</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f9, </data>
+    <data columnname="Estimated Value">6865,5</data>
+    <data columnname="Measured Value">9160,5</data>
+    <data columnname="Difference Absolut">2295</data>
+    <data columnname="Difference in %">25,0532176191256</data>
+  </row>
+  <row>
+    <data columnname="Configuration">500</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">7085,5</data>
+    <data columnname="Measured Value">9597,5</data>
+    <data columnname="Difference Absolut">2512</data>
+    <data columnname="Difference in %">26,1734826777807</data>
+  </row>
+  <row>
+    <data columnname="Configuration">502</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f8, </data>
+    <data columnname="Estimated Value">13147,5</data>
+    <data columnname="Measured Value">17928,5</data>
+    <data columnname="Difference Absolut">4781</data>
+    <data columnname="Difference in %">26,6670385140977</data>
+  </row>
+  <row>
+    <data columnname="Configuration">504</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f8, f9, </data>
+    <data columnname="Estimated Value">13196,5</data>
+    <data columnname="Measured Value">18106</data>
+    <data columnname="Difference Absolut">4909,5</data>
+    <data columnname="Difference in %">27,1153208881034</data>
+  </row>
+  <row>
+    <data columnname="Configuration">506</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">8965</data>
+    <data columnname="Measured Value">20970</data>
+    <data columnname="Difference Absolut">12005</data>
+    <data columnname="Difference in %">57,2484501669051</data>
+  </row>
+  <row>
+    <data columnname="Configuration">508</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f7, f9, </data>
+    <data columnname="Estimated Value">15076</data>
+    <data columnname="Measured Value">35188,5</data>
+    <data columnname="Difference Absolut">20112,5</data>
+    <data columnname="Difference in %">57,1564573653324</data>
+  </row>
+  <row>
+    <data columnname="Configuration">510</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f7, f8, </data>
+    <data columnname="Estimated Value">15247</data>
+    <data columnname="Measured Value">35640,5</data>
+    <data columnname="Difference Absolut">20393,5</data>
+    <data columnname="Difference in %">57,220016554201</data>
+  </row>
+  <row>
+    <data columnname="Configuration">512</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f7, f8, f9, </data>
+    <data columnname="Estimated Value">15296</data>
+    <data columnname="Measured Value">35820</data>
+    <data columnname="Difference Absolut">20524</data>
+    <data columnname="Difference in %">57,2975991066443</data>
+  </row>
+  <row>
+    <data columnname="Configuration">514</data>
+    <data columnname="Elements">base, f8, f10, </data>
+    <data columnname="Estimated Value">2807,5</data>
+    <data columnname="Measured Value">2851</data>
+    <data columnname="Difference Absolut">43,5</data>
+    <data columnname="Difference in %">1,52578042792003</data>
+  </row>
+  <row>
+    <data columnname="Configuration">516</data>
+    <data columnname="Elements">base, f7, f10, </data>
+    <data columnname="Estimated Value">4687</data>
+    <data columnname="Measured Value">4840</data>
+    <data columnname="Difference Absolut">153</data>
+    <data columnname="Difference in %">3,16115702479338</data>
+  </row>
+  <row>
+    <data columnname="Configuration">518</data>
+    <data columnname="Elements">base, f7, f9, f10, </data>
+    <data columnname="Estimated Value">4736</data>
+    <data columnname="Measured Value">4902,5</data>
+    <data columnname="Difference Absolut">166,5</data>
+    <data columnname="Difference in %">3,39622641509433</data>
+  </row>
+  <row>
+    <data columnname="Configuration">520</data>
+    <data columnname="Elements">base, f6, f10, </data>
+    <data columnname="Estimated Value">2987</data>
+    <data columnname="Measured Value">3023</data>
+    <data columnname="Difference Absolut">36</data>
+    <data columnname="Difference in %">1,19086999669203</data>
+  </row>
+  <row>
+    <data columnname="Configuration">522</data>
+    <data columnname="Elements">base, f6, f7, f10, </data>
+    <data columnname="Estimated Value">5086,5</data>
+    <data columnname="Measured Value">6868</data>
+    <data columnname="Difference Absolut">1781,5</data>
+    <data columnname="Difference in %">25,9391380314502</data>
+  </row>
+  <row>
+    <data columnname="Configuration">524</data>
+    <data columnname="Elements">base, f6, f8, f10, </data>
+    <data columnname="Estimated Value">3207</data>
+    <data columnname="Measured Value">3264,5</data>
+    <data columnname="Difference Absolut">57,5</data>
+    <data columnname="Difference in %">1,76137233879614</data>
+  </row>
+  <row>
+    <data columnname="Configuration">526</data>
+    <data columnname="Elements">base, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">3256</data>
+    <data columnname="Measured Value">3327</data>
+    <data columnname="Difference Absolut">71</data>
+    <data columnname="Difference in %">2,13405470393748</data>
+  </row>
+  <row>
+    <data columnname="Configuration">528</data>
+    <data columnname="Elements">base, f5, f10, </data>
+    <data columnname="Estimated Value">3186,5</data>
+    <data columnname="Measured Value">3249</data>
+    <data columnname="Difference Absolut">62,5</data>
+    <data columnname="Difference in %">1,92366882117575</data>
+  </row>
+  <row>
+    <data columnname="Configuration">530</data>
+    <data columnname="Elements">base, f5, f8, f10, </data>
+    <data columnname="Estimated Value">3406,5</data>
+    <data columnname="Measured Value">3475</data>
+    <data columnname="Difference Absolut">68,5</data>
+    <data columnname="Difference in %">1,97122302158273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">532</data>
+    <data columnname="Elements">base, f5, f6, f10, </data>
+    <data columnname="Estimated Value">3586</data>
+    <data columnname="Measured Value">3654,5</data>
+    <data columnname="Difference Absolut">68,5</data>
+    <data columnname="Difference in %">1,87440142290328</data>
+  </row>
+  <row>
+    <data columnname="Configuration">534</data>
+    <data columnname="Elements">base, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">3635</data>
+    <data columnname="Measured Value">3717</data>
+    <data columnname="Difference Absolut">82</data>
+    <data columnname="Difference in %">2,20608017218187</data>
+  </row>
+  <row>
+    <data columnname="Configuration">536</data>
+    <data columnname="Elements">base, f5, f7, f10, </data>
+    <data columnname="Estimated Value">5286</data>
+    <data columnname="Measured Value">6712</data>
+    <data columnname="Difference Absolut">1426</data>
+    <data columnname="Difference in %">21,2455303933254</data>
+  </row>
+  <row>
+    <data columnname="Configuration">538</data>
+    <data columnname="Elements">base, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">5685,5</data>
+    <data columnname="Measured Value">8732</data>
+    <data columnname="Difference Absolut">3046,5</data>
+    <data columnname="Difference in %">34,8889143380669</data>
+  </row>
+  <row>
+    <data columnname="Configuration">540</data>
+    <data columnname="Elements">base, f5, f7, f8, f10, </data>
+    <data columnname="Estimated Value">5506</data>
+    <data columnname="Measured Value">6946</data>
+    <data columnname="Difference Absolut">1440</data>
+    <data columnname="Difference in %">20,7313561762165</data>
+  </row>
+  <row>
+    <data columnname="Configuration">542</data>
+    <data columnname="Elements">base, f5, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">5555</data>
+    <data columnname="Measured Value">7001</data>
+    <data columnname="Difference Absolut">1446</data>
+    <data columnname="Difference in %">20,6541922582488</data>
+  </row>
+  <row>
+    <data columnname="Configuration">544</data>
+    <data columnname="Elements">base, f4, f10, </data>
+    <data columnname="Estimated Value">2787</data>
+    <data columnname="Measured Value">2828</data>
+    <data columnname="Difference Absolut">41</data>
+    <data columnname="Difference in %">1,44978783592644</data>
+  </row>
+  <row>
+    <data columnname="Configuration">546</data>
+    <data columnname="Elements">base, f4, f8, f10, </data>
+    <data columnname="Estimated Value">3007</data>
+    <data columnname="Measured Value">3062</data>
+    <data columnname="Difference Absolut">55</data>
+    <data columnname="Difference in %">1,79621162638799</data>
+  </row>
+  <row>
+    <data columnname="Configuration">548</data>
+    <data columnname="Elements">base, f4, f7, f10, </data>
+    <data columnname="Estimated Value">4886,5</data>
+    <data columnname="Measured Value">5846</data>
+    <data columnname="Difference Absolut">959,5</data>
+    <data columnname="Difference in %">16,412931919261</data>
+  </row>
+  <row>
+    <data columnname="Configuration">550</data>
+    <data columnname="Elements">base, f4, f7, f9, f10, </data>
+    <data columnname="Estimated Value">4935,5</data>
+    <data columnname="Measured Value">5916,5</data>
+    <data columnname="Difference Absolut">981</data>
+    <data columnname="Difference in %">16,580748753486</data>
+  </row>
+  <row>
+    <data columnname="Configuration">552</data>
+    <data columnname="Elements">base, f4, f5, f10, </data>
+    <data columnname="Estimated Value">3386</data>
+    <data columnname="Measured Value">3452</data>
+    <data columnname="Difference Absolut">66</data>
+    <data columnname="Difference in %">1,91193511008112</data>
+  </row>
+  <row>
+    <data columnname="Configuration">554</data>
+    <data columnname="Elements">base, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">5485,5</data>
+    <data columnname="Measured Value">7726</data>
+    <data columnname="Difference Absolut">2240,5</data>
+    <data columnname="Difference in %">28,9994822676676</data>
+  </row>
+  <row>
+    <data columnname="Configuration">556</data>
+    <data columnname="Elements">base, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">3606</data>
+    <data columnname="Measured Value">3678</data>
+    <data columnname="Difference Absolut">72</data>
+    <data columnname="Difference in %">1,95758564437195</data>
+  </row>
+  <row>
+    <data columnname="Configuration">558</data>
+    <data columnname="Elements">base, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">3655</data>
+    <data columnname="Measured Value">3748</data>
+    <data columnname="Difference Absolut">93</data>
+    <data columnname="Difference in %">2,48132337246531</data>
+  </row>
+  <row>
+    <data columnname="Configuration">560</data>
+    <data columnname="Elements">base, f4, f6, f10, </data>
+    <data columnname="Estimated Value">3186,5</data>
+    <data columnname="Measured Value">3233,5</data>
+    <data columnname="Difference Absolut">47</data>
+    <data columnname="Difference in %">1,45353332302459</data>
+  </row>
+  <row>
+    <data columnname="Configuration">562</data>
+    <data columnname="Elements">base, f4, f6, f8, f10, </data>
+    <data columnname="Estimated Value">3406,5</data>
+    <data columnname="Measured Value">3467,5</data>
+    <data columnname="Difference Absolut">61</data>
+    <data columnname="Difference in %">1,75919250180245</data>
+  </row>
+  <row>
+    <data columnname="Configuration">564</data>
+    <data columnname="Elements">base, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">3785,5</data>
+    <data columnname="Measured Value">3850</data>
+    <data columnname="Difference Absolut">64,5</data>
+    <data columnname="Difference in %">1,67532467532467</data>
+  </row>
+  <row>
+    <data columnname="Configuration">566</data>
+    <data columnname="Elements">base, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">3834,5</data>
+    <data columnname="Measured Value">3920</data>
+    <data columnname="Difference Absolut">85,5</data>
+    <data columnname="Difference in %">2,18112244897959</data>
+  </row>
+  <row>
+    <data columnname="Configuration">568</data>
+    <data columnname="Elements">base, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">5286</data>
+    <data columnname="Measured Value">7882</data>
+    <data columnname="Difference Absolut">2596</data>
+    <data columnname="Difference in %">32,935803095661</data>
+  </row>
+  <row>
+    <data columnname="Configuration">570</data>
+    <data columnname="Elements">base, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">5885</data>
+    <data columnname="Measured Value">9754</data>
+    <data columnname="Difference Absolut">3869</data>
+    <data columnname="Difference in %">39,6657781423006</data>
+  </row>
+  <row>
+    <data columnname="Configuration">572</data>
+    <data columnname="Elements">base, f4, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">5506</data>
+    <data columnname="Measured Value">8108</data>
+    <data columnname="Difference Absolut">2602</data>
+    <data columnname="Difference in %">32,091761223483</data>
+  </row>
+  <row>
+    <data columnname="Configuration">574</data>
+    <data columnname="Elements">base, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">5555</data>
+    <data columnname="Measured Value">8178,5</data>
+    <data columnname="Difference Absolut">2623,5</data>
+    <data columnname="Difference in %">32,0780094149294</data>
+  </row>
+  <row>
+    <data columnname="Configuration">576</data>
+    <data columnname="Elements">base, f3, f10, </data>
+    <data columnname="Estimated Value">4696,5</data>
+    <data columnname="Measured Value">5345</data>
+    <data columnname="Difference Absolut">648,5</data>
+    <data columnname="Difference in %">12,132834424696</data>
+  </row>
+  <row>
+    <data columnname="Configuration">578</data>
+    <data columnname="Elements">base, f3, f8, f10, </data>
+    <data columnname="Estimated Value">4916,5</data>
+    <data columnname="Measured Value">5797,5</data>
+    <data columnname="Difference Absolut">881</data>
+    <data columnname="Difference in %">15,1962052608883</data>
+  </row>
+  <row>
+    <data columnname="Configuration">580</data>
+    <data columnname="Elements">base, f3, f7, f10, </data>
+    <data columnname="Estimated Value">6796</data>
+    <data columnname="Measured Value">9775,5</data>
+    <data columnname="Difference Absolut">2979,5</data>
+    <data columnname="Difference in %">30,4792593729221</data>
+  </row>
+  <row>
+    <data columnname="Configuration">582</data>
+    <data columnname="Elements">base, f3, f7, f9, f10, </data>
+    <data columnname="Estimated Value">6845</data>
+    <data columnname="Measured Value">9900</data>
+    <data columnname="Difference Absolut">3055</data>
+    <data columnname="Difference in %">30,8585858585859</data>
+  </row>
+  <row>
+    <data columnname="Configuration">584</data>
+    <data columnname="Elements">base, f3, f6, f10, </data>
+    <data columnname="Estimated Value">5096</data>
+    <data columnname="Measured Value">7326</data>
+    <data columnname="Difference Absolut">2230</data>
+    <data columnname="Difference in %">30,4395304395304</data>
+  </row>
+  <row>
+    <data columnname="Configuration">586</data>
+    <data columnname="Elements">base, f3, f6, f7, f10, </data>
+    <data columnname="Estimated Value">7195,5</data>
+    <data columnname="Measured Value">18847</data>
+    <data columnname="Difference Absolut">11651,5</data>
+    <data columnname="Difference in %">61,8215100546506</data>
+  </row>
+  <row>
+    <data columnname="Configuration">588</data>
+    <data columnname="Elements">base, f3, f6, f8, f10, </data>
+    <data columnname="Estimated Value">5316</data>
+    <data columnname="Measured Value">7966</data>
+    <data columnname="Difference Absolut">2650</data>
+    <data columnname="Difference in %">33,2663821240271</data>
+  </row>
+  <row>
+    <data columnname="Configuration">590</data>
+    <data columnname="Elements">base, f3, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">5365</data>
+    <data columnname="Measured Value">8145</data>
+    <data columnname="Difference Absolut">2780</data>
+    <data columnname="Difference in %">34,1313689379988</data>
+  </row>
+  <row>
+    <data columnname="Configuration">592</data>
+    <data columnname="Elements">base, f3, f4, f10, </data>
+    <data columnname="Estimated Value">4896</data>
+    <data columnname="Measured Value">5758</data>
+    <data columnname="Difference Absolut">862</data>
+    <data columnname="Difference in %">14,9704758596735</data>
+  </row>
+  <row>
+    <data columnname="Configuration">594</data>
+    <data columnname="Elements">base, f3, f4, f8, f10, </data>
+    <data columnname="Estimated Value">5116</data>
+    <data columnname="Measured Value">6203</data>
+    <data columnname="Difference Absolut">1087</data>
+    <data columnname="Difference in %">17,5237788167016</data>
+  </row>
+  <row>
+    <data columnname="Configuration">596</data>
+    <data columnname="Elements">base, f3, f4, f6, f10, </data>
+    <data columnname="Estimated Value">5295,5</data>
+    <data columnname="Measured Value">7934,5</data>
+    <data columnname="Difference Absolut">2639</data>
+    <data columnname="Difference in %">33,2598147331275</data>
+  </row>
+  <row>
+    <data columnname="Configuration">598</data>
+    <data columnname="Elements">base, f3, f4, f6, f9, f10, </data>
+    <data columnname="Estimated Value">5344,5</data>
+    <data columnname="Measured Value">8114</data>
+    <data columnname="Difference Absolut">2769,5</data>
+    <data columnname="Difference in %">34,1323638156273</data>
+  </row>
+  <row>
+    <data columnname="Configuration">600</data>
+    <data columnname="Elements">base, f3, f4, f7, f10, </data>
+    <data columnname="Estimated Value">6995,5</data>
+    <data columnname="Measured Value">11819</data>
+    <data columnname="Difference Absolut">4823,5</data>
+    <data columnname="Difference in %">40,811405364244</data>
+  </row>
+  <row>
+    <data columnname="Configuration">602</data>
+    <data columnname="Elements">base, f3, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">7395</data>
+    <data columnname="Measured Value">21889</data>
+    <data columnname="Difference Absolut">14494</data>
+    <data columnname="Difference in %">66,2159075334643</data>
+  </row>
+  <row>
+    <data columnname="Configuration">604</data>
+    <data columnname="Elements">base, f3, f4, f7, f8, f10, </data>
+    <data columnname="Estimated Value">7215,5</data>
+    <data columnname="Measured Value">12256</data>
+    <data columnname="Difference Absolut">5040,5</data>
+    <data columnname="Difference in %">41,1267950391645</data>
+  </row>
+  <row>
+    <data columnname="Configuration">606</data>
+    <data columnname="Elements">base, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">7264,5</data>
+    <data columnname="Measured Value">12380,5</data>
+    <data columnname="Difference Absolut">5116</data>
+    <data columnname="Difference in %">41,323048342151</data>
+  </row>
+  <row>
+    <data columnname="Configuration">608</data>
+    <data columnname="Elements">base, f3, f5, f10, </data>
+    <data columnname="Estimated Value">5295,5</data>
+    <data columnname="Measured Value">6296,5</data>
+    <data columnname="Difference Absolut">1001</data>
+    <data columnname="Difference in %">15,8977209560867</data>
+  </row>
+  <row>
+    <data columnname="Configuration">610</data>
+    <data columnname="Elements">base, f3, f5, f8, f10, </data>
+    <data columnname="Estimated Value">5515,5</data>
+    <data columnname="Measured Value">6733,5</data>
+    <data columnname="Difference Absolut">1218</data>
+    <data columnname="Difference in %">18,0886611717532</data>
+  </row>
+  <row>
+    <data columnname="Configuration">612</data>
+    <data columnname="Elements">base, f3, f5, f7, f10, </data>
+    <data columnname="Estimated Value">7395</data>
+    <data columnname="Measured Value">13231,5</data>
+    <data columnname="Difference Absolut">5836,5</data>
+    <data columnname="Difference in %">44,1106450515815</data>
+  </row>
+  <row>
+    <data columnname="Configuration">614</data>
+    <data columnname="Elements">base, f3, f5, f7, f9, f10, </data>
+    <data columnname="Estimated Value">7444</data>
+    <data columnname="Measured Value">13348</data>
+    <data columnname="Difference Absolut">5904</data>
+    <data columnname="Difference in %">44,2313455199281</data>
+  </row>
+  <row>
+    <data columnname="Configuration">616</data>
+    <data columnname="Elements">base, f3, f4, f5, f10, </data>
+    <data columnname="Estimated Value">5495</data>
+    <data columnname="Measured Value">6694</data>
+    <data columnname="Difference Absolut">1199</data>
+    <data columnname="Difference in %">17,9115625933672</data>
+  </row>
+  <row>
+    <data columnname="Configuration">618</data>
+    <data columnname="Elements">base, f3, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">7594,5</data>
+    <data columnname="Measured Value">15243</data>
+    <data columnname="Difference Absolut">7648,5</data>
+    <data columnname="Difference in %">50,1771304861248</data>
+  </row>
+  <row>
+    <data columnname="Configuration">620</data>
+    <data columnname="Elements">base, f3, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">5715</data>
+    <data columnname="Measured Value">7139</data>
+    <data columnname="Difference Absolut">1424</data>
+    <data columnname="Difference in %">19,9467712564785</data>
+  </row>
+  <row>
+    <data columnname="Configuration">622</data>
+    <data columnname="Elements">base, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">5764</data>
+    <data columnname="Measured Value">7265,5</data>
+    <data columnname="Difference Absolut">1501,5</data>
+    <data columnname="Difference in %">20,666161998486</data>
+  </row>
+  <row>
+    <data columnname="Configuration">624</data>
+    <data columnname="Elements">base, f3, f5, f6, f10, </data>
+    <data columnname="Estimated Value">5695</data>
+    <data columnname="Measured Value">8574</data>
+    <data columnname="Difference Absolut">2879</data>
+    <data columnname="Difference in %">33,5782598553767</data>
+  </row>
+  <row>
+    <data columnname="Configuration">626</data>
+    <data columnname="Elements">base, f3, f5, f6, f8, f10, </data>
+    <data columnname="Estimated Value">5915</data>
+    <data columnname="Measured Value">9206</data>
+    <data columnname="Difference Absolut">3291</data>
+    <data columnname="Difference in %">35,7484249402564</data>
+  </row>
+  <row>
+    <data columnname="Configuration">628</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">5894,5</data>
+    <data columnname="Measured Value">9182,5</data>
+    <data columnname="Difference Absolut">3288</data>
+    <data columnname="Difference in %">35,8072420364824</data>
+  </row>
+  <row>
+    <data columnname="Configuration">630</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">5943,5</data>
+    <data columnname="Measured Value">9378</data>
+    <data columnname="Difference Absolut">3434,5</data>
+    <data columnname="Difference in %">36,6229473235231</data>
+  </row>
+  <row>
+    <data columnname="Configuration">632</data>
+    <data columnname="Elements">base, f3, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">7794,5</data>
+    <data columnname="Measured Value">23838,5</data>
+    <data columnname="Difference Absolut">16044</data>
+    <data columnname="Difference in %">67,3028923799736</data>
+  </row>
+  <row>
+    <data columnname="Configuration">634</data>
+    <data columnname="Elements">base, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">7994</data>
+    <data columnname="Measured Value">26881</data>
+    <data columnname="Difference Absolut">18887</data>
+    <data columnname="Difference in %">70,2615230088166</data>
+  </row>
+  <row>
+    <data columnname="Configuration">636</data>
+    <data columnname="Elements">base, f3, f5, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">8014,5</data>
+    <data columnname="Measured Value">24486</data>
+    <data columnname="Difference Absolut">16471,5</data>
+    <data columnname="Difference in %">67,269051703014</data>
+  </row>
+  <row>
+    <data columnname="Configuration">638</data>
+    <data columnname="Elements">base, f3, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">8063,5</data>
+    <data columnname="Measured Value">24665,5</data>
+    <data columnname="Difference Absolut">16602</data>
+    <data columnname="Difference in %">67,3085889197462</data>
+  </row>
+  <row>
+    <data columnname="Configuration">640</data>
+    <data columnname="Elements">base, f1, f10, </data>
+    <data columnname="Estimated Value">3589</data>
+    <data columnname="Measured Value">3639</data>
+    <data columnname="Difference Absolut">50</data>
+    <data columnname="Difference in %">1,37400384721077</data>
+  </row>
+  <row>
+    <data columnname="Configuration">642</data>
+    <data columnname="Elements">base, f1, f8, f10, </data>
+    <data columnname="Estimated Value">3809</data>
+    <data columnname="Measured Value">3873</data>
+    <data columnname="Difference Absolut">64</data>
+    <data columnname="Difference in %">1,65246578879422</data>
+  </row>
+  <row>
+    <data columnname="Configuration">644</data>
+    <data columnname="Elements">base, f1, f7, f10, </data>
+    <data columnname="Estimated Value">5688,5</data>
+    <data columnname="Measured Value">5846</data>
+    <data columnname="Difference Absolut">157,5</data>
+    <data columnname="Difference in %">2,69414984604857</data>
+  </row>
+  <row>
+    <data columnname="Configuration">646</data>
+    <data columnname="Elements">base, f1, f7, f9, f10, </data>
+    <data columnname="Estimated Value">5737,5</data>
+    <data columnname="Measured Value">5924</data>
+    <data columnname="Difference Absolut">186,5</data>
+    <data columnname="Difference in %">3,14821066846726</data>
+  </row>
+  <row>
+    <data columnname="Configuration">648</data>
+    <data columnname="Elements">base, f1, f6, f10, </data>
+    <data columnname="Estimated Value">3988,5</data>
+    <data columnname="Measured Value">4044,5</data>
+    <data columnname="Difference Absolut">56</data>
+    <data columnname="Difference in %">1,38459636543455</data>
+  </row>
+  <row>
+    <data columnname="Configuration">650</data>
+    <data columnname="Elements">base, f1, f6, f7, f10, </data>
+    <data columnname="Estimated Value">6088</data>
+    <data columnname="Measured Value">7874,5</data>
+    <data columnname="Difference Absolut">1786,5</data>
+    <data columnname="Difference in %">22,6871547399835</data>
+  </row>
+  <row>
+    <data columnname="Configuration">652</data>
+    <data columnname="Elements">base, f1, f6, f8, f10, </data>
+    <data columnname="Estimated Value">4208,5</data>
+    <data columnname="Measured Value">4278,5</data>
+    <data columnname="Difference Absolut">70</data>
+    <data columnname="Difference in %">1,63608741381326</data>
+  </row>
+  <row>
+    <data columnname="Configuration">654</data>
+    <data columnname="Elements">base, f1, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">4257,5</data>
+    <data columnname="Measured Value">4341</data>
+    <data columnname="Difference Absolut">83,5</data>
+    <data columnname="Difference in %">1,92351992628427</data>
+  </row>
+  <row>
+    <data columnname="Configuration">656</data>
+    <data columnname="Elements">base, f1, f5, f10, </data>
+    <data columnname="Estimated Value">4188</data>
+    <data columnname="Measured Value">4263</data>
+    <data columnname="Difference Absolut">75</data>
+    <data columnname="Difference in %">1,75932441942294</data>
+  </row>
+  <row>
+    <data columnname="Configuration">658</data>
+    <data columnname="Elements">base, f1, f5, f8, f10, </data>
+    <data columnname="Estimated Value">4408</data>
+    <data columnname="Measured Value">4489</data>
+    <data columnname="Difference Absolut">81</data>
+    <data columnname="Difference in %">1,80441078191134</data>
+  </row>
+  <row>
+    <data columnname="Configuration">660</data>
+    <data columnname="Elements">base, f1, f5, f6, f10, </data>
+    <data columnname="Estimated Value">4587,5</data>
+    <data columnname="Measured Value">4661</data>
+    <data columnname="Difference Absolut">73,5</data>
+    <data columnname="Difference in %">1,57691482514483</data>
+  </row>
+  <row>
+    <data columnname="Configuration">662</data>
+    <data columnname="Elements">base, f1, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">4636,5</data>
+    <data columnname="Measured Value">4723</data>
+    <data columnname="Difference Absolut">86,5</data>
+    <data columnname="Difference in %">1,83146305314419</data>
+  </row>
+  <row>
+    <data columnname="Configuration">664</data>
+    <data columnname="Elements">base, f1, f5, f7, f10, </data>
+    <data columnname="Estimated Value">6287,5</data>
+    <data columnname="Measured Value">7726</data>
+    <data columnname="Difference Absolut">1438,5</data>
+    <data columnname="Difference in %">18,6189490033653</data>
+  </row>
+  <row>
+    <data columnname="Configuration">666</data>
+    <data columnname="Elements">base, f1, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">6687</data>
+    <data columnname="Measured Value">9762</data>
+    <data columnname="Difference Absolut">3075</data>
+    <data columnname="Difference in %">31,499692685925</data>
+  </row>
+  <row>
+    <data columnname="Configuration">668</data>
+    <data columnname="Elements">base, f1, f5, f7, f8, f10, </data>
+    <data columnname="Estimated Value">6507,5</data>
+    <data columnname="Measured Value">7960</data>
+    <data columnname="Difference Absolut">1452,5</data>
+    <data columnname="Difference in %">18,2474874371859</data>
+  </row>
+  <row>
+    <data columnname="Configuration">670</data>
+    <data columnname="Elements">base, f1, f5, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">6556,5</data>
+    <data columnname="Measured Value">8022,5</data>
+    <data columnname="Difference Absolut">1466</data>
+    <data columnname="Difference in %">18,2736054845746</data>
+  </row>
+  <row>
+    <data columnname="Configuration">672</data>
+    <data columnname="Elements">base, f1, f3, f10, </data>
+    <data columnname="Estimated Value">5698</data>
+    <data columnname="Measured Value">6914</data>
+    <data columnname="Difference Absolut">1216</data>
+    <data columnname="Difference in %">17,5875036158519</data>
+  </row>
+  <row>
+    <data columnname="Configuration">674</data>
+    <data columnname="Elements">base, f1, f3, f8, f10, </data>
+    <data columnname="Estimated Value">5918</data>
+    <data columnname="Measured Value">7359</data>
+    <data columnname="Difference Absolut">1441</data>
+    <data columnname="Difference in %">19,5814648729447</data>
+  </row>
+  <row>
+    <data columnname="Configuration">676</data>
+    <data columnname="Elements">base, f1, f3, f7, f10, </data>
+    <data columnname="Estimated Value">7797,5</data>
+    <data columnname="Measured Value">11352</data>
+    <data columnname="Difference Absolut">3554,5</data>
+    <data columnname="Difference in %">31,3116631430585</data>
+  </row>
+  <row>
+    <data columnname="Configuration">678</data>
+    <data columnname="Elements">base, f1, f3, f7, f9, f10, </data>
+    <data columnname="Estimated Value">7846,5</data>
+    <data columnname="Measured Value">11477</data>
+    <data columnname="Difference Absolut">3630,5</data>
+    <data columnname="Difference in %">31,6328308791496</data>
+  </row>
+  <row>
+    <data columnname="Configuration">680</data>
+    <data columnname="Elements">base, f1, f3, f5, f10, </data>
+    <data columnname="Estimated Value">6297</data>
+    <data columnname="Measured Value">7865,5</data>
+    <data columnname="Difference Absolut">1568,5</data>
+    <data columnname="Difference in %">19,9415167503655</data>
+  </row>
+  <row>
+    <data columnname="Configuration">682</data>
+    <data columnname="Elements">base, f1, f3, f5, f7, f10, </data>
+    <data columnname="Estimated Value">8396,5</data>
+    <data columnname="Measured Value">14792</data>
+    <data columnname="Difference Absolut">6395,5</data>
+    <data columnname="Difference in %">43,2362087614927</data>
+  </row>
+  <row>
+    <data columnname="Configuration">684</data>
+    <data columnname="Elements">base, f1, f3, f5, f8, f10, </data>
+    <data columnname="Estimated Value">6517</data>
+    <data columnname="Measured Value">8302,5</data>
+    <data columnname="Difference Absolut">1785,5</data>
+    <data columnname="Difference in %">21,5055706112617</data>
+  </row>
+  <row>
+    <data columnname="Configuration">686</data>
+    <data columnname="Elements">base, f1, f3, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">6566</data>
+    <data columnname="Measured Value">8427</data>
+    <data columnname="Difference Absolut">1861</data>
+    <data columnname="Difference in %">22,0837783315533</data>
+  </row>
+  <row>
+    <data columnname="Configuration">688</data>
+    <data columnname="Elements">base, f1, f3, f6, f10, </data>
+    <data columnname="Estimated Value">6097,5</data>
+    <data columnname="Measured Value">8887</data>
+    <data columnname="Difference Absolut">2789,5</data>
+    <data columnname="Difference in %">31,3885450658265</data>
+  </row>
+  <row>
+    <data columnname="Configuration">690</data>
+    <data columnname="Elements">base, f1, f3, f6, f8, f10, </data>
+    <data columnname="Estimated Value">6317,5</data>
+    <data columnname="Measured Value">9535</data>
+    <data columnname="Difference Absolut">3217,5</data>
+    <data columnname="Difference in %">33,744100681699</data>
+  </row>
+  <row>
+    <data columnname="Configuration">692</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f10, </data>
+    <data columnname="Estimated Value">6696,5</data>
+    <data columnname="Measured Value">10135</data>
+    <data columnname="Difference Absolut">3438,5</data>
+    <data columnname="Difference in %">33,9269856931426</data>
+  </row>
+  <row>
+    <data columnname="Configuration">694</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">6745,5</data>
+    <data columnname="Measured Value">10330,5</data>
+    <data columnname="Difference Absolut">3585</data>
+    <data columnname="Difference in %">34,7030637432844</data>
+  </row>
+  <row>
+    <data columnname="Configuration">696</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f10, </data>
+    <data columnname="Estimated Value">8197</data>
+    <data columnname="Measured Value">20431</data>
+    <data columnname="Difference Absolut">12234</data>
+    <data columnname="Difference in %">59,8795947334932</data>
+  </row>
+  <row>
+    <data columnname="Configuration">698</data>
+    <data columnname="Elements">base, f1, f3, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">8796</data>
+    <data columnname="Measured Value">25408</data>
+    <data columnname="Difference Absolut">16612</data>
+    <data columnname="Difference in %">65,3809823677582</data>
+  </row>
+  <row>
+    <data columnname="Configuration">700</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">8417</data>
+    <data columnname="Measured Value">21055</data>
+    <data columnname="Difference Absolut">12638</data>
+    <data columnname="Difference in %">60,0237473284256</data>
+  </row>
+  <row>
+    <data columnname="Configuration">702</data>
+    <data columnname="Elements">base, f1, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">8466</data>
+    <data columnname="Measured Value">21250,5</data>
+    <data columnname="Difference Absolut">12784,5</data>
+    <data columnname="Difference in %">60,1609373897085</data>
+  </row>
+  <row>
+    <data columnname="Configuration">704</data>
+    <data columnname="Elements">base, f1, f4, f10, </data>
+    <data columnname="Estimated Value">3788,5</data>
+    <data columnname="Measured Value">3842</data>
+    <data columnname="Difference Absolut">53,5</data>
+    <data columnname="Difference in %">1,39250390421655</data>
+  </row>
+  <row>
+    <data columnname="Configuration">706</data>
+    <data columnname="Elements">base, f1, f4, f8, f10, </data>
+    <data columnname="Estimated Value">4008,5</data>
+    <data columnname="Measured Value">4076</data>
+    <data columnname="Difference Absolut">67,5</data>
+    <data columnname="Difference in %">1,65603532875367</data>
+  </row>
+  <row>
+    <data columnname="Configuration">708</data>
+    <data columnname="Elements">base, f1, f4, f7, f10, </data>
+    <data columnname="Estimated Value">5888</data>
+    <data columnname="Measured Value">6868</data>
+    <data columnname="Difference Absolut">980</data>
+    <data columnname="Difference in %">14,2690739662201</data>
+  </row>
+  <row>
+    <data columnname="Configuration">710</data>
+    <data columnname="Elements">base, f1, f4, f7, f9, f10, </data>
+    <data columnname="Estimated Value">5937</data>
+    <data columnname="Measured Value">6930,5</data>
+    <data columnname="Difference Absolut">993,5</data>
+    <data columnname="Difference in %">14,3351850515836</data>
+  </row>
+  <row>
+    <data columnname="Configuration">712</data>
+    <data columnname="Elements">base, f1, f4, f6, f10, </data>
+    <data columnname="Estimated Value">4188</data>
+    <data columnname="Measured Value">4240</data>
+    <data columnname="Difference Absolut">52</data>
+    <data columnname="Difference in %">1,22641509433963</data>
+  </row>
+  <row>
+    <data columnname="Configuration">714</data>
+    <data columnname="Elements">base, f1, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">6287,5</data>
+    <data columnname="Measured Value">8896</data>
+    <data columnname="Difference Absolut">2608,5</data>
+    <data columnname="Difference in %">29,3221672661871</data>
+  </row>
+  <row>
+    <data columnname="Configuration">716</data>
+    <data columnname="Elements">base, f1, f4, f6, f8, f10, </data>
+    <data columnname="Estimated Value">4408</data>
+    <data columnname="Measured Value">4474</data>
+    <data columnname="Difference Absolut">66</data>
+    <data columnname="Difference in %">1,47518998658919</data>
+  </row>
+  <row>
+    <data columnname="Configuration">718</data>
+    <data columnname="Elements">base, f1, f4, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">4457</data>
+    <data columnname="Measured Value">4544</data>
+    <data columnname="Difference Absolut">87</data>
+    <data columnname="Difference in %">1,91461267605634</data>
+  </row>
+  <row>
+    <data columnname="Configuration">720</data>
+    <data columnname="Elements">base, f1, f3, f4, f10, </data>
+    <data columnname="Estimated Value">5897,5</data>
+    <data columnname="Measured Value">7319,5</data>
+    <data columnname="Difference Absolut">1422</data>
+    <data columnname="Difference in %">19,4275565270852</data>
+  </row>
+  <row>
+    <data columnname="Configuration">722</data>
+    <data columnname="Elements">base, f1, f3, f4, f8, f10, </data>
+    <data columnname="Estimated Value">6117,5</data>
+    <data columnname="Measured Value">7772</data>
+    <data columnname="Difference Absolut">1654,5</data>
+    <data columnname="Difference in %">21,2879567678847</data>
+  </row>
+  <row>
+    <data columnname="Configuration">724</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f10, </data>
+    <data columnname="Estimated Value">6297</data>
+    <data columnname="Measured Value">9504</data>
+    <data columnname="Difference Absolut">3207</data>
+    <data columnname="Difference in %">33,7436868686869</data>
+  </row>
+  <row>
+    <data columnname="Configuration">726</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f9, f10, </data>
+    <data columnname="Estimated Value">6346</data>
+    <data columnname="Measured Value">9683</data>
+    <data columnname="Difference Absolut">3337</data>
+    <data columnname="Difference in %">34,4624599814107</data>
+  </row>
+  <row>
+    <data columnname="Configuration">728</data>
+    <data columnname="Elements">base, f1, f3, f4, f7, f10, </data>
+    <data columnname="Estimated Value">7997</data>
+    <data columnname="Measured Value">13388</data>
+    <data columnname="Difference Absolut">5391</data>
+    <data columnname="Difference in %">40,2674036450553</data>
+  </row>
+  <row>
+    <data columnname="Configuration">730</data>
+    <data columnname="Elements">base, f1, f3, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">8396,5</data>
+    <data columnname="Measured Value">23458</data>
+    <data columnname="Difference Absolut">15061,5</data>
+    <data columnname="Difference in %">64,2062409412567</data>
+  </row>
+  <row>
+    <data columnname="Configuration">732</data>
+    <data columnname="Elements">base, f1, f3, f4, f7, f8, f10, </data>
+    <data columnname="Estimated Value">8217</data>
+    <data columnname="Measured Value">13825</data>
+    <data columnname="Difference Absolut">5608</data>
+    <data columnname="Difference in %">40,5641952983725</data>
+  </row>
+  <row>
+    <data columnname="Configuration">734</data>
+    <data columnname="Elements">base, f1, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">8266</data>
+    <data columnname="Measured Value">13953</data>
+    <data columnname="Difference Absolut">5687</data>
+    <data columnname="Difference in %">40,7582598724289</data>
+  </row>
+  <row>
+    <data columnname="Configuration">736</data>
+    <data columnname="Elements">base, f1, f4, f5, f10, </data>
+    <data columnname="Estimated Value">4387,5</data>
+    <data columnname="Measured Value">4458</data>
+    <data columnname="Difference Absolut">70,5</data>
+    <data columnname="Difference in %">1,5814266487214</data>
+  </row>
+  <row>
+    <data columnname="Configuration">738</data>
+    <data columnname="Elements">base, f1, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">4607,5</data>
+    <data columnname="Measured Value">4700</data>
+    <data columnname="Difference Absolut">92,5</data>
+    <data columnname="Difference in %">1,96808510638297</data>
+  </row>
+  <row>
+    <data columnname="Configuration">740</data>
+    <data columnname="Elements">base, f1, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">6487</data>
+    <data columnname="Measured Value">8740</data>
+    <data columnname="Difference Absolut">2253</data>
+    <data columnname="Difference in %">25,7780320366133</data>
+  </row>
+  <row>
+    <data columnname="Configuration">742</data>
+    <data columnname="Elements">base, f1, f4, f5, f7, f9, f10, </data>
+    <data columnname="Estimated Value">6536</data>
+    <data columnname="Measured Value">8802,5</data>
+    <data columnname="Difference Absolut">2266,5</data>
+    <data columnname="Difference in %">25,7483669412099</data>
+  </row>
+  <row>
+    <data columnname="Configuration">744</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f10, </data>
+    <data columnname="Estimated Value">6496,5</data>
+    <data columnname="Measured Value">8279</data>
+    <data columnname="Difference Absolut">1782,5</data>
+    <data columnname="Difference in %">21,5303780649837</data>
+  </row>
+  <row>
+    <data columnname="Configuration">746</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">8596</data>
+    <data columnname="Measured Value">16835,5</data>
+    <data columnname="Difference Absolut">8239,5</data>
+    <data columnname="Difference in %">48,9412253868314</data>
+  </row>
+  <row>
+    <data columnname="Configuration">748</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">6716,5</data>
+    <data columnname="Measured Value">8700</data>
+    <data columnname="Difference Absolut">1983,5</data>
+    <data columnname="Difference in %">22,7988505747126</data>
+  </row>
+  <row>
+    <data columnname="Configuration">750</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">6765,5</data>
+    <data columnname="Measured Value">8833</data>
+    <data columnname="Difference Absolut">2067,5</data>
+    <data columnname="Difference in %">23,4065436431563</data>
+  </row>
+  <row>
+    <data columnname="Configuration">752</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">4787</data>
+    <data columnname="Measured Value">4871,5</data>
+    <data columnname="Difference Absolut">84,5</data>
+    <data columnname="Difference in %">1,73457867186698</data>
+  </row>
+  <row>
+    <data columnname="Configuration">754</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f8, f10, </data>
+    <data columnname="Estimated Value">5007</data>
+    <data columnname="Measured Value">5098</data>
+    <data columnname="Difference Absolut">91</data>
+    <data columnname="Difference in %">1,78501373087485</data>
+  </row>
+  <row>
+    <data columnname="Configuration">756</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">6896</data>
+    <data columnname="Measured Value">10759</data>
+    <data columnname="Difference Absolut">3863</data>
+    <data columnname="Difference in %">35,9048238683893</data>
+  </row>
+  <row>
+    <data columnname="Configuration">758</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">6945</data>
+    <data columnname="Measured Value">10939</data>
+    <data columnname="Difference Absolut">3994</data>
+    <data columnname="Difference in %">36,5115641283481</data>
+  </row>
+  <row>
+    <data columnname="Configuration">760</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">6886,5</data>
+    <data columnname="Measured Value">10768</data>
+    <data columnname="Difference Absolut">3881,5</data>
+    <data columnname="Difference in %">36,0466196136701</data>
+  </row>
+  <row>
+    <data columnname="Configuration">762</data>
+    <data columnname="Elements">base, f1, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">8995,5</data>
+    <data columnname="Measured Value">28457,5</data>
+    <data columnname="Difference Absolut">19462</data>
+    <data columnname="Difference in %">68,3897039444786</data>
+  </row>
+  <row>
+    <data columnname="Configuration">764</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">7106,5</data>
+    <data columnname="Measured Value">11010</data>
+    <data columnname="Difference Absolut">3903,5</data>
+    <data columnname="Difference in %">35,4541326067212</data>
+  </row>
+  <row>
+    <data columnname="Configuration">766</data>
+    <data columnname="Elements">base, f1, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">7155,5</data>
+    <data columnname="Measured Value">11072</data>
+    <data columnname="Difference Absolut">3916,5</data>
+    <data columnname="Difference in %">35,3730130057804</data>
+  </row>
+  <row>
+    <data columnname="Configuration">768</data>
+    <data columnname="Elements">base, f2, f10, </data>
+    <data columnname="Estimated Value">8698,5</data>
+    <data columnname="Measured Value">9338,5</data>
+    <data columnname="Difference Absolut">640</data>
+    <data columnname="Difference in %">6,85334903892488</data>
+  </row>
+  <row>
+    <data columnname="Configuration">770</data>
+    <data columnname="Elements">base, f2, f8, f10, </data>
+    <data columnname="Estimated Value">8918,5</data>
+    <data columnname="Measured Value">9791</data>
+    <data columnname="Difference Absolut">872,5</data>
+    <data columnname="Difference in %">8,9112450209376</data>
+  </row>
+  <row>
+    <data columnname="Configuration">772</data>
+    <data columnname="Elements">base, f2, f7, f10, </data>
+    <data columnname="Estimated Value">10798</data>
+    <data columnname="Measured Value">13784,5</data>
+    <data columnname="Difference Absolut">2986,5</data>
+    <data columnname="Difference in %">21,6656389422903</data>
+  </row>
+  <row>
+    <data columnname="Configuration">774</data>
+    <data columnname="Elements">base, f2, f7, f9, f10, </data>
+    <data columnname="Estimated Value">10847</data>
+    <data columnname="Measured Value">13894</data>
+    <data columnname="Difference Absolut">3047</data>
+    <data columnname="Difference in %">21,930329638693</data>
+  </row>
+  <row>
+    <data columnname="Configuration">776</data>
+    <data columnname="Elements">base, f2, f6, f10, </data>
+    <data columnname="Estimated Value">9098</data>
+    <data columnname="Measured Value">11320</data>
+    <data columnname="Difference Absolut">2222</data>
+    <data columnname="Difference in %">19,6289752650177</data>
+  </row>
+  <row>
+    <data columnname="Configuration">778</data>
+    <data columnname="Elements">base, f2, f6, f7, f10, </data>
+    <data columnname="Estimated Value">11197,5</data>
+    <data columnname="Measured Value">22825,5</data>
+    <data columnname="Difference Absolut">11628</data>
+    <data columnname="Difference in %">50,943024249195</data>
+  </row>
+  <row>
+    <data columnname="Configuration">780</data>
+    <data columnname="Elements">base, f2, f6, f8, f10, </data>
+    <data columnname="Estimated Value">9318</data>
+    <data columnname="Measured Value">11967</data>
+    <data columnname="Difference Absolut">2649</data>
+    <data columnname="Difference in %">22,1358736525445</data>
+  </row>
+  <row>
+    <data columnname="Configuration">782</data>
+    <data columnname="Elements">base, f2, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">9367</data>
+    <data columnname="Measured Value">12146,5</data>
+    <data columnname="Difference Absolut">2779,5</data>
+    <data columnname="Difference in %">22,8831350594822</data>
+  </row>
+  <row>
+    <data columnname="Configuration">784</data>
+    <data columnname="Elements">base, f2, f5, f10, </data>
+    <data columnname="Estimated Value">9297,5</data>
+    <data columnname="Measured Value">10282</data>
+    <data columnname="Difference Absolut">984,5</data>
+    <data columnname="Difference in %">9,57498541139856</data>
+  </row>
+  <row>
+    <data columnname="Configuration">786</data>
+    <data columnname="Elements">base, f2, f5, f8, f10, </data>
+    <data columnname="Estimated Value">9517,5</data>
+    <data columnname="Measured Value">10727</data>
+    <data columnname="Difference Absolut">1209,5</data>
+    <data columnname="Difference in %">11,2752866598303</data>
+  </row>
+  <row>
+    <data columnname="Configuration">788</data>
+    <data columnname="Elements">base, f2, f5, f6, f10, </data>
+    <data columnname="Estimated Value">9697</data>
+    <data columnname="Measured Value">12568</data>
+    <data columnname="Difference Absolut">2871</data>
+    <data columnname="Difference in %">22,8437301082113</data>
+  </row>
+  <row>
+    <data columnname="Configuration">790</data>
+    <data columnname="Elements">base, f2, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">9746</data>
+    <data columnname="Measured Value">12747</data>
+    <data columnname="Difference Absolut">3001</data>
+    <data columnname="Difference in %">23,5427943829921</data>
+  </row>
+  <row>
+    <data columnname="Configuration">792</data>
+    <data columnname="Elements">base, f2, f5, f7, f10, </data>
+    <data columnname="Estimated Value">11397</data>
+    <data columnname="Measured Value">17209</data>
+    <data columnname="Difference Absolut">5812</data>
+    <data columnname="Difference in %">33,7730257423441</data>
+  </row>
+  <row>
+    <data columnname="Configuration">794</data>
+    <data columnname="Elements">base, f2, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">11796,5</data>
+    <data columnname="Measured Value">27840</data>
+    <data columnname="Difference Absolut">16043,5</data>
+    <data columnname="Difference in %">57,6275143678161</data>
+  </row>
+  <row>
+    <data columnname="Configuration">796</data>
+    <data columnname="Elements">base, f2, f5, f7, f8, f10, </data>
+    <data columnname="Estimated Value">11617</data>
+    <data columnname="Measured Value">17653,5</data>
+    <data columnname="Difference Absolut">6036,5</data>
+    <data columnname="Difference in %">34,1943523947093</data>
+  </row>
+  <row>
+    <data columnname="Configuration">798</data>
+    <data columnname="Elements">base, f2, f5, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">11666</data>
+    <data columnname="Measured Value">17770</data>
+    <data columnname="Difference Absolut">6104</data>
+    <data columnname="Difference in %">34,3500281373101</data>
+  </row>
+  <row>
+    <data columnname="Configuration">800</data>
+    <data columnname="Elements">base, f2, f4, f10, </data>
+    <data columnname="Estimated Value">8898</data>
+    <data columnname="Measured Value">9744</data>
+    <data columnname="Difference Absolut">846</data>
+    <data columnname="Difference in %">8,68226600985221</data>
+  </row>
+  <row>
+    <data columnname="Configuration">802</data>
+    <data columnname="Elements">base, f2, f4, f8, f10, </data>
+    <data columnname="Estimated Value">9118</data>
+    <data columnname="Measured Value">10196,5</data>
+    <data columnname="Difference Absolut">1078,5</data>
+    <data columnname="Difference in %">10,57715882901</data>
+  </row>
+  <row>
+    <data columnname="Configuration">804</data>
+    <data columnname="Elements">base, f2, f4, f7, f10, </data>
+    <data columnname="Estimated Value">10997,5</data>
+    <data columnname="Measured Value">15797</data>
+    <data columnname="Difference Absolut">4799,5</data>
+    <data columnname="Difference in %">30,3823510793189</data>
+  </row>
+  <row>
+    <data columnname="Configuration">806</data>
+    <data columnname="Elements">base, f2, f4, f7, f9, f10, </data>
+    <data columnname="Estimated Value">11046,5</data>
+    <data columnname="Measured Value">15930</data>
+    <data columnname="Difference Absolut">4883,5</data>
+    <data columnname="Difference in %">30,6559949780289</data>
+  </row>
+  <row>
+    <data columnname="Configuration">808</data>
+    <data columnname="Elements">base, f2, f4, f5, f10, </data>
+    <data columnname="Estimated Value">9497</data>
+    <data columnname="Measured Value">10688,5</data>
+    <data columnname="Difference Absolut">1191,5</data>
+    <data columnname="Difference in %">11,1474949712308</data>
+  </row>
+  <row>
+    <data columnname="Configuration">810</data>
+    <data columnname="Elements">base, f2, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">11596,5</data>
+    <data columnname="Measured Value">19252</data>
+    <data columnname="Difference Absolut">7655,5</data>
+    <data columnname="Difference in %">39,7646997714523</data>
+  </row>
+  <row>
+    <data columnname="Configuration">812</data>
+    <data columnname="Elements">base, f2, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">9717</data>
+    <data columnname="Measured Value">11132,5</data>
+    <data columnname="Difference Absolut">1415,5</data>
+    <data columnname="Difference in %">12,7150235796093</data>
+  </row>
+  <row>
+    <data columnname="Configuration">814</data>
+    <data columnname="Elements">base, f2, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">9766</data>
+    <data columnname="Measured Value">11250</data>
+    <data columnname="Difference Absolut">1484</data>
+    <data columnname="Difference in %">13,1911111111111</data>
+  </row>
+  <row>
+    <data columnname="Configuration">816</data>
+    <data columnname="Elements">base, f2, f4, f6, f10, </data>
+    <data columnname="Estimated Value">9297,5</data>
+    <data columnname="Measured Value">11924</data>
+    <data columnname="Difference Absolut">2626,5</data>
+    <data columnname="Difference in %">22,0270043609527</data>
+  </row>
+  <row>
+    <data columnname="Configuration">818</data>
+    <data columnname="Elements">base, f2, f4, f6, f8, f10, </data>
+    <data columnname="Estimated Value">9517,5</data>
+    <data columnname="Measured Value">12568</data>
+    <data columnname="Difference Absolut">3050,5</data>
+    <data columnname="Difference in %">24,2719605346913</data>
+  </row>
+  <row>
+    <data columnname="Configuration">820</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">9896,5</data>
+    <data columnname="Measured Value">13168</data>
+    <data columnname="Difference Absolut">3271,5</data>
+    <data columnname="Difference in %">24,8443195625759</data>
+  </row>
+  <row>
+    <data columnname="Configuration">822</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">9945,5</data>
+    <data columnname="Measured Value">13363,5</data>
+    <data columnname="Difference Absolut">3418</data>
+    <data columnname="Difference in %">25,5771317394395</data>
+  </row>
+  <row>
+    <data columnname="Configuration">824</data>
+    <data columnname="Elements">base, f2, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">11397</data>
+    <data columnname="Measured Value">25890</data>
+    <data columnname="Difference Absolut">14493</data>
+    <data columnname="Difference in %">55,9791425260718</data>
+  </row>
+  <row>
+    <data columnname="Configuration">826</data>
+    <data columnname="Elements">base, f2, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">11996</data>
+    <data columnname="Measured Value">30874,5</data>
+    <data columnname="Difference Absolut">18878,5</data>
+    <data columnname="Difference in %">61,1459294887367</data>
+  </row>
+  <row>
+    <data columnname="Configuration">828</data>
+    <data columnname="Elements">base, f2, f4, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">11617</data>
+    <data columnname="Measured Value">26522</data>
+    <data columnname="Difference Absolut">14905</data>
+    <data columnname="Difference in %">56,1986275544831</data>
+  </row>
+  <row>
+    <data columnname="Configuration">830</data>
+    <data columnname="Elements">base, f2, f4, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">11666</data>
+    <data columnname="Measured Value">26709</data>
+    <data columnname="Difference Absolut">15043</data>
+    <data columnname="Difference in %">56,3218390804598</data>
+  </row>
+  <row>
+    <data columnname="Configuration">832</data>
+    <data columnname="Elements">base, f1, f2, f10, </data>
+    <data columnname="Estimated Value">9700</data>
+    <data columnname="Measured Value">10900</data>
+    <data columnname="Difference Absolut">1200</data>
+    <data columnname="Difference in %">11,0091743119266</data>
+  </row>
+  <row>
+    <data columnname="Configuration">834</data>
+    <data columnname="Elements">base, f1, f2, f8, f10, </data>
+    <data columnname="Estimated Value">9920</data>
+    <data columnname="Measured Value">11361,5</data>
+    <data columnname="Difference Absolut">1441,5</data>
+    <data columnname="Difference in %">12,68758526603</data>
+  </row>
+  <row>
+    <data columnname="Configuration">836</data>
+    <data columnname="Elements">base, f1, f2, f7, f10, </data>
+    <data columnname="Estimated Value">11799,5</data>
+    <data columnname="Measured Value">15346</data>
+    <data columnname="Difference Absolut">3546,5</data>
+    <data columnname="Difference in %">23,1102567444285</data>
+  </row>
+  <row>
+    <data columnname="Configuration">838</data>
+    <data columnname="Elements">base, f1, f2, f7, f9, f10, </data>
+    <data columnname="Estimated Value">11848,5</data>
+    <data columnname="Measured Value">15471</data>
+    <data columnname="Difference Absolut">3622,5</data>
+    <data columnname="Difference in %">23,4147760325771</data>
+  </row>
+  <row>
+    <data columnname="Configuration">840</data>
+    <data columnname="Elements">base, f1, f2, f6, f10, </data>
+    <data columnname="Estimated Value">10099,5</data>
+    <data columnname="Measured Value">12889</data>
+    <data columnname="Difference Absolut">2789,5</data>
+    <data columnname="Difference in %">21,6424858406393</data>
+  </row>
+  <row>
+    <data columnname="Configuration">842</data>
+    <data columnname="Elements">base, f1, f2, f6, f7, f10, </data>
+    <data columnname="Estimated Value">12199</data>
+    <data columnname="Measured Value">24409</data>
+    <data columnname="Difference Absolut">12210</data>
+    <data columnname="Difference in %">50,0225326723749</data>
+  </row>
+  <row>
+    <data columnname="Configuration">844</data>
+    <data columnname="Elements">base, f1, f2, f6, f8, f10, </data>
+    <data columnname="Estimated Value">10319,5</data>
+    <data columnname="Measured Value">13531</data>
+    <data columnname="Difference Absolut">3211,5</data>
+    <data columnname="Difference in %">23,7343877023132</data>
+  </row>
+  <row>
+    <data columnname="Configuration">846</data>
+    <data columnname="Elements">base, f1, f2, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">10368,5</data>
+    <data columnname="Measured Value">13715,5</data>
+    <data columnname="Difference Absolut">3347</data>
+    <data columnname="Difference in %">24,4030476468229</data>
+  </row>
+  <row>
+    <data columnname="Configuration">848</data>
+    <data columnname="Elements">base, f1, f2, f4, f10, </data>
+    <data columnname="Estimated Value">9899,5</data>
+    <data columnname="Measured Value">11313</data>
+    <data columnname="Difference Absolut">1413,5</data>
+    <data columnname="Difference in %">12,4944753823035</data>
+  </row>
+  <row>
+    <data columnname="Configuration">850</data>
+    <data columnname="Elements">base, f1, f2, f4, f8, f10, </data>
+    <data columnname="Estimated Value">10119,5</data>
+    <data columnname="Measured Value">11765,5</data>
+    <data columnname="Difference Absolut">1646</data>
+    <data columnname="Difference in %">13,9900556712422</data>
+  </row>
+  <row>
+    <data columnname="Configuration">852</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f10, </data>
+    <data columnname="Estimated Value">10299</data>
+    <data columnname="Measured Value">13497</data>
+    <data columnname="Difference Absolut">3198</data>
+    <data columnname="Difference in %">23,6941542565014</data>
+  </row>
+  <row>
+    <data columnname="Configuration">854</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f9, f10, </data>
+    <data columnname="Estimated Value">10348</data>
+    <data columnname="Measured Value">13684,5</data>
+    <data columnname="Difference Absolut">3336,5</data>
+    <data columnname="Difference in %">24,381599620008</data>
+  </row>
+  <row>
+    <data columnname="Configuration">856</data>
+    <data columnname="Elements">base, f1, f2, f4, f7, f10, </data>
+    <data columnname="Estimated Value">11999</data>
+    <data columnname="Measured Value">17381,5</data>
+    <data columnname="Difference Absolut">5382,5</data>
+    <data columnname="Difference in %">30,9668325518511</data>
+  </row>
+  <row>
+    <data columnname="Configuration">858</data>
+    <data columnname="Elements">base, f1, f2, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">12398,5</data>
+    <data columnname="Measured Value">27459</data>
+    <data columnname="Difference Absolut">15060,5</data>
+    <data columnname="Difference in %">54,8472267744637</data>
+  </row>
+  <row>
+    <data columnname="Configuration">860</data>
+    <data columnname="Elements">base, f1, f2, f4, f7, f8, f10, </data>
+    <data columnname="Estimated Value">12219</data>
+    <data columnname="Measured Value">17830,5</data>
+    <data columnname="Difference Absolut">5611,5</data>
+    <data columnname="Difference in %">31,471355262051</data>
+  </row>
+  <row>
+    <data columnname="Configuration">862</data>
+    <data columnname="Elements">base, f1, f2, f4, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">12268</data>
+    <data columnname="Measured Value">17935</data>
+    <data columnname="Difference Absolut">5667</data>
+    <data columnname="Difference in %">31,5974351826038</data>
+  </row>
+  <row>
+    <data columnname="Configuration">864</data>
+    <data columnname="Elements">base, f1, f2, f5, f10, </data>
+    <data columnname="Estimated Value">10299</data>
+    <data columnname="Measured Value">11859</data>
+    <data columnname="Difference Absolut">1560</data>
+    <data columnname="Difference in %">13,1545661522894</data>
+  </row>
+  <row>
+    <data columnname="Configuration">866</data>
+    <data columnname="Elements">base, f1, f2, f5, f8, f10, </data>
+    <data columnname="Estimated Value">10519</data>
+    <data columnname="Measured Value">12296</data>
+    <data columnname="Difference Absolut">1777</data>
+    <data columnname="Difference in %">14,4518542615485</data>
+  </row>
+  <row>
+    <data columnname="Configuration">868</data>
+    <data columnname="Elements">base, f1, f2, f5, f7, f10, </data>
+    <data columnname="Estimated Value">12398,5</data>
+    <data columnname="Measured Value">18793</data>
+    <data columnname="Difference Absolut">6394,5</data>
+    <data columnname="Difference in %">34,0259671154153</data>
+  </row>
+  <row>
+    <data columnname="Configuration">870</data>
+    <data columnname="Elements">base, f1, f2, f5, f7, f9, f10, </data>
+    <data columnname="Estimated Value">12447,5</data>
+    <data columnname="Measured Value">18910,5</data>
+    <data columnname="Difference Absolut">6463</data>
+    <data columnname="Difference in %">34,176780095714</data>
+  </row>
+  <row>
+    <data columnname="Configuration">872</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f10, </data>
+    <data columnname="Estimated Value">10498,5</data>
+    <data columnname="Measured Value">12257</data>
+    <data columnname="Difference Absolut">1758,5</data>
+    <data columnname="Difference in %">14,3469038100677</data>
+  </row>
+  <row>
+    <data columnname="Configuration">874</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">12598</data>
+    <data columnname="Measured Value">20813,5</data>
+    <data columnname="Difference Absolut">8215,5</data>
+    <data columnname="Difference in %">39,4719773224109</data>
+  </row>
+  <row>
+    <data columnname="Configuration">876</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">10718,5</data>
+    <data columnname="Measured Value">12709</data>
+    <data columnname="Difference Absolut">1990,5</data>
+    <data columnname="Difference in %">15,6621291997797</data>
+  </row>
+  <row>
+    <data columnname="Configuration">878</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">10767,5</data>
+    <data columnname="Measured Value">12819</data>
+    <data columnname="Difference Absolut">2051,5</data>
+    <data columnname="Difference in %">16,003588423434</data>
+  </row>
+  <row>
+    <data columnname="Configuration">880</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f10, </data>
+    <data columnname="Estimated Value">10698,5</data>
+    <data columnname="Measured Value">14129</data>
+    <data columnname="Difference Absolut">3430,5</data>
+    <data columnname="Difference in %">24,2798499539953</data>
+  </row>
+  <row>
+    <data columnname="Configuration">882</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f8, f10, </data>
+    <data columnname="Estimated Value">10918,5</data>
+    <data columnname="Measured Value">14782</data>
+    <data columnname="Difference Absolut">3863,5</data>
+    <data columnname="Difference in %">26,13651738601</data>
+  </row>
+  <row>
+    <data columnname="Configuration">884</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">10898</data>
+    <data columnname="Measured Value">14737</data>
+    <data columnname="Difference Absolut">3839</data>
+    <data columnname="Difference in %">26,0500780348782</data>
+  </row>
+  <row>
+    <data columnname="Configuration">886</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">10947</data>
+    <data columnname="Measured Value">14933</data>
+    <data columnname="Difference Absolut">3986</data>
+    <data columnname="Difference in %">26,692560101788</data>
+  </row>
+  <row>
+    <data columnname="Configuration">888</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">12798</data>
+    <data columnname="Measured Value">29409</data>
+    <data columnname="Difference Absolut">16611</data>
+    <data columnname="Difference in %">56,4827093746812</data>
+  </row>
+  <row>
+    <data columnname="Configuration">890</data>
+    <data columnname="Elements">base, f1, f2, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">12997,5</data>
+    <data columnname="Measured Value">32436</data>
+    <data columnname="Difference Absolut">19438,5</data>
+    <data columnname="Difference in %">59,9287828338883</data>
+  </row>
+  <row>
+    <data columnname="Configuration">892</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">13018</data>
+    <data columnname="Measured Value">30041</data>
+    <data columnname="Difference Absolut">17023</data>
+    <data columnname="Difference in %">56,6658899504011</data>
+  </row>
+  <row>
+    <data columnname="Configuration">894</data>
+    <data columnname="Elements">base, f1, f2, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">13067</data>
+    <data columnname="Measured Value">30236</data>
+    <data columnname="Difference Absolut">17169</data>
+    <data columnname="Difference in %">56,7833046699299</data>
+  </row>
+  <row>
+    <data columnname="Configuration">896</data>
+    <data columnname="Elements">base, f2, f3, f10, </data>
+    <data columnname="Estimated Value">10807,5</data>
+    <data columnname="Measured Value">12058,5</data>
+    <data columnname="Difference Absolut">1251</data>
+    <data columnname="Difference in %">10,3744246796865</data>
+  </row>
+  <row>
+    <data columnname="Configuration">898</data>
+    <data columnname="Elements">base, f2, f3, f8, f10, </data>
+    <data columnname="Estimated Value">11027,5</data>
+    <data columnname="Measured Value">12714</data>
+    <data columnname="Difference Absolut">1686,5</data>
+    <data columnname="Difference in %">13,264904829322</data>
+  </row>
+  <row>
+    <data columnname="Configuration">900</data>
+    <data columnname="Elements">base, f2, f3, f7, f10, </data>
+    <data columnname="Estimated Value">12907</data>
+    <data columnname="Measured Value">18727,5</data>
+    <data columnname="Difference Absolut">5820,5</data>
+    <data columnname="Difference in %">31,0799626218128</data>
+  </row>
+  <row>
+    <data columnname="Configuration">902</data>
+    <data columnname="Elements">base, f2, f3, f7, f9, f10, </data>
+    <data columnname="Estimated Value">12956</data>
+    <data columnname="Measured Value">18899,5</data>
+    <data columnname="Difference Absolut">5943,5</data>
+    <data columnname="Difference in %">31,4479219026958</data>
+  </row>
+  <row>
+    <data columnname="Configuration">904</data>
+    <data columnname="Elements">base, f2, f3, f6, f10, </data>
+    <data columnname="Estimated Value">11207</data>
+    <data columnname="Measured Value">15608</data>
+    <data columnname="Difference Absolut">4401</data>
+    <data columnname="Difference in %">28,1970784213224</data>
+  </row>
+  <row>
+    <data columnname="Configuration">906</data>
+    <data columnname="Elements">base, f2, f3, f6, f7, f10, </data>
+    <data columnname="Estimated Value">13306,5</data>
+    <data columnname="Measured Value">34834,5</data>
+    <data columnname="Difference Absolut">21528</data>
+    <data columnname="Difference in %">61,8008009301124</data>
+  </row>
+  <row>
+    <data columnname="Configuration">908</data>
+    <data columnname="Elements">base, f2, f3, f6, f8, f10, </data>
+    <data columnname="Estimated Value">11427</data>
+    <data columnname="Measured Value">16660,5</data>
+    <data columnname="Difference Absolut">5233,5</data>
+    <data columnname="Difference in %">31,412622670388</data>
+  </row>
+  <row>
+    <data columnname="Configuration">910</data>
+    <data columnname="Elements">base, f2, f3, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">11476</data>
+    <data columnname="Measured Value">16980</data>
+    <data columnname="Difference Absolut">5504</data>
+    <data columnname="Difference in %">32,414605418139</data>
+  </row>
+  <row>
+    <data columnname="Configuration">912</data>
+    <data columnname="Elements">base, f2, f3, f5, f10, </data>
+    <data columnname="Estimated Value">11406,5</data>
+    <data columnname="Measured Value">13330</data>
+    <data columnname="Difference Absolut">1923,5</data>
+    <data columnname="Difference in %">14,4298574643661</data>
+  </row>
+  <row>
+    <data columnname="Configuration">914</data>
+    <data columnname="Elements">base, f2, f3, f5, f8, f10, </data>
+    <data columnname="Estimated Value">11626,5</data>
+    <data columnname="Measured Value">13962</data>
+    <data columnname="Difference Absolut">2335,5</data>
+    <data columnname="Difference in %">16,7275461968199</data>
+  </row>
+  <row>
+    <data columnname="Configuration">916</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, f10, </data>
+    <data columnname="Estimated Value">11806</data>
+    <data columnname="Measured Value">17487,5</data>
+    <data columnname="Difference Absolut">5681,5</data>
+    <data columnname="Difference in %">32,4889206576126</data>
+  </row>
+  <row>
+    <data columnname="Configuration">918</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">11855</data>
+    <data columnname="Measured Value">17799,5</data>
+    <data columnname="Difference Absolut">5944,5</data>
+    <data columnname="Difference in %">33,3970055338633</data>
+  </row>
+  <row>
+    <data columnname="Configuration">920</data>
+    <data columnname="Elements">base, f2, f3, f5, f7, f10, </data>
+    <data columnname="Estimated Value">13506</data>
+    <data columnname="Measured Value">23719,5</data>
+    <data columnname="Difference Absolut">10213,5</data>
+    <data columnname="Difference in %">43,059507999747</data>
+  </row>
+  <row>
+    <data columnname="Configuration">922</data>
+    <data columnname="Elements">base, f2, f3, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">13905,5</data>
+    <data columnname="Measured Value">42938,5</data>
+    <data columnname="Difference Absolut">29033</data>
+    <data columnname="Difference in %">67,6153102693387</data>
+  </row>
+  <row>
+    <data columnname="Configuration">924</data>
+    <data columnname="Elements">base, f2, f3, f5, f7, f8, f10, </data>
+    <data columnname="Estimated Value">13726</data>
+    <data columnname="Measured Value">24367</data>
+    <data columnname="Difference Absolut">10641</data>
+    <data columnname="Difference in %">43,6697172405302</data>
+  </row>
+  <row>
+    <data columnname="Configuration">926</data>
+    <data columnname="Elements">base, f2, f3, f5, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">13775</data>
+    <data columnname="Measured Value">24554</data>
+    <data columnname="Difference Absolut">10779</data>
+    <data columnname="Difference in %">43,8991610328256</data>
+  </row>
+  <row>
+    <data columnname="Configuration">928</data>
+    <data columnname="Elements">base, f1, f2, f3, f10, </data>
+    <data columnname="Estimated Value">11809</data>
+    <data columnname="Measured Value">14222</data>
+    <data columnname="Difference Absolut">2413</data>
+    <data columnname="Difference in %">16,9666713542399</data>
+  </row>
+  <row>
+    <data columnname="Configuration">930</data>
+    <data columnname="Elements">base, f1, f2, f3, f8, f10, </data>
+    <data columnname="Estimated Value">12029</data>
+    <data columnname="Measured Value">14854</data>
+    <data columnname="Difference Absolut">2825</data>
+    <data columnname="Difference in %">19,0184462097751</data>
+  </row>
+  <row>
+    <data columnname="Configuration">932</data>
+    <data columnname="Elements">base, f1, f2, f3, f7, f10, </data>
+    <data columnname="Estimated Value">13908,5</data>
+    <data columnname="Measured Value">20844</data>
+    <data columnname="Difference Absolut">6935,5</data>
+    <data columnname="Difference in %">33,2733640376127</data>
+  </row>
+  <row>
+    <data columnname="Configuration">934</data>
+    <data columnname="Elements">base, f1, f2, f3, f7, f9, f10, </data>
+    <data columnname="Estimated Value">13957,5</data>
+    <data columnname="Measured Value">21031</data>
+    <data columnname="Difference Absolut">7073,5</data>
+    <data columnname="Difference in %">33,6336836099092</data>
+  </row>
+  <row>
+    <data columnname="Configuration">936</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f10, </data>
+    <data columnname="Estimated Value">12408</data>
+    <data columnname="Measured Value">15446,5</data>
+    <data columnname="Difference Absolut">3038,5</data>
+    <data columnname="Difference in %">19,6711229081022</data>
+  </row>
+  <row>
+    <data columnname="Configuration">938</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f7, f10, </data>
+    <data columnname="Estimated Value">14507,5</data>
+    <data columnname="Measured Value">25859</data>
+    <data columnname="Difference Absolut">11351,5</data>
+    <data columnname="Difference in %">43,8976758575351</data>
+  </row>
+  <row>
+    <data columnname="Configuration">940</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f8, f10, </data>
+    <data columnname="Estimated Value">12628</data>
+    <data columnname="Measured Value">16094</data>
+    <data columnname="Difference Absolut">3466</data>
+    <data columnname="Difference in %">21,5359761401765</data>
+  </row>
+  <row>
+    <data columnname="Configuration">942</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">12677</data>
+    <data columnname="Measured Value">16273</data>
+    <data columnname="Difference Absolut">3596</data>
+    <data columnname="Difference in %">22,097953665581</data>
+  </row>
+  <row>
+    <data columnname="Configuration">944</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f10, </data>
+    <data columnname="Estimated Value">12208,5</data>
+    <data columnname="Measured Value">17739,5</data>
+    <data columnname="Difference Absolut">5531</data>
+    <data columnname="Difference in %">31,179007300093</data>
+  </row>
+  <row>
+    <data columnname="Configuration">946</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f8, f10, </data>
+    <data columnname="Estimated Value">12428,5</data>
+    <data columnname="Measured Value">18793</data>
+    <data columnname="Difference Absolut">6364,5</data>
+    <data columnname="Difference in %">33,8663332091736</data>
+  </row>
+  <row>
+    <data columnname="Configuration">948</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f10, </data>
+    <data columnname="Estimated Value">12807,5</data>
+    <data columnname="Measured Value">19612</data>
+    <data columnname="Difference Absolut">6804,5</data>
+    <data columnname="Difference in %">34,6955945339588</data>
+  </row>
+  <row>
+    <data columnname="Configuration">950</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">12856,5</data>
+    <data columnname="Measured Value">19923,5</data>
+    <data columnname="Difference Absolut">7067</data>
+    <data columnname="Difference in %">35,4706753331493</data>
+  </row>
+  <row>
+    <data columnname="Configuration">952</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f7, f10, </data>
+    <data columnname="Estimated Value">14308</data>
+    <data columnname="Measured Value">36951</data>
+    <data columnname="Difference Absolut">22643</data>
+    <data columnname="Difference in %">61,2784498389759</data>
+  </row>
+  <row>
+    <data columnname="Configuration">954</data>
+    <data columnname="Elements">base, f1, f2, f3, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">14907</data>
+    <data columnname="Measured Value">45072,5</data>
+    <data columnname="Difference Absolut">30165,5</data>
+    <data columnname="Difference in %">66,9266182261911</data>
+  </row>
+  <row>
+    <data columnname="Configuration">956</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">14528</data>
+    <data columnname="Measured Value">37991</data>
+    <data columnname="Difference Absolut">23463</data>
+    <data columnname="Difference in %">61,7593640599089</data>
+  </row>
+  <row>
+    <data columnname="Configuration">958</data>
+    <data columnname="Elements">base, f1, f2, f3, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">14577</data>
+    <data columnname="Measured Value">38278,5</data>
+    <data columnname="Difference Absolut">23701,5</data>
+    <data columnname="Difference in %">61,9185704768996</data>
+  </row>
+  <row>
+    <data columnname="Configuration">960</data>
+    <data columnname="Elements">base, f2, f3, f4, f10, </data>
+    <data columnname="Estimated Value">11007</data>
+    <data columnname="Measured Value">12667</data>
+    <data columnname="Difference Absolut">1660</data>
+    <data columnname="Difference in %">13,1049182916239</data>
+  </row>
+  <row>
+    <data columnname="Configuration">962</data>
+    <data columnname="Elements">base, f2, f3, f4, f8, f10, </data>
+    <data columnname="Estimated Value">11227</data>
+    <data columnname="Measured Value">13330</data>
+    <data columnname="Difference Absolut">2103</data>
+    <data columnname="Difference in %">15,7764441110278</data>
+  </row>
+  <row>
+    <data columnname="Configuration">964</data>
+    <data columnname="Elements">base, f2, f3, f4, f7, f10, </data>
+    <data columnname="Estimated Value">13106,5</data>
+    <data columnname="Measured Value">21762</data>
+    <data columnname="Difference Absolut">8655,5</data>
+    <data columnname="Difference in %">39,7734583218454</data>
+  </row>
+  <row>
+    <data columnname="Configuration">966</data>
+    <data columnname="Elements">base, f2, f3, f4, f7, f9, f10, </data>
+    <data columnname="Estimated Value">13155,5</data>
+    <data columnname="Measured Value">21965</data>
+    <data columnname="Difference Absolut">8809,5</data>
+    <data columnname="Difference in %">40,1069883906214</data>
+  </row>
+  <row>
+    <data columnname="Configuration">968</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f10, </data>
+    <data columnname="Estimated Value">11406,5</data>
+    <data columnname="Measured Value">16629,5</data>
+    <data columnname="Difference Absolut">5223</data>
+    <data columnname="Difference in %">31,4080399290418</data>
+  </row>
+  <row>
+    <data columnname="Configuration">970</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">13506</data>
+    <data columnname="Measured Value">39904,5</data>
+    <data columnname="Difference Absolut">26398,5</data>
+    <data columnname="Difference in %">66,1541931361125</data>
+  </row>
+  <row>
+    <data columnname="Configuration">972</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f8, f10, </data>
+    <data columnname="Estimated Value">11626,5</data>
+    <data columnname="Measured Value">17682,5</data>
+    <data columnname="Difference Absolut">6056</data>
+    <data columnname="Difference in %">34,2485508270889</data>
+  </row>
+  <row>
+    <data columnname="Configuration">974</data>
+    <data columnname="Elements">base, f2, f3, f4, f6, f8, f9, f10, </data>
+    <data columnname="Estimated Value">11675,5</data>
+    <data columnname="Measured Value">17990</data>
+    <data columnname="Difference Absolut">6314,5</data>
+    <data columnname="Difference in %">35,1000555864369</data>
+  </row>
+  <row>
+    <data columnname="Configuration">976</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f10, </data>
+    <data columnname="Estimated Value">12008,5</data>
+    <data columnname="Measured Value">14791</data>
+    <data columnname="Difference Absolut">2782,5</data>
+    <data columnname="Difference in %">18,8121154756271</data>
+  </row>
+  <row>
+    <data columnname="Configuration">978</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f8, f10, </data>
+    <data columnname="Estimated Value">12228,5</data>
+    <data columnname="Measured Value">15446,5</data>
+    <data columnname="Difference Absolut">3218</data>
+    <data columnname="Difference in %">20,8331984591979</data>
+  </row>
+  <row>
+    <data columnname="Configuration">980</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f10, </data>
+    <data columnname="Estimated Value">12408</data>
+    <data columnname="Measured Value">18753,5</data>
+    <data columnname="Difference Absolut">6345,5</data>
+    <data columnname="Difference in %">33,8363505478977</data>
+  </row>
+  <row>
+    <data columnname="Configuration">982</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f9, f10, </data>
+    <data columnname="Estimated Value">12457</data>
+    <data columnname="Measured Value">19073</data>
+    <data columnname="Difference Absolut">6616</data>
+    <data columnname="Difference in %">34,687778535102</data>
+  </row>
+  <row>
+    <data columnname="Configuration">984</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f7, f10, </data>
+    <data columnname="Estimated Value">14108</data>
+    <data columnname="Measured Value">23883</data>
+    <data columnname="Difference Absolut">9775</data>
+    <data columnname="Difference in %">40,9286940501612</data>
+  </row>
+  <row>
+    <data columnname="Configuration">986</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f6, f7, f10, </data>
+    <data columnname="Estimated Value">14507,5</data>
+    <data columnname="Measured Value">42023</data>
+    <data columnname="Difference Absolut">27515,5</data>
+    <data columnname="Difference in %">65,4772386550222</data>
+  </row>
+  <row>
+    <data columnname="Configuration">988</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f7, f8, f10, </data>
+    <data columnname="Estimated Value">14328</data>
+    <data columnname="Measured Value">24541</data>
+    <data columnname="Difference Absolut">10213</data>
+    <data columnname="Difference in %">41,6160710647488</data>
+  </row>
+  <row>
+    <data columnname="Configuration">990</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">14377</data>
+    <data columnname="Measured Value">24724</data>
+    <data columnname="Difference Absolut">10347</data>
+    <data columnname="Difference in %">41,8500242679178</data>
+  </row>
+  <row>
+    <data columnname="Configuration">992</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f10, </data>
+    <data columnname="Estimated Value">11606</data>
+    <data columnname="Measured Value">13928</data>
+    <data columnname="Difference Absolut">2322</data>
+    <data columnname="Difference in %">16,6714531878231</data>
+  </row>
+  <row>
+    <data columnname="Configuration">994</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">11826</data>
+    <data columnname="Measured Value">14570,5</data>
+    <data columnname="Difference Absolut">2744,5</data>
+    <data columnname="Difference in %">18,8360042551731</data>
+  </row>
+  <row>
+    <data columnname="Configuration">996</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">13705,5</data>
+    <data columnname="Measured Value">26769,5</data>
+    <data columnname="Difference Absolut">13064</data>
+    <data columnname="Difference in %">48,8018080277928</data>
+  </row>
+  <row>
+    <data columnname="Configuration">998</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f7, f9, f10, </data>
+    <data columnname="Estimated Value">13754,5</data>
+    <data columnname="Measured Value">26953</data>
+    <data columnname="Difference Absolut">13198,5</data>
+    <data columnname="Difference in %">48,9685749267243</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1000</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f10, </data>
+    <data columnname="Estimated Value">12607,5</data>
+    <data columnname="Measured Value">16055</data>
+    <data columnname="Difference Absolut">3447,5</data>
+    <data columnname="Difference in %">21,4730613516039</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1002</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f7, f10, </data>
+    <data columnname="Estimated Value">14707</data>
+    <data columnname="Measured Value">28883</data>
+    <data columnname="Difference Absolut">14176</data>
+    <data columnname="Difference in %">49,0807741578091</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1004</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f8, f10, </data>
+    <data columnname="Estimated Value">12827,5</data>
+    <data columnname="Measured Value">16703</data>
+    <data columnname="Difference Absolut">3875,5</data>
+    <data columnname="Difference in %">23,2024187271748</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1006</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f8, f9, f10, </data>
+    <data columnname="Estimated Value">12876,5</data>
+    <data columnname="Measured Value">16874</data>
+    <data columnname="Difference Absolut">3997,5</data>
+    <data columnname="Difference in %">23,6902927580894</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1008</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">12005,5</data>
+    <data columnname="Measured Value">18495</data>
+    <data columnname="Difference Absolut">6489,5</data>
+    <data columnname="Difference in %">35,087861584212</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1010</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f8, f10, </data>
+    <data columnname="Estimated Value">12225,5</data>
+    <data columnname="Measured Value">19547</data>
+    <data columnname="Difference Absolut">7321,5</data>
+    <data columnname="Difference in %">37,4558755819307</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1012</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f10, </data>
+    <data columnname="Estimated Value">13007</data>
+    <data columnname="Measured Value">20625,5</data>
+    <data columnname="Difference Absolut">7618,5</data>
+    <data columnname="Difference in %">36,9372863688153</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1014</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f9, f10, </data>
+    <data columnname="Estimated Value">13056</data>
+    <data columnname="Measured Value">20937,5</data>
+    <data columnname="Difference Absolut">7881,5</data>
+    <data columnname="Difference in %">37,6429850746269</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1016</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">14105</data>
+    <data columnname="Measured Value">48009</data>
+    <data columnname="Difference Absolut">33904</data>
+    <data columnname="Difference in %">70,620092066071</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1018</data>
+    <data columnname="Elements">base, f1, f2, f3, f4, f5, f6, f7, f10, </data>
+    <data columnname="Estimated Value">15106,5</data>
+    <data columnname="Measured Value">50130</data>
+    <data columnname="Difference Absolut">35023,5</data>
+    <data columnname="Difference in %">69,8653500897666</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1020</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f7, f8, f10, </data>
+    <data columnname="Estimated Value">14325</data>
+    <data columnname="Measured Value">49055</data>
+    <data columnname="Difference Absolut">34730</data>
+    <data columnname="Difference in %">70,7980837835083</data>
+  </row>
+  <row>
+    <data columnname="Configuration">1022</data>
+    <data columnname="Elements">base, f2, f3, f4, f5, f6, f7, f8, f9, f10, </data>
+    <data columnname="Estimated Value">14374</data>
+    <data columnname="Measured Value">49382</data>
+    <data columnname="Difference Absolut">35008</data>
+    <data columnname="Difference in %">70,8922279373051</data>
+  </row>
+</results>

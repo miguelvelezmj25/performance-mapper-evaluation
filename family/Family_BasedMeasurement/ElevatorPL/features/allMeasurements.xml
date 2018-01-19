@@ -1,0 +1,42 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">28,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, empty, </data>
+    <data columnname="Measured Value">10027,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, </data>
+    <data columnname="Measured Value">20029,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, overloaded, </data>
+    <data columnname="Measured Value">22433,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, empty, </data>
+    <data columnname="Measured Value">30042</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, overloaded, empty, </data>
+    <data columnname="Measured Value">32427,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, twothirdsfull, </data>
+    <data columnname="Measured Value">20029</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, twothirdsfull, empty, </data>
+    <data columnname="Measured Value">30030</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, twothirdsfull, overloaded, </data>
+    <data columnname="Measured Value">22429,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, weight, twothirdsfull, overloaded, empty, </data>
+    <data columnname="Measured Value">32431,5</data>
+  </row>
+</results>

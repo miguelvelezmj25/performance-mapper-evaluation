@@ -1,0 +1,135 @@
+#Configurations: 67
+base,
+value: 2508
+base,f1,
+value: 3509,5
+base,f2,
+value: 8619
+base,f3,
+value: 4617
+base,f4,
+value: 2707,5
+base,f5,
+value: 3107
+base,f6,
+value: 2907,5
+base,f7,
+value: 4607,5
+base,f8,
+value: 2728
+base,f9,
+value: 2557
+base,f10,
+value: 2587,5
+base,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,
+value: 51498
+base,f2,f3,f4,f5,f6,f7,f8,f9,f10,
+value: 49382
+base,f1,f3,f4,f5,f6,f7,f8,f9,f10,
+value: 29277
+base,f1,f2,f4,f5,f6,f7,f8,f9,f10,
+value: 33270
+base,f1,f2,f3,f5,f6,f7,f8,f9,f10,
+value: 46429,5
+base,f1,f2,f3,f4,f6,f7,f8,f9,f10,
+value: 43381,5
+base,f1,f2,f3,f4,f5,f7,f8,f9,f10,
+value: 29723
+base,f1,f2,f3,f4,f5,f6,f8,f9,f10,
+value: 21983
+base,f1,f2,f3,f4,f5,f6,f7,f9,f10,
+value: 50455,5
+base,f1,f2,f3,f4,f5,f6,f7,f8,f10,
+value: 51179
+base,f1,f2,f3,f4,f5,f6,f7,f8,f9,
+value: 35820
+base,f1,f2,
+value: 10205,5
+base,f1,f3,
+value: 6212
+base,f1,f4,
+value: 3740
+base,f1,f5,
+value: 4169,5
+base,f1,f6,
+value: 3951
+base,f1,f7,
+value: 5753
+base,f1,f8,
+value: 3779,5
+base,f1,f9,
+value: 3608
+base,f1,f10,
+value: 3639
+base,f2,f3,
+value: 10761,5
+base,f2,f4,
+value: 8840
+base,f2,f5,
+value: 9276
+base,f2,f6,
+value: 10118,5
+base,f2,f7,
+value: 10852
+base,f2,f8,
+value: 8878
+base,f2,f9,
+value: 8699
+base,f2,f10,
+value: 9338,5
+base,f3,f4,
+value: 4846
+base,f3,f5,
+value: 5282,5
+base,f3,f6,
+value: 6117
+base,f3,f7,
+value: 6858
+base,f3,f8,
+value: 4892,5
+base,f3,f9,
+value: 4705,5
+base,f3,f10,
+value: 5345
+base,f4,f5,
+value: 3358
+base,f4,f6,
+value: 3140
+base,f4,f7,
+value: 5753
+base,f4,f8,
+value: 2968
+base,f4,f9,
+value: 2804
+base,f4,f10,
+value: 2828
+base,f5,f6,
+value: 3561
+base,f5,f7,
+value: 6611
+base,f5,f8,
+value: 3389,5
+base,f5,f9,
+value: 3210
+base,f5,f10,
+value: 3249
+base,f6,f7,
+value: 6767
+base,f6,f8,
+value: 3163
+base,f6,f9,
+value: 2999,5
+base,f6,f10,
+value: 3023
+base,f7,f8,
+value: 4973
+base,f7,f9,
+value: 4801
+base,f7,f10,
+value: 4840
+base,f8,f9,
+value: 2828
+base,f8,f10,
+value: 2851
+base,f9,f10,
+value: 2687,5

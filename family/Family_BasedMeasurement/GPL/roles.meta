@@ -1,0 +1,30 @@
+{
+	"features" : [
+		"Base",
+		"DirectedOnlyVertices",
+		"DirectedWithEdges",
+		"DirectedWithNeighbors",
+		"UndirectedOnlyVertices",
+		"UndirectedWithEdges",
+		"UndirectedWithNeighbors",
+		"WeightedOnlyVertices",
+		"WeightedWithNeighbors",
+		"BFS",
+		"Connected",
+		"Cycle",
+		"DFS",
+		"MSTKruskal",
+		"MSTPrim",
+		"Number",
+		"Transpose",
+		"Benchmark",
+		"TestProg",
+		"Base",
+		"WithEdges",
+		"WithNeighbors",
+		"OnlyVertices"
+	],
+	"roles": {
+	}
+
+}

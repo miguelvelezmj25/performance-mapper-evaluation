@@ -1,0 +1,50 @@
+package configurationGeneration;
+
+import java.util.HashMap;
+
+import choco.Choco;
+import choco.kernel.model.constraints.Constraint;
+import choco.kernel.model.variables.integer.IntegerVariable;
+
+parser code {:
+	public HashMap<String, IntegerVariable> vars = new HashMap<String, IntegerVariable>();
+
+  @Override
+  public void report_error(String message, Object info) {
+    String errorString = message;
+    if (info != null) {
+      errorString += " near " + info;
+    }
+  }
+:};
+
+
+
+terminal IDENTIFIER, AND, OR, XOR, IMPLIES, NOT, OBRACKETS, CBRACKETS;
+non terminal Constraint initial ;  
+non terminal Constraint Expression ;
+
+precedence left AND, OR, XOR, IMPLIES;
+precedence left NOT;
+
+initial ::= Expression:e {: RESULT = e; :}
+          | /* empty */ {: RESULT = Choco.TRUE; :}
+          ;
+
+Expression ::= Expression:e1 AND Expression:e2 {: RESULT = Choco.and(e1,e2); :}
+			 | Expression:e1 OR Expression:e2 {: RESULT = Choco.or(e1,e2); :}
+			 /* The Choco xor does only take integerVariables as arguments, have to use a workaround */
+			 | Expression:e1 XOR Expression:e2 {: RESULT = Choco.or(Choco.and(Choco.not(e1),e2), Choco.and(e1,Choco.not(e2))); :}
+			 | Expression:e1 IMPLIES Expression:e2 {: RESULT = Choco.implies(e1,e2); :}
+			 | NOT Expression:e1 {: RESULT = Choco.not(e1); :}
+			 | OBRACKETS Expression:e1 CBRACKETS {: RESULT = e1; :}
+			 | IDENTIFIER:i {: 
+			 		String id = i.toString();
+			 		IntegerVariable var = this.parser.vars.get(id);
+			 		if (var == null) {
+			 			var = Choco.makeBooleanVar(id);
+						this.parser.vars.put(id, var);
+					} 
+			 		RESULT = Choco.eq(1, var); 
+			 :}
+			 ; 

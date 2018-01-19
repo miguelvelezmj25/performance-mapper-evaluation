@@ -1,0 +1,46 @@
+<results>
+  <row>
+    <data columnname="Configuration">base, </data>
+    <data columnname="Measured Value">2508</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f1, </data>
+    <data columnname="Measured Value">3509,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f2, </data>
+    <data columnname="Measured Value">8619</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f3, </data>
+    <data columnname="Measured Value">4617</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f4, </data>
+    <data columnname="Measured Value">2707,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f5, </data>
+    <data columnname="Measured Value">3107</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f6, </data>
+    <data columnname="Measured Value">2907,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f7, </data>
+    <data columnname="Measured Value">4607,5</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f8, </data>
+    <data columnname="Measured Value">2728</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f9, </data>
+    <data columnname="Measured Value">2557</data>
+  </row>
+  <row>
+    <data columnname="Configuration">base, f10, </data>
+    <data columnname="Measured Value">2587,5</data>
+  </row>
+</results>

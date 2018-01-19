@@ -1,0 +1,14 @@
+
+(Base) and (ZipMeTest) and
+// we need compress and extract for our test scenario
+(Compress) and (Extract) and
+
+(not GZIP or CRC) and
+(CRC or Adler32Checksum) and
+
+(not (Compress and Adler32Checksum) xor DerivativeCompressAdler32Checksum) and
+(not (Compress and CRC) xor DerivativeCompressCRC) and
+(not (Compress and GZIP) xor DerivativeCompressGZIP) and
+(not (Compress and GZIP and CRC) xor DerivativeCompressGZIPCRC) and
+(not (Extract and CRC) xor DerivativeExtractCRC) and
+(not (GZIP and CRC) xor DerivativeGZIPCRC)

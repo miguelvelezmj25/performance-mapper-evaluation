@@ -1,0 +1,55 @@
+#Configurations: 27
+base,
+value: 23
+base,encrypt,decrypt,keys,
+value: 15020,5
+base,keys,
+value: 4023
+base,keys,sign,verify,
+value: 9037,5
+base,autoresponder,
+value: 5025
+base,addressbook,
+value: 2027
+base,forward,
+value: 11022,5
+base,encrypt,decrypt,keys,sign,verify,autoresponder,addressbook,forward,
+value: 1043
+base,keys,sign,verify,autoresponder,addressbook,forward,
+value: 36578
+base,autoresponder,addressbook,forward,
+value: 24532,5
+base,encrypt,decrypt,keys,autoresponder,addressbook,forward,
+value: 53036
+base,encrypt,decrypt,keys,sign,verify,addressbook,forward,
+value: 47038,5
+base,encrypt,decrypt,keys,sign,verify,autoresponder,forward,
+value: 52055
+base,encrypt,decrypt,keys,sign,verify,autoresponder,addressbook,
+value: 36544
+base,encrypt,decrypt,keys,sign,verify,
+value: 20052
+base,encrypt,decrypt,keys,autoresponder,
+value: 23034
+base,encrypt,decrypt,keys,addressbook,
+value: 20033
+base,encrypt,decrypt,keys,forward,
+value: 33529
+base,keys,autoresponder,
+value: 9025
+base,keys,addressbook,
+value: 6038
+base,keys,forward,
+value: 15068,5
+base,keys,sign,verify,autoresponder,
+value: 15569,5
+base,keys,sign,verify,addressbook,
+value: 12036
+base,keys,sign,verify,forward,
+value: 20542,5
+base,autoresponder,addressbook,
+value: 8028,5
+base,autoresponder,forward,
+value: 19525
+base,addressbook,forward,
+value: 15026,5

@@ -1,0 +1,88 @@
+<plm name="Elevator" canReuseInstance="true">
+  <element id="1" name="base" type="feature" optional="false" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>base</generationParameter>
+  </element>
+  <element id="2" name="weight" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements>
+      <child optional="true">
+        <id>3</id>
+      </child>
+      <child optional="true">
+        <id>4</id>
+      </child>
+    </childElements>
+    <order />
+    <description>no description</description>
+    <generationParameter>weight</generationParameter>
+  </element>
+  <element id="3" name="twothirdsfull" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>2</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>twothirdsfull</generationParameter>
+  </element>
+  <element id="4" name="overloaded" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement>
+      <id>2</id>
+    </parentElement>
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>overloaded</generationParameter>
+  </element>
+  <element id="5" name="empty" type="feature" optional="true" dynamic="true">
+    <path_absolut />
+    <path_relativ />
+    <parentElement />
+    <constraints>
+      <constraint type="alternative" />
+      <constraint type="commulative" />
+      <constraint type="requires" />
+      <constraint type="excludes" />
+    </constraints>
+    <childElements />
+    <order />
+    <description>no description</description>
+    <generationParameter>empty</generationParameter>
+  </element>
+</plm>

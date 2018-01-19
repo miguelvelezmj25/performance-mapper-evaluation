@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<configurations type="per Feature">
+  <configuration features="1" measuredValue="37,5">
+    <Element>base</Element>
+  </configuration>
+  <configuration features="2" measuredValue="20029">
+    <Element>base</Element>
+    <Element>weight</Element>
+  </configuration>
+  <configuration features="3" measuredValue="20031">
+    <Element>base</Element>
+    <Element>weight</Element>
+    <Element>twothirdsfull</Element>
+  </configuration>
+  <configuration features="3" measuredValue="22429">
+    <Element>base</Element>
+    <Element>weight</Element>
+    <Element>overloaded</Element>
+  </configuration>
+  <configuration features="2" measuredValue="10060">
+    <Element>base</Element>
+    <Element>empty</Element>
+  </configuration>
+</configurations>

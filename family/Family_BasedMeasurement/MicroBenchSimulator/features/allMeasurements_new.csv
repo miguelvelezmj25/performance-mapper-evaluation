@@ -1,0 +1,1024 @@
+base, ;2524
+base, f9, ;2594
+base, f8, ;2765,5
+base, f8, f9, ;2828
+base, f7, ;4754,5
+base, f7, f8, ;4973
+base, f7, f9, ;4801
+base, f7, f8, f9, ;5051
+base, f6, ;2937
+base, f6, f9, ;2999,5
+base, f6, f7, ;6767
+base, f6, f7, f9, ;6837
+base, f6, f8, ;3163
+base, f6, f7, f8, ;7008,5
+base, f6, f8, f9, ;3226
+base, f6, f7, f8, f9, ;7071
+base, f5, ;3155,5
+base, f5, f9, ;3210
+base, f5, f8, ;3389,5
+base, f5, f8, f9, ;3452
+base, f5, f6, ;3561
+base, f5, f6, f8, ;3795
+base, f5, f6, f9, ;3623,5
+base, f5, f6, f8, f9, ;3850
+base, f5, f7, ;6611
+base, f5, f7, f9, ;6689
+base, f5, f6, f7, ;8646,5
+base, f5, f6, f7, f9, ;8709
+base, f5, f7, f8, ;6845
+base, f5, f6, f7, f8, ;8880,5
+base, f5, f7, f8, f9, ;6915
+base, f5, f6, f7, f8, f9, ;8950,5
+base, f4, ;2726
+base, f4, f9, ;2804
+base, f4, f8, ;2968
+base, f4, f8, f9, ;3030,5
+base, f4, f7, ;5753
+base, f4, f7, f8, ;5994,5
+base, f4, f7, f9, ;5823
+base, f4, f7, f8, f9, ;6049
+base, f4, f5, ;3358
+base, f4, f5, f9, ;3413
+base, f4, f5, f7, ;7625
+base, f4, f5, f7, f9, ;7687
+base, f4, f5, f8, ;3584
+base, f4, f5, f7, f8, ;7866,5
+base, f4, f5, f8, f9, ;3647
+base, f4, f5, f7, f8, f9, ;7929
+base, f4, f6, ;3140
+base, f4, f6, f9, ;3194
+base, f4, f6, f8, ;3374
+base, f4, f6, f8, f9, ;3428
+base, f4, f5, f6, ;3764
+base, f4, f5, f6, f8, ;3998
+base, f4, f5, f6, f9, ;3818
+base, f4, f5, f6, f8, f9, ;4060
+base, f4, f6, f7, ;7788,5
+base, f4, f6, f7, f9, ;7851
+base, f4, f5, f6, f7, ;9653
+base, f4, f5, f6, f7, f9, ;9723
+base, f4, f6, f7, f8, ;8022,5
+base, f4, f5, f6, f7, f8, ;9894,5
+base, f4, f6, f7, f8, f9, ;8085
+base, f4, f5, f6, f7, f8, f9, ;9965
+base, f3, ;4643
+base, f3, f9, ;4705,5
+base, f3, f8, ;4892,5
+base, f3, f8, f9, ;4947
+base, f3, f7, ;6858
+base, f3, f7, f8, ;7100
+base, f3, f7, f9, ;6920,5
+base, f3, f7, f8, f9, ;7170
+base, f3, f6, ;6117
+base, f3, f6, f9, ;6250
+base, f3, f6, f7, ;13808,5
+base, f3, f6, f7, f9, ;13933
+base, f3, f6, f8, ;6562
+base, f3, f6, f7, f8, ;14245
+base, f3, f6, f8, f9, ;6686,5
+base, f3, f6, f7, f8, f9, ;14370
+base, f3, f4, ;4846
+base, f3, f4, f9, ;4908
+base, f3, f4, f8, ;5095,5
+base, f3, f4, f8, f9, ;5158
+base, f3, f4, f6, ;6534
+base, f3, f4, f6, f8, ;6960
+base, f3, f4, f6, f9, ;6648
+base, f3, f4, f6, f8, f9, ;7084
+base, f3, f4, f7, ;7864
+base, f3, f4, f7, f9, ;7934,5
+base, f3, f4, f6, f7, ;15828
+base, f3, f4, f6, f7, f9, ;15961
+base, f3, f4, f7, f8, ;8130
+base, f3, f4, f6, f7, f8, ;16273
+base, f3, f4, f7, f8, f9, ;8184
+base, f3, f4, f6, f7, f8, f9, ;16398
+base, f3, f5, ;5282,5
+base, f3, f5, f9, ;5337
+base, f3, f5, f8, ;5524
+base, f3, f5, f8, f9, ;5571
+base, f3, f5, f7, ;8738
+base, f3, f5, f7, f8, ;8983,5
+base, f3, f5, f7, f9, ;8808
+base, f3, f5, f7, f8, f9, ;9042
+base, f3, f4, f5, ;5485,5
+base, f3, f4, f5, f9, ;5548
+base, f3, f4, f5, f7, ;9768
+base, f3, f4, f5, f7, f9, ;9822
+base, f3, f4, f5, f8, ;5719,5
+base, f3, f4, f5, f7, f8, ;9986
+base, f3, f4, f5, f8, f9, ;5774
+base, f3, f4, f5, f7, f8, f9, ;10056
+base, f3, f5, f6, ;7061
+base, f3, f5, f6, f9, ;7194
+base, f3, f5, f6, f8, ;7498
+base, f3, f5, f6, f8, f9, ;7630,5
+base, f3, f4, f5, f6, ;7459
+base, f3, f4, f5, f6, f8, ;7903,5
+base, f3, f4, f5, f6, f9, ;7591,5
+base, f3, f4, f5, f6, f8, f9, ;8020
+base, f3, f5, f6, f7, ;17248
+base, f3, f5, f6, f7, f9, ;17365
+base, f3, f4, f5, f6, f7, ;19252
+base, f3, f4, f5, f6, f7, f9, ;19385,5
+base, f3, f5, f6, f7, f8, ;17677
+base, f3, f4, f5, f6, f7, f8, ;19705
+base, f3, f5, f6, f7, f8, f9, ;17802
+base, f3, f4, f5, f6, f7, f8, f9, ;19837,5
+base, f2, ;8636,5
+base, f2, f9, ;8699
+base, f2, f8, ;8878
+base, f2, f8, f9, ;8941
+base, f2, f7, ;10852
+base, f2, f7, f8, ;11109
+base, f2, f7, f9, ;10922
+base, f2, f7, f8, f9, ;11156
+base, f2, f6, ;10118,5
+base, f2, f6, f9, ;10243,5
+base, f2, f6, f7, ;17802
+base, f2, f6, f7, f9, ;17918,5
+base, f2, f6, f8, ;10555,5
+base, f2, f6, f7, f8, ;18238
+base, f2, f6, f8, f9, ;10680
+base, f2, f6, f7, f8, f9, ;18371
+base, f2, f5, ;9276
+base, f2, f5, f9, ;9338,5
+base, f2, f5, f8, ;9510
+base, f2, f5, f8, f9, ;9572,5
+base, f2, f5, f6, ;11054,5
+base, f2, f5, f6, f8, ;11492,5
+base, f2, f5, f6, f9, ;11179,5
+base, f2, f5, f6, f8, f9, ;11608
+base, f2, f5, f7, ;12732
+base, f2, f5, f7, f9, ;12802
+base, f2, f5, f6, f7, ;21242,5
+base, f2, f5, f6, f7, f9, ;21358
+base, f2, f5, f7, f8, ;12981,5
+base, f2, f5, f6, f7, f8, ;21670,5
+base, f2, f5, f7, f8, f9, ;13020,5
+base, f2, f5, f6, f7, f8, f9, ;21803
+base, f2, f3, ;10761,5
+base, f2, f3, f9, ;10832
+base, f2, f3, f8, ;11003
+base, f2, f3, f8, f9, ;11073,5
+base, f2, f3, f7, ;12977
+base, f2, f3, f7, f8, ;13219
+base, f2, f3, f7, f9, ;13039
+base, f2, f3, f7, f8, f9, ;13283,5
+base, f2, f3, f5, ;11401
+base, f2, f3, f5, f9, ;11463,5
+base, f2, f3, f5, f7, ;14857
+base, f2, f3, f5, f7, f9, ;14935
+base, f2, f3, f5, f8, ;11639,5
+base, f2, f3, f5, f7, f8, ;15098,5
+base, f2, f3, f5, f8, f9, ;11690
+base, f2, f3, f5, f7, f8, f9, ;15161
+base, f2, f3, f6, ;13306,5
+base, f2, f3, f6, f9, ;13487
+base, f2, f3, f6, f8, ;13946
+base, f2, f3, f6, f8, f9, ;14141
+base, f2, f3, f5, f6, ;14570
+base, f2, f3, f5, f6, f8, ;15194
+base, f2, f3, f5, f6, f9, ;14742
+base, f2, f3, f5, f6, f8, f9, ;15389
+base, f2, f3, f6, f7, ;24835
+base, f2, f3, f6, f7, f9, ;25022
+base, f2, f3, f5, f6, f7, ;29831,5
+base, f2, f3, f5, f6, f7, f9, ;30006,5
+base, f2, f3, f6, f7, f8, ;25477,5
+base, f2, f3, f5, f6, f7, f8, ;30467
+base, f2, f3, f6, f7, f8, f9, ;25654
+base, f2, f3, f5, f6, f7, f8, f9, ;30661,5
+base, f2, f4, ;8840
+base, f2, f4, f9, ;8894
+base, f2, f4, f8, ;9089
+base, f2, f4, f8, f9, ;9151,5
+base, f2, f4, f7, ;11866,5
+base, f2, f4, f7, f8, ;12115,5
+base, f2, f4, f7, f9, ;11928
+base, f2, f4, f7, f8, f9, ;12178
+base, f2, f4, f6, ;10524
+base, f2, f4, f6, f9, ;10649
+base, f2, f4, f6, f7, ;19829,5
+base, f2, f4, f6, f7, f9, ;19954,5
+base, f2, f4, f6, f8, ;10961
+base, f2, f4, f6, f7, f8, ;20274
+base, f2, f4, f6, f8, f9, ;11086
+base, f2, f4, f6, f7, f8, f9, ;20391
+base, f2, f3, f4, ;10964,5
+base, f2, f3, f4, f9, ;11019
+base, f2, f3, f4, f8, ;11214
+base, f2, f3, f4, f8, f9, ;11276,5
+base, f2, f3, f4, f6, ;13915
+base, f2, f3, f4, f6, f8, ;14547
+base, f2, f3, f4, f6, f9, ;14094
+base, f2, f3, f4, f6, f8, f9, ;14742
+base, f2, f3, f4, f7, ;13983
+base, f2, f3, f4, f7, f9, ;14045
+base, f2, f3, f4, f6, f7, ;27869,5
+base, f2, f3, f4, f6, f7, f9, ;28072
+base, f2, f3, f4, f7, f8, ;14225,5
+base, f2, f3, f4, f6, f7, f8, ;28508,5
+base, f2, f3, f4, f7, f8, f9, ;14311
+base, f2, f3, f4, f6, f7, f8, f9, ;28704
+base, f2, f4, f5, ;9479
+base, f2, f4, f5, f9, ;9541,5
+base, f2, f4, f5, f8, ;9721
+base, f2, f4, f5, f8, f9, ;9775,5
+base, f2, f4, f5, f7, ;13746
+base, f2, f4, f5, f7, f8, ;13980
+base, f2, f4, f5, f7, f9, ;13817,5
+base, f2, f4, f5, f7, f8, f9, ;14050
+base, f2, f3, f4, f5, ;11596
+base, f2, f3, f4, f5, f9, ;11659
+base, f2, f3, f4, f5, f7, ;15878,5
+base, f2, f3, f4, f5, f7, f9, ;15942,5
+base, f2, f3, f4, f5, f8, ;11838
+base, f2, f3, f4, f5, f7, f8, ;16105
+base, f2, f3, f4, f5, f8, f9, ;11893
+base, f2, f3, f4, f5, f7, f8, f9, ;16175
+base, f2, f4, f5, f6, ;11468
+base, f2, f4, f5, f6, f9, ;11585
+base, f2, f4, f5, f6, f8, ;11897
+base, f2, f4, f5, f6, f8, f9, ;12022
+base, f2, f3, f4, f5, f6, ;15163
+base, f2, f3, f4, f5, f6, f8, ;15802,5
+base, f2, f3, f4, f5, f6, f9, ;15350
+base, f2, f3, f4, f5, f6, f8, f9, ;15990
+base, f2, f4, f5, f6, f7, ;23262
+base, f2, f4, f5, f6, f7, f9, ;23386
+base, f2, f3, f4, f5, f6, f7, ;32869
+base, f2, f3, f4, f5, f6, f7, f9, ;33057
+base, f2, f4, f5, f6, f7, f8, ;23690,5
+base, f2, f3, f4, f5, f6, f7, f8, ;33508,5
+base, f2, f4, f5, f6, f7, f8, f9, ;23823,5
+base, f2, f3, f4, f5, f6, f7, f8, f9, ;33711,5
+base, f1, ;3553
+base, f1, f9, ;3608
+base, f1, f8, ;3779,5
+base, f1, f8, f9, ;3842
+base, f1, f7, ;5753
+base, f1, f7, f8, ;5994,5
+base, f1, f7, f9, ;5815
+base, f1, f7, f8, f9, ;6057
+base, f1, f6, ;3951
+base, f1, f6, f9, ;4006
+base, f1, f6, f7, ;7788,5
+base, f1, f6, f7, f9, ;7851
+base, f1, f6, f8, ;4177
+base, f1, f6, f7, f8, ;8015
+base, f1, f6, f8, f9, ;4247,5
+base, f1, f6, f7, f8, f9, ;8085
+base, f1, f5, ;4169,5
+base, f1, f5, f9, ;4232
+base, f1, f5, f8, ;4403,5
+base, f1, f5, f8, f9, ;4458
+base, f1, f5, f6, ;4567
+base, f1, f5, f6, f8, ;4801
+base, f1, f5, f6, f9, ;4645,5
+base, f1, f5, f6, f8, f9, ;4871,5
+base, f1, f5, f7, ;7632,5
+base, f1, f5, f7, f9, ;7695
+base, f1, f5, f6, f7, ;9660,5
+base, f1, f5, f6, f7, f9, ;9723
+base, f1, f5, f7, f8, ;7859
+base, f1, f5, f6, f7, f8, ;9902
+base, f1, f5, f7, f8, f9, ;7929
+base, f1, f5, f6, f7, f8, f9, ;9949
+base, f1, f4, ;3740
+base, f1, f4, f9, ;3803
+base, f1, f4, f8, ;3982
+base, f1, f4, f8, f9, ;4044,5
+base, f1, f4, f7, ;6774,5
+base, f1, f4, f7, f8, ;7008,5
+base, f1, f4, f7, f9, ;6837
+base, f1, f4, f7, f8, f9, ;7063
+base, f1, f4, f5, ;4372
+base, f1, f4, f5, f9, ;4434,5
+base, f1, f4, f5, f7, ;8646,5
+base, f1, f4, f5, f7, f9, ;8709
+base, f1, f4, f5, f8, ;4606
+base, f1, f4, f5, f7, f8, ;8880,5
+base, f1, f4, f5, f8, f9, ;4661
+base, f1, f4, f5, f7, f8, f9, ;8943
+base, f1, f4, f6, ;4154
+base, f1, f4, f6, f9, ;4224
+base, f1, f4, f6, f8, ;4388
+base, f1, f4, f6, f8, f9, ;4450
+base, f1, f4, f5, f6, ;4778
+base, f1, f4, f5, f6, f8, ;5012
+base, f1, f4, f5, f6, f9, ;4840
+base, f1, f4, f5, f6, f8, f9, ;5074,5
+base, f1, f4, f6, f7, ;8795
+base, f1, f4, f6, f7, f9, ;8865
+base, f1, f4, f5, f6, f7, ;10667
+base, f1, f4, f5, f6, f7, f9, ;10737
+base, f1, f4, f6, f7, f8, ;9036,5
+base, f1, f4, f5, f6, f7, f8, ;10901
+base, f1, f4, f6, f7, f8, f9, ;9099
+base, f1, f4, f5, f6, f7, f8, f9, ;10979
+base, f1, f2, ;10205,5
+base, f1, f2, f9, ;10268
+base, f1, f2, f8, ;10447
+base, f1, f2, f8, f9, ;10511,5
+base, f1, f2, f7, ;12421,5
+base, f1, f2, f7, f8, ;12678
+base, f1, f2, f7, f9, ;12483
+base, f1, f2, f7, f8, f9, ;12736,5
+base, f1, f2, f6, ;11687,5
+base, f1, f2, f6, f9, ;11812,5
+base, f1, f2, f6, f7, ;19378,5
+base, f1, f2, f6, f7, f9, ;19495,5
+base, f1, f2, f6, f8, ;12117
+base, f1, f2, f6, f7, f8, ;19807,5
+base, f1, f2, f6, f8, f9, ;12249
+base, f1, f2, f6, f7, f8, f9, ;19932
+base, f1, f2, f4, ;10408,5
+base, f1, f2, f4, f9, ;10471
+base, f1, f2, f4, f8, ;10666
+base, f1, f2, f4, f8, f9, ;10720,5
+base, f1, f2, f4, f6, ;12093,5
+base, f1, f2, f4, f6, f8, ;12537,5
+base, f1, f2, f4, f6, f9, ;12221,5
+base, f1, f2, f4, f6, f8, f9, ;12663
+base, f1, f2, f4, f7, ;13435
+base, f1, f2, f4, f7, f9, ;13497
+base, f1, f2, f4, f6, f7, ;21406,5
+base, f1, f2, f4, f6, f7, f9, ;21524
+base, f1, f2, f4, f7, f8, ;13684,5
+base, f1, f2, f4, f6, f7, f8, ;21843
+base, f1, f2, f4, f7, f8, f9, ;13739
+base, f1, f2, f4, f6, f7, f8, f9, ;21960
+base, f1, f2, f5, ;10845
+base, f1, f2, f5, f9, ;10907,5
+base, f1, f2, f5, f8, ;11071
+base, f1, f2, f5, f8, f9, ;11149
+base, f1, f2, f5, f7, ;14301
+base, f1, f2, f5, f7, f8, ;14535
+base, f1, f2, f5, f7, f9, ;14363
+base, f1, f2, f5, f7, f8, f9, ;14605
+base, f1, f2, f4, f5, ;11048
+base, f1, f2, f4, f5, f9, ;11110,5
+base, f1, f2, f4, f5, f7, ;15315
+base, f1, f2, f4, f5, f7, f9, ;15377,5
+base, f1, f2, f4, f5, f8, ;11290
+base, f1, f2, f4, f5, f7, f8, ;15556,5
+base, f1, f2, f4, f5, f8, f9, ;11344,5
+base, f1, f2, f4, f5, f7, f8, f9, ;15619
+base, f1, f2, f5, f6, ;12616
+base, f1, f2, f5, f6, f9, ;12741
+base, f1, f2, f5, f6, f8, ;13060,5
+base, f1, f2, f5, f6, f8, f9, ;13177
+base, f1, f2, f4, f5, f6, ;13029
+base, f1, f2, f4, f5, f6, f8, ;13474
+base, f1, f2, f4, f5, f6, f9, ;13155,5
+base, f1, f2, f4, f5, f6, f8, f9, ;13591
+base, f1, f2, f5, f6, f7, ;22810,5
+base, f1, f2, f5, f6, f7, f9, ;22935
+base, f1, f2, f4, f5, f6, f7, ;24838,5
+base, f1, f2, f4, f5, f6, f7, f9, ;24948
+base, f1, f2, f5, f6, f7, f8, ;23247
+base, f1, f2, f4, f5, f6, f7, f8, ;25267
+base, f1, f2, f5, f6, f7, f8, f9, ;23364,5
+base, f1, f2, f4, f5, f6, f7, f8, f9, ;25400
+base, f1, f3, ;6212
+base, f1, f3, f9, ;6274,5
+base, f1, f3, f8, ;6454
+base, f1, f3, f8, f9, ;6539,5
+base, f1, f3, f7, ;8427
+base, f1, f3, f7, f8, ;8669
+base, f1, f3, f7, f9, ;8482
+base, f1, f3, f7, f8, f9, ;8739
+base, f1, f3, f6, ;7694
+base, f1, f3, f6, f9, ;7811
+base, f1, f3, f6, f7, ;15385
+base, f1, f3, f6, f7, f9, ;15501,5
+base, f1, f3, f6, f8, ;8123
+base, f1, f3, f6, f7, f8, ;15821,5
+base, f1, f3, f6, f8, f9, ;8248
+base, f1, f3, f6, f7, f8, f9, ;15946,5
+base, f1, f3, f5, ;6844
+base, f1, f3, f5, f9, ;6914
+base, f1, f3, f5, f8, ;7085,5
+base, f1, f3, f5, f8, f9, ;7140
+base, f1, f3, f5, f6, ;8630
+base, f1, f3, f5, f6, f8, ;9059
+base, f1, f3, f5, f6, f9, ;8755
+base, f1, f3, f5, f6, f8, f9, ;9200,5
+base, f1, f3, f5, f7, ;10315
+base, f1, f3, f5, f7, f9, ;10369
+base, f1, f3, f5, f6, f7, ;18801
+base, f1, f3, f5, f6, f7, f9, ;18941,5
+base, f1, f3, f5, f7, f8, ;10549
+base, f1, f3, f5, f6, f7, f8, ;19245,5
+base, f1, f3, f5, f7, f8, f9, ;10611
+base, f1, f3, f5, f6, f7, f8, f9, ;19378,5
+base, f1, f2, f3, ;12886
+base, f1, f2, f3, f9, ;12940
+base, f1, f2, f3, f8, ;13136,5
+base, f1, f2, f3, f8, f9, ;13199
+base, f1, f2, f3, f7, ;15093
+base, f1, f2, f3, f7, f8, ;15350,5
+base, f1, f2, f3, f7, f9, ;15156
+base, f1, f2, f3, f7, f8, f9, ;15413
+base, f1, f2, f3, f5, ;13518
+base, f1, f2, f3, f5, f9, ;13596
+base, f1, f2, f3, f5, f7, ;16988,5
+base, f1, f2, f3, f5, f7, f9, ;17051
+base, f1, f2, f3, f5, f8, ;13752
+base, f1, f2, f3, f5, f7, f8, ;17215
+base, f1, f2, f3, f5, f8, f9, ;13822
+base, f1, f2, f3, f5, f7, f8, f9, ;17285
+base, f1, f2, f3, f6, ;15423
+base, f1, f2, f3, f6, f9, ;15618
+base, f1, f2, f3, f6, f8, ;16063
+base, f1, f2, f3, f6, f8, f9, ;16257,5
+base, f1, f2, f3, f5, f6, ;16679
+base, f1, f2, f3, f5, f6, f8, ;17318,5
+base, f1, f2, f3, f5, f6, f9, ;16866
+base, f1, f2, f3, f5, f6, f8, f9, ;17513,5
+base, f1, f2, f3, f6, f7, ;26960,5
+base, f1, f2, f3, f6, f7, f9, ;27154,5
+base, f1, f2, f3, f5, f6, f7, ;31951,5
+base, f1, f2, f3, f5, f6, f7, f9, ;32131,5
+base, f1, f2, f3, f6, f7, f8, ;27606,5
+base, f1, f2, f3, f5, f6, f7, f8, ;32591
+base, f1, f2, f3, f6, f7, f8, f9, ;27786
+base, f1, f2, f3, f5, f6, f7, f8, f9, ;32770,5
+base, f1, f3, f4, ;6415
+base, f1, f3, f4, f9, ;6477
+base, f1, f3, f4, f8, ;6664,5
+base, f1, f3, f4, f8, f9, ;6727
+base, f1, f3, f4, f7, ;9441
+base, f1, f3, f4, f7, f8, ;9683
+base, f1, f3, f4, f7, f9, ;9503,5
+base, f1, f3, f4, f7, f8, f9, ;9753
+base, f1, f3, f4, f6, ;8099,5
+base, f1, f3, f4, f6, f9, ;8217
+base, f1, f3, f4, f6, f7, ;17397
+base, f1, f3, f4, f6, f7, f9, ;17522
+base, f1, f3, f4, f6, f8, ;8536,5
+base, f1, f3, f4, f6, f7, f8, ;17834
+base, f1, f3, f4, f6, f8, f9, ;8653
+base, f1, f3, f4, f6, f7, f8, f9, ;17959
+base, f1, f2, f3, f4, ;13081
+base, f1, f2, f3, f4, f9, ;13229
+base, f1, f2, f3, f4, f8, ;13338
+base, f1, f2, f3, f4, f8, f9, ;13400,5
+base, f1, f2, f3, f4, f6, ;16055
+base, f1, f2, f3, f4, f6, f8, ;16687
+base, f1, f2, f3, f4, f6, f9, ;16226,5
+base, f1, f2, f3, f4, f6, f8, f9, ;16866
+base, f1, f2, f3, f4, f7, ;16115
+base, f1, f2, f3, f4, f7, f9, ;16177,5
+base, f1, f2, f3, f4, f6, f7, ;30001
+base, f1, f2, f3, f4, f6, f7, f9, ;30189
+base, f1, f2, f3, f4, f7, f8, ;16364,5
+base, f1, f2, f3, f4, f6, f7, f8, ;30685
+base, f1, f2, f3, f4, f7, f8, f9, ;16427
+base, f1, f2, f3, f4, f6, f7, f8, f9, ;30835,5
+base, f1, f3, f4, f5, ;7054,5
+base, f1, f3, f4, f5, f9, ;7117
+base, f1, f3, f4, f5, f8, ;7281
+base, f1, f3, f4, f5, f8, f9, ;7343
+base, f1, f3, f4, f5, f7, ;11330
+base, f1, f3, f4, f5, f7, f8, ;11563
+base, f1, f3, f4, f5, f7, f9, ;11383
+base, f1, f3, f4, f5, f7, f8, f9, ;11620,5
+base, f1, f2, f3, f4, f5, ;13720
+base, f1, f2, f3, f4, f5, f9, ;13786
+base, f1, f2, f3, f4, f5, f7, ;17998
+base, f1, f2, f3, f4, f5, f7, f9, ;18065
+base, f1, f2, f3, f4, f5, f8, ;13962
+base, f1, f2, f3, f4, f5, f7, f8, ;18236,5
+base, f1, f2, f3, f4, f5, f8, f9, ;14025
+base, f1, f2, f3, f4, f5, f7, f8, f9, ;18300
+base, f1, f3, f4, f5, f6, ;9035,5
+base, f1, f3, f4, f5, f6, f9, ;9160,5
+base, f1, f3, f4, f5, f6, f8, ;9473
+base, f1, f3, f4, f5, f6, f8, f9, ;9597,5
+base, f1, f2, f3, f4, f5, f6, ;17287
+base, f1, f2, f3, f4, f5, f6, f8, ;17928,5
+base, f1, f2, f3, f4, f5, f6, f9, ;17471,5
+base, f1, f2, f3, f4, f5, f6, f8, f9, ;18106
+base, f1, f3, f4, f5, f6, f7, ;20837
+base, f1, f3, f4, f5, f6, f7, f9, ;20970
+base, f1, f2, f3, f4, f5, f6, f7, ;35001
+base, f1, f2, f3, f4, f5, f6, f7, f9, ;35188,5
+base, f1, f3, f4, f5, f6, f7, f8, ;21274
+base, f1, f2, f3, f4, f5, f6, f7, f8, ;35640,5
+base, f1, f3, f4, f5, f6, f7, f8, f9, ;21399
+base, f1, f2, f3, f4, f5, f6, f7, f8, f9, ;35820
+base, f10, ;2625
+base, f9, f10, ;2687,5
+base, f8, f10, ;2851
+base, f8, f9, f10, ;2921,5
+base, f7, f10, ;4840
+base, f7, f8, f10, ;5066
+base, f7, f9, f10, ;4902,5
+base, f7, f8, f9, f10, ;5136,5
+base, f6, f10, ;3023
+base, f6, f9, f10, ;3085
+base, f6, f7, f10, ;6868
+base, f6, f7, f9, f10, ;6930,5
+base, f6, f8, f10, ;3264,5
+base, f6, f7, f8, f10, ;7102
+base, f6, f8, f9, f10, ;3327
+base, f6, f7, f8, f9, f10, ;7164,5
+base, f5, f10, ;3249
+base, f5, f9, f10, ;3304
+base, f5, f8, f10, ;3475
+base, f5, f8, f9, f10, ;3545,5
+base, f5, f6, f10, ;3654,5
+base, f5, f6, f8, f10, ;3896
+base, f5, f6, f9, f10, ;3717
+base, f5, f6, f8, f9, f10, ;3951
+base, f5, f7, f10, ;6712
+base, f5, f7, f9, f10, ;6774,5
+base, f5, f6, f7, f10, ;8732
+base, f5, f6, f7, f9, f10, ;8802,5
+base, f5, f7, f8, f10, ;6946
+base, f5, f6, f7, f8, f10, ;8974
+base, f5, f7, f8, f9, f10, ;7001
+base, f5, f6, f7, f8, f9, f10, ;9036,5
+base, f4, f10, ;2828
+base, f4, f9, f10, ;2890
+base, f4, f8, f10, ;3062
+base, f4, f8, f9, f10, ;3116
+base, f4, f7, f10, ;5846
+base, f4, f7, f8, f10, ;6088
+base, f4, f7, f9, f10, ;5916,5
+base, f4, f7, f8, f9, f10, ;6150,5
+base, f4, f5, f10, ;3452
+base, f4, f5, f9, f10, ;3514
+base, f4, f5, f7, f10, ;7726
+base, f4, f5, f7, f9, f10, ;7788,5
+base, f4, f5, f8, f10, ;3678
+base, f4, f5, f7, f8, f10, ;7960
+base, f4, f5, f8, f9, f10, ;3748
+base, f4, f5, f7, f8, f9, f10, ;8022,5
+base, f4, f6, f10, ;3233,5
+base, f4, f6, f9, f10, ;3296
+base, f4, f6, f8, f10, ;3467,5
+base, f4, f6, f8, f9, f10, ;3522
+base, f4, f5, f6, f10, ;3850
+base, f4, f5, f6, f8, f10, ;4091,5
+base, f4, f5, f6, f9, f10, ;3920
+base, f4, f5, f6, f8, f9, f10, ;4154,5
+base, f4, f6, f7, f10, ;7882
+base, f4, f6, f7, f9, f10, ;7944,5
+base, f4, f5, f6, f7, f10, ;9754
+base, f4, f5, f6, f7, f9, f10, ;9824
+base, f4, f6, f7, f8, f10, ;8108
+base, f4, f5, f6, f7, f8, f10, ;9996
+base, f4, f6, f7, f8, f9, f10, ;8178,5
+base, f4, f5, f6, f7, f8, f9, f10, ;10058
+base, f3, f10, ;5345
+base, f3, f9, f10, ;5470
+base, f3, f8, f10, ;5797,5
+base, f3, f8, f9, f10, ;5922
+base, f3, f7, f10, ;9775,5
+base, f3, f7, f8, f10, ;10229
+base, f3, f7, f9, f10, ;9900
+base, f3, f7, f8, f9, f10, ;10353
+base, f3, f6, f10, ;7326
+base, f3, f6, f9, f10, ;7513,5
+base, f3, f6, f7, f10, ;18847
+base, f3, f6, f7, f9, f10, ;19034
+base, f3, f6, f8, f10, ;7966
+base, f3, f6, f7, f8, f10, ;19494
+base, f3, f6, f8, f9, f10, ;8145
+base, f3, f6, f7, f8, f9, f10, ;19673,5
+base, f3, f4, f10, ;5758
+base, f3, f4, f9, f10, ;5883,5
+base, f3, f4, f8, f10, ;6203
+base, f3, f4, f8, f9, f10, ;6329
+base, f3, f4, f6, f10, ;7934,5
+base, f3, f4, f6, f8, f10, ;8574
+base, f3, f4, f6, f9, f10, ;8114
+base, f3, f4, f6, f8, f9, f10, ;8765
+base, f3, f4, f7, f10, ;11819
+base, f3, f4, f7, f9, f10, ;11936
+base, f3, f4, f6, f7, f10, ;21889
+base, f3, f4, f6, f7, f9, f10, ;22084
+base, f3, f4, f7, f8, f10, ;12256
+base, f3, f4, f6, f7, f8, f10, ;22536
+base, f3, f4, f7, f8, f9, f10, ;12380,5
+base, f3, f4, f6, f7, f8, f9, f10, ;22724,5
+base, f3, f5, f10, ;6296,5
+base, f3, f5, f9, f10, ;6429,5
+base, f3, f5, f8, f10, ;6733,5
+base, f3, f5, f8, f9, f10, ;6850
+base, f3, f5, f7, f10, ;13231,5
+base, f3, f5, f7, f8, f10, ;13660,5
+base, f3, f5, f7, f9, f10, ;13348
+base, f3, f5, f7, f8, f9, f10, ;13792
+base, f3, f4, f5, f10, ;6694
+base, f3, f4, f5, f9, f10, ;6827
+base, f3, f4, f5, f7, f10, ;15243
+base, f3, f4, f5, f7, f9, f10, ;15384
+base, f3, f4, f5, f8, f10, ;7139
+base, f3, f4, f5, f7, f8, f10, ;15688
+base, f3, f4, f5, f8, f9, f10, ;7265,5
+base, f3, f4, f5, f7, f8, f9, f10, ;15812,5
+base, f3, f5, f6, f10, ;8574
+base, f3, f5, f6, f9, f10, ;8761,5
+base, f3, f5, f6, f8, f10, ;9206
+base, f3, f5, f6, f8, f9, f10, ;9401
+base, f3, f4, f5, f6, f10, ;9182,5
+base, f3, f4, f5, f6, f8, f10, ;9814
+base, f3, f4, f5, f6, f9, f10, ;9378
+base, f3, f4, f5, f6, f8, f9, f10, ;10009,5
+base, f3, f5, f6, f7, f10, ;23838,5
+base, f3, f5, f6, f7, f9, f10, ;24026
+base, f3, f4, f5, f6, f7, f10, ;26881
+base, f3, f4, f5, f6, f7, f9, f10, ;27084
+base, f3, f5, f6, f7, f8, f10, ;24486
+base, f3, f4, f5, f6, f7, f8, f10, ;27528
+base, f3, f5, f6, f7, f8, f9, f10, ;24665,5
+base, f3, f4, f5, f6, f7, f8, f9, f10, ;27715,5
+base, f1, f10, ;3639
+base, f1, f9, f10, ;3701,5
+base, f1, f8, f10, ;3873
+base, f1, f8, f9, f10, ;3935,5
+base, f1, f7, f10, ;5846
+base, f1, f7, f8, f10, ;6080
+base, f1, f7, f9, f10, ;5924
+base, f1, f7, f8, f9, f10, ;6150,5
+base, f1, f6, f10, ;4044,5
+base, f1, f6, f9, f10, ;4107
+base, f1, f6, f7, f10, ;7874,5
+base, f1, f6, f7, f9, f10, ;7937
+base, f1, f6, f8, f10, ;4278,5
+base, f1, f6, f7, f8, f10, ;8116
+base, f1, f6, f8, f9, f10, ;4341
+base, f1, f6, f7, f8, f9, f10, ;8171
+base, f1, f5, f10, ;4263
+base, f1, f5, f9, f10, ;4325,5
+base, f1, f5, f8, f10, ;4489
+base, f1, f5, f8, f9, f10, ;4559,5
+base, f1, f5, f6, f10, ;4661
+base, f1, f5, f6, f8, f10, ;4895
+base, f1, f5, f6, f9, f10, ;4723
+base, f1, f5, f6, f8, f9, f10, ;4965
+base, f1, f5, f7, f10, ;7726
+base, f1, f5, f7, f9, f10, ;7788,5
+base, f1, f5, f6, f7, f10, ;9762
+base, f1, f5, f6, f7, f9, f10, ;9809
+base, f1, f5, f7, f8, f10, ;7960
+base, f1, f5, f6, f7, f8, f10, ;9988
+base, f1, f5, f7, f8, f9, f10, ;8022,5
+base, f1, f5, f6, f7, f8, f9, f10, ;10043
+base, f1, f3, f10, ;6914
+base, f1, f3, f9, f10, ;7039
+base, f1, f3, f8, f10, ;7359
+base, f1, f3, f8, f9, f10, ;7505,5
+base, f1, f3, f7, f10, ;11352
+base, f1, f3, f7, f8, f10, ;11797
+base, f1, f3, f7, f9, f10, ;11477
+base, f1, f3, f7, f8, f9, f10, ;11929
+base, f1, f3, f5, f10, ;7865,5
+base, f1, f3, f5, f9, f10, ;7990,5
+base, f1, f3, f5, f7, f10, ;14792
+base, f1, f3, f5, f7, f9, f10, ;14925
+base, f1, f3, f5, f8, f10, ;8302,5
+base, f1, f3, f5, f7, f8, f10, ;15221
+base, f1, f3, f5, f8, f9, f10, ;8427
+base, f1, f3, f5, f7, f8, f9, f10, ;15361
+base, f1, f3, f6, f10, ;8887
+base, f1, f3, f6, f9, f10, ;9082,5
+base, f1, f3, f6, f8, f10, ;9535
+base, f1, f3, f6, f8, f9, f10, ;9722
+base, f1, f3, f5, f6, f10, ;10135
+base, f1, f3, f5, f6, f8, f10, ;10783
+base, f1, f3, f5, f6, f9, f10, ;10330,5
+base, f1, f3, f5, f6, f8, f9, f10, ;10970
+base, f1, f3, f6, f7, f10, ;20431
+base, f1, f3, f6, f7, f9, f10, ;20611
+base, f1, f3, f5, f6, f7, f10, ;25408
+base, f1, f3, f5, f6, f7, f9, f10, ;25588
+base, f1, f3, f6, f7, f8, f10, ;21055
+base, f1, f3, f5, f6, f7, f8, f10, ;26047
+base, f1, f3, f6, f7, f8, f9, f10, ;21250,5
+base, f1, f3, f5, f6, f7, f8, f9, f10, ;26242,5
+base, f1, f4, f10, ;3842
+base, f1, f4, f9, f10, ;3896
+base, f1, f4, f8, f10, ;4076
+base, f1, f4, f8, f9, f10, ;4130
+base, f1, f4, f7, f10, ;6868
+base, f1, f4, f7, f8, f10, ;7094
+base, f1, f4, f7, f9, f10, ;6930,5
+base, f1, f4, f7, f8, f9, f10, ;7164,5
+base, f1, f4, f6, f10, ;4240
+base, f1, f4, f6, f9, f10, ;4310
+base, f1, f4, f6, f7, f10, ;8896
+base, f1, f4, f6, f7, f9, f10, ;8958,5
+base, f1, f4, f6, f8, f10, ;4474
+base, f1, f4, f6, f7, f8, f10, ;9130
+base, f1, f4, f6, f8, f9, f10, ;4544
+base, f1, f4, f6, f7, f8, f9, f10, ;9192,5
+base, f1, f3, f4, f10, ;7319,5
+base, f1, f3, f4, f9, f10, ;7452,5
+base, f1, f3, f4, f8, f10, ;7772
+base, f1, f3, f4, f8, f9, f10, ;7889
+base, f1, f3, f4, f6, f10, ;9504
+base, f1, f3, f4, f6, f8, f10, ;10135
+base, f1, f3, f4, f6, f9, f10, ;9683
+base, f1, f3, f4, f6, f8, f9, f10, ;10330,5
+base, f1, f3, f4, f7, f10, ;13388
+base, f1, f3, f4, f7, f9, f10, ;13513
+base, f1, f3, f4, f6, f7, f10, ;23458
+base, f1, f3, f4, f6, f7, f9, f10, ;23645
+base, f1, f3, f4, f7, f8, f10, ;13825
+base, f1, f3, f4, f6, f7, f8, f10, ;24089,5
+base, f1, f3, f4, f7, f8, f9, f10, ;13953
+base, f1, f3, f4, f6, f7, f8, f9, f10, ;24284,5
+base, f1, f4, f5, f10, ;4458
+base, f1, f4, f5, f9, f10, ;4528
+base, f1, f4, f5, f8, f10, ;4700
+base, f1, f4, f5, f8, f9, f10, ;4754
+base, f1, f4, f5, f7, f10, ;8740
+base, f1, f4, f5, f7, f8, f10, ;8966
+base, f1, f4, f5, f7, f9, f10, ;8802,5
+base, f1, f4, f5, f7, f8, f9, f10, ;9029,5
+base, f1, f3, f4, f5, f10, ;8279
+base, f1, f3, f4, f5, f9, f10, ;8404
+base, f1, f3, f4, f5, f7, f10, ;16835,5
+base, f1, f3, f4, f5, f7, f9, f10, ;16953,5
+base, f1, f3, f4, f5, f8, f10, ;8700
+base, f1, f3, f4, f5, f7, f8, f10, ;17265
+base, f1, f3, f4, f5, f8, f9, f10, ;8833
+base, f1, f3, f4, f5, f7, f8, f9, f10, ;17381,5
+base, f1, f4, f5, f6, f10, ;4871,5
+base, f1, f4, f5, f6, f9, f10, ;4934
+base, f1, f4, f5, f6, f8, f10, ;5098
+base, f1, f4, f5, f6, f8, f9, f10, ;5168
+base, f1, f3, f4, f5, f6, f10, ;10759
+base, f1, f3, f4, f5, f6, f8, f10, ;11395
+base, f1, f3, f4, f5, f6, f9, f10, ;10939
+base, f1, f3, f4, f5, f6, f8, f9, f10, ;11578,5
+base, f1, f4, f5, f6, f7, f10, ;10768
+base, f1, f4, f5, f6, f7, f9, f10, ;10830,5
+base, f1, f3, f4, f5, f6, f7, f10, ;28457,5
+base, f1, f3, f4, f5, f6, f7, f9, f10, ;28649
+base, f1, f4, f5, f6, f7, f8, f10, ;11010
+base, f1, f3, f4, f5, f6, f7, f8, f10, ;29097
+base, f1, f4, f5, f6, f7, f8, f9, f10, ;11072
+base, f1, f3, f4, f5, f6, f7, f8, f9, f10, ;29277
+base, f2, f10, ;9338,5
+base, f2, f9, f10, ;9463,5
+base, f2, f8, f10, ;9791
+base, f2, f8, f9, f10, ;9916
+base, f2, f7, f10, ;13784,5
+base, f2, f7, f8, f10, ;14221,5
+base, f2, f7, f9, f10, ;13894
+base, f2, f7, f8, f9, f10, ;14338
+base, f2, f6, f10, ;11320
+base, f2, f6, f9, f10, ;11507
+base, f2, f6, f7, f10, ;22825,5
+base, f2, f6, f7, f9, f10, ;23028
+base, f2, f6, f8, f10, ;11967
+base, f2, f6, f7, f8, f10, ;23488
+base, f2, f6, f8, f9, f10, ;12146,5
+base, f2, f6, f7, f8, f9, f10, ;23662,5
+base, f2, f5, f10, ;10282
+base, f2, f5, f9, f10, ;10407
+base, f2, f5, f8, f10, ;10727
+base, f2, f5, f8, f9, f10, ;10852
+base, f2, f5, f6, f10, ;12568
+base, f2, f5, f6, f8, f10, ;13217,5
+base, f2, f5, f6, f9, f10, ;12747
+base, f2, f5, f6, f8, f9, f10, ;13394,5
+base, f2, f5, f7, f10, ;17209
+base, f2, f5, f7, f9, f10, ;17349
+base, f2, f5, f6, f7, f10, ;27840
+base, f2, f5, f6, f7, f9, f10, ;28027,5
+base, f2, f5, f7, f8, f10, ;17653,5
+base, f2, f5, f6, f7, f8, f10, ;28472
+base, f2, f5, f7, f8, f9, f10, ;17770
+base, f2, f5, f6, f7, f8, f9, f10, ;28667
+base, f2, f4, f10, ;9744
+base, f2, f4, f9, f10, ;9869
+base, f2, f4, f8, f10, ;10196,5
+base, f2, f4, f8, f9, f10, ;10321,5
+base, f2, f4, f7, f10, ;15797
+base, f2, f4, f7, f8, f10, ;16258
+base, f2, f4, f7, f9, f10, ;15930
+base, f2, f4, f7, f8, f9, f10, ;16374
+base, f2, f4, f5, f10, ;10688,5
+base, f2, f4, f5, f9, f10, ;10820,5
+base, f2, f4, f5, f7, f10, ;19252
+base, f2, f4, f5, f7, f9, f10, ;19377
+base, f2, f4, f5, f8, f10, ;11132,5
+base, f2, f4, f5, f7, f8, f10, ;19681,5
+base, f2, f4, f5, f8, f9, f10, ;11250
+base, f2, f4, f5, f7, f8, f9, f10, ;19814
+base, f2, f4, f6, f10, ;11924
+base, f2, f4, f6, f9, f10, ;12108
+base, f2, f4, f6, f8, f10, ;12568
+base, f2, f4, f6, f8, f9, f10, ;12755
+base, f2, f4, f5, f6, f10, ;13168
+base, f2, f4, f5, f6, f8, f10, ;13824
+base, f2, f4, f5, f6, f9, f10, ;13363,5
+base, f2, f4, f5, f6, f8, f9, f10, ;13995
+base, f2, f4, f6, f7, f10, ;25890
+base, f2, f4, f6, f7, f9, f10, ;26070
+base, f2, f4, f5, f6, f7, f10, ;30874,5
+base, f2, f4, f5, f6, f7, f9, f10, ;31069,5
+base, f2, f4, f6, f7, f8, f10, ;26522
+base, f2, f4, f5, f6, f7, f8, f10, ;31530
+base, f2, f4, f6, f7, f8, f9, f10, ;26709
+base, f2, f4, f5, f6, f7, f8, f9, f10, ;31717
+base, f1, f2, f10, ;10900
+base, f1, f2, f9, f10, ;11032,5
+base, f1, f2, f8, f10, ;11361,5
+base, f1, f2, f8, f9, f10, ;11485
+base, f1, f2, f7, f10, ;15346
+base, f1, f2, f7, f8, f10, ;15783
+base, f1, f2, f7, f9, f10, ;15471
+base, f1, f2, f7, f8, f9, f10, ;15907
+base, f1, f2, f6, f10, ;12889
+base, f1, f2, f6, f9, f10, ;13076
+base, f1, f2, f6, f7, f10, ;24409
+base, f1, f2, f6, f7, f9, f10, ;24597
+base, f1, f2, f6, f8, f10, ;13531
+base, f1, f2, f6, f7, f8, f10, ;25060
+base, f1, f2, f6, f8, f9, f10, ;13715,5
+base, f1, f2, f6, f7, f8, f9, f10, ;25244
+base, f1, f2, f4, f10, ;11313
+base, f1, f2, f4, f9, f10, ;11438
+base, f1, f2, f4, f8, f10, ;11765,5
+base, f1, f2, f4, f8, f9, f10, ;11890,5
+base, f1, f2, f4, f6, f10, ;13497
+base, f1, f2, f4, f6, f8, f10, ;14137
+base, f1, f2, f4, f6, f9, f10, ;13684,5
+base, f1, f2, f4, f6, f8, f9, f10, ;14324
+base, f1, f2, f4, f7, f10, ;17381,5
+base, f1, f2, f4, f7, f9, f10, ;17499
+base, f1, f2, f4, f6, f7, f10, ;27459
+base, f1, f2, f4, f6, f7, f9, f10, ;27646,5
+base, f1, f2, f4, f7, f8, f10, ;17830,5
+base, f1, f2, f4, f6, f7, f8, f10, ;28083
+base, f1, f2, f4, f7, f8, f9, f10, ;17935
+base, f1, f2, f4, f6, f7, f8, f9, f10, ;28278,5
+base, f1, f2, f5, f10, ;11859
+base, f1, f2, f5, f9, f10, ;11992
+base, f1, f2, f5, f8, f10, ;12296
+base, f1, f2, f5, f8, f9, f10, ;12421
+base, f1, f2, f5, f7, f10, ;18793
+base, f1, f2, f5, f7, f8, f10, ;19230
+base, f1, f2, f5, f7, f9, f10, ;18910,5
+base, f1, f2, f5, f7, f8, f9, f10, ;19339
+base, f1, f2, f4, f5, f10, ;12257
+base, f1, f2, f4, f5, f9, f10, ;12389,5
+base, f1, f2, f4, f5, f7, f10, ;20813,5
+base, f1, f2, f4, f5, f7, f9, f10, ;21064
+base, f1, f2, f4, f5, f8, f10, ;12709
+base, f1, f2, f4, f5, f7, f8, f10, ;21243
+base, f1, f2, f4, f5, f8, f9, f10, ;12819
+base, f1, f2, f4, f5, f7, f8, f9, f10, ;21367
+base, f1, f2, f5, f6, f10, ;14129
+base, f1, f2, f5, f6, f9, f10, ;14324
+base, f1, f2, f5, f6, f8, f10, ;14782
+base, f1, f2, f5, f6, f8, f9, f10, ;14956
+base, f1, f2, f4, f5, f6, f10, ;14737
+base, f1, f2, f4, f5, f6, f8, f10, ;15377
+base, f1, f2, f4, f5, f6, f9, f10, ;14933
+base, f1, f2, f4, f5, f6, f8, f9, f10, ;15572
+base, f1, f2, f5, f6, f7, f10, ;29409
+base, f1, f2, f5, f6, f7, f9, f10, ;29588,5
+base, f1, f2, f4, f5, f6, f7, f10, ;32436
+base, f1, f2, f4, f5, f6, f7, f9, f10, ;32638,5
+base, f1, f2, f5, f6, f7, f8, f10, ;30041
+base, f1, f2, f4, f5, f6, f7, f8, f10, ;33099
+base, f1, f2, f5, f6, f7, f8, f9, f10, ;30236
+base, f1, f2, f4, f5, f6, f7, f8, f9, f10, ;33270
+base, f2, f3, f10, ;12058,5
+base, f2, f3, f9, f10, ;12246
+base, f2, f3, f8, f10, ;12714
+base, f2, f3, f8, f9, f10, ;12893
+base, f2, f3, f7, f10, ;18727,5
+base, f2, f3, f7, f8, f10, ;19375
+base, f2, f3, f7, f9, f10, ;18899,5
+base, f2, f3, f7, f8, f9, f10, ;19554
+base, f2, f3, f6, f10, ;15608
+base, f2, f3, f6, f9, f10, ;15927,5
+base, f2, f3, f6, f7, f10, ;34834,5
+base, f2, f3, f6, f7, f9, f10, ;35146,5
+base, f2, f3, f6, f8, f10, ;16660,5
+base, f2, f3, f6, f7, f8, f10, ;35880
+base, f2, f3, f6, f8, f9, f10, ;16980
+base, f2, f3, f6, f7, f8, f9, f10, ;36184,5
+base, f2, f3, f5, f10, ;13330
+base, f2, f3, f5, f9, f10, ;13509,5
+base, f2, f3, f5, f8, f10, ;13962
+base, f2, f3, f5, f8, f9, f10, ;14149
+base, f2, f3, f5, f6, f10, ;17487,5
+base, f2, f3, f5, f6, f8, f10, ;18540
+base, f2, f3, f5, f6, f9, f10, ;17799,5
+base, f2, f3, f5, f6, f8, f9, f10, ;18852
+base, f2, f3, f5, f7, f10, ;23719,5
+base, f2, f3, f5, f7, f9, f10, ;23899
+base, f2, f3, f5, f6, f7, f10, ;42938,5
+base, f2, f3, f5, f6, f7, f9, f10, ;43250,5
+base, f2, f3, f5, f7, f8, f10, ;24367
+base, f2, f3, f5, f6, f7, f8, f10, ;43984
+base, f2, f3, f5, f7, f8, f9, f10, ;24554
+base, f2, f3, f5, f6, f7, f8, f9, f10, ;31477,5
+base, f1, f2, f3, f10, ;14222
+base, f1, f2, f3, f9, f10, ;14393,5
+base, f1, f2, f3, f8, f10, ;14854
+base, f1, f2, f3, f8, f9, f10, ;15033
+base, f1, f2, f3, f7, f10, ;20844
+base, f1, f2, f3, f7, f8, f10, ;21491,5
+base, f1, f2, f3, f7, f9, f10, ;21031
+base, f1, f2, f3, f7, f8, f9, f10, ;21686,5
+base, f1, f2, f3, f5, f10, ;15446,5
+base, f1, f2, f3, f5, f9, f10, ;15630,5
+base, f1, f2, f3, f5, f7, f10, ;25859
+base, f1, f2, f3, f5, f7, f9, f10, ;26039
+base, f1, f2, f3, f5, f8, f10, ;16094
+base, f1, f2, f3, f5, f7, f8, f10, ;26488
+base, f1, f2, f3, f5, f8, f9, f10, ;16273
+base, f1, f2, f3, f5, f7, f8, f9, f10, ;26670,5
+base, f1, f2, f3, f6, f10, ;17739,5
+base, f1, f2, f3, f6, f9, f10, ;18051,5
+base, f1, f2, f3, f6, f8, f10, ;18793
+base, f1, f2, f3, f6, f8, f9, f10, ;19097
+base, f1, f2, f3, f5, f6, f10, ;19612
+base, f1, f2, f3, f5, f6, f8, f10, ;20665
+base, f1, f2, f3, f5, f6, f9, f10, ;19923,5
+base, f1, f2, f3, f5, f6, f8, f9, f10, ;20977
+base, f1, f2, f3, f6, f7, f10, ;36951
+base, f1, f2, f3, f6, f7, f9, f10, ;37272,5
+base, f1, f2, f3, f5, f6, f7, f10, ;45072,5
+base, f1, f2, f3, f5, f6, f7, f9, f10, ;45378,5
+base, f1, f2, f3, f6, f7, f8, f10, ;37991
+base, f1, f2, f3, f5, f6, f7, f8, f10, ;46104
+base, f1, f2, f3, f6, f7, f8, f9, f10, ;38278,5
+base, f1, f2, f3, f5, f6, f7, f8, f9, f10, ;46429,5
+base, f2, f3, f4, f10, ;12667
+base, f2, f3, f4, f9, f10, ;12854
+base, f2, f3, f4, f8, f10, ;13330
+base, f2, f3, f4, f8, f9, f10, ;13509,5
+base, f2, f3, f4, f7, f10, ;21762
+base, f2, f3, f4, f7, f8, f10, ;22404
+base, f2, f3, f4, f7, f9, f10, ;21965
+base, f2, f3, f4, f7, f8, f9, f10, ;22593,5
+base, f2, f3, f4, f6, f10, ;16629,5
+base, f2, f3, f4, f6, f9, f10, ;16941,5
+base, f2, f3, f4, f6, f7, f10, ;39904,5
+base, f2, f3, f4, f6, f7, f9, f10, ;40204
+base, f2, f3, f4, f6, f8, f10, ;17682,5
+base, f2, f3, f4, f6, f7, f8, f10, ;40942
+base, f2, f3, f4, f6, f8, f9, f10, ;17990
+base, f2, f3, f4, f6, f7, f8, f9, f10, ;41255,5
+base, f1, f2, f3, f4, f10, ;14791
+base, f1, f2, f3, f4, f9, f10, ;14986,5
+base, f1, f2, f3, f4, f8, f10, ;15446,5
+base, f1, f2, f3, f4, f8, f9, f10, ;15626
+base, f1, f2, f3, f4, f6, f10, ;18753,5
+base, f1, f2, f3, f4, f6, f8, f10, ;19799
+base, f1, f2, f3, f4, f6, f9, f10, ;19073
+base, f1, f2, f3, f4, f6, f8, f9, f10, ;20119
+base, f1, f2, f3, f4, f7, f10, ;23883
+base, f1, f2, f3, f4, f7, f9, f10, ;24080
+base, f1, f2, f3, f4, f6, f7, f10, ;42023
+base, f1, f2, f3, f4, f6, f7, f9, f10, ;42333
+base, f1, f2, f3, f4, f7, f8, f10, ;24541
+base, f1, f2, f3, f4, f6, f7, f8, f10, ;43068,5
+base, f1, f2, f3, f4, f7, f8, f9, f10, ;24724
+base, f1, f2, f3, f4, f6, f7, f8, f9, f10, ;43381,5
+base, f2, f3, f4, f5, f10, ;13928
+base, f2, f3, f4, f5, f9, f10, ;14112,5
+base, f2, f3, f4, f5, f8, f10, ;14570,5
+base, f2, f3, f4, f5, f8, f9, f10, ;14757,5
+base, f2, f3, f4, f5, f7, f10, ;26769,5
+base, f2, f3, f4, f5, f7, f8, f10, ;27401
+base, f2, f3, f4, f5, f7, f9, f10, ;26953
+base, f2, f3, f4, f5, f7, f8, f9, f10, ;27596
+base, f1, f2, f3, f4, f5, f10, ;16055
+base, f1, f2, f3, f4, f5, f9, f10, ;16234
+base, f1, f2, f3, f4, f5, f7, f10, ;28883
+base, f1, f2, f3, f4, f5, f7, f9, f10, ;29081,5
+base, f1, f2, f3, f4, f5, f8, f10, ;16703
+base, f1, f2, f3, f4, f5, f7, f8, f10, ;29525,5
+base, f1, f2, f3, f4, f5, f8, f9, f10, ;16874
+base, f1, f2, f3, f4, f5, f7, f8, f9, f10, ;29723
+base, f2, f3, f4, f5, f6, f10, ;18495
+base, f2, f3, f4, f5, f6, f9, f10, ;18813,5
+base, f2, f3, f4, f5, f6, f8, f10, ;19547
+base, f2, f3, f4, f5, f6, f8, f9, f10, ;19864
+base, f1, f2, f3, f4, f5, f6, f10, ;20625,5
+base, f1, f2, f3, f4, f5, f6, f8, f10, ;21687,5
+base, f1, f2, f3, f4, f5, f6, f9, f10, ;20937,5
+base, f1, f2, f3, f4, f5, f6, f8, f9, f10, ;21983
+base, f2, f3, f4, f5, f6, f7, f10, ;48009
+base, f2, f3, f4, f5, f6, f7, f9, f10, ;48329
+base, f1, f2, f3, f4, f5, f6, f7, f10, ;50130
+base, f1, f2, f3, f4, f5, f6, f7, f9, f10, ;50455,5
+base, f2, f3, f4, f5, f6, f7, f8, f10, ;49055
+base, f1, f2, f3, f4, f5, f6, f7, f8, f10, ;51179
+base, f2, f3, f4, f5, f6, f7, f8, f9, f10, ;49382
+base, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, ;51498

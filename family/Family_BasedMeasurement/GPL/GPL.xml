@@ -1,0 +1,1089 @@
+<plm canReuseInstance="true" name="GPL">
+	<element dynamic="false" id="2" name="MainGpl" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>3</id>
+			</child>
+			<child optional="false">
+				<id>4</id>
+			</child>
+			<child optional="false">
+				<id>13</id>
+			</child>
+			<child optional="false">
+				<id>16</id>
+			</child>
+			<child optional="false">
+				<id>21</id>
+			</child>
+			<child optional="false">
+				<id>24</id>
+			</child>
+			<child optional="false">
+				<id>31</id>
+			</child>
+			<child optional="false">
+				<id>34</id>
+			</child>
+			<child optional="false">
+				<id>38</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="3" name="TestProg" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="4" name="Alg" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>5</id>
+			</child>
+			<child optional="false">
+				<id>6</id>
+			</child>
+			<child optional="false">
+				<id>7</id>
+			</child>
+			<child optional="false">
+				<id>10</id>
+			</child>
+			<child optional="false">
+				<id>11</id>
+			</child>
+			<child optional="false">
+				<id>12</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="5" name="Number" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>6</id>
+					<name>Connected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>7</id>
+					<name>StrongC</name>
+				</constraint_element>
+				<constraint_element>
+					<id>10</id>
+					<name>Cycle</name>
+				</constraint_element>
+				<constraint_element>
+					<id>11</id>
+					<name>MSTPrim</name>
+				</constraint_element>
+				<constraint_element>
+					<id>12</id>
+					<name>MSTKruskal</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>31</id>
+					<name>Gtp</name>
+				</constraint_element>
+				<constraint_element>
+					<id>13</id>
+					<name>Src</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="6" name="Connected" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>5</id>
+					<name>Number</name>
+				</constraint_element>
+				<constraint_element>
+					<id>7</id>
+					<name>StrongC</name>
+				</constraint_element>
+				<constraint_element>
+					<id>10</id>
+					<name>Cycle</name>
+				</constraint_element>
+				<constraint_element>
+					<id>11</id>
+					<name>MSTPrim</name>
+				</constraint_element>
+				<constraint_element>
+					<id>12</id>
+					<name>MSTKruskal</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>33</id>
+					<name>Undirected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>13</id>
+					<name>Src</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="7" name="StrongC" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>5</id>
+					<name>Number</name>
+				</constraint_element>
+				<constraint_element>
+					<id>6</id>
+					<name>Connected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>10</id>
+					<name>Cycle</name>
+				</constraint_element>
+				<constraint_element>
+					<id>11</id>
+					<name>MSTPrim</name>
+				</constraint_element>
+				<constraint_element>
+					<id>12</id>
+					<name>MSTKruskal</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>15</id>
+					<name>DFS</name>
+				</constraint_element>
+				<constraint_element>
+					<id>32</id>
+					<name>Directed</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>8</id>
+			</child>
+			<child optional="false">
+				<id>9</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="8" name="StronglyConnected" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>7</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="9" name="Transpose" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>7</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="10" name="Cycle" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>5</id>
+					<name>Number</name>
+				</constraint_element>
+				<constraint_element>
+					<id>6</id>
+					<name>Connected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>7</id>
+					<name>StrongC</name>
+				</constraint_element>
+				<constraint_element>
+					<id>11</id>
+					<name>MSTPrim</name>
+				</constraint_element>
+				<constraint_element>
+					<id>12</id>
+					<name>MSTKruskal</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>15</id>
+					<name>DFS</name>
+				</constraint_element>
+				<constraint_element>
+					<id>31</id>
+					<name>Gtp</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="11" name="MSTPrim" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>5</id>
+					<name>Number</name>
+				</constraint_element>
+				<constraint_element>
+					<id>6</id>
+					<name>Connected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>7</id>
+					<name>StrongC</name>
+				</constraint_element>
+				<constraint_element>
+					<id>10</id>
+					<name>Cycle</name>
+				</constraint_element>
+				<constraint_element>
+					<id>12</id>
+					<name>MSTKruskal</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>33</id>
+					<name>Undirected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>22</id>
+					<name>Weighted</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="12" name="MSTKruskal" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>4</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative">
+				<constraint_element>
+					<id>5</id>
+					<name>Number</name>
+				</constraint_element>
+				<constraint_element>
+					<id>6</id>
+					<name>Connected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>7</id>
+					<name>StrongC</name>
+				</constraint_element>
+				<constraint_element>
+					<id>10</id>
+					<name>Cycle</name>
+				</constraint_element>
+				<constraint_element>
+					<id>11</id>
+					<name>MSTPrim</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="requires">
+				<constraint_element>
+					<id>33</id>
+					<name>Undirected</name>
+				</constraint_element>
+				<constraint_element>
+					<id>22</id>
+					<name>Weighted</name>
+				</constraint_element>
+				<constraint_element>
+					<id>37</id>
+					<name>WithEdges</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="13" name="Src" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>14</id>
+			</child>
+			<child optional="false">
+				<id>15</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="14" name="BFS" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>13</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>15</id>
+					<name>DFS</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="15" name="DFS" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>13</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>14</id>
+					<name>BFS</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="16" name="HiddenWgt" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>17</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="17" name="WeightOptions" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>16</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="true">
+				<id>18</id>
+			</child>
+			<child optional="true">
+				<id>19</id>
+			</child>
+			<child optional="true">
+				<id>20</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="18" name="WeightedWithEdges" optional="true" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>17</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="19" name="WeightedWithNeighbors" optional="true" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>17</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="20" name="WeightedOnlyVertices" optional="true" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>17</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="21" name="Wgt" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>22</id>
+			</child>
+			<child optional="false">
+				<id>23</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="22" name="Weighted" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>21</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>23</id>
+					<name>Unweighted</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="23" name="Unweighted" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>21</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>22</id>
+					<name>Weighted</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="24" name="HiddenGtp" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>25</id>
+			</child>
+			<child optional="false">
+				<id>26</id>
+			</child>
+			<child optional="false">
+				<id>27</id>
+			</child>
+			<child optional="false">
+				<id>28</id>
+			</child>
+			<child optional="false">
+				<id>29</id>
+			</child>
+			<child optional="false">
+				<id>30</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="25" name="DirectedWithEdges" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>26</id>
+					<name>DirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>27</id>
+					<name>DirectedOnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>28</id>
+					<name>UndirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>29</id>
+					<name>UndirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>30</id>
+					<name>UndirectedOnlyVertices</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="26" name="DirectedWithNeighbors" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>25</id>
+					<name>DirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>27</id>
+					<name>DirectedOnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>28</id>
+					<name>UndirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>29</id>
+					<name>UndirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>30</id>
+					<name>UndirectedOnlyVertices</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="27" name="DirectedOnlyVertices" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>25</id>
+					<name>DirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>26</id>
+					<name>DirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>28</id>
+					<name>UndirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>29</id>
+					<name>UndirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>30</id>
+					<name>UndirectedOnlyVertices</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="28" name="UndirectedWithEdges" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>25</id>
+					<name>DirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>26</id>
+					<name>DirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>27</id>
+					<name>DirectedOnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>29</id>
+					<name>UndirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>30</id>
+					<name>UndirectedOnlyVertices</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="29" name="UndirectedWithNeighbors" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>25</id>
+					<name>DirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>26</id>
+					<name>DirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>27</id>
+					<name>DirectedOnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>28</id>
+					<name>UndirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>30</id>
+					<name>UndirectedOnlyVertices</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="30" name="UndirectedOnlyVertices" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>24</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>25</id>
+					<name>DirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>26</id>
+					<name>DirectedWithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>27</id>
+					<name>DirectedOnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>28</id>
+					<name>UndirectedWithEdges</name>
+				</constraint_element>
+				<constraint_element>
+					<id>29</id>
+					<name>UndirectedWithNeighbors</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="31" name="Gtp" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>32</id>
+			</child>
+			<child optional="false">
+				<id>33</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="32" name="Directed" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>31</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>33</id>
+					<name>Undirected</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="33" name="Undirected" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>31</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>32</id>
+					<name>Directed</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="34" name="Implementation" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements>
+			<child optional="false">
+				<id>35</id>
+			</child>
+			<child optional="false">
+				<id>36</id>
+			</child>
+			<child optional="false">
+				<id>37</id>
+			</child>
+		</childElements>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="35" name="OnlyVertices" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>34</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>36</id>
+					<name>WithNeighbors</name>
+				</constraint_element>
+				<constraint_element>
+					<id>37</id>
+					<name>WithEdges</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="36" name="WithNeighbors" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>34</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>35</id>
+					<name>OnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>37</id>
+					<name>WithEdges</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="37" name="WithEdges" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>34</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative">
+				<constraint_element>
+					<id>35</id>
+					<name>OnlyVertices</name>
+				</constraint_element>
+				<constraint_element>
+					<id>36</id>
+					<name>WithNeighbors</name>
+				</constraint_element>
+			</constraint>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<element dynamic="false" id="38" name="Base" optional="false" type="feature">
+		<path_absolut/>
+		<path_relativ/>
+		<parentElement>
+			<id>2</id>
+		</parentElement>
+		<constraints>
+			<constraint type="alternative"/>
+			<constraint type="commulative"/>
+			<constraint type="requires"/>
+			<constraint type="excludes"/>
+		</constraints>
+		<childElements/>
+		<order/>
+		<classes/>
+	</element>
+	<properties/>
+	<furtherConstraints>
+		<clause>-MSTKruskal  |  -MSTKruskal  |  -MSTPrim</clause>
+		<clause>-OnlyVertices  |  -Weighted  |  WeightedOnlyVertices</clause>
+		<clause>-WithNeighbors  |  -Weighted  |  WeightedWithNeighbors</clause>
+		<clause>-WithEdges  |  -Weighted  |  WeightedWithEdges</clause>
+		<clause>-OnlyVertices  |  -Directed  |  DirectedOnlyVertices</clause>
+		<clause>-WithNeighbors  |  -Directed  |  DirectedWithNeighbors</clause>
+		<clause>-WithEdges  |  -Directed  |  DirectedWithEdges</clause>
+		<clause>-OnlyVertices  |  -Undirected  |  UndirectedOnlyVertices</clause>
+		<clause>-WithNeighbors  |  -Undirected  |  UndirectedWithNeighbors</clause>
+		<clause>-WithEdges  |  -Undirected  |  UndirectedWithEdges</clause>
+	</furtherConstraints>
+</plm>
