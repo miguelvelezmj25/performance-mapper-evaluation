@@ -48,7 +48,7 @@ public class Main {
         FindArguments findArgs = new FindArguments(isTypeDirectory, isTypeFile, isTypeSymlink,
         isTypeOther,  isRegex, isIgnoreCase, isTimeNewer, isTimeOlder,
         isTimeCreate, isTimeAccess, isTimeModified, isPrint0);
-        findArgs.setPath("/home/feature");
+        findArgs.setPath("/home/mvelezce");
         findArgs.setSize(25000);
 
         String name = "*E*";
