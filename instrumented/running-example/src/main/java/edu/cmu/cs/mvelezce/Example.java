@@ -23,6 +23,8 @@ public class Example {
         boolean c = Options.C;
         boolean d = Options.D;
 
+        Thread.sleep(1000);
+
         if(Workload.ONE) {
             Example.foo(a, b, c);
         }

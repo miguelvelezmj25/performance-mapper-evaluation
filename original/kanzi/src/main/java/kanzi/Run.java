@@ -41,17 +41,17 @@ public class Run {
         CHECKSUM = Source.getOptionCHECKSUM(Boolean.valueOf(args[6]));
 
 //        VERBOSE = Source.getOptionVERBOSE(true);
-//        FORCE = Source.getOptionFORCE(false);
-//        BLOCKSIZE = Source.getOptionBLOCKSIZE(false);
+//        FORCE = Source.getOptionFORCE(true);
+//        BLOCKSIZE = Source.getOptionBLOCKSIZE(true);
 //        LEVEL = Source.getOptionLEVEL(false);
-//        ENTROPY = Source.getOptionENTROPY(false);
-//        TRANSFORM = Source.getOptionTRANSFORM(false);
-//        CHECKSUM = Source.getOptionCHECKSUM(false);
+//        ENTROPY = Source.getOptionENTROPY(true);
+//        TRANSFORM = Source.getOptionTRANSFORM(true);
+//        CHECKSUM = Source.getOptionCHECKSUM(true);
 
         int verbose = 0;
         boolean force = false;
         int blockSize = 1024 * 1024;
-        int level = 0;
+        int level = 1;
         String entropy = "Huffman";
         String transform = "BWT+MTFT+ZRLT";
         boolean checksum = false;

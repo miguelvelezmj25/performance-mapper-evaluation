@@ -10,35 +10,78 @@ import org.unix4j.grep.unix.grep.GrepCommand;
 
 public class Main {
 
+    public static boolean ISIGNORECASE;
+    public static boolean ISINVERTMATCH;
+    public static boolean ISFIXEDSTRINGS;
+    public static boolean ISLINENUMBER;
+    public static boolean ISCOUNT;
+    public static boolean ISMATCHINGFILES;
+    public static boolean ISWHOLELINE;
+
     public static void main(String[] args) {
+        long start = System.nanoTime();
+        System.out.println("Original");
         Sink.init();
 
-        boolean isIgnoreCase = Source.getIsIgnoreCase(true);
-        boolean isInvertMatch = Source.getIsInvertMatch(false);
-        boolean isFixedStrings = Source.getIsFixedStrings(false);
-        boolean isLineNumber = Source.getIsLineNumber(false);
-        boolean isCount = Source.getIsCount(true);
-        boolean isMatchingFiles = Source.getIsMatchingFiles(false);
-        boolean isWholeLine = Source.getIsWholeLine(false);
+        ISIGNORECASE = Source.getIsIgnoreCase(Boolean.valueOf(args[0]));
+        ISINVERTMATCH = Source.getIsInvertMatch(Boolean.valueOf(args[1]));
+        ISFIXEDSTRINGS = Source.getIsFixedStrings(Boolean.valueOf(args[2]));
+        ISLINENUMBER = Source.getIsLineNumber(Boolean.valueOf(args[3]));
+        ISCOUNT = Source.getIsCount(Boolean.valueOf(args[4]));
+        ISMATCHINGFILES = Source.getIsMatchingFiles(Boolean.valueOf(args[5]));
+        ISWHOLELINE = Source.getIsWholeLine(Boolean.valueOf(args[6]));
 
-//        DefaultUnix4jCommandBuilder u = new DefaultUnix4jCommandBuilder();
-////        Unix4jCommandBuilder res = u.grep("name", "pom.xml");
-//        Unix4jCommandBuilder res = u.grep(isIgnoreCase, isInvertMatch, isFixedStrings, isLineNumber, isCount,
-//                isMatchingFiles, isWholeLine, "Name", "pom.xml");
-//        res.toStdOut();
+//      ISIGNORECASE = Source.getIsIgnoreCase(false);
+//      ISINVERTMATCH = Source.getIsInvertMatch(false);
+//      ISFIXEDSTRINGS = Source.getIsFixedStrings(false);
+//      ISLINENUMBER = Source.getIsLineNumber(true);
+//      ISCOUNT = Source.getIsCount(true);
+//      ISMATCHINGFILES = Source.getIsMatchingFiles(true);
+//      ISWHOLELINE = Source.getIsWholeLine(false);
 
-        String regexp = "heaven";
-        String anna = "anna.txt";
-        String bible = "bible.txt";
-        String big = "big.txt";
-        String don = "don.txt";
-        String shak = "shak.txt";
-        String war = "war.txt";
+        boolean isIgnoreCase = false;
+        boolean isInvertMatch = false;
+        boolean isFixedStrings = false;
+        boolean isLineNumber = false;
+        boolean isCount = false;
+        boolean isMatchingFiles = false;
+        boolean isWholeLine = false;
+
+        if(ISIGNORECASE) {
+            isIgnoreCase = true;
+        }
+
+        if(ISINVERTMATCH) {
+            isInvertMatch = true;
+        }
+
+        if(ISFIXEDSTRINGS) {
+            isFixedStrings = true;
+        }
+
+        if(ISLINENUMBER) {
+            isLineNumber = true;
+        }
+
+        if(ISCOUNT) {
+            isCount = true;
+        }
+
+        if(ISMATCHINGFILES) {
+            isMatchingFiles = true;
+        }
+
+        if(ISWHOLELINE) {
+            isWholeLine = true;
+        }
+
+        String regexp = "A.*C.*I.*K.*L.*W";
+//        String regexp = "wood";
 
         GrepArguments grepArgs = new GrepArguments(isIgnoreCase, isInvertMatch, isFixedStrings, isLineNumber, isCount,
                 isMatchingFiles, isWholeLine);
         grepArgs.setRegexp(regexp);
-        grepArgs.setPaths(anna, bible, big, don, shak, war);
+        grepArgs.setPaths("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/grep/files/*.txt");
         GrepCommand grep = new GrepCommand(grepArgs);
 
         DefaultExecutionContext executionContext = new DefaultExecutionContext();
@@ -47,5 +90,9 @@ public class Main {
         LineProcessor exec = grep.execute(executionContext, out);
 
         exec.finish();
+
+        long end = System.nanoTime();
+
+        System.out.println((end - start) / 1000000000.0);
     }
 }
