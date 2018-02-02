@@ -2,6 +2,8 @@ package optimizer.com.googlecode.pngtastic;
 
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
+import optimizer.com.googlecode.pngtastic.core.PngImage;
+import optimizer.com.googlecode.pngtastic.core.processing.zopfli.Buffer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,9 +76,9 @@ public class Run {
 
 //        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
 //        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
-//        COMPRESSOR = Source.getOptionCOMPRESSOR(false);
+//        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
 //        ITERATIONS = Source.getOptionITERATIONS(false);
-//        LOGLEVEL = Source.getOptionLOGLEVEL(true);
+//        LOGLEVEL = Source.getOptionLOGLEVEL(false);
 
         Boolean removeGamma = false;
         Integer compressionLevel = 0;

@@ -3,11 +3,16 @@ package edu.cmu.cs.mvelezce;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 
+import java.util.Stack;
+
 public class Example {
+
+    public static void splat(String[] args, Stack<String> s) { }
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Instrumented");
         Sink.init();
+
         Options.A = Source.getOptionA(Boolean.valueOf(args[0]));
         Options.B = Source.getOptionB(Boolean.valueOf(args[1]));
         Options.C = Source.getOptionC(Boolean.valueOf(args[2]));
@@ -34,19 +39,19 @@ public class Example {
         boolean x = false;
 
         if(a) {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             Example.moo(c);
             x = true;
         }
 
         if(b && x) {
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         }
     }
 
     private static void moo(boolean c) throws InterruptedException {
         if(c) {
-            Thread.sleep(4000);
+            Thread.sleep(7000);
         }
     }
 }

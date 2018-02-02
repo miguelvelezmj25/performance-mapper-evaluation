@@ -1,6 +1,5 @@
 package kanzi;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import kanzi.app.BlockCompressor;
@@ -29,6 +28,7 @@ public class Run {
         File output = new File(dir);
 
         if(output.exists()) {
+            System.out.println("Deleting " + output);
             FileUtils.forceDelete(output);
         }
 
@@ -92,7 +92,7 @@ public class Run {
 
         try {
             bc = new BlockCompressor(verbose, force, blockSize, level, entropy, transform, checksum, 1, map, null);
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Could not create the compressor: " + e.getMessage());
             System.exit(kanzi.io.Error.ERR_CREATE_COMPRESSOR);
         }

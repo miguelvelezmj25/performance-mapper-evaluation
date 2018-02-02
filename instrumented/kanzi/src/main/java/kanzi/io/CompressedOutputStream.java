@@ -136,38 +136,38 @@ public class CompressedOutputStream extends OutputStream {
 //    }
 
     public CompressedOutputStream(OutputStream os, int blockSize, boolean checksum, ExecutorService pool, int jobs, String codec, String transform) {
-        if(os == null) {
-            throw new NullPointerException("Invalid null output stream parameter");
-        }
-
-        if(codec == null) {
-            throw new NullPointerException("Invalid null entropy encoder type parameter");
-        }
-
-        if(transform == null) {
-            throw new NullPointerException("Invalid null transform type parameter");
-        }
-
-        if(blockSize > MAX_BITSTREAM_BLOCK_SIZE) {
-            throw new IllegalArgumentException("The block size must be at most " + (MAX_BITSTREAM_BLOCK_SIZE >> 20) + " MB");
-        }
-
-        if(blockSize < MIN_BITSTREAM_BLOCK_SIZE) {
-            throw new IllegalArgumentException("The block size must be at least " + MIN_BITSTREAM_BLOCK_SIZE);
-        }
-
-        if((blockSize & -16) != blockSize) {
-            throw new IllegalArgumentException("The block size must be a multiple of 16");
-        }
-
-        if((jobs < 0) || (jobs > 16)) // 0 indicates no user choice
-        {
-            throw new IllegalArgumentException("The number of jobs must be in [1..16]");
-        }
-
-        if((jobs > 1) && (pool == null)) {
-            throw new IllegalArgumentException("The thread pool cannot be null when the number of jobs is " + jobs);
-        }
+//        if(os == null) {
+//            throw new NullPointerException("Invalid null output stream parameter");
+//        }
+//
+//        if(codec == null) {
+//            throw new NullPointerException("Invalid null entropy encoder type parameter");
+//        }
+//
+//        if(transform == null) {
+//            throw new NullPointerException("Invalid null transform type parameter");
+//        }
+//
+//        if(blockSize > MAX_BITSTREAM_BLOCK_SIZE) {
+//            throw new IllegalArgumentException("The block size must be at most " + (MAX_BITSTREAM_BLOCK_SIZE >> 20) + " MB");
+//        }
+//
+//        if(blockSize < MIN_BITSTREAM_BLOCK_SIZE) {
+//            throw new IllegalArgumentException("The block size must be at least " + MIN_BITSTREAM_BLOCK_SIZE);
+//        }
+//
+//        if((blockSize & -16) != blockSize) {
+//            throw new IllegalArgumentException("The block size must be a multiple of 16");
+//        }
+//
+//        if((jobs < 0) || (jobs > 16)) // 0 indicates no user choice
+//        {
+//            throw new IllegalArgumentException("The number of jobs must be in [1..16]");
+//        }
+//
+//        if((jobs > 1) && (pool == null)) {
+//            throw new IllegalArgumentException("The thread pool cannot be null when the number of jobs is " + jobs);
+//        }
 
         final int bufferSize = (blockSize <= 65536) ? blockSize : 65536;
         this.obs = new DefaultOutputBitStream(os, bufferSize);

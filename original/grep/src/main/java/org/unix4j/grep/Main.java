@@ -31,13 +31,13 @@ public class Main {
         ISMATCHINGFILES = Source.getIsMatchingFiles(Boolean.valueOf(args[5]));
         ISWHOLELINE = Source.getIsWholeLine(Boolean.valueOf(args[6]));
 
-//      ISIGNORECASE = Source.getIsIgnoreCase(false);
-//      ISINVERTMATCH = Source.getIsInvertMatch(false);
+//      ISIGNORECASE = Source.getIsIgnoreCase(true);
+//      ISINVERTMATCH = Source.getIsInvertMatch(true);
 //      ISFIXEDSTRINGS = Source.getIsFixedStrings(false);
-//      ISLINENUMBER = Source.getIsLineNumber(true);
+//      ISLINENUMBER = Source.getIsLineNumber(false);
 //      ISCOUNT = Source.getIsCount(true);
-//      ISMATCHINGFILES = Source.getIsMatchingFiles(true);
-//      ISWHOLELINE = Source.getIsWholeLine(false);
+//      ISMATCHINGFILES = Source.getIsMatchingFiles(false);
+//      ISWHOLELINE = Source.getIsWholeLine(true);
 
         boolean isIgnoreCase = false;
         boolean isInvertMatch = false;

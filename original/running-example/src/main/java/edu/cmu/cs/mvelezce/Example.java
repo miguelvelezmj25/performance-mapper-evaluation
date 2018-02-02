@@ -8,6 +8,7 @@ public class Example {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Original");
         Sink.init();
+
         Options.A = Source.getOptionA(Boolean.valueOf(args[0]));
         Options.B = Source.getOptionB(Boolean.valueOf(args[1]));
         Options.C = Source.getOptionC(Boolean.valueOf(args[2]));

@@ -11,118 +11,19 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/pngtastic_optimizer$Run__1_.coverage" NAME="Run (1) Coverage Results" MODIFIED="1510944663894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>optimizer.com.googlecode.pngtastic.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/pngtastic_optimizer$Run.coverage" NAME="Run Coverage Results" MODIFIED="1502828696273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.googlecode.pngtastic.*</FILTER>
     </SUITE>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PngOptimizer.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngOptimizer.java">
+      <file leaf-file-name="Run.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="37" column="20" lean-forward="false" selection-start-line="37" selection-start-column="20" selection-end-line="37" selection-end-column="20" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PngtasticOptimizer.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/PngtasticOptimizer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="287">
-              <caret line="51" column="26" lean-forward="false" selection-start-line="51" selection-start-column="26" selection-end-line="51" selection-end-column="26" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PngOptimizer.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/PngOptimizer.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="29" column="5" lean-forward="false" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
+            <state relative-caret-position="-533">
+              <caret line="36" column="17" lean-forward="false" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
               <folding>
-                <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1516303216000" expanded="false" signature="163:685" ph="..." />
-                <marker date="1516303216000" expanded="false" signature="864:875" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="888:894" ph=" }" />
-                <marker date="1516303216000" expanded="true" signature="937:1050" ph="{...}" />
-                <marker date="1516303216000" expanded="false" signature="1117:1128" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="1173:1179" ph=" }" />
-                <marker date="1516303216000" expanded="false" signature="1239:1250" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="1270:1276" ph=" }" />
-                <marker date="1516303216000" expanded="true" signature="1408:3195" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="3261:3327" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="3440:7848" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="7912:8180" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="8253:8695" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="8731:9069" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="9137:10508" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="10603:10966" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="11021:11371" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="11442:11758" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="11800:12603" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="12140:12401" ph="{...}" />
-                <marker date="1516303216000" expanded="false" signature="12444:12459" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="12488:12498" ph=" }" />
-                <marker date="1516303216000" expanded="false" signature="12542:12557" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="12587:12597" ph=" }" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PngtasticCompressionHandler.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="525">
-              <caret line="51" column="0" lean-forward="false" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
-              <folding>
-                <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1516303216000" expanded="false" signature="174:494" ph="..." />
-                <marker date="1516303216000" expanded="false" signature="740:751" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="766:772" ph=" }" />
-                <marker date="1516303216000" expanded="true" signature="909:1471" ph="{...}" />
-                <marker date="1516303216000" expanded="false" signature="1516:1527" ph=" { " />
-                <marker date="1516303216000" expanded="false" signature="1560:1566" ph=" }" />
-                <marker date="1516303216000" expanded="true" signature="1717:2335" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="2476:3387" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="3525:4000" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Run.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/Run.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1516303216000" expanded="false" signature="158:323" ph="..." />
-                <marker date="1516303216000" expanded="true" signature="1308:1315" ph="{}" />
-                <marker date="1516303216000" expanded="true" signature="1360:4420" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PngtasticOptimizer.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/PngtasticOptimizer.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="3" column="2" lean-forward="false" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
-              <folding>
-                <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1516303216000" expanded="false" signature="158:378" ph="..." />
-                <marker date="1516303216000" expanded="true" signature="600:1583" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="1638:1772" ph="{...}" />
-                <marker date="1516303216000" expanded="true" signature="1834:2060" ph="{...}" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -139,36 +40,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>log.</find>
-      <find>sink</find>
-      <find>if(</find>
-      <find>compressionlevel</find>
       <find>runnable</find>
-      <find>deflate(</find>
-      <find>sub:</find>
-      <find>paeth</find>
-      <find>applying</find>
-      <find>setcompre</find>
-      <find>cachedis</find>
-      <find>deflate</find>
-      <find>expand(</find>
-      <find>deflates</find>
-      <find>fill</find>
-      <find>fill0(</find>
-      <find>a3f1f</find>
-      <find>bestlengths(</find>
-      <find>130</find>
+      <find>encodeTre</find>
+      <find>getun</find>
+      <find>calcu</find>
       <find>bestfi</find>
-      <find>encodeTree(</find>
-      <find>bestle</find>
+      <find>fixedco</find>
       <find>add</find>
-      <find>fixedcost(</find>
-      <find>calculateBlock</find>
-      <find>optimalrun</find>
-      <find>optimize(</find>
-      <find>getheight()</find>
-      <find>addch</find>
+      <find>write</find>
+      <find>distex</find>
+      <find>writefileout</find>
+      <find>bound</find>
+      <find>calculatedis</find>
+      <find>gethe</find>
+      <find>calculate(</find>
+      <find>updateh</find>
+      <find>boundarypm(</find>
+      <find>static</find>
+      <find>deflate</find>
+      <find>deflateimagedataser</find>
       <find>deflateima</find>
+      <find>addch</find>
+      <find>sort(</find>
+      <find>setcomp</find>
+      <find>iterat</find>
+      <find>applyfilter</find>
+      <find>deflate(</find>
+      <find>delfa</find>
+      <find>deflate(PN</find>
+      <find>compressionlevel</find>
+      <find>png</find>
     </findStrings>
     <replaceStrings>
       <replace>if(Sink.getDecision(</replace>
@@ -213,12 +114,12 @@
         <option value="$PROJECT_DIR$/src/com/googlecode/pngtastic/core/PngOptimizer.java" />
         <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/pngtastic/Run.java" />
         <option value="$PROJECT_DIR$/src/com/googlecode/pngtastic/Run.java" />
-        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java" />
+        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngImage.java" />
+        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Buffer.java" />
+        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngOptimizer.java" />
         <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.java" />
-        <option value="$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/PngOptimizer.class" />
-        <option value="$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/Run.class" />
-        <option value="$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/PngImage.class" />
-        <option value="$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.class" />
+        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/ZopfliCompressionHandler.java" />
+        <option value="$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java" />
       </list>
     </option>
   </component>
@@ -229,10 +130,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1987" />
     <option name="y" value="23" />
-    <option name="width" value="1778" />
-    <option name="height" value="1018" />
+    <option name="width" value="1440" />
+    <option name="height" value="873" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -268,10 +168,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="AndroidView" />
       <pane id="Scope" />
-      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -282,11 +181,6 @@
             <path>
               <item name="pngtastic-optimizer" type="b2602c69:ProjectViewProjectNode" />
               <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="pngtastic-optimizer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
               <item name="out" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -339,41 +233,12 @@
               <item name="com" type="462c0819:PsiDirectoryNode" />
               <item name="googlecode" type="462c0819:PsiDirectoryNode" />
               <item name="pngtastic" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="pngtastic-optimizer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="out" type="462c0819:PsiDirectoryNode" />
-              <item name="production" type="462c0819:PsiDirectoryNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="com" type="462c0819:PsiDirectoryNode" />
-              <item name="googlecode" type="462c0819:PsiDirectoryNode" />
-              <item name="pngtastic" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="pngtastic-optimizer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="out" type="462c0819:PsiDirectoryNode" />
-              <item name="production" type="462c0819:PsiDirectoryNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="com" type="462c0819:PsiDirectoryNode" />
-              <item name="googlecode" type="462c0819:PsiDirectoryNode" />
-              <item name="pngtastic" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-              <item name="processing" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="pngtastic-optimizer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pngtastic-optimizer" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -450,6 +315,25 @@
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="pngtastic-optimizer" />
+      <envs />
+    </configuration>
+    <configuration name="Run" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="optimizer.com.googlecode.pngtastic.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="optimizer.com.googlecode.pngtastic.Run" />
+      <option name="VM_PARAMETERS" value="-Xms10G -Xmx10G -XX:+UseConcMarkSweepGC" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
@@ -537,9 +421,10 @@
       <item index="1" class="java.lang.String" itemvalue="Application.Run (1)" />
     </list>
     <recent_temporary>
-      <list size="2">
+      <list size="3">
         <item index="0" class="java.lang.String" itemvalue="Application.Run (1)" />
         <item index="1" class="java.lang.String" itemvalue="Application.Run" />
+        <item index="2" class="java.lang.String" itemvalue="Application.Run" />
       </list>
     </recent_temporary>
   </component>
@@ -600,64 +485,64 @@
       <workItem from="1507638470377" duration="119000" />
       <workItem from="1507638632667" duration="86000" />
       <workItem from="1507656700560" duration="1592000" />
-      <workItem from="1507661161547" duration="6000" />
-      <workItem from="1507662205535" duration="1253000" />
-      <workItem from="1507723814292" duration="34000" />
-      <workItem from="1507723885005" duration="17000" />
-      <workItem from="1507723939906" duration="3073000" />
-      <workItem from="1507810780325" duration="167000" />
-      <workItem from="1507810996921" duration="608000" />
-      <workItem from="1507896527933" duration="50000" />
-      <workItem from="1507896612272" duration="596000" />
-      <workItem from="1507897255830" duration="199000" />
-      <workItem from="1507897481793" duration="7181000" />
-      <workItem from="1508156410721" duration="147000" />
-      <workItem from="1508156589239" duration="589000" />
-      <workItem from="1508269761717" duration="5000" />
-      <workItem from="1508270168071" duration="631000" />
-      <workItem from="1508281311717" duration="38000" />
-      <workItem from="1508281390295" duration="25000" />
-      <workItem from="1508328642561" duration="1907000" />
-      <workItem from="1508435525208" duration="280000" />
-      <workItem from="1510101294750" duration="603000" />
-      <workItem from="1510146117631" duration="140000" />
-      <workItem from="1510152910016" duration="9217000" />
-      <workItem from="1510319703510" duration="11132000" />
-      <workItem from="1510580988235" duration="708000" />
-      <workItem from="1510585501781" duration="5178000" />
-      <workItem from="1510944662083" duration="11000" />
-      <workItem from="1516305214999" duration="2000" />
+      <workItem from="1507661161547" duration="35000" />
+      <workItem from="1507728565404" duration="244000" />
+      <workItem from="1507746135660" duration="5917000" />
+      <workItem from="1507810794640" duration="147000" />
+      <workItem from="1507913034753" duration="6796000" />
+      <workItem from="1508156411597" duration="146000" />
+      <workItem from="1508156589716" duration="3975000" />
+      <workItem from="1508172885293" duration="5893000" />
+      <workItem from="1508196198040" duration="844000" />
+      <workItem from="1508269746407" duration="10000" />
+      <workItem from="1508330379795" duration="44000" />
+      <workItem from="1508350090654" duration="6033000" />
+      <workItem from="1508435528336" duration="264000" />
+      <workItem from="1509730657239" duration="1298000" />
+      <workItem from="1509998023121" duration="767000" />
+      <workItem from="1509999356859" duration="33000" />
+      <workItem from="1510077919474" duration="5096000" />
+      <workItem from="1510101273210" duration="599000" />
+      <workItem from="1510146116305" duration="5748000" />
+      <workItem from="1510319702754" duration="598000" />
+      <workItem from="1516305220942" duration="14000" />
+      <workItem from="1516384157767" duration="9000" />
+      <workItem from="1516733993429" duration="14000" />
+      <workItem from="1517409295835" duration="32000" />
+      <workItem from="1517409487492" duration="812000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="81940000" />
+    <option name="totallyTimeSpent" value="83491000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1987" y="23" width="1778" height="1018" extended-state="0" />
+    <frame x="0" y="23" width="1440" height="873" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Statistic" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Statistic" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32980132" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26528257" sideWeight="0.49386504" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23675115" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973376" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18553008" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0037974683" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3989305" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.27555555" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37880793" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26092714" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2612198" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run with VisualVM" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2295271" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14899713" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Debug with VisualVM" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -666,9 +551,8 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Coverage" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.265553" sideWeight="0.506135" order="12" side_tool="true" content_ui="tabs" />
+      <window_info id="Coverage" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32990316" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3678026" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -710,14 +594,48 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Buffer.java</url>
+          <line>31</line>
+          <properties />
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="6" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
-  <component name="antWorkspaceConfiguration">
-    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
-    <option name="FILTER_TARGETS" value="false" />
-  </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticInterlaceHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1065">
+          <caret line="75" column="37" lean-forward="false" selection-start-line="75" selection-start-column="37" selection-end-line="75" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1110">
+          <caret line="83" column="42" lean-forward="false" selection-start-line="83" selection-start-column="42" selection-end-line="83" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="915">
+          <caret line="66" column="19" lean-forward="false" selection-start-line="66" selection-start-column="8" selection-end-line="66" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1770">
+          <caret line="122" column="22" lean-forward="false" selection-start-line="122" selection-start-column="22" selection-end-line="122" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/PngtasticOptimizer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="690">
@@ -837,6 +755,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Hash.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="78" column="23" lean-forward="true" selection-start-line="78" selection-start-column="23" selection-end-line="78" selection-end-column="23" />
+          <caret line="112" column="19" lean-forward="true" selection-start-line="112" selection-start-column="19" selection-end-line="112" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngByteArrayOutputStream.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="350">
@@ -844,10 +770,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/Base64.java">
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/BlockSplitter.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="1796" column="48" lean-forward="false" selection-start-line="1796" selection-start-column="48" selection-end-line="1796" selection-end-column="48" />
+        <state relative-caret-position="493">
+          <caret line="60" column="23" lean-forward="true" selection-start-line="60" selection-start-column="23" selection-end-line="60" selection-end-column="23" />
+          <caret line="73" column="91" lean-forward="true" selection-start-line="73" selection-start-column="91" selection-end-line="73" selection-end-column="91" />
+          <caret line="91" column="65" lean-forward="true" selection-start-line="91" selection-start-column="65" selection-end-line="91" selection-end-column="65" />
+          <caret line="99" column="22" lean-forward="true" selection-start-line="99" selection-start-column="22" selection-end-line="99" selection-end-column="22" />
+          <caret line="103" column="34" lean-forward="true" selection-start-line="103" selection-start-column="34" selection-end-line="103" selection-end-column="34" />
+          <caret line="114" column="30" lean-forward="true" selection-start-line="114" selection-start-column="30" selection-end-line="114" selection-end-column="30" />
+          <caret line="120" column="28" lean-forward="true" selection-start-line="120" selection-start-column="28" selection-end-line="120" selection-end-column="28" />
+          <caret line="135" column="36" lean-forward="true" selection-start-line="135" selection-start-column="36" selection-end-line="135" selection-end-column="36" />
+          <caret line="147" column="36" lean-forward="true" selection-start-line="147" selection-start-column="36" selection-end-line="147" selection-end-column="36" />
+          <caret line="152" column="35" lean-forward="true" selection-start-line="152" selection-start-column="35" selection-end-line="152" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -855,13 +790,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngFilterHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="37" column="22" lean-forward="false" selection-start-line="37" selection-start-column="16" selection-end-line="37" selection-end-column="24" />
         </state>
       </provider>
     </entry>
@@ -879,10 +807,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Katajainen.java">
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/LongestMatchCache.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="77" column="50" lean-forward="false" selection-start-line="77" selection-start-column="50" selection-end-line="77" selection-end-column="50" />
+        <state relative-caret-position="360">
+          <caret line="40" column="42" lean-forward="false" selection-start-line="40" selection-start-column="42" selection-end-line="40" selection-end-column="42" />
         </state>
       </provider>
     </entry>
@@ -893,240 +821,174 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/LongestMatchCache.java">
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/Logger.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="72" column="18" lean-forward="false" selection-start-line="72" selection-start-column="18" selection-end-line="72" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Hash.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="97" column="11" lean-forward="false" selection-start-line="97" selection-start-column="11" selection-end-line="97" selection-end-column="11" />
+        <state relative-caret-position="156">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Buffer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="39" column="10" lean-forward="false" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
+        <state relative-caret-position="210">
+          <caret line="32" column="45" lean-forward="false" selection-start-line="32" selection-start-column="45" selection-end-line="32" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Squeeze.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="219" column="63" lean-forward="false" selection-start-line="219" selection-start-column="63" selection-end-line="219" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/Base64.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="455">
+          <caret line="1754" column="34" lean-forward="false" selection-start-line="1754" selection-start-column="34" selection-end-line="1754" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Util.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="92" column="77" lean-forward="false" selection-start-line="92" selection-start-column="77" selection-end-line="92" selection-end-column="77" />
+        <state relative-caret-position="437">
+          <caret line="228" column="28" lean-forward="false" selection-start-line="228" selection-start-column="28" selection-end-line="228" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/SymbolStats.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="116">
+          <caret line="55" column="47" lean-forward="false" selection-start-line="55" selection-start-column="47" selection-end-line="55" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngChunk.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="489">
+          <caret line="95" column="0" lean-forward="false" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Katajainen.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="83">
+          <caret line="84" column="30" lean-forward="false" selection-start-line="84" selection-start-column="30" selection-end-line="84" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Cookie.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="43" column="38" lean-forward="false" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngImage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="36" column="15" lean-forward="false" selection-start-line="36" selection-start-column="15" selection-end-line="36" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Zopfli.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="607">
+          <caret line="59" column="17" lean-forward="false" selection-start-line="59" selection-start-column="17" selection-end-line="59" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngFilterHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="19" column="16" lean-forward="false" selection-start-line="19" selection-start-column="16" selection-end-line="19" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticFilterHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="280">
+          <caret line="29" column="16" lean-forward="false" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Deflate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="22" column="12" lean-forward="false" selection-start-line="22" selection-start-column="12" selection-end-line="22" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/ZopfliCompressionHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="26" column="5" lean-forward="false" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
+          <folding>
+            <element signature="e#869#870#0" expanded="false" />
+            <element signature="e#914#915#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="23" column="46" lean-forward="false" selection-start-line="23" selection-start-column="46" selection-end-line="23" selection-end-column="46" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngCompressionHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
-          <caret line="23" column="20" lean-forward="false" selection-start-line="23" selection-start-column="20" selection-end-line="23" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngProcessor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="678">
-          <caret line="90" column="32" lean-forward="false" selection-start-line="90" selection-start-column="32" selection-end-line="90" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Cookie.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="127" column="18" lean-forward="false" selection-start-line="127" selection-start-column="18" selection-end-line="127" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/BlockSplitter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="33" column="23" lean-forward="false" selection-start-line="33" selection-start-column="23" selection-end-line="33" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/SymbolStats.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="118" column="11" lean-forward="false" selection-start-line="118" selection-start-column="11" selection-end-line="118" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Deflate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5775">
-          <caret line="401" column="19" lean-forward="false" selection-start-line="401" selection-start-column="19" selection-end-line="401" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Zopfli.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="48" column="34" lean-forward="false" selection-start-line="48" selection-start-column="34" selection-end-line="48" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/ZopfliCompressionHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticFilterHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="29" column="23" lean-forward="false" selection-start-line="29" selection-start-column="23" selection-end-line="29" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/zopfli/Squeeze.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="429">
-          <caret line="77" column="28" lean-forward="false" selection-start-line="77" selection-start-column="28" selection-end-line="77" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngChunk.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1606">
-          <caret line="10" column="21" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngImage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="189" column="31" lean-forward="true" selection-start-line="189" selection-start-column="31" selection-end-line="189" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="34" column="21" lean-forward="false" selection-start-line="34" selection-start-column="21" selection-end-line="34" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/Logger.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="373">
-          <caret line="30" column="16" lean-forward="false" selection-start-line="30" selection-start-column="16" selection-end-line="30" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="103" column="63" lean-forward="true" selection-start-line="103" selection-start-column="63" selection-end-line="103" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/PngImage.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="41" column="36" lean-forward="false" selection-start-line="41" selection-start-column="36" selection-end-line="41" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/Run.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1516303216000" expanded="false" signature="158:323" ph="..." />
-            <marker date="1516303216000" expanded="true" signature="1308:1315" ph="{}" />
-            <marker date="1516303216000" expanded="true" signature="1360:4420" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/PngtasticOptimizer.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="3" column="2" lean-forward="false" selection-start-line="3" selection-start-column="2" selection-end-line="3" selection-end-column="2" />
-          <folding>
-            <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1516303216000" expanded="false" signature="158:378" ph="..." />
-            <marker date="1516303216000" expanded="true" signature="600:1583" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="1638:1772" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="1834:2060" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/PngOptimizer.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="29" column="5" lean-forward="false" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
-          <folding>
-            <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1516303216000" expanded="false" signature="163:685" ph="..." />
-            <marker date="1516303216000" expanded="false" signature="864:875" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="888:894" ph=" }" />
-            <marker date="1516303216000" expanded="true" signature="937:1050" ph="{...}" />
-            <marker date="1516303216000" expanded="false" signature="1117:1128" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="1173:1179" ph=" }" />
-            <marker date="1516303216000" expanded="false" signature="1239:1250" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="1270:1276" ph=" }" />
-            <marker date="1516303216000" expanded="true" signature="1408:3195" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="3261:3327" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="3440:7848" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="7912:8180" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="8253:8695" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="8731:9069" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="9137:10508" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="10603:10966" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="11021:11371" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="11442:11758" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="11800:12603" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="12140:12401" ph="{...}" />
-            <marker date="1516303216000" expanded="false" signature="12444:12459" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="12488:12498" ph=" }" />
-            <marker date="1516303216000" expanded="false" signature="12542:12557" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="12587:12597" ph=" }" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="51" column="0" lean-forward="false" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
-          <folding>
-            <marker date="1516303216000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1516303216000" expanded="false" signature="174:494" ph="..." />
-            <marker date="1516303216000" expanded="false" signature="740:751" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="766:772" ph=" }" />
-            <marker date="1516303216000" expanded="true" signature="909:1471" ph="{...}" />
-            <marker date="1516303216000" expanded="false" signature="1516:1527" ph=" { " />
-            <marker date="1516303216000" expanded="false" signature="1560:1566" ph=" }" />
-            <marker date="1516303216000" expanded="true" signature="1717:2335" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="2476:3387" ph="{...}" />
-            <marker date="1516303216000" expanded="true" signature="3525:4000" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngOptimizer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="37" column="20" lean-forward="false" selection-start-line="37" selection-start-column="20" selection-end-line="37" selection-end-column="20" />
+          <caret line="23" column="18" lean-forward="false" selection-start-line="23" selection-start-column="18" selection-end-line="23" selection-end-column="18" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/PngtasticOptimizer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="51" column="26" lean-forward="false" selection-start-line="51" selection-start-column="26" selection-end-line="51" selection-end-column="26" />
+        <state relative-caret-position="570">
+          <caret line="43" column="24" lean-forward="false" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/processing/PngtasticCompressionHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="28" column="11" lean-forward="false" selection-start-line="28" selection-start-column="11" selection-end-line="28" selection-end-column="11" />
+          <folding>
+            <element signature="e#891#892#0" expanded="false" />
+            <element signature="e#921#922#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/core/PngOptimizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1005">
+          <caret line="81" column="64" lean-forward="false" selection-start-line="81" selection-start-column="53" selection-end-line="81" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/out/production/pngtastic-optimizer/optimizer/com/googlecode/pngtastic/Run.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-123">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/optimizer/com/googlecode/pngtastic/Run.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-533">
+          <caret line="36" column="17" lean-forward="false" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

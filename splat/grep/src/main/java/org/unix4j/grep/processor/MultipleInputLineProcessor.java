@@ -1,0 +1,115 @@
+package org.unix4j.grep.processor;
+
+import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import org.unix4j.grep.command.ExitValueException;
+import org.unix4j.grep.io.Input;
+import org.unix4j.grep.line.Line;
+
+import java.util.List;
+
+/**
+ * A line processor for multiple inputs processing the same operation for each
+ * input object individually. An operation here is another {@link LineProcessor}
+ * reading the lines passed to it from the standard input.
+ * <p>
+ * The {@link #processLine(Line)} method does nothing and returns false
+ * indicating that the (standard) input is not read by this processor. The
+ * {@link #finish()} method reads the lines from the {@link Input} object passed
+ * to the constructor and passes them as input to the delegate processor
+ * performing the real work.
+ */
+public class MultipleInputLineProcessor implements LineProcessor {
+
+    final List<? extends Input> inputs;
+    final InputProcessor processor;
+    final LineProcessor output;
+
+    /**
+     * Constructor with input objects (usually file operands of the command) and
+     * the input processor of the command that reads from the standard input.
+     *
+     * @param inputs    the input devices, usually file operands of the command
+     * @param processor the operation applied to every input in the given
+     *                  {@code inputs} list
+     */
+    public MultipleInputLineProcessor(List<? extends Input> inputs, InputProcessor processor, LineProcessor output) {
+        this.inputs = inputs;
+        this.processor = processor;
+        this.output = output;
+
+        Sink.sink(this.inputs);
+        Sink.sink(this.processor);
+        Sink.sink(this.output);
+    }
+
+    @Override
+    public boolean processLine(Line line) {
+        return false;// we want no input, we have it already
+    }
+
+    /**
+     * Performs the following operations to process all {@code Input} objects
+     * that have been passed to the constructor:
+     * <ol>
+     * <li>Calls {@link #beginMultiple(List, LineProcessor) beginMultiple(..)}</li>
+     * <li>Iterates over all input objects in sequence</li>
+     * <li>Calls {@link InputProcessor#begin(Input, LineProcessor)}</li>
+     * <li>Calls {@link InputProcessor#processLine(Input, Line, LineProcessor)}
+     * for every line in the current input</li>
+     * <li>Calls {@link InputProcessor#finish(Input, LineProcessor)}</li>
+     * <li>Calls {@link #finishMultiple(List, LineProcessor) finishMultiple(..)}
+     * </li>
+     * </ol>
+     */
+    @Override
+    public void finish() {
+        beginMultiple(inputs, output);
+
+        for(int i = 0; i < inputs.size(); i++) {
+            final Input input = inputs.get(i);
+
+            try {
+                processor.begin(input, output);
+
+                for(final Line line : input) {
+                    if(!processor.processLine(line)) {
+                        break;// wants no more lines
+                    }
+                }
+                processor.finish(input, output);
+            } catch(ExitValueException e) {
+                e.setInput(input);
+                throw e;
+            }
+        }
+        finishMultiple(inputs, output);
+    }
+
+    /**
+     * Called once at the beginning before iterating over the {@link Input}
+     * objects in the given {@code inputs} list.
+     * <p>
+     * The DEFAULT implementation performs no operation.
+     *
+     * @param inputs the input object being iterated next
+     * @param output the output to write to
+     */
+    protected void beginMultiple(List<? extends Input> inputs, LineProcessor output) {
+        // default: no op
+    }
+
+    /**
+     * Called once at the end after iterating over the {@link Input} objects in
+     * the given {@code inputs} list.
+     * <p>
+     * The DEFAULT implementation calls {@link LineProcessor#finish()
+     * output.finish()}.
+     *
+     * @param inputs the input object being iterated next
+     * @param output the output to write to
+     */
+    protected void finishMultiple(List<? extends Input> inputs, LineProcessor output) {
+        output.finish();
+    }
+
+}

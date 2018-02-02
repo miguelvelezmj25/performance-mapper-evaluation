@@ -1,6 +1,5 @@
 package kanzi;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import kanzi.app.BlockCompressor;
@@ -22,13 +21,14 @@ public class Run {
     public static boolean CHECKSUM;
 
     public static void main(String[] args) throws IOException {
-        System.out.println("Instrument");
+        System.out.println("Original");
         Sink.init();
 
-        String dir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.knz";
+        String dir = "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.knz";
         File output = new File(dir);
 
         if(output.exists()) {
+            System.out.println("Deleting " + output);
             FileUtils.forceDelete(output);
         }
 
@@ -41,17 +41,17 @@ public class Run {
         CHECKSUM = Source.getOptionCHECKSUM(Boolean.valueOf(args[6]));
 
 //        VERBOSE = Source.getOptionVERBOSE(true);
-//        FORCE = Source.getOptionFORCE(false);
-//        BLOCKSIZE = Source.getOptionBLOCKSIZE(false);
-//        LEVEL = Source.getOptionLEVEL(true);
-//        ENTROPY = Source.getOptionENTROPY(false);
-//        TRANSFORM = Source.getOptionTRANSFORM(false);
-//        CHECKSUM = Source.getOptionCHECKSUM(false);
+//        FORCE = Source.getOptionFORCE(true);
+//        BLOCKSIZE = Source.getOptionBLOCKSIZE(true);
+//        LEVEL = Source.getOptionLEVEL(false);
+//        ENTROPY = Source.getOptionENTROPY(true);
+//        TRANSFORM = Source.getOptionTRANSFORM(true);
+//        CHECKSUM = Source.getOptionCHECKSUM(true);
 
         int verbose = 0;
         boolean force = false;
         int blockSize = 1024 * 1024;
-        int level = 0;
+        int level = 1;
         String entropy = "Huffman";
         String transform = "BWT+MTFT+ZRLT";
         boolean checksum = false;
@@ -85,14 +85,14 @@ public class Run {
         }
 
         Map<String, Object> map = new HashMap<>();
-        map.put("inputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.jar");
-        map.put("outputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/kanzi/src/main/resources/rt.knz");
+        map.put("inputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.jar");
+        map.put("outputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.knz");
 
         BlockCompressor bc = null;
 
         try {
             bc = new BlockCompressor(verbose, force, blockSize, level, entropy, transform, checksum, 1, map, null);
-        } catch (Exception e) {
+        } catch(Exception e) {
             System.err.println("Could not create the compressor: " + e.getMessage());
             System.exit(kanzi.io.Error.ERR_CREATE_COMPRESSOR);
         }
