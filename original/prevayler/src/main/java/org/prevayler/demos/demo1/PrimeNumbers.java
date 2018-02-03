@@ -60,17 +60,17 @@ public class PrimeNumbers {
 //        JOURNALSERIALIZER = Source.getOptionJOURNALSERIALIZER(false);
 //        SNAPSHOTSERIALIZER = Source.getOptionSNAPSHOTSERIALIZER(false);
 
-        boolean transientMode = false;
+        boolean transientMode = TRANSIENTMODE;
         Clock clock;
-        boolean deepCopy = false;
-        boolean diskSync = false;
+        boolean deepCopy = DEEPCOPY;
+        boolean diskSync = DISKSYNC;
         int fileSizeThreshold = 0;
         int fileAgeThreshold = 0;
         LoggingMonitor monitor;
 
-        if(TRANSIENTMODE) {
-            transientMode = true;
-        }
+//        if(TRANSIENTMODE) {
+//            transientMode = true;
+//        }
 
         if(CLOCK) {
             clock = new PausableClock(new MachineClock());
@@ -79,13 +79,13 @@ public class PrimeNumbers {
             clock = new MachineClock();
         }
 
-        if(DEEPCOPY) {
-            deepCopy = true;
-        }
+//        if(DEEPCOPY) {
+//            deepCopy = true;
+//        }
 
-        if(DISKSYNC) {
-            diskSync = true;
-        }
+//        if(DISKSYNC) {
+//            diskSync = true;
+//        }
 
         if(FILESIZETHRESHOLD) {
             fileSizeThreshold = 1000000;

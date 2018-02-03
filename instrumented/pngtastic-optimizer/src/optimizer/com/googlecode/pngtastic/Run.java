@@ -29,9 +29,11 @@ public class Run {
 
     /** */
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println("Instrumented");
         Sink.init();
+
+        Thread.sleep(1500);
 
         Map<String, String> options = new HashMap<>();
         int last = 0;
@@ -68,11 +70,11 @@ public class Run {
 //        String compressor = options.get("--compressor");
 //        Integer iterations = safeInteger(options.get("--iterations"));
 
-        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[0]));
-        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[1]));
-        COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[2]));
-        ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[3]));
-        LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[4]));
+        COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[0]));
+        ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[1]));
+        LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[2]));
+        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
+        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
 
 //        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
 //        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
@@ -80,15 +82,15 @@ public class Run {
 //        ITERATIONS = Source.getOptionITERATIONS(false);
 //        LOGLEVEL = Source.getOptionLOGLEVEL(false);
 
-        Boolean removeGamma = false;
+        Boolean removeGamma = REMOVEGAMMA;
         Integer compressionLevel = 0;
         String logLevel = "none";
         String compressor = "none";
         Integer iterations = 1;
 
-        if(REMOVEGAMMA) {
-            removeGamma = true;
-        }
+//        if(REMOVEGAMMA) {
+//            removeGamma = true;
+//        }
 
         if(COMPRESSIONLEVEL) {
             compressionLevel = 9;

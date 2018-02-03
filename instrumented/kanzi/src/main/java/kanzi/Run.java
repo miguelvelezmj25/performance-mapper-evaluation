@@ -49,20 +49,20 @@ public class Run {
 //        CHECKSUM = Source.getOptionCHECKSUM(true);
 
         int verbose = 0;
-        boolean force = false;
+        boolean force = FORCE;
         int blockSize = 1024 * 1024;
         int level = 1;
         String entropy = "Huffman";
         String transform = "BWT+MTFT+ZRLT";
-        boolean checksum = false;
+        boolean checksum = CHECKSUM;
 
         if(VERBOSE) {
             verbose = 4;
         }
 
-        if(FORCE) {
-            force = true;
-        }
+//        if(FORCE) {
+//            force = true;
+//        }
 
         if(BLOCKSIZE) {
             blockSize = 1024 * 1024 * 1024;
@@ -80,9 +80,9 @@ public class Run {
             transform = "LZ4";
         }
 
-        if(CHECKSUM) {
-            checksum = true;
-        }
+//        if(CHECKSUM) {
+//            checksum = true;
+//        }
 
         Map<String, Object> map = new HashMap<>();
         map.put("inputName", "/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/kanzi/src/main/resources/rt.jar");

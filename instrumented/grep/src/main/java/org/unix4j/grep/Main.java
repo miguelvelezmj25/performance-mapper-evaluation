@@ -18,10 +18,12 @@ public class Main {
     public static boolean ISMATCHINGFILES;
     public static boolean ISWHOLELINE;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         long start = System.nanoTime();
         System.out.println("Instrumented");
         Sink.init();
+
+        Thread.sleep(1500);
 
         ISIGNORECASE = Source.getIsIgnoreCase(Boolean.valueOf(args[0]));
         ISINVERTMATCH = Source.getIsInvertMatch(Boolean.valueOf(args[1]));
@@ -39,41 +41,41 @@ public class Main {
 //      ISMATCHINGFILES = Source.getIsMatchingFiles(false);
 //      ISWHOLELINE = Source.getIsWholeLine(true);
 
-        boolean isIgnoreCase = false;
-        boolean isInvertMatch = false;
-        boolean isFixedStrings = false;
-        boolean isLineNumber = false;
-        boolean isCount = false;
-        boolean isMatchingFiles = false;
-        boolean isWholeLine = false;
+        boolean isIgnoreCase = ISIGNORECASE;
+        boolean isInvertMatch = ISINVERTMATCH;
+        boolean isFixedStrings = ISFIXEDSTRINGS;
+        boolean isLineNumber = ISLINENUMBER;
+        boolean isCount = ISCOUNT;
+        boolean isMatchingFiles = ISMATCHINGFILES;
+        boolean isWholeLine = ISWHOLELINE;
 
-        if(ISIGNORECASE) {
-            isIgnoreCase = true;
-        }
-
-        if(ISINVERTMATCH) {
-            isInvertMatch = true;
-        }
-
-        if(ISFIXEDSTRINGS) {
-            isFixedStrings = true;
-        }
-
-        if(ISLINENUMBER) {
-            isLineNumber = true;
-        }
-
-        if(ISCOUNT) {
-            isCount = true;
-        }
-
-        if(ISMATCHINGFILES) {
-            isMatchingFiles = true;
-        }
-
-        if(ISWHOLELINE) {
-            isWholeLine = true;
-        }
+//        if(ISIGNORECASE) {
+//            isIgnoreCase = true;
+//        }
+//
+//        if(ISINVERTMATCH) {
+//            isInvertMatch = true;
+//        }
+//
+//        if(ISFIXEDSTRINGS) {
+//            isFixedStrings = true;
+//        }
+//
+//        if(ISLINENUMBER) {
+//            isLineNumber = true;
+//        }
+//
+//        if(ISCOUNT) {
+//            isCount = true;
+//        }
+//
+//        if(ISMATCHINGFILES) {
+//            isMatchingFiles = true;
+//        }
+//
+//        if(ISWHOLELINE) {
+//            isWholeLine = true;
+//        }
 
         String regexp = "A.*C.*I.*K.*L.*W";
 //        String regexp = "wood";
