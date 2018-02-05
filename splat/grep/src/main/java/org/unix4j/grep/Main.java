@@ -163,7 +163,7 @@ public class Main {
         GrepArguments grepArgs = new GrepArguments(isIgnoreCase, isInvertMatch, isFixedStrings, isLineNumber, isCount,
                 isMatchingFiles, isWholeLine);
         grepArgs.setRegexp(regexp);
-        grepArgs.setPaths("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/splat/grep/files/*.txt");
+        grepArgs.setPaths(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/splat/grep/files/*.txt");
         GrepCommand grep = new GrepCommand(grepArgs);
 
         DefaultExecutionContext executionContext = new DefaultExecutionContext();
