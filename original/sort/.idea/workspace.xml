@@ -16,8 +16,8 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/org/unix4j/sort/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="41" column="0" lean-forward="true" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+            <state relative-caret-position="244">
+              <caret line="89" column="115" lean-forward="false" selection-start-line="89" selection-start-column="115" selection-end-line="89" selection-end-column="115" />
               <folding />
             </state>
           </provider>
@@ -70,6 +70,7 @@
       <find>grep</find>
       <find>getar</find>
       <find>sink.si</find>
+      <find>/Us</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -356,12 +357,12 @@
       <workItem from="1516305412559" duration="14000" />
       <workItem from="1516309618722" duration="95000" />
       <workItem from="1516310107122" duration="757000" />
-      <workItem from="1518014346661" duration="3804000" />
+      <workItem from="1518014346661" duration="4165000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14159000" />
+    <option name="totallyTimeSpent" value="14520000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="873" extended-state="6" />
@@ -623,6 +624,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="103">
           <caret line="11" column="52" lean-forward="false" selection-start-line="11" selection-start-column="52" selection-end-line="11" selection-end-column="52" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -893,8 +895,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/unix4j/sort/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="41" column="0" lean-forward="true" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+        <state relative-caret-position="244">
+          <caret line="89" column="115" lean-forward="false" selection-start-line="89" selection-start-column="115" selection-end-line="89" selection-end-column="115" />
           <folding />
         </state>
       </provider>
