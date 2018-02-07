@@ -81,6 +81,7 @@ public class SingleCharSequenceLine implements Line {
 
     @Override
     public CharSequence subSequence(int start, int end) {
+        if(start >= end) { return ""; }
         return charSequence.subSequence(offset + start, offset + end);
     }
 
