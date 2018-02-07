@@ -82,7 +82,7 @@ public class DurableOutputStream {
         _file = file;
         _fileOutputStream = new FileOutputStream(file);
         _fileChannel = _fileOutputStream.getChannel();
-        _preallocateLength = journalSizeThreshold.getAsLong() == 0 ?
+        _preallocateLength = journalSizeThreshold .getAsLong()== 0 ?
                 JOURNAL_PREALLOCATE_LENGTH :
                 (int) Math.min(journalSizeThreshold.getAsLong() - 1, JOURNAL_PREALLOCATE_LENGTH);
         _journalDiskSync = journalDiskSync;

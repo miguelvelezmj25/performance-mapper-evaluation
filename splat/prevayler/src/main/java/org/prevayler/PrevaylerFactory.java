@@ -5,7 +5,6 @@
 
 package org.prevayler;
 
-import org.prevayler.foundation.monitor.LoggingMonitor;
 import org.prevayler.foundation.monitor.Monitor;
 import org.prevayler.foundation.monitor.SimpleMonitor;
 import org.prevayler.foundation.network.OldNetworkImpl;
@@ -29,7 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -117,7 +115,7 @@ public class PrevaylerFactory<P> {
         PrevaylerFactory<P> factory = new PrevaylerFactory<P>();
         factory.configurePrevalentSystem(newPrevalentSystem);
         factory.configurePrevalenceDirectory(snapshotDirectory);
-        factory.configureTransientMode(() -> true);
+        factory.configureTransientMode(()->true);
         try {
             return factory.create();
         } catch (Exception e) {
@@ -138,7 +136,7 @@ public class PrevaylerFactory<P> {
         PrevaylerFactory<P> factory = new PrevaylerFactory<P>();
         factory.configurePrevalentSystem(newPrevalentSystem);
         factory.configureNullSnapshotManager(new NullSnapshotManager<P>(newPrevalentSystem, "Transient Prevaylers are unable to take snapshots."));
-        factory.configureTransientMode(() -> true);
+        factory.configureTransientMode(()->true);
         try {
             return factory.create();
         } catch (Exception e) {
@@ -399,6 +397,6 @@ public class PrevaylerFactory<P> {
 
 
     private Supplier<Monitor> monitor() {
-        return _monitor != null ? _monitor : () -> new SimpleMonitor(System.err);
+        return _monitor != null ? _monitor : ()->new SimpleMonitor(System.err);
     }
 }

@@ -282,13 +282,13 @@ public class PrimeNumbers {
         factory.configureJournalFileAgeThreshold(fileAgeThreshold);
 
 
-        if(JOURNALSERIALIZER) {
+        if(journalSerializer.getAsBoolean()) {
             factory.configureJournalSerializer(new XStreamSerializer());
         } else {
             factory.configureJournalSerializer(new JavaSerializer());
         }
 
-        if(SNAPSHOTSERIALIZER) {
+        if(snapshotSerializer.getAsBoolean()) {
             factory.configureSnapshotSerializer(new XStreamSerializer());
         } else {
             factory.configureSnapshotSerializer(new JavaSerializer());
@@ -310,13 +310,13 @@ public class PrimeNumbers {
         factory.configureJournalFileAgeThreshold(fileAgeThreshold);
 
 
-        if(JOURNALSERIALIZER) {
+        if(journalSerializer.getAsBoolean()) {
             factory.configureJournalSerializer(new XStreamSerializer());
         } else {
             factory.configureJournalSerializer(new JavaSerializer());
         }
 
-        if(SNAPSHOTSERIALIZER) {
+        if(snapshotSerializer.getAsBoolean()) {
             factory.configureSnapshotSerializer(new XStreamSerializer());
         } else {
             factory.configureSnapshotSerializer(new JavaSerializer());
@@ -342,7 +342,7 @@ public class PrimeNumbers {
         this.push("CLOCK");
 
         if(option) {
-            return new PausableClock(() -> new MachineClock());
+            return new PausableClock(()->new MachineClock());
         }
 
         return new MachineClock();

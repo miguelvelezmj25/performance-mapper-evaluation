@@ -1,6 +1,5 @@
 package org.prevayler.implementation;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import org.prevayler.foundation.Chunk;
 import org.prevayler.foundation.serialization.Serializer;
 
