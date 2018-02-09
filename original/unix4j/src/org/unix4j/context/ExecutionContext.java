@@ -3,7 +3,6 @@ package org.unix4j.context;
 import org.unix4j.command.Command;
 import org.unix4j.convert.ConverterRegistry;
 import org.unix4j.convert.ValueConverter;
-import org.unix4j.processor.LineProcessor;
 import org.unix4j.variable.VariableContext;
 
 import java.io.File;

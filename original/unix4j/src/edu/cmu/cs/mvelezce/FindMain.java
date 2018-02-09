@@ -34,6 +34,7 @@ public class FindMain {
         Unix4jCommandBuilder u = Unix4j.find("cash");
         u.toStdOut();
 
+        Unix4j.sed()
 //        D = Source.getOptionD(Boolean.valueOf(args[0]));
 //        I = Source.getOptionI(Boolean.valueOf(args[1]));
 //        O = Source.getOptionO(Boolean.valueOf(args[2]));
