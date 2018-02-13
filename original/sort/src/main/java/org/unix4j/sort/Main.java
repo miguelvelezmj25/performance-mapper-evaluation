@@ -89,8 +89,8 @@ public class Main {
                 isDictionaryOrder, isIgnoreCase, isNumericSort,
                 isGeneralNumericSort, isHumanNumericSort, isMonthSort,
                 isVersionSort, isReverse);
-        sortArgs.setPaths(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/sort/files/*.txt");
-//        sortArgs.setPaths(System.getProperty("user.home") + "/Documents/performance-mapper-evaluation/original/sort/files/*.txt");
+//        sortArgs.setPaths(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/sort/files/*.txt");
+        sortArgs.setPaths(System.getProperty("user.home") + "/Documents/performance-mapper-evaluation/original/sort/files/*.txt");
         SortCommand sort = new SortCommand(sortArgs);
 
         DefaultExecutionContext executionContext = new DefaultExecutionContext();
