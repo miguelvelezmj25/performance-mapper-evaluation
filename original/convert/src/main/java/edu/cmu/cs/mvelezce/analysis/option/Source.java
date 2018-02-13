@@ -51,31 +51,31 @@ public class Source {
     public static boolean getOptionINCLUDEANDROIDLDPITVDPI(boolean option) { return option;
     }
 
-    public static boolean getOptionsCREATEMIPMAPINSTEADOFDRAWABLEDIR(boolean option) { return option;
+    public static boolean getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(boolean option) { return option;
     }
 
-    public static boolean getOptionsENABLEPNGCRUSH(boolean option) { return option;
+    public static boolean getOptionENABLEPNGCRUSH(boolean option) { return option;
     }
 
-    public static boolean getOptionsENABLEMOZJPEG(boolean option) { return option;
+    public static boolean getOptionENABLEMOZJPEG(boolean option) { return option;
     }
 
-    public static boolean getOptionsPOSTCONVERTWEBP(boolean option) { return option;
+    public static boolean getOptionPOSTCONVERTWEBP(boolean option) { return option;
     }
 
-    public static boolean getOptionsENABLEANTIALIASING(boolean option) { return option;
+    public static boolean getOptionENABLEANTIALIASING(boolean option) { return option;
     }
 
-    public static boolean getOptionsKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(boolean option) { return option;
+    public static boolean getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(boolean option) { return option;
     }
 
-    public static boolean getOptionsROUNDINGHANDLER(boolean option) { return option;
+    public static boolean getOptionROUNDINGHANDLER(boolean option) { return option;
     }
 
-    public static boolean getOptionsIOSCREATEIMAGESETFOLDERS(boolean option) { return option;
+    public static boolean getOptionIOSCREATEIMAGESETFOLDERS(boolean option) { return option;
     }
 
-    public static boolean getOptionsCLEARDIRBEFORECONVERT(boolean option) { return option;
+    public static boolean getOptionCLEARDIRBEFORECONVERT(boolean option) { return option;
     }
 
 

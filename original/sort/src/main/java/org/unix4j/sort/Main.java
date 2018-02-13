@@ -2,6 +2,7 @@ package org.unix4j.sort;
 
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
+import org.unix4j.sort.command.ExitValueException;
 import org.unix4j.sort.context.DefaultExecutionContext;
 import org.unix4j.sort.io.StdOutput;
 import org.unix4j.sort.processor.LineProcessor;
@@ -59,7 +60,7 @@ public class Main {
         REVERSE = Source.getIsReverse(Boolean.valueOf(args[11]));
 
 //        CHECK = Source.getIsCheck(false);
-//        MERGE = Source.getIsMerge(false);
+//        MERGE = Source.getIsMerge(true);
 //        UNIQUE = Source.getIsUnique(false);
 //        IGNORELEADINGBLANKS = Source.getIsIgnoreLeadingBlanks(false);
 //        DICTIONARYORDER = Source.getIsDictionaryOrder(false);
@@ -67,9 +68,9 @@ public class Main {
 //        NUMERICSORT = Source.getIsNumericSort(false);
 //        GENERALNUMERICSORT = Source.getIsGeneralNumericSort(false);
 //        HUMANNUMERICSORT = Source.getIsHumanNumericSort(false);
-//        MONTHSORT = Source.getIsMonthSort(false);
-//        VERSIONSORT = Source.getIsVersionSort(false);
-//        REVERSE = Source.getIsReverse(false);
+//        MONTHSORT = Source.getIsMonthSort(true);
+//        VERSIONSORT = Source.getIsVersionSort(true);
+//        REVERSE = Source.getIsReverse(true);
 
         boolean isCheck = CHECK;
         boolean isMerge = MERGE;
@@ -97,6 +98,11 @@ public class Main {
         StdOutput out = new StdOutput();
         LineProcessor exec = sort.execute(executionContext, out);
 
-        exec.finish();
+        try {
+            exec.finish();
+        }
+        catch(ExitValueException eve) {
+            eve.printStackTrace();
+        }
     }
 }

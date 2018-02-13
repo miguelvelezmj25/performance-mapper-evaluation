@@ -37,29 +37,60 @@ import java.util.concurrent.TimeUnit;
  */
 public class WorkerHandler<T> {
 
-    private final List<T> processors;
+    //    private final List<T> processors;
     private final ExecutorService threadPool;
     private final Arguments arguments;
     private final Callback callback;
     private int jobCount;
+    private final T processor;
 
-    public WorkerHandler(List<T> processors, Arguments arguments, Callback callback) {
-        this.processors = processors;
+//    public WorkerHandler(List<T> processors, Arguments arguments, Callback callback) {
+//        this.processors = processors;
+//        this.threadPool = new ThreadPoolExecutor(arguments.threadCount, arguments.threadCount, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1024 * 10));
+//        this.callback = callback;
+//        this.arguments = arguments;
+//    }
+
+    public WorkerHandler(T processor, Arguments arguments, Callback callback) {
+        this.processor = processor;
         this.threadPool = new ThreadPoolExecutor(arguments.threadCount, arguments.threadCount, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1024 * 10));
         this.callback = callback;
         this.arguments = arguments;
     }
 
+//    public void start(List<File> allFiles) {
+//        this.jobCount = allFiles.size() * processors.size();
+//
+//        InternalCallback internalCallback = new InternalCallback(callback);
+//
+//        for(T processor : processors) {
+//            for(File fileToProcess : allFiles) {
+//                threadPool.execute(new Worker(fileToProcess, processor, arguments, internalCallback));
+//            }
+//        }
+//
+//        threadPool.shutdown();
+//
+//        if(jobCount == 0) {
+//            callback.onFinished(0, Collections.emptyList(), new StringBuilder(), Collections.emptyList(), false);
+//        }
+//    }
+
     public void start(List<File> allFiles) {
-        this.jobCount = allFiles.size() * processors.size();
+        this.jobCount = allFiles.size();
 
         InternalCallback internalCallback = new InternalCallback(callback);
 
-        for(T processor : processors) {
-            for(File fileToProcess : allFiles) {
-                threadPool.execute(new Worker(fileToProcess, processor, arguments, internalCallback));
-            }
+//        for(T processor : processors) {
+//            for(File fileToProcess : allFiles) {
+//                threadPool.execute(new Worker(fileToProcess, processor, arguments, internalCallback));
+//            }
+//        }
+
+        for(File fileToProcess : allFiles) {
+            threadPool.execute(new Worker(fileToProcess, processor, arguments, internalCallback));
         }
+
 
         threadPool.shutdown();
 
@@ -97,7 +128,7 @@ public class WorkerHandler<T> {
                     WebpProcessor wp = new WebpProcessor();
                     result = wp.process(unprocessedFile, arguments.keepUnoptimizedFilesPostProcessor);
                 }
-                else{
+                else {
                     result = ((IPostProcessor) processor).process(unprocessedFile, arguments.keepUnoptimizedFilesPostProcessor);
                 }
             }

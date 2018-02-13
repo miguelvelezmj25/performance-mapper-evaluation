@@ -174,23 +174,23 @@ public final class DensityBucketUtil {
         return bucketMap;
     }
 
-    private static Dimension getHqDimension(File image, Arguments args) throws IOException {
-        Dimension srcDimension = ImageUtil.getImageDimension(image);
-        Dimension hqDimension;
-        if(args.scaleMode == EScaleMode.FACTOR && args.scale < SVG_UPSCALE_FACTOR) {
-            hqDimension = new Dimension((int) args.round(SVG_UPSCALE_FACTOR / args.scale * (float) srcDimension.width), (int) args.round(SVG_UPSCALE_FACTOR / args.scale * (float) srcDimension.width));
-        }
-        else if(args.scaleMode == EScaleMode.DP_WIDTH && (args.scale * SVG_UPSCALE_FACTOR < srcDimension.width)) {
-            float scaleFactor = args.scale / (float) srcDimension.width * SVG_UPSCALE_FACTOR;
-            hqDimension = new Dimension((int) args.round(scaleFactor * (float) srcDimension.width), (int) args.round(scaleFactor * (float) srcDimension.height));
-        }
-        else if(args.scaleMode == EScaleMode.DP_HEIGHT && (args.scale * SVG_UPSCALE_FACTOR < srcDimension.height)) {
-            float scaleFactor = args.scale / (float) srcDimension.height * SVG_UPSCALE_FACTOR;
-            hqDimension = new Dimension((int) args.round(scaleFactor * (float) srcDimension.width), (int) args.round(scaleFactor * (float) srcDimension.height));
-        }
-        else {
-            hqDimension = srcDimension;
-        }
-        return hqDimension;
-    }
+//    private static Dimension getHqDimension(File image, Arguments args) throws IOException {
+//        Dimension srcDimension = ImageUtil.getImageDimension(image);
+//        Dimension hqDimension;
+//        if(args.scaleMode == EScaleMode.FACTOR && args.scale < SVG_UPSCALE_FACTOR) {
+//            hqDimension = new Dimension((int) args.round(SVG_UPSCALE_FACTOR / args.scale * (float) srcDimension.width), (int) args.round(SVG_UPSCALE_FACTOR / args.scale * (float) srcDimension.width));
+//        }
+//        else if(args.scaleMode == EScaleMode.DP_WIDTH && (args.scale * SVG_UPSCALE_FACTOR < srcDimension.width)) {
+//            float scaleFactor = args.scale / (float) srcDimension.width * SVG_UPSCALE_FACTOR;
+//            hqDimension = new Dimension((int) args.round(scaleFactor * (float) srcDimension.width), (int) args.round(scaleFactor * (float) srcDimension.height));
+//        }
+//        else if(args.scaleMode == EScaleMode.DP_HEIGHT && (args.scale * SVG_UPSCALE_FACTOR < srcDimension.height)) {
+//            float scaleFactor = args.scale / (float) srcDimension.height * SVG_UPSCALE_FACTOR;
+//            hqDimension = new Dimension((int) args.round(scaleFactor * (float) srcDimension.width), (int) args.round(scaleFactor * (float) srcDimension.height));
+//        }
+//        else {
+//            hqDimension = srcDimension;
+//        }
+//        return hqDimension;
+//    }
 }

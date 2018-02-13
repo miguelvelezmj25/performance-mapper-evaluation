@@ -47,155 +47,155 @@ public final class CLIInterpreter {
     private CLIInterpreter() {
     }
 
-    public static Arguments parse(String[] args) {
-        ResourceBundle strings = ResourceBundle.getBundle("bundles.strings", Locale.getDefault());
-        Options options = setupOptions(strings);
-        CommandLineParser parser = new DefaultParser();
-
-        Arguments.Builder builder;
-        try {
-            CommandLine commandLine = parser.parse(options, args);
-
-            if (commandLine.hasOption("gui")) {
-                return Arguments.START_GUI;
-            }
-
-            if (commandLine.hasOption("h") || commandLine.hasOption("help")) {
-                printHelp(options);
-                return null;
-            }
-
-            if (commandLine.hasOption("v") || commandLine.hasOption("version")) {
-                System.out.println("Version: " + CLIInterpreter.class.getPackage().getImplementationVersion());
-                return null;
-            }
-
-            String scaleRawParam = commandLine.getOptionValue(SCALE_ARG).toLowerCase();
-
-            boolean dp = false;
-
-            if (scaleRawParam.contains("dp")) {
-                dp = true;
-                scaleRawParam = scaleRawParam.replace("dp", "").trim();
-            }
-
-            builder = new Arguments.Builder(new File(commandLine.getOptionValue(SOURCE_ARG)), Float.parseFloat(scaleRawParam));
-
-            if (dp && commandLine.hasOption(SCALE_IS_HEIGHT_DP_ARG)) {
-                builder.scaleMode(EScaleMode.DP_HEIGHT);
-            } else if (dp && !commandLine.hasOption(SCALE_IS_HEIGHT_DP_ARG)) {
-                builder.scaleMode(EScaleMode.DP_WIDTH);
-            } else {
-                builder.scaleMode(EScaleMode.FACTOR);
-            }
-
-            if (commandLine.hasOption(DST_ARG)) {
-                builder.dstFolder(new File(commandLine.getOptionValue(DST_ARG)));
-            }
-
-            float compressionQuality = Arguments.DEFAULT_COMPRESSION_QUALITY;
-            if (commandLine.hasOption(COMPRESSION_QUALITY_ARG)) {
-                compressionQuality = Float.valueOf(commandLine.getOptionValue(COMPRESSION_QUALITY_ARG));
-            }
-
-            if (commandLine.hasOption(OUT_COMPRESSION_ARG)) {
-                switch (commandLine.getOptionValue(OUT_COMPRESSION_ARG)) {
-                    case "strict":
-                        builder.compression(EOutputCompressionMode.SAME_AS_INPUT_STRICT);
-                        break;
-                    case "png":
-                        builder.compression(EOutputCompressionMode.AS_PNG);
-                        break;
-                    case "jpg":
-                        builder.compression(EOutputCompressionMode.AS_JPG, compressionQuality);
-                        break;
-                    case "gif":
-                        builder.compression(EOutputCompressionMode.AS_GIF);
-                        break;
-                    case "bmp":
-                        builder.compression(EOutputCompressionMode.AS_BMP);
-                        break;
-                    case "png+jpg":
-                        builder.compression(EOutputCompressionMode.AS_JPG_AND_PNG, compressionQuality);
-                        break;
-                    default:
-                        System.err.println("unknown compression type: " + commandLine.getOptionValue(OUT_COMPRESSION_ARG));
-                }
-            }
-
-            Set<EPlatform> platformSet = new HashSet<>(EPlatform.values().length);
-            if (commandLine.hasOption(PLATFORM_ARG)) {
-                switch (commandLine.getOptionValue(PLATFORM_ARG)) {
-                    case "all":
-                        platformSet = EPlatform.getAll();
-                        break;
-                    case "android":
-                        platformSet.add(EPlatform.ANDROID);
-                        break;
-                    case "ios":
-                        platformSet.add(EPlatform.IOS);
-                        break;
-                    case "win":
-                        platformSet.add(EPlatform.WINDOWS);
-                        break;
-                    case "web":
-                        platformSet.add(EPlatform.WEB);
-                        break;
-                    default:
-                        System.err.println("unknown mode: " + commandLine.getOptionValue(PLATFORM_ARG));
-                }
-                builder.platform(platformSet);
-            }
-
-            if (commandLine.hasOption(UPSCALING_ALGO_ARG)) {
-                builder.upScaleAlgorithm(EScalingAlgorithm.getByName(commandLine.getOptionValue(UPSCALING_ALGO_ARG)));
-            }
-
-            if (commandLine.hasOption(DOWNSCALING_ALGO_ARG)) {
-                builder.downScaleAlgorithm(EScalingAlgorithm.getByName(commandLine.getOptionValue(DOWNSCALING_ALGO_ARG)));
-            }
-
-            if (commandLine.hasOption(ROUNDING_MODE_ARG)) {
-                switch (commandLine.getOptionValue(ROUNDING_MODE_ARG)) {
-                    case "round":
-                        builder.scaleRoundingStragy(RoundingHandler.Strategy.ROUND_HALF_UP);
-                        break;
-                    case "ceil":
-                        builder.scaleRoundingStragy(RoundingHandler.Strategy.CEIL);
-                        break;
-                    case "floor":
-                        builder.scaleRoundingStragy(RoundingHandler.Strategy.FLOOR);
-                        break;
-                    default:
-                        System.err.println("unknown mode: " + commandLine.getOptionValue(ROUNDING_MODE_ARG));
-                }
-            }
-
-            if (commandLine.hasOption(THREADS_ARG)) {
-                builder.threadCount(Integer.valueOf(commandLine.getOptionValue(THREADS_ARG)));
-            }
-
-            builder.skipUpscaling(commandLine.hasOption("skipUpscaling"));
-            builder.skipExistingFiles(commandLine.hasOption(SKIP_EXISTING_ARG));
-            builder.includeAndroidLdpiTvdpi(commandLine.hasOption("androidIncludeLdpiTvdpi"));
-            builder.verboseLog(commandLine.hasOption(VERBOSE_ARG));
-            builder.haltOnError(commandLine.hasOption("haltOnError"));
-            builder.createMipMapInsteadOfDrawableDir(commandLine.hasOption("androidMipmapInsteadOfDrawable"));
-            builder.antiAliasing(commandLine.hasOption("antiAliasing"));
-            builder.enablePngCrush(commandLine.hasOption("postProcessorPngCrush"));
-            builder.postConvertWebp(commandLine.hasOption("postProcessorWebp"));
-            builder.dryRun(commandLine.hasOption("dryRun"));
-            builder.enableMozJpeg(commandLine.hasOption("postProcessorMozJpeg"));
-            builder.keepUnoptimizedFilesPostProcessor(commandLine.hasOption("keepOriginalPostProcessedFiles"));
-            builder.iosCreateImagesetFolders(commandLine.hasOption("iosCreateImagesetFolders"));
-            builder.clearDirBeforeConvert(commandLine.hasOption("clean"));
-
-            return builder.build();
-        } catch (Exception e) {
-            System.err.println("Could not parse args: " + e.getMessage());
-        }
-        return null;
-    }
+//    public static Arguments parse(String[] args) {
+//        ResourceBundle strings = ResourceBundle.getBundle("bundles.strings", Locale.getDefault());
+//        Options options = setupOptions(strings);
+//        CommandLineParser parser = new DefaultParser();
+//
+//        Arguments.Builder builder;
+//        try {
+//            CommandLine commandLine = parser.parse(options, args);
+//
+//            if (commandLine.hasOption("gui")) {
+//                return Arguments.START_GUI;
+//            }
+//
+//            if (commandLine.hasOption("h") || commandLine.hasOption("help")) {
+//                printHelp(options);
+//                return null;
+//            }
+//
+//            if (commandLine.hasOption("v") || commandLine.hasOption("version")) {
+//                System.out.println("Version: " + CLIInterpreter.class.getPackage().getImplementationVersion());
+//                return null;
+//            }
+//
+//            String scaleRawParam = commandLine.getOptionValue(SCALE_ARG).toLowerCase();
+//
+//            boolean dp = false;
+//
+//            if (scaleRawParam.contains("dp")) {
+//                dp = true;
+//                scaleRawParam = scaleRawParam.replace("dp", "").trim();
+//            }
+//
+//            builder = new Arguments.Builder(new File(commandLine.getOptionValue(SOURCE_ARG)), Float.parseFloat(scaleRawParam));
+//
+//            if (dp && commandLine.hasOption(SCALE_IS_HEIGHT_DP_ARG)) {
+//                builder.scaleMode(EScaleMode.DP_HEIGHT);
+//            } else if (dp && !commandLine.hasOption(SCALE_IS_HEIGHT_DP_ARG)) {
+//                builder.scaleMode(EScaleMode.DP_WIDTH);
+//            } else {
+//                builder.scaleMode(EScaleMode.FACTOR);
+//            }
+//
+//            if (commandLine.hasOption(DST_ARG)) {
+//                builder.dstFolder(new File(commandLine.getOptionValue(DST_ARG)));
+//            }
+//
+//            float compressionQuality = Arguments.DEFAULT_COMPRESSION_QUALITY;
+//            if (commandLine.hasOption(COMPRESSION_QUALITY_ARG)) {
+//                compressionQuality = Float.valueOf(commandLine.getOptionValue(COMPRESSION_QUALITY_ARG));
+//            }
+//
+//            if (commandLine.hasOption(OUT_COMPRESSION_ARG)) {
+//                switch (commandLine.getOptionValue(OUT_COMPRESSION_ARG)) {
+//                    case "strict":
+//                        builder.compression(EOutputCompressionMode.SAME_AS_INPUT_STRICT);
+//                        break;
+//                    case "png":
+//                        builder.compression(EOutputCompressionMode.AS_PNG);
+//                        break;
+//                    case "jpg":
+//                        builder.compression(EOutputCompressionMode.AS_JPG, compressionQuality);
+//                        break;
+//                    case "gif":
+//                        builder.compression(EOutputCompressionMode.AS_GIF);
+//                        break;
+//                    case "bmp":
+//                        builder.compression(EOutputCompressionMode.AS_BMP);
+//                        break;
+//                    case "png+jpg":
+//                        builder.compression(EOutputCompressionMode.AS_JPG_AND_PNG, compressionQuality);
+//                        break;
+//                    default:
+//                        System.err.println("unknown compression type: " + commandLine.getOptionValue(OUT_COMPRESSION_ARG));
+//                }
+//            }
+//
+//            Set<EPlatform> platformSet = new HashSet<>(EPlatform.values().length);
+//            if (commandLine.hasOption(PLATFORM_ARG)) {
+//                switch (commandLine.getOptionValue(PLATFORM_ARG)) {
+//                    case "all":
+//                        platformSet = EPlatform.getAll();
+//                        break;
+//                    case "android":
+//                        platformSet.add(EPlatform.ANDROID);
+//                        break;
+//                    case "ios":
+//                        platformSet.add(EPlatform.IOS);
+//                        break;
+//                    case "win":
+//                        platformSet.add(EPlatform.WINDOWS);
+//                        break;
+//                    case "web":
+//                        platformSet.add(EPlatform.WEB);
+//                        break;
+//                    default:
+//                        System.err.println("unknown mode: " + commandLine.getOptionValue(PLATFORM_ARG));
+//                }
+//                builder.platform(platformSet);
+//            }
+//
+//            if (commandLine.hasOption(UPSCALING_ALGO_ARG)) {
+//                builder.upScaleAlgorithm(EScalingAlgorithm.getByName(commandLine.getOptionValue(UPSCALING_ALGO_ARG)));
+//            }
+//
+//            if (commandLine.hasOption(DOWNSCALING_ALGO_ARG)) {
+//                builder.downScaleAlgorithm(EScalingAlgorithm.getByName(commandLine.getOptionValue(DOWNSCALING_ALGO_ARG)));
+//            }
+//
+//            if (commandLine.hasOption(ROUNDING_MODE_ARG)) {
+//                switch (commandLine.getOptionValue(ROUNDING_MODE_ARG)) {
+//                    case "round":
+//                        builder.scaleRoundingStragy(RoundingHandler.Strategy.ROUND_HALF_UP);
+//                        break;
+//                    case "ceil":
+//                        builder.scaleRoundingStragy(RoundingHandler.Strategy.CEIL);
+//                        break;
+//                    case "floor":
+//                        builder.scaleRoundingStragy(RoundingHandler.Strategy.FLOOR);
+//                        break;
+//                    default:
+//                        System.err.println("unknown mode: " + commandLine.getOptionValue(ROUNDING_MODE_ARG));
+//                }
+//            }
+//
+//            if (commandLine.hasOption(THREADS_ARG)) {
+//                builder.threadCount(Integer.valueOf(commandLine.getOptionValue(THREADS_ARG)));
+//            }
+//
+//            builder.skipUpscaling(commandLine.hasOption("skipUpscaling"));
+//            builder.skipExistingFiles(commandLine.hasOption(SKIP_EXISTING_ARG));
+//            builder.includeAndroidLdpiTvdpi(commandLine.hasOption("androidIncludeLdpiTvdpi"));
+//            builder.verboseLog(commandLine.hasOption(VERBOSE_ARG));
+//            builder.haltOnError(commandLine.hasOption("haltOnError"));
+//            builder.createMipMapInsteadOfDrawableDir(commandLine.hasOption("androidMipmapInsteadOfDrawable"));
+//            builder.antiAliasing(commandLine.hasOption("antiAliasing"));
+//            builder.enablePngCrush(commandLine.hasOption("postProcessorPngCrush"));
+//            builder.postConvertWebp(commandLine.hasOption("postProcessorWebp"));
+//            builder.dryRun(commandLine.hasOption("dryRun"));
+//            builder.enableMozJpeg(commandLine.hasOption("postProcessorMozJpeg"));
+//            builder.keepUnoptimizedFilesPostProcessor(commandLine.hasOption("keepOriginalPostProcessedFiles"));
+//            builder.iosCreateImagesetFolders(commandLine.hasOption("iosCreateImagesetFolders"));
+//            builder.clearDirBeforeConvert(commandLine.hasOption("clean"));
+//
+//            return builder.build();
+//        } catch (Exception e) {
+//            System.err.println("Could not parse args: " + e.getMessage());
+//        }
+//        return null;
+//    }
 
     public static void printHelp(Options options) {
         HelpFormatter help = new HelpFormatter();

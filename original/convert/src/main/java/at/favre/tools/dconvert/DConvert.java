@@ -17,7 +17,6 @@
 package at.favre.tools.dconvert;
 
 import at.favre.tools.dconvert.arg.Arguments;
-import at.favre.tools.dconvert.arg.EPlatform;
 import at.favre.tools.dconvert.converters.IPlatformConverter;
 import at.favre.tools.dconvert.converters.postprocessing.IPostProcessor;
 import at.favre.tools.dconvert.converters.postprocessing.MozJpegProcessor;
@@ -63,51 +62,66 @@ public class DConvert {
         logStringBuilder.append("begin execution using ").append(args.threadCount).append(" theads\n");
         logStringBuilder.append("args: ").append(args).append("\n");
 
-        if (!args.filesToProcess.isEmpty()) {
-            List<IPlatformConverter> converters = new ArrayList<>();
-            List<IPostProcessor> postProcessors = new ArrayList<>();
+        if(!args.filesToProcess.isEmpty()) {
+//            List<IPlatformConverter> converters = new ArrayList<>();
+            IPlatformConverter converter = null;
+//            List<IPostProcessor> postProcessors = new ArrayList<>();
+            IPostProcessor postProcessors = null;
 
-            for (EPlatform ePlatform : args.platform) {
-                logStringBuilder.append("add ").append(ePlatform.getConverter().getClass().getSimpleName()).append("\n");
-                converters.add(ePlatform.getConverter());
-            }
+//            for (EPlatform ePlatform : args.platform) {
+//                logStringBuilder.append("add ").append(ePlatform.getConverter().getClass().getSimpleName()).append("\n");
+//                converters.add(ePlatform.getConverter());
+//            }
 
-            if (args.clearDirBeforeConvert) {
+            logStringBuilder.append("add ").append(args.platform.getConverter().getClass().getSimpleName()).append("\n");
+            converter = args.platform.getConverter();
+
+
+//            if (args.clearDirBeforeConvert) {
+//                logStringBuilder.append("clear out dirs before convert\n");
+//                for (IPlatformConverter converter : converters) {
+//                    converter.clean(args);
+//                }
+//            }
+
+            if(args.clearDirBeforeConvert) {
                 logStringBuilder.append("clear out dirs before convert\n");
-                for (IPlatformConverter converter : converters) {
-                    converter.clean(args);
-                }
+                converter.clean(args);
             }
 
-            if (args.enablePngCrush) {
+            if(args.enablePngCrush) {
                 IPostProcessor postProcessor = new PngCrushProcessor();
-                if (postProcessor.isSupported()) {
+                if(postProcessor.isSupported()) {
                     logStringBuilder.append("add pngcrush postprocessor\n");
                     postProcessors.add(postProcessor);
-                } else {
+                }
+                else {
                     logStringBuilder.append("WARNING: Tool 'pngcrush' cannot be accessed. Is it set in PATH?\n");
                 }
             }
-            if (args.postConvertWebp) {
+            if(args.postConvertWebp) {
                 IPostProcessor postProcessor = new WebpProcessor();
-                if (postProcessor.isSupported()) {
+                if(postProcessor.isSupported()) {
                     logStringBuilder.append("add cwebp postprocessor\n");
                     postProcessors.add(postProcessor);
-                } else {
+                }
+                else {
                     logStringBuilder.append("WARNING: Tool 'cwebp' cannot be accessed. Is it set in PATH?\n");
                 }
             }
-            if (args.enableMozJpeg) {
+            if(args.enableMozJpeg) {
                 IPostProcessor postProcessor = new MozJpegProcessor();
-                if (postProcessor.isSupported()) {
+                if(postProcessor.isSupported()) {
                     logStringBuilder.append("add mozJpeg postprocessor\n");
                     postProcessors.add(postProcessor);
-                } else {
+                }
+                else {
                     logStringBuilder.append("WARNING: Tool 'jpegtran' cannot be accessed. Is it set in PATH?\n");
                 }
             }
 
-            int convertJobs = args.filesToProcess.size() * converters.size();
+//            int convertJobs = args.filesToProcess.size() * converters.size();
+            int convertJobs = args.filesToProcess.size();
             int postProcessorJobs = convertJobs * postProcessors.size();
 
             float convertPercentage = (float) convertJobs / (float) (convertJobs + postProcessorJobs);
@@ -115,16 +129,16 @@ public class DConvert {
 
             mainLatch = new CountDownLatch(1);
 
-            for (File srcFile : args.filesToProcess) {
+            for(File srcFile : args.filesToProcess) {
                 logStringBuilder.append("add ").append(srcFile).append(" to processing queue\n");
 
-                if (!srcFile.exists() || !srcFile.isFile()) {
+                if(!srcFile.exists() || !srcFile.isFile()) {
                     throw new IllegalStateException("srcFile " + srcFile + " does not exist");
                 }
             }
 
             WorkerHandler.Callback cb = new MyDCConvertCallback<>(handlerCallback, convertPercentage, logStringBuilder, postProcessors, args, this, postProcessPercentage);
-            WorkerHandler wh = new WorkerHandler<>(converters, args, cb);
+            WorkerHandler wh = new WorkerHandler<>(converter, args, cb);
             wh.start(args.filesToProcess);
 
 //            new WorkerHandler<>(converters, args, new WorkerHandler.Callback() {
@@ -156,14 +170,15 @@ public class DConvert {
 //                }
 //            }).start(args.filesToProcess);
 
-            if (blockingWaitForFinish) {
+            if(blockingWaitForFinish) {
                 try {
                     mainLatch.await(60, TimeUnit.MINUTES);
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        } else {
+        }
+        else {
             logStringBuilder.append("no files to convert\n");
             informFinished(0, Collections.emptyList(), false);
         }
@@ -173,13 +188,13 @@ public class DConvert {
         System.gc();
         printTrace();
 //        if (handlerCallback != null) {
-            if (mainLatch != null) {
-                mainLatch.countDown();
-            }
-            for (Exception exception : exceptions) {
-                logStringBuilder.append(MiscUtil.getStackTrace(exception)).append("\n");
-            }
-            handlerCallback.onFinished(finishedJobs, exceptions, (System.currentTimeMillis() - beginMs), haltedDuringProcess, logStringBuilder.toString().trim());
+        if(mainLatch != null) {
+            mainLatch.countDown();
+        }
+        for(Exception exception : exceptions) {
+            logStringBuilder.append(MiscUtil.getStackTrace(exception)).append("\n");
+        }
+        handlerCallback.onFinished(finishedJobs, exceptions, (System.currentTimeMillis() - beginMs), haltedDuringProcess, logStringBuilder.toString().trim());
 //        }
     }
 
@@ -193,14 +208,14 @@ public class DConvert {
         String[] formats = new String[]{"JPEG", "PNG", "TIFF", "PSD", "SVG", "BMP"};
 
         StringBuilder sb = new StringBuilder();
-        for (String format : Arrays.asList(formats)) {
+        for(String format : Arrays.asList(formats)) {
             Iterator<ImageReader> reader = ImageIO.getImageReadersByFormatName(format);
-            while (reader.hasNext()) {
+            while(reader.hasNext()) {
                 ImageReader next = reader.next();
                 sb.append("reader: ").append(next).append("\n");
             }
             Iterator<ImageWriter> writer = ImageIO.getImageWritersByFormatName(format);
-            while (writer.hasNext()) {
+            while(writer.hasNext()) {
                 ImageWriter next = writer.next();
                 sb.append("writer: ").append(next).append("\n");
             }
@@ -209,8 +224,8 @@ public class DConvert {
     }
 
     private void printTrace() {
-        if (ImageHandler.TEST_MODE) {
-            for (Map.Entry<ScaleAlgorithm, Long> entry : ImageHandler.traceMap.entrySet()) {
+        if(ImageHandler.TEST_MODE) {
+            for(Map.Entry<ScaleAlgorithm, Long> entry : ImageHandler.traceMap.entrySet()) {
                 System.out.println(entry.getKey() + ": " + String.format(Locale.US, "%.2f", (double) entry.getValue() / 1000000.0));
             }
         }

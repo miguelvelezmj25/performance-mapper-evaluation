@@ -33,12 +33,12 @@ import java.util.*;
 public final class Main {
 
     public static boolean SCALE;
-    public static boolean PLATFORM;
+    public static boolean PLATFORM; // TODO MV maybe pick android and web?
     public static boolean OUTPUTCOMPRESSIONGMODE;
     public static boolean SCALEMODE;
     public static boolean SCALEISHEIGHTDP;
     public static boolean DOWNSCALINGALGORITHM;
-    public static boolean UPSCALINGALGORITHM;
+    public static boolean UPSCALINGALGORITHM; // TODO MV pick between two algorithms
     public static boolean COMPRESSQUALITY;
     public static boolean SKIPEXISTINGFILES;
     public static boolean SKIPUPSCALING;
@@ -68,7 +68,7 @@ public final class Main {
         File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/convert/files/person.jpg");
         File dst = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/convert/output");
 
-        SCALE = Source.getOptionSCALE(Boolean.valueOf(false));
+        SCALE = Source.getOptionSCALE(Boolean.valueOf(true));
         PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(false));
         OUTPUTCOMPRESSIONGMODE = Source.getOptionOUTPUTCOMPRESSIONGMODE(Boolean.valueOf(false));
         SCALEMODE = Source.getOptionSCALEMODE(Boolean.valueOf(false));
@@ -81,22 +81,23 @@ public final class Main {
         VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(false));
         INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(false));
         HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(false));
-        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionsCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(false));
-        ENABLEPNGCRUSH = Source.getOptionsENABLEPNGCRUSH(Boolean.valueOf(false));
-        ENABLEMOZJPEG = Source.getOptionsENABLEMOZJPEG(Boolean.valueOf(false));
-        POSTCONVERTWEBP = Source.getOptionsPOSTCONVERTWEBP(Boolean.valueOf(false));
-        ENABLEANTIALIASING = Source.getOptionsENABLEANTIALIASING(Boolean.valueOf(false));
+        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(false));
+        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(false));
+        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(false));
+        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(false));
+        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(false));
         DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(false));
-        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionsKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(false));
-        ROUNDINGHANDLER = Source.getOptionsROUNDINGHANDLER(Boolean.valueOf(false));
-        IOSCREATEIMAGESETFOLDERS = Source.getOptionsIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(false));
-        CLEARDIRBEFORECONVERT = Source.getOptionsCLEARDIRBEFORECONVERT(Boolean.valueOf(false));
+        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(false));
+        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(false));
+        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(false));
+        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(false));
         HELP = Source.getOptionHELP(Boolean.valueOf(false));
         VERSION = Source.getOptionVERSION(Boolean.valueOf(false));
         GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(false));
 
         int scale = 1;
-        Set<EPlatform> platforms = new HashSet<>(Arrays.asList(EPlatform.ANDROID));
+//        Set<EPlatform> platforms = new HashSet<>(Arrays.asList(EPlatform.ANDROID));
+        EPlatform platform = EPlatform.ANDROID;
         EOutputCompressionMode compressionMode = EOutputCompressionMode.AS_JPG;
         EScaleMode scaleMode = EScaleMode.FACTOR;
         boolean scaleIsHeightdp = SCALEISHEIGHTDP;
@@ -139,7 +140,8 @@ public final class Main {
         }
 
         if(PLATFORM) {
-            platforms = EPlatform.getAll();
+            platform = EPlatform.WEB;
+//            platforms = EPlatform.getAll();
         }
 
         if(OUTPUTCOMPRESSIONGMODE) {
@@ -170,7 +172,7 @@ public final class Main {
         }
 
 
-        Arguments args = new Arguments(src, dst, scale, platforms,
+        Arguments args = new Arguments(src, dst, scale, platform,
                 compressionMode, scaleMode, downScaling, upScaling,
                 compressionQuality, 1, skipExistingFiles, skipUpScaling,
                 verboseLog, includeAndroiddpiTvdpi, haltOnError, createMipMapInsteadOfDrawableDir,

@@ -18,6 +18,7 @@ public class MyPredicate3 implements Predicate<DensityDescriptor> {
 
     @Override
     public boolean test(DensityDescriptor density) {
+
         return scale >= density.scale || !args.skipUpscaling;
     }
 }

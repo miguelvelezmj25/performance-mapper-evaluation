@@ -60,11 +60,11 @@ public class AndroidConverter extends APlatformConverter<AndroidDensityDescripto
 
     @Override
     public File createMainSubFolder(File destinationFolder, String targetImageFileName, Arguments arguments) {
-        if (arguments.platform.size() > 1) {
+//        if (arguments.platform.size() > 1) {
             return MiscUtil.createAndCheckFolder(new File(destinationFolder, ANDROID_FOLDER_NAME).getAbsolutePath(), arguments.dryRun);
-        } else {
-            return destinationFolder;
-        }
+//        } else {
+//            return destinationFolder;
+//        }
     }
 
     @Override
@@ -93,13 +93,13 @@ public class AndroidConverter extends APlatformConverter<AndroidDensityDescripto
 
     @Override
     public void clean(Arguments arguments) {
-        if (arguments.platform.size() == 1) {
+//        if (arguments.platform.size() == 1) {
             for (AndroidDensityDescriptor androidDensityDescriptor : getAndroidDensityDescriptors(arguments)) {
                 File dir = new File(arguments.dst, androidDensityDescriptor.folderName);
                 MiscUtil.deleteFolder(dir);
             }
-        } else {
-            MiscUtil.deleteFolder(new File(arguments.dst, ANDROID_FOLDER_NAME));
-        }
+//        } else {
+//            MiscUtil.deleteFolder(new File(arguments.dst, ANDROID_FOLDER_NAME));
+//        }
     }
 }

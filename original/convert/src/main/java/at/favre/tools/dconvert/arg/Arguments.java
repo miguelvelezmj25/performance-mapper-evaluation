@@ -47,7 +47,8 @@ public class Arguments implements Serializable {
     public final File src;
     public final File dst;
     public final float scale;
-    public final Set<EPlatform> platform;
+//    public final Set<EPlatform> platform;
+    public final EPlatform platform;
     public final EOutputCompressionMode outputCompressionMode;
     public final EScaleMode scaleMode;
     public final EScalingAlgorithm downScalingAlgorithm;
@@ -72,7 +73,60 @@ public class Arguments implements Serializable {
     public final boolean clearDirBeforeConvert;
     public final transient List<File> filesToProcess;
 
-    public Arguments(File src, File dst, float scale, Set<EPlatform> platform, EOutputCompressionMode outputCompressionMode,
+//    public Arguments(File src, File dst, float scale, Set<EPlatform> platform, EOutputCompressionMode outputCompressionMode,
+//                     EScaleMode scaleMode, EScalingAlgorithm downScalingAlgorithm, EScalingAlgorithm upScalingAlgorithm, float compressionQuality, int threadCount, boolean skipExistingFiles,
+//                     boolean skipUpscaling,
+//                     boolean verboseLog, boolean includeAndroidLdpiTvdpi, boolean haltOnError,
+//                     boolean createMipMapInsteadOfDrawableDir,
+//                     boolean iosCreateImagesetFolders, boolean enablePngCrush, boolean enableMozJpeg, boolean postConvertWebp, boolean enableAntiAliasing, boolean dryRun,
+//                     boolean keepUnoptimizedFilesPostProcessor, RoundingHandler.Strategy roundingHandler,
+//                     boolean guiAdvancedOptions, boolean clearDirBeforeConvert) {
+//        this.dst = dst;
+//        this.src = src;
+//        this.scale = scale;
+//        this.platform = platform;
+//        this.outputCompressionMode = outputCompressionMode;
+//        this.scaleMode = scaleMode;
+//        this.downScalingAlgorithm = downScalingAlgorithm;
+//        this.upScalingAlgorithm = upScalingAlgorithm;
+//        this.compressionQuality = compressionQuality;
+//        this.threadCount = threadCount;
+//        this.skipExistingFiles = skipExistingFiles;
+//        this.skipUpscaling = skipUpscaling;
+//        this.verboseLog = verboseLog;
+//        this.includeAndroidLdpiTvdpi = includeAndroidLdpiTvdpi;
+//        this.haltOnError = haltOnError;
+//        this.createMipMapInsteadOfDrawableDir = createMipMapInsteadOfDrawableDir;
+//        this.iosCreateImagesetFolders = iosCreateImagesetFolders;
+//        this.enablePngCrush = enablePngCrush;
+//        this.enableMozJpeg = enableMozJpeg;
+//        this.postConvertWebp = postConvertWebp;
+//        this.enableAntiAliasing = enableAntiAliasing;
+//        this.dryRun = dryRun;
+//        this.keepUnoptimizedFilesPostProcessor = keepUnoptimizedFilesPostProcessor;
+//        this.roundingHandler = roundingHandler;
+//        this.guiAdvancedOptions = guiAdvancedOptions;
+//        this.clearDirBeforeConvert = clearDirBeforeConvert;
+//
+//        this.filesToProcess = new ArrayList<>();
+//
+//        Set<String> supportedFileTypes = getSupportedFileTypes();
+//
+//        if (src != null && src.isDirectory()) {
+//            for (File file : src.listFiles()) {
+//                String extension = MiscUtil.getFileExtensionLowerCase(file);
+//                if (supportedFileTypes.contains(extension)) {
+//                    filesToProcess.add(file);
+//                }
+//            }
+//        } else {
+//            if (supportedFileTypes.contains(MiscUtil.getFileExtensionLowerCase(src))) {
+//                filesToProcess.add(src);
+//            }
+//        }
+//    }
+
+    public Arguments(File src, File dst, float scale, EPlatform platform, EOutputCompressionMode outputCompressionMode,
                      EScaleMode scaleMode, EScalingAlgorithm downScalingAlgorithm, EScalingAlgorithm upScalingAlgorithm, float compressionQuality, int threadCount, boolean skipExistingFiles,
                      boolean skipUpscaling,
                      boolean verboseLog, boolean includeAndroidLdpiTvdpi, boolean haltOnError,
@@ -125,10 +179,10 @@ public class Arguments implements Serializable {
         }
     }
 
-    public Arguments() {
-        this(null, null, DEFAULT_SCALE, DEFAULT_PLATFORM, DEFAULT_OUT_COMPRESSION, DEFAULT_SCALE_TYPE, DEFAULT_DOWNSCALING_QUALITY, DEFAULT_UPSCALING_QUALITY, DEFAULT_COMPRESSION_QUALITY, DEFAULT_THREAD_COUNT,
-                false, false, true, false, false, false, false, false, false, false, false, false, false, DEFAULT_ROUNDING_STRATEGY, false, false);
-    }
+//    public Arguments() {
+//        this(null, null, DEFAULT_SCALE, DEFAULT_PLATFORM, DEFAULT_OUT_COMPRESSION, DEFAULT_SCALE_TYPE, DEFAULT_DOWNSCALING_QUALITY, DEFAULT_UPSCALING_QUALITY, DEFAULT_COMPRESSION_QUALITY, DEFAULT_THREAD_COUNT,
+//                false, false, true, false, false, false, false, false, false, false, false, false, false, DEFAULT_ROUNDING_STRATEGY, false, false);
+//    }
 
     public double round(double raw) {
         return new RoundingHandler(roundingHandler).round(raw);
@@ -407,56 +461,56 @@ public class Arguments implements Serializable {
             return this;
         }
 
-        public Arguments build() throws InvalidArgumentException {
-            if (!internalSkipParamValidation) {
-                ResourceBundle bundle = ResourceBundle.getBundle("bundles.strings", Locale.getDefault());
-
-                if (platform.isEmpty()) {
-                    throw new InvalidArgumentException(bundle.getString("error.missing.platforms"));
-                }
-
-                if (src == null || !src.exists()) {
-                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.missing.src"), src));
-                }
-
-                if (dst == null) {
-                    if (src.isDirectory()) {
-                        dst = src;
-                    } else {
-                        dst = src.getParentFile();
-                    }
-                }
-
-                if (compressionQuality < 0 || compressionQuality > 1.0) {
-                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.compressionQ"), compressionQuality));
-                }
-
-                if (threadCount < 1 || threadCount > MAX_THREAD_COUNT) {
-                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.thread"), threadCount, MAX_THREAD_COUNT));
-                }
-
-                switch (scaleType) {
-                    case FACTOR:
-                        if (srcScale <= 0 || srcScale >= 100) {
-                            throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.factorscale"), srcScale));
-                        }
-                        break;
-                    case DP_WIDTH:
-                    case DP_HEIGHT:
-                        if (srcScale <= 0 || srcScale >= 9999) {
-                            throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.dp"), srcScale));
-                        }
-                        break;
-                }
-
-                if (downScalingAlgorithm == null || upScalingAlgorithm == null) {
-                    throw new InvalidArgumentException(bundle.getString("error.missing.scalealgorithm"));
-                }
-            }
-            return new Arguments(src, dst, srcScale, platform, outputCompressionMode, scaleType, downScalingAlgorithm, upScalingAlgorithm, compressionQuality, threadCount,
-                    skipExistingFiles, skipUpscaling, verboseLog, includeAndroidLdpiTvdpi, haltOnError, createMipMapInsteadOfDrawableDir,
-                    iosCreateImagesetFolders, enablePngCrush, enableMozJpeg, postConvertWebp, enableAntiAliasing, dryRun, keepUnoptimizedFilesPostProcessor, roundingStrategy, guiAdvancedOptions, clearDirBeforeConvert);
-        }
+//        public Arguments build() throws InvalidArgumentException {
+//            if (!internalSkipParamValidation) {
+//                ResourceBundle bundle = ResourceBundle.getBundle("bundles.strings", Locale.getDefault());
+//
+//                if (platform.isEmpty()) {
+//                    throw new InvalidArgumentException(bundle.getString("error.missing.platforms"));
+//                }
+//
+//                if (src == null || !src.exists()) {
+//                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.missing.src"), src));
+//                }
+//
+//                if (dst == null) {
+//                    if (src.isDirectory()) {
+//                        dst = src;
+//                    } else {
+//                        dst = src.getParentFile();
+//                    }
+//                }
+//
+//                if (compressionQuality < 0 || compressionQuality > 1.0) {
+//                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.compressionQ"), compressionQuality));
+//                }
+//
+//                if (threadCount < 1 || threadCount > MAX_THREAD_COUNT) {
+//                    throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.thread"), threadCount, MAX_THREAD_COUNT));
+//                }
+//
+//                switch (scaleType) {
+//                    case FACTOR:
+//                        if (srcScale <= 0 || srcScale >= 100) {
+//                            throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.factorscale"), srcScale));
+//                        }
+//                        break;
+//                    case DP_WIDTH:
+//                    case DP_HEIGHT:
+//                        if (srcScale <= 0 || srcScale >= 9999) {
+//                            throw new InvalidArgumentException(MessageFormat.format(bundle.getString("error.invalid.dp"), srcScale));
+//                        }
+//                        break;
+//                }
+//
+//                if (downScalingAlgorithm == null || upScalingAlgorithm == null) {
+//                    throw new InvalidArgumentException(bundle.getString("error.missing.scalealgorithm"));
+//                }
+//            }
+//            return new Arguments(src, dst, srcScale, platform, outputCompressionMode, scaleType, downScalingAlgorithm, upScalingAlgorithm, compressionQuality, threadCount,
+//                    skipExistingFiles, skipUpscaling, verboseLog, includeAndroidLdpiTvdpi, haltOnError, createMipMapInsteadOfDrawableDir,
+//                    iosCreateImagesetFolders, enablePngCrush, enableMozJpeg, postConvertWebp, enableAntiAliasing, dryRun, keepUnoptimizedFilesPostProcessor, roundingStrategy, guiAdvancedOptions, clearDirBeforeConvert);
+//        }
     }
 
     public static ImageType getImageType(File srcFile) {

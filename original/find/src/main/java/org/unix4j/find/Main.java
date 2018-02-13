@@ -71,7 +71,7 @@ public class Main {
 
         long end = System.nanoTime();
 
-        org.unix4j.find.testing.Main.main(args);
+//        org.unix4j.find.testing.Main.main(args);
 
         System.out.println((end - start) / 1000000000.0);
     }
