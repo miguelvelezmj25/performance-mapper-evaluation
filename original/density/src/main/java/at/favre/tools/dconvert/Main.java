@@ -68,29 +68,29 @@ public final class Main {
 
 //        System.out.println(rawArgs[0]);
 
-        SCALE = Source.getOptionSCALE(Boolean.valueOf(true));
+        SCALE = Source.getOptionSCALE(Boolean.valueOf(false));
         PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(false));
         OUTPUTCOMPRESSIONGMODE = Source.getOptionOUTPUTCOMPRESSIONGMODE(Boolean.valueOf(false));
         SCALEMODE = Source.getOptionSCALEMODE(Boolean.valueOf(false));
         SCALEISHEIGHTDP = Source.getOptionSCALEISHEIGHTDP(Boolean.valueOf(false));
-        DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(false));
-        UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(false));
-        COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(false));
+        DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(true));
+        UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(true));
+        COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(true));
         SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(false));
         SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(false));
         VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(false));
         INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(false));
         HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(false));
         CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(false));
-        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(false));
+        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(true));
         ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(false));
         POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(false));
         ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(false));
         DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(false));
         KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(false));
-        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(false));
+        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(true));
         IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(false));
-        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(false));
+        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(true));
         HELP = Source.getOptionHELP(Boolean.valueOf(false));
         VERSION = Source.getOptionVERSION(Boolean.valueOf(false));
         GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(false));
