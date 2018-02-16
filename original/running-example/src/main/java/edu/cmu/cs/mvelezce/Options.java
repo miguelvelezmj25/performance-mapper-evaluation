@@ -12,7 +12,6 @@ public class Options {
     public static boolean H;
     public static boolean I;
     public static boolean J;
-    public static boolean K;
 
 }
 
