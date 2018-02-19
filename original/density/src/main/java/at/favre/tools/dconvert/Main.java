@@ -31,12 +31,12 @@ import java.util.*;
 public final class Main {
 
     public static boolean SCALE;
-    public static boolean PLATFORM; // TODO MV maybe pick android and web?
+    public static boolean PLATFORM;
     public static boolean OUTPUTCOMPRESSIONGMODE;
     public static boolean SCALEMODE;
     public static boolean SCALEISHEIGHTDP;
     public static boolean DOWNSCALINGALGORITHM;
-    public static boolean UPSCALINGALGORITHM; // TODO MV pick between two algorithms
+    public static boolean UPSCALINGALGORITHM;
     public static boolean COMPRESSQUALITY;
     public static boolean SKIPEXISTINGFILES;
     public static boolean SKIPUPSCALING;
@@ -66,38 +66,62 @@ public final class Main {
         File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/files/person.jpg");
         File dst = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/output");
 
-//        System.out.println(rawArgs[0]);
+        SCALE = Source.getOptionSCALE(Boolean.valueOf(rawArgs[0]));
+        PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(rawArgs[1]));
+        OUTPUTCOMPRESSIONGMODE = Source.getOptionOUTPUTCOMPRESSIONGMODE(Boolean.valueOf(rawArgs[2]));
+        SCALEMODE = Source.getOptionSCALEMODE(Boolean.valueOf(rawArgs[3]));
+        SCALEISHEIGHTDP = Source.getOptionSCALEISHEIGHTDP(Boolean.valueOf(rawArgs[4])); // Skip
+        DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(rawArgs[5]));
+        UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(rawArgs[6]));
+        COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(rawArgs[7]));
+        SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(rawArgs[8])); // Skip
+        SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(rawArgs[9]));
+        VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(rawArgs[10])); // Skip
+        INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(rawArgs[11])); // Skip
+        HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(rawArgs[12])); // Skip
+        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(rawArgs[13])); // Skip
+        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(rawArgs[14]));
+        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(rawArgs[15]));
+        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(rawArgs[16]));
+        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(rawArgs[17])); // Skip
+        DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(rawArgs[18])); // Skip
+        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(rawArgs[19])); // Skip
+        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(rawArgs[20])); // Skip
+        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(rawArgs[21])); // Skip
+        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(rawArgs[22])); // Skip
+        HELP = Source.getOptionHELP(Boolean.valueOf(rawArgs[23])); // Skip
+        VERSION = Source.getOptionVERSION(Boolean.valueOf(rawArgs[24])); // Skip
+        GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(rawArgs[25])); // Skip
 
-        SCALE = Source.getOptionSCALE(Boolean.valueOf(false));
-        PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(false));
-        OUTPUTCOMPRESSIONGMODE = Source.getOptionOUTPUTCOMPRESSIONGMODE(Boolean.valueOf(false));
-        SCALEMODE = Source.getOptionSCALEMODE(Boolean.valueOf(false));
-        SCALEISHEIGHTDP = Source.getOptionSCALEISHEIGHTDP(Boolean.valueOf(false));
-        DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(true));
-        UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(true));
-        COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(true));
-        SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(false));
-        SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(false));
-        VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(false));
-        INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(false));
-        HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(false));
-        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(false));
-        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(true));
-        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(false));
-        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(false));
-        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(false));
-        DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(false));
-        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(false));
-        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(true));
-        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(false));
-        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(true));
-        HELP = Source.getOptionHELP(Boolean.valueOf(false));
-        VERSION = Source.getOptionVERSION(Boolean.valueOf(false));
-        GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(false));
+//        SCALE = Source.getOptionSCALE(Boolean.valueOf(true));
+//        PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(false));
+//        OUTPUTCOMPRESSIONGMODE = Source.getOptionOUTPUTCOMPRESSIONGMODE(Boolean.valueOf(true));
+//        SCALEMODE = Source.getOptionSCALEMODE(Boolean.valueOf(false));
+//        SCALEISHEIGHTDP = Source.getOptionSCALEISHEIGHTDP(Boolean.valueOf(false)); // Skip
+//        DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(false));
+//        UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(false));
+//        COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(false));
+//        SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(false)); // Skip
+//        SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(false));
+//        VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(false)); // Skip
+//        INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(false)); // Skip
+//        HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(false)); // Skip
+//        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(false)); // Skip
+//        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(false));
+//        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(false));
+//        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(false));
+//        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(false)); // Skip
+//        DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(false)); // Skip
+//        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(false)); // Skip
+//        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(false)); // Skip
+//        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(false)); // Skip
+//        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(false)); // Skip
+//        HELP = Source.getOptionHELP(Boolean.valueOf(false)); // Skip
+//        VERSION = Source.getOptionVERSION(Boolean.valueOf(false)); // Skip
+//        GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(false)); // Skip
 
         int scale = 1;
         Set<EPlatform> platforms = new HashSet<>(Arrays.asList(EPlatform.ANDROID));
-//        EPlatform platform = EPlatform.ANDROID;
         EOutputCompressionMode compressionMode = EOutputCompressionMode.AS_JPG;
         EScaleMode scaleMode = EScaleMode.FACTOR;
         boolean scaleIsHeightdp = SCALEISHEIGHTDP;
@@ -148,12 +172,15 @@ public final class Main {
             compressionMode = EOutputCompressionMode.AS_JPG_AND_PNG;
         }
 
-        if(SCALEMODE && scaleIsHeightdp) {
+        if(SCALEMODE) {
             scaleMode = EScaleMode.DP_HEIGHT;
         }
-        else if(SCALEMODE && !scaleIsHeightdp) {
-            scaleMode = EScaleMode.DP_WIDTH;
-        }
+//        if(SCALEMODE && scaleIsHeightdp) {
+//            scaleMode = EScaleMode.DP_HEIGHT;
+//        }
+//        else if(SCALEMODE && !scaleIsHeightdp) {
+//            scaleMode = EScaleMode.DP_WIDTH;
+//        }
 
         if(DOWNSCALINGALGORITHM) {
             downScaling = EScalingAlgorithm.BILINEAR_PROGRESSIVE;

@@ -12,123 +12,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PrimeNumbers.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/demos/demo1/PrimeNumbers.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="251">
-              <caret line="104" column="25" lean-forward="false" selection-start-line="104" selection-start-column="25" selection-end-line="104" selection-end-column="25" />
-              <folding>
-                <marker date="1518731479000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1518731479000" expanded="false" signature="149:249" ph="..." />
-                <marker date="1518731479000" expanded="true" signature="4961:4969" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CentralPublisher.class" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/implementation/publishing/CentralPublisher.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="36" column="44" lean-forward="false" selection-start-line="36" selection-start-column="44" selection-end-line="36" selection-end-column="44" />
-              <folding>
-                <marker date="1518731480000" expanded="false" signature="0:104" ph="/.../" />
-                <marker date="1518731480000" expanded="true" signature="3396:3402" ph="{...}" />
-                <marker date="1518731480000" expanded="true" signature="3512:4042" ph="{...}" />
-                <marker date="1518731480000" expanded="true" signature="4087:4125" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrimeNumbers.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/demos/demo1/PrimeNumbers.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1825">
-              <caret line="161" column="31" lean-forward="false" selection-start-line="161" selection-start-column="28" selection-end-line="161" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrevaylerFactory.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/PrevaylerFactory.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="261">
-              <caret line="327" column="41" lean-forward="false" selection-start-line="327" selection-start-column="41" selection-end-line="327" selection-end-column="41" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrimeCalculator.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/demos/demo1/PrimeCalculator.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="57" lean-forward="false" selection-start-line="6" selection-start-column="56" selection-end-line="6" selection-end-column="57" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CentralPublisher.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/publishing/CentralPublisher.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Guided.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/foundation/Guided.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="13" column="21" lean-forward="false" selection-start-line="13" selection-start-column="21" selection-end-line="13" selection-end-column="21" />
-              <folding>
-                <element signature="e#247#248#0" expanded="true" />
-                <element signature="e#276#277#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Turn.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/foundation/Turn.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="282">
-              <caret line="46" column="32" lean-forward="false" selection-start-line="46" selection-start-column="32" selection-end-line="46" selection-end-column="32" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PersistentJournal.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/journal/PersistentJournal.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="62" column="14" lean-forward="false" selection-start-line="62" selection-start-column="14" selection-end-line="62" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrevaylerImpl.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/PrevaylerImpl.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="66" column="20" lean-forward="false" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
-              <folding>
-                <element signature="e#2419#2420#0" expanded="true" />
-                <element signature="e#2462#2463#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -155,6 +39,7 @@
       <find>b0</find>
       <find>writeobj</find>
       <find>append(</find>
+      <find>toxml</find>
     </findStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
@@ -203,7 +88,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="2018" />
+    <option name="x" value="2074" />
     <option name="y" value="23" />
     <option name="width" value="1822" />
     <option name="height" value="990" />
@@ -242,8 +127,10 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="AndroidView" />
       <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -284,25 +171,6 @@
               <item name="classes" type="462c0819:PsiDirectoryNode" />
               <item name="org" type="462c0819:PsiDirectoryNode" />
               <item name="prevayler" type="462c0819:PsiDirectoryNode" />
-              <item name="demos" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="prevayler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="prevayler" type="462c0819:PsiDirectoryNode" />
-              <item name="target" type="462c0819:PsiDirectoryNode" />
-              <item name="classes" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="prevayler" type="462c0819:PsiDirectoryNode" />
-              <item name="demos" type="462c0819:PsiDirectoryNode" />
-              <item name="demo1" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="prevayler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="prevayler" type="462c0819:PsiDirectoryNode" />
-              <item name="target" type="462c0819:PsiDirectoryNode" />
-              <item name="classes" type="462c0819:PsiDirectoryNode" />
-              <item name="org" type="462c0819:PsiDirectoryNode" />
-              <item name="prevayler" type="462c0819:PsiDirectoryNode" />
               <item name="implementation" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -319,8 +187,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -518,14 +384,16 @@
       <workItem from="1518634799473" duration="8000" />
       <workItem from="1518724113144" duration="180000" />
       <workItem from="1518728072136" duration="3382000" />
+      <workItem from="1519046208936" duration="239000" />
+      <workItem from="1519056616620" duration="1584000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32435000" />
+    <option name="totallyTimeSpent" value="34258000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="2018" y="23" width="1822" height="990" extended-state="0" />
+    <frame x="2074" y="23" width="1822" height="990" extended-state="0" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -547,8 +415,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3090909" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run with VisualVM" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13048369" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298122" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13385826" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
@@ -563,6 +430,7 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298122" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -586,14 +454,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="795">
-          <caret line="53" column="20" lean-forward="false" selection-start-line="53" selection-start-column="20" selection-end-line="53" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -661,13 +521,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/foundation/serialization/XStreamSerializer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="41" column="7" lean-forward="false" selection-start-line="41" selection-start-column="7" selection-end-line="41" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -813,13 +666,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/Capsule.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="26" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/implementation/Capsule.class" />
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/replication/ServerListener.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -832,59 +678,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2070">
           <caret line="189" column="32" lean-forward="false" selection-start-line="189" selection-start-column="24" selection-end-line="189" selection-end-column="32" />
-          <folding>
-            <marker date="1518731480000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1518731480000" expanded="false" signature="137:1376" ph="..." />
-            <marker date="1518731480000" expanded="true" signature="2191:2198" ph="{}" />
-            <marker date="1518731480000" expanded="true" signature="2289:2476" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="2554:2617" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="2701:3056" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3126:3560" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3566:3584" ph="/**...*/" />
-            <marker date="1518731480000" expanded="true" signature="3666:3727" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3755:4001" ph="{...}" />
-            <marker date="1518731480000" expanded="false" signature="4051:4062" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4091:4097" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4156:4167" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4200:4206" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4266:4277" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4314:4320" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4364:4375" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4394:4400" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4448:4459" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4480:4486" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4540:4551" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4578:4584" ph=" }" />
-            <marker date="1518731480000" expanded="true" signature="4652:4742" ph="{...}" />
-            <marker date="1518731480000" expanded="false" signature="4796:4807" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4831:4837" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="4913:4924" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="4957:4963" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="5025:5036" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="5070:5076" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="5137:5148" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="5181:5187" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="5243:5254" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="5283:5289" ph=" }" />
-            <marker date="1518731480000" expanded="false" signature="5354:5365" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="5414:5420" ph=" }" />
-            <marker date="1518731480000" expanded="true" signature="5489:5561" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="5636:5940" ph="{...}" />
-            <marker date="1518731480000" expanded="false" signature="6006:6017" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="6068:6074" ph=" }" />
-            <marker date="1518731480000" expanded="true" signature="6144:6218" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="6294:6521" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="6573:7227" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="7270:7370" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="7404:7614" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="7710:8164" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="8215:8581" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="8626:8744" ph="{...}" />
-            <marker date="1518731480000" expanded="false" signature="8780:8791" ph=" { " />
-            <marker date="1518731480000" expanded="false" signature="8860:8866" ph=" }" />
-            <marker date="1518731480000" expanded="true" signature="8941:10382" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="9062:9069" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -892,20 +685,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1518731480000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1518731480000" expanded="false" signature="164:591" ph="..." />
-            <marker date="1518731480000" expanded="true" signature="1090:1210" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="1234:1763" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="1835:1843" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="1888:2513" ph="{...}" />
-            <marker date="1518731480000" expanded="false" signature="1905:1951" ph="run() → {" />
-            <marker date="1518731480000" expanded="false" signature="2491:2506" ph="}" />
-            <marker date="1518731480000" expanded="true" signature="2594:2882" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="2935:3347" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3387:3513" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3550:3808" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -913,26 +692,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="277">
           <caret line="35" column="16" lean-forward="false" selection-start-line="35" selection-start-column="16" selection-end-line="35" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/implementation/publishing/CentralPublisher.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="36" column="44" lean-forward="false" selection-start-line="36" selection-start-column="44" selection-end-line="36" selection-end-column="44" />
-          <folding>
-            <marker date="1518731480000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1518731480000" expanded="true" signature="3396:3402" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="3512:4042" ph="{...}" />
-            <marker date="1518731480000" expanded="true" signature="4087:4125" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/demos/demo1/PrimeNumbers.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1825">
+        <state relative-caret-position="2205">
           <caret line="161" column="31" lean-forward="false" selection-start-line="161" selection-start-column="28" selection-end-line="161" selection-end-column="34" />
           <folding />
         </state>
@@ -940,21 +705,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/PrevaylerFactory.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="261">
+        <state relative-caret-position="4230">
           <caret line="327" column="41" lean-forward="false" selection-start-line="327" selection-start-column="41" selection-end-line="327" selection-end-column="41" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/demos/demo1/PrimeNumbers.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="104" column="25" lean-forward="false" selection-start-line="104" selection-start-column="25" selection-end-line="104" selection-end-column="25" />
-          <folding>
-            <marker date="1518731479000" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1518731479000" expanded="false" signature="149:249" ph="..." />
-            <marker date="1518731479000" expanded="true" signature="4961:4969" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -968,11 +721,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/PrevaylerImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
+        <state relative-caret-position="810">
           <caret line="66" column="20" lean-forward="false" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
           <folding>
-            <element signature="e#2419#2420#0" expanded="true" />
-            <element signature="e#2462#2463#0" expanded="true" />
+            <element signature="e#2419#2420#0" expanded="false" />
+            <element signature="e#2462#2463#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -981,7 +734,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="15" column="16" lean-forward="false" selection-start-line="15" selection-start-column="16" selection-end-line="15" selection-end-column="16" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -995,7 +747,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/foundation/Turn.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="282">
+        <state relative-caret-position="660">
           <caret line="46" column="32" lean-forward="false" selection-start-line="46" selection-start-column="32" selection-end-line="46" selection-end-column="32" />
           <folding />
         </state>
@@ -1003,7 +755,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/journal/PersistentJournal.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
+        <state relative-caret-position="750">
           <caret line="62" column="14" lean-forward="false" selection-start-line="62" selection-start-column="14" selection-end-line="62" selection-end-column="14" />
           <folding />
         </state>
@@ -1014,16 +766,202 @@
         <state relative-caret-position="150">
           <caret line="13" column="21" lean-forward="false" selection-start-line="13" selection-start-column="21" selection-end-line="13" selection-end-column="21" />
           <folding>
-            <element signature="e#247#248#0" expanded="true" />
-            <element signature="e#276#277#0" expanded="true" />
+            <element signature="e#247#248#0" expanded="false" />
+            <element signature="e#276#277#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/thoughtworks/xstream/xstream/1.4.5/xstream-1.4.5.jar!/com/thoughtworks/xstream/XStream.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6210">
+          <caret line="550" column="16" lean-forward="false" selection-start-line="550" selection-start-column="16" selection-end-line="550" selection-end-column="16" />
+          <folding>
+            <marker date="1497470417000" expanded="false" signature="0:104" ph="/.../" />
+            <marker date="1497470417000" expanded="false" signature="148:7164" ph="..." />
+            <marker date="1497470417000" expanded="true" signature="8959:9075" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="9135:9245" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="9317:9440" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="9551:9632" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="9638:9656" ph="/**...*/" />
+            <marker date="1497470417000" expanded="true" signature="9763:9863" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="9999:10106" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="10112:10130" ph="/**...*/" />
+            <marker date="1497470417000" expanded="true" signature="10247:10336" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="10342:10360" ph="/**...*/" />
+            <marker date="1497470417000" expanded="true" signature="10492:10618" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="10769:10878" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="11068:11208" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="11214:11232" ph="/**...*/" />
+            <marker date="1497470417000" expanded="true" signature="11434:11566" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="11787:12435" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="12470:14192" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="14318:14767" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="14827:14838" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="14850:14856" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="14911:14922" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="14935:14941" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="14975:16346" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="16382:20542" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="20610:20747" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="20798:21241" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="21280:27437" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="27581:28320" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="28363:30131" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="30196:30337" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="30419:30482" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="30520:30646" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="30694:30905" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="30959:31170" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="31240:31251" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="31295:31301" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="31395:31504" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="31543:31554" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="31607:31613" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="31656:31760" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="31807:31910" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="31946:31957" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="32001:32007" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="32045:32056" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="32102:32108" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="32160:32171" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="32230:32236" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="32289:32382" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="32432:32525" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="32577:32841" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="32901:32996" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="33059:33137" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="33213:33283" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="33382:33814" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="33863:34141" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="34194:34471" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="34549:34656" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="34716:35005" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="35083:35378" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="35447:35745" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="35826:36148" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="36234:36355" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="36419:36692" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="36761:37039" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="37085:37347" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="37433:37768" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="37815:38093" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="38149:38160" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="38208:38214" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="38285:38424" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="38492:38567" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="38649:38821" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="38918:39232" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="39340:39463" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="39494:39505" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="39524:39530" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="39585:39596" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="39627:39633" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="39682:39693" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="39721:39727" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="39763:40888" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="40963:41055" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="41146:41235" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="41348:41445" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="41515:41580" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="41666:41741" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="41828:41916" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="42021:42117" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="42239:42566" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="42605:42616" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="42649:42655" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="42746:42868" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="42977:43055" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="43167:43286" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="43380:43499" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="43614:43730" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="43860:44875" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="44062:44867" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="44116:44135" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="44180:44194" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="44278:44369" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="44442:44533" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="44566:44585" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="44608:44622" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="44656:44857" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="44967:45074" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="45164:45264" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="45377:46543" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="45502:46508" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="45567:45899" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="45966:46056" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="46128:46218" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="46337:46417" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="46450:46469" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="46484:46498" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="46600:46611" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="46663:46669" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="46710:46721" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="46769:46775" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="46834:46845" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="46878:46884" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="46947:47231" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="47272:47283" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="47322:47328" ph=" }" />
+            <marker date="1497470417000" expanded="false" signature="47383:47394" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="47447:47453" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="47511:47790" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="47842:48133" ph="{...}" />
+            <marker date="1497470417000" expanded="false" signature="48181:48192" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="48235:48241" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="48295:48435" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="48441:48459" ph="/**...*/" />
+            <marker date="1497470417000" expanded="true" signature="48533:48809" ph="{...}" />
+            <marker date="1497470417000" expanded="true" signature="48543:48561" ph="/**...*/" />
+            <marker date="1497470417000" expanded="false" signature="48633:48648" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="48670:48680" ph=" }" />
+            <marker date="1497470417000" expanded="true" signature="48690:48708" ph="/**...*/" />
+            <marker date="1497470417000" expanded="false" signature="48763:48778" ph=" { " />
+            <marker date="1497470417000" expanded="false" signature="48793:48803" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/foundation/serialization/XStreamSerializer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="458">
+          <caret line="47" column="0" lean-forward="false" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/demos/demo1/PrimeNumbers.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="795">
+          <caret line="118" column="25" lean-forward="false" selection-start-line="118" selection-start-column="25" selection-end-line="118" selection-end-column="25" />
+          <folding>
+            <marker date="1519058229000" expanded="false" signature="0:104" ph="/.../" />
+            <marker date="1519058229000" expanded="false" signature="149:249" ph="..." />
+            <marker date="1519058229000" expanded="true" signature="6143:6151" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/target/classes/org/prevayler/implementation/publishing/CentralPublisher.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-468">
+          <caret line="36" column="44" lean-forward="false" selection-start-line="36" selection-start-column="44" selection-end-line="36" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/Capsule.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="362">
+          <caret line="35" column="92" lean-forward="true" selection-start-line="35" selection-start-column="92" selection-end-line="35" selection-end-column="92" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/prevayler/implementation/publishing/CentralPublisher.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
+        <state relative-caret-position="960">
+          <caret line="75" column="5" lean-forward="false" selection-start-line="75" selection-start-column="5" selection-end-line="75" selection-end-column="5" />
           <folding />
         </state>
       </provider>
