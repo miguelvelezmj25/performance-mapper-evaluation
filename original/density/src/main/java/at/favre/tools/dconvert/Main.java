@@ -60,7 +60,7 @@ public final class Main {
     public Main() {
     }
 
-    public static void main(String[] rawArgs) {
+    public static void main(String[] rawArgs) throws InterruptedException {
         Sink.init();
 
         File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/files/person.jpg");
@@ -222,6 +222,8 @@ public final class Main {
 //            new GUI().launchApp(rawArgs);
 //            return;
 //        }
+
+        Thread.sleep(1500);
 
         System.out.println("start converting " + args.filesToProcess.size() + " files");
 
