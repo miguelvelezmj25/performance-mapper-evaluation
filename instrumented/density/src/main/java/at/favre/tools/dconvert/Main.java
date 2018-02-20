@@ -61,6 +61,10 @@ public final class Main {
     }
 
     public static void main(String[] rawArgs) throws InterruptedException {
+        if(rawArgs.length != 0) {
+            return;
+        }
+
         Sink.init();
 
         File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/files/person.jpg");
