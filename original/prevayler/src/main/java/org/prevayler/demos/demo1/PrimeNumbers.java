@@ -18,6 +18,8 @@ import java.io.File;
 
 public class PrimeNumbers {
 
+    public static String temp = "temp";
+
     public static boolean JOURNALSERIALIZER;
     public static boolean SNAPSHOTSERIALIZER;
     public static boolean TRANSIENTMODE;
@@ -159,8 +161,10 @@ public class PrimeNumbers {
             factory.configureSnapshotSerializer(new JavaSerializer());
         }
 
-        prevayler = factory.create();
-        new PrimeCalculator(prevayler).start1();
+        if(!PrimeNumbers.temp.isEmpty() || PrimeNumbers.JOURNALSERIALIZER) {
+            prevayler = factory.create();
+            new PrimeCalculator(prevayler).start1();
+        }
 
         long end = System.nanoTime();
 

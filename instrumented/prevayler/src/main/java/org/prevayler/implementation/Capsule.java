@@ -1,6 +1,6 @@
 package org.prevayler.implementation;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
+import org.prevayler.demos.demo1.PrimeNumbers;
 import org.prevayler.foundation.Chunk;
 import org.prevayler.foundation.serialization.Serializer;
 
@@ -11,19 +11,22 @@ import java.util.Date;
 
 public abstract class Capsule implements Serializable {
 
-    private final byte[] _serialized;
+    private byte[] _serialized;
     private transient Object _directTransaction = null;
 
     protected Capsule(Object transaction, Serializer journalSerializer, boolean transactionDeepCopyMode) {
         if(transactionDeepCopyMode == false) {
             _directTransaction = transaction;
         }
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            journalSerializer.writeObject(bytes, transaction);
-            _serialized = bytes.toByteArray();
-        } catch (Exception exception) {
-            throw new Error("Unable to serialize transaction", exception);
+
+        if(!PrimeNumbers.temp.isEmpty() || PrimeNumbers.FILEAGETHRESHOLD || PrimeNumbers.TRANSIENTMODE || PrimeNumbers. JOURNALSERIALIZER || PrimeNumbers.FILESIZETHRESHOLD) {
+            try {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                journalSerializer.writeObject(bytes, transaction);
+                _serialized = bytes.toByteArray();
+            } catch(Exception exception) {
+                throw new Error("Unable to serialize transaction", exception);
+            }
         }
 
     }
@@ -55,7 +58,7 @@ public abstract class Capsule implements Serializable {
     public Object deserialize(Serializer journalSerializer) {
         try {
             return journalSerializer.readObject(new ByteArrayInputStream(_serialized));
-        } catch (Exception exception) {
+        } catch(Exception exception) {
             throw new Error("Unable to deserialize transaction", exception);
         }
     }
@@ -72,7 +75,7 @@ public abstract class Capsule implements Serializable {
             transaction = deserialize(journalSerializer);
         }
 
-        synchronized (prevalentSystem) {
+        synchronized(prevalentSystem) {
             justExecute(transaction, prevalentSystem, executionTime);
         }
     }

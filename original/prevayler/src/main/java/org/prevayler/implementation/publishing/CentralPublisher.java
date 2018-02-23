@@ -5,6 +5,7 @@
 package org.prevayler.implementation.publishing;
 
 import org.prevayler.Clock;
+import org.prevayler.demos.demo1.PrimeNumbers;
 import org.prevayler.foundation.Cool;
 import org.prevayler.foundation.Turn;
 import org.prevayler.implementation.Capsule;
@@ -64,14 +65,18 @@ public class CentralPublisher extends AbstractPublisher {
 
     private TransactionGuide guideFor(Capsule capsule) {
         synchronized (_nextTurnMonitor) {
-            TransactionTimestamp timestamp = new TransactionTimestamp(capsule, _nextTransaction, _pausableClock.realTime());
+            if(!PrimeNumbers.temp.isEmpty() || PrimeNumbers.DEEPCOPY) {
+                TransactionTimestamp timestamp = new TransactionTimestamp(capsule, _nextTransaction, _pausableClock.realTime());
 
-            // Count this transaction
-            Turn turn = _nextTurn;
-            _nextTurn = _nextTurn.next();
-            _nextTransaction++;
+                // Count this transaction
+                Turn turn = _nextTurn;
+                _nextTurn = _nextTurn.next();
+                _nextTransaction++;
 
-            return new TransactionGuide(timestamp, turn);
+                return new TransactionGuide(timestamp, turn);
+            }
+
+            return null;
         }
     }
 
