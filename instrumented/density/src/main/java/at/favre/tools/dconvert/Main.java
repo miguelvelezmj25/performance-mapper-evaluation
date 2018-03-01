@@ -21,8 +21,10 @@ import at.favre.tools.dconvert.ui.CLIInterpreter;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -38,7 +40,7 @@ public final class Main {
     public static boolean DOWNSCALINGALGORITHM;
     public static boolean UPSCALINGALGORITHM;
     public static boolean COMPRESSQUALITY;
-    public static boolean SKIPEXISTINGFILES;
+//    public static boolean SKIPEXISTINGFILES;
     public static boolean SKIPUPSCALING;
     public static boolean VERBOSELOG;
     public static boolean INCLUDEANDROIDLDPITVDPI;
@@ -48,27 +50,25 @@ public final class Main {
     public static boolean ENABLEMOZJPEG;
     public static boolean POSTCONVERTWEBP;
     public static boolean ENABLEANTIALIASING;
-    public static boolean DRYRUN;
+//    public static boolean DRYRUN;
     public static boolean KEEPUNOPTIMIZEDFILESPOSTPROCESSOR;
     public static boolean ROUNDINGHANDLER;
     public static boolean IOSCREATEIMAGESETFOLDERS;
     public static boolean CLEARDIRBEFORECONVERT;
-    public static boolean HELP;
-    public static boolean VERSION;
+//    public static boolean HELP;
+//    public static boolean VERSION;
     public static boolean GUIADVANCEDOPTIONS;
 
     public Main() {
     }
 
-    public static void main(String[] rawArgs) throws InterruptedException {
-        if(rawArgs.length != 0) {
-            return;
-        }
-
+    public static void main(String[] rawArgs) throws InterruptedException, IOException {
         Sink.init();
 
         File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/files/person.jpg");
         File dst = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/output");
+
+        FileUtils.cleanDirectory(dst);
 
         SCALE = Source.getOptionSCALE(Boolean.valueOf(rawArgs[0]));
         PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(rawArgs[1]));
@@ -78,24 +78,24 @@ public final class Main {
         DOWNSCALINGALGORITHM = Source.getOptionDOWNSCALINGALGORITHM(Boolean.valueOf(rawArgs[5]));
         UPSCALINGALGORITHM = Source.getOptionUPSCALINGALGORITHM(Boolean.valueOf(rawArgs[6]));
         COMPRESSQUALITY = Source.getOptionCOMPRESSQUALITY(Boolean.valueOf(rawArgs[7]));
-        SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(rawArgs[8])); // Skip
-        SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(rawArgs[9]));
-        VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(rawArgs[10])); // Skip
-        INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(rawArgs[11])); // Skip
-        HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(rawArgs[12])); // Skip
-        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(rawArgs[13])); // Skip
-        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(rawArgs[14]));
-        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(rawArgs[15]));
-        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(rawArgs[16]));
-        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(rawArgs[17])); // Skip
-        DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(rawArgs[18])); // Skip
-        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(rawArgs[19])); // Skip
-        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(rawArgs[20])); // Skip
-        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(rawArgs[21])); // Skip
-        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(rawArgs[22])); // Skip
-        HELP = Source.getOptionHELP(Boolean.valueOf(rawArgs[23])); // Skip
-        VERSION = Source.getOptionVERSION(Boolean.valueOf(rawArgs[24])); // Skip
-        GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(rawArgs[25])); // Skip
+//        SKIPEXISTINGFILES = Source.getOptionSKIPEXISTINGFILES(Boolean.valueOf(rawArgs[8])); // Skip
+        SKIPUPSCALING = Source.getOptionSKIPUPSCALING(Boolean.valueOf(rawArgs[8]));
+        VERBOSELOG = Source.getOptionVERBOSELOG(Boolean.valueOf(rawArgs[9])); // Skip
+        INCLUDEANDROIDLDPITVDPI = Source.getOptionINCLUDEANDROIDLDPITVDPI(Boolean.valueOf(rawArgs[10])); // Skip
+        HALTONERROR = Source.getOptionHALTONERROR(Boolean.valueOf(rawArgs[11])); // Skip
+        CREATEMIPMAPINSTEADOFDRAWABLEDIR = Source.getOptionCREATEMIPMAPINSTEADOFDRAWABLEDIR(Boolean.valueOf(rawArgs[12])); // Skip
+        ENABLEPNGCRUSH = Source.getOptionENABLEPNGCRUSH(Boolean.valueOf(rawArgs[13]));
+        ENABLEMOZJPEG = Source.getOptionENABLEMOZJPEG(Boolean.valueOf(rawArgs[14]));
+        POSTCONVERTWEBP = Source.getOptionPOSTCONVERTWEBP(Boolean.valueOf(rawArgs[15]));
+        ENABLEANTIALIASING = Source.getOptionENABLEANTIALIASING(Boolean.valueOf(rawArgs[16])); // Skip
+//        DRYRUN = Source.getOptionDRYRUN(Boolean.valueOf(rawArgs[18])); // Skip
+        KEEPUNOPTIMIZEDFILESPOSTPROCESSOR = Source.getOptionKEEPUNOPTIMIZEDFILESPOSTPROCESSOR(Boolean.valueOf(rawArgs[17])); // Skip
+        ROUNDINGHANDLER = Source.getOptionROUNDINGHANDLER(Boolean.valueOf(rawArgs[18])); // Skip
+        IOSCREATEIMAGESETFOLDERS = Source.getOptionIOSCREATEIMAGESETFOLDERS(Boolean.valueOf(rawArgs[19])); // Skip
+        CLEARDIRBEFORECONVERT = Source.getOptionCLEARDIRBEFORECONVERT(Boolean.valueOf(rawArgs[20])); // Skip
+//        HELP = Source.getOptionHELP(Boolean.valueOf(rawArgs[23])); // Skip
+//        VERSION = Source.getOptionVERSION(Boolean.valueOf(rawArgs[24])); // Skip
+        GUIADVANCEDOPTIONS = Source.getOptionGUIADVANCEDOPTIONS(Boolean.valueOf(rawArgs[21])); // Skip
 
 //        SCALE = Source.getOptionSCALE(Boolean.valueOf(true));
 //        PLATFORM = Source.getOptionPLATFORM(Boolean.valueOf(false));
@@ -132,7 +132,8 @@ public final class Main {
         EScalingAlgorithm downScaling = EScalingAlgorithm.LANCZOS3;
         EScalingAlgorithm upScaling = EScalingAlgorithm.LANCZOS3;
         float compressionQuality = 0.9f;
-        boolean skipExistingFiles = SKIPEXISTINGFILES;
+//        boolean skipExistingFiles = SKIPEXISTINGFILES;
+        boolean skipExistingFiles = false;
         boolean skipUpScaling = SKIPUPSCALING;
         boolean verboseLog = VERBOSELOG;
         boolean includeAndroiddpiTvdpi = INCLUDEANDROIDLDPITVDPI;
@@ -142,13 +143,16 @@ public final class Main {
         boolean enableMozJPEG = ENABLEMOZJPEG;
         boolean postConvertWEBP = POSTCONVERTWEBP;
         boolean enableAntiAliasing = ENABLEANTIALIASING;
-        boolean dryRun = DRYRUN;
+//        boolean dryRun = DRYRUN;
+        boolean dryRun = false;
         boolean keepUnoptimizedFilesPostProcessor = KEEPUNOPTIMIZEDFILESPOSTPROCESSOR;
         RoundingHandler.Strategy roundingStrategy = RoundingHandler.Strategy.FLOOR;
         boolean iosCreateImageSetFolder = IOSCREATEIMAGESETFOLDERS;
         boolean clearDirBeforeConvert = CLEARDIRBEFORECONVERT;
-        boolean help = HELP;
-        boolean version = VERSION;
+//        boolean help = HELP;
+        boolean help = false;
+//        boolean version = VERSION;
+        boolean version = false;
         boolean guiAdvancedOptions = GUIADVANCEDOPTIONS;
 
         if(help) {
