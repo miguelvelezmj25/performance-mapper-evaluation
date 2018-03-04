@@ -27,23 +27,6 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Sink.init();
 
-//        args = new String[] {
-//                "true",
-//                "false",
-//                "true",
-//                "true",
-//                "false",
-//                "true",
-//                "true",
-//                "false",
-//                "true",
-//                "true",
-//                "false",
-//                "true"};
-
-
-
-
         Thread.sleep(1500);
 
         CHECK = Source.getIsCheck(Boolean.valueOf(args[0]));

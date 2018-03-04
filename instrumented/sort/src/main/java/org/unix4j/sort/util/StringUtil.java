@@ -206,6 +206,7 @@ public class StringUtil {
      */
     public static int findStartTrimWhitespace(CharSequence s, int start) {
         final int len = s.length();
+
         for(int i = start; i < len; i++) {
             if(!Character.isWhitespace(s.charAt(i))) {
                 return i;
