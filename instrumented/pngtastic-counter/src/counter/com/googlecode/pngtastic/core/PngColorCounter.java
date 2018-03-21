@@ -91,6 +91,8 @@ public class PngColorCounter extends PngProcessor {
         final PngImageType imageType = PngImageType.forColorType(original.getColorType());
         final int sampleSize = original.getSampleBitCount();
 
+        System.out.println(rows.size());
+
         int y = 0;
         for(byte[] row : rows) {
             if(timeout > 0 && (System.currentTimeMillis() - start > timeout)) {

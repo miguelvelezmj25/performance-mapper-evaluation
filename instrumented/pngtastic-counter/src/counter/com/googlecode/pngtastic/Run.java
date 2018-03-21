@@ -62,17 +62,17 @@ public class Run {
 //        Integer timeout = safeInteger(options.get("--timeout"), 0);
 //        String logLevel = options.get("--logLevel");
 
-        FREQTHRESHOLD = Source.getOptionFreqThreshold(Boolean.valueOf(args[0]));
-        DISTTHRESHOLD = Source.getOptionDistThreshold(Boolean.valueOf(args[1]));
-        MINALPHA = Source.getOptionMinAlpha(Boolean.valueOf(args[2]));
-        TIMEOUT = Source.getOptionTimeout(Boolean.valueOf(args[3]));
-        LOGLEVEL = Source.getOptionLogLevel(Boolean.valueOf(args[4]));
+//        FREQTHRESHOLD = Source.getOptionFreqThreshold(Boolean.valueOf(args[0]));
+//        DISTTHRESHOLD = Source.getOptionDistThreshold(Boolean.valueOf(args[1]));
+//        MINALPHA = Source.getOptionMinAlpha(Boolean.valueOf(args[2]));
+//        TIMEOUT = Source.getOptionTimeout(Boolean.valueOf(args[3]));
+//        LOGLEVEL = Source.getOptionLogLevel(Boolean.valueOf(args[4]));
 
-//        FREQTHRESHOLD = Source.getOptionFreqThreshold(false);
-//        DISTTHRESHOLD = Source.getOptionDistThreshold(false);
-//        MINALPHA = Source.getOptionMinAlpha(false);
-//        TIMEOUT = Source.getOptionTimeout(true);
-//        LOGLEVEL = Source.getOptionLogLevel(true);
+        FREQTHRESHOLD = Source.getOptionFreqThreshold(false);
+        DISTTHRESHOLD = Source.getOptionDistThreshold(false);
+        MINALPHA = Source.getOptionMinAlpha(false);
+        TIMEOUT = Source.getOptionTimeout(false);
+        LOGLEVEL = Source.getOptionLogLevel(false);
 
         Double distThreshold;
         Double freqThreshold;
