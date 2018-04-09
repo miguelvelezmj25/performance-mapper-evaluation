@@ -53,24 +53,24 @@ public class CleanWithSmallCache {
     private static final NumberFormat NUMBER_FORMAT =
         NumberFormat.getNumberInstance();
 
-    private File envHome = null;
-    private int cacheSize = 0;
+    private File envHome = new File("tmp");
+    private int cacheSize = 250 * 1024;
     private boolean offHeap = false;
-    private int records = -1;
-    private int keySize = -1;
-    private int dataSize = -1;
+    private int records = 4000;
+    private int keySize = 48;
+    private int dataSize = 10;
     private int fanout = 128;
     private boolean doReads = false;
     private boolean doWrites = false;
-    private int totalSeconds = 0;
+    private int totalSeconds = 30;
     private long beginTime = 0;
     private long endTime = 0;
     private boolean randomKeys = false;
     private boolean doClean = false;
     private boolean fillCache = false;
     private Random random = new Random(123);
-    private AtomicInteger nReads = new AtomicInteger(0);
-    private AtomicInteger nWrites = new AtomicInteger(0);
+    private AtomicInteger nReads = new AtomicInteger(10);
+    private AtomicInteger nWrites = new AtomicInteger(100);
     private boolean programDone = false;
     private Environment env = null;
     private Database db = null;

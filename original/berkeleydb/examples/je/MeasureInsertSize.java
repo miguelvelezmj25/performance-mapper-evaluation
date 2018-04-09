@@ -49,12 +49,12 @@ import com.sleepycat.je.Transaction;
  */
 public class MeasureInsertSize {
 
-    private File home;
-    private int records;
-    private int keySize;
-    private int dataSize = -1;
-    private int insertsPerTxn;
-    private boolean deferredWrite;
+    private File home = new File("tmp");
+    private int records = 100000;
+    private int keySize = 10;
+    private int dataSize = 10;
+    private int insertsPerTxn = 0;
+    private boolean deferredWrite = true;
     private Environment env;
     private Database db;
 

@@ -70,7 +70,7 @@ public class ClosedDbEviction {
     private static Database dataAccessDb = null;
     private static Database metadataDb = null;
     private static Database[] openDbList =  new Database[nKeepOpenedDbs];
-    private static Random random = new Random();
+    private static Random random = new Random(10);
     private static Runtime rt = Runtime.getRuntime();
 
     public static void main(String[] args) {

@@ -33,7 +33,7 @@ import com.sleepycat.je.Transaction;
 
 public class ExampleDatabasePut {
 
-    private static File myDbEnvPath = new File("/tmp/JEDB");
+    private static File myDbEnvPath = new File("./tmp/JEDB");
     private static File inventoryFile = new File("./inventory.txt");
     private static File vendorsFile = new File("./vendors.txt");
 
