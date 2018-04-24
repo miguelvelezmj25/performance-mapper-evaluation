@@ -54,13 +54,13 @@ import java.util.Random;
  * MeasureDiskOrderedScan.sh (in this directory) is a script for running this
  * program that can be copied and modified to run a subset of tests.
  */
-public class MeasureDiskOrderedScan {
+public class MeasureDiskOrderedScan1 {
 
     private enum Action {Populate, DirtyReadScan, DiskOrderedScan}
 
     public static boolean DUPLICATES;
     public static boolean KEYSONLY;
-    //    public static boolean PRELOAD;
+//    public static boolean PRELOAD;
     public static boolean SEQUENTIAL;
     public static boolean ACTION;
     public static boolean RECORDS;
@@ -74,7 +74,7 @@ public class MeasureDiskOrderedScan {
     private boolean keysOnly = false;
     private boolean preload = false;
     private boolean sequentialWrites = false;
-    private Action action = Action.Populate;
+    private Action action = Action.DiskOrderedScan;
     private int nRecords = 25 * 1000 * 50;
     private int keySize = 10;
     private int dataSize = 1000;
@@ -118,7 +118,7 @@ public class MeasureDiskOrderedScan {
 //        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
 
         try {
-            new MeasureDiskOrderedScan(args).run();
+            new MeasureDiskOrderedScan1(args).run();
 //            System.exit(0);
         } catch(Throwable e) {
             e.printStackTrace(System.out);
@@ -126,26 +126,7 @@ public class MeasureDiskOrderedScan {
         }
     }
 
-    public static void deleteFolder(File folder) {
-        File[] files = folder.listFiles();
-        if(files != null) { //some JVMs return null for empty dirs
-            for(File f : files) {
-                if(f.isDirectory()) {
-                    deleteFolder(f);
-                }
-                else {
-                    f.delete();
-                }
-            }
-        }
-        folder.delete();
-    }
-
-    private MeasureDiskOrderedScan(String args[]) {
-        File dir = new File(this.homeDir);
-        deleteFolder(dir);
-        dir.mkdir();
-
+    private MeasureDiskOrderedScan1(String args[]) {
         boolean dataSizeSpecified = false;
 
         if(ACTION) {
@@ -316,44 +297,37 @@ public class MeasureDiskOrderedScan {
         final DatabaseEntry key = new DatabaseEntry();
         final DatabaseEntry data = new DatabaseEntry();
 
-        Regions.enter("2"); // PN
         for(long i = 0; i < nRecords; i += 1) {
-            Regions.enter("3"); // PNSK
             if(sequentialWrites) {
                 makeLongKey(key, i);
             }
             else {
                 makeRandomKey(key);
             }
-            Regions.exit("3"); // PNSK
 
-            Regions.enter("4"); // PNDa
             makeData(data);
-            Regions.exit("4"); // PNDa
 
             OperationStatus status;
             /* Insert */
 
-            Regions.enter("5"); // PNDuKDa
             if(dupDb) {
                 status = db.putNoDupData(null, key, data);
             }
             else {
                 status = db.putNoOverwrite(null, key, data);
             }
-            Regions.exit("5"); // PNDuKDa
+
             if(status != OperationStatus.SUCCESS) {
                 fail(status);
             }
             /* Update to create waste */
-            Regions.enter("6"); // ANDaK
+
             status = db.put(null, key, data);
-            Regions.exit("6"); // ANDaK
+
             if(status != OperationStatus.SUCCESS) {
                 fail(status);
             }
         }
-        Regions.exit("2"); // PN
     }
 
     private void dirtyReadScan() {
@@ -390,14 +364,18 @@ public class MeasureDiskOrderedScan {
         config.setLSNBatchSize(lsnBatchSize);
         final DiskOrderedCursor cursor = db.openCursor(config);
         int nScanned = 0;
+
+        Regions.enter("2"); // AKDa
         while(cursor.getNext(key, data, LockMode.READ_UNCOMMITTED) ==
                 OperationStatus.SUCCESS) {
             checkAnyKey(key);
+
             if(!keysOnly) {
                 checkData(data);
             }
             nScanned += 1;
         }
+        Regions.exit("2"); // AKDa
         cursor.close();
         checkEquals(nRecords, nScanned);
     }

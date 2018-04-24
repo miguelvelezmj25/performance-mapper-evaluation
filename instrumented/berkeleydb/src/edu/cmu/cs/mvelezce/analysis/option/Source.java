@@ -23,4 +23,7 @@ public class Source {
 
     public static boolean getOptionSEQUENTIAL(boolean option) { return option;
     }
+
+    public static boolean getOptionKEYSONLY(boolean option) { return option;
+    }
 }
