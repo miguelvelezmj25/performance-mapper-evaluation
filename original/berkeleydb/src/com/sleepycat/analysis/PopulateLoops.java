@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-public class MeasureDiskOrderedScan {
+public class PopulateLoops {
 
     private enum Action {Populate, DirtyReadScan, DiskOrderedScan}
 
@@ -65,7 +65,7 @@ public class MeasureDiskOrderedScan {
         SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(true));
 
         try {
-            new MeasureDiskOrderedScan(args).run();
+            new PopulateLoops(args).run();
 //            System.exit(0);
         } catch(Throwable e) {
             e.printStackTrace(System.out);
@@ -88,7 +88,7 @@ public class MeasureDiskOrderedScan {
         folder.delete();
     }
 
-    public MeasureDiskOrderedScan(String args[]) {
+    public PopulateLoops(String args[]) {
         File dir = new File(this.homeDir);
         deleteFolder(dir);
         dir.mkdir();
@@ -256,7 +256,6 @@ public class MeasureDiskOrderedScan {
     private void populate() {
         final DatabaseEntry key = new DatabaseEntry();
         final DatabaseEntry data = new DatabaseEntry();
-
         for(long i = 0; i < nRecords; i += 1) {
             if(sequentialWrites) {
                 makeLongKey(key, i);
@@ -264,12 +263,9 @@ public class MeasureDiskOrderedScan {
             else {
                 makeRandomKey(key);
             }
-
             makeData(data);
-
             OperationStatus status;
             /* Insert */
-
             if(dupDb) {
                 status = db.putNoDupData(null, key, data);
             }
@@ -286,7 +282,6 @@ public class MeasureDiskOrderedScan {
             }
         }
     }
-
 
     private void dirtyReadScan() {
         final DatabaseEntry key = new DatabaseEntry();
