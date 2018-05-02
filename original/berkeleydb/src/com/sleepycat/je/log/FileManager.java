@@ -365,7 +365,6 @@ public class FileManager {
 
             if (!envImpl.isMemOnly()) {
                 if (!dbEnvHome.exists()) {
-//                    System.out.println(dbEnvHome.getAbsolutePath());
                     throw new IllegalArgumentException
                         ("Environment home " + dbEnvHome + " doesn't exist");
                 }

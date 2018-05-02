@@ -12,25 +12,31 @@ import java.util.Random;
 
 public class MeasureDiskOrderedScan {
 
-    public static boolean DUPDB;
-    public static boolean KEYSONLY;
-
     private enum Action {Populate, DirtyReadScan, DiskOrderedScan}
 
-    private String homeDir = "tmp";
-    private Environment env = null;
-    private Database db = null;
-    private Action action = Action.Populate;
+    public static boolean ACTION;
+    public static boolean RECORDS;
+    public static boolean DATA;
+    public static boolean DUPLICATES;
+    public static boolean KEYSIZE;
+    public static boolean SEQUENTIAL;
+
     private boolean dupDb = false;
     private boolean keysOnly = false;
     private boolean preload = false;
     private boolean sequentialWrites = false;
-    private int nRecords = 25;// * 1000 * 50;
+    private Action action = Action.Populate;
+    private int nRecords = 25 * 1000 * 50;
     private int keySize = 10;
     private int dataSize = 1000;
     private long lsnBatchSize = Long.MAX_VALUE;
     private long internalMemoryLimit = 100L * 1000 * 1000;
     private long jeCacheSize = 1000L * 1000 * 1000;
+
+
+    private String homeDir = "tmp";
+    private Environment env = null;
+    private Database db = null;
     private Random random = new Random(10);
     private long startTime;
     private long endTime;
@@ -39,24 +45,77 @@ public class MeasureDiskOrderedScan {
         Sink.init();
 
         try {
-            MeasureDiskOrderedScan m = new MeasureDiskOrderedScan(args);
-            m.run();
-            System.exit(0);
+            Thread.sleep(1100);
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+//        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
+//        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
+//        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
+//        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(args[3]));
+//        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
+//        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
+
+        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
+        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
+        DATA = Source.getOptionDATA(Boolean.valueOf(true));
+        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(true));
+        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(true));
+        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(true));
+
+        try {
+            new MeasureDiskOrderedScan(args).run();
+//            System.exit(0);
         } catch(Throwable e) {
             e.printStackTrace(System.out);
-            System.exit(1);
+//            System.exit(1);
         }
     }
 
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if(files != null) { //some JVMs return null for empty dirs
+            for(File f : files) {
+                if(f.isDirectory()) {
+                    deleteFolder(f);
+                }
+                else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
+
     public MeasureDiskOrderedScan(String args[]) {
-        DUPDB = Source.getOptionDUPDB(true);
-        KEYSONLY = Source.getOptionKEYSONLY(true);
-
-        this.dupDb = DUPDB;
-        this.keysOnly = KEYSONLY;
-
+        File dir = new File(this.homeDir);
+        deleteFolder(dir);
+        dir.mkdir();
 
         boolean dataSizeSpecified = false;
+
+        if(ACTION) {
+            this.action = null;
+        }
+
+        if(RECORDS) {
+            this.nRecords /= 50;
+        }
+
+        if(DATA) {
+            this.dataSize = 100;
+            dataSizeSpecified = true;
+        }
+
+        if(DUPLICATES) {
+            this.dupDb = true;
+        }
+
+        if(KEYSIZE) {
+            this.keySize = 100;
+        }
+
 //        for (int i = 0; i < args.length; i += 1) {
 //            final String arg = args[i];
 //            if (arg.equals("-dupDb")) {
@@ -102,7 +161,6 @@ public class MeasureDiskOrderedScan {
                     ("Only one of lsnBatchSize and internalMemoryLimit may be " +
                             "specified (not equal to Long.MAX_VALUE)");
         }
-
         if(dupDb && !dataSizeSpecified) {
             dataSize = keySize;
         }
@@ -150,7 +208,6 @@ public class MeasureDiskOrderedScan {
             default:
                 fail(action);
         }
-
         final double endTime = System.currentTimeMillis();
         final double totalSecs = (endTime - startTime) / 1000;
         final double throughput = nRecords / totalSecs;
@@ -199,6 +256,7 @@ public class MeasureDiskOrderedScan {
     private void populate() {
         final DatabaseEntry key = new DatabaseEntry();
         final DatabaseEntry data = new DatabaseEntry();
+
         for(long i = 0; i < nRecords; i += 1) {
             if(sequentialWrites) {
                 makeLongKey(key, i);
@@ -206,9 +264,12 @@ public class MeasureDiskOrderedScan {
             else {
                 makeRandomKey(key);
             }
+
             makeData(data);
+
             OperationStatus status;
             /* Insert */
+
             if(dupDb) {
                 status = db.putNoDupData(null, key, data);
             }
@@ -225,6 +286,7 @@ public class MeasureDiskOrderedScan {
             }
         }
     }
+
 
     private void dirtyReadScan() {
         final DatabaseEntry key = new DatabaseEntry();

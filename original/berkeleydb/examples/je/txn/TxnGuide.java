@@ -35,7 +35,7 @@ public class TxnGuide {
     private static Database myClassDb = null;
     private static Environment myEnv = null;
 
-    private static int NUMTHREADS = 1;
+    private static int NUMTHREADS = 5;
 
     private static void usage() {
         System.out.println("TxnGuide [-h <env directory>]");

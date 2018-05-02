@@ -1,5 +1,3 @@
-package standalone;
-
 /*-
  * Copyright (C) 2002, 2017, Oracle and/or its affiliates. All rights reserved.
  *
@@ -69,18 +67,18 @@ public class MeasureDiskOrderedScan {
     private String homeDir = "tmp";
     private Environment env = null;
     private Database db = null;
-    private Action action = Action.DiskOrderedScan;
+    private Action action = null;
     private boolean dupDb = false;
     private boolean keysOnly = false;
     private boolean preload = false;
     private boolean sequentialWrites = false;
-    private int nRecords = 25 * 1000 * 50;
+    private int nRecords = 25 * 1000 * 1000;
     private int keySize = 10;
     private int dataSize = 1000;
     private long lsnBatchSize = Long.MAX_VALUE;
     private long internalMemoryLimit = 100L * 1000 * 1000;
     private long jeCacheSize = 1000L * 1000 * 1000;
-    private Random random = new Random(10);
+    private Random random = new Random();
     private long startTime;
     private long endTime;
 
