@@ -50,19 +50,19 @@ public class PopulateCGDepth {
             e.printStackTrace();
         }
 
-//        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
-//        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
-//        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
-//        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(args[3]));
-//        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
-//        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
+        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
+        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
+        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
+        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(args[3]));
+        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
+        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
 
-        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
-        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
-        DATA = Source.getOptionDATA(Boolean.valueOf(false));
-        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(false));
-        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
-        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
+//        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
+//        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
+//        DATA = Source.getOptionDATA(Boolean.valueOf(false));
+//        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(false));
+//        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
+//        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
 
         try {
             new PopulateCGDepth(args).run();

@@ -9,74 +9,110 @@ import java.util.Stack;
  */
 public class Regions {
 
-    public static Map<String, Long> regionsToOverhead = new HashMap<>();
-
     public static final String PROGRAM_REGION_ID = "program";
+
+    // TODO change to method
+    public static Map<String, Long> regionsToOverhead = new HashMap<>();
 
     private static Stack<String> executingRegions = new Stack<>();
     private static Stack<Long> executingRegionsStart = new Stack<>();
     private static Stack<Long> innerRegionsExecutionTime = new Stack<>();
+
     private static Map<String, Long> regionsToProcessedPerformance = new HashMap<>();
 
     public static void enter(String id) {
-        long os = System.nanoTime();
+        long startRegion = System.nanoTime();
 
-        long start = System.nanoTime();
         Regions.executingRegions.push(id);
-        Regions.executingRegionsStart.push(start);
+        Regions.executingRegionsStart.push(startRegion);
         Regions.innerRegionsExecutionTime.push(0L);
 
-        long overhead = regionsToOverhead.get(id);
-        long oe = System.nanoTime();
-        regionsToOverhead.put(id, overhead + (oe - os));
+        long overhead = Regions.regionsToOverhead.get(id);
+        long endProcess = System.nanoTime();
+        Regions.regionsToOverhead.put(id, overhead + (endProcess - startRegion));
+    }
+
+    public static void forceExit() {
+        while(!Regions.executingRegions.empty()) {
+            Regions.exit(Regions.executingRegions.peek());
+        }
     }
 
     public static void exit(String id) {
-        long os = System.nanoTime();
+        long startRegion = System.nanoTime();
 
         if(!Regions.executingRegions.peek().equals(id)) {
-            long overhead = regionsToOverhead.get(id);
-            long oe = System.nanoTime();
-            regionsToOverhead.put(id, overhead + (oe - os));
+            long overhead = Regions.regionsToOverhead.get(id);
+            long endProcess = System.nanoTime();
+            Regions.regionsToOverhead.put(id, overhead + (endProcess - startRegion));
             return;
         }
 
-        long end = System.nanoTime();
+        long endRegion = System.nanoTime();
+        long regionExecutionTime = Regions.processRegion(endRegion);
+
+        if(Regions.executingRegions.isEmpty()) {
+            return;
+        }
+
+        Regions.processOuterRegions(regionExecutionTime);
+
+        long overhead = Regions.regionsToOverhead.get(id);
+        long endProcess = System.nanoTime();
+        Regions.regionsToOverhead.put(id, overhead + (endProcess - startRegion));
+    }
+
+    private static void processOuterRegions(long regionExecutionTime) {
+        Stack<Long> temp = new Stack<>();
+
+        while(!Regions.innerRegionsExecutionTime.isEmpty()) {
+            long currentInnerRegionExecutionTime = Regions.innerRegionsExecutionTime.pop();
+            temp.push(currentInnerRegionExecutionTime + regionExecutionTime);
+        }
+
+        while(!temp.isEmpty()) {
+            Regions.innerRegionsExecutionTime.push(temp.pop());
+        }
+    }
+
+    private static long processRegion(long endRegion) {
         long start = Regions.executingRegionsStart.pop();
         long innerTime = Regions.innerRegionsExecutionTime.pop();
-        long regionExecutionTime = end - start - innerTime;
-        long currentRegionExecutionTime = regionExecutionTime;
+        long regionExecutionTime = endRegion - start - innerTime;
 
         String region = Regions.executingRegions.pop();
         Long time = Regions.regionsToProcessedPerformance.get(region);
+        long realExecutionTime = regionExecutionTime;
 
         if(time != null) {
-            regionExecutionTime += time;
+            realExecutionTime += time;
         }
 
-        Regions.regionsToProcessedPerformance.put(region, regionExecutionTime);
+        Regions.regionsToProcessedPerformance.put(region, realExecutionTime);
 
-        if(executingRegions.isEmpty()) {
-            return;
-        }
+        return regionExecutionTime;
+    }
 
-        Stack<Long> added = new Stack<>();
 
-        while(!innerRegionsExecutionTime.isEmpty()) {
-            long currentInnerRegionExecutionTime = innerRegionsExecutionTime.pop();
-            added.push(currentInnerRegionExecutionTime + currentRegionExecutionTime);
-        }
+    public static Map<String, Long> getRegionsToOverhead() {
+        return Regions.regionsToOverhead;
+    }
 
-        while(!added.isEmpty()) {
-            innerRegionsExecutionTime.push(added.pop());
-        }
+    public static Stack<String> getExecutingRegions() {
+        return Regions.executingRegions;
+    }
 
-        long overhead = regionsToOverhead.get(id);
-        long oe = System.nanoTime();
-        regionsToOverhead.put(id, overhead + (oe - os));
+    public static Stack<Long> getExecutingRegionsStart() {
+        return Regions.executingRegionsStart;
+    }
+
+    public static Stack<Long> getInnerRegionsExecutionTime() {
+        return Regions.innerRegionsExecutionTime;
     }
 
     public static Map<String, Long> getRegionsToProcessedPerformance() {
         return regionsToProcessedPerformance;
     }
+
+
 }

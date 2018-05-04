@@ -18,9 +18,11 @@ import com.sleepycat.bind.tuple.TupleOutput;
 import com.sleepycat.je.*;
 import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
+import edu.cmu.cs.mvelezce.tool.analysis.region.Regions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -94,19 +96,19 @@ public class ScanLoops {
             e.printStackTrace();
         }
 
-//        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
-//        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
-//        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
-//        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[3]));
-//        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[4]));
-//        KEYSONLY = Source.getOptionKEYSONLY(Boolean.valueOf(args[5]));
+        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
+        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
+        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
+        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[3]));
+        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[4]));
+        KEYSONLY = Source.getOptionKEYSONLY(Boolean.valueOf(args[5]));
 
-        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
-        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
-        DATA = Source.getOptionDATA(Boolean.valueOf(false));
-        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
-        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(true));
-        KEYSONLY = Source.getOptionKEYSONLY(Boolean.valueOf(false));
+//        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
+//        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
+//        DATA = Source.getOptionDATA(Boolean.valueOf(false));
+//        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
+//        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
+//        KEYSONLY = Source.getOptionKEYSONLY(Boolean.valueOf(true));
 
         try {
             new ScanLoops(args).run();
@@ -224,6 +226,7 @@ public class ScanLoops {
             db.preload(null); /* LNs are not loaded. */
         }
         final double startTime = System.currentTimeMillis();
+        Regions.enter("1");
         switch(action) {
             case Populate:
                 populate();
@@ -237,6 +240,7 @@ public class ScanLoops {
             default:
                 fail(action);
         }
+        Regions.exit("1");
         final double endTime = System.currentTimeMillis();
         final double totalSecs = (endTime - startTime) / 1000;
         final double throughput = nRecords / totalSecs;
@@ -346,14 +350,18 @@ public class ScanLoops {
         config.setLSNBatchSize(lsnBatchSize);
         final DiskOrderedCursor cursor = db.openCursor(config);
         int nScanned = 0;
+
+        Regions.enter("2");
         while(cursor.getNext(key, data, LockMode.READ_UNCOMMITTED) ==
                 OperationStatus.SUCCESS) {
             checkAnyKey(key);
+
             if(!keysOnly) {
                 checkData(data);
             }
             nScanned += 1;
         }
+        Regions.exit("2");
         cursor.close();
         checkEquals(nRecords, nScanned);
     }
@@ -398,7 +406,7 @@ public class ScanLoops {
     }
 
     private void fail(Object msg) {
-        throw new IllegalStateException(msg.toString());
+//        throw new IllegalStateException(msg.toString());
     }
 
     private void check(boolean cond) {

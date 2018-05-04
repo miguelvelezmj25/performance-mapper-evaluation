@@ -59,10 +59,10 @@ public class PopulateLoops {
 
         ACTION = Source.getOptionACTION(Boolean.valueOf(false));
         RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
-        DATA = Source.getOptionDATA(Boolean.valueOf(true));
-        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(true));
-        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(true));
-        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(true));
+        DATA = Source.getOptionDATA(Boolean.valueOf(false));
+        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(false));
+        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
+        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
 
         try {
             new PopulateLoops(args).run();
