@@ -20,6 +20,7 @@ public class Run {
     /** */
 
 
+    // OPTIONS
     public static boolean FREQTHRESHOLD;
     public static boolean DISTTHRESHOLD;
     public static boolean MINALPHA;
@@ -48,7 +49,8 @@ public class Run {
         String[] files = Arrays.copyOfRange(args, last, args.length);
 
         files = new String[1];
-        files[0] = System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/us.png";
+//        files[0] = System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/us.png";
+        files[0] = "./images/optimizer/us.png";
 
         if(files.length == 0) {
             System.out.println("No files to process");
