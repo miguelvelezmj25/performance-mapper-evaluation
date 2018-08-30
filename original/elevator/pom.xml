@@ -22,9 +22,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <groupId>gov.nasa.jpf</groupId>
+      <artifactId>classes</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/jpf-classes.jar</systemPath>
     </dependency>
   </dependencies>
 
