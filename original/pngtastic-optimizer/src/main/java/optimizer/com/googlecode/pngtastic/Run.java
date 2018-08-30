@@ -60,7 +60,7 @@ public class Run {
       return;
     }
 
-    String toDir = (options.get("--toDir") == null) ? "." : options.get("--toDir");
+    String toDir = (options.get("--toDir") == null) ? "./results" : options.get("--toDir");
     String fileSuffix = (options.get("--fileSuffix") == null) ? "" : options.get("--fileSuffix");
 //        Boolean removeGamma = Boolean.valueOf(options.get("--removeGamma"));
 //        Integer compressionLevel = safeInteger(options.get("--compressionLevel"));
@@ -74,11 +74,11 @@ public class Run {
     COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
     REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
 
-//        REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
-//        COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
-//        COMPRESSOR = Source.getOptionCOMPRESSOR(true);
-//        ITERATIONS = Source.getOptionITERATIONS(false);
-//        LOGLEVEL = Source.getOptionLOGLEVEL(false);
+//    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
+//    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
+//    COMPRESSOR = Source.getOptionCOMPRESSOR(false);
+//    ITERATIONS = Source.getOptionITERATIONS(false);
+//    LOGLEVEL = Source.getOptionLOGLEVEL(false);
 
     Boolean removeGamma = REMOVEGAMMA;
     Integer compressionLevel = 0;
