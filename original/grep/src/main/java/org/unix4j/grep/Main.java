@@ -34,12 +34,12 @@ public class Main {
         ISWHOLELINE = Source.getIsWholeLine(Boolean.valueOf(args[6]));
 
 //      ISIGNORECASE = Source.getIsIgnoreCase(true);
-//      ISINVERTMATCH = Source.getIsInvertMatch(true);
+//      ISINVERTMATCH = Source.getIsInvertMatch(false);
 //      ISFIXEDSTRINGS = Source.getIsFixedStrings(false);
 //      ISLINENUMBER = Source.getIsLineNumber(false);
 //      ISCOUNT = Source.getIsCount(true);
 //      ISMATCHINGFILES = Source.getIsMatchingFiles(false);
-//      ISWHOLELINE = Source.getIsWholeLine(true);
+//      ISWHOLELINE = Source.getIsWholeLine(false);
 
         boolean isIgnoreCase = ISIGNORECASE;
         boolean isInvertMatch = ISINVERTMATCH;
@@ -83,7 +83,7 @@ public class Main {
         GrepArguments grepArgs = new GrepArguments(isIgnoreCase, isInvertMatch, isFixedStrings, isLineNumber, isCount,
                 isMatchingFiles, isWholeLine);
         grepArgs.setRegexp(regexp);
-        grepArgs.setPaths("/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/grep/files/*.txt");
+        grepArgs.setPaths("./files/*.txt");
         GrepCommand grep = new GrepCommand(grepArgs);
 
         DefaultExecutionContext executionContext = new DefaultExecutionContext();
