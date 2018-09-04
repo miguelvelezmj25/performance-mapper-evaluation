@@ -52,7 +52,8 @@ public class Run {
     files = new String[1];
 //        files[0] = System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-optimizer/images/optimizer/car.png";
 //    files[0] = "./images/optimizer/us.png";
-    files[0] = "./images/optimizer/amigaball.png";
+//    files[0] = "./images/optimizer/amigaball.png";
+    files[0] = "./images/optimizer/car.png";
 
     if (files.length == 0) {
       System.out.println("No files to process");
@@ -68,17 +69,17 @@ public class Run {
 //        String compressor = options.get("--compressor");
 //        Integer iterations = safeInteger(options.get("--iterations"));
 
-    COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[0]));
-    ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[1]));
-    LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[2]));
-    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
-    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
+//    COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[0]));
+//    ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[1]));
+//    LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[2]));
+//    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
+//    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
 
-//    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(false);
-//    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(false);
-//    COMPRESSOR = Source.getOptionCOMPRESSOR(false);
-//    ITERATIONS = Source.getOptionITERATIONS(false);
-//    LOGLEVEL = Source.getOptionLOGLEVEL(false);
+    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(true);
+    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(true);
+    COMPRESSOR = Source.getOptionCOMPRESSOR(true);
+    ITERATIONS = Source.getOptionITERATIONS(true);
+    LOGLEVEL = Source.getOptionLOGLEVEL(true);
 
     Boolean removeGamma = REMOVEGAMMA;
     Integer compressionLevel = 0;
