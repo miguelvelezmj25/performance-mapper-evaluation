@@ -46,7 +46,7 @@ class PrimeCalculator {
                 ? 2
                 : _numberKeeper.lastNumber() + 1;
 
-        while (primeCandidate <= 1_000_000) {
+        while (primeCandidate <= 500_000) {
             if(isPrime(primeCandidate)) {
 
                 _prevayler.execute(new NumberStorageTransaction(primeCandidate));
