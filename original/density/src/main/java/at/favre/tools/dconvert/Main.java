@@ -65,8 +65,8 @@ public final class Main {
     public static void main(String[] rawArgs) throws InterruptedException, IOException {
         Sink.init();
 
-        File src = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/files/person.jpg");
-        File dst = new File(System.getProperty("user.home") + "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/density/output");
+        File src = new File("./files/person.jpg");
+        File dst = new File("./output");
 
         FileUtils.cleanDirectory(dst);
 
