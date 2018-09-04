@@ -69,17 +69,17 @@ public class Run {
 //        String compressor = options.get("--compressor");
 //        Integer iterations = safeInteger(options.get("--iterations"));
 
-//    COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[0]));
-//    ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[1]));
-//    LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[2]));
-//    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
-//    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
+    COMPRESSOR = Source.getOptionCOMPRESSOR(Boolean.valueOf(args[0]));
+    ITERATIONS = Source.getOptionITERATIONS(Boolean.valueOf(args[1]));
+    LOGLEVEL = Source.getOptionLOGLEVEL(Boolean.valueOf(args[2]));
+    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(Boolean.valueOf(args[3]));
+    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(Boolean.valueOf(args[4]));
 
-    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(true);
-    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(true);
-    COMPRESSOR = Source.getOptionCOMPRESSOR(true);
-    ITERATIONS = Source.getOptionITERATIONS(true);
-    LOGLEVEL = Source.getOptionLOGLEVEL(true);
+//    REMOVEGAMMA = Source.getOptionREMOVEGAMMA(true);
+//    COMPRESSIONLEVEL = Source.getOptionCOMPRESSIONLEVEL(true);
+//    COMPRESSOR = Source.getOptionCOMPRESSOR(true);
+//    ITERATIONS = Source.getOptionITERATIONS(true);
+//    LOGLEVEL = Source.getOptionLOGLEVEL(true);
 
     Boolean removeGamma = REMOVEGAMMA;
     Integer compressionLevel = 0;
