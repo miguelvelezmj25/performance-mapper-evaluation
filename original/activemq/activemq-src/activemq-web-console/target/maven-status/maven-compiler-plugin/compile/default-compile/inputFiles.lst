@@ -1,0 +1,15 @@
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/handler/BindingBeanNameUrlHandlerMapping.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/PurgeDestination.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/filter/ApplicationContextFilter.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/CreateDestination.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/config/OsgiConfiguration.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/DeleteDestination.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/WebConsoleStarter.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/DeleteJob.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/CopyMessage.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/RetryMessage.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/SendMessage.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/MoveMessage.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/CreateSubscriber.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/DeleteSubscriber.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-web-console/src/main/java/org/apache/activemq/web/controller/DeleteMessage.java

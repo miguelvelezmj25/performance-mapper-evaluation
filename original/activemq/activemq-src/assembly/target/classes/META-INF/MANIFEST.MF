@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Implementation-Title: ActiveMQ :: Console
+Implementation-Version: 5.15.6
+Archiver-Version: Plexus Archiver
+Built-By: mvelezce
+Specification-Vendor: The Apache Software Foundation
+Specification-Title: ActiveMQ :: Console
+Implementation-Vendor-Id: org.apache.activemq
+Created-By: Apache Maven 3.5.3
+Build-Jdk: 1.8.0_162
+Specification-Version: 5.15.6
+Implementation-Vendor: The Apache Software Foundation
+

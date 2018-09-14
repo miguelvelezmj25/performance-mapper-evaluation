@@ -1,0 +1,14 @@
+2018-09-14 13:45:22,525 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:22,580 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:22,586 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:23,641 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:23,704 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:23,712 [ActiveMQ Task-1] - ERROR FailoverTransport              - Failed to connect to [ssl://localhost:0] after: 1 attempt(s)
+2018-09-14 13:45:27,948 [main           ] - INFO  TaskRunnerTest                 - Iterations: 9820
+2018-09-14 13:45:27,948 [main           ] - INFO  TaskRunnerTest                 - counter: 100000
+2018-09-14 13:45:27,950 [main           ] - INFO  TaskRunnerTest                 - Dequeues/s: 534759.3582887701
+2018-09-14 13:45:27,950 [main           ] - INFO  TaskRunnerTest                 - duration: 0.187
+2018-09-14 13:45:28,201 [main           ] - INFO  TaskRunnerTest                 - Iterations: 21943
+2018-09-14 13:45:28,202 [main           ] - INFO  TaskRunnerTest                 - counter: 100000
+2018-09-14 13:45:28,202 [main           ] - INFO  TaskRunnerTest                 - Dequeues/s: 404858.2995951417
+2018-09-14 13:45:28,202 [main           ] - INFO  TaskRunnerTest                 - duration: 0.247

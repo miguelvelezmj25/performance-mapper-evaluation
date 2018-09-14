@@ -1,0 +1,23 @@
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// maven pom organized by organization.
+// ------------------------------------------------------------------
+
+ActiveMQ :: Openwire Generator
+
+
+From: 'an unknown organization'
+  - annogen  annogen:annogen:jar:0.1.0
+
+  - ant  ant:ant:jar:1.6.2
+
+  - groovy-all-1.0-jsr  groovy:groovy-all-1.0-jsr:jar:03
+
+
+From: 'The Codehaus' (http://codehaus.org)
+  - gram (http://groovy.codehaus.org/) groovy:gram:jar:1.1
+
+
+
+
+

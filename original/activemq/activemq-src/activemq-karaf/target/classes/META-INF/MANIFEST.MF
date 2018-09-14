@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1536947267985
+Build-Jdk: 1.8.0_162
+Built-By: mvelezce
+Bundle-Description: Provides resources for running ActiveMQ in Apache Ka
+ raf
+Bundle-DocURL: https://www.apache.org/
+Bundle-License: https://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: activemq-karaf
+Bundle-SymbolicName: activemq-karaf
+Bundle-Vendor: The Apache Software Foundation
+Bundle-Version: 5.15.6
+Created-By: Apache Maven Bundle Plugin
+Embed-Transitive: true
+Export-Package: org.apache.activemq.karaf.commands;uses:="org.apache.fel
+ ix.gogo.commands,org.apache.felix.service.command,org.apache.karaf.shel
+ l.console.commands,org.apache.felix.gogo.commands.basic,org.osgi.servic
+ e.blueprint.container,org.osgi.framework,org.apache.karaf.shell.console
+ ,org.apache.activemq.console.command,org.apache.activemq.console.format
+ ter,org.apache.activemq.console";version="5.15.6"
+Implementation-Title: Apache ActiveMQ
+Implementation-Version: 5.15.6
+Import-Package: org.apache.activemq.console,org.apache.activemq.console.
+ command,org.apache.activemq.console.formatter,org.apache.felix.gogo.com
+ mands;version="[0.16,1)",org.apache.felix.gogo.commands.basic;version="
+ [0.16,1)",org.apache.felix.service.command;version="[0.16,1)",org.apach
+ e.karaf.shell.console;version="[2,4)",org.apache.karaf.shell.console.co
+ mmands;version="[2,4)",org.osgi.framework;version="[1.8,2)",org.osgi.se
+ rvice.blueprint;version="[1.0.0,2.0.0)",org.osgi.service.blueprint.cont
+ ainer;version="[1.0,2)"
+Tool: Bnd-1.50.0

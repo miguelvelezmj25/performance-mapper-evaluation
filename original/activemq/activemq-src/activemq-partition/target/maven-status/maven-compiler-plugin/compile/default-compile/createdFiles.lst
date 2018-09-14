@@ -1,0 +1,11 @@
+org/apache/activemq/partition/dto/Partitioning.class
+org/apache/activemq/partition/PartitionBrokerPlugin.class
+org/apache/activemq/partition/PartitionBroker.class
+org/apache/activemq/partition/ZooKeeperPartitionBroker.class
+org/apache/activemq/partition/dto/Target.class
+org/apache/activemq/partition/PartitionBroker$ConnectionMonitor.class
+org/apache/activemq/partition/ZooKeeperPartitionBroker$1.class
+org/apache/activemq/partition/ZooKeeperPartitionBrokerPlugin.class
+org/apache/activemq/partition/PartitionBroker$1.class
+org/apache/activemq/partition/PartitionBroker$Traffic.class
+org/apache/activemq/partition/PartitionBroker$Score.class

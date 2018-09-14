@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1536947265663
+Build-Jdk: 1.8.0_162
+Built-By: mvelezce
+Bundle-Description: ActiveMQ Log4j Appender
+Bundle-DocURL: https://www.apache.org/
+Bundle-License: https://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: activemq-log4j-appender
+Bundle-SymbolicName: activemq-log4j-appender
+Bundle-Vendor: The Apache Software Foundation
+Bundle-Version: 5.15.6
+Created-By: Apache Maven Bundle Plugin
+Fragment-Host: org.apache.activemq.activemq-core
+Implementation-Title: ActiveMQ :: Log4j Appender
+Implementation-Vendor: The Apache Software Foundation
+Implementation-Vendor-Id: org.apache.activemq
+Implementation-Version: 5.15.6
+Import-Package: javax.jms;version="[1.1,2)",javax.naming,org.apache.acti
+ vemq;version="[5.15,6)",org.apache.log4j;version="[1.2,2)",org.apache.l
+ og4j.helpers;version="[1.2,2)",org.apache.log4j.spi;version="[1.2,2)"
+Specification-Title: ActiveMQ :: Log4j Appender
+Specification-Vendor: The Apache Software Foundation
+Specification-Version: 5.15.6
+Tool: Bnd-1.50.0

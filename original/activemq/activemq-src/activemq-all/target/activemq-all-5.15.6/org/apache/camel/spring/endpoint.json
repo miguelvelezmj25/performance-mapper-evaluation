@@ -1,0 +1,22 @@
+{
+ "model": {
+    "kind": "model",
+    "name": "endpoint",
+    "title": "Endpoint",
+    "description": "Camel endpoint configuration",
+    "javaType": "org.apache.camel.spring.CamelEndpointFactoryBean",
+    "label": "spring,configuration,endpoint",
+    "deprecated": false,
+    "input": false,
+    "output": false
+  },
+  "properties": {
+    "singleton": { "kind": "attribute", "displayName": "Singleton", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": true, "secret": false, "defaultValue": false, "description": "Not in use" },
+    "uri": { "kind": "attribute", "displayName": "Uri", "required": true, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Sets the URI to use to resolve the endpoint. Notice that additional options can be configured using a series of property." },
+    "pattern": { "kind": "attribute", "displayName": "Pattern", "required": false, "type": "object", "javaType": "org.apache.camel.ExchangePattern", "enum": [ "InOnly", "InOptionalOut", "InOut", "OutIn", "OutOnly", "OutOptionalIn", "RobustInOnly", "RobustOutOnly" ], "deprecated": true, "secret": false, "description": "Sets the exchange pattern of the endpoint" },
+    "properties": { "kind": "element", "displayName": "Properties", "required": true, "type": "array", "javaType": "java.util.List<org.apache.camel.model.PropertyDefinition>", "oneOf": [ "property" ], "deprecated": false, "secret": false, "description": "To configure additional endpoint options using a XML style which is similar as configuring Spring or Blueprint beans." },
+    "camelContextId": { "kind": "attribute", "displayName": "Camel Context Id", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Id of CamelContext to use if there are multiple CamelContexts in the same JVM" },
+    "id": { "kind": "attribute", "displayName": "Id", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Sets the id of this node" }
+  }
+}
+

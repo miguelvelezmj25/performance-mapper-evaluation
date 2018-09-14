@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1536947286671
+Build-Jdk: 1.8.0_162
+Built-By: mvelezce
+Bundle-Description: The ActiveMQ Message Broker and Client implementatio
+ ns
+Bundle-DocURL: https://www.apache.org/
+Bundle-License: https://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: activemq-blueprint
+Bundle-SymbolicName: org.apache.activemq.activemq-blueprint
+Bundle-Vendor: The Apache Software Foundation
+Bundle-Version: 5.15.6
+Created-By: Apache Maven Bundle Plugin
+Export-Service: org.apache.aries.blueprint.NamespaceHandler;osgi.service
+ .blueprint.namespace="http://activemq.apache.org/schema/core"
+Fragment-Host: org.apache.activemq.activemq-osgi
+Implementation-Title: Apache ActiveMQ
+Implementation-Version: 5.15.6
+Import-Package: org.apache.aries.blueprint;version="[1.0,2)",org.apache.
+ xbean.blueprint.context.impl;version="[3.13,5)",org.osgi.service.bluepr
+ int;version="[1.0.0,2.0.0)"
+Tool: Bnd-1.50.0

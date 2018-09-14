@@ -1,0 +1,6 @@
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/MavenBrokerManager.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/MavenBrokerSingletonManager.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/StopBrokerMojo.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/Broker.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/XBeanFileResolver.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-tooling/activemq-maven-plugin/src/main/java/org/apache/activemq/maven/StartBrokerMojo.java

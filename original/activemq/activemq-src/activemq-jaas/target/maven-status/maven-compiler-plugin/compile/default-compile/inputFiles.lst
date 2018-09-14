@@ -1,0 +1,15 @@
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/ReloadableProperties.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/TextFileCertificateLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/PropertiesLoader.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/UserPrincipal.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/PropertiesLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/EncryptionSupport.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginProperty.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/GuestLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/JassCredentialCallbackHandler.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/CertificateCallback.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/JaasCertificateCallbackHandler.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/CertificateLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/EncryptableLDAPLoginModule.java
+/Users/mvelezce/Desktop/activemq-parent-5.15.6/activemq-jaas/src/main/java/org/apache/activemq/jaas/GroupPrincipal.java

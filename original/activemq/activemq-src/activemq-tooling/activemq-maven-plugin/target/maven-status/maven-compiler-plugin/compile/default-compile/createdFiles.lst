@@ -1,0 +1,8 @@
+org/apache/activemq/maven/MavenBrokerManager.class
+org/apache/activemq/maven/MavenBrokerSingletonManager.class
+org/apache/activemq/maven/XBeanFileResolver.class
+org/apache/activemq/maven/StartBrokerMojo.class
+org/apache/activemq/maven/StopBrokerMojo.class
+org/apache/activemq/maven/Broker$1.class
+org/apache/activemq/maven/Broker$2.class
+org/apache/activemq/maven/Broker.class

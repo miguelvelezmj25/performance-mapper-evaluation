@@ -1,0 +1,16 @@
+org/apache/activemq/jaas/JassCredentialCallbackHandler.class
+org/apache/activemq/jaas/PropertiesLoader$FileNameKey.class
+org/apache/activemq/jaas/UserPrincipal.class
+org/apache/activemq/jaas/LDAPLoginProperty.class
+org/apache/activemq/jaas/EncryptableLDAPLoginModule.class
+org/apache/activemq/jaas/EncryptionSupport.class
+org/apache/activemq/jaas/GuestLoginModule.class
+org/apache/activemq/jaas/PropertiesLoginModule.class
+org/apache/activemq/jaas/ReloadableProperties.class
+org/apache/activemq/jaas/GroupPrincipal.class
+org/apache/activemq/jaas/CertificateCallback.class
+org/apache/activemq/jaas/PropertiesLoader.class
+org/apache/activemq/jaas/LDAPLoginModule.class
+org/apache/activemq/jaas/CertificateLoginModule.class
+org/apache/activemq/jaas/JaasCertificateCallbackHandler.class
+org/apache/activemq/jaas/TextFileCertificateLoginModule.class

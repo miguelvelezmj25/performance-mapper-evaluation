@@ -1,0 +1,3 @@
+org/apache/activemq/util/JmsLogAppender.class
+org/apache/activemq/util/JmsLogAppenderSupport.class
+org/apache/activemq/util/JndiJmsLogAppender.class
