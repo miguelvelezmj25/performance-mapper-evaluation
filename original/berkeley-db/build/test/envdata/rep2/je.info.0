@@ -1,0 +1,31 @@
+2018-09-13 15:04:06.409 UTC INFO [Node3] No server auth method
+2018-09-13 15:04:06.409 UTC INFO [Node3] Started ServiceDispatcher. HostPort=localhost:5003
+2018-09-13 15:04:06.410 UTC INFO [Node3] DataChannel factory: com.sleepycat.je.rep.utilint.net.SimpleChannelFactory
+2018-09-13 15:04:06.412 UTC INFO [Node3] DTVLSN at start:0
+2018-09-13 15:04:06.412 UTC INFO [Node3] node:NullNode(-1) state change from DETACHED to UNKNOWN
+2018-09-13 15:04:06.412 UTC INFO [Node3] Current group size: 0
+2018-09-13 15:04:06.412 UTC INFO [Node3] New node Node3(-1) unknown to rep group
+2018-09-13 15:04:06.414 UTC INFO [Node3] Master changed to Node1
+2018-09-13 15:04:06.415 UTC INFO [Node3] New node Node3 located master: Node1(1)
+2018-09-13 15:04:06.416 UTC INFO [Node3] Node Node3 started
+2018-09-13 15:04:06.416 UTC INFO [Node3] Transitioning node to replica state, 0 txns to clean up
+2018-09-13 15:04:06.416 UTC INFO [Node3] Releasing commit block latch
+2018-09-13 15:04:06.416 UTC INFO [Node3] Replica loop started with master: Node1(1)
+2018-09-13 15:04:06.417 UTC INFO [Node3] Replica-feeder handshake start
+2018-09-13 15:04:06.429 UTC INFO [Node3] Replica-feeder Node1 handshake completed.
+2018-09-13 15:04:06.429 UTC INFO [Node3] node:Node1(1) state change from UNKNOWN to REPLICA
+2018-09-13 15:04:06.429 UTC INFO [Node3] Replica-feeder Node1 syncup started. Replica range: first=-1 last=-1 sync=-1 txnEnd=-1
+2018-09-13 15:04:06.430 UTC INFO [Node3] Rollback to matchpoint -1 at 0x0/0x0 status=No active txns, nothing to rollback
+2018-09-13 15:04:06.430 UTC INFO [Node3] Replica-feeder Node1 start stream at VLSN: 1
+2018-09-13 15:04:06.430 UTC INFO [Node3] Replica-feeder Node1 syncup ended. Elapsed time: 1ms
+2018-09-13 15:04:06.432 UTC INFO [Node3] Replica initialization completed. Replica VLSN: -1  Heartbeat master commit VLSN: 21  DTVLSN:0 Replica VLSN delta: 22
+2018-09-13 15:04:06.432 UTC INFO [Node3] Replica output thread started. Queue size:2000 Max grouped acks:170
+2018-09-13 15:04:06.432 UTC INFO [Node3] Replay thread started. Message queue size:1000
+2018-09-13 15:04:06.439 UTC INFO [Node3] Joined group as a replica.  join consistencyPolicy=PointConsistencyPolicy targetVLSN=21 first=1 last=21 sync=21 txnEnd=21
+2018-09-13 15:04:11.477 UTC SEVERE [Node3] Disk usage is not within je.maxDisk or je.freeDisk limits and write operations are prohibited: maxDiskLimit=1 freeDiskLimit=5,368,709,120 adjustedMaxDiskLimit=1 maxDiskOverage=7,156 freeDiskShortage=-28,996,423,680 diskFreeSpace=34,365,132,800 availableLogSize=-7,156 totalLogSize=7,157 activeLogSize=7,157 reservedLogSize=0 protectedLogSize=0 protectedLogSizeMap={}
+2018-09-13 15:04:12.441 UTC INFO [Node3] ReplicaOutputThread soft shutdown initiated.
+2018-09-13 15:04:12.441 UTC INFO [Node3] Thread[ReplicaOutputThread,5,main]exited. Singleton acks sent:5 Grouped acks sent:0 Max pending acks:0
+2018-09-13 15:04:12.441 UTC INFO [Node3] Exiting inner Replica loop.
+2018-09-13 15:04:12.441 UTC INFO [Node3] Replica stats - Lag waits: 0 Lag wait time: 0ms.  VLSN waits: 0 Lag wait time: 0ms.
+2018-09-13 15:04:12.441 UTC INFO [Node3] node:NullNode(-1) state change from REPLICA to UNKNOWN
+2018-09-13 15:04:12.441 UTC INFO [Node3] Node waiting for disk space to become available. Disk limit violation:Disk usage is not within je.maxDisk or je.freeDisk limits and write operations are prohibited: maxDiskLimit=1 freeDiskLimit=5,368,709,120 adjustedMaxDiskLimit=1 maxDiskOverage=7,156 freeDiskShortage=-28,996,423,680 diskFreeSpace=34,365,132,800 availableLogSize=-7,156 totalLogSize=7,157 activeLogSize=7,157 reservedLogSize=0 protectedLogSize=0 protectedLogSizeMap={}
