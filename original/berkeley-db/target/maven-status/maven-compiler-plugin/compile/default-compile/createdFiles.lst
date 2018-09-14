@@ -23,6 +23,7 @@ com/sleepycat/je/txn/LockGrantType.class
 com/sleepycat/je/rep/utilint/net/AliasKeyManager.class
 com/sleepycat/je/utilint/FloatStat.class
 com/sleepycat/je/dbi/INList$Iter.class
+edu/cmu/cs/mvelezce/analysis/option/Source.class
 com/sleepycat/je/evictor/OffHeapCache$LRUList.class
 com/sleepycat/je/rep/elections/Protocol$Propose.class
 com/sleepycat/je/util/verify/DataVerifier$1.class
@@ -110,6 +111,7 @@ com/sleepycat/je/utilint/PropUtil$IEEETimeUnit$3.class
 com/sleepycat/je/utilint/StoppableThreadFactory.class
 com/sleepycat/je/rep/impl/RepGroupProtocol$UpdateAddress.class
 com/sleepycat/collections/StoredList.class
+edu/cmu/cs/mvelezce/analysis/option/Sink.class
 com/sleepycat/je/dbi/DbTree.class
 com/sleepycat/je/dbi/GetMode.class
 com/sleepycat/je/JEVersion.class
@@ -323,6 +325,7 @@ com/sleepycat/je/rep/monitor/GroupChangeEvent.class
 com/sleepycat/je/utilint/TestHookAdapter.class
 com/sleepycat/je/log/LogBufferSegment.class
 com/sleepycat/je/DatabaseComparator.class
+com/sleepycat/analysis/ScanLoops.class
 com/sleepycat/collections/StoredCollections.class
 com/sleepycat/je/CheckpointConfig.class
 com/sleepycat/je/recovery/RecoveryManager.class
@@ -380,6 +383,7 @@ com/sleepycat/je/rep/stream/FeederReader.class
 com/sleepycat/je/rep/elections/Utils$WithFutureExceptionHandler.class
 com/sleepycat/je/log/INFileReader.class
 com/sleepycat/je/rep/stream/Protocol$NodeGroupInfoReject.class
+com/sleepycat/analysis/PopulateCGDepth$Action.class
 com/sleepycat/je/rep/subscription/ClientAuthMethod$ClientTokenOp.class
 com/sleepycat/je/utilint/RelatchRequiredException.class
 com/sleepycat/je/evictor/Evictor$EvictionSource$3.class
@@ -620,6 +624,7 @@ com/sleepycat/je/utilint/LongMinStat.class
 com/sleepycat/je/rep/stream/ReplicaFeederSyncup.class
 com/sleepycat/je/txn/LockConflict.class
 com/sleepycat/je/dbi/StartupTracker$1.class
+com/sleepycat/analysis/PopulateLoops$1.class
 com/sleepycat/bind/tuple/CharacterBinding.class
 com/sleepycat/je/tree/IN.class
 com/sleepycat/je/rep/InsufficientAcksException.class
@@ -749,6 +754,7 @@ com/sleepycat/je/dbi/DatabaseImpl$DOSCountCallback.class
 com/sleepycat/je/log/entry/RestoreRequired$FailureType.class
 com/sleepycat/je/Transaction.class
 com/sleepycat/persist/impl/RawComplexInput.class
+com/sleepycat/analysis/PopulateCGDepth.class
 com/sleepycat/je/dbi/VLSNProxy.class
 com/sleepycat/je/rep/utilint/LongMinZeroStat.class
 com/sleepycat/je/cleaner/Cleaner$EnvLockedException.class
@@ -898,7 +904,6 @@ com/sleepycat/je/rep/impl/RepParams$3.class
 com/sleepycat/je/rep/LockPreemptedException.class
 com/sleepycat/util/PackedInteger.class
 com/sleepycat/je/config/EnvironmentParams$1.class
-com/sleepycat/analysis/Hello.class
 com/sleepycat/je/rep/impl/node/FeederManagerStatDefinition.class
 com/sleepycat/je/rep/stream/Protocol$JEVersions.class
 com/sleepycat/je/rep/elections/Protocol$StringValue.class
@@ -1049,6 +1054,7 @@ com/sleepycat/je/log/UtilizationFileReader$NodeInfo.class
 com/sleepycat/je/rep/impl/node/Replica$ConnectRetryException.class
 com/sleepycat/je/cleaner/FileProcessor$LookAheadCache.class
 com/sleepycat/je/XAFailureException.class
+com/sleepycat/analysis/PopulateLoops$Action.class
 com/sleepycat/je/rep/impl/TextProtocol$Message.class
 com/sleepycat/persist/impl/RawAbstractInput.class
 com/sleepycat/je/ForeignConstraintException.class
@@ -1146,6 +1152,7 @@ com/sleepycat/je/dbi/DbEnvPool.class
 com/sleepycat/je/log/FileReader.class
 com/sleepycat/je/latch/LatchContext.class
 com/sleepycat/je/jmx/plugin/Stats$BeanComboBoxListener.class
+com/sleepycat/analysis/PopulateLoops.class
 com/sleepycat/je/statcap/EnvStatsLogger.class
 com/sleepycat/je/rep/subscription/SubscriptionConfig$DefaultCallback.class
 com/sleepycat/je/rep/NodeType$5.class
@@ -1226,6 +1233,7 @@ com/sleepycat/utilint/ActivityCounter$1.class
 com/sleepycat/je/dbi/RecordVersion.class
 com/sleepycat/je/dbi/DbTree$RootLevel.class
 com/sleepycat/je/rep/impl/TextProtocol$MessageExchange.class
+com/sleepycat/analysis/ScanLoops$Action.class
 com/sleepycat/je/rep/stream/ReplicaFeederSyncup$TestHook.class
 com/sleepycat/je/rep/stream/ArbiterFeederSource.class
 com/sleepycat/je/rep/subscription/Subscription.class
@@ -1250,6 +1258,7 @@ com/sleepycat/persist/impl/ReflectionAccessor$KeyObjectAccess.class
 com/sleepycat/bind/tuple/StringBinding.class
 com/sleepycat/je/cleaner/VerifyUtils.class
 com/sleepycat/je/rep/stream/FeederTxnStatDefinition.class
+com/sleepycat/analysis/ScanCGDepth.class
 com/sleepycat/je/dbi/CursorImpl$LockStanding.class
 com/sleepycat/je/rep/util/ldiff/BlockBag.class
 com/sleepycat/bind/tuple/LongBinding.class
@@ -1350,6 +1359,7 @@ com/sleepycat/je/rep/impl/node/JoinGroupTimeouts.class
 com/sleepycat/je/utilint/FormatUtil.class
 com/sleepycat/je/txn/LockImpl.class
 com/sleepycat/je/rep/impl/NodeStateService$NodeStateServiceRunnable.class
+com/sleepycat/analysis/ScanCGDepth$1.class
 com/sleepycat/je/rep/stream/BaseProtocol$EntryRequestType.class
 com/sleepycat/persist/impl/ComplexFormat$FieldAddress.class
 com/sleepycat/je/utilint/LongMaxStat.class
@@ -1397,6 +1407,7 @@ com/sleepycat/je/rep/elections/TimebasedProposalGenerator$StringProposal$1.class
 com/sleepycat/je/rep/subscription/ServerAuthMethod$ServerTokenOp.class
 com/sleepycat/je/txn/TxnChain$CompareSlot.class
 com/sleepycat/je/utilint/ConsoleRedirectHandler.class
+com/sleepycat/analysis/ScanLoops$1.class
 com/sleepycat/je/tree/ChildReference.class
 com/sleepycat/je/txn/TxnManager.class
 com/sleepycat/je/rep/subscription/ClientAuthMethod$ServerTokenOp.class
@@ -1435,6 +1446,7 @@ com/sleepycat/persist/impl/SimpleFormat.class
 com/sleepycat/je/evictor/Evictor$ReentrancyGuard.class
 com/sleepycat/je/rep/elections/Protocol$Accept.class
 com/sleepycat/persist/evolve/EvolveStats.class
+com/sleepycat/analysis/ScanCGDepth$Action.class
 com/sleepycat/persist/SubIndexCursor.class
 com/sleepycat/je/log/entry/DeletedDupLNLogEntry.class
 com/sleepycat/persist/PrimaryKeyValueAdapter.class
@@ -1497,6 +1509,7 @@ com/sleepycat/persist/impl/EnhancedAccessor.class
 com/sleepycat/je/utilint/CmdUtil.class
 com/sleepycat/je/TransactionConfigBeanInfo.class
 com/sleepycat/persist/impl/EnumFormat.class
+com/sleepycat/analysis/PopulateCGDepth$1.class
 com/sleepycat/je/Environment$DbNameOperation.class
 com/sleepycat/je/log/FileManager$1.class
 com/sleepycat/bind/tuple/SortedDoubleBinding.class
