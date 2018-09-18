@@ -1,0 +1,11 @@
+edu/cmu/cs/mvelezce/inttag/SimpleConditionals.class
+edu/cmu/cs/mvelezce/objtag/Simple.class
+edu/cmu/cs/mvelezce/taints/A.class
+edu/cmu/cs/mvelezce/TaintUtils.class
+edu/cmu/cs/mvelezce/implicit/SimpleConditionals.class
+edu/cmu/cs/mvelezce/taints/B.class
+edu/cmu/cs/mvelezce/objtag/SimpleConditionals.class
+edu/cmu/cs/mvelezce/implicit/Simple.class
+edu/cmu/cs/mvelezce/taints/Taint.class
+edu/cmu/cs/mvelezce/inttag/Test.class
+edu/cmu/cs/mvelezce/Debug.class
