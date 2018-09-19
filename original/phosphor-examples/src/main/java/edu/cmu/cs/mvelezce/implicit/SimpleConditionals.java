@@ -1,10 +1,11 @@
 package edu.cmu.cs.mvelezce.implicit;
 
 import edu.cmu.cs.mvelezce.TaintUtils;
-import edu.cmu.cs.mvelezce.taints.A;
-import edu.cmu.cs.mvelezce.taints.B;
+import edu.cmu.cs.mvelezce.taints.Sources;
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
+import edu.columbia.cs.psl.phosphor.runtime.cc.TaintLabel;
+import java.util.Iterator;
 import java.util.Set;
 
 public class SimpleConditionals {
@@ -21,40 +22,38 @@ public class SimpleConditionals {
 
   private static void simpleConditional_forFalseTaintInControlFlow() throws InterruptedException {
     System.out.println("Testing simpleConditional_forFalseTaintInControlFlow");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    boolean A = MultiTainter.taintedBoolean(false, optionA);
+    boolean A = Sources.A_0(false);
 
     Taint taintOfA = MultiTainter.getTaint(A);
     if (A) {
       Thread.sleep(300);
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
   }
 
   private static void simpleConditional_forTrueTaintInControlFlow() throws InterruptedException {
     System.out.println("Testing simpleConditional_forTrueTaintInControlFlow");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    boolean A = MultiTainter.taintedBoolean(true, optionA);
+    boolean A = Sources.A_0(true);
 
     Taint taintOfA = MultiTainter.getTaint(A);
     if (A) {
       Thread.sleep(300);
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
   }
 
   private static void simpleConditional_forMultipleTaints() throws InterruptedException {
     System.out.println("Testing simpleConditional_forMultipleTaints");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    edu.cmu.cs.mvelezce.taints.Taint optionB = B.getInstance();
-    boolean A = MultiTainter.taintedBoolean(true, optionA);
-    boolean B = MultiTainter.taintedBoolean(false, optionB);
+    boolean A = Sources.A_0(true);
+    boolean B = Sources.B_1(false);
 
     Taint taintOfA = MultiTainter.getTaint(A);
     if (A) {
@@ -66,19 +65,20 @@ public class SimpleConditionals {
       Thread.sleep(300);
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfB = TaintUtils.getTaints(taintOfB);
+    Set taintsOfB = TaintUtils.getLabels(taintOfB);
     assert (taintsOfB.size() == 1);
-    assert (taintsOfB.contains(optionB));
+    TaintLabel taintLabelB = (TaintLabel) taintsOfB.iterator().next();
+    assert (taintLabelB.getSource().equals("B"));
   }
 
   private static void implicitFlow_forBranchNotTaken() throws InterruptedException {
     System.out.println("Testing implicitFlow_forBranchNotTaken");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    boolean A = MultiTainter.taintedBoolean(false, optionA);
+    boolean A = Sources.A_0(false);
     boolean x = false;
 
     Taint taintOfA = MultiTainter.getTaint(A);
@@ -92,18 +92,18 @@ public class SimpleConditionals {
       Thread.sleep(300);
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfx = TaintUtils.getTaints(taintOfx);
+    Set taintsOfx = TaintUtils.getLabels(taintOfx);
     assert (taintsOfx.isEmpty());
   }
 
   private static void implicitFlow_forBranchTaken() throws InterruptedException {
     System.out.println("Testing implicitFlow_forBranchTaken");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    boolean A = MultiTainter.taintedBoolean(true, optionA);
+    boolean A = Sources.A_0(true);
     boolean x = false;
 
     Taint taintOfA = MultiTainter.getTaint(A);
@@ -117,19 +117,20 @@ public class SimpleConditionals {
       Thread.sleep(300);
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfx = TaintUtils.getTaints(taintOfx);
+    Set taintsOfx = TaintUtils.getLabels(taintOfx);
     assert (taintsOfx.size() == 1);
-    assert (taintsOfx.contains(optionA));
+    TaintLabel taintLabelx = (TaintLabel) taintsOfx.iterator().next();
+    assert (taintLabelx.getSource().equals("A"));
   }
 
   private static void implicitFlow_forBranchTakenLoop() throws InterruptedException {
     System.out.println("Testing implicitFlow_forBranchTakenLoop");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    boolean A = MultiTainter.taintedBoolean(true, optionA);
+    boolean A = Sources.A_0(true);
     int l = 0;
 
     Taint taintOfA = MultiTainter.getTaint(A);
@@ -145,46 +146,52 @@ public class SimpleConditionals {
       sum += Math.random();
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfl = TaintUtils.getTaints(taintOfl);
+    Set taintsOfl = TaintUtils.getLabels(taintOfl);
     assert (taintsOfl.size() == 1);
-    assert (taintsOfl.contains(optionA));
+    TaintLabel taintLabell = (TaintLabel) taintsOfl.iterator().next();
+    assert (taintLabell.getSource().equals("A"));
   }
 
   private static void simpleNestedConditional_forBranchesTaken() throws InterruptedException {
     System.out.println("Testing simpleNestedConditional_forBranchesTaken");
-    edu.cmu.cs.mvelezce.taints.Taint optionA = A.getInstance();
-    edu.cmu.cs.mvelezce.taints.Taint optionB = B.getInstance();
-    boolean A = MultiTainter.taintedBoolean(true, optionA);
-    boolean B = MultiTainter.taintedBoolean(true, optionB);
+    boolean A = Sources.A_0(true);
+    boolean B = Sources.B_1(true);
 
     Taint taintOfA = MultiTainter.getTaint(A);
     Taint taintOfB = null;
-    Taint taintOfX = null;
+    Taint taintOfx = null;
     if (A) {
       int x = 0;
-      taintOfX = MultiTainter.getTaint(x);
+      taintOfx = MultiTainter.getTaint(x);
       taintOfB = MultiTainter.getTaint(B);
-      taintOfX = Taint.combineTags(taintOfX, taintOfB);
+      taintOfx = Taint.combineTags(taintOfx, taintOfB);
       if (!B) {
         Thread.sleep(300);
       }
     }
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfA = TaintUtils.getTaints(taintOfA);
+    Set taintsOfA = TaintUtils.getLabels(taintOfA);
     assert (taintsOfA.size() == 1);
-    assert (taintsOfA.contains(optionA));
+    TaintLabel taintLabelA = (TaintLabel) taintsOfA.iterator().next();
+    assert (taintLabelA.getSource().equals("A"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfB = TaintUtils.getTaints(taintOfB);
+    Set taintsOfB = TaintUtils.getLabels(taintOfB);
     assert (taintsOfB.size() == 1);
-    assert (taintsOfB.contains(optionB));
+    TaintLabel taintLabelB = (TaintLabel) taintsOfB.iterator().next();
+    assert (taintLabelB.getSource().equals("B"));
 
-    Set<edu.cmu.cs.mvelezce.taints.Taint> taintsOfX = TaintUtils.getTaints(taintOfX);
-    assert (taintsOfX.size() == 2);
-    assert (taintsOfX.contains(optionA));
-    assert (taintsOfX.contains(optionB));
+    Set taintsOfx = TaintUtils.getLabels(taintOfx);
+    assert (taintsOfx.size() == 2);
+
+    Iterator taintsOfxIter = taintsOfx.iterator();
+    TaintLabel taintLabelx = (TaintLabel) taintsOfxIter.next();
+    assert (taintLabelx.getSource().equals("A") || taintLabelx.getSource().equals("B"));
+    taintLabelx = (TaintLabel) taintsOfxIter.next();
+    assert (taintLabelx.getSource().equals("A") || taintLabelx.getSource().equals("B"));
   }
 }
