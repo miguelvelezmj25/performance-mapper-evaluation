@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.taints.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Test {

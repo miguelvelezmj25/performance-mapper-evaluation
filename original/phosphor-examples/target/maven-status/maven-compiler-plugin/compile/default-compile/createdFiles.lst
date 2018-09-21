@@ -1,5 +1,4 @@
 edu/cmu/cs/mvelezce/inttag/SimpleConditionals.class
-edu/cmu/cs/mvelezce/taints/Sinks.class
 edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/implicit/Car.class
 edu/cmu/cs/mvelezce/objtag/Simple.class
