@@ -5,12 +5,14 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class Test {
 
   public static void main(String[] args) {
-//    testExample1();
-//    testExample2();
-    testExample3();
+//    testAllTypesOfComparisons();
+//    testBranchNotTaken();
+//    testImplicitFlows();
+//    testFields1();
+    testFields2();
   }
 
-  public static void testExample1() {
+  public static void testAllTypesOfComparisons() {
     boolean A = Sources.A_0(true);
     String s1 = "example1";
 
@@ -35,7 +37,7 @@ public class Test {
     }
   }
 
-  public static void testExample2() {
+  public static void testBranchNotTaken() {
     boolean A = Sources.A_0(false);
     String s1 = "example2";
 
@@ -60,7 +62,7 @@ public class Test {
     }
   }
 
-  public static void testExample3() {
+  public static void testImplicitFlows() {
     boolean A = Sources.A_0(true);
     boolean B = Sources.B_1(true);
 
@@ -90,6 +92,38 @@ public class Test {
 
     if(i == 0) { // {A}
       System.out.println();
+    }
+  }
+
+  public static void testFields1() {
+    boolean A = Sources.A_0(true);
+
+    Car c = new Car("Ford", 2018);
+
+    if(A) {
+      c = new Car("Chevy", 2014);
+    }
+
+    if(c.getYear() < 2015) {
+      System.out.println("Chevy");
+    }
+  }
+
+  public static void testFields2() {
+    boolean A = Sources.A_0(true);
+
+    Car c = new Car("Ford", 2018);
+
+    if(A) {
+      c.setName("Chevy");
+    }
+
+    if(c.getYear() == 2018) {
+      System.out.println("Chevy");
+    }
+
+    if(c.getName() == "Ford") {
+      System.out.println("Ford");
     }
   }
 }

@@ -3,7 +3,7 @@ package edu.cmu.cs.mvelezce.inttag;
 public class Test {
 
 //  public static void main(String[] args) {
-//    testExample2();
+//    testBranchNotTaken();
 //  }
 //
 //  public static boolean HELP(boolean b) {
@@ -19,7 +19,7 @@ public class Test {
 //    System.out.println("Someone gave me a: " + b);
 //  }
 //
-//  public static void testExample2() {
+//  public static void testBranchNotTaken() {
 //    System.out.println("==> Expect exception");
 //    boolean help = HELP(true);
 //    boolean version = VERSION(true);
