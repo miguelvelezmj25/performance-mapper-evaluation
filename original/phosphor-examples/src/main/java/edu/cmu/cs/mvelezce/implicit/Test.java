@@ -1,18 +1,20 @@
 package edu.cmu.cs.mvelezce.implicit;
 
+import edu.cmu.cs.mvelezce.taints.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Test {
 
   public static void main(String[] args) {
-//    testAllTypesOfComparisons();
-//    testBranchNotTaken();
-//    testImplicitFlows();
-//    testFields1();
+    testAllTypesOfComparisons();
+    testBranchNotTaken();
+    testImplicitFlows();
+    testFields1();
     testFields2();
   }
 
   public static void testAllTypesOfComparisons() {
+    System.out.println("\ntestAllTypesOfComparisons");
     boolean A = Sources.A_0(true);
     String s1 = "example1";
 
@@ -38,6 +40,7 @@ public class Test {
   }
 
   public static void testBranchNotTaken() {
+    System.out.println("\ntestBranchNotTaken");
     boolean A = Sources.A_0(false);
     String s1 = "example2";
 
@@ -63,6 +66,7 @@ public class Test {
   }
 
   public static void testImplicitFlows() {
+    System.out.println("\ntestImplicitFlows");
     boolean A = Sources.A_0(true);
     boolean B = Sources.B_1(true);
 
@@ -86,7 +90,7 @@ public class Test {
       s = "not example3";
     }
 
-    if(s.equals("example3")) { // {A, B}
+    if(s == "example3") { // {A, B}
       System.out.println();
     }
 
@@ -96,6 +100,7 @@ public class Test {
   }
 
   public static void testFields1() {
+    System.out.println("\ntestFields1");
     boolean A = Sources.A_0(true);
 
     Car c = new Car("Ford", 2018);
@@ -110,20 +115,21 @@ public class Test {
   }
 
   public static void testFields2() {
+    System.out.println("\ntestFields2");
     boolean A = Sources.A_0(true);
 
-    Car c = new Car("Ford", 2018);
+    Car c = new Car("Honda", 2018);
 
     if(A) {
-      c.setName("Chevy");
+      c.setName("Renault");
     }
 
     if(c.getYear() == 2018) {
-      System.out.println("Chevy");
+      System.out.println("Renault");
     }
 
-    if(c.getName() == "Ford") {
-      System.out.println("Ford");
+    if(c.getName() == "Honda") {
+      System.out.println("Honda");
     }
   }
 }
