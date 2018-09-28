@@ -26,4 +26,16 @@ public class Source {
 
     public static boolean getOptionKEYSONLY(boolean option) { return option;
     }
+
+    public static boolean ACTION_0(boolean option) { return option; }
+
+    public static boolean RECORDS_1(boolean option) { return option; }
+
+    public static boolean DATA_2(boolean option) { return option; }
+
+    public static boolean DUPLICATES_3(boolean option) { return option; }
+
+    public static boolean KEYSIZE_4(boolean option) { return option; }
+
+    public static boolean SEQUENTIAL_5(boolean option) { return option; }
 }

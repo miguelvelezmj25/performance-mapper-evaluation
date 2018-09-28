@@ -34,6 +34,8 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/cleaner/ReservedFileInfo.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/InsufficientAcksException.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/CollectionProxy.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/PopulateCGDepth.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/ScanLoops.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/recovery/Checkpointer.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/DatabaseNamer.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/package-info.java
@@ -152,6 +154,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/node/FeederManagerStatDefinition.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/utilint/net/DataChannelFactoryBuilder.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/latch/package-info.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/latch/SharedLatchImpl.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/EnvironmentMutableConfigBeanInfo.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/UtilizationFileReader.java
@@ -334,6 +337,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/RawComplexInput.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/VersionedWriteTxnEnd.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/arbiter/ArbiterMutableConfig.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/ScanCGDepth.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/FileCacheWarmer.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/model/ClassEnhancer.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/TxnCommit.java
@@ -393,7 +397,6 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/asm/MethodWriter.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/NetworkRestoreConfigBeanInfo.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/LockGrantType.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/Hello.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/PropUtil.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/jca/ra/JEManagedConnectionFactory.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/node/RepNode.java
@@ -554,6 +557,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/ReplicationMutableConfig.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/collections/StoredCollections.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/CronScheduleParser.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/ForeignKeyDeleteAction.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/LastFileReader.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/dbi/EnvironmentImpl.java
@@ -879,6 +883,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/ReadOptions.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/node/cbvlsn/LocalCBVLSNUpdater.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/LoggerUtils.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/PopulateLoops.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/tree/DeltaInfo.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/monitor/Monitor.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/stream/FeederReplicaSyncup.java

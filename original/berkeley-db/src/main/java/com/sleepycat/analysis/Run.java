@@ -13,6 +13,12 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
+import edu.cmu.cs.mvelezce.analysis.option.Source;
+import edu.cmu.cs.mvelezce.cc.CCTaintSourceWrapper;
+import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.columbia.cs.psl.phosphor.Configuration;
+import edu.columbia.cs.psl.phosphor.runtime.Taint;
+import edu.columbia.cs.psl.phosphor.runtime.TaintSourceWrapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -37,7 +43,7 @@ public class Run {
   private boolean preload = false;
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
-  private int nRecords = 300_000;
+  private int nRecords = 10_000;
   private int keySize = 10;
   private int dataSize = 1000;
   private long lsnBatchSize = Long.MAX_VALUE;
@@ -79,6 +85,12 @@ public class Run {
     KEYSIZE = false;
     SEQUENTIAL = false;
 
+    RECORDS = Source.RECORDS_1(true);
+    DATA = Source.DATA_2(true);
+    DUPLICATES = Source.DUPLICATES_3(true);
+    KEYSIZE = Source.KEYSIZE_4(true);
+    SEQUENTIAL = Source.SEQUENTIAL_5(true);
+
     try {
       new Run(args).run();
       //            System.exit(0);
@@ -86,6 +98,8 @@ public class Run {
       e.printStackTrace(System.out);
       //            System.exit(1);
     }
+
+    Sinks.postProcessSinks();
   }
 
   public static void deleteFolder(File folder) {
@@ -128,6 +142,10 @@ public class Run {
 
     if (KEYSIZE) {
       this.keySize = 100;
+    }
+
+    if(SEQUENTIAL) {
+      this.sequentialWrites = true;
     }
 
     //        for (int i = 0; i < args.length; i += 1) {
