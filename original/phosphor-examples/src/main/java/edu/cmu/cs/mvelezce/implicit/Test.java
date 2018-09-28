@@ -1,16 +1,42 @@
 package edu.cmu.cs.mvelezce.implicit;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
+import edu.columbia.cs.psl.phosphor.Configuration;
 
 public class Test {
 
   public static void main(String[] args) {
+//    test();
     testAllTypesOfComparisons();
     testBranchNotTaken();
     testImplicitFlows();
     testFields1();
     testFields2();
+
+//    Configuration.autoTainter.work();
   }
+
+//  public static void test() {
+//    boolean A = Sources.A_0(true);
+//
+//    String name = "Miguel";
+//
+//    if(A) {
+//      name = "Velez";
+//    }
+//
+//    if(name.equals("Miguel")) {
+//      System.out.println("First");
+//    }
+//
+//    long i = 100L;
+//
+//    if (i < 100) {
+//      i = 1000;
+//    }
+//
+//    System.out.println(i);
+//  }
 
   public static void testAllTypesOfComparisons() {
     System.out.println("\ntestAllTypesOfComparisons");
@@ -20,20 +46,20 @@ public class Test {
     String s = null;
     int i = 100;
 
-    if (A) { // if<cond>
+    if (A) { // if<cond> {A}
       i = 1000;
       s = "example1";
     }
 
-    if (s != null) { // ifnonnull || ifnull
+    if (s != null) { // ifnonnull || ifnull REFERENCES
       System.out.println(s);
     }
 
-    if (s == s1) { // if_acmp<cond>
+    if (s == s1) { // if_acmp<cond> REFERENCES
       System.out.println(s);
     }
 
-    if (i < 500) { // if_icmp<cond>
+    if (i < 500) { // if_icmp<cond> {A}
       System.out.println(s);
     }
   }
@@ -51,11 +77,11 @@ public class Test {
       s = "example2";
     }
 
-    if (s != null) {
+    if (s != null) { // REFERENCE
       System.out.println(s);
     }
 
-    if (s == s1) {
+    if (s == s1) { // REFERENCE
       System.out.println(s);
     }
 
@@ -89,11 +115,11 @@ public class Test {
       s = "not example3";
     }
 
-    if(s == "example3") { // {A, B}
+    if (s == "example3") { // REFERENCE
       System.out.println();
     }
 
-    if(i == 0) { // {A}
+    if (i == 0) { // {A}
       System.out.println();
     }
   }
@@ -104,11 +130,15 @@ public class Test {
 
     Car c = new Car("Ford", 2018);
 
-    if(A) {
+    if (A) { // {A}
       c = new Car("Chevy", 2014);
     }
 
-    if(c.getYear() < 2015) {
+    if(c == null) { // REFERENCE
+      System.out.println("null car");
+    }
+
+    if (c.getYear() < 2015) { // {A}
       System.out.println("Chevy");
     }
   }
@@ -119,15 +149,16 @@ public class Test {
 
     Car c = new Car("Honda", 2018);
 
-    if(A) {
-      c.setName("Renault");
+    if (A) { // {A}
+//      c.setName("Renault");
+      c.setYear(2015);
     }
 
-    if(c.getYear() == 2018) {
+    if (c.getYear() == 2018) { // {A}
       System.out.println("Renault");
     }
 
-    if(c.getName() == "Honda") {
+    if (c.getName() == "Honda") {
       System.out.println("Honda");
     }
   }

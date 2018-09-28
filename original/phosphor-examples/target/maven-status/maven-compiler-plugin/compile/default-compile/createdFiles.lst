@@ -1,11 +1,12 @@
-edu/cmu/cs/mvelezce/inttag/SimpleConditionals.class
-edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/implicit/Car.class
-edu/cmu/cs/mvelezce/objtag/Simple.class
-edu/cmu/cs/mvelezce/implicit/Test.class
 edu/cmu/cs/mvelezce/TaintUtils.class
 edu/cmu/cs/mvelezce/implicit/SimpleConditionals.class
 edu/cmu/cs/mvelezce/debug/Debug.class
+edu/cmu/cs/mvelezce/inttag/Test.class
+edu/cmu/cs/mvelezce/inttag/SimpleConditionals.class
+edu/cmu/cs/mvelezce/taints/Sources.class
+edu/cmu/cs/mvelezce/objtag/Simple.class
+edu/cmu/cs/mvelezce/implicit/Test.class
 edu/cmu/cs/mvelezce/objtag/SimpleConditionals.class
 edu/cmu/cs/mvelezce/implicit/Simple.class
-edu/cmu/cs/mvelezce/inttag/Test.class
+edu/cmu/cs/mvelezce/taints/Test.class

@@ -2,55 +2,58 @@ package edu.cmu.cs.mvelezce.debug;
 
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
-import edu.columbia.cs.psl.phosphor.runtime.TaintSentinel;
 import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
 import edu.columbia.cs.psl.phosphor.struct.EnqueuedTaint;
 import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
-import edu.columbia.cs.psl.phosphor.struct.TaintedIntWithObjTag;
-import edu.columbia.cs.psl.phosphor.struct.TaintedLongWithObjTag;
 
 public class Debug {
 
-//  public static void main(String[] args) throws InterruptedException {
-//    main(args, ControlTaintTagStack.getInstance());
-//  }
-//
-//  public static void sleep$$PHOSPHORTAGGED(Taint phosphorNativeWrapArg0, long phosphorNativeWrapArg1, ControlTaintTagStack var3) throws InterruptedException {
-//    Thread.sleep(phosphorNativeWrapArg1);
-//  }
-//
-//
-//    private static void main(String[] args, ControlTaintTagStack phosphorJumpControlTag)
-//        throws InterruptedException {
-//    EnqueuedTaint phosphorJumpControlTag0 = null;
-//
-//    try {
-//      TaintedBooleanWithObjTag var10000 = new TaintedBooleanWithObjTag();
-//      Taint.combineTagsOnObject(var10000, phosphorJumpControlTag);
-//      TaintedBooleanWithObjTag phosphorReturnPreAlloc0 = var10000;
-////      System.out.println$$PHOSPHORTAGGED("Testing simpleConditional_forTrueTaintInControlFlow", phosphorJumpControlTag);
-//      Taint.combineTagsOnObject("A", phosphorJumpControlTag);
-//      String optionA = "A";
-//      var10000 = MultiTainter.taintedBoolean$$PHOSPHORTAGGED(phosphorJumpControlTag.copyTag(), true, optionA, phosphorReturnPreAlloc0);
-//      TaintedBooleanWithObjTag var10001 = var10000;
-//      Taint var8 = var10000.taint;
-//      boolean var10002 = var10001.val;
-//      Taint var10 = var8;
-//      boolean var9 = var10002;
-//      Taint var11 = Taint.combineTags(var10, phosphorJumpControlTag);
-//      boolean A = var9;
-//      Taint phosphorShadowLV2 = Taint.copyTaint(var11);
-//      phosphorJumpControlTag0 = phosphorJumpControlTag.push(phosphorShadowLV2, phosphorJumpControlTag0);
-//      if (A) {
-//        sleep$$PHOSPHORTAGGED(phosphorJumpControlTag.copyTag(), 1000L, phosphorJumpControlTag);
-//      }
-//
-//      phosphorJumpControlTag.pop(phosphorJumpControlTag0);
-//    } catch (Throwable var7) {
-//      phosphorJumpControlTag.pop(phosphorJumpControlTag0);
-//      throw var7;
-//    }
-//
+  //  public static void main(String[] args) throws InterruptedException {
+  //    main(args, ControlTaintTagStack.getInstance());
+  //  }
+  //
+  //  public static void sleep$$PHOSPHORTAGGED(Taint phosphorNativeWrapArg0, long
+  // phosphorNativeWrapArg1, ControlTaintTagStack var3) throws InterruptedException {
+  //    Thread.sleep(phosphorNativeWrapArg1);
+  //  }
+  //
+  //
+  private static void main(String[] args, ControlTaintTagStack phosphorJumpControlTag)
+      throws InterruptedException {
+    EnqueuedTaint phosphorJumpControlTag0 = null;
+
+    try {
+      TaintedBooleanWithObjTag var10000 = new TaintedBooleanWithObjTag();
+      Taint.combineTagsOnObject(var10000, phosphorJumpControlTag);
+      TaintedBooleanWithObjTag phosphorReturnPreAlloc0 = var10000;
+      //      System.out.println$$PHOSPHORTAGGED("Testing
+      // simpleConditional_forTrueTaintInControlFlow", phosphorJumpControlTag);
+      Taint.combineTagsOnObject("A", phosphorJumpControlTag);
+      String optionA = "A";
+      var10000 =
+          MultiTainter.taintedBoolean$$PHOSPHORTAGGED(
+              phosphorJumpControlTag.copyTag(), true, optionA, phosphorReturnPreAlloc0);
+      TaintedBooleanWithObjTag var10001 = var10000;
+      Taint var8 = var10000.taint;
+      boolean var10002 = var10001.val;
+      Taint var10 = var8;
+      boolean var9 = var10002;
+      Taint var11 = Taint.combineTags(var10, phosphorJumpControlTag);
+      boolean A = var9;
+      Taint phosphorShadowLV2 = Taint.copyTaint(var11);
+      phosphorJumpControlTag0 =
+          phosphorJumpControlTag.push(phosphorShadowLV2, phosphorJumpControlTag0);
+      if (A) {
+        System.out.println();
+      }
+
+      phosphorJumpControlTag.pop(phosphorJumpControlTag0);
+    } catch (Throwable var7) {
+      phosphorJumpControlTag.pop(phosphorJumpControlTag0);
+      throw var7;
+    }
+    }
+
 //
 ////    EnqueuedTaint phosphorJumpControlTag0 = null;
 ////

@@ -1,12 +1,12 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.TaintUtils;
-import edu.cmu.cs.mvelezce.taints.Sources;
-import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-import edu.columbia.cs.psl.phosphor.runtime.Taint;
-import edu.columbia.cs.psl.phosphor.runtime.cc.TaintLabel;
-import java.util.Iterator;
-import java.util.Set;
+//import edu.cmu.cs.mvelezce.TaintUtils;
+//import edu.cmu.cs.mvelezce.taints.Sources;
+//import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+//import edu.columbia.cs.psl.phosphor.runtime.Taint;
+//import edu.columbia.cs.psl.phosphor.runtime.cc.TaintLabel;
+//import java.util.Iterator;
+//import java.util.Set;
 
 public class SimpleConditionals {
 
