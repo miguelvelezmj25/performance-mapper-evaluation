@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce.implicit;
 
+import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Loops {
@@ -16,7 +17,7 @@ public class Loops {
     boolean x = false;
     int i = 2;
 
-    sink(A);
+//    sink(A);
     if(A) {
       i = 4;
     }
@@ -25,10 +26,12 @@ public class Loops {
       i--;
     }
 
-    sink(x);
+//    sink(x);
     if(x) {
       System.out.println();
     }
+
+    Sinks.postProcessSinks();
   }
 
 }

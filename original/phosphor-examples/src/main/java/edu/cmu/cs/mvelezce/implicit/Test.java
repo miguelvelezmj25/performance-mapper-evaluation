@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce.implicit;
 
+import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 import edu.columbia.cs.psl.phosphor.Configuration;
 
@@ -13,7 +14,7 @@ public class Test {
     testFields1();
     testFields2();
 
-//    Configuration.autoTainter.work();
+    Sinks.postProcessSinks();
   }
 
 //  public static void test() {
