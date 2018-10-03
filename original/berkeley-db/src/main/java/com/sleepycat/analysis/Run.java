@@ -85,11 +85,11 @@ public class Run {
     KEYSIZE = false;
     SEQUENTIAL = false;
 
-    RECORDS = Source.RECORDS_1(true);
-    DATA = Source.DATA_2(true);
-    DUPLICATES = Source.DUPLICATES_3(true);
-    KEYSIZE = Source.KEYSIZE_4(true);
-    SEQUENTIAL = Source.SEQUENTIAL_5(true);
+    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
+    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
+    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
+    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
+    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
 
     try {
       new Run(args).run();
@@ -99,7 +99,7 @@ public class Run {
       //            System.exit(1);
     }
 
-    Sinks.postProcessSinks();
+    Sinks.postProcessSinks("berkeley");
   }
 
   public static void deleteFolder(File folder) {
