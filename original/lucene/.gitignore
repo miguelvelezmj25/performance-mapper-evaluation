@@ -1,5 +1,5 @@
 
-# Created by https://www.gitignore.io/api/macos,windows,linux,intellij+iml
+# Created by https://www.gitignore.io/api/macos,windows,linux,intellij+iml,maven
 
 ### Intellij+iml ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
@@ -120,6 +120,18 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -146,4 +158,4 @@ $RECYCLE.BIN/
 *.lnk
 
 
-# End of https://www.gitignore.io/api/macos,windows,linux,intellij+iml
+# End of https://www.gitignore.io/api/macos,windows,linux,intellij+iml,maven
