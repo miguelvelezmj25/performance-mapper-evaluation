@@ -99,7 +99,7 @@ public class Run {
       //            System.exit(1);
     }
 
-    Sinks.postProcessSinks("berkeley");
+//    Sinks.postProcessSinks("berkeley");
   }
 
   public static void deleteFolder(File folder) {
