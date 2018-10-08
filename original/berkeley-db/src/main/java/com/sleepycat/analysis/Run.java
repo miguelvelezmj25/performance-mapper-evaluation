@@ -43,7 +43,7 @@ public class Run {
   private boolean preload = false;
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
-  private int nRecords = 10_000;
+  private int nRecords = 200_000;
   private int keySize = 10;
   private int dataSize = 1000;
   private long lsnBatchSize = Long.MAX_VALUE;
