@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.lucene</groupId>
-  <artifactId>lucene-core</artifactId>
+  <artifactId>lucene-codecs</artifactId>
   <version>7.4.0</version>
 
-  <name>lucene-core</name>
+  <name>lucene-codecs</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
@@ -28,25 +28,18 @@
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
+      <artifactId>lucene-core</artifactId>
       <version>7.4.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../jars/test-framework/lucene-test-framework-7.4.0.jar</systemPath>
-    </dependency>
-
-    <dependency>
-      <groupId>com.carrotsearch.randomizedtesting</groupId>
-      <artifactId>randomizedtesting-runner</artifactId>
-      <version>2.7.0</version>
-      <scope>test</scope>
+      <systemPath>${project.basedir}/../core/target/lucene-core-7.4.0.jar</systemPath>
     </dependency>
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-codecs</artifactId>
+      <artifactId>lucene-test-framework</artifactId>
       <version>7.4.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../codecs/target/lucene-codecs-7.4.0.jar</systemPath>
+      <systemPath>${project.basedir}/../jars/test-framework/lucene-test-framework-7.4.0.jar</systemPath>
     </dependency>
 
   </dependencies>
