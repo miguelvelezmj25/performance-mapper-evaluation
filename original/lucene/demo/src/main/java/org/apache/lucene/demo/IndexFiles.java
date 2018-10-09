@@ -58,6 +58,9 @@ public class IndexFiles {
   private static boolean RAM_BUFFER_SIZE;
   private static boolean MERGE_POLICY;
   private static boolean CODEC;
+  private static boolean MAX_BUFFERED_DOCS;
+  private static boolean USE_COMPOUND_FILE;
+  private static boolean MAX_TOKEN_LENGTH;
 
   private IndexFiles() {}
 
@@ -104,12 +107,20 @@ public class IndexFiles {
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
       Analyzer analyzer = new StandardAnalyzer();
-      IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
       CREATE = Source.CREATE_0(Boolean.valueOf(args[2]));
       RAM_BUFFER_SIZE = Source.RAM_BUFFER_SIZE_1(Boolean.valueOf(args[3]));
       MERGE_POLICY = Source.MERGE_POLICY_2(Boolean.valueOf(args[4]));
       CODEC = Source.CODEC_3(Boolean.valueOf(args[5]));
+      MAX_BUFFERED_DOCS = Source.MAX_BUFFERED_DOCS_4(Boolean.valueOf(args[6]));
+      USE_COMPOUND_FILE = Source.USE_COMPOUND_FILE_5(Boolean.valueOf(args[7]));
+      MAX_TOKEN_LENGTH = Source.MAX_TOKEN_LENGTH_6(Boolean.valueOf(args[6]));
+
+      if (MAX_TOKEN_LENGTH) {
+        ((StandardAnalyzer) analyzer).setMaxTokenLength(32);
+      }
+
+      IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
       if (CREATE) {
         create = true;
@@ -127,6 +138,14 @@ public class IndexFiles {
 
       if(CODEC) {
         iwc.setCodec(new SimpleTextCodec());
+      }
+
+      if(MAX_BUFFERED_DOCS) {
+        iwc.setMaxBufferedDocs(500);
+      }
+
+      if(USE_COMPOUND_FILE) {
+        iwc.setUseCompoundFile(false);
       }
 
       if (create) {

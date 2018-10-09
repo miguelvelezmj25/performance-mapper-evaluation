@@ -17,4 +17,16 @@ public class Source {
   public static boolean CODEC_3(boolean option) {
     return option;
   }
+
+  public static boolean MAX_BUFFERED_DOCS_4(boolean option) {
+    return option;
+  }
+
+  public static boolean USE_COMPOUND_FILE_5(boolean option) {
+    return option;
+  }
+
+  public static boolean MAX_TOKEN_LENGTH_6(boolean option) {
+    return option;
+  }
 }
