@@ -7,19 +7,18 @@ package counter.com.googlecode.pngtastic.core;
  */
 public class PngException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    /** */
-    public PngException() {
-    }
+  /** */
+  public PngException() {}
 
-    /** */
-    public PngException(String message) {
-        super(message);
-    }
+  /** */
+  public PngException(String message) {
+    super(message);
+  }
 
-    /** */
-    public PngException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  /** */
+  public PngException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

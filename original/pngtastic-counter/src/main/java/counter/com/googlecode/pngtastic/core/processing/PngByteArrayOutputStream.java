@@ -9,35 +9,35 @@ import java.io.ByteArrayOutputStream;
  */
 public class PngByteArrayOutputStream extends ByteArrayOutputStream {
 
-    private final int initialSize;
+  private final int initialSize;
 
-    public PngByteArrayOutputStream() {
-        this(32);
-    }
+  public PngByteArrayOutputStream() {
+    this(32);
+  }
 
-    public PngByteArrayOutputStream(int size) {
-        super(size);
-        this.initialSize = size;
-    }
+  public PngByteArrayOutputStream(int size) {
+    super(size);
+    this.initialSize = size;
+  }
 
-    public PngByteArrayOutputStream(byte[] initial) {
-        buf = initial;
-        count = initial.length;
-        initialSize = count;
-    }
+  public PngByteArrayOutputStream(byte[] initial) {
+    buf = initial;
+    count = initial.length;
+    initialSize = count;
+  }
 
-    public byte[] get() {
-        return buf;
-    }
+  public byte[] get() {
+    return buf;
+  }
 
-    public void reset() {
-        super.reset();
-        if(buf.length > initialSize) {
-            buf = new byte[initialSize];
-        }
+  public void reset() {
+    super.reset();
+    if (buf.length > initialSize) {
+      buf = new byte[initialSize];
     }
+  }
 
-    public int len() {
-        return count;
-    }
+  public int len() {
+    return count;
+  }
 }
