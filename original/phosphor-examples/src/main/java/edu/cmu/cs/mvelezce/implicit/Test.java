@@ -14,7 +14,7 @@ public class Test {
     testFields1();
     testFields2();
 
-    Sinks.postProcessSinks();
+    Sinks.postProcessSinks("Test");
   }
 
 //  public static void test() {
@@ -129,10 +129,19 @@ public class Test {
     System.out.println("\ntestFields1");
     boolean A = Sources.A_0(true);
 
-    Car c = new Car("Ford", 2018);
+    Car c = new Car("Ford", 2018, false);
 
     if (A) { // {A}
-      c = new Car("Chevy", 2014);
+      c = new Car("Chevy", 2014, true);
+    }
+
+    Car copy = Car.copy(c);
+    System.out.println(copy);
+
+    int x = copy.getYear() + 5;
+
+    if(x > 12) {
+      System.out.println("something");
     }
 
     if(c == null) { // REFERENCE
@@ -148,11 +157,22 @@ public class Test {
     System.out.println("\ntestFields2");
     boolean A = Sources.A_0(true);
 
-    Car c = new Car("Honda", 2018);
+    Garage g = new Garage();
+    Car c = new Car("Honda", 2018, false);
+
+//    if(A) {
+//      g.setCar(c);
+//    }
 
     if (A) { // {A}
-//      c.setName("Renault");
+      c.setName("Renault");
       c.setYear(2015);
+    }
+
+    int x = c.getYear() + 5;
+
+    if(x > 20) {
+      System.out.println("something");
     }
 
     if (c.getYear() == 2018) { // {A}
@@ -162,5 +182,8 @@ public class Test {
     if (c.getName() == "Honda") {
       System.out.println("Honda");
     }
+
+    Car copy = Car.copy(c);
+    System.out.println(copy);
   }
 }
