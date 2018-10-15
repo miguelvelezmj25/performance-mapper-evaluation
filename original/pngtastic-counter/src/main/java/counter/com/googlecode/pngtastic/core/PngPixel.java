@@ -3,13 +3,13 @@ package counter.com.googlecode.pngtastic.core;
 /** An individual pixel in an image */
 public class PngPixel {
 
-  public final int red;
-  public final int green;
-  public final int blue;
-  public final int alpha;
+  private final int red;
+  private final int green;
+  private final int blue;
+  private final int alpha;
 
-  public final int x;
-  public final int y;
+  private final int x;
+  private final int y;
 
   private int freq = 0;
   private boolean duplicate;
