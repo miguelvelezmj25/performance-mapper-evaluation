@@ -14,7 +14,8 @@ public class TestPrintExample {
     }
     if (z) {
       System.out.println(i);
-    } else {
+    }
+    else {
       System.out.println(i);
     }
 

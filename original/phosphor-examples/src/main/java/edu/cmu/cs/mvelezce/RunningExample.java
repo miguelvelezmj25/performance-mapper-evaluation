@@ -12,13 +12,13 @@ public class RunningExample {
     boolean x = false;
     Thread.sleep(100);
 
-    if(A) {
+    if (A) {
       Thread.sleep(100);
       x = true;
       foo(B);
     }
 
-    if(x) {
+    if (x) {
       Thread.sleep(100);
     }
 

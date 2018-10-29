@@ -4,6 +4,7 @@ import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example4 {
+
   public static void main(String[] args) {
     boolean green = Sources.A_0(Boolean.valueOf(args[0]));
     boolean yellow = Sources.B_1(Boolean.valueOf(args[1]));

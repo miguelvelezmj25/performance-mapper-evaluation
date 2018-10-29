@@ -5,10 +5,10 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example5 {
 
-  private static String subject = null;
-  private static int totalLength = 600;
   private static final int HTTP_UNAUTHORIZED = 401;
   private static final int HTTP_NOT_IMPLEMENTED = 501;
+  private static String subject = null;
+  private static int totalLength = 600;
   private static String REQUEST_GET = "GET";
 
   public static void main(String[] args) {

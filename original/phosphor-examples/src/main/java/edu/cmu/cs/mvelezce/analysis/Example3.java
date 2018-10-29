@@ -4,6 +4,7 @@ import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example3 {
+
   public static void main(String[] args) throws InterruptedException {
     boolean x = Sources.A_0(Boolean.valueOf(args[0]));
 

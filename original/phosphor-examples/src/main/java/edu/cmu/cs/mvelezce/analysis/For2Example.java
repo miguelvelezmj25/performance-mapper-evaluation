@@ -26,14 +26,17 @@ public class For2Example {
       System.out.println(a * a == 16);
       if (y) {
         System.out.println(a == -4);
-      } else {
+      }
+      else {
         System.out.println(a == 4);
       }
-    } else {
+    }
+    else {
       System.out.println(a * a == 1);
       if (y) {
         System.out.println(a == 1);
-      } else {
+      }
+      else {
         System.out.println(a == 1);
       }
     }
