@@ -10,6 +10,7 @@ edu/cmu/cs/mvelezce/implicit/MultiFacets.class
 edu/cmu/cs/mvelezce/implicit/ControlStack.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample.class
 edu/cmu/cs/mvelezce/RunningExample.class
+edu/cmu/cs/mvelezce/analysis/GuessANumber.class
 edu/cmu/cs/mvelezce/analysis/Example7.class
 edu/cmu/cs/mvelezce/analysis/ForExample.class
 edu/cmu/cs/mvelezce/analysis/Example2.class
