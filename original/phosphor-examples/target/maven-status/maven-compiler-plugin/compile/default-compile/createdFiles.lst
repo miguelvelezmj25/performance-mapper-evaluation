@@ -24,6 +24,7 @@ edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/analysis/TimerHelper.class
 edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/TestPrintExample.class
+edu/cmu/cs/mvelezce/analysis/SimpleExample1.class
 edu/cmu/cs/mvelezce/implicit/Test.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/implicit/Garage.class

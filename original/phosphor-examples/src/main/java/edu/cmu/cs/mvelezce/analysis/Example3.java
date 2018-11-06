@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example3 {
@@ -23,6 +22,5 @@ public class Example3 {
       Thread.sleep(100);
     }
 
-    Sinks.postProcessSinks("phosphorExample3");
   }
 }

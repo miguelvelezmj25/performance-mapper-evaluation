@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class RunningExample {
@@ -21,8 +20,6 @@ public class RunningExample {
     if (x) {
       Thread.sleep(100);
     }
-
-    Sinks.postProcessSinks("phosphor-examples");
   }
 
   private static void foo(boolean b) throws InterruptedException {

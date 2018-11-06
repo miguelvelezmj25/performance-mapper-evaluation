@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example7 {
@@ -42,7 +41,5 @@ public class Example7 {
     if (blue) {
       System.out.println(localTotalScore < 0);
     }
-
-    Sinks.postProcessSinks("phosphorExample7");
   }
 }

@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class EarlyJoinExample {
@@ -68,7 +67,5 @@ public class EarlyJoinExample {
       throw new Exception();
     }
     System.out.println(sum);
-
-    Sinks.postProcessSinks("earlyJoinExample");
   }
 }

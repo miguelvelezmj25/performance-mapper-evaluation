@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example6 {
@@ -22,8 +21,6 @@ public class Example6 {
 
     foo = 42 / foo;
     System.out.println(foo);
-
-    Sinks.postProcessSinks("phosphorExample6");
   }
 
   private static int unnecessaryMethod(int foo) {

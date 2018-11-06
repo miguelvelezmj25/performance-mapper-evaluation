@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class SimpleForExample {
@@ -22,7 +21,5 @@ public class SimpleForExample {
     for (int start = 0; start <= rounds; start++) {
       a++;
     }
-
-    Sinks.postProcessSinks("simpleForExample");
   }
 }

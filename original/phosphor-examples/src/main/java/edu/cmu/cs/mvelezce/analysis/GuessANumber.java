@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class GuessANumber {
@@ -58,7 +57,5 @@ public class GuessANumber {
     else {
       System.out.println("Out of range");
     }
-
-    Sinks.postProcessSinks("guessANumber");
   }
 }

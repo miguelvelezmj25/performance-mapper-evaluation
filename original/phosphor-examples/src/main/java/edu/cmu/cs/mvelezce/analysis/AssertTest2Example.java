@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class AssertTest2Example {
@@ -13,7 +12,5 @@ public class AssertTest2Example {
         System.out.println(false);
       }
     }
-
-    Sinks.postProcessSinks("assertTest2Example");
   }
 }

@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example4 {
@@ -24,12 +23,10 @@ public class Example4 {
 
     if (blue && ipv4) {
       System.out.println(err);
-      Sinks.postProcessSinks("phosphorExample4");
 
       return;
     }
 
     System.out.println(1);
-    Sinks.postProcessSinks("phosphorExample4");
   }
 }

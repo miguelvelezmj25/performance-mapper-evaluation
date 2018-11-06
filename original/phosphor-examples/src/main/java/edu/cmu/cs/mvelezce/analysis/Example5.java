@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Example5 {
@@ -29,7 +28,6 @@ public class Example5 {
       }
     }
 
-    Sinks.postProcessSinks("phosphorExample5");
   }
 
   private static void sendHeaders(int responseNum, boolean green) {

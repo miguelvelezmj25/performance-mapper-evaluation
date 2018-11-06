@@ -32,6 +32,12 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/Phosphor-0.0.4-SNAPSHOT.jar</systemPath>
     </dependency>
+
+    <dependency>
+      <groupId>com.bpodgursky</groupId>
+      <artifactId>jbool_expressions</artifactId>
+      <version>1.13</version>
+    </dependency>
   </dependencies>
 
   <build>

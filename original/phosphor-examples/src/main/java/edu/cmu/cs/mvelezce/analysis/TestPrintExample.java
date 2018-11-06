@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class TestPrintExample {
@@ -18,7 +17,5 @@ public class TestPrintExample {
     else {
       System.out.println(i);
     }
-
-    Sinks.postProcessSinks("testPrintExample");
   }
 }
