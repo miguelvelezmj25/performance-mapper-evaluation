@@ -10,16 +10,16 @@ public class MultiFacets {
     boolean y = true;
     boolean z = true;
 
-    if (x) { // A
+    if (x) { // 1
       y = false;
     }
 
-    if (y) { // A
+    if (y) { // 2
       z = false;
     }
 
-    if (z) { // A
-      Thread.sleep(100);
+    if (z) { // 3
+      Thread.sleep(1);
     }
 
   }

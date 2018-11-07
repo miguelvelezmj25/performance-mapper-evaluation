@@ -10,13 +10,13 @@ public class Example2 {
 
     boolean x = false;
 
-    if (A) { // A
+    if (A) { // 1
       x = true;
     }
 
-    if (!B) { // B
-      if (x) { // A -> !B
-        Thread.sleep(300);
+    if (!B) { // 2
+      if (x) { // 3
+        Thread.sleep(1);
       }
     }
   }
