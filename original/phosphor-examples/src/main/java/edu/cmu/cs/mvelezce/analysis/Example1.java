@@ -24,7 +24,5 @@ public class Example1 {
         Thread.sleep(300);
       }
     }
-
-    TimerHelper.printExecutionTime();
   }
 }
