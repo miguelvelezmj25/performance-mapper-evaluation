@@ -17,6 +17,7 @@ public class RunningExample {
       foo(B);
     }
 
+
     if (x) {
       Thread.sleep(100);
     }

@@ -47,5 +47,63 @@ public class SimpleExample1 {
       j--;
     }
 
+    if (A) { // 9
+      foo();
+    }
+
+    if (B) { // 10
+      foo();
+    }
+
+    if (A) { // 11
+      moo(A);
+    }
+
+    if (B) { // 12
+      moo(B);
+    }
+
+    if (A) { // 13
+      bar(true);
+    }
+
+    if (B) { // 14
+      bar(true);
+    }
+
+    if (A) { // 15
+      cow(B);
+    }
+
+    if (B) { // 16
+      cow(A);
+    }
   }
+
+  private static void foo() throws InterruptedException {
+    int x = 0;
+
+    if (x >= 0) { // 1
+      Thread.sleep(1);
+    }
+  }
+
+  private static void moo(boolean x) throws InterruptedException {
+    if (x) { // 1
+      Thread.sleep(1);
+    }
+  }
+
+  private static void bar(boolean x) throws InterruptedException {
+    if (x) { // 1
+      Thread.sleep(1);
+    }
+  }
+
+  private static void cow(boolean x) throws InterruptedException {
+    if (x) { // 1
+      Thread.sleep(1);
+    }
+  }
+
 }
