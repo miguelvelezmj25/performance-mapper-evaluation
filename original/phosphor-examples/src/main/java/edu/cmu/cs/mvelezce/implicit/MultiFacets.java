@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class MultiFacets {
@@ -12,14 +11,13 @@ public class MultiFacets {
     boolean y = true;
     boolean z = true;
 
-    if(x) {
+    if (x) {
       y = false;
     }
 
-    if(y) {
+    if (y) {
       z = false;
     }
 
-    Sinks.postProcessSinks("MultiFacets");
   }
 }

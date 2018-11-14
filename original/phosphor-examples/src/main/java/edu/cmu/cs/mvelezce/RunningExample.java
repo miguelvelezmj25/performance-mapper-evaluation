@@ -11,20 +11,20 @@ public class RunningExample {
     boolean x = false;
     Thread.sleep(100);
 
-    if (A) {
+    if (A) { // 1
       Thread.sleep(100);
       x = true;
       foo(B);
     }
 
-
-    if (x) {
+    if (x) { // 2
       Thread.sleep(100);
     }
+
   }
 
   private static void foo(boolean b) throws InterruptedException {
-    if (b) {
+    if (b) { // 1
       Thread.sleep(100);
     }
   }

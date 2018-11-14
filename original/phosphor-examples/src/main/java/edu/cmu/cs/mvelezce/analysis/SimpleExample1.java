@@ -78,6 +78,7 @@ public class SimpleExample1 {
     if (B) { // 16
       cow(A);
     }
+
   }
 
   private static void foo() throws InterruptedException {

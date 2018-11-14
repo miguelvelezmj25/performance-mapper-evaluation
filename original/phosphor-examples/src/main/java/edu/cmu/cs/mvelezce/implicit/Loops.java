@@ -1,6 +1,5 @@
 //package edu.cmu.cs.mvelezce.implicit;
 //
-//import edu.cmu.cs.mvelezce.cc.Sinks;
 //import edu.cmu.cs.mvelezce.taints.Sources;
 //
 //public class Loops {
@@ -31,7 +30,6 @@
 //      System.out.println();
 //    }
 //
-//    Sinks.postProcessSinks();
 //  }
 //
 //}

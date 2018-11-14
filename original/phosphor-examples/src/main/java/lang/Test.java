@@ -1,6 +1,5 @@
 package lang;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Test {
@@ -28,7 +27,6 @@ public class Test {
       System.out.println("true");
     }
 
-    Sinks.postProcessSinks("Test");
   }
 
   public void practice(int i, int j) {
@@ -49,7 +47,9 @@ public class Test {
         char v2[] = anotherTest.value;
         int i = 0;
         while (n-- != 0) {
-          if (v1[i] != v2[i]) return false;
+          if (v1[i] != v2[i]) {
+            return false;
+          }
           i++;
         }
         return true;

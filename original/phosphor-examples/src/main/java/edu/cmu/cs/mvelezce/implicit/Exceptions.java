@@ -27,14 +27,15 @@ public class Exceptions {
 
     if (A) {
       minAlpha = 1;
-    } else {
+    }
+    else {
       minAlpha = 50;
     }
 
-
     if (B) {
       timeout = 0;
-    } else {
+    }
+    else {
       timeout = 1_000_000;
     }
 
@@ -42,12 +43,9 @@ public class Exceptions {
     exceptions.counter(System.currentTimeMillis());
 
     //    exceptions(A, B);
-    if(A || B) {
+    if (A || B) {
       System.out.println();
     }
-
-      Sinks.postProcessSinks("exceptions");
-
 
   }
 
@@ -55,7 +53,8 @@ public class Exceptions {
     if (e) {
       //            throw new RuntimeException("Exception");
       System.out.println("error");
-    } else {
+    }
+    else {
 
       if (b) {
         System.out.println("hello");

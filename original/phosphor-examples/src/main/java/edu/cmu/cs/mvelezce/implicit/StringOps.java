@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
@@ -9,9 +8,8 @@ public class StringOps {
 
   public static void main(String[] args) {
 //    stringOps();
-        carOps();
+    carOps();
 
-    Sinks.postProcessSinks("StringOps");
   }
 
   private static void carOps() {
@@ -22,13 +20,15 @@ public class StringOps {
 
     if (A) {
       c = new Car("ford", 2019, false);
-    } else {
+    }
+    else {
       c = new Car("toyota", 2014, true);
     }
 
     if (B) {
       y = 20;
-    } else {
+    }
+    else {
       y = 10;
     }
 
@@ -68,7 +68,8 @@ public class StringOps {
 
     if (A) {
       s = "true";
-    } else {
+    }
+    else {
       s = "false";
     }
 

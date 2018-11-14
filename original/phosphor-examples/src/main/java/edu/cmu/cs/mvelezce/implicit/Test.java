@@ -1,8 +1,6 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
-import edu.columbia.cs.psl.phosphor.Configuration;
 
 public class Test {
 
@@ -14,7 +12,6 @@ public class Test {
     testFields1();
     testFields2();
 
-    Sinks.postProcessSinks("Test");
   }
 
 //  public static void test() {
@@ -140,11 +137,11 @@ public class Test {
 
     int x = copy.getYear() + 5;
 
-    if(x > 12) {
+    if (x > 12) {
       System.out.println("something");
     }
 
-    if(c == null) { // REFERENCE
+    if (c == null) { // REFERENCE
       System.out.println("null car");
     }
 
@@ -171,7 +168,7 @@ public class Test {
 
     int x = c.getYear() + 5;
 
-    if(x > 20) {
+    if (x > 20) {
       System.out.println("something");
     }
 

@@ -12,16 +12,20 @@ public class Car {
     this.used = used;
   }
 
+  public static Car copy(Car car) {
+    return new Car(car.name, 2019, car.used);
+  }
+
   public String getName() {
     return name;
   }
 
-  public int getYear() {
-    return year;
-  }
-
   public void setName(String name) {
     this.name = name;
+  }
+
+  public int getYear() {
+    return year;
   }
 
   public void setYear(int year) {
@@ -34,10 +38,6 @@ public class Car {
 
   public void setUsed(boolean used) {
     this.used = used;
-  }
-
-  public static Car copy(Car car) {
-    return new Car(car.name, 2019, car.used);
   }
 
   @Override

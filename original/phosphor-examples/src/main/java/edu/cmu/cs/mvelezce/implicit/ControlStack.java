@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class ControlStack {
@@ -13,7 +12,6 @@ public class ControlStack {
     boolean b = get(B);
 
     equalTaintAndStack(a, b);
-    Sinks.postProcessSinks("controlstack");
   }
 
   private static boolean get(boolean option) {
