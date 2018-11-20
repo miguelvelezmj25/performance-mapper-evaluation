@@ -17,11 +17,11 @@ public class Example1 {
 
     if (x) {
       TimerHelper.sleep("2", 2);
-      Thread.sleep(200);
+      System.out.println(200);
 
       if (B) {
         TimerHelper.sleep("3", 3);
-        Thread.sleep(300);
+        System.out.println(300);
       }
     }
 

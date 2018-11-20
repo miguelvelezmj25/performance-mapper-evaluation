@@ -18,7 +18,7 @@
 ////
 ////    int taintOfA = Tainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA == 1);
@@ -31,12 +31,12 @@
 ////
 ////    int taintOfA = Tainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    int taintOfB = Tainter.getTaint(B);
 ////    if (B) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA == 1);
@@ -51,12 +51,12 @@
 ////    int taintOfA = Tainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    int taintOfx = Tainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA == 1);
@@ -71,12 +71,12 @@
 ////    int taintOfA = Tainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    int taintOfx = Tainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA == 1);
@@ -91,7 +91,7 @@
 ////    int taintOfA = Tainter.getTaint(A);
 ////    if (A) {
 ////      l = 1000;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    long sum = 0;

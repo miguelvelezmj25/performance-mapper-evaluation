@@ -14,7 +14,7 @@
 //  //
 //  //  public static void sleep$$PHOSPHORTAGGED(Taint phosphorNativeWrapArg0, long
 //  // phosphorNativeWrapArg1, ControlTaintTagStack var3) throws InterruptedException {
-//  //    Thread.sleep(phosphorNativeWrapArg1);
+//  //    System.out.println(phosphorNativeWrapArg1);
 //  //  }
 //  //
 //  //

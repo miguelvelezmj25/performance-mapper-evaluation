@@ -20,7 +20,7 @@
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA != null);
@@ -36,12 +36,12 @@
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    Taint taintOfB = MultiTainter.getTaint(B);
 ////    if (B) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA != null);
@@ -59,12 +59,12 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    Taint taintOfx = MultiTainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA != null);
@@ -81,12 +81,12 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    Taint taintOfx = MultiTainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    assert (taintOfA != null);
@@ -103,7 +103,7 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      l = 1000;
-////      Thread.sleep(1000);
+////      System.out.println(1000);
 ////    }
 ////
 ////    long sum = 0;

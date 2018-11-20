@@ -26,7 +26,7 @@
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Set taintsOfA = TaintUtils.getLabels(taintOfA);
@@ -41,7 +41,7 @@
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Set taintsOfA = TaintUtils.getLabels(taintOfA);
@@ -57,12 +57,12 @@
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Taint taintOfB = MultiTainter.getTaint(B);
 ////    if (B) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Set taintsOfA = TaintUtils.getLabels(taintOfA);
@@ -84,12 +84,12 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Taint taintOfx = MultiTainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Set taintsOfA = TaintUtils.getLabels(taintOfA);
@@ -109,12 +109,12 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      x = true;
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Taint taintOfx = MultiTainter.getTaint(x);
 ////    if (x) {
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    Set taintsOfA = TaintUtils.getLabels(taintOfA);
@@ -136,7 +136,7 @@
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
 ////      l = 1000;
-////      Thread.sleep(300);
+////      System.out.println(300);
 ////    }
 ////
 ////    long sum = 0;
@@ -171,7 +171,7 @@
 ////      taintOfB = MultiTainter.getTaint(B);
 ////      taintOfx = Taint.combineTags(taintOfx, taintOfB);
 ////      if (!B) {
-////        Thread.sleep(300);
+////        System.out.println(300);
 ////      }
 ////    }
 ////

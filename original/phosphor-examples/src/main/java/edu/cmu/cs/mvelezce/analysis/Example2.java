@@ -16,7 +16,7 @@ public class Example2 {
 
     if (!B) { // 2
       if (x) { // 3
-        Thread.sleep(1);
+        System.out.println(1);
       }
     }
   }

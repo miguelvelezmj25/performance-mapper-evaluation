@@ -12,7 +12,7 @@ public class SimpleExample1 {
 
     if (A) { // 1
       if (x) { // 2
-        Thread.sleep(1);
+        System.out.println(1);
       }
     }
 
@@ -20,7 +20,7 @@ public class SimpleExample1 {
 
     while (i > 0) { // 3
       if (i > 3) { // 4
-        Thread.sleep(1);
+        System.out.println(1);
       }
 
       i--;
@@ -36,12 +36,12 @@ public class SimpleExample1 {
     }
 
     if (j > 0) { // 6
-      Thread.sleep(1);
+      System.out.println(1);
     }
 
     while (j > 0) { // 7
       if (j > 2) { // 8
-        Thread.sleep(1);
+        System.out.println(1);
       }
 
       j--;
@@ -85,25 +85,25 @@ public class SimpleExample1 {
     int x = 0;
 
     if (x >= 0) { // 1
-      Thread.sleep(1);
+      System.out.println(1);
     }
   }
 
   private static void moo(boolean x) throws InterruptedException {
     if (x) { // 1
-      Thread.sleep(1);
+      System.out.println(1);
     }
   }
 
   private static void bar(boolean x) throws InterruptedException {
     if (x) { // 1
-      Thread.sleep(1);
+      System.out.println(1);
     }
   }
 
   private static void cow(boolean x) throws InterruptedException {
     if (x) { // 1
-      Thread.sleep(1);
+      System.out.println(1);
     }
   }
 

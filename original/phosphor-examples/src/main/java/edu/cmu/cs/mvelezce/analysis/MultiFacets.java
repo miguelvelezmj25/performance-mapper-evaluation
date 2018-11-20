@@ -19,7 +19,7 @@ public class MultiFacets {
     }
 
     if (z) { // 3
-      Thread.sleep(1);
+      System.out.println(1);
     }
 
   }

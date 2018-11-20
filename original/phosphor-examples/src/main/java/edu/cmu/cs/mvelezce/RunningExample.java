@@ -9,23 +9,23 @@ public class RunningExample {
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     boolean x = false;
-    Thread.sleep(100);
+    System.out.println(100);
 
     if (A) { // 1
-      Thread.sleep(100);
+      System.out.println(100);
       x = true;
       foo(B);
     }
 
     if (x) { // 2
-      Thread.sleep(100);
+      System.out.println(100);
     }
 
   }
 
   private static void foo(boolean b) throws InterruptedException {
     if (b) { // 1
-      Thread.sleep(100);
+      System.out.println(100);
     }
   }
 }

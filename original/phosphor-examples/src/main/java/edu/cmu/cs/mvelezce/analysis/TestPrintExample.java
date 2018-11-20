@@ -5,7 +5,7 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class TestPrintExample {
 
   public static void main(String[] args) {
-    boolean z = Sources.L_11(Boolean.valueOf(args[0]));
+    boolean z = Sources.A_0(Boolean.valueOf(args[0]));
 
     int i = 0;
     if (z) {
