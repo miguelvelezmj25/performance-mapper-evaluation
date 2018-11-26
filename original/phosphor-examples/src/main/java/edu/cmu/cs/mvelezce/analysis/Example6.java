@@ -5,11 +5,11 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class Example6 {
 
   public static void main(String[] args) {
-    boolean green = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
 
     int foo = 1;
 
-    if (green) {
+    if (A) {
       foo = 10;
     }
 

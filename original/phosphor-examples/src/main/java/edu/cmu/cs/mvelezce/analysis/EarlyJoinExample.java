@@ -4,12 +4,12 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class EarlyJoinExample {
 
-  public static void main(String[] args) throws Exception {
-    boolean a = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean b = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean c = Sources.C_2(Boolean.valueOf(args[2]));
-    boolean d = Sources.D_3(Boolean.valueOf(args[3]));
-    boolean e = Sources.E_4(Boolean.valueOf(args[4]));
+  public static void main(String[] args) {
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean D = Sources.D_3(Boolean.valueOf(args[3]));
+    boolean E = Sources.E_4(Boolean.valueOf(args[4]));
 //    boolean f = Sources.F_5(Boolean.valueOf(args[5]));
 //    boolean g = Sources.G_6(Boolean.valueOf(args[6]));
 //    boolean h = Sources.H_7(Boolean.valueOf(args[7]));
@@ -28,20 +28,20 @@ public class EarlyJoinExample {
 //    if (z) {
 //      i += 1;
 //    }
-    if (a) {
+    if (A) {
       i += 1;
     }
-    if (b) {
+    if (B) {
       i += 1;
     }
     i = 10;// early join
-    if (c) {
+    if (C) {
       i += 1;
     }
-    if (d) {
+    if (D) {
       i += 1;
     }
-    if (e) {
+    if (E) {
       i += 1;
     }
 //    if (f) {

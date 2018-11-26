@@ -5,14 +5,14 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class SimpleForExample {
 
   public static void main(String[] args) {
-    boolean z = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean y = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     int rounds = 1;
-    if (z) {
+    if (A) {
       rounds = 4;
     }
-    if (y) {
+    if (B) {
       rounds = 2;
     }
 

@@ -9,36 +9,36 @@ public class Example7 {
   private static final int TIME_BONUS = 2;
 
   public static void main(String[] args) {
-    boolean green = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean yellow = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean blue = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
 
     int totalScore = 0;
     int penalty = 0;
 
-    if (blue) {
+    if (C) {
       penalty = 10;
     }
 
     int localTotalScore = PERFECT_CUREVE + PERFECT_STRAIGHT;
 
-    if (green) {
+    if (A) {
       localTotalScore += TIME_BONUS;
     }
 
-    if (blue) {
+    if (C) {
       localTotalScore -= penalty;
     }
 
-    if (blue) {
+    if (C) {
       System.out.println(localTotalScore < 0);
     }
 
-    if (yellow) {
+    if (B) {
       totalScore = localTotalScore;
     }
 
-    if (blue) {
+    if (C) {
       System.out.println(localTotalScore < 0);
     }
   }

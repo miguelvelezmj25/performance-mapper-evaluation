@@ -5,12 +5,12 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class MultiFacets {
 
   public static void main(String[] args) {
-    boolean x = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
 
     boolean y = true;
     boolean z = true;
 
-    if (x) { // 1
+    if (A) { // 1
       y = false;
     }
 

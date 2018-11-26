@@ -5,13 +5,13 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class TestPrintExample {
 
   public static void main(String[] args) {
-    boolean z = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
 
     int i = 0;
-    if (z) {
+    if (A) {
       i++;
     }
-    if (z) {
+    if (A) {
       System.out.println(i);
     }
     else {

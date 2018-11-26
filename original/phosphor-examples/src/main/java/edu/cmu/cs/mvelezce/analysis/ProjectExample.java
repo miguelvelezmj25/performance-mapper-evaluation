@@ -5,12 +5,12 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class ProjectExample {
 
   public static void main(String[] args) {
-    boolean c = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean d = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     int x = 1;
     int y = 1;
-    if (c) {
+    if (A) {
       y = 0;
     }
     if (x * y < 3) {
@@ -19,7 +19,7 @@ public class ProjectExample {
     if (y == 1) {
       x = -1;
     }
-    if (d) {
+    if (B) {
       x = 0;
     }
     while (x > 0) {

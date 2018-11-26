@@ -5,15 +5,15 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class ForExample {
 
   public static void main(String[] args) {
-    boolean z = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean y = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     int rounds = 1;
     int increment = 1;
-    if (z) {
+    if (A) {
       rounds = 4;
     }
-    if (y) {
+    if (B) {
       increment = -1;
     }
     int a = 0;
@@ -21,9 +21,9 @@ public class ForExample {
       a += increment;
     }
 
-    if (z) {
+    if (A) {
       System.out.println(a * a == 16);
-      if (y) {
+      if (B) {
         System.out.println(a == -4);
       }
       else {
@@ -32,7 +32,7 @@ public class ForExample {
     }
     else {
       System.out.println(a * a == 1);
-      if (y) {
+      if (B) {
         System.out.println(a == -1);
       }
       else {
