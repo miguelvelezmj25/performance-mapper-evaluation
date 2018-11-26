@@ -1,6 +1,7 @@
 edu/cmu/cs/mvelezce/analysis/AssertTest2Example.class
 edu/cmu/cs/mvelezce/implicit/Car.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
+edu/cmu/cs/mvelezce/analysis/Example3.class
 edu/cmu/cs/mvelezce/analysis/ReturnExample.class
 edu/cmu/cs/mvelezce/analysis/MultiFacets.class
 edu/cmu/cs/mvelezce/analysis/For2Example.class
@@ -16,6 +17,7 @@ edu/cmu/cs/mvelezce/analysis/Example7.class
 edu/cmu/cs/mvelezce/analysis/ForExample.class
 edu/cmu/cs/mvelezce/analysis/SimpleExample2.class
 edu/cmu/cs/mvelezce/analysis/Example2.class
+edu/cmu/cs/mvelezce/TimerHelper.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/implicit/Exceptions.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class
@@ -23,7 +25,6 @@ edu/cmu/cs/mvelezce/implicit/Nested.class
 lang/Test.class
 edu/cmu/cs/mvelezce/analysis/Example4.class
 edu/cmu/cs/mvelezce/taints/Sources.class
-edu/cmu/cs/mvelezce/analysis/TimerHelper.class
 edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/TestPrintExample.class
 edu/cmu/cs/mvelezce/analysis/IfAnd.class

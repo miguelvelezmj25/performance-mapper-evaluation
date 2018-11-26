@@ -4,7 +4,7 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class SimpleExample1 {
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
@@ -81,7 +81,7 @@ public class SimpleExample1 {
 
   }
 
-  private static void foo() throws InterruptedException {
+  private static void foo() {
     int x = 0;
 
     if (x >= 0) { // 1
@@ -89,19 +89,19 @@ public class SimpleExample1 {
     }
   }
 
-  private static void moo(boolean x) throws InterruptedException {
+  private static void moo(boolean x) {
     if (x) { // 1
       System.out.println(1);
     }
   }
 
-  private static void bar(boolean x) throws InterruptedException {
+  private static void bar(boolean x) {
     if (x) { // 1
       System.out.println(1);
     }
   }
 
-  private static void cow(boolean x) throws InterruptedException {
+  private static void cow(boolean x) {
     if (x) { // 1
       System.out.println(1);
     }

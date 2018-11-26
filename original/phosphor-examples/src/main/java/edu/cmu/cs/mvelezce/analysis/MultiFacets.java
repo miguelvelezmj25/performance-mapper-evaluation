@@ -4,7 +4,7 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class MultiFacets {
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     boolean x = Sources.A_0(Boolean.valueOf(args[0]));
 
     boolean y = true;

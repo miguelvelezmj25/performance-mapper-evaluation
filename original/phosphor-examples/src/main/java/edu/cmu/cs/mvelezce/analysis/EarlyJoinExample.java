@@ -18,7 +18,7 @@ public class EarlyJoinExample {
 //    boolean y = Sources.K_10(Boolean.valueOf(args[10]));
 //    boolean z = Sources.L_11(Boolean.valueOf(args[11]));
 
-//    int i = 1;
+    int i = 1;
 //    if (x) {
 //      i += 1;
 //    }
@@ -28,22 +28,22 @@ public class EarlyJoinExample {
 //    if (z) {
 //      i += 1;
 //    }
-//    if (a) {
-//      i += 1;
-//    }
-//    if (b) {
-//      i += 1;
-//    }
-//    //			i = 10;// early join
-//    if (c) {
-//      i += 1;
-//    }
-//    if (d) {
-//      i += 1;
-//    }
-//    if (e) {
-//      i += 1;
-//    }
+    if (a) {
+      i += 1;
+    }
+    if (b) {
+      i += 1;
+    }
+    i = 10;// early join
+    if (c) {
+      i += 1;
+    }
+    if (d) {
+      i += 1;
+    }
+    if (e) {
+      i += 1;
+    }
 //    if (f) {
 //      i += 1;
 //    }
@@ -57,15 +57,16 @@ public class EarlyJoinExample {
 //    if (j) {
 //      i += 1;
 //    }
-//
-//    //			i = 1000;// early join
-//    int sum = 0;
-//    for (int start = 1; start <= i; start++) {
-//      sum++;
-//    }
-//    if (sum > 15) {
-//      throw new Exception();
-//    }
-//    System.out.println(sum);
+
+    i = 1000;// early join
+    int sum = 0;
+    for (int start = 1; start <= i; start++) {
+      sum++;
+    }
+    if (sum > 15) {
+      System.out.println("Error");
+      return;
+    }
+    System.out.println(sum);
   }
 }

@@ -11,21 +11,21 @@ public class Example5 {
   private static String REQUEST_GET = "GET";
 
   public static void main(String[] args) {
-    boolean green = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean yellow = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean blue = Sources.C_2(Boolean.valueOf(args[2]));
-    boolean http_unauthorized = Sources.D_3(Boolean.valueOf(args[3]));
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean D = Sources.D_3(Boolean.valueOf(args[3]));
 
-    if (yellow) {
-      if (http_unauthorized) {
-        sendHeaders(HTTP_UNAUTHORIZED, green);
+    if (B) {
+      if (D) {
+        sendHeaders(HTTP_UNAUTHORIZED, A);
       }
     }
 
-    if (blue) {
-      if (!"POST".equals(REQUEST_GET)) {
-        sendHeaders(HTTP_NOT_IMPLEMENTED, green);
-      }
+    if (C) {
+//      if (!"POST".equals(REQUEST_GET)) {
+//        sendHeaders(HTTP_NOT_IMPLEMENTED, A);
+//      }
     }
 
   }
@@ -37,9 +37,9 @@ public class Example5 {
       subject = "response header";
     }
 
-    if (subject.isEmpty()) {
-      subject = "Void response";
-    }
+//    if (subject.isEmpty()) {
+//      subject = "Void response";
+//    }
     System.out.println("Done");
   }
 }

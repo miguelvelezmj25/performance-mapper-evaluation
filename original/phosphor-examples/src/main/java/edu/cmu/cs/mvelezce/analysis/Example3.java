@@ -2,31 +2,24 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class Example4 {
+public class Example3 {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
     boolean C = Sources.C_2(Boolean.valueOf(args[2]));
 
-    Integer err = null;
-    boolean ipv4 = true;
-    boolean flag = true;
+    foo(A);
 
-    if (A) {
-      flag = false;
+    if (A) { // 1
+      foo(B);
+      foo(C);
     }
+  }
 
-    if (B && flag) {
-      err = -1;
+  public static void foo(boolean x) {
+    if (x) {
+      System.out.println();
     }
-
-    if (C && ipv4) {
-      System.out.println(err);
-
-      return;
-    }
-
-    System.out.println(1);
   }
 }
