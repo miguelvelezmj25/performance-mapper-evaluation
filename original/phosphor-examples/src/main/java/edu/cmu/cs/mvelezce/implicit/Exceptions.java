@@ -88,8 +88,8 @@ public class Exceptions {
     }
 
     Taint taint = MultiTainter.getTaint(minAlpha);
-    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
+//    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
     taint = MultiTainter.getTaint(timeout);
-    Sinks.sink(taint, "timeout", "timeout", 0);
+//    Sinks.sink(taint, "timeout", "timeout", 0);
   }
 }
