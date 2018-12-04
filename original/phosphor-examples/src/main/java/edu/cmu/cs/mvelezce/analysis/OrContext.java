@@ -2,11 +2,12 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class GTOverapprox {
+public class OrContext {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
 
     int x = 1;
 
@@ -19,7 +20,9 @@ public class GTOverapprox {
     }
 
     if (x > 0) {
-      System.out.println(1);
+      if (C) {
+        System.out.println();
+      }
     }
   }
 }
