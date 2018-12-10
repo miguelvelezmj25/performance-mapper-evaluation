@@ -2,22 +2,21 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class VariabilityContext1 {
+public class IfOr2 {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean x = true;
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
-    if (A) {
-      foo(x);
-      foo(x);
+    boolean x = false;
+
+    if (A || B) {
+      x = true;
     }
 
-  }
-
-  private static void foo(boolean x) {
     if (x) {
-      System.out.println();
+      System.out.println(1);
     }
   }
+
 }
