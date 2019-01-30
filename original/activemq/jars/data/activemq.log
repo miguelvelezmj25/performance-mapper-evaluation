@@ -2230,3 +2230,44 @@ java.lang.InterruptedException
 2018-09-14 14:17:08,969 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-56146-1536947702124-0:1) is shutdown | org.apache.activemq.broker.BrokerService | Thread-25
 2018-09-14 14:17:08,971 | INFO  | Closing org.apache.activemq.xbean.XBeanBrokerFactory$1@e45f292: startup date [Fri Sep 14 13:55:01 EDT 2018]; root of context hierarchy | org.apache.activemq.xbean.XBeanBrokerFactory$1 | Thread-25
 2018-09-14 14:17:08,986 | INFO  | Destroying Spring FrameworkServlet 'dispatcher' | /admin | Thread-25
+2018-09-17 14:19:18,585 | INFO  | Refreshing org.apache.activemq.xbean.XBeanBrokerFactory$1@e45f292: startup date [Mon Sep 17 14:19:18 EDT 2018]; root of context hierarchy | org.apache.activemq.xbean.XBeanBrokerFactory$1 | main
+2018-09-17 14:19:19,452 | INFO  | Using Persistence Adapter: KahaDBPersistenceAdapter[/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/jars/data/kahadb] | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:19,519 | INFO  | KahaDB is version 6 | org.apache.activemq.store.kahadb.MessageDatabase | main
+2018-09-17 14:19:19,554 | INFO  | PListStore:[/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/jars/data/localhost/tmp_storage] started | org.apache.activemq.store.kahadb.plist.PListStoreImpl | main
+2018-09-17 14:19:19,741 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-58049-1537208359565-0:1) is starting | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:19,814 | INFO  | Listening for connections at: tcp://MVELEZCE-MBPRO.isri.cmu.edu:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2018-09-17 14:19:19,816 | INFO  | Connector openwire started | org.apache.activemq.broker.TransportConnector | main
+2018-09-17 14:19:19,820 | INFO  | Listening for connections at: amqp://MVELEZCE-MBPRO.isri.cmu.edu:5672?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2018-09-17 14:19:19,821 | INFO  | Connector amqp started | org.apache.activemq.broker.TransportConnector | main
+2018-09-17 14:19:19,826 | INFO  | Listening for connections at: stomp://MVELEZCE-MBPRO.isri.cmu.edu:61613?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2018-09-17 14:19:19,827 | INFO  | Connector stomp started | org.apache.activemq.broker.TransportConnector | main
+2018-09-17 14:19:19,831 | INFO  | Listening for connections at: mqtt://MVELEZCE-MBPRO.isri.cmu.edu:1883?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2018-09-17 14:19:19,832 | INFO  | Connector mqtt started | org.apache.activemq.broker.TransportConnector | main
+2018-09-17 14:19:19,951 | WARN  | ServletContext@o.e.j.s.ServletContextHandler@7ae42ce3{/,null,STARTING} has uncovered http methods for path: / | org.eclipse.jetty.security.SecurityHandler | main
+2018-09-17 14:19:20,003 | INFO  | Listening for connections at ws://MVELEZCE-MBPRO.isri.cmu.edu:61614?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.ws.WSTransportServer | main
+2018-09-17 14:19:20,004 | INFO  | Connector ws started | org.apache.activemq.broker.TransportConnector | main
+2018-09-17 14:19:20,005 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-58049-1537208359565-0:1) started | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:20,007 | INFO  | For help or more information please see: http://activemq.apache.org | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:20,008 | WARN  | Store limit is 102400 mb (current store usage is 5 mb). The data directory: /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/jars/data/kahadb only has 29273 mb of usable space. - resetting to maximum available disk space: 29273 mb | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:20,009 | WARN  | Temporary Store limit is 51200 mb (current store usage is 0 mb). The data directory: /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/jars/data only has 29267 mb of usable space. - resetting to maximum available disk space: 29267 mb | org.apache.activemq.broker.BrokerService | main
+2018-09-17 14:19:20,418 | INFO  | No Spring WebApplicationInitializer types detected on classpath | /admin | main
+2018-09-17 14:19:20,743 | INFO  | ActiveMQ WebConsole available at http://0.0.0.0:8161/ | org.apache.activemq.web.WebConsoleStarter | main
+2018-09-17 14:19:20,744 | INFO  | ActiveMQ Jolokia REST API available at http://0.0.0.0:8161/api/jolokia/ | org.apache.activemq.web.WebConsoleStarter | main
+2018-09-17 14:19:20,799 | INFO  | Initializing Spring FrameworkServlet 'dispatcher' | /admin | main
+2018-09-17 14:19:20,969 | INFO  | No Spring WebApplicationInitializer types detected on classpath | /api | main
+2018-09-17 14:19:21,023 | INFO  | jolokia-agent: Using policy access restrictor classpath:/jolokia-access.xml | /api | main
+2018-09-17 14:24:44,210 | WARN  | Async error occurred: java.lang.IllegalStateException: Cannot remove a consumer from a connection that had not been registered: ID:MVELEZCE-MBPRO.isri.cmu.edu-58087-1537208683413-1:1 | org.apache.activemq.broker.TransportConnection.Service | ActiveMQ Transport: tcp:///127.0.0.1:58088@61616
+2018-09-17 17:04:02,872 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-58049-1537208359565-0:1) is shutting down | org.apache.activemq.broker.BrokerService | Thread-25
+2018-09-17 17:04:02,879 | INFO  | Connector openwire stopped | org.apache.activemq.broker.TransportConnector | Thread-25
+2018-09-17 17:04:02,881 | INFO  | Connector amqp stopped | org.apache.activemq.broker.TransportConnector | Thread-25
+2018-09-17 17:04:02,883 | INFO  | Connector stomp stopped | org.apache.activemq.broker.TransportConnector | Thread-25
+2018-09-17 17:04:02,885 | INFO  | Connector mqtt stopped | org.apache.activemq.broker.TransportConnector | Thread-25
+2018-09-17 17:04:02,901 | INFO  | Connector ws stopped | org.apache.activemq.broker.TransportConnector | Thread-25
+2018-09-17 17:04:02,910 | INFO  | PListStore:[/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/jars/data/localhost/tmp_storage] stopped | org.apache.activemq.store.kahadb.plist.PListStoreImpl | Thread-25
+2018-09-17 17:04:02,912 | INFO  | Stopping async queue tasks | org.apache.activemq.store.kahadb.KahaDBStore | Thread-25
+2018-09-17 17:04:02,913 | INFO  | Stopping async topic tasks | org.apache.activemq.store.kahadb.KahaDBStore | Thread-25
+2018-09-17 17:04:02,914 | INFO  | Stopped KahaDB | org.apache.activemq.store.kahadb.KahaDBStore | Thread-25
+2018-09-17 17:04:02,927 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-58049-1537208359565-0:1) uptime 2 hours 44 minutes | org.apache.activemq.broker.BrokerService | Thread-25
+2018-09-17 17:04:02,930 | INFO  | Apache ActiveMQ 5.15.6 (localhost, ID:MVELEZCE-MBPRO.isri.cmu.edu-58049-1537208359565-0:1) is shutdown | org.apache.activemq.broker.BrokerService | Thread-25
+2018-09-17 17:04:02,931 | INFO  | Closing org.apache.activemq.xbean.XBeanBrokerFactory$1@e45f292: startup date [Mon Sep 17 14:19:18 EDT 2018]; root of context hierarchy | org.apache.activemq.xbean.XBeanBrokerFactory$1 | Thread-25
+2018-09-17 17:04:02,947 | INFO  | Destroying Spring FrameworkServlet 'dispatcher' | /admin | Thread-25

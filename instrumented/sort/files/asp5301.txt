@@ -1113,7 +1113,7 @@
             files or groups may be quickly marked and then acted upon. The
             actions include copy, move, spawn, append, erase, rename,
             change attribute status, display, print and locate. Features
-            include context sensitive help, macro procedures, directory
+            include variabilityCtx sensitive help, macro procedures, directory
             tree, diskette labels and program parameter customization.
 
           Product: FLEXIBAK Plus
@@ -2250,7 +2250,7 @@
             a much eaiser task.  Can handle ZIP, ARC, ZOO, LZH, PAK, AND
             ARJ compressed files.  The user can use drop down menus to
             manage their compressed files, or built in hotkeys can be used
-            for the more advanced user.  Provides built-in context
+            for the more advanced user.  Provides built-in variabilityCtx
             sensitive help for all functions, and provides a common
             interface to all of the supported compressed file formats. You
             can view, create, modify, convert, virus-check, and much more.
@@ -2463,7 +2463,7 @@
             Presentation Manager clipboard or output to a printer.
 
             The search feature locates words or phrases and displays them
-            in context.  User options include a choice of display fonts and
+            in variabilityCtx.  User options include a choice of display fonts and
             sizes, line numbering, tab stop intervals and printer controls.
 
           Product: DOS Extensions for Professional
@@ -4246,7 +4246,7 @@
           Download size: 130k
           Description:
             Full interactive (internal and/or external editor, pull down
-            menus, mouse support, and  context sensitive help) or command
+            menus, mouse support, and  variabilityCtx sensitive help) or command
             line AUTOEXEC.BAT and CONFIG.SYS configuration management.  Can
             use current configuration files.  Provisions for disk cacheing
             software.  MENU.CTL device driver allows configuration
@@ -4822,7 +4822,7 @@
             available. It features simple or complex reminders (e.g., 3
                                       th
             from last Thurs of every 9   month), desktop calendar & scan
-            (AUTOEXEC) modes, color pull-down & pop-up menus, context
+            (AUTOEXEC) modes, color pull-down & pop-up menus, variabilityCtx
             sensitive on-line help, alarm, DOS shell, mouse support, file
             commands, & selectable group printing. Also has user definable
             classes, notice, print/display options and many special
@@ -4868,7 +4868,7 @@
             designed for those who must keep up with appointments and other
             future events. Memos, appointments, and events are entered
             through a full screen editor and may be previewed in a WYSIWYG
-            view prior to printing.  Features on-line context sensitive
+            view prior to printing.  Features on-line variabilityCtx sensitive
             help, pop-up windows, and a tickler to remind you of important
             events.  A calendar is printed in full page format with events
             listed in each day's block.
@@ -5306,7 +5306,7 @@
 
             sizes), sort by name or Zip, 9 diff. reports, print envelope
             addresses (laser too, optional return), 5-line 33 character
-            address area, unlimited names, large NOTES area, context
+            address area, unlimited names, large NOTES area, variabilityCtx
             sensitive help.
 
           Product: ORGANIZE
@@ -5938,7 +5938,7 @@
             standalone PCs and DOS LANs.  Differentiating features range
             from user-defined help and full screen blanker/color
             configurations to an integrated menu definition editor with
-            context-sensitive help and user-defined dialogs.  PullDown
+            variabilityCtx-sensitive help and user-defined dialogs.  PullDown
             offers unmatched ease of use for users and maximum power to the
             professional. Non-TSR design assures conflict-free reliable
             operation on all DOS and LAN platforms.
@@ -6231,7 +6231,7 @@
                * Sort/view/copy/move/delete/print files
                * Modify date/time/attr of files
                * Add, delete, or rename directories
-               * Online context sensitive help
+               * Online variabilityCtx sensitive help
                * Full mouse support
                * Pull down menus
                * Excellent use of color
@@ -6364,7 +6364,7 @@
             manager.  Unlimited user menus with with single-keystroke
             program execution.  Split-screen file list and directory tree
             with all standard commands and some valuable extras. Pull-down
-            menus, context-sensitive help, mouse support, floppy disk
+            menus, variabilityCtx-sensitive help, mouse support, floppy disk
             formatting, password protection, usage logging and a host of
             other features.
 
@@ -7006,7 +7006,7 @@
 
 
 
-            editor, word processing and context sensitive help. Extensive
+            editor, word processing and variabilityCtx sensitive help. Extensive
             block text commands: sort, fill, case, total, invert...
             Reconfigurable keyboard with popular maps supplied; pull-down
             menus & online help change *dynamically* to reflect
@@ -7326,7 +7326,7 @@
           Description:
             Powerful multiwindow word processor.  Block moves, macros,
             configurable colors, supports 26 printers, EGA/VGA 43 and 50
-            line modes, context-sensitive online help, smart tabbing and
+            line modes, variabilityCtx-sensitive online help, smart tabbing and
             indenting, optional auto-save or .BAK files, more.
 
           Product: KWIKWRITE
@@ -7372,7 +7372,7 @@
             standard features, primed for speed and convience, and is a
             word processing enviornment that fullfills.
 
-            Major features include context sensitive help, DOS shell,
+            Major features include variabilityCtx sensitive help, DOS shell,
             multiple file in-window editing and more. Plus files are not
             restricted to a size limit. A powerful program that is easy to
             learn.
@@ -10200,7 +10200,7 @@
             CompuServe/TAPCIS Message file manager, with message/reply
             editor & script generator, pulldown menus & command line mode.
             Handles forum messages, CMail & INTERNET. Keeps files trimed
-            and sorted into context, now with forum specific settings. Menu
+            and sorted into variabilityCtx, now with forum specific settings. Menu
             SHELL organizes TAPCIS & add-ons. Sysop commands, changes
             immediately reflected in file. Powerful file navigation &
             viewing, multiple sorts, duplicate deletion, filters, search,
@@ -10668,7 +10668,7 @@
           Description:
             This Accounts Payable module fully integrates with other Takin'
             Care of Business! modules but needs at least the files TCB.ZIP
-            and TCB-GL.ZIP to run. Some features include: context sensitive
+            and TCB-GL.ZIP to run. Some features include: variabilityCtx sensitive
             help, 2000 vendors, unlimited transactions, manual/computer
             printed checks, discounts, partial payments, pre/post dated
             transactions, many payment options, address labels and a full
@@ -10693,7 +10693,7 @@
           Description:
             This Accounts Receivable module fully integrates with other
             Takin' Care of Business! modules but needs at least the files
-            TCB.ZIP and TCB-GL.ZIP to run.  Some features include: context
+            TCB.ZIP and TCB-GL.ZIP to run.  Some features include: variabilityCtx
             sensitive help, 2000 customers, unlimited transactions,
             Invoices, Statements, pre-printed or plain-paper forms, finance
             charges, pre/post dated transactions, address labels and a full
@@ -10722,7 +10722,7 @@
           Description:
             This General Ledger module is fully integrated with other
             Takin' Care of Business! modules but needs at least the file
-            TCB.ZIP to run.  Some features include: context sensitive help,
+            TCB.ZIP to run.  Some features include: variabilityCtx sensitive help,
             real-time accounting, 2000 accounts, unlimited transactions,
             full range of accountant-ready reports, budgets, double entry,
             pop-up windows, recurring transactions, passwords, pre/post
@@ -10747,7 +10747,7 @@
           Description:
             This Inventory module fully integrates with other Takin' Care
             of Business! modules but needs at least the files TCB.ZIP and
-            TCB-GL.ZIP to run.  Some features include: context sensitive
+            TCB-GL.ZIP to run.  Some features include: variabilityCtx sensitive
             help, 3000 items, unlimited transactions, services or products,
             FIFO, LIFO, standard cost, specific cost, physical inventory
             and a full range of reports including activity and re-order
@@ -10778,7 +10778,7 @@
           Description:
             A fully integrated, eight-module, double-entry accounting
             system designed for small/medium sized businesses. Some
-            features include pop-up windows, menu driven, context sensitive
+            features include pop-up windows, menu driven, variabilityCtx sensitive
             help, passwords, full-range of accountant-ready reports and
             pre/post dated transactions. Combines the power &
             sophistication of "Big Business" bookkeeping with a simple,
@@ -10802,7 +10802,7 @@
           Description:
             This Payroll module fully integrates with other Takin' Care of
             Business! modules but needs at least the files TCB.ZIP and TCB-
-            GL.ZIP to run.  Some features include: context sensitive help,
+            GL.ZIP to run.  Some features include: variabilityCtx sensitive help,
             auto deduction/liability calculations, override options,
             manual/computer checks, 401K plans, user-modifiable tax tables,
             W-2s, 1099s, hourly/salary, weekly/biweekly/semi-monthly/
@@ -10831,7 +10831,7 @@
           Description:
             This Point Of Sale module fully integrates with other Takin'
             Care of Business! modules but needs at least the files TCB.ZIP
-            and TCB-GL.ZIP to run.  Some features include: context
+            and TCB-GL.ZIP to run.  Some features include: variabilityCtx
             sensitive help, product & service invoices, pre-printed or
             plain-paper forms, pop-up account windows, pre-defined service
             descriptions and multiple pricing. Integrates with the
@@ -11930,7 +11930,7 @@
             as well as durations. It uses easy, full-screen spreadsheet-
             style data entry screens and avoids specialized terminology and
             concepts. The Operating instructions, User's Guide and Glossary
-            are on-line and context-sensitive.
+            are on-line and variabilityCtx-sensitive.
 
 
           8.6  Client management
@@ -13090,7 +13090,7 @@
             supporting schedules and forms. An IRS approved signature 1040
             for EPSON FX/LQ,IBM Proprinter,or HP Laserjet.  State programs
             for registered uses.  Pulldown menus, mouse support, and
-            context help. A natural method of entering and reviewing tax
+            variabilityCtx help. A natural method of entering and reviewing tax
             data including scrolling forms, and single button switching
             between forms.  Popup Calculator.  Fees schedule.  Front page.
           Editor's note: The author claims to release yearly updates for
@@ -13179,7 +13179,7 @@
             A menu-driven, double-entry, personal accounting system
             combining powerful bookkeeping methods with an easy-to-use,
             full-featured design.  Some features include passwords, pop-up
-            windows, context sensitive help, full range of accountant-ready
+            windows, variabilityCtx sensitive help, full range of accountant-ready
             reports and pre/post dated transactions. Supports any checks
             and any printers.  Tracks income, expenses, assets,
             liabilities, budgets and net worth. Works under Windows. Manage
@@ -13566,7 +13566,7 @@
                v/ reconciliation
                v/ print income/budget statement
                v/ pull-down menu
-               v/ context-sensitive help
+               v/ variabilityCtx-sensitive help
                v/ up to 30 accounts, 32,767 transactions per account
                v/ 4 separate category sets, up to 100 categories for each
                v/ up to 100 recurrent payees
@@ -15445,7 +15445,7 @@
             This development system supplements your compiler's
             capabilities by providing more than 400 functions which make
             complex user interfaces simple to program. Also includes data-
-            entry forms, context sensitive help, automatic mouse support,
+            entry forms, variabilityCtx sensitive help, automatic mouse support,
             and more.
 
           Product: TesSeRact Compression System
@@ -15729,7 +15729,7 @@
 
 
             Supports Microsoft, Borland, Clipper, Aztec and Mix.  Mouse
-            support, context sensitive help, user configurable.
+            support, variabilityCtx sensitive help, user configurable.
 
           Product: Stamper
             Changes file/date time stamps.  See full description on
@@ -17950,7 +17950,7 @@
             memory or disk for drawings up to 32 megabytes.
 
             Pop up menus or single keystroke commands. Mouse support,
-            context sensitive help. Over 65 commands + undo/redo, pan,
+            variabilityCtx sensitive help. Over 65 commands + undo/redo, pan,
             zoom, fill patterns, Macros. Make exact scale prints with HPGL
             plotters, dot-matrix or laser printers. Exports WPG GEM HPGL
             ASCII. Imports WPG DXF ASCII.
@@ -18516,7 +18516,7 @@
           Description:
             Powerful easy-to-use menu-driven program to organize and manage
             a personal, club, corporate, church or school library. Features
-            context sensitive help, BROWSE and FIND windows.  Each record
+            variabilityCtx sensitive help, BROWSE and FIND windows.  Each record
             stores title, author, subject, book type, catalog # and much
             more. Full featured reporting with numerous reports to the
             screen, printer or disk.
@@ -19217,7 +19217,7 @@
             information about each title.  Has very fast search and find
             routines. Prints reports to the screen, printer or disk. Prints
             labels on regular or custom labels for cassettes.  Mouse
-            support, context sensitive help, moveable, re-sizeable browse/
+            support, variabilityCtx sensitive help, moveable, re-sizeable browse/
             find screens. Memo field for movie synopsis. Can hold 2 billion
             titles.
 
@@ -20218,7 +20218,7 @@
             Keeps a log of a vehicle's or machine's operation. It
             independently tracks when each maintenance item or inspection
             is due.  Full statistics display.  Quick, powerful, & easy to
-            use, comprehensive, and has pop-up context-sensitive help and a
+            use, comprehensive, and has pop-up variabilityCtx-sensitive help and a
             28 p. manual.  It will help you operate your vehicles or
             machines reliably and economically.  The detailed, printed log
             adds value to your vehicle at resale time.  "Scan" mode can
@@ -20350,7 +20350,7 @@
             including home inventory, valuables, important documents,
             medical data, family dates, entertainment catalog, tax data,
             loan information, credit cards, tradespeople, etc.  Each
-            category has an associated report. Full context-sensitive help,
+            category has an associated report. Full variabilityCtx-sensitive help,
             very easy to use.  Complete documentation is included on the
             distribution diskette.
 
@@ -21730,9 +21730,9 @@
           Author: Dennis Cunningham
           Registration: $15.00
           Registration benefits: Most recent version complete with a
-            context-sensitive hint facility.
+            variabilityCtx-sensitive hint facility.
           Version: 1.03  (05-19-91)
-          User benefits: Most recent version complete with a context-
+          User benefits: Most recent version complete with a variabilityCtx-
             sensitive hint facility.
           Look for: T-ZERO.ZIP on BBSs (call 414-789-4210 to download it at
             no charge); T-ZERO.ZIP in IBMNEW forum LIB 3 on CompuServe; T-

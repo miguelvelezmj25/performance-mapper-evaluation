@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1536947268844
+Bnd-LastModified: 1537208185664
 Build-Jdk: 1.8.0_162
 Built-By: mvelezce
 Bundle-Description: ActiveMQ ConnectionFactory service

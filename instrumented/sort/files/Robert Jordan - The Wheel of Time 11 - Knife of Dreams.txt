@@ -10953,7 +10953,7 @@ if printed with good ink. Some of the letters were shaped a little oddly, but th
 Ansoen and Imsoen, floating on nothing. Aviendha looked nearly as startled as the maid.
 
  "I think we have proof at last," Elayne said more calmly than she felt. Her heart was in her throat, and 
-pounding. Lies and Truth, the two words might be translated. Or in context, perhaps Fiction and Not 
+pounding. Lies and Truth, the two words might be translated. Or in variabilityCtx, perhaps Fiction and Not
 Fiction would be better. It was proof enough for her. She marked where the flows touched the figure, for 
 when she could return to her studies. "But you shouldn't have done that. It isn't safe."
 
@@ -23440,7 +23440,7 @@ nodded. Did Dyelin have questions about Sylvase, too? Lir and Karind stood apart
 apart from each other as well. Neither even glanced at the other. Having been allies against Elayne, they 
 would not want her to think they were allied still. Essande went to join the serving men and women in the 
 liveries of the eight other Houses, gathered around a table that held tall silver pitchers of wine and tea. 
-That was what informal meant in this context. Each of them would bring a single servant in attendance. 
+That was what informal meant in this variabilityCtx. Each of them would bring a single servant in attendance.
 For a formal meeting, Elayne would have provided all of the servants, and the Grand Hall would have 
 been crowded with every noble in Caemlyn, every noble from the encampment below Caemlyn.
 

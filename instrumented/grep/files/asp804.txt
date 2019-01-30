@@ -3283,7 +3283,7 @@
             was created to let you quickly search the contents of your
             files. Fast indexing with small indexes. Supports wild cards,
             logicals and indexing files inside Zip archives. Results are
-            shown in context. Fully featured 30 day time limited evaluation
+            shown in variabilityCtx. Fully featured 30 day time limited evaluation
             copy. Win95 and WinNT only. See http://www.redtree.com.
 
           Chapter 2, "Utilities"                                         54
@@ -5464,7 +5464,7 @@
             just the options you need.  You can then either execute the
             command directly with the options you have specified, or store
             the options in an environment variable to make the changes
-            permanent.  Both programs feature context-sensitive help and
+            permanent.  Both programs feature variabilityCtx-sensitive help and
             complete access to all documented (and some undocumented)
             command features.
 
@@ -7255,7 +7255,7 @@
             A popular favorite.  It allows users to store names, addresses,
             phone numbers, and up to 64K of notes per record.  Includes
             print and print-preview features as well as a full-featured on-
-            line context sensitive Windows help system. Also has an
+            line variabilityCtx sensitive Windows help system. Also has an
             intuitive toolbar interface in addition to the standard menu
             structure interface.  Data is created in MS-Access 2.0 format
             for easy portability to other popular applications.
@@ -7704,7 +7704,7 @@
           Download size: 410k (about 31 minutes with a 2400 baud modem)
           Description:
             Fast Personal Information Manager (PIM) runs under DOS/Windows,
-            icon included: 7 screens/contact, 22 search fields, context-
+            icon included: 7 screens/contact, 22 search fields, variabilityCtx-
             sensitive help windows & online manual, flexible import/export
             program.
 
@@ -7763,7 +7763,7 @@
             default scheduling on a weekly basis. Diary section includes
             text search feature, allowing you to view all journal entries
             pertaining to specific person, place, event, etc., and allows
-            for up to 64k of notes per day. Includes full on-line, context
+            for up to 64k of notes per day. Includes full on-line, variabilityCtx
             sensitive Windows Help system.
 
 
@@ -8252,7 +8252,7 @@
             A home and business calendar/reminder program that is easy to
             use, flexible, and powerful. It features simple or complex
             reminder types, desktop calendar and scan modes, color pull-
-            down and pop-up menus, and context sensitive on-line help.
+            down and pop-up menus, and variabilityCtx sensitive on-line help.
 
 
           Product: Family Scheduler
@@ -8352,7 +8352,7 @@
             enter up to 64000 characters of notes per day. Includes text
             search feature enabling you to zero in on dates in which you
             entered information about specific people, events, etc.
-            Includes full on-line context sensitive Windows help system.
+            Includes full on-line variabilityCtx sensitive Windows help system.
             Data is stored in MS-Access 2.0 format for easy portability to
             other applications. Supports international date formats.
 
@@ -8649,7 +8649,7 @@
             quick access to apps docs, directories, tasks and more.
             Enhances window managment with a Virtual Desktop, layout
             functions and enhanced system menu. Provides customizable
-            context senstive menus. Every menu, even apps menus, can be
+            variabilityCtx senstive menus. Every menu, even apps menus, can be
             stuck onto the desktop. Multi-user configuration.
 
 
@@ -8775,7 +8775,7 @@
             style file transfers via cable, ZIP/LHA/ARJ compressed file
             support, ASCII/hex file viewer and text editor, file search,
             split/join, date stamping, Blowfish encryption and secure file
-            wipe, context sensitive hypertext help system, Directory Maven
+            wipe, variabilityCtx sensitive hypertext help system, Directory Maven
             tree scanning/quick chdir, and much more!
 
           Chapter 2, "Utilities"                                        155
@@ -8831,7 +8831,7 @@
             files or groups may be quickly marked and then acted upon. The
             actions include copy, move, spawn, append, erase, rename,
             change attribute status, display, print and locate. Features
-            include context sensitive help, macro procedures, directory
+            include variabilityCtx sensitive help, macro procedures, directory
             tree, diskette labels and program parameter customization.
 
           Chapter 2, "Utilities"                                        156
@@ -9027,7 +9027,7 @@
           Description:
             Removes itself completely from system memory for running
             programs; 18 categories with up to 18 programs per category are
-            supported; mouse support; fully configurable; context sensitive
+            supported; mouse support; fully configurable; variabilityCtx sensitive
             on-line help; offers many built in utilities such as a file
             handler, screen blanker, contact manager and label manager.
 
@@ -9942,7 +9942,7 @@
             features: color syntax highlighting, multi-level undo and redo,
             full mouse support, multiple files/windows, macros, graphic
             drawing, column marking, compile from editor, word processing,
-            and context sensitive help. Search & replace with wildcards;
+            and variabilityCtx sensitive help. Search & replace with wildcards;
             globally, selectively or across all edited files.
             Reconfigurable keyboard with popular maps supplied; pull-down
             menus & online help change dynamically to reflect reassignment.
@@ -9978,7 +9978,7 @@
             A powerful but courteous editor which is packed with features:
             color syntax highlighting, multi-level undo and redo, full
             mouse support, macros, graphic drawing, column marking, compile
-            from editor, word processing, and context sensitive help. This
+            from editor, word processing, and variabilityCtx sensitive help. This
             32-bit charcter mode program supports HPFS filenames and makes
             full use of OS/2's virtual memory to edit very large files.
             Fully reconfigurable keyboard: pull-down menus & online help
@@ -10009,7 +10009,7 @@
             DEXTER is a PREMIUM QUALITY, super fast, full featured, multi-
             file text editor which is compact and EASY to use.  Has
             interactive multi-file search & replace, NO FILE SIZE LIMIT,
-            split and/or boxed windows, context sensitive help, on-line
+            split and/or boxed windows, variabilityCtx sensitive help, on-line
             local & global configuration, keyboard reconfig, wonderful
             customizable menus, TEMPORARY QUIT, word processing, line
             drawing, column blocks, macros, multiple printers, ASCII table,
@@ -10469,7 +10469,7 @@
           Description:
             Industrial strength word processor. Multiple file editing (up
             to 8 windows & copy text between), pull down menus, autosave,
-            macros, context sensitive help, tables & columns (with
+            macros, variabilityCtx sensitive help, tables & columns (with
             independent wrap), newspaper (snaking) columns, automatic
             footnotes and endnotes, generation of table of contents &
             indexes, spell checker, supports many printers (also lasers &
@@ -10634,7 +10634,7 @@
           Description:
             A full-feature WYSIWYG desktop publishing program. It has a
             mouse-driven Graphical User Interface and it can be used with
-            or without a mouse. Detailed context-sensitive help. Lets you
+            or without a mouse. Detailed variabilityCtx-sensitive help. Lets you
             create publications directly on the screen, and then print them
             on any printer. Provides scalable fonts that can be rotated and
             filled with any fill pattern. You can import PCX images, and
@@ -12520,7 +12520,7 @@
             your own databases, design your own data entry forms, create
             and store report queries, design report layouts, and store all
             data in MS-Access 2.0 format for easy portability.  Includes
-            print preview feature and on-line context sensitive Windows
+            print preview feature and on-line variabilityCtx sensitive Windows
             help system.
 
 
@@ -13478,7 +13478,7 @@
           Download size: 1889k (about 140 minutes with a 2400 baud modem)
           Description:
             Searches by zip code, state, area code, city or the sound of
-            the city name.  Very visual user interface with context
+            the city name.  Very visual user interface with variabilityCtx
             sensitive help.  Supports reporting and custom reports via SQL
             queries.  Even shows the time at the selected city vs. your
             local time.  Very useful!
@@ -15050,7 +15050,7 @@
             diagrams.  Solves for optimal strategy.  Performs sensitivity
             analysis of probability, value, and risk attitude. Includes
             exponential utility, automatic EVPI, Bayes revision, and 500
-            lines of context-sensitive on-screen help.  User manual has
+            lines of variabilityCtx-sensitive on-screen help.  User manual has
             complete command reference, step-by-step tutorial, and two
             application examples explaining decision tree concepts and
             terminology.
@@ -15130,7 +15130,7 @@
             with ISO9000/BS5750 requirements. Maintains calibration and
             verification schedules, keeping full history records for each.
             Completely menu driven - Features include: a powerful yet easy-
-            to-use query system, context sensitive help system, easy
+            to-use query system, variabilityCtx sensitive help system, easy
             installation, reports, label printing, etc.
 
 
@@ -17303,7 +17303,7 @@
             the way YOU work.  Turn conversion groups off/on. You can even
             turn off/on individual conversion factors! Conversions include:
             temperature, velocity, density, money, power, force, distance,
-            and more. On-line context sensitive help. In use by many
+            and more. On-line variabilityCtx sensitive help. In use by many
             Fortune 500, FedGov, NASA and many others.
 
 
@@ -17865,7 +17865,7 @@
             inventory, and financial investments. PF2 prints checks, works
             with CheckFree, interfaces to TurboTax, imports stock quotes
             from Prodigy, and imports Quicken .QIF files. Has on-line user
-            guide and extensive context sensitive help. Fully supported.
+            guide and extensive variabilityCtx sensitive help. Fully supported.
 
 
           Product: Portfolio Manager
@@ -18739,7 +18739,7 @@
             Replaces and improves on printed steam tables by providing a
             wider set of properties, eliminating need to interpolate, and
             working in many different units. Will find the conditions for
-            known values of enthalpy, entropy or density. Has context
+            known values of enthalpy, entropy or density. Has variabilityCtx
             sensitive on-line help.
 
             It gives 15 point properties and 17 temperature and pressure
@@ -19349,7 +19349,7 @@
             CompuServe message file manager, with message/reply editor &
             script generator, pulldown menus & command line mode. New
             PreScan summary for files.  Handles forum messages, CMail &
-            INTERNET. Keeps files trimed and sorted into context, Menu
+            INTERNET. Keeps files trimed and sorted into variabilityCtx, Menu
             SHELL organizes your navigator & add-ons. Sysop commands,
             changes immediately reflected in file. Powerful file navigation
             & viewing, multiple sorts, duplicate deletion, filters, search,
@@ -19908,7 +19908,7 @@
             change colors, reset category to any record and more! Send
             messages across the net to all or special messages to selected
             users, limit number of quotes displayed, administrator controls
-            categories displayed & more. Full mouse support & context
+            categories displayed & more. Full mouse support & variabilityCtx
             sensitive help.
 
           Chapter 10, "Communications"                                  370
@@ -22162,7 +22162,7 @@
           Description:
             Create a fully functional, self contained, application install
             program in less than 5 minutes! Menu driven setup (No scripts,
-            CFG's or programing) with mouse support & context sensitive
+            CFG's or programing) with mouse support & variabilityCtx sensitive
             help. Supports multiple disks, creates directories, copies
             files or unpacks EXE archives, checks disk space, executes
             application after installation, 6.5k INSTALL.EXE stores setup
@@ -22593,7 +22593,7 @@
             AHP144.ZIP on GEnie in CLIPPER forum LIBrary 0.
           Download size: 150k (about eleven minutes with a 2400 baud modem)
           Description:
-            Create fully index and context sensitive help screens.  The
+            Create fully index and variabilityCtx sensitive help screens.  The
             programmer can optionally let users add/update help text.  Help
             windows pop up when user presses help key for a specific topic
             or users can search help topic index for information.
@@ -22953,7 +22953,7 @@
           Description:
             A program for children from pre-K through third grade that
             teaches important time skills involving analog and digital
-            clocks. Various levels and context sensitive help are provided.
+            clocks. Various levels and variabilityCtx sensitive help are provided.
             Animated rewards pop out of the doors of the cuckoo clock, and
             ten correct answers gets a full-screen silly cartoon. Winner of
             the Shareware Industry Award for "Best Educational Software".
@@ -23456,7 +23456,7 @@
             abilities. Lets you record your child's progress unobtrusively
             and view results via printed and/or on-screen reports.  Handy
             on-screen pointers guide you and your child every step of the
-            way. Includes on-line context sensitive help system.
+            way. Includes on-line variabilityCtx sensitive help system.
 
 
           Product: U.S. Geography Tutor
@@ -23904,7 +23904,7 @@
           Description:
             Powerful easy-to-use menu-driven program to organize and manage
             a personal, club, corporate, church or school library. Features
-            context sensitive help, browse and find windows.  Each record
+            variabilityCtx sensitive help, browse and find windows.  Each record
             stores title, author, subject, book type, catalog # and much
             more. Full featured reporting with numerous reports to the
             screen, printer or disk.
@@ -26075,7 +26075,7 @@
             illustrations, logos, brochures, newsletters, more.  Rotating
             text, text on a line, convert text to curves, text wraps to fit
             shapes, gradient fills, textures, calligraphic pens, unlimited
-            named layers, complete Bezier curve support, context-sensitive
+            named layers, complete Bezier curve support, variabilityCtx-sensitive
             help, status line,  excellent shape palette, comprehensive
             multi-level undo. Import/export WMF, BMP and PCX. Much more!
 
@@ -26603,7 +26603,7 @@
           Description:
             A full featured CAD system with features found in expensive
             commercial CAD systems. Automatic dimensions, unlimited layers,
-            named objects in group libraries, context sensitive help, print
+            named objects in group libraries, variabilityCtx sensitive help, print
             on plotters, dot-matrix, lasers. Exact scale output in feet-
             inches, metric, decimal feet or inches. Keyboard macros. Import
             WordPerfect .WPG, .DXF; export .WPG, .GEM, ASCII or HPGL
@@ -29410,7 +29410,7 @@
             information about each title.  Has very fast search and find
             routines. Prints reports to the screen, printer or disk. Prints
             labels on regular or custom labels for cassettes.  Mouse
-            support, context sensitive help, moveable, re-sizeable browse/
+            support, variabilityCtx sensitive help, moveable, re-sizeable browse/
             find screens. Memo field for movie synopsis.
 
 
@@ -29694,7 +29694,7 @@
             design. Advanced data input/display screen stores an unlimited
             number of songs per side. Nine reports that can be indexed 6
             ways. Lists reports to screen, printer or disk. Quick find/
-            search on single or multiple fields. Features context sensitive
+            search on single or multiple fields. Features variabilityCtx sensitive
             help, online manual, screen saver, mouse support and much more.
 
 
@@ -30098,7 +30098,7 @@
             assistance).
           Download size: 1200k (about 89 minutes with a 2400 baud modem)
           Description:
-            TROOP TRACKER is a menu-driven program with a context-sensitive
+            TROOP TRACKER is a menu-driven program with a variabilityCtx-sensitive
             help system and mouse support. Requires 530K RAM and a Hard
             Disk. Will generate Rosters, Lables, Individual Records,
             Advancement Evaluations, Eligibility for OA Evaluations,
@@ -30450,7 +30450,7 @@
             single game, season games, season players, season single
             player), custom report generation, custom performance rating
             formulas, the ability to view reports on the screen, print
-            them, or save them to a file, and context-sensitive help.
+            them, or save them to a file, and variabilityCtx-sensitive help.
 
           Chapter 15, "Home & hobby"                                    569
 
@@ -30879,7 +30879,7 @@
             an intuitive, easy-to-use, 3D graphical user interface.  It
             includes powerful text search software, color maps, timeline,
             personal notes linked to the corresponding Scripture, tutorial,
-            context-sensitive help, and study-aids with topical hypertext
+            variabilityCtx-sensitive help, and study-aids with topical hypertext
             links to events, parables and miracles in the life of Christ.
             Over 40,000 copies in use.
 
@@ -31649,7 +31649,7 @@
           Description:
             A bridge program for all bridge players. It enables you to
             improve your game by study and practice away from the table.
-            Has an easy to use interface and extensive context sensitive
+            Has an easy to use interface and extensive variabilityCtx sensitive
 
           Chapter 17, "Games"                                           593
 
@@ -32811,7 +32811,7 @@
           Description:
             For the animal in all of us. ESCAPE! is the first tale in a
             collection called Crowndale Tales. The tale is sophisticated
-            enough to appeal to an adult while simple enough in context for
+            enough to appeal to an adult while simple enough in variabilityCtx for
             a child. In the story, a wounded and helpless dove faces the
             challenge of outwiting a cunning hyena.
 

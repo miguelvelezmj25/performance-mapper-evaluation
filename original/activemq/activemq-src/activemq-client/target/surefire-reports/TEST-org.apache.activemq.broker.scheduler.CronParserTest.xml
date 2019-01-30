@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.apache.activemq.broker.scheduler.CronParserTest" time="0.133" tests="16" errors="0" skipped="0" failures="0">
+<testsuite name="org.apache.activemq.broker.scheduler.CronParserTest" time="0.081" tests="16" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib"/>
     <property name="java.vm.version" value="25.162-b12"/>
     <property name="gopherProxySet" value="false"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
-    <property name="maven.multiModuleProjectDirectory" value="/Users/mvelezce/Desktop/activemq-parent-5.15.6"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/activemq-src"/>
     <property name="java.vendor.url" value="http://java.oracle.com/"/>
     <property name="path.separator" value=":"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -16,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.os.patch.level" value="unknown"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/Users/mvelezce/Desktop/activemq-parent-5.15.6"/>
+    <property name="user.dir" value="/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/activemq-src"/>
     <property name="java.runtime.version" value="1.8.0_162-b12"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
     <property name="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/endorsed"/>
@@ -65,18 +65,18 @@
   </properties>
   <testcase name="testGetNextExact" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.002"/>
   <testcase name="testGetNextRange" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
-  <testcase name="testgetNextTimeDayOfWeekVariant" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.006"/>
+  <testcase name="testgetNextTimeDayOfWeekVariant" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.003"/>
   <testcase name="testgetNextTimeDayOfWeek" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
-  <testcase name="testgetStartNextMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
-  <testcase name="testgetNextTimeHoursZeroMin" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
-  <testcase name="testValidate" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.002"/>
+  <testcase name="testgetStartNextMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
+  <testcase name="testgetNextTimeHoursZeroMin" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
+  <testcase name="testValidate" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
   <testcase name="testgetNextTimeDays" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
-  <testcase name="testgetNextTimeMinutes" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
-  <testcase name="testGetNext" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.118"/>
+  <testcase name="testgetNextTimeMinutes" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
+  <testcase name="testGetNext" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.071"/>
   <testcase name="testTokenize" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
   <testcase name="testgetNextTimeMonthVariant" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
   <testcase name="testgetNextTimeHours" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
-  <testcase name="testgetNextTimeMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
-  <testcase name="testgetNextStartCurrMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0.001"/>
+  <testcase name="testgetNextTimeMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
+  <testcase name="testgetNextStartCurrMonth" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
   <testcase name="testGetNextCommaSeparated" classname="org.apache.activemq.broker.scheduler.CronParserTest" time="0"/>
 </testsuite>

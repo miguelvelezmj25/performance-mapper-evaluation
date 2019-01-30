@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1536947298357
+Bnd-LastModified: 1537208212119
 Build-Jdk: 1.8.0_162
 Built-By: mvelezce
 Bundle-ClassPath: .,WEB-INF/classes,WEB-INF/lib/geronimo-jms_1.1_spec-1.

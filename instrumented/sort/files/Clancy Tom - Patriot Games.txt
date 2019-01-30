@@ -4441,7 +4441,7 @@ Robby nodded at that one. Pilots trust their instinct, too. Now, his were tellin
 
 "American Embassy," the switchboard operator answered after the first ring.
 
-"Legal Attach‚, please."
+"Legal Attachï¿½, please."
 
 "Thank you. Wait, please." Jack waited. The operator was back in fifteen seconds. "No answer. Mr. Murray has gone home for the day -- no, excuse me, he's out of town for the remainder of the week. Can I take a message?"
 
@@ -5167,7 +5167,7 @@ One junior analyst's brief was coverage on camps suspected to be used for the tr
 
 And as was so often the case, here was the nib. The junior analyst was better described as a technician. He collected and collated data, but didn't really analyze it. That was someone else's job, for when the project was finished. In this particular case the data being processed noted infrared energy. The camps he examined on a daily basis -- there were over two hundred -- were mainly in deserts. That was remarkably good luck. While everyone knew that deserts suffer from blistering daylight heat, it was less appreciated that they can get quite cold at night -- falling below freezing in many cases. So the technician was trying to determine the occupancy of the camps from the number of buildings that were heated during the cool nights. These showed up quite well on the infrared: bright blobs of white on a cold, black background.
 
-A computer stored the digital signals from the satellite. The technician called up the camps by code number, noted the number of heated buildings in each, and transferred the data to a second data file. Camp 11-5-18, located at 28ø 32' 47" North Latitude, 19ø 07' 52" East Longitude, had six buildings, one of which was a garage. This one had at least two vehicles in it; though the building was unheated, the thermal signatures of two internal-combustion engines radiated clearly through the corrugated steel roofs. Of the other five buildings, only one had its heater on, the technician noted. The previous week -- he checked -- three had been warm. The warm one now, the data sheet said, was occupied by a small guard and maintenance group, thought to be five men. It evidently had its own kitchen, since one part of the building was always a little warmer than the rest. Another building was a full-sized dining hall. That and the dormitories were now empty. The technician made the appropriate notations, and the computer assigned them to a simple line graph that peaked when occupancy was high and fell when it was low. The technician didn't have the time to check the patterns on the graph, but he assumed, wrongly, that someone else did.
+A computer stored the digital signals from the satellite. The technician called up the camps by code number, noted the number of heated buildings in each, and transferred the data to a second data file. Camp 11-5-18, located at 28ï¿½ 32' 47" North Latitude, 19ï¿½ 07' 52" East Longitude, had six buildings, one of which was a garage. This one had at least two vehicles in it; though the building was unheated, the thermal signatures of two internal-combustion engines radiated clearly through the corrugated steel roofs. Of the other five buildings, only one had its heater on, the technician noted. The previous week -- he checked -- three had been warm. The warm one now, the data sheet said, was occupied by a small guard and maintenance group, thought to be five men. It evidently had its own kitchen, since one part of the building was always a little warmer than the rest. Another building was a full-sized dining hall. That and the dormitories were now empty. The technician made the appropriate notations, and the computer assigned them to a simple line graph that peaked when occupancy was high and fell when it was low. The technician didn't have the time to check the patterns on the graph, but he assumed, wrongly, that someone else did.
 
 
 "You remember. Lieutenant," Breckenridge said. "Deep breath, let it half out and squeeeze gently."
@@ -7604,7 +7604,7 @@ Alex pocketed the book. "That's more like it. Okay, we have another job. I hope 
 
 "Look, what you do with your people, I don't give a rat's ass. What happens to my people, I do. That last little game we played for you was bush league, Sean."
 
-Miller figured out what "bush league" meant from context. "The operation was politically sound, and you know it. Perhaps you've forgotten that the objective is always political. Politically, the operation was a complete success."
+Miller figured out what "bush league" meant from variabilityCtx. "The operation was politically sound, and you know it. Perhaps you've forgotten that the objective is always political. Politically, the operation was a complete success."
 
 "I don't need you to tell me that!" Alex snapped back in his best intimidating tone. Miller was a proud little twerp, but Alex figured he could pinch his head off with one good squeeze. "You lost a troop because you were playing this personal, not professional -- and I know what you're thinking. It was our first big play, right? Well, son, I think we proved that we got our shit together, didn't we? And I warned you up front that your man was too exposed. If you'd listened to me, you wouldn't have a man on the inside. I know your background is pretty impressive, but this is my turf, and I know it."
 

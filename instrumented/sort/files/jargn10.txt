@@ -108,18 +108,18 @@ linguistic evolution in action.
 
 Hackish slang also challenges some common linguistic and
 anthropological assumptions.  For example, it has recently become
-fashionable to speak of `low-context' versus `high-context'
-communication, and to classify cultures by the preferred context level
+fashionable to speak of `low-variabilityCtx' versus `high-variabilityCtx'
+communication, and to classify cultures by the preferred variabilityCtx level
 of their languages and art forms.  It is usually claimed that
-low-context communication (characterized by precision, clarity, and
+low-variabilityCtx communication (characterized by precision, clarity, and
 completeness of self-contained utterances) is typical in cultures
 which value logic, objectivity, individualism, and competition; by
-contrast, high-context communication (elliptical, emotive,
+contrast, high-variabilityCtx communication (elliptical, emotive,
 nuance-filled, multi-modal, heavily coded) is associated with cultures
 which value subjectivity, consensus, cooperation, and tradition.  What
 then are we to make of hackerdom, which is themed around extremely
-low-context interaction with computers and exhibits primarily
-"low-context" values, but cultivates an almost absurdly high-context
+low-variabilityCtx interaction with computers and exhibits primarily
+"low-variabilityCtx" values, but cultivates an almost absurdly high-variabilityCtx
 slang style?
 
 The intensity and consciousness of hackish invention make a compilation
@@ -1151,7 +1151,7 @@ bug.
 The beginning of each entry is marked by a colon (`:') at the
 left margin.  This convention helps out tools like hypertext browsers
 that benefit from knowing where entry boundaries are, but aren't as
-context-sensitive as humans.
+variabilityCtx-sensitive as humans.
 
 In pure ASCII renderings of the Jargon File, you will see {} used to
 bracket words which themselves have entries in the File.  This isn't
@@ -1390,7 +1390,7 @@ The Jargon Lexicon
    Motorola 680x0 family.  2. A register being used for arithmetic or
    logic (as opposed to addressing or a loop index), especially one
    being used to accumulate a sum or count of many items.  This use is
-   in context of a particular routine or stretch of code.  "The
+   in variabilityCtx of a particular routine or stretch of code.  "The
    FOOBAZ routine uses A3 as an accumulator."  3. One's in-basket
    (esp. among old-timers who might use sense 1).  "You want this
    reviewed?  Sure, just put it in the accumulator."  (See {stack}.)
@@ -1492,7 +1492,7 @@ The Jargon Lexicon
    Natural Language Problem' (building a system that can understand
    and speak a natural language as well as a human).  These may appear
    to be modular, but all attempts so far (1991) to solve them have
-   foundered on the amount of context information and `intelligence'
+   foundered on the amount of variabilityCtx information and `intelligence'
    they seem to require. See also {gedanken}.
 
 :AI koans: /A-I koh'anz/ pl.n. A series of pastiches of Zen
@@ -2421,7 +2421,7 @@ noticed.
 
    In either of senses 1 or 2, the term is usually prefixed by the
    name of the intended board (`the Moonlight Casino bboard' or
-   `market bboard'); however, if the context is clear, the better-read
+   `market bboard'); however, if the variabilityCtx is clear, the better-read
    bboards may be referred to by name alone, as in (at CMU) "Don't
    post for-sale ads on general".
 
@@ -3139,7 +3139,7 @@ noticed.
    Compare {purple wire}, {red wire}, {yellow wire}.
 
 :blurgle: /bler'gl/ [Great Britain] n. Spoken {metasyntactic
-   variable}, to indicate some text which is obvious from context, or
+   variable}, to indicate some text which is obvious from variabilityCtx, or
    which is already known. If several words are to be replaced,
    blurgle may well be doubled or trebled. "To look for something in
    several files use `grep string blurgle blurgle'."  In each case,
@@ -3179,7 +3179,7 @@ noticed.
    by a ZIP-code followed by an end-of-line."  Note that many things
    (such as the format of a personal-part, apartment specifier, or
    ZIP-code) are left unspecified.  These are presumed to be obvious
-   from context or detailed somewhere nearby.  See also {parse}.
+   from variabilityCtx or detailed somewhere nearby.  See also {parse}.
    2. The term is also used loosely for any number of variants and
    extensions, possibly containing some or all of the {regexp}
    wildcards such as `*' or `+'.  In fact the example above
@@ -3200,7 +3200,7 @@ noticed.
    worth noting that one of the major cable makers uses the trademark
    `Anaconda'.
 
-:board: n. 1. In-context synonym for {bboard}; sometimes used
+:board: n. 1. In-variabilityCtx synonym for {bboard}; sometimes used
    even for USENET newsgroups.  2. An electronic circuit board
    (compare {card}).
 
@@ -3719,7 +3719,7 @@ noticed.
    first number off the front.
 
    Whether brute-force programming should be considered stupid or not
-   depends on the context; if the problem isn't too big, the extra CPU
+   depends on the variabilityCtx; if the problem isn't too big, the extra CPU
    time spent on a brute-force solution may cost less than the
    programmer time it would take to develop a more `intelligent'
    algorithm.  Additionally, a more intelligent algorithm may imply
@@ -4162,7 +4162,7 @@ noticed.
    "What did he say?"  Steele: "Bob just used `canonical' in the
    canonical way."
 
-   Of course, canonicality depends on context, but it is implicitly
+   Of course, canonicality depends on variabilityCtx, but it is implicitly
    defined as the way *hackers* normally expect things to be.
    Thus, a hacker may claim with a straight face that `according to
    religious law' is *not* the canonical meaning of `canonical'.
@@ -4367,7 +4367,7 @@ noticed.
    `pointer hunt': The process of going through a dump
    (interactively or on a large piece of paper printed with hex
    {runes}) following dynamic data-structures.  Used only in a
-   debugging context.
+   debugging variabilityCtx.
 
 :check: n. A hardware-detected error condition, most commonly used
    to refer to actual hardware failures rather than software-induced
@@ -4922,7 +4922,7 @@ noticed.
 
 :console jockey: n. See {terminal junkie}.
 
-:content-free: [by analogy with techspeak `context-free'] adj.
+:content-free: [by analogy with techspeak `variabilityCtx-free'] adj.
    Used of a message that adds nothing to the recipient's knowledge.
    Though this adjective is sometimes applied to {flamage}, it more
    usually connotes derision for communication styles that exalt form
@@ -6947,7 +6947,7 @@ noticed.
    produced from it by a compiler.  The idea behind the term is that
    to a real hacker, a program written in his favorite programming
    language is at least as readable as English.  Usage: used mostly by
-   old-time hackers, though recognizable in context.  2. The official
+   old-time hackers, though recognizable in variabilityCtx.  2. The official
    name of the database language used by the Pick Operating System,
    actually a sort of crufty, brain-damaged SQL with delusions of
    grandeur.  The name permits {marketroid}s to say "Yes, and you
@@ -7699,7 +7699,7 @@ noticed.
    Cressida', Cressida laments her inability to grasp the proof of a
    particular mathematical theorem; her uncle Pandarus then observes
    that it's called "the fleminge of wrecches."  This phrase seems
-   to have been intended in context as "that which puts the wretches
+   to have been intended in variabilityCtx as "that which puts the wretches
    to flight" but was probably just as ambiguous in Middle English as
    "the flaming of wretches" would be today.  One suspects that
    Chaucer would be right at home on USENET.
@@ -8088,7 +8088,7 @@ noticed.
    {email}.
 
 :fossil: n. 1. In software, a misfeature that becomes
-   understandable only in historical context, as a remnant of times
+   understandable only in historical variabilityCtx, as a remnant of times
    past retained so as not to break compatibility.  Example: the
    retention of octal as default base for string escapes in {C}, in
    spite of the better match of hexadecimal to ASCII and modern
@@ -8473,7 +8473,7 @@ noticed.
 
    In jargon, the full phrase is sometimes heard but the {abbrev} is
    more frequently used because it is shorter.  Note that there is an
-   ambiguity in usage that has to be resolved by context: "I'm going
+   ambiguity in usage that has to be resolved by variabilityCtx: "I'm going
    to garbage-collect my desk" usually means to clean out the
    drawers, but it could also mean to throw away or recycle the desk
    itself.
@@ -8529,7 +8529,7 @@ noticed.
    also {blinkenlights}.
 
 :geek out: vi. To temporarily enter techno-nerd mode while in a
-   non-hackish context, for example at parties held near computer
+   non-hackish variabilityCtx, for example at parties held near computer
    equipment.  Especially used when you need to do something highly
    technical and don't have time to explain: "Pardon me while I geek
    out for a moment."  See {computer geek}.
@@ -8643,12 +8643,12 @@ noticed.
    of only a handful of highly parallel machines, but this is expected
    to change.  Compare {KIPS}.
 
-:glark: /glark/ vt. To figure something out from context.  "The
+:glark: /glark/ vt. To figure something out from variabilityCtx.  "The
    System III manuals are pretty poor, but you can generally glark the
-   meaning from context."  Interestingly, the word was originally
-   `glork'; the context was "This gubblick contains many
+   meaning from variabilityCtx."  Interestingly, the word was originally
+   `glork'; the variabilityCtx was "This gubblick contains many
    nonsklarkish English flutzpahs, but the overall pluggandisp can be
-   glorked [sic] from context" (David Moser, quoted by Douglas
+   glorked [sic] from variabilityCtx" (David Moser, quoted by Douglas
    Hofstadter in his "Metamagical Themas" column in the
    January 1981 `Scientific American').  It is conjectured that
    hackish usage mutated the verb to `glark' because {glork} was
@@ -8945,7 +8945,7 @@ noticed.
    and shared.  There is a common heuristic about the amount of food
    to order, expressed as "Get N - 1 entrees"; the value of N,
    which is the number of people in the group, can be inferred from
-   context (see {N}).  See {{oriental food}}, {ravs},
+   variabilityCtx (see {N}).  See {{oriental food}}, {ravs},
    {stir-fried random}.
 
 :Green Book: n. 1. One of the three standard {PostScript}
@@ -9265,7 +9265,7 @@ noticed.
    other's presence (of course, he or she is reciprocally free to
    leave without a word).  The understanding is that you might be in
    {hack mode} with a lot of delicate {state} (sense 2) in your
-   head, and you dare not {swap} that context out until you have
+   head, and you dare not {swap} that variabilityCtx out until you have
    reached a good point to pause. See also {juggling eggs}.
 
 :hack on: vt. To {hack}; implies that the subject is some
@@ -9420,7 +9420,7 @@ noticed.
 :hairy: adj. 1. Annoyingly complicated.  "{DWIM} is incredibly
    hairy."  2. Incomprehensible.  "{DWIM} is incredibly hairy."
    3. Of people, high-powered, authoritative, rare, expert, and/or
-   incomprehensible.  Hard to explain except in context: "He knows
+   incomprehensible.  Hard to explain except in variabilityCtx: "He knows
    this hairy lawyer who says there's nothing to worry about."  See
    also {hirsute}.
 
@@ -9582,7 +9582,7 @@ noticed.
    at the elbows and/or shoulders (depending on the magnitude of the
    handwave); alternatively, holding the forearms in one position
    while rotating the hands at the wrist to make them flutter.  In
-   context, the gestures alone can suffice as a remark; if a speaker
+   variabilityCtx, the gestures alone can suffice as a remark; if a speaker
    makes an outrageously unsupported assumption, you might simply wave
    your hands in this way, as an accusation, far more eloquent than
    words could express, that his logic is faulty.
@@ -9787,7 +9787,7 @@ noticed.
    `sendenary'.  `Decimal' is from an ordinal number; the
    corresponding prefix for 6 would imply something like
    `sextidecimal'.  The `sexa-' prefix is Latin but incorrect in this
-   context, and `hexa-' is Greek.  The word `octal' is similarly
+   variabilityCtx, and `hexa-' is Greek.  The word `octal' is similarly
    incorrect; a correct form would be `octaval' (to go with decimal),
    or `octonary' (to go with binary).  If anyone ever implements a
    base-3 computer, computer scientists will be faced with the
@@ -10210,7 +10210,7 @@ noticed.
 
 :include: vt. [USENET] 1. To duplicate a portion (or whole) of
    another's message (typically with attribution to the source) in a
-   reply or followup, for clarifying the context of one's response.
+   reply or followup, for clarifying the variabilityCtx of one's response.
    See the the discussion of inclusion styles under "Hacker
    Writing Style".  2. [from {C}] `#include <disclaimer.h>'
    has appeared in {sig block}s to refer to a notional `standard
@@ -11612,7 +11612,7 @@ noticed.
    didn't get let out."  Compare the original phrasing of {Murphy's
    Law}.
 
-:mailing list: n. (often shortened in context to `list') 1. An
+:mailing list: n. (often shortened in variabilityCtx to `list') 1. An
    {email} address that is an alias (or {macro}, though that word
    is never used in this connection) for many other email addresses.
    Some mailing lists are simple `reflectors', redirecting mail sent
@@ -12541,7 +12541,7 @@ noticed.
    now has an extra 16M of memory, thanks to the card I'm testing for
    Mumbleco." 6. A conversational wild card used to designate
    something one doesn't want to bother spelling out, but which can be
-   {glark}ed from context.  Compare {blurgle}.  7. [XEROX PARC]
+   {glark}ed from variabilityCtx.  Compare {blurgle}.  7. [XEROX PARC]
    A colloquialism used to suggest that further discussion would be
    fruitless.
 
@@ -12661,7 +12661,7 @@ noticed.
    original sense of a variable name: "This crock has N bugs,
    as N goes to infinity."  (The true number of bugs is always
    at least N + 1.)  2. A variable whose value is inherited
-   from the current context.  For example, when a meal is being
+   from the current variabilityCtx.  For example, when a meal is being
    ordered at a restaurant, N may be understood to mean however
    many people there are at the table.  From the remark "We'd like to
    order N wonton soups and a family dinner
@@ -12669,7 +12669,7 @@ noticed.
    wants to eat only soup, even though you don't know how many people
    there are (see {great-wall}).  3. `Nth': adj. The
    ordinal counterpart of N, senses 1 and 2.  "Now for the
-   Nth and last time..." In the specific context
+   Nth and last time..." In the specific variabilityCtx
    "Nth-year grad student", N is generally assumed to
    be at least 4, and is usually 5 or more (see {tenured graduate
    student}).  See also {{random numbers}}, {two-to-the-N}.
@@ -13146,7 +13146,7 @@ noticed.
    computation far off from its expected course.  2. When describing
    the behavior of a person, suggests a tantrum or a {flame}.
    "When you talk to Bob, don't mention the drug problem or he'll go
-   nonlinear for hours."  In this context, `go nonlinear' connotes
+   nonlinear for hours."  In this variabilityCtx, `go nonlinear' connotes
    `blow up out of proportion' (proportion connotes linearity).
 
 :nontrivial: adj. Requiring real thought or significant computing
@@ -14042,7 +14042,7 @@ noticed.
 :phreaking: /freek'ing/ [from `phone phreak'] n. 1. The art and
    science of cracking the phone network (so as, for example, to make
    free long-distance calls).  2. By extension, security-cracking in
-   any other context (especially, but not exclusively, on
+   any other variabilityCtx (especially, but not exclusively, on
    communications networks) (see {cracking}).
 
    At one time phreaking was a semi-respectable activity among
@@ -14331,7 +14331,7 @@ noticed.
    the nearest terminal".  See {RL}.
 
 :post: v. To send a message to a {mailing list} or {newsgroup}.
-   Distinguished in context from `mail'; one might ask, for
+   Distinguished in variabilityCtx from `mail'; one might ask, for
    example: "Are you going to post the patch or mail it to known
    users?"
 
@@ -14929,7 +14929,7 @@ noticed.
    also {J. Random}, {some random X}.
 
 :random numbers:: n. When one wishes to specify a large but random
-   number of things, and the context is inappropriate for {N}, certain
+   number of things, and the variabilityCtx is inappropriate for {N}, certain
    numbers are preferred by hacker tradition (that is, easily
    recognized as placeholders).  These include the following:
 
@@ -16561,7 +16561,7 @@ noticed.
    Often, the behavior of a {trampoline} is to perform an error
    check once and then snap the pointer that invoked it so as
    henceforth to bypass the trampoline (and its one-shot error check).
-   In this context one also speaks of `snapping links'.  For
+   In this variabilityCtx one also speaks of `snapping links'.  For
    example, in a Lisp implementation, a function interface trampoline
    might check to make sure that the caller is passing the correct
    number of arguments; if it is, and if the caller and the callee are
@@ -16574,7 +16574,7 @@ noticed.
    permission.  See also {BLT}.  2. [in the UNIX community] To
    fetch a file or set of files across a network.  See also
    {blast}.  This term was mainstream in the late 1960s, meaning
-   `to eat piggishly'.  It may still have this connotation in context.
+   `to eat piggishly'.  It may still have this connotation in variabilityCtx.
    "He's in the snarfing phase of hacking --- {FTP}ing megs of
    stuff a day."  3. To acquire, with little concern for legal forms
    or politesse (but not quite by stealing).  "They were giving
@@ -16833,7 +16833,7 @@ noticed.
    the spiffy {X} version of {empire} yet?"  2. Said
    sarcastically of a program that is perceived to have little more
    than a flashy interface going for it.  Which meaning should be
-   drawn depends delicately on tone of voice and context.  This word
+   drawn depends delicately on tone of voice and variabilityCtx.  This word
    was common mainstream slang during the 1940s, in a sense close to #1.
 
 :spike: v. To defeat a selection mechanism by introducing a
@@ -17366,7 +17366,7 @@ noticed.
    FYI, FYA, BTW, BCNU, WTF, and CUL.  A few other abbreviations have
    been reported from commercial networks, such as GEnie and
    CompuServe, where on-line `live' chat including more than two
-   people is common and usually involves a more `social' context,
+   people is common and usually involves a more `social' variabilityCtx,
    notably the following:
 
      <g>
@@ -17875,7 +17875,7 @@ noticed.
 :time T: /ti:m T/ n. 1. An unspecified but usually well-understood
    time, often used in conjunction with a later time T+1.
    "We'll meet on campus at time T or at Louie's at
-   time T+1" means, in the context of going out for dinner:
+   time T+1" means, in the variabilityCtx of going out for dinner:
    "We can meet on campus and go to Louie's, or we can meet at Louie's
    itself a bit later."  (Louie's was a Chinese restaurant in Palo Alto
    that was a favorite with hackers.)  Had the number 30 been used instead
@@ -18170,7 +18170,7 @@ noticed.
 :trit: /trit/ [by analogy with `bit'] n. One base-3 digit; the
    amount of information conveyed by a selection among one of three
    equally likely outcomes (see also {bit}).  These arise, for
-   example, in the context of a {flag} that should actually be able
+   example, in the variabilityCtx of a {flag} that should actually be able
    to assume *three* values --- such as yes, no, or unknown.  Trits are
    sometimes jokingly called `3-state bits'.  A trit may be
    semi-seriously referred to as `a bit and a half', although it is
@@ -18520,7 +18520,7 @@ noticed.
    parse its arguments in 69 bletcherous ways.  It must have been
    written by a real UNIX weenie."  2. A derogatory term for anyone
    who engages in uncritical praise of UNIX.  Often appearing in the
-   context "stupid UNIX weenie".  See {Weenix}, {UNIX
+   variabilityCtx "stupid UNIX weenie".  See {Weenix}, {UNIX
    conspiracy}.  See also {weenie}.
 
 :unixism: n. A piece of code or a coding technique that depends on the
@@ -18623,7 +18623,7 @@ noticed.
    uses LISP (but with the skill of a hacker).  A LISP user is one who
    uses LISP, whether skillfully or not.  Thus there is some overlap
    between the two terms; the subtle distinctions must be resolved by
-   context.
+   variabilityCtx.
 
 :user-friendly: adj. Programmer-hostile.  Generally used by hackers in
    a critical tone, to describe systems that hold the user's hand so
@@ -18868,7 +18868,7 @@ noticed.
    {verbiage} that assimilates it to the word `garbage'.  Compare
    {content-free}.  More pejorative than `verbiage'.
 
-:verbiage: n. When the context involves a software or hardware
+:verbiage: n. When the variabilityCtx involves a software or hardware
    system, this refers to {{documentation}}.  This term borrows the
    connotations of mainstream `verbiage' to suggest that the
    documentation is of marginal utility and that the motives behind
@@ -19312,7 +19312,7 @@ noticed.
    Compare {spod}, {computer geek}, {terminal junkie}.
    2. [Among hackers] When used with a qualifier (for example, as in
    {UNIX weenie}, VMS weenie, IBM weenie) this can be either an
-   insult or a term of praise, depending on context, tone of voice,
+   insult or a term of praise, depending on variabilityCtx, tone of voice,
    and whether or not it is applied by a person who considers him or
    herself to be the same sort of weenie.  Implies that the weenie has
    put a major investment of time, effort, and concentration into the
@@ -19357,7 +19357,7 @@ noticed.
    program with no idea whatsoever how it works." (See {whacker}.)
    It is actually possible to do this in nontrivial circumstances if
    the change is small and well-defined and you are very good at
-   {glark}ing things from context.  As a trivial example, it is
+   {glark}ing things from variabilityCtx.  As a trivial example, it is
    relatively easy to change all `stderr' writes to `stdout'
    writes in a piece of C filter code which remains otherwise
    mysterious.
@@ -19705,7 +19705,7 @@ noticed.
 
 :X: /X/ n. 1. Used in various speech and writing contexts (also
    in lowercase) in roughly its algebraic sense of `unknown within a
-   set defined by context' (compare {N}).  Thus, the abbreviation
+   set defined by variabilityCtx' (compare {N}).  Thus, the abbreviation
    680x0 stands for 68000, 68010, 68020, 68030, or 68040, and 80x86
    stands for 80186, 80286 80386 or 80486 (note that a UNIX hacker
    might write these as 680[0-4]0 and 80[1-4]86 or 680?0 and 80?86
@@ -19806,7 +19806,7 @@ noticed.
 :You are not expected to understand this: cav. [UNIX] The canonical
    comment describing something {magic} or too complicated to
    bother explaining properly.  From an infamous comment in the
-   context-switching code of the V6 UNIX kernel.
+   variabilityCtx-switching code of the V6 UNIX kernel.
 
 :You know you've been hacking too long when...: The set-up line
    for a genre of one-liners told by hackers about themselves.  These
@@ -20059,7 +20059,7 @@ noticed.
 :@Begin: // See {\begin}.
 
 :\begin: // [from the LaTeX command] With \end, used
-   humorously in writing to indicate a context or to remark on the
+   humorously in writing to indicate a variabilityCtx or to remark on the
    surrounded text.  For example:
 
      \begin{flame}
@@ -20089,7 +20089,7 @@ meaning of various entries in the lexicon.
 to MIT hacker Phil Agre.  "In fact, {hack} has only one meaning, an
 extremely subtle and profound one which defies articulation.  Which
 connotation is implied by a given use of the word depends in similarly
-profound ways on the context.  Similar remarks apply to a couple of
+profound ways on the variabilityCtx.  Similar remarks apply to a couple of
 other hacker words, most notably {random}."
 
 Hacking might be characterized as `an appropriate application of
@@ -21032,7 +21032,7 @@ Although high general intelligence is common among hackers, it is not
 the sine qua non one might expect.  Another trait is probably even more
 important: the ability to mentally absorb, retain, and reference large
 amounts of `meaningless' detail, trusting to later experience to give it
-context and meaning.  A person of merely average analytical intelligence
+variabilityCtx and meaning.  A person of merely average analytical intelligence
 who has this trait can become an effective hacker, but a creative genius
 who lacks it will swiftly find himself outdistanced by people who
 routinely upload the contents of thick reference manuals into their

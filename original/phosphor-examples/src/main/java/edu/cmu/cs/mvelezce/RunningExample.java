@@ -8,24 +8,43 @@ public class RunningExample {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
-    boolean x = false;
-    System.out.println(1);
-
-    if (A) { // 1
-      System.out.println(2);
-      x = true;
-      foo(B);
+    if (A && B) {
+      System.out.println();
     }
 
-    if (x) { // 2
-      System.out.println(3);
+    System.out.println();
+
+    if (A) {
+      System.out.println();
+
+      if (B) {
+        System.out.println();
+      }
+
+      System.out.println();
     }
+
+//    boolean x = false;
+//    System.out.println(1);
+//
+//    if (A) { // 1
+//      System.out.println(2);
+//      x = true;
+//      foo(B);
+//    }
+//
+//    if (x) { // 2
+//      System.out.println(3);
+//    }
 
   }
 
   private static void foo(boolean b) {
     if (b) { // 1
       System.out.println(4);
+    }
+    else {
+      System.out.println();
     }
   }
 }

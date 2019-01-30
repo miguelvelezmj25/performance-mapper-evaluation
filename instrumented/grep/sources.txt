@@ -1,10 +1,10 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/command/ExitValueException.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/context/DefaultExecutionContext.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/context/DerivedExecutionContext.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/context/ExecutionContext.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/context/ExecutionContextFactory.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/variabilityCtx/DefaultExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/variabilityCtx/DerivedExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/variabilityCtx/ExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/variabilityCtx/ExecutionContextFactory.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/convert/ArrayConverters.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/convert/CharacterConverters.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/grep/src/main/java/org/unix4j/grep/convert/CompositeValueConverter.java

@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1536947267985
+Bnd-LastModified: 1537208184929
 Build-Jdk: 1.8.0_162
 Built-By: mvelezce
 Bundle-Description: Provides resources for running ActiveMQ in Apache Ka

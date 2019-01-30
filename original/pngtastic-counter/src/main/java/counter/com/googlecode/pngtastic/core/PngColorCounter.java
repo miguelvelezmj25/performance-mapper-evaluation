@@ -100,14 +100,23 @@ public class PngColorCounter extends PngProcessor {
     final int sampleSize = original.getSampleBitCount();
 
     int y = 0;
+
+    long somethinhg = 0;
+
     for (byte[] row : rows) {
       if (timeout > 0 && (System.currentTimeMillis() - start > timeout)) {
         throw new PngException("Reached " + timeout + "ms timeout");
       }
+
+      long miguelStart = System.nanoTime();
+
       final int sampleCount = ((row.length - 1) * 8) / sampleSize;
       final ByteArrayInputStream ins = new ByteArrayInputStream(row);
       final DataInputStream dis = new DataInputStream(ins);
       dis.readUnsignedByte(); // the filter byte
+
+      long miguelEnd = System.nanoTime();
+      somethinhg += (miguelEnd - miguelStart);
 
       for (int x = 0; x < sampleCount; x++) {
         switch (imageType) {
@@ -165,10 +174,17 @@ public class PngColorCounter extends PngProcessor {
                 final int a = dis.readUnsignedShort();
                 pixel = new PngPixel(x, y, r, g, b, a);
               }
+
+//              long miguelStart = System.nanoTime();
+
               if (pixel.getAlpha() > minAlpha) {
                 final Integer count = colors.get(pixel);
                 colors.put(pixel, (count == null) ? 1 : (count + 1));
               }
+
+//              long miguelEnd = System.nanoTime();
+//              somethinhg += (miguelEnd - miguelStart);
+
               break;
             }
 
@@ -176,10 +192,15 @@ public class PngColorCounter extends PngProcessor {
             throw new IllegalArgumentException();
         }
       }
+
+
+
       y++;
     }
+      System.out.println("MinAlpah: " + somethinhg / 1000000000.0);
     log.debug("Full color count=%d", colors.size());
 
+    long miguelStart = System.nanoTime();
     if (freqThreshold > 0) {
       final int minFreq = (int) (original.getWidth() * original.getHeight() * freqThreshold);
       for (Iterator<Map.Entry<PngPixel, Integer>> it = colors.entrySet().iterator();
@@ -190,6 +211,10 @@ public class PngColorCounter extends PngProcessor {
         }
       }
     }
+
+    long miguelEnd = System.nanoTime();
+    System.out.println("Freq: " + (miguelEnd - miguelStart) / 1000000000.0);
+
     log.debug("Filtered color count=%d", colors.size());
 
     final List<PngPixel> results = new ArrayList<>(colors.keySet());

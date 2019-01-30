@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.694" tests="16" errors="0" skipped="0" failures="0">
+<testsuite name="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.69" tests="16" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib"/>
     <property name="java.vm.version" value="25.162-b12"/>
     <property name="gopherProxySet" value="false"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
-    <property name="maven.multiModuleProjectDirectory" value="/Users/mvelezce/Desktop/activemq-parent-5.15.6"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/activemq-src"/>
     <property name="java.vendor.url" value="http://java.oracle.com/"/>
     <property name="path.separator" value=":"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -16,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.os.patch.level" value="unknown"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/Users/mvelezce/Desktop/activemq-parent-5.15.6"/>
+    <property name="user.dir" value="/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/activemq/activemq-src"/>
     <property name="java.runtime.version" value="1.8.0_162-b12"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
     <property name="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/jre/lib/endorsed"/>
@@ -63,20 +63,20 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase name="validPkcs12TrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.596"/>
-  <testcase name="validTrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.007"/>
-  <testcase name="validTrustStoreResourceFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.033"/>
-  <testcase name="invalidTrustStoreResourceFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.002"/>
+  <testcase name="validPkcs12TrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.595"/>
+  <testcase name="validTrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.008"/>
+  <testcase name="validTrustStoreResourceFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.031"/>
+  <testcase name="invalidTrustStoreResourceFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.004"/>
   <testcase name="invalidTrustStoreResourceTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
-  <testcase name="validPkcs12TrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.009"/>
-  <testcase name="validPkcs12TrustStoreResourceTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.009"/>
-  <testcase name="invalidTrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.002"/>
+  <testcase name="validPkcs12TrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.008"/>
+  <testcase name="validPkcs12TrustStoreResourceTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.008"/>
+  <testcase name="invalidTrustStoreFileTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
   <testcase name="invalidTrustStoreTypeTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.007"/>
-  <testcase name="invalidTrustStoreURLFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
-  <testcase name="validTrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.012"/>
+  <testcase name="invalidTrustStoreURLFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.009"/>
+  <testcase name="validTrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.004"/>
   <testcase name="validTrustStoreURLFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
-  <testcase name="validTrustStoreResourceTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
-  <testcase name="validTrustStoreFileFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.002"/>
-  <testcase name="invalidTrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.002"/>
+  <testcase name="validTrustStoreResourceTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.002"/>
+  <testcase name="validTrustStoreFileFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.003"/>
+  <testcase name="invalidTrustStoreURLTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.001"/>
   <testcase name="invalidTrustStoreFileFailoverTest" classname="org.apache.activemq.ActiveMQSslConnectionFactoryTest" time="0.001"/>
 </testsuite>

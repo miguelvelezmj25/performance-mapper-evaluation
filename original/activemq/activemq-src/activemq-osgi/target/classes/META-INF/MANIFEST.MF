@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1536947283058
+Bnd-LastModified: 1537208198806
 Build-Jdk: 1.8.0_162
 Built-By: mvelezce
 Bundle-Activator: org.apache.activemq.util.osgi.Activator

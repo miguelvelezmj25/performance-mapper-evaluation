@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1536947254753
+Bnd-LastModified: 1537208177411
 Build-Jdk: 1.8.0_162
 Built-By: mvelezce
 Bundle-Description: ActiveMQ HTTP Protocol Support
@@ -42,6 +42,7 @@ Import-Package: org.apache.activemq;version="5.15.6";resolution:=optiona
  il.ssl;version="[9.0,10.0)";resolution:=optional,org.eclipse.jetty.webs
  ocket.api;version="[9.0,10.0)";resolution:=optional,org.eclipse.jetty.w
  ebsocket.servlet;version="[9.0,10.0)";resolution:=optional
+Originally-Created-By: Apache Maven Bundle Plugin
 Specification-Title: ActiveMQ :: HTTP Protocol Support
 Specification-Vendor: The Apache Software Foundation
 Specification-Version: 5.15.6

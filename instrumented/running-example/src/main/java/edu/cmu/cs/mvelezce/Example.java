@@ -32,7 +32,6 @@ public class Example {
 //        Options.J = Source.getOptionD(Boolean.valueOf(false));
 //        Options.K = Source.getOptionD(Boolean.valueOf(false));
 
-
         boolean a = Options.A;
         boolean b = Options.B;
         boolean c = Options.C;

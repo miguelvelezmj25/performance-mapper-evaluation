@@ -31,7 +31,8 @@
       <artifactId>lucene-core</artifactId>
       <version>7.4.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../core/target/lucene-core-7.4.0.jar</systemPath>
+      <!--<systemPath>${project.basedir}/../core/target/lucene-core-7.4.0.jar</systemPath>-->
+      <systemPath>${project.basedir}/../jars/core/lucene-core-7.4.0.jar</systemPath>
     </dependency>
 
     <dependency>

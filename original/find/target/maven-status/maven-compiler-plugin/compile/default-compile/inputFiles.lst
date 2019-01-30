@@ -8,7 +8,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/util/FileUtil.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/line/Line.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/context/DefaultExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variabilityCtx/DefaultExecutionContext.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/unix/find/TypeFilter.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/util/FileTestUtils.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/io/Input.java
@@ -29,7 +29,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/line/SingleCharSequenceLine.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/convert/LongConverters.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variable/ExecutionContextVariableResolver.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/context/ExecutionContextFactory.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variabilityCtx/ExecutionContextFactory.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/util/PropertyUtil.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/convert/ArrayConverters.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/option/Option.java
@@ -39,8 +39,8 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/util/CloneUtil.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/util/sort/CompositeComparator.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variable/DefaultVariableContext.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/context/ExecutionContext.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/context/DerivedExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variabilityCtx/ExecutionContext.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variabilityCtx/DerivedExecutionContext.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variable/VariableResolver.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/processor/InputProcessor.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/find/src/main/java/org/unix4j/find/variable/VariableContext.java
