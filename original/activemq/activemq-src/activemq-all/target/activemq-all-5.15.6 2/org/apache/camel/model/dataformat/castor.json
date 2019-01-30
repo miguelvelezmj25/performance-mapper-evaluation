@@ -1,0 +1,27 @@
+{
+ "model": {
+    "kind": "model",
+    "name": "castor",
+    "title": "Castor",
+    "description": "Castor data format",
+    "firstVersion": "2.1.0",
+    "javaType": "org.apache.camel.model.dataformat.CastorDataFormat",
+    "label": "dataformat,transformation,xml",
+    "deprecated": true,
+    "input": false,
+    "output": false
+  },
+  "properties": {
+    "mappingFile": { "kind": "attribute", "displayName": "Mapping File", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Path to a Castor mapping file to load from the classpath." },
+    "whitelistEnabled": { "kind": "attribute", "displayName": "Whitelist Enabled", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": true, "description": "Define if Whitelist feature is enabled or not" },
+    "allowedUnmarshallObjects": { "kind": "attribute", "displayName": "Allowed Unmarshall Objects", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Define the allowed objects to be unmarshalled. You can specify the FQN class name of allowed objects and you can use comma to separate multiple entries. It is also possible to use wildcards and regular expression which is based on the pattern defined by link org.apache.camel.util.EndpointHelpermatchPattern(String String). Denied objects takes precedence over allowed objects." },
+    "deniedUnmarshallObjects": { "kind": "attribute", "displayName": "Denied Unmarshall Objects", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Define the denied objects to be unmarshalled. You can specify the FQN class name of deined objects and you can use comma to separate multiple entries. It is also possible to use wildcards and regular expression which is based on the pattern defined by link org.apache.camel.util.EndpointHelpermatchPattern(String String). Denied objects takes precedence over allowed objects." },
+    "validation": { "kind": "attribute", "displayName": "Validation", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": true, "description": "Whether validation is turned on or off. Is by default true." },
+    "encoding": { "kind": "attribute", "displayName": "Encoding", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "defaultValue": "UTF-8", "description": "Encoding to use when marshalling an Object to XML. Is by default UTF-8" },
+    "packages": { "kind": "attribute", "displayName": "Packages", "required": false, "type": "array", "javaType": "java.lang.String[]", "deprecated": false, "secret": false, "description": "Add additional packages to Castor XmlContext" },
+    "classes": { "kind": "attribute", "displayName": "Classes", "required": false, "type": "array", "javaType": "java.lang.String[]", "deprecated": false, "secret": false, "description": "Add additional class names to Castor XmlContext" },
+    "contentTypeHeader": { "kind": "attribute", "displayName": "Content Type Header", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": false, "description": "Whether the data format should set the Content-Type header with the type from the data format if the data format is capable of doing so. For example application/xml for data formats marshalling to XML or application/json for data formats marshalling to JSon etc." },
+    "id": { "kind": "attribute", "displayName": "Id", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Sets the value of the id property." }
+  }
+}
+

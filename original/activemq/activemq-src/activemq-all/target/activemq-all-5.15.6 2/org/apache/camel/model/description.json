@@ -1,0 +1,22 @@
+{
+ "model": {
+    "kind": "model",
+    "name": "description",
+    "title": "Description",
+    "description": "To provide comments about the node.",
+    "javaType": "org.apache.camel.model.DescriptionDefinition",
+    "label": "configuration",
+    "deprecated": false,
+    "input": false,
+    "output": false
+  },
+  "properties": {
+    "lang": { "kind": "attribute", "displayName": "Lang", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Language such as en for english." },
+    "layoutX": { "kind": "attribute", "displayName": "Layout X", "required": false, "type": "number", "javaType": "java.lang.Double", "deprecated": true, "secret": false, "description": "Layout position X" },
+    "layoutY": { "kind": "attribute", "displayName": "Layout Y", "required": false, "type": "number", "javaType": "java.lang.Double", "deprecated": true, "secret": false, "description": "Layout position Y" },
+    "layoutWidth": { "kind": "attribute", "displayName": "Layout Width", "required": false, "type": "number", "javaType": "java.lang.Double", "deprecated": true, "secret": false, "description": "Layout width" },
+    "layoutHeight": { "kind": "attribute", "displayName": "Layout Height", "required": false, "type": "number", "javaType": "java.lang.Double", "deprecated": true, "secret": false, "description": "Layout height" },
+    "text": { "kind": "value", "displayName": "Text", "required": true, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "The description as human readable text" }
+  }
+}
+

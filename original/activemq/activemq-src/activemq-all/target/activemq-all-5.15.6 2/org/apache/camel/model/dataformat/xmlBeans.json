@@ -1,0 +1,20 @@
+{
+ "model": {
+    "kind": "model",
+    "name": "xmlBeans",
+    "title": "XML Beans",
+    "description": "XMLBeans data format",
+    "firstVersion": "1.2.0",
+    "javaType": "org.apache.camel.model.dataformat.XMLBeansDataFormat",
+    "label": "dataformat,transformation,xml",
+    "deprecated": false,
+    "input": false,
+    "output": false
+  },
+  "properties": {
+    "prettyPrint": { "kind": "attribute", "displayName": "Pretty Print", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": false, "description": "To enable pretty printing output nicely formatted. Is by default false." },
+    "contentTypeHeader": { "kind": "attribute", "displayName": "Content Type Header", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": false, "description": "Whether the data format should set the Content-Type header with the type from the data format if the data format is capable of doing so. For example application/xml for data formats marshalling to XML or application/json for data formats marshalling to JSon etc." },
+    "id": { "kind": "attribute", "displayName": "Id", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Sets the value of the id property." }
+  }
+}
+

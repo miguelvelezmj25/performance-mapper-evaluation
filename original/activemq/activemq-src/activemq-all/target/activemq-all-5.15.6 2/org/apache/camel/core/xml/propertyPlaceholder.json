@@ -1,0 +1,31 @@
+{
+ "model": {
+    "kind": "model",
+    "name": "propertyPlaceholder",
+    "title": "Property Placeholder",
+    "description": "Properties placeholder",
+    "javaType": "org.apache.camel.core.xml.CamelPropertyPlaceholderDefinition",
+    "label": "spring,configuration",
+    "deprecated": false,
+    "input": false,
+    "output": false
+  },
+  "properties": {
+    "location": { "kind": "attribute", "displayName": "Location", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "A list of locations to load properties. You can use comma to separate multiple locations. This option will override any default locations and only use the locations from this option." },
+    "encoding": { "kind": "attribute", "displayName": "Encoding", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Encoding to use when loading properties file from the file system or classpath. If no encoding has been set then the properties files is loaded using ISO-8859-1 encoding (latin-1) as documented by link java.util.Propertiesload(java.io.InputStream)" },
+    "cache": { "kind": "attribute", "displayName": "Cache", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": true, "description": "Whether or not to cache loaded properties. The default value is true." },
+    "ignoreMissingLocation": { "kind": "attribute", "displayName": "Ignore Missing Location", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": false, "description": "Whether to silently ignore if a location cannot be located such as a properties file not found." },
+    "propertiesResolverRef": { "kind": "attribute", "displayName": "Properties Resolver Ref", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Reference to a custom PropertiesResolver to be used" },
+    "propertiesParserRef": { "kind": "attribute", "displayName": "Properties Parser Ref", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Reference to a custom PropertiesParser to be used" },
+    "propertyPrefix": { "kind": "attribute", "displayName": "Property Prefix", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Optional prefix prepended to property names before resolution." },
+    "propertySuffix": { "kind": "attribute", "displayName": "Property Suffix", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Optional suffix appended to property names before resolution." },
+    "fallbackToUnaugmentedProperty": { "kind": "attribute", "displayName": "Fallback To Unaugmented Property", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": true, "description": "If true first attempt resolution of property name augmented with propertyPrefix and propertySuffix before falling back the plain property name specified. If false only the augmented property name is searched." },
+    "defaultFallbackEnabled": { "kind": "attribute", "displayName": "Default Fallback Enabled", "required": false, "type": "boolean", "javaType": "java.lang.Boolean", "deprecated": false, "secret": false, "defaultValue": true, "description": "If false the component does not attempt to find a default for the key by looking after the colon separator." },
+    "prefixToken": { "kind": "attribute", "displayName": "Prefix Token", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "defaultValue": "{{", "description": "Sets the value of the prefix token used to identify properties to replace. Setting a value of null restores the default token" },
+    "suffixToken": { "kind": "attribute", "displayName": "Suffix Token", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "defaultValue": "}}", "description": "Sets the value of the suffix token used to identify properties to replace. Setting a value of null restores the default token" },
+    "propertiesFunction": { "kind": "element", "displayName": "Properties Function", "required": false, "type": "array", "javaType": "java.util.List<org.apache.camel.core.xml.CamelPropertyPlaceholderFunctionDefinition>", "oneOf": [ "propertiesFunction" ], "deprecated": false, "secret": false, "description": "List of custom properties function to use." },
+    "propertiesLocation": { "kind": "element", "displayName": "Properties Location", "required": false, "type": "array", "javaType": "java.util.List<org.apache.camel.core.xml.CamelPropertyPlaceholderLocationDefinition>", "oneOf": [ "propertiesLocation" ], "deprecated": false, "secret": false, "description": "List of property locations to use." },
+    "id": { "kind": "attribute", "displayName": "Id", "required": false, "type": "string", "javaType": "java.lang.String", "deprecated": false, "secret": false, "description": "Sets the id of this node" }
+  }
+}
+
