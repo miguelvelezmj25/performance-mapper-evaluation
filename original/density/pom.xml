@@ -10,8 +10,10 @@
   <name>convert</name>
   <url>http://maven.apache.org</url>
 
-  <properties>
+<properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <imageiodep.version>3.3.1</imageiodep.version>
   </properties>
 
