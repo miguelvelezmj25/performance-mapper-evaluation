@@ -23,9 +23,9 @@ public class Example5 {
     }
 
     if (C) {
-//      if (!"POST".equals(REQUEST_GET)) {
-//        sendHeaders(HTTP_NOT_IMPLEMENTED, A);
-//      }
+      if (!"POST".equals(REQUEST_GET)) {
+        sendHeaders(HTTP_NOT_IMPLEMENTED, A);
+      }
     }
 
   }
