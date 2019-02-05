@@ -2,6 +2,10 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
+/**
+ * This program shows why we need to track the beginning and end of a control flow decision for
+ * accurate results.
+ */
 public class Subtraces2 {
 
   public static void main(String[] args) {

@@ -23,6 +23,7 @@ edu/cmu/cs/mvelezce/analysis/VariabilityContext2.class
 edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/OrContext.class
+edu/cmu/cs/mvelezce/analysis/SimpleForExample4.class
 edu/cmu/cs/mvelezce/implicit/Test.class
 edu/cmu/cs/mvelezce/analysis/Traces.class
 edu/cmu/cs/mvelezce/analysis/AssertTest2Example.class
