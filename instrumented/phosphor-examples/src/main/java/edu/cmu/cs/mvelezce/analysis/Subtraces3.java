@@ -2,23 +2,23 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class OrContext6 {
+public class Subtraces3 {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
-    int x = 0;
-
     if (A) {
-      x++;
+      foo(4);
     }
 
     if (B) {
-      x++;
+      foo(2);
     }
+  }
 
-    if (x > 0) {
+  private static void foo(int x) {
+    for (int i = 0; i < x; i++) {
       System.out.println();
     }
   }

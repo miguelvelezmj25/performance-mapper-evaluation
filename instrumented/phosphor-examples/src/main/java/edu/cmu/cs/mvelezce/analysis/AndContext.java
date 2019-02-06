@@ -2,23 +2,24 @@ package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class OrContext6 {
+public class AndContext {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean D = Sources.D_3(Boolean.valueOf(args[3]));
 
-    int x = 0;
-
-    if (A) {
-      x++;
+    if (A && B) {
+      foo(D);
     }
 
-    if (B) {
-      x++;
+    if (A && C) {
+      foo(D);
     }
-
-    if (x > 0) {
+  }
+  private static void foo(boolean x) {
+    if (x) {
       System.out.println();
     }
   }

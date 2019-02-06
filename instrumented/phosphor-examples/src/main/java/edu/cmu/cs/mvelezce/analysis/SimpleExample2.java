@@ -30,5 +30,4 @@ public class SimpleExample2 {
       System.out.println(1);
     }
   }
-
 }

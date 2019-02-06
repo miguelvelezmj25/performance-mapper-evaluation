@@ -27,7 +27,6 @@ public class Example5 {
         sendHeaders(HTTP_NOT_IMPLEMENTED, A);
       }
     }
-
   }
 
   private static void sendHeaders(int responseNum, boolean green) {
@@ -37,9 +36,9 @@ public class Example5 {
       subject = "response header";
     }
 
-//    if (subject.isEmpty()) {
-//      subject = "Void response";
-//    }
+    //    if (subject.isEmpty()) {
+    //      subject = "Void response";
+    //    }
     System.out.println("Done");
   }
 }

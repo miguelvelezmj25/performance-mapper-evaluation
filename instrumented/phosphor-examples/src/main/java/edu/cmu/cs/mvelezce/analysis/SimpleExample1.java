@@ -30,8 +30,7 @@ public class SimpleExample1 {
 
     if (B) { // 5
       j = 5;
-    }
-    else {
+    } else {
       j = 2;
     }
 
@@ -78,7 +77,6 @@ public class SimpleExample1 {
     if (B) { // 16
       cow(A);
     }
-
   }
 
   private static void foo() {
@@ -106,5 +104,4 @@ public class SimpleExample1 {
       System.out.println(1);
     }
   }
-
 }

@@ -11,19 +11,18 @@ public class Example1 {
     boolean x = false;
 
     if (!A) {
-//      TimerHelper.sleep("1", 1);;
+      //      TimerHelper.sleep("1", 1);;
       x = true;
     }
 
     if (x) {
-//      TimerHelper.sleep("2", 2);;
+      //      TimerHelper.sleep("2", 2);;
       System.out.println(200);
 
       if (B) {
-//        TimerHelper.sleep("3", 3);;
+        //        TimerHelper.sleep("3", 3);;
         System.out.println(300);
       }
     }
-
   }
 }

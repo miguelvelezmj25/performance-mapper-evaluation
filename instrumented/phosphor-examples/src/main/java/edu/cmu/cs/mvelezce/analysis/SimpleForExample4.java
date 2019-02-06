@@ -12,13 +12,12 @@ public class SimpleForExample4 {
 
     if (A) {
       x = 4;
-    }
-    else {
+    } else {
       x = 2;
     }
 
-    while(x > 0) {
-      if(B) {
+    while (x > 0) {
+      if (B) {
         System.out.println();
       }
 

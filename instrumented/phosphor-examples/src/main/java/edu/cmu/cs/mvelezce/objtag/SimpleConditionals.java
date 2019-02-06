@@ -1,9 +1,9 @@
-//package edu.cmu.cs.mvelezce.objtag;
+// package edu.cmu.cs.mvelezce.objtag;
 //
-//import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-//import edu.columbia.cs.psl.phosphor.runtime.Taint;
+// import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+// import edu.columbia.cs.psl.phosphor.runtime.Taint;
 //
-//public class SimpleConditionals {
+// public class SimpleConditionals {
 //
 ////  public static void main(String[] args) throws InterruptedException {
 ////    simpleConditional1();
@@ -117,4 +117,4 @@
 ////    assert (taintOfA.getLabel().equals(optionA));
 ////    assert (taintOfl == null);
 ////  }
-//}
+// }

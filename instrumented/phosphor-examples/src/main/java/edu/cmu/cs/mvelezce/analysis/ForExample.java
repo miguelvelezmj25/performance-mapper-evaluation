@@ -25,17 +25,14 @@ public class ForExample {
       System.out.println(a * a == 16);
       if (B) {
         System.out.println(a == -4);
-      }
-      else {
+      } else {
         System.out.println(a == 4);
       }
-    }
-    else {
+    } else {
       System.out.println(a * a == 1);
       if (B) {
         System.out.println(a == -1);
-      }
-      else {
+      } else {
         System.out.println(a == 1);
       }
     }

@@ -1,8 +1,8 @@
-//package edu.cmu.cs.mvelezce.objtag;
+// package edu.cmu.cs.mvelezce.objtag;
 //
-//import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+// import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 //
-//public class Simple {
+// public class Simple {
 //
 ////  public static void main(String[] args) {
 ////    boolean A = MultiTainter.taintedBoolean(true, "A");
@@ -18,4 +18,4 @@
 ////      }
 ////    }
 ////  }
-//}
+// }

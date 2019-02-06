@@ -1,12 +1,12 @@
-//package edu.cmu.cs.mvelezce.debug;
+// package edu.cmu.cs.mvelezce.debug;
 //
-//import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-//import edu.columbia.cs.psl.phosphor.runtime.Taint;
-//import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
-//import edu.columbia.cs.psl.phosphor.struct.EnqueuedTaint;
-//import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
+// import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+// import edu.columbia.cs.psl.phosphor.runtime.Taint;
+// import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
+// import edu.columbia.cs.psl.phosphor.struct.EnqueuedTaint;
+// import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
 //
-//public class Debug {
+// public class Debug {
 //
 //  //  public static void main(String[] args) throws InterruptedException {
 //  //    main(args, ControlTaintTagStack.getInstance());
@@ -61,7 +61,8 @@
 //////      TaintedBooleanWithObjTag var10000 = new TaintedBooleanWithObjTag();
 //////      Taint.combineTagsOnObject(var10000, phosphorJumpControlTag);
 //////      TaintedBooleanWithObjTag phosphorReturnPreAlloc0 = var10000;
-//////      var10000 = MultiTainter.taintedBoolean$$PHOSPHORTAGGED(phosphorJumpControlTag.copyTag(), true, "A", phosphorReturnPreAlloc0);
+//////      var10000 = MultiTainter.taintedBoolean$$PHOSPHORTAGGED(phosphorJumpControlTag.copyTag(),
+// true, "A", phosphorReturnPreAlloc0);
 //////      TaintedBooleanWithObjTag var10001 = var10000;
 //////      Taint var14 = var10000.taint;
 //////      boolean var10002 = var10001.val;
@@ -79,7 +80,8 @@
 //////      var17 = Taint.combineTags(phosphorJumpControlTag.copyTag(), phosphorJumpControlTag);
 //////      byte w = 0;
 //////      Taint phosphorShadowLV8 = Taint.copyTaint(var17);
-//////      phosphorJumpControlTag0 = phosphorJumpControlTag.push(phosphorShadowLV5, phosphorJumpControlTag0);
+//////      phosphorJumpControlTag0 = phosphorJumpControlTag.push(phosphorShadowLV5,
+// phosphorJumpControlTag0);
 //////      if (A) {
 //////        var17 = Taint.combineTags(phosphorJumpControlTag.copyTag(), phosphorJumpControlTag);
 //////        x = 0;
@@ -136,4 +138,4 @@
 //////      throw var9;
 //////    }
 ////  }
-//}
+// }

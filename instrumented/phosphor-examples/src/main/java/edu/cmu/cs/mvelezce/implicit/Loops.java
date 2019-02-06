@@ -1,8 +1,8 @@
-//package edu.cmu.cs.mvelezce.implicit;
+// package edu.cmu.cs.mvelezce.implicit;
 //
-//import edu.cmu.cs.mvelezce.taints.Sources;
+// import edu.cmu.cs.mvelezce.taints.Sources;
 //
-//public class Loops {
+// public class Loops {
 //
 //  public static void main(String[] args) {
 //    counterLoop();
@@ -32,4 +32,4 @@
 //
 //  }
 //
-//}
+// }

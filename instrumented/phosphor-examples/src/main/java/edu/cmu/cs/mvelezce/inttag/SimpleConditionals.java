@@ -1,8 +1,8 @@
-//package edu.cmu.cs.mvelezce.inttag;
+// package edu.cmu.cs.mvelezce.inttag;
 //
-//import edu.columbia.cs.psl.phosphor.runtime.Tainter;
+// import edu.columbia.cs.psl.phosphor.runtime.Tainter;
 //
-//public class SimpleConditionals {
+// public class SimpleConditionals {
 //
 ////  public static void main(String[] args) throws InterruptedException {
 ////    simpleConditional1();
@@ -105,4 +105,4 @@
 ////    assert (taintOfl == 0);
 ////  }
 //
-//}
+// }
