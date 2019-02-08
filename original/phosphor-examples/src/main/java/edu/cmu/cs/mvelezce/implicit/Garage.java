@@ -11,5 +11,4 @@ public class Garage {
   public void setCar(Car car) {
     this.car = car;
   }
-
 }

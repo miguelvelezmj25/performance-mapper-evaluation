@@ -24,6 +24,5 @@ public class Example8 {
     if (x) {
       System.out.println();
     }
-
   }
 }

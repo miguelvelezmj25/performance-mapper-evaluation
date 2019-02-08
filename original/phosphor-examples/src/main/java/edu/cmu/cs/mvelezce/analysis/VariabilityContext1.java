@@ -12,7 +12,6 @@ public class VariabilityContext1 {
       foo(x);
       foo(x);
     }
-
   }
 
   private static void foo(boolean x) {

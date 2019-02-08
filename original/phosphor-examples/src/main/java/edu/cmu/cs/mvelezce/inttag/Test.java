@@ -1,6 +1,6 @@
-//package edu.cmu.cs.mvelezce.inttag;
+// package edu.cmu.cs.mvelezce.inttag;
 //
-//public class Test {
+// public class Test {
 //
 //  public static void main(String[] args) {
 //    testExample();
@@ -53,4 +53,4 @@
 ////
 ////    sink(x);
 ////  }
-//}
+// }

@@ -10,12 +10,10 @@ public class IfOr {
 
     if (A || B) {
       System.out.println("True");
-    }
-    else {
+    } else {
       System.out.println("False");
     }
 
     System.out.println("End");
   }
-
 }

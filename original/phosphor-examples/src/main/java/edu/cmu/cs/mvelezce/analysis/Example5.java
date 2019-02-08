@@ -23,11 +23,10 @@ public class Example5 {
     }
 
     if (C) {
-//      if (!"POST".equals(REQUEST_GET)) {
-//        sendHeaders(HTTP_NOT_IMPLEMENTED, A);
-//      }
+      if (!"POST".equals(REQUEST_GET)) {
+        sendHeaders(HTTP_NOT_IMPLEMENTED, A);
+      }
     }
-
   }
 
   private static void sendHeaders(int responseNum, boolean green) {
@@ -37,9 +36,9 @@ public class Example5 {
       subject = "response header";
     }
 
-//    if (subject.isEmpty()) {
-//      subject = "Void response";
-//    }
+    //    if (subject.isEmpty()) {
+    //      subject = "Void response";
+    //    }
     System.out.println("Done");
   }
 }

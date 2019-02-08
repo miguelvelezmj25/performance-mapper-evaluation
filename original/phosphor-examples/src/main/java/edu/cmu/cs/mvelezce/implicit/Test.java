@@ -5,36 +5,35 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class Test {
 
   public static void main(String[] args) {
-//    test();
+    //    test();
     testAllTypesOfComparisons();
     testBranchNotTaken();
     testImplicitFlows();
     testFields1();
     testFields2();
-
   }
 
-//  public static void test() {
-//    boolean A = Sources.A_0(true);
-//
-//    String name = "Miguel";
-//
-//    if(A) {
-//      name = "Velez";
-//    }
-//
-//    if(name.equals("Miguel")) {
-//      System.out.println("First");
-//    }
-//
-//    long i = 100L;
-//
-//    if (i < 100) {
-//      i = 1000;
-//    }
-//
-//    System.out.println(i);
-//  }
+  //  public static void test() {
+  //    boolean A = Sources.A_0(true);
+  //
+  //    String name = "Miguel";
+  //
+  //    if(A) {
+  //      name = "Velez";
+  //    }
+  //
+  //    if(name.equals("Miguel")) {
+  //      System.out.println("First");
+  //    }
+  //
+  //    long i = 100L;
+  //
+  //    if (i < 100) {
+  //      i = 1000;
+  //    }
+  //
+  //    System.out.println(i);
+  //  }
 
   public static void testAllTypesOfComparisons() {
     System.out.println("\ntestAllTypesOfComparisons");
@@ -157,9 +156,9 @@ public class Test {
     Garage g = new Garage();
     Car c = new Car("Honda", 2018, false);
 
-//    if(A) {
-//      g.setCar(c);
-//    }
+    //    if(A) {
+    //      g.setCar(c);
+    //    }
 
     if (A) { // {A}
       c.setName("Renault");

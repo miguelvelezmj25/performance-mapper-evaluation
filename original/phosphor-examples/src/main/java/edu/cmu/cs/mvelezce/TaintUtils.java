@@ -1,11 +1,11 @@
-//package edu.cmu.cs.mvelezce;
+// package edu.cmu.cs.mvelezce;
 //
-//import edu.columbia.cs.psl.phosphor.runtime.Taint;
-//import edu.columbia.cs.psl.phosphor.struct.SimpleHashSet;
-//import java.util.HashSet;
-//import java.util.Set;
+// import edu.columbia.cs.psl.phosphor.runtime.Taint;
+// import edu.columbia.cs.psl.phosphor.struct.SimpleHashSet;
+// import java.util.HashSet;
+// import java.util.Set;
 //
-//public class TaintUtils {
+// public class TaintUtils {
 //
 ////  private TaintUtils() {
 ////    throw new UnsupportedOperationException();
@@ -41,4 +41,4 @@
 ////    return taints;
 ////  }
 //
-//}
+// }

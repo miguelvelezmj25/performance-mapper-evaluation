@@ -18,5 +18,4 @@ public class IfOr2 {
       System.out.println(1);
     }
   }
-
 }

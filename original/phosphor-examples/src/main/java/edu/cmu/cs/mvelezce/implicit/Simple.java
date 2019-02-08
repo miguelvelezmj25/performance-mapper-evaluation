@@ -1,10 +1,10 @@
-//package edu.cmu.cs.mvelezce.implicit;
+// package edu.cmu.cs.mvelezce.implicit;
 //
-////import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-//import java.util.HashSet;
-//import java.util.Set;
+//// import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+// import java.util.HashSet;
+// import java.util.Set;
 //
-//public class Simple {
+// public class Simple {
 //
 ////  public static void main(String[] args) {
 //////        boolean A = MultiTainter.taintedBoolean(true, "A");
@@ -27,4 +27,4 @@
 ////      }
 ////    }
 ////  }
-//}
+// }

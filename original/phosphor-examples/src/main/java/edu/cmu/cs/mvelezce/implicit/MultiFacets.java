@@ -18,6 +18,5 @@ public class MultiFacets {
     if (y) {
       z = false;
     }
-
   }
 }

@@ -21,6 +21,5 @@ public class MultiFacets {
     if (z) { // 3
       System.out.println(1);
     }
-
   }
 }

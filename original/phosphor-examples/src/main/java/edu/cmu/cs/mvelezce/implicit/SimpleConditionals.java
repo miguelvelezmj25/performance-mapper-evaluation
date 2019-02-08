@@ -1,14 +1,14 @@
-//package edu.cmu.cs.mvelezce.implicit;
+// package edu.cmu.cs.mvelezce.implicit;
 //
-////import edu.cmu.cs.mvelezce.TaintUtils;
-////import edu.cmu.cs.mvelezce.taints.Sources;
-////import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-////import edu.columbia.cs.psl.phosphor.runtime.Taint;
-////import edu.columbia.cs.psl.phosphor.runtime.cc.TaintLabel;
-////import java.util.Iterator;
-////import java.util.Set;
+//// import edu.cmu.cs.mvelezce.TaintUtils;
+//// import edu.cmu.cs.mvelezce.taints.Sources;
+//// import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+//// import edu.columbia.cs.psl.phosphor.runtime.Taint;
+//// import edu.columbia.cs.psl.phosphor.runtime.cc.TaintLabel;
+//// import java.util.Iterator;
+//// import java.util.Set;
 //
-//public class SimpleConditionals {
+// public class SimpleConditionals {
 //
 ////  public static void main(String[] args) throws InterruptedException {
 ////    simpleConditional_forFalseTaintInControlFlow();
@@ -20,7 +20,8 @@
 ////    simpleNestedConditional_forBranchesTaken();
 ////  }
 ////
-////  private static void simpleConditional_forFalseTaintInControlFlow() throws InterruptedException {
+////  private static void simpleConditional_forFalseTaintInControlFlow() throws InterruptedException
+// {
 ////    System.out.println("Testing simpleConditional_forFalseTaintInControlFlow");
 ////    boolean A = Sources.A_0(false);
 ////
@@ -35,7 +36,8 @@
 ////    assert (taintLabelA.getSource().equals("A"));
 ////  }
 ////
-////  private static void simpleConditional_forTrueTaintInControlFlow() throws InterruptedException {
+////  private static void simpleConditional_forTrueTaintInControlFlow() throws InterruptedException
+// {
 ////    System.out.println("Testing simpleConditional_forTrueTaintInControlFlow");
 ////    boolean A = Sources.A_0(true);
 ////
@@ -194,4 +196,4 @@
 ////    taintLabelx = (TaintLabel) taintsOfxIter.next();
 ////    assert (taintLabelx.getSource().equals("A") || taintLabelx.getSource().equals("B"));
 ////  }
-//}
+// }

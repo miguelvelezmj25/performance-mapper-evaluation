@@ -22,5 +22,4 @@ public class OrContext6 {
       System.out.println();
     }
   }
-
 }

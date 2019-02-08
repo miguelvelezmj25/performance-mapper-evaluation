@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
@@ -11,7 +10,6 @@ public class Exceptions {
 
   private final int minAlpha;
   private final long timeout;
-
 
   public Exceptions(long timeout, int minAlpha) {
     this.timeout = timeout;
@@ -27,15 +25,13 @@ public class Exceptions {
 
     if (A) {
       minAlpha = 1;
-    }
-    else {
+    } else {
       minAlpha = 50;
     }
 
     if (B) {
       timeout = 0;
-    }
-    else {
+    } else {
       timeout = 1_000_000;
     }
 
@@ -46,15 +42,13 @@ public class Exceptions {
     if (A || B) {
       System.out.println();
     }
-
   }
 
   private static void exceptions(boolean b, boolean e) {
     if (e) {
       //            throw new RuntimeException("Exception");
       System.out.println("error");
-    }
-    else {
+    } else {
 
       if (b) {
         System.out.println("hello");
@@ -88,8 +82,8 @@ public class Exceptions {
     }
 
     Taint taint = MultiTainter.getTaint(minAlpha);
-//    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
+    //    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
     taint = MultiTainter.getTaint(timeout);
-//    Sinks.sink(taint, "timeout", "timeout", 0);
+    //    Sinks.sink(taint, "timeout", "timeout", 0);
   }
 }

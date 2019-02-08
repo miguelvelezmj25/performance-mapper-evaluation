@@ -19,7 +19,6 @@ public class VariabilityContext3 {
         foo(4);
       }
     }
-
   }
 
   private static void foo(int x) {

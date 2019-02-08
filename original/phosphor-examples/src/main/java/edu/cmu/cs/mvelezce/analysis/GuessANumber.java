@@ -15,22 +15,19 @@ public class GuessANumber {
 
     if (A) {
       secret = 5;
-    }
-    else {
+    } else {
       secret = 10;
     }
 
     if (B) {
       tries = 1;
-    }
-    else {
+    } else {
       tries = 2;
     }
 
     if (C) {
       num = 5;
-    }
-    else {
+    } else {
       num = 0;
     }
 
@@ -43,18 +40,15 @@ public class GuessANumber {
       if (tries > 0 && i == secret) {
         tries = 0;
         System.out.println("You win!");
-      }
-      else {
+      } else {
         tries--;
         if (tries > 0) {
           System.out.println("Try again");
-        }
-        else {
+        } else {
           System.out.println("Game over!");
         }
       }
-    }
-    else {
+    } else {
       System.out.println("Out of range");
     }
   }

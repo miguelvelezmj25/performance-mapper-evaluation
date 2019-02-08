@@ -6,23 +6,19 @@ public class SimpleForExample3 {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     int x;
 
     if (A) {
       x = 4;
-    }
-    else {
+    } else {
       x = 2;
     }
 
-    while(x > 0) {
-      if(B) {
-        System.out.println();
-      }
-
+    while (x > 0) {
       x--;
     }
+
+    System.out.println();
   }
 }

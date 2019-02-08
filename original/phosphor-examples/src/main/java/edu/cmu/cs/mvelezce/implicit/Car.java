@@ -49,15 +49,15 @@ public class Car {
       return false;
     }
 
-//    Car car = (Car) o;
-//
-//    if (year != car.year) {
-//      return false;
-//    }
-//    if (used != car.used) {
-//      return false;
-//    }
-//    return name.equals(car.name);
+    //    Car car = (Car) o;
+    //
+    //    if (year != car.year) {
+    //      return false;
+    //    }
+    //    if (used != car.used) {
+    //      return false;
+    //    }
+    //    return name.equals(car.name);
     return true;
   }
 
