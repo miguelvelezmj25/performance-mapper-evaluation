@@ -37,6 +37,7 @@ edu/cmu/cs/mvelezce/analysis/OrContext4.class
 edu/cmu/cs/mvelezce/analysis/MultiFacets.class
 edu/cmu/cs/mvelezce/analysis/For2Example.class
 edu/cmu/cs/mvelezce/analysis/Example5.class
+edu/cmu/cs/mvelezce/analysis/SimpleForExample5.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext.class
 edu/cmu/cs/mvelezce/RunningExample.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext3.class

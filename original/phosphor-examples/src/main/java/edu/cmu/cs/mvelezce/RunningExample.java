@@ -39,11 +39,11 @@ public class RunningExample {
 
   }
 
-  private static void foo(boolean b) {
-    if (b) { // 1
-      System.out.println(4);
-    } else {
-      System.out.println();
-    }
-  }
+//  private static void foo(boolean b) {
+//    if (b) { // 1
+//      System.out.println(4);
+//    } else {
+//      System.out.println();
+//    }
+//  }
 }
