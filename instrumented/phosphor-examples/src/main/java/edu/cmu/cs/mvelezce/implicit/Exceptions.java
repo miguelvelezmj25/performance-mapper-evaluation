@@ -46,7 +46,7 @@ public class Exceptions {
 
   private static void exceptions(boolean b, boolean e) {
     if (e) {
-      //            throw new RuntimeException("Exception");
+      //            throw new RuntimeException("FinallyBlock");
       System.out.println("error");
     } else {
 
