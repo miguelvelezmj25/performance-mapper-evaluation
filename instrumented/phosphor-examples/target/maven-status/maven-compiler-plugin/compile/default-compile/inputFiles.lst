@@ -41,6 +41,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/SimpleForExample2.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Return2Example.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Align.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/WhileTrue2.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example7.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/objtag/SimpleConditionals.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Nesting.java
@@ -48,9 +49,11 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ForExample.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/objtag/Simple.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/VariabilityContext3.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ThrowIf.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example8.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces2.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext3.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/WhileTrueNoReturn.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext4.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces3.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/WhileTrue.java
@@ -75,3 +78,4 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/taints/Sources.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/debug/Debug.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces4.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ThrowEnd.java

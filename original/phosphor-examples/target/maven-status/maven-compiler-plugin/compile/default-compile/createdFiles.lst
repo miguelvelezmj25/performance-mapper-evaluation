@@ -19,6 +19,7 @@ edu/cmu/cs/mvelezce/analysis/Sound.class
 edu/cmu/cs/mvelezce/analysis/Subtraces3.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class
+edu/cmu/cs/mvelezce/analysis/WhileTrueNoReturn.class
 edu/cmu/cs/mvelezce/analysis/AndContext.class
 edu/cmu/cs/mvelezce/analysis/Example4.class
 edu/cmu/cs/mvelezce/analysis/Implicit.class
@@ -29,6 +30,7 @@ edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/Nesting.class
 edu/cmu/cs/mvelezce/analysis/Subtraces6.class
+edu/cmu/cs/mvelezce/analysis/ThrowIf.class
 edu/cmu/cs/mvelezce/analysis/OrContext.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample4.class
 edu/cmu/cs/mvelezce/implicit/Test.class
@@ -60,9 +62,11 @@ edu/cmu/cs/mvelezce/analysis/Subtraces7.class
 edu/cmu/cs/mvelezce/analysis/TestPrintExample.class
 edu/cmu/cs/mvelezce/analysis/IfAnd.class
 edu/cmu/cs/mvelezce/analysis/SimpleExample1.class
+edu/cmu/cs/mvelezce/analysis/ThrowEnd.class
 edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
+edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
 edu/cmu/cs/mvelezce/implicit/Garage.class
 edu/cmu/cs/mvelezce/analysis/Subtraces4.class
 edu/cmu/cs/mvelezce/analysis/IfOr.class
