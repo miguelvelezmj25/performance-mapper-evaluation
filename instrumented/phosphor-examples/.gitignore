@@ -182,3 +182,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/macos,windows,intellij+iml,maven,eclipse,java
+
+!/lib/Phosphor-0.0.4-SNAPSHOT.jar
+!/phosphor/Phosphor-Examples-1.0-SNAPSHOT.jar
