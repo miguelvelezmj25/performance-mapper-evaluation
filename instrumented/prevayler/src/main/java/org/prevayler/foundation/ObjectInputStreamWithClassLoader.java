@@ -1,6 +1,7 @@
-//Prevayler(TM) - The Free-Software Prevalence Layer.
-//Copyright (C) 2001-2003 Klaus Wuestefeld
-//This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// Prevayler(TM) - The Free-Software Prevalence Layer.
+// Copyright (C) 2001-2003 Klaus Wuestefeld
+// This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 package org.prevayler.foundation;
 
@@ -10,15 +11,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
 public class ObjectInputStreamWithClassLoader extends ObjectInputStream {
-    ClassLoader _loader;
+  ClassLoader _loader;
 
-    public ObjectInputStreamWithClassLoader(InputStream stream, ClassLoader loader) throws IOException {
-        super(stream);
+  public ObjectInputStreamWithClassLoader(InputStream stream, ClassLoader loader)
+      throws IOException {
+    super(stream);
 
-        _loader = loader;
-    }
+    _loader = loader;
+  }
 
-    protected Class resolveClass(ObjectStreamClass v) throws IOException, ClassNotFoundException {
-        return (_loader != null ? Class.forName(v.getName(), false, _loader) : super.resolveClass(v));
-    }
+  protected Class resolveClass(ObjectStreamClass v) throws IOException, ClassNotFoundException {
+    return (_loader != null ? Class.forName(v.getName(), false, _loader) : super.resolveClass(v));
+  }
 }
