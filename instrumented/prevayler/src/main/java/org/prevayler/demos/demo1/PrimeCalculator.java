@@ -16,7 +16,7 @@ class PrimeCalculator {
   void start() {
     int primeCandidate = _numberKeeper.lastNumber() == 0 ? 2 : _numberKeeper.lastNumber() + 1;
 
-    while (primeCandidate <= 5_000_000) {
+    while (primeCandidate <= 5) {
       if (isPrime(primeCandidate)) {
 
         _prevayler.execute(new NumberStorageTransaction(primeCandidate));
@@ -32,7 +32,7 @@ class PrimeCalculator {
   void start1() {
     int primeCandidate = _numberKeeper.lastNumber() == 0 ? 2 : _numberKeeper.lastNumber() + 1;
 
-    while (primeCandidate <= 10_000_000) {
+    while (primeCandidate <= 10) {
       if (isPrime(primeCandidate)) {
 
         _prevayler.execute(new NumberStorageTransaction(primeCandidate));
