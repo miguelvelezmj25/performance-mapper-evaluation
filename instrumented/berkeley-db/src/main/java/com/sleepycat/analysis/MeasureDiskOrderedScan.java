@@ -58,12 +58,12 @@ public class MeasureDiskOrderedScan {
   private long startTime;
   private long endTime;
 
-  public static void main(String args[]) {
-    try {
+  public static void main(String args[]) throws InterruptedException, IOException {
+//    try {
       Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
 
     //        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
     //        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
@@ -92,13 +92,13 @@ public class MeasureDiskOrderedScan {
 //    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
 //    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
 
-    try {
+//    try {
       new MeasureDiskOrderedScan(args).run();
       //            System.exit(0);
-    } catch (Throwable e) {
-      e.printStackTrace(System.out);
-      //            System.exit(1);
-    }
+//    } catch (Throwable e) {
+//      e.printStackTrace(System.out);
+//      //            System.exit(1);
+//    }
 
 //    Sinks.postProcessSinks("berkeley");
   }
