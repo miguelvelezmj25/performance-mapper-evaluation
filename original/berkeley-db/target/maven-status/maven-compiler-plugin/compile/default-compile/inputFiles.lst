@@ -117,7 +117,6 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/cleaner/UtilizationTracker.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/config/DurationConfigParam.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/PartialComparator.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/Run.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/node/cbvlsn/package-info.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/BaseStat.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/LongDiffStat.java
@@ -270,6 +269,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/RepParams.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/bind/tuple/TupleInputBinding.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/ReflectionAccessor.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/analysis/MeasureDiskOrderedScan.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/BtreeStats.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/ReadOnlyCatalog.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/stream/FeederReader.java

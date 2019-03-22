@@ -75,7 +75,6 @@ com/sleepycat/persist/impl/CollectionProxy$LinkedListProxy.class
 com/sleepycat/je/tree/Tree$SplitInfo.class
 com/sleepycat/je/rep/utilint/ServiceHandshake$ClientHandshake.class
 com/sleepycat/je/rep/subscription/SubscriptionThread$SubscriptionThreadExceptionHandler.class
-com/sleepycat/analysis/Run.class
 com/sleepycat/je/incomp/INCompressor.class
 com/sleepycat/je/rep/impl/RepGroupProtocol$DeleteMember.class
 com/sleepycat/je/rep/RepInternal.class
@@ -232,7 +231,6 @@ com/sleepycat/je/rep/impl/TextProtocol$InvalidMessageException.class
 com/sleepycat/je/dbi/DbTree$1.class
 com/sleepycat/je/rep/utilint/ServiceHandshake$SendNameOp.class
 com/sleepycat/je/txn/LockAttemptResult.class
-com/sleepycat/analysis/Run$Action.class
 com/sleepycat/je/log/WholeEntry.class
 com/sleepycat/bind/tuple/SortedFloatBinding.class
 com/sleepycat/je/rep/elections/Elections$ElectionListener.class
@@ -477,6 +475,7 @@ com/sleepycat/persist/ValueAdapter.class
 com/sleepycat/je/rep/impl/networkRestore/Protocol$FileReq.class
 com/sleepycat/je/evictor/Arbiter.class
 com/sleepycat/je/rep/util/ldiff/LDiffService$LDiffServiceRunnable.class
+com/sleepycat/analysis/MeasureDiskOrderedScan.class
 com/sleepycat/je/EnvironmentStats.class
 com/sleepycat/asm/ClassVisitor.class
 com/sleepycat/je/tree/INTargetRep.class
@@ -521,7 +520,6 @@ com/sleepycat/je/rep/monitor/Monitor$1.class
 com/sleepycat/je/rep/stream/OutputWireRecord.class
 com/sleepycat/persist/impl/PersistCatalog$1.class
 com/sleepycat/je/rep/impl/node/Feeder$InputThread.class
-com/sleepycat/analysis/Run$1.class
 com/sleepycat/je/rep/utilint/BinaryProtocol.class
 com/sleepycat/je/rep/utilint/net/SSLChannelFactory$KeyStoreInfo.class
 com/sleepycat/je/dbi/DiskOrderedScanner$DeferredLsnsBatch.class
@@ -828,6 +826,7 @@ com/sleepycat/je/rep/impl/networkRestore/Protocol$FileStart.class
 com/sleepycat/je/rep/InsufficientLogException$LogFileSource.class
 com/sleepycat/asm/AnnotationWriter.class
 com/sleepycat/je/txn/ThinLockImpl.class
+com/sleepycat/analysis/MeasureDiskOrderedScan$1.class
 com/sleepycat/je/jmx/plugin/Stats$StatsTableModel.class
 com/sleepycat/je/rep/subscription/SubscriptionThread$ConnectionException.class
 com/sleepycat/persist/model/SecondaryKey.class
@@ -1065,6 +1064,7 @@ com/sleepycat/je/rep/NetworkRestoreConfig.class
 com/sleepycat/je/utilint/ConfiguredRedirectHandler.class
 com/sleepycat/je/rep/impl/EnumConfigParam.class
 com/sleepycat/je/rep/utilint/ServiceDispatcher$Service.class
+com/sleepycat/analysis/MeasureDiskOrderedScan$Action.class
 com/sleepycat/je/rep/utilint/net/SSLMirrorAuthenticator.class
 com/sleepycat/je/log/Provisional$1.class
 com/sleepycat/je/rep/utilint/ServiceDispatcher$1.class
