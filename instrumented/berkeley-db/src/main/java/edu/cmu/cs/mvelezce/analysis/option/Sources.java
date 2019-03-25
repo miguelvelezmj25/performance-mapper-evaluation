@@ -1,6 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis.option;
 
-public class Source {
+public class Sources {
     public static boolean getOptionACTION(boolean option) {
         return option;
     }
@@ -33,7 +33,7 @@ public class Source {
 
     public static boolean DATA_2(boolean option) { return option; }
 
-    public static boolean DUPLICATES_3(boolean option) { return option; }
+    public static boolean DUPLICATES_0(boolean option) { return option; }
 
     public static boolean KEYSIZE_4(boolean option) { return option; }
 

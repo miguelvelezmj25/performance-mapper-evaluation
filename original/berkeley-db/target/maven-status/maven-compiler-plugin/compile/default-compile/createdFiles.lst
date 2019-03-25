@@ -23,7 +23,6 @@ com/sleepycat/je/txn/LockGrantType.class
 com/sleepycat/je/rep/utilint/net/AliasKeyManager.class
 com/sleepycat/je/utilint/FloatStat.class
 com/sleepycat/je/dbi/INList$Iter.class
-edu/cmu/cs/mvelezce/analysis/option/Source.class
 com/sleepycat/je/evictor/OffHeapCache$LRUList.class
 com/sleepycat/je/rep/elections/Protocol$Propose.class
 com/sleepycat/je/util/verify/DataVerifier$1.class
@@ -1020,6 +1019,7 @@ com/sleepycat/je/dbi/SortedLSNTreeWalker$TreeNodeProcessor.class
 com/sleepycat/je/util/verify/BtreeVerifier$FileSizeCache.class
 com/sleepycat/je/txn/LockManager$DeadlockChecker$CycleNode.class
 com/sleepycat/je/log/FileManager$LogEndFileDescriptor.class
+edu/cmu/cs/mvelezce/analysis/option/Sources.class
 com/sleepycat/je/rep/subscription/SubscriptionStatDefinition.class
 com/sleepycat/je/cleaner/FileProtector$ProtectedFileRange.class
 com/sleepycat/je/rep/stream/Protocol.class

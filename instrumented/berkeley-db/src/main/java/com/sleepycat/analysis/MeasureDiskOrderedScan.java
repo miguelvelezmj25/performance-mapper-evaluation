@@ -13,12 +13,7 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
-import edu.cmu.cs.mvelezce.analysis.option.Source;
-import edu.cmu.cs.mvelezce.cc.CCTaintSourceWrapper;
-import edu.cmu.cs.mvelezce.cc.Sinks;
-import edu.columbia.cs.psl.phosphor.Configuration;
-import edu.columbia.cs.psl.phosphor.runtime.Taint;
-import edu.columbia.cs.psl.phosphor.runtime.TaintSourceWrapper;
+import edu.cmu.cs.mvelezce.analysis.option.Sources;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -43,7 +38,7 @@ public class MeasureDiskOrderedScan {
   private boolean preload = false;
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
-//  private int nRecords = 25 * 1000 * 1000;
+  //  private int nRecords = 25 * 1000 * 1000;
   private int nRecords = 500_000;
   private int keySize = 10;
   private int dataSize = 1000;
@@ -59,16 +54,16 @@ public class MeasureDiskOrderedScan {
   private long endTime;
 
   public static void main(String args[]) throws InterruptedException, IOException {
-//    try {
-      Thread.sleep(1000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
+    //    try {
+    Thread.sleep(1000);
+    //    } catch (InterruptedException e) {
+    //      e.printStackTrace();
+    //    }
 
+    DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
     //        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
     //        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
     //        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
-    //        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(args[3]));
     //        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
     //        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
 
@@ -86,68 +81,68 @@ public class MeasureDiskOrderedScan {
     KEYSIZE = false;
     SEQUENTIAL = false;
 
-//    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
-//    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
-//    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
-//    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
-//    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
+    //    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
+    //    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
+    //    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
+    //    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
+    //    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
 
-//    try {
-      new MeasureDiskOrderedScan(args).run();
-      //            System.exit(0);
-//    } catch (Throwable e) {
-//      e.printStackTrace(System.out);
-//      //            System.exit(1);
-//    }
+    //    try {
+    new MeasureDiskOrderedScan(args).run();
+    //            System.exit(0);
+    //    } catch (Throwable e) {
+    //      e.printStackTrace(System.out);
+    //      //            System.exit(1);
+    //    }
 
-//    Sinks.postProcessSinks("berkeley");
+    //    Sinks.postProcessSinks("berkeley");
   }
 
-//  public static void deleteFolder(File folder) {
-//    File[] files = folder.listFiles();
-//    if (files != null) { // some JVMs return null for empty dirs
-//      for (File f : files) {
-//        if (f.isDirectory()) {
-//          deleteFolder(f);
-//        } else {
-//          f.delete();
-//        }
-//      }
-//    }
-//    folder.delete();
-//  }
+  //  public static void deleteFolder(File folder) {
+  //    File[] files = folder.listFiles();
+  //    if (files != null) { // some JVMs return null for empty dirs
+  //      for (File f : files) {
+  //        if (f.isDirectory()) {
+  //          deleteFolder(f);
+  //        } else {
+  //          f.delete();
+  //        }
+  //      }
+  //    }
+  //    folder.delete();
+  //  }
 
   public MeasureDiskOrderedScan(String args[]) {
-//    File dir = new File(this.homeDir);
-//    deleteFolder(dir);
-//    dir.mkdir();
+    //    File dir = new File(this.homeDir);
+    //    deleteFolder(dir);
+    //    dir.mkdir();
 
     boolean dataSizeSpecified = false;
 
-//    if (ACTION) {
-//      this.action = null;
-//    }
-//
-//    if (RECORDS) {
-//      this.nRecords /= 50;
-//    }
-//
-//    if (DATA) {
-//      this.dataSize = 100;
-//      dataSizeSpecified = true;
-//    }
-//
-//    if (DUPLICATES) {
-//      this.dupDb = true;
-//    }
-//
-//    if (KEYSIZE) {
-//      this.keySize = 100;
-//    }
-//
-//    if(SEQUENTIAL) {
-//      this.sequentialWrites = true;
-//    }
+    //    if (ACTION) {
+    //      this.action = null;
+    //    }
+    //
+    //    if (RECORDS) {
+    //      this.nRecords /= 50;
+    //    }
+    //
+    //    if (DATA) {
+    //      this.dataSize = 100;
+    //      dataSizeSpecified = true;
+    //    }
+    //
+    if (DUPLICATES) {
+      this.dupDb = true;
+    }
+
+    //    if (KEYSIZE) {
+    //      this.keySize = 100;
+    //    }
+    //
+    //    if(SEQUENTIAL) {
+    //      this.sequentialWrites = true;
+    //    }
 
     //        for (int i = 0; i < args.length; i += 1) {
     //            final String arg = args[i];

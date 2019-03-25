@@ -13,6 +13,7 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
+import edu.cmu.cs.mvelezce.analysis.option.Sources;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -53,16 +54,16 @@ public class MeasureDiskOrderedScan {
   private long endTime;
 
   public static void main(String args[]) throws InterruptedException, IOException {
-//    try {
+    //    try {
     Thread.sleep(1000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
+    //    } catch (InterruptedException e) {
+    //      e.printStackTrace();
+    //    }
 
+    DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
     //        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
     //        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
     //        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
-    //        DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(args[3]));
     //        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
     //        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
 
@@ -80,21 +81,21 @@ public class MeasureDiskOrderedScan {
     KEYSIZE = false;
     SEQUENTIAL = false;
 
-//    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
-//    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
-//    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
-//    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
-//    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
+    //    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
+    //    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
+    //    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
+    //    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
+    //    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
 
-//    try {
+    //    try {
     new MeasureDiskOrderedScan(args).run();
     //            System.exit(0);
-//    } catch (Throwable e) {
-//      e.printStackTrace(System.out);
-//      //            System.exit(1);
-//    }
+    //    } catch (Throwable e) {
+    //      e.printStackTrace(System.out);
+    //      //            System.exit(1);
+    //    }
 
-//    Sinks.postProcessSinks("berkeley");
+    //    Sinks.postProcessSinks("berkeley");
   }
 
   //  public static void deleteFolder(File folder) {
@@ -131,10 +132,10 @@ public class MeasureDiskOrderedScan {
     //      dataSizeSpecified = true;
     //    }
     //
-    //    if (DUPLICATES) {
-    //      this.dupDb = true;
-    //    }
-    //
+    if (DUPLICATES) {
+      this.dupDb = true;
+    }
+
     //    if (KEYSIZE) {
     //      this.keySize = 100;
     //    }

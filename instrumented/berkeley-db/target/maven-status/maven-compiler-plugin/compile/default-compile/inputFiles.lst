@@ -121,7 +121,6 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/impl/ProxiedFormat.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/latch/TimingLatch.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/ReplicationSSLConfigBeanInfo.java
-/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Source.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/recovery/CheckpointEnd.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/utilint/IntStat.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/UniqueConstraintException.java
@@ -684,6 +683,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/BasicIndex.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/collections/DataCursor.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/tree/WithRootLatched.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sources.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/impl/KeyLocation.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/evolve/Renamer.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/utilint/LongMaxZeroStat.java
