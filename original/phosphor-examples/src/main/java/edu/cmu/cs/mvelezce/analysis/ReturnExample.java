@@ -6,11 +6,13 @@ public class ReturnExample {
 
   public static void main(String[] args) {
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     if (A) {
       return;
     }
-    if (!A) {
+
+    if (B) {
       return;
     }
   }

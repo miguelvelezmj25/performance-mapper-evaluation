@@ -12,6 +12,7 @@ edu/cmu/cs/mvelezce/analysis/VariabilityContext1.class
 edu/cmu/cs/mvelezce/analysis/GuessANumber.class
 edu/cmu/cs/mvelezce/analysis/Subtraces5.class
 edu/cmu/cs/mvelezce/analysis/Example7.class
+edu/cmu/cs/mvelezce/analysis/LightControlTracking.class
 edu/cmu/cs/mvelezce/analysis/SimpleExample2.class
 edu/cmu/cs/mvelezce/analysis/Example2.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample3.class
@@ -19,6 +20,7 @@ edu/cmu/cs/mvelezce/analysis/Sound.class
 edu/cmu/cs/mvelezce/analysis/Subtraces3.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class
+edu/cmu/cs/mvelezce/analysis/Maps.class
 edu/cmu/cs/mvelezce/analysis/WhileTrueNoReturn.class
 edu/cmu/cs/mvelezce/analysis/AndContext.class
 edu/cmu/cs/mvelezce/analysis/Example4.class
@@ -40,11 +42,13 @@ edu/cmu/cs/mvelezce/analysis/Example8.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample2.class
 edu/cmu/cs/mvelezce/analysis/OrContext4.class
+edu/cmu/cs/mvelezce/analysis/Diff.class
 edu/cmu/cs/mvelezce/analysis/MultiFacets.class
 edu/cmu/cs/mvelezce/analysis/For2Example.class
 edu/cmu/cs/mvelezce/analysis/Example5.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample5.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext.class
+edu/cmu/cs/mvelezce/analysis/SimpleForExample6.class
 edu/cmu/cs/mvelezce/RunningExample.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext3.class
 edu/cmu/cs/mvelezce/analysis/Subtraces.class

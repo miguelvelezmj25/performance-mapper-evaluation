@@ -1,13 +1,14 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class Trivial {
+/**
+ * Example to showcase Phosphor's light control tracking. Taints are propagated through control-flow,
+ * but are not propagated control dependencies between methods.
+ */
+public class LightControlTracking {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks("Trivial");
-
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 

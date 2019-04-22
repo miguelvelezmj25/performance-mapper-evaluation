@@ -1,16 +1,20 @@
 package edu.cmu.cs.mvelezce.analysis;
 
+import edu.cmu.cs.mvelezce.taints.Sources;
+
 public class ThrowIf {
 
   public static void main(String[] args) {
-  }
+    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
-  public void some(String[] args) {
-    if (args.length == 0) {
-      throw new RuntimeException();
+    if (A) {
+      throw new RuntimeException("A is enabled");
     }
 
-    System.out.println();
+    if (B) {
+      System.out.println();
+    }
   }
 
 }
