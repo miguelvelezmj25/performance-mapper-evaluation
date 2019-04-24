@@ -306,6 +306,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/StateChangeListener.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/jmx/plugin/RepJEStats.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/SequenceOverflowException.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Testing.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/impl/PersistKeyAssigner.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/util/DbDump.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/cleaner/CleanerStatDefinition.java
@@ -837,6 +838,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/jmx/plugin/RepJEStatsPlugin.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/util/ldiff/LDiffConfigBeanInfo.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/CheckpointConfigBeanInfo.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Taint.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/persist/impl/EnhancedAccessor.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/rep/impl/NodeStateService.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/instrumented/berkeley-db/src/main/java/com/sleepycat/je/utilint/TestHookAdapter.java

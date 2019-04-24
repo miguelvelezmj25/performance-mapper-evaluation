@@ -825,6 +825,7 @@ com/sleepycat/je/rep/impl/networkRestore/Protocol$FileStart.class
 com/sleepycat/je/rep/InsufficientLogException$LogFileSource.class
 com/sleepycat/asm/AnnotationWriter.class
 com/sleepycat/je/txn/ThinLockImpl.class
+edu/cmu/cs/mvelezce/analysis/option/Taint.class
 com/sleepycat/analysis/MeasureDiskOrderedScan$1.class
 com/sleepycat/je/jmx/plugin/Stats$StatsTableModel.class
 com/sleepycat/je/rep/subscription/SubscriptionThread$ConnectionException.class
@@ -1120,6 +1121,7 @@ com/sleepycat/je/log/entry/MatchpointLogEntry.class
 com/sleepycat/je/jmx/plugin/Stats$GraphFrame$1.class
 com/sleepycat/je/log/FSyncManager.class
 com/sleepycat/je/jmx/plugin/Stats$GraphFrame.class
+edu/cmu/cs/mvelezce/analysis/option/Testing.class
 com/sleepycat/je/rep/util/ldiff/LDiffUtil.class
 com/sleepycat/je/Database$1.class
 com/sleepycat/je/rep/utilint/SizeAwaitMap.class

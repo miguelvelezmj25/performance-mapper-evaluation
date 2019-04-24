@@ -14,6 +14,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
 import edu.cmu.cs.mvelezce.analysis.option.Sources;
+import edu.cmu.cs.mvelezce.cc.Sinks;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -26,12 +27,18 @@ public class MeasureDiskOrderedScan {
     DiskOrderedScan
   }
 
-  public static boolean ACTION;
-  public static boolean RECORDS;
-  public static boolean DATA;
+  //  public static boolean ACTION;
+  //  public static boolean RECORDS;
+  //  public static boolean DATA;
   public static boolean DUPLICATES;
-  public static boolean KEYSIZE;
   public static boolean SEQUENTIAL;
+  public static boolean KEYSONLY;
+  public static String FILELOGGINGLEVEL;
+  public static long JECACHESIZE;
+  public static boolean LOCKING;
+  public static boolean SHAREDCACHE;
+  public static boolean REPLICATED;
+  //  public static boolean KEYSIZE;
 
   private boolean dupDb = false;
   private boolean keysOnly = false;
@@ -39,7 +46,10 @@ public class MeasureDiskOrderedScan {
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
   //  private int nRecords = 25 * 1000 * 1000;
-  private int nRecords = 500_000;
+//  private int nRecords = 500_000;
+//  private int nRecords = 100_000;
+//      private int nRecords = 50;
+  private int nRecords = 5;
   private int keySize = 10;
   private int dataSize = 1000;
   private long lsnBatchSize = Long.MAX_VALUE;
@@ -53,49 +63,41 @@ public class MeasureDiskOrderedScan {
   private long startTime;
   private long endTime;
 
-  public static void main(String args[]) throws InterruptedException, IOException {
-    //    try {
-    Thread.sleep(1000);
-    //    } catch (InterruptedException e) {
-    //      e.printStackTrace();
-    //    }
-
+  public static void main(String[] args) throws IOException {
     DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
-    //        ACTION = Source.getOptionACTION(Boolean.valueOf(args[0]));
-    //        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(args[1]));
-    //        DATA = Source.getOptionDATA(Boolean.valueOf(args[2]));
-    //        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
-    //        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
+    SEQUENTIAL = Sources.SEQUENTIAL_1(Boolean.valueOf(args[1]));
+    KEYSONLY = Sources.KEYSONLY_2(Boolean.valueOf(args[2]));
+    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(Boolean.valueOf(args[3]));
+    JECACHESIZE = Sources.JECACHESIZE_4(Boolean.valueOf(args[4]));
+    LOCKING = Sources.LOCKING_5(Boolean.valueOf(args[5]));
+    SHAREDCACHE = Sources.SHAREDCACHE_6(Boolean.valueOf(args[6]));
+    REPLICATED = Sources.REPLICATED_7(Boolean.valueOf(args[7]));
 
-    //    ACTION = Source.getOptionACTION(Boolean.valueOf(false));
-    //    RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));
-    //    DATA = Source.getOptionDATA(Boolean.valueOf(false));
-    //    DUPLICATES = Source.getOptionDUPLICATES(Boolean.valueOf(false));
-    //    KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(false));
-    //    SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(false));
+//    DUPLICATES = Sources.DUPLICATES_0(false);
+//    SEQUENTIAL = Sources.SEQUENTIAL_1(false);
+//    KEYSONLY = Sources.KEYSONLY_2(false);
+//    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(false);
+//    JECACHESIZE = Sources.JECACHESIZE_4(false);
+//    LOCKING = Sources.LOCKING_5(false);
+//    SHAREDCACHE = Sources.SHAREDCACHE_6(false);
+//    REPLICATED = Sources.REPLICATED_7(false);
 
-    ACTION = false;
-    RECORDS = false;
-    DATA = false;
-    DUPLICATES = false;
-    KEYSIZE = false;
-    SEQUENTIAL = false;
+//    DUPLICATES = false;
+//    SEQUENTIAL = false;
+//    KEYSONLY = false;
+//    FILELOGGINGLEVEL = true;
 
-    //    RECORDS = Source.RECORDS_1(Boolean.valueOf(args[0]));
-    //    DATA = Source.DATA_2(Boolean.valueOf(args[1]));
-    //    DUPLICATES = Source.DUPLICATES_3(Boolean.valueOf(args[2]));
-    //    KEYSIZE = Source.KEYSIZE_4(Boolean.valueOf(args[3]));
-    //    SEQUENTIAL = Source.SEQUENTIAL_5(Boolean.valueOf(args[4]));
 
-    //    try {
+//    int x = 0;
+//    if(DUPLICATES) {
+//      x = 1;
+//
+//      if(SEQUENTIAL) {
+//        x = 2;
+//      }
+//    }
+
     new MeasureDiskOrderedScan(args).run();
-    //            System.exit(0);
-    //    } catch (Throwable e) {
-    //      e.printStackTrace(System.out);
-    //      //            System.exit(1);
-    //    }
-
-    //    Sinks.postProcessSinks("berkeley");
   }
 
   //  public static void deleteFolder(File folder) {
@@ -132,9 +134,11 @@ public class MeasureDiskOrderedScan {
     //      dataSizeSpecified = true;
     //    }
     //
-    if (DUPLICATES) {
-      this.dupDb = true;
-    }
+
+    this.dupDb = DUPLICATES;
+    this.sequentialWrites = SEQUENTIAL;
+    this.keysOnly = KEYSONLY;
+    this.jeCacheSize = JECACHESIZE;
 
     //    if (KEYSIZE) {
     //      this.keySize = 100;
@@ -275,6 +279,19 @@ public class MeasureDiskOrderedScan {
     envConfig.setAllowCreate(create);
     envConfig.setCacheSize(jeCacheSize);
     envConfig.setConfigParam(EnvironmentConfig.LOG_FILE_MAX, String.valueOf(1000 * 1000 * 1000));
+    envConfig.setConfigParam(EnvironmentConfig.FILE_LOGGING_LEVEL, FILELOGGINGLEVEL);
+    envConfig.setTxnSerializableIsolation(LOCKING);
+    envConfig.setSharedCache(SHAREDCACHE);
+
+    /* Daemons interfere with cache size measurements. */
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_EVICTOR, "false");
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_OFFHEAP_EVICTOR, "false");
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_IN_COMPRESSOR, "false");
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_CHECKPOINTER, "false");
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_CLEANER, "false");
+    envConfig.setConfigParam(EnvironmentConfig.ENV_RUN_VERIFIER, "false");
+    envConfig.setConfigParam(EnvironmentConfig.STATS_COLLECT, "false");
+    /* Daemons interfere with cache size measurements. */
 
     env = new Environment(new File(homeDir), envConfig);
 
@@ -283,6 +300,7 @@ public class MeasureDiskOrderedScan {
     dbConfig.setExclusiveCreate(create);
     dbConfig.setSortedDuplicates(dupDb);
     dbConfig.setCacheMode(CacheMode.EVICT_LN);
+    dbConfig.setReplicated(REPLICATED);
 
     db = env.openDatabase(null, "foo", dbConfig);
   }

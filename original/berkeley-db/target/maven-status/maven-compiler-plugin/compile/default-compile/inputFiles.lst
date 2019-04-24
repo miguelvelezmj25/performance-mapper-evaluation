@@ -197,6 +197,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/vlsn/VLSNRecoveryTracker.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/DatabasePreemptedException.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/ComplexFormat.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Taint.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/config/LongConfigParam.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/monitor/MonitorConfig.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/DiskOrderedCursorProducerException.java
@@ -745,6 +746,7 @@
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/jmx/plugin/package-info.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/LockAttemptResult.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/dbi/ExpirationInfo.java
+/Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Testing.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/collections/StoredKeySet.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/statcap/StatManager.java
 /Users/mvelezce/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/statcap/StatUtils.java
