@@ -1,22 +1,16 @@
 package edu.cmu.cs.mvelezce.analysis;
 
 import edu.cmu.cs.mvelezce.cc.Sinks;
-import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class Trivial {
+public class BerkeleyDbStaticNewLabelBug {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks("Trivial");
+    Sinks.preProcessSinks(BerkeleyDbStaticNewLabelBug.class.getSimpleName());
 
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    final String vendor = System.getProperty("java.vendor");
+    final String vmName = System.getProperty("java.vm.name");
 
-    if (A) {
-      System.out.println();
-    }
-
-    if (B) {
-      System.out.println();
-    }
+    boolean ZING_JVM = vendor != null && vmName != null &&
+        vendor.equals("Azul Systems, Inc.") && vmName.contains("Zing");
   }
 }

@@ -26,13 +26,6 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>edu.gmu.swe.phosphor</groupId>
-      <artifactId>Phosphor</artifactId>
-      <version>0.0.4-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/Phosphor-0.0.4-SNAPSHOT.jar</systemPath>
-    </dependency>
 
     <dependency>
       <groupId>com.bpodgursky</groupId>
