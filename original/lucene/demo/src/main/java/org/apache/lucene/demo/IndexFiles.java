@@ -32,7 +32,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.codecs.simpletext.SimpleTextCodec;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongPoint;
@@ -41,7 +40,6 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.LogByteSizeMergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -54,13 +52,12 @@ import org.apache.lucene.store.FSDirectory;
  */
 public class IndexFiles {
 
-  private static boolean CREATE;
-  private static boolean RAM_BUFFER_SIZE;
-  private static boolean MERGE_POLICY;
-  private static boolean CODEC;
-  private static boolean MAX_BUFFERED_DOCS;
-  private static boolean USE_COMPOUND_FILE;
-  private static boolean MAX_TOKEN_LENGTH;
+  private static int MAX_BUFFERED_DOCS;
+  //  private static boolean RAM_BUFFER_SIZE;
+  //  private static boolean MERGE_POLICY;
+  //  private static boolean CODEC;
+  //  private static boolean USE_COMPOUND_FILE;
+  //  private static boolean MAX_TOKEN_LENGTH;
 
   private IndexFiles() {}
 
@@ -71,25 +68,27 @@ public class IndexFiles {
             + " [-index INDEX_PATH] [-docs DOCS_PATH] [-update]\n\n"
             + "This indexes the documents in DOCS_PATH, creating a Lucene index"
             + "in INDEX_PATH that can be searched with SearchFiles";
-    String indexPath = "index";
-    String docsPath = null;
-    boolean create = true;
-    for (int i = 0; i < args.length; i++) {
-      if ("-index".equals(args[i])) {
-        indexPath = args[i + 1];
-        i++;
-      } else if ("-docs".equals(args[i])) {
-        docsPath = args[i + 1];
-        i++;
-      } else if ("-update".equals(args[i])) {
-        create = false;
-      }
-    }
 
-    if (docsPath == null) {
-      System.err.println("Usage: " + usage);
-      System.exit(1);
-    }
+    String indexPath = "index";
+    String docsPath = "../core/src/main";
+    boolean create = true;
+
+    //    for (int i = 0; i < args.length; i++) {
+    //      if ("-index".equals(args[i])) {
+    //        indexPath = args[i + 1];
+    //        i++;
+    //      } else if ("-docs".equals(args[i])) {
+    //        docsPath = args[i + 1];
+    //        i++;
+    //      } else if ("-update".equals(args[i])) {
+    //        create = false;
+    //      }
+    //    }
+    //
+    //    if (docsPath == null) {
+    //      System.err.println("Usage: " + usage);
+    //      System.exit(1);
+    //    }
 
     final Path docDir = Paths.get(docsPath);
     if (!Files.isReadable(docDir)) {
@@ -103,50 +102,47 @@ public class IndexFiles {
     Date start = new Date();
     try {
       System.out.println("Indexing to directory '" + indexPath + "'...");
-      deleteFolder(new File(indexPath));
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
       Analyzer analyzer = new StandardAnalyzer();
 
-      CREATE = Source.CREATE_0(Boolean.valueOf(args[2]));
-      RAM_BUFFER_SIZE = Source.RAM_BUFFER_SIZE_1(Boolean.valueOf(args[3]));
-      MERGE_POLICY = Source.MERGE_POLICY_2(Boolean.valueOf(args[4]));
-      CODEC = Source.CODEC_3(Boolean.valueOf(args[5]));
-      MAX_BUFFERED_DOCS = Source.MAX_BUFFERED_DOCS_4(Boolean.valueOf(args[6]));
-      USE_COMPOUND_FILE = Source.USE_COMPOUND_FILE_5(Boolean.valueOf(args[7]));
-      MAX_TOKEN_LENGTH = Source.MAX_TOKEN_LENGTH_6(Boolean.valueOf(args[6]));
+      //      RAM_BUFFER_SIZE = Source.RAM_BUFFER_SIZE_1(Boolean.valueOf(args[3]));
+      //      MERGE_POLICY = Source.MERGE_POLICY_2(Boolean.valueOf(args[4]));
+      //      CODEC = Source.CODEC_3(Boolean.valueOf(args[5]));
+      //      MAX_BUFFERED_DOCS = Source.MAX_BUFFERED_DOCS_4(Boolean.valueOf(args[6]));
+      //      USE_COMPOUND_FILE = Source.USE_COMPOUND_FILE_5(Boolean.valueOf(args[7]));
+      //      MAX_TOKEN_LENGTH = Source.MAX_TOKEN_LENGTH_6(Boolean.valueOf(args[6]));
 
-      if (MAX_TOKEN_LENGTH) {
-        ((StandardAnalyzer) analyzer).setMaxTokenLength(32);
-      }
+      MAX_BUFFERED_DOCS = Source.MAX_BUFFERED_DOCS_0(true);
+      //      RAM_BUFFER_SIZE = Source.RAM_BUFFER_SIZE_1(false);
+      //      MERGE_POLICY = Source.MERGE_POLICY_2(false);
+      //      CODEC = Source.CODEC_3(false);
+      //      USE_COMPOUND_FILE = Source.USE_COMPOUND_FILE_5(false);
+      //      MAX_TOKEN_LENGTH = Source.MAX_TOKEN_LENGTH_6(false);
 
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+      iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
 
-      if (CREATE) {
-        create = true;
-      } else {
-        create = false;
-      }
-
-      if(RAM_BUFFER_SIZE) {
-        iwc.setRAMBufferSizeMB(256.0);
-      }
-
-      if (MERGE_POLICY) {
-        iwc.setMergePolicy(new LogByteSizeMergePolicy());
-      }
-
-      if(CODEC) {
-        iwc.setCodec(new SimpleTextCodec());
-      }
-
-      if(MAX_BUFFERED_DOCS) {
-        iwc.setMaxBufferedDocs(500);
-      }
-
-      if(USE_COMPOUND_FILE) {
-        iwc.setUseCompoundFile(false);
-      }
+      //      if (MAX_TOKEN_LENGTH) {
+      //        ((StandardAnalyzer) analyzer).setMaxTokenLength(32);
+      //      }
+      //
+      //
+      //      if(RAM_BUFFER_SIZE) {
+      //        iwc.setRAMBufferSizeMB(256.0);
+      //      }
+      //
+      //      if (MERGE_POLICY) {
+      //        iwc.setMergePolicy(new LogByteSizeMergePolicy());
+      //      }
+      //
+      //      if(CODEC) {
+      //        iwc.setCodec(new SimpleTextCodec());
+      //      }
+      //
+      //      if(USE_COMPOUND_FILE) {
+      //        iwc.setUseCompoundFile(false);
+      //      }
 
       if (create) {
         // Create a new index in the directory, removing any
@@ -183,21 +179,6 @@ public class IndexFiles {
     } catch (IOException e) {
       System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
     }
-  }
-
-  static void deleteFolder(File folder) {
-    boolean exi = folder.exists();
-    File[] files = folder.listFiles();
-    if (files != null) { // some JVMs return null for empty dirs
-      for (File f : files) {
-        if (f.isDirectory()) {
-          deleteFolder(f);
-        } else {
-          f.delete();
-        }
-      }
-    }
-    folder.delete();
   }
 
   /**
