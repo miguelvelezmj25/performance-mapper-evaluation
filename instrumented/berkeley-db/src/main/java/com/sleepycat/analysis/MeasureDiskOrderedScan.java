@@ -66,12 +66,21 @@ public class MeasureDiskOrderedScan {
   public static void main(String[] args) throws IOException {
     DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
     SEQUENTIAL = Sources.SEQUENTIAL_1(Boolean.valueOf(args[1]));
-    KEYSONLY = Sources.KEYSONLY_2(Boolean.valueOf(args[2]));
-    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(Boolean.valueOf(args[3]));
-    JECACHESIZE = Sources.JECACHESIZE_4(Boolean.valueOf(args[4]));
-    LOCKING = Sources.LOCKING_5(Boolean.valueOf(args[5]));
-    SHAREDCACHE = Sources.SHAREDCACHE_6(Boolean.valueOf(args[6]));
-    REPLICATED = Sources.REPLICATED_7(Boolean.valueOf(args[7]));
+    JECACHESIZE = Sources.JECACHESIZE_4(Boolean.valueOf(args[2]));
+    SHAREDCACHE = Sources.SHAREDCACHE_6(Boolean.valueOf(args[3]));
+    REPLICATED = Sources.REPLICATED_7(Boolean.valueOf(args[4]));
+    KEYSONLY = Sources.KEYSONLY_2(false);
+    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(false);
+    LOCKING = Sources.LOCKING_5(false);
+
+//    DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
+//    SEQUENTIAL = Sources.SEQUENTIAL_1(Boolean.valueOf(args[1]));
+//    KEYSONLY = Sources.KEYSONLY_2(Boolean.valueOf(args[2]));
+//    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(Boolean.valueOf(args[3]));
+//    JECACHESIZE = Sources.JECACHESIZE_4(Boolean.valueOf(args[4]));
+//    LOCKING = Sources.LOCKING_5(Boolean.valueOf(args[5]));
+//    SHAREDCACHE = Sources.SHAREDCACHE_6(Boolean.valueOf(args[6]));
+//    REPLICATED = Sources.REPLICATED_7(Boolean.valueOf(args[7]));
 
 //    DUPLICATES = Sources.DUPLICATES_0(false);
 //    SEQUENTIAL = Sources.SEQUENTIAL_1(false);
