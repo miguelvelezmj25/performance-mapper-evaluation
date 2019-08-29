@@ -30,7 +30,8 @@ public class SimpleExample1 {
 
     if (B) { // 5
       j = 5;
-    } else {
+    }
+    else {
       j = 2;
     }
 

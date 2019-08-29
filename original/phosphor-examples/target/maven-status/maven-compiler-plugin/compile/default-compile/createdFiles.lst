@@ -8,6 +8,7 @@ edu/cmu/cs/mvelezce/analysis/Subtraces2.class
 edu/cmu/cs/mvelezce/analysis/EarlyJoinExample.class
 edu/cmu/cs/mvelezce/implicit/MultiFacets.class
 edu/cmu/cs/mvelezce/implicit/ControlStack.class
+edu/cmu/cs/mvelezce/analysis/ImpossibleDynamicPerformanceMeasurement.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext1.class
 edu/cmu/cs/mvelezce/analysis/GuessANumber.class
@@ -18,6 +19,7 @@ edu/cmu/cs/mvelezce/analysis/SimpleExample2.class
 edu/cmu/cs/mvelezce/analysis/Example2.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample3.class
 edu/cmu/cs/mvelezce/analysis/Sound.class
+edu/cmu/cs/mvelezce/analysis/BerkeleyDbStaticNewLabelBug.class
 edu/cmu/cs/mvelezce/analysis/Subtraces3.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class

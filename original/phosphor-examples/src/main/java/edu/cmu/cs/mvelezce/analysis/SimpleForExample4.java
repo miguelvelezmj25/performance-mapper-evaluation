@@ -12,7 +12,8 @@ public class SimpleForExample4 {
 
     if (A) {
       x = 4;
-    } else {
+    }
+    else {
       x = 2;
     }
 

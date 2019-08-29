@@ -8,7 +8,8 @@ public class WhileTrue {
     while (true) {
       try {
         System.out.println("miguel");
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         if (x < 0) {
           break;
         }

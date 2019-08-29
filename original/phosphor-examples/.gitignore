@@ -185,3 +185,6 @@ $RECYCLE.BIN/
 
 !/lib/Phosphor-0.0.4-SNAPSHOT.jar
 !/phosphor/Phosphor-Examples-1.0-SNAPSHOT.jar
+/target/generated-sources/
+/target/maven-archiver/
+/target/maven-status/

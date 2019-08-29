@@ -13,7 +13,8 @@ public class Example9 {
 
     if (A) {
       i = 1;
-    } else {
+    }
+    else {
       i = 2;
     }
 
@@ -22,7 +23,8 @@ public class Example9 {
     if (A) {
       if (B) {
         i = 3;
-      } else {
+      }
+      else {
         i = 4;
       }
 
@@ -32,7 +34,8 @@ public class Example9 {
     if (!A && !B) {
       if (C) {
         i = 5;
-      } else {
+      }
+      else {
         i = 6;
       }
 

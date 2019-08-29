@@ -13,7 +13,8 @@ public class TestPrintExample {
     }
     if (A) {
       System.out.println(i);
-    } else {
+    }
+    else {
       System.out.println(i);
     }
   }

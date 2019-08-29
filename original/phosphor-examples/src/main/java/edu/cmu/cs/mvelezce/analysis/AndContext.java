@@ -18,6 +18,7 @@ public class AndContext {
       foo(D);
     }
   }
+
   private static void foo(boolean x) {
     if (x) {
       System.out.println();

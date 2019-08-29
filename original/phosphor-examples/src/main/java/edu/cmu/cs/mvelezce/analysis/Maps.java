@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
 import java.util.HashSet;
 import java.util.Set;
 

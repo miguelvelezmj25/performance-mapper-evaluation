@@ -3,8 +3,8 @@ package edu.cmu.cs.mvelezce.analysis;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 /**
- * Example to showcase Phosphor's light control tracking. Taints are propagated through control-flow,
- * but are not propagated control dependencies between methods.
+ * Example to showcase Phosphor's light control tracking. Taints are propagated through
+ * control-flow, but are not propagated control dependencies between methods.
  */
 public class LightControlTracking {
 

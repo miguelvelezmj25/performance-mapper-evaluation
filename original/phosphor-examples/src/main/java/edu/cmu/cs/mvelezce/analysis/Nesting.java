@@ -11,7 +11,8 @@ public class Nesting {
     if (A) {
       if (B) {
         System.out.println();
-      } else {
+      }
+      else {
         System.out.println();
       }
     }

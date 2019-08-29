@@ -8,7 +8,7 @@ public class WhileTrue2 {
 
   int some(int x) {
     while (true) {
-      if(x == 0) {
+      if (x == 0) {
         return 0;
       }
 
