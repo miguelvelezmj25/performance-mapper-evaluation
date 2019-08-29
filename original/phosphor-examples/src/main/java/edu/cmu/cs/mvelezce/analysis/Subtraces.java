@@ -15,19 +15,19 @@ public class Subtraces {
     int x = 0;
 
     if (A) {
-      Thread.sleep(1000);
+//      Thread.sleep(1000);
       x = 1;
       foo(C);
     }
 
     if (B) {
-      Thread.sleep(2000);
+//      Thread.sleep(2000);
       x = 2;
       foo(C);
     }
 
     if (x > 0) {
-      Thread.sleep(3000);
+//      Thread.sleep(3000);
     }
 
     Sinks.postProcessSinks();
@@ -35,7 +35,7 @@ public class Subtraces {
 
   private static void foo(boolean x) throws InterruptedException {
     if (x) {
-      Thread.sleep(4000);
+//      Thread.sleep(4000);
     }
   }
 }

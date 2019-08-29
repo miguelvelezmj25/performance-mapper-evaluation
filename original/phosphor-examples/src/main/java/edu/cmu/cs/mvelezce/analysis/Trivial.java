@@ -5,18 +5,24 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Trivial {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     Sinks.preProcessSinks("Trivial");
 
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));
 
     if (A) {
-      System.out.println();
+      int time = 1000;
+      System.out.println(time);
+      Thread.sleep(time);
     }
 
     if (B) {
-      System.out.println();
+      int time = 2000;
+      System.out.println(time);
+      Thread.sleep(time);
     }
+
+    Sinks.postProcessSinks();
   }
 }
