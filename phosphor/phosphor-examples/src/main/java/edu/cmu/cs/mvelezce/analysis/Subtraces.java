@@ -5,7 +5,7 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Subtraces {
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     Sinks.preProcessSinks(Subtraces.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
@@ -17,7 +17,6 @@ public class Subtraces {
     if (A) {
       int time = 1000;
       System.out.println(time);
-      Thread.sleep(time);
       x = 1;
       foo(C);
     }
@@ -25,7 +24,6 @@ public class Subtraces {
     if (B) {
       int time = 2000;
       System.out.println(time);
-      Thread.sleep(time);
       x = 2;
       foo(C);
     }
@@ -33,17 +31,15 @@ public class Subtraces {
     if (x > 0) {
       int time = 3000;
       System.out.println(time);
-      Thread.sleep(time);
     }
 
     Sinks.postProcessSinks();
   }
 
-  private static void foo(boolean x) throws InterruptedException {
+  private static void foo(boolean x) {
     if (x) {
       int time = 4000;
       System.out.println(time);
-      Thread.sleep(time);
     }
   }
 }
