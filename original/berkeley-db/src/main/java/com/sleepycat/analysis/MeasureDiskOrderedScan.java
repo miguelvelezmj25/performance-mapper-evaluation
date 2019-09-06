@@ -62,12 +62,13 @@ public class MeasureDiskOrderedScan {
   public static void main(String[] args) throws IOException {
     DUPLICATES = Boolean.parseBoolean(args[0]);
     SEQUENTIAL = Boolean.parseBoolean(args[1]);
-    KEYSONLY = Boolean.parseBoolean(args[2]);
-    FILELOGGINGLEVEL = fileLoggingLevel(Boolean.parseBoolean(args[3]));
-    JECACHESIZE = jeCacheSize(Boolean.parseBoolean(args[4]));
-    LOCKING = Boolean.parseBoolean(args[5]);
-    SHAREDCACHE = Boolean.parseBoolean(args[6]);
-    REPLICATED = Boolean.parseBoolean(args[7]);
+//    KEYSONLY = Boolean.parseBoolean(args[2]);
+//    FILELOGGINGLEVEL = fileLoggingLevel(Boolean.parseBoolean(args[3]));
+    FILELOGGINGLEVEL = fileLoggingLevel(true);
+    JECACHESIZE = jeCacheSize(Boolean.parseBoolean(args[2]));
+//    LOCKING = Boolean.parseBoolean(args[5]);
+    SHAREDCACHE = Boolean.parseBoolean(args[3]);
+    REPLICATED = Boolean.parseBoolean(args[4]);
 
     new MeasureDiskOrderedScan(args).run();
   }
