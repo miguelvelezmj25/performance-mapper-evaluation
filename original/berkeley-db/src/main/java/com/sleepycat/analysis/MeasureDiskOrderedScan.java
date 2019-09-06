@@ -13,8 +13,6 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
-import edu.cmu.cs.mvelezce.analysis.option.Sources;
-import edu.cmu.cs.mvelezce.cc.Sinks;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -30,14 +28,14 @@ public class MeasureDiskOrderedScan {
   //  public static boolean ACTION;
   //  public static boolean RECORDS;
   //  public static boolean DATA;
-  public static boolean DUPLICATES;
-  public static boolean SEQUENTIAL;
-  public static boolean KEYSONLY;
-  public static String FILELOGGINGLEVEL;
-  public static long JECACHESIZE;
-  public static boolean LOCKING;
-  public static boolean SHAREDCACHE;
-  public static boolean REPLICATED;
+  private static boolean DUPLICATES;
+  private static boolean SEQUENTIAL;
+  private static boolean KEYSONLY;
+  private static String FILELOGGINGLEVEL;
+  private static long JECACHESIZE;
+  private static boolean LOCKING;
+  private static boolean SHAREDCACHE;
+  private static boolean REPLICATED;
   //  public static boolean KEYSIZE;
 
   private boolean dupDb = false;
@@ -46,10 +44,8 @@ public class MeasureDiskOrderedScan {
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
   //  private int nRecords = 25 * 1000 * 1000;
-//  private int nRecords = 500_000;
-//  private int nRecords = 100_000;
-//      private int nRecords = 50;
-      private int nRecords = 5;
+  //  private int nRecords = 500_000;
+  private int nRecords = 10;
   private int keySize = 10;
   private int dataSize = 1000;
   private long lsnBatchSize = Long.MAX_VALUE;
@@ -64,42 +60,34 @@ public class MeasureDiskOrderedScan {
   private long endTime;
 
   public static void main(String[] args) throws IOException {
-//    Sinks.preProcessSinks("MeasureDiskOrderedScan");
-
-//    DUPLICATES = Sources.DUPLICATES_0(Boolean.valueOf(args[0]));
-//    SEQUENTIAL = Sources.SEQUENTIAL_1(Boolean.valueOf(args[1]));
-//    KEYSONLY = Sources.KEYSONLY_2(Boolean.valueOf(args[2]));
-//    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(Boolean.valueOf(args[3]));
-//    JECACHESIZE = Sources.JECACHESIZE_4(Boolean.valueOf(args[4]));
-//    LOCKING = Sources.LOCKING_5(Boolean.valueOf(args[5]));
-//    SHAREDCACHE = Sources.SHAREDCACHE_6(Boolean.valueOf(args[6]));
-//    REPLICATED = Sources.REPLICATED_7(Boolean.valueOf(args[7]));
-
-    DUPLICATES = Sources.DUPLICATES_0(false);
-    SEQUENTIAL = Sources.SEQUENTIAL_1(false);
-    KEYSONLY = Sources.KEYSONLY_2(false);
-    FILELOGGINGLEVEL = Sources.FILELOGGINGLEVEL_3(false);
-    JECACHESIZE = Sources.JECACHESIZE_4(false);
-    LOCKING = Sources.LOCKING_5(false);
-    SHAREDCACHE = Sources.SHAREDCACHE_6(false);
-    REPLICATED = Sources.REPLICATED_7(false);
-
-//    DUPLICATES = false;
-//    SEQUENTIAL = false;
-//    KEYSONLY = false;
-//    FILELOGGINGLEVEL = true;
-
-
-//    int x = 0;
-//    if(DUPLICATES) {
-//      x = 1;
-//
-//      if(SEQUENTIAL) {
-//        x = 2;
-//      }
-//    }
+    DUPLICATES = Boolean.parseBoolean(args[0]);
+    SEQUENTIAL = Boolean.parseBoolean(args[1]);
+    KEYSONLY = Boolean.parseBoolean(args[2]);
+    FILELOGGINGLEVEL = fileLoggingLevel(Boolean.parseBoolean(args[3]));
+    JECACHESIZE = jeCacheSize(Boolean.parseBoolean(args[4]));
+    LOCKING = Boolean.parseBoolean(args[5]);
+    SHAREDCACHE = Boolean.parseBoolean(args[6]);
+    REPLICATED = Boolean.parseBoolean(args[7]);
 
     new MeasureDiskOrderedScan(args).run();
+  }
+
+  private static long jeCacheSize(boolean option) {
+    long value = 1000L * 1000;
+
+    if (option) {
+      return value * 1000;
+    }
+
+    return value;
+  }
+
+  private static String fileLoggingLevel(boolean option) {
+    if (option) {
+      return "INFO";
+    }
+
+    return "OFF";
   }
 
   //  public static void deleteFolder(File folder) {
