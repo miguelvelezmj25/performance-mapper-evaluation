@@ -41,13 +41,14 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-codecs</artifactId>
-      <version>7.4.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/../codecs/target/lucene-codecs-7.4.0.jar</systemPath>
-    </dependency>
+<!--    TODO MIGUEL Used in tests-->
+<!--    <dependency>-->
+<!--      <groupId>org.apache.lucene</groupId>-->
+<!--      <artifactId>lucene-codecs</artifactId>-->
+<!--      <version>7.4.0</version>-->
+<!--      <scope>system</scope>-->
+<!--      <systemPath>${project.basedir}/../jars/codecs/lucene-codecs-7.4.0.jar</systemPath>-->
+<!--    </dependency>-->
 
   </dependencies>
 
