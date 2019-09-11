@@ -1,0 +1,47 @@
+2018-09-13 15:04:06.215 UTC INFO [Node1] No server auth method
+2018-09-13 15:04:06.215 UTC INFO [Node1] Started ServiceDispatcher. HostPort=localhost:5001
+2018-09-13 15:04:06.216 UTC INFO [Node1] DataChannel factory: com.sleepycat.je.rep.utilint.net.SimpleChannelFactory
+2018-09-13 15:04:06.277 UTC INFO [Node1] DTVLSN at start:0
+2018-09-13 15:04:06.278 UTC INFO [Node1] node:NullNode(-1) state change from DETACHED to UNKNOWN
+2018-09-13 15:04:06.295 UTC INFO [Node1] Current group size: 0
+2018-09-13 15:04:06.296 UTC INFO [Node1] New node Node1(-1) unknown to rep group
+2018-09-13 15:04:06.296 UTC INFO [Node1] Master changed to Node1
+2018-09-13 15:04:06.297 UTC INFO [Node1] Nascent group. Node1 is master by virtue of being the first node.
+2018-09-13 15:04:06.297 UTC INFO [Node1] node:Node1(1) state change from UNKNOWN to MASTER
+2018-09-13 15:04:06.306 UTC INFO [Node1] Successfully added node:Node1(1) HostPort = localhost: 5001 [ELECTABLE]
+2018-09-13 15:04:06.311 UTC INFO [Node1] Updated minimum JE group version to 7.5.0
+2018-09-13 15:04:06.315 UTC INFO [Node1] Node Node1 started
+2018-09-13 15:04:06.315 UTC INFO [Node1] node:NullNode(-1) state change from MASTER to UNKNOWN
+2018-09-13 15:04:06.316 UTC INFO [Node1] node:Node1(1) state change from UNKNOWN to MASTER
+2018-09-13 15:04:06.316 UTC INFO [Node1] Feeder manager accepting requests.
+2018-09-13 15:04:06.318 UTC INFO [Node1] Joining group as master
+2018-09-13 15:04:06.358 UTC INFO [Node1] Feeder accepted connection from com.sleepycat.je.rep.utilint.net.SimpleDataChannel@2b37a628
+2018-09-13 15:04:06.370 UTC INFO [Node1] Feeder-replica handshake start
+2018-09-13 15:04:06.373 UTC INFO [Node1] Successfully added node:Node2(2) HostPort = localhost: 5002 [ELECTABLE]
+2018-09-13 15:04:06.374 UTC INFO [Node1] Feeder-replica Node2 handshake completed. Replica Node2 Versions JE: 7.5.11 Log: 15 Protocol: 7 Stream Log: 13
+2018-09-13 15:04:06.376 UTC INFO [Node1] Feeder-replica Node2 syncup started. Feeder range: first=1 last=16 sync=16 txnEnd=16
+2018-09-13 15:04:06.382 UTC INFO [Node1] Feeder-replica Node2 start stream at VLSN: 1
+2018-09-13 15:04:06.386 UTC INFO [Node1] Feeder-replica Node2 syncup ended. Elapsed time: 10ms
+2018-09-13 15:04:06.388 UTC INFO [Node1] Feeder output thread for replica Node2 started at VLSN 1 master at 16 (DTVLSN:16) VLSN delta=15 socket=(Node2(2))com.sleepycat.je.rep.utilint.net.SimpleDataChannel@2b37a628
+2018-09-13 15:04:06.417 UTC INFO [Node1] Feeder accepted connection from com.sleepycat.je.rep.utilint.net.SimpleDataChannel@6a0aac13
+2018-09-13 15:04:06.418 UTC INFO [Node1] Feeder-replica handshake start
+2018-09-13 15:04:06.427 UTC INFO [Node1] Successfully added node:Node3(3) HostPort = localhost: 5003 [ELECTABLE]
+2018-09-13 15:04:06.429 UTC INFO [Node1] Feeder-replica Node3 handshake completed. Replica Node3 Versions JE: 7.5.11 Log: 15 Protocol: 7 Stream Log: 13
+2018-09-13 15:04:06.429 UTC INFO [Node1] Feeder-replica Node3 syncup started. Feeder range: first=1 last=21 sync=21 txnEnd=21
+2018-09-13 15:04:06.430 UTC INFO [Node1] Feeder-replica Node3 start stream at VLSN: 1
+2018-09-13 15:04:06.430 UTC INFO [Node1] Feeder-replica Node3 syncup ended. Elapsed time: 1ms
+2018-09-13 15:04:06.431 UTC INFO [Node1] Feeder output thread for replica Node3 started at VLSN 1 master at 21 (DTVLSN:19) VLSN delta=20 socket=(Node3(3))com.sleepycat.je.rep.utilint.net.SimpleDataChannel@6a0aac13
+2018-09-13 15:04:06.458 UTC SEVERE [Node1] Disk usage is not within je.maxDisk or je.freeDisk limits and write operations are prohibited: maxDiskLimit=1 freeDiskLimit=5,368,709,120 adjustedMaxDiskLimit=1 maxDiskOverage=6,940 freeDiskShortage=-28,996,616,192 diskFreeSpace=34,365,325,312 availableLogSize=-6,940 totalLogSize=6,941 activeLogSize=6,941 reservedLogSize=0 protectedLogSize=0 protectedLogSizeMap={}
+2018-09-13 15:04:07.471 UTC INFO [Node1] Shutting down feeder for replica Node2 Reason: Expected bytes: 6 read bytes: 0 write time:  0ms Avg write time: 20us
+2018-09-13 15:04:07.471 UTC INFO [Node1] Feeder Output for Node2 soft shutdown initiated.
+2018-09-13 15:04:07.472 UTC INFO [Node1] Feeder output for replica Node2 shutdown. feeder VLSN: 131 currentTxnEndVLSN: 130
+2018-09-13 15:04:11.474 UTC INFO [Node1] (JE 7.5.11) Transaction: -29  VLSN: 130, initiated at: 11:04:06.  Insufficient acks for policy:ALL. Need replica acks: 2. Missing replica acks: 1. Timeout: 5000ms. FeederState=Node1(1)[MASTER]
+Current feeds:
+ Node3: feederVLSN=132 replicaTxnEndVLSN=130
+
+2018-09-13 15:04:12.442 UTC INFO [Node1] Shutting down feeder for replica Node3 Reason: Expected bytes: 6 read bytes: 0 write time:  0ms Avg write time: 37us
+2018-09-13 15:04:12.442 UTC INFO [Node1] Feeder Output for Node3 soft shutdown initiated.
+2018-09-13 15:04:12.482 UTC INFO [Node1] Feeder output for replica Node3 shutdown. feeder VLSN: 134 currentTxnEndVLSN: 133
+2018-09-13 15:04:16.479 UTC INFO [Node1] (JE 7.5.11) Transaction: -32  VLSN: 133, initiated at: 11:04:11.  Insufficient acks for policy:SIMPLE_MAJORITY. Need replica acks: 1. Missing replica acks: 1. Timeout: 5000ms. FeederState=Node1(1)[MASTER]
+No feeders.
+
