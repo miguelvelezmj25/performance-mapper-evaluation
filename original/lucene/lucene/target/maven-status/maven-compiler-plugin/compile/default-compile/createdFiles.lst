@@ -1249,7 +1249,6 @@ org/apache/lucene/core/index/DocIDMerger$Sub.class
 org/apache/lucene/core/index/SortingLeafReader$SortingPointValues.class
 org/apache/lucene/core/search/DisiPriorityQueue.class
 org/apache/lucene/core/index/SortedDocValues$1.class
-org/apache/lucene/Hello.class
 org/apache/lucene/core/codecs/PointsWriter$1.class
 org/apache/lucene/core/util/packed/Packed64SingleBlock$Packed64SingleBlock6.class
 org/apache/lucene/core/geo/Polygon.class

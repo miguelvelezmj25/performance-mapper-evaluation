@@ -272,7 +272,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/search/spans/SpanPositionQueue.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/search/SortRescorer.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/index/FreqProxTermsWriterPerField.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/Hello.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/util/packed/PackedInts.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/search/Boolean2ScorerSupplier.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/lucene/lucene/src/main/java/org/apache/lucene/core/index/EmptyDocValuesProducer.java

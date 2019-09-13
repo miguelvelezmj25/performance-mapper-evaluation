@@ -187,7 +187,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/index/SortedNumericDocValues.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/util/ByteBlockPool.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/codecs/bloom/FuzzySet.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/Hello.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/index/IndexReaderContext.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/codecs/blocktree/package-info.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/index/FlushByRamOrCountsPolicy.java

@@ -50,13 +50,15 @@ import org.apache.lucene.core.store.FSDirectory;
 public class IndexFiles {
 
     private static int MAX_BUFFERED_DOCS;
-    private static MergeScheduler MERGE_SCHEDULER;
-    private static MergePolicy MERGE_POLICY;
+//    private static MergeScheduler MERGE_SCHEDULER;
+//    private static MergePolicy MERGE_POLICY;
     private static boolean COMMIT_ON_CLOSE;
     //  private static boolean RAM_BUFFER_SIZE;
     //  private static boolean CODEC;
     //  private static boolean USE_COMPOUND_FILE;
     //  private static boolean MAX_TOKEN_LENGTH;
+    private static boolean CHECK_PENDING_FLUSH_UPDATE;
+    private static boolean READER_POOLING;
 
     private IndexFiles() {
     }
@@ -65,9 +67,11 @@ public class IndexFiles {
      * Index all text files under a directory.
      */
     public static void main(String[] args) {
-        MERGE_SCHEDULER = mergeScheduler(Boolean.parseBoolean(args[0]));
+//        MERGE_SCHEDULER = mergeScheduler(Boolean.parseBoolean(args[0]));
+        CHECK_PENDING_FLUSH_UPDATE = Boolean.parseBoolean(args[0]);
         MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[1]));
-        MERGE_POLICY = mergePolicy(Boolean.parseBoolean(args[2]));
+//        MERGE_POLICY = mergePolicy(Boolean.parseBoolean(args[2]));
+        READER_POOLING = Boolean.parseBoolean(args[2]);
         COMMIT_ON_CLOSE = Boolean.parseBoolean(args[3]);
 
 //        String usage =
@@ -115,9 +119,13 @@ public class IndexFiles {
             Analyzer analyzer = new StandardAnalyzer();
 
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-            iwc.setMergeScheduler(MERGE_SCHEDULER);
+            iwc.setMergePolicy(NoMergePolicy.INSTANCE);
+
+            iwc.setCheckPendingFlushUpdate(CHECK_PENDING_FLUSH_UPDATE);
+//            iwc.setMergeScheduler(MERGE_SCHEDULER);
             iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
-            iwc.setMergePolicy(MERGE_POLICY);
+            iwc.setReaderPooling(READER_POOLING);
+//            iwc.setMergePolicy(MERGE_POLICY);
             iwc.setCommitOnClose(COMMIT_ON_CLOSE);
 
 
