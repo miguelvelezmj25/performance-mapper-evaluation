@@ -1,0 +1,2 @@
+org.apache.storm.server.scheduler.utils.ArtifactoryConfigLoaderFactory
+org.apache.storm.server.scheduler.utils.FileConfigLoaderFactory
