@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,8 +19,8 @@ public class Maps {
     condition.removeAll(context);
     System.out.println();
 
-//    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-//    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+//    boolean A = Boolean.valueOf(args[0]);
+//    boolean B = Boolean.valueOf(args[1]);
 //
 //    Set<Boolean> booleans = new HashSet<>();
 //    booleans.add(A);

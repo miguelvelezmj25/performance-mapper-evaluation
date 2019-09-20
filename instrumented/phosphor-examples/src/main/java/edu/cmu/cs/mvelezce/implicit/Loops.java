@@ -11,7 +11,7 @@
 //  private static void sink(boolean a) { }
 //
 //  private static void counterLoop() {
-//    boolean A = Sources.A_0(true);
+//    boolean A = true);
 //
 //    boolean x = false;
 //    int i = 2;

@@ -1,7 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 /**
  * This program shows why we need to track the beginning and end of a control flow decision for
  * accurate results.
@@ -9,9 +7,9 @@ import edu.cmu.cs.mvelezce.taints.Sources;
 public class Subtraces2 {
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean A = Boolean.valueOf(args[0]);
+    boolean B = Boolean.valueOf(args[1]);
+    boolean C = Boolean.valueOf(args[2]);
 
     if (A) {
       System.out.println(1);

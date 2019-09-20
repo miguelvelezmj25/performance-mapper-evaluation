@@ -1,7 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 /**
  * Example to showcase Phosphor's light control tracking. Taints are propagated through control-flow
 *
@@ -13,7 +11,7 @@ public class Diff {
     int x = 2;
 
     System.out.println(x | 0);
-//    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+//    boolean A = Boolean.valueOf(args[0]);
 //
 //    int x = 0;
 //
