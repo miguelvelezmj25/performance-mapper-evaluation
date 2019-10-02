@@ -1,6 +1,5 @@
 package edu.cmu.cs.mvelezce.taints;
 
-
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import edu.columbia.cs.psl.phosphor.runtime.TaintInstrumented;
 import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
@@ -33,6 +32,34 @@ public class Sources implements TaintedWithObjTag {
     return ret;
   }
 
+  public static TaintedBooleanWithObjTag D_3$$PHOSPHORTAGGED(
+      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+    ret.val = option;
+    ret.taint = new Taint(3);
+    return ret;
+  }
+
+  public static TaintedBooleanWithObjTag E_4$$PHOSPHORTAGGED(
+      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+    ret.val = option;
+    ret.taint = new Taint(4);
+    return ret;
+  }
+
+  public static TaintedBooleanWithObjTag F_5$$PHOSPHORTAGGED(
+      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+    ret.val = option;
+    ret.taint = new Taint(5);
+    return ret;
+  }
+
+  public static TaintedBooleanWithObjTag G_6$$PHOSPHORTAGGED(
+      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+    ret.val = option;
+    ret.taint = new Taint(6);
+    return ret;
+  }
+
   public static boolean A_0(boolean option) {
     return option;
   }
@@ -50,6 +77,14 @@ public class Sources implements TaintedWithObjTag {
   }
 
   public static boolean E_4(boolean option) {
+    return option;
+  }
+
+  public static boolean F_5(boolean option) {
+    return option;
+  }
+
+  public static boolean G_6(boolean option) {
     return option;
   }
 
