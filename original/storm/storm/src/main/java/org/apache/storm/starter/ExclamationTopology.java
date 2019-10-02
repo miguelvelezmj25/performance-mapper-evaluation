@@ -24,6 +24,7 @@ import org.apache.storm.client.topology.base.BaseRichBolt;
 import org.apache.storm.client.tuple.Fields;
 import org.apache.storm.client.tuple.Tuple;
 import org.apache.storm.client.tuple.Values;
+import org.apache.storm.client.utils.Utils;
 import org.apache.storm.server.LocalCluster;
 
 import java.util.Map;
@@ -32,20 +33,20 @@ import java.util.Map;
 public class ExclamationTopology extends ConfigurableTopology {
 
   public static void main(String[] args) throws Exception {
-//    System.out.println("DSFdsf");
+    //    System.out.println("DSFdsf");
     ConfigurableTopology.start(new ExclamationTopology(), args);
   }
 
   protected int run(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new TestWordSpout(), 10);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 3).shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping("exclaim1");
+    builder.setSpout("word", new TestWordSpout(false), 1);
+    builder.setBolt("exclaim1", new ExclamationBolt(), 1).shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(), 1).shuffleGrouping("exclaim1");
 
     conf.setDebug(true);
 
-    String topologyName = "test";
+    String topologyName = "test1";
 
     conf.setNumWorkers(1);
 
@@ -53,21 +54,14 @@ public class ExclamationTopology extends ConfigurableTopology {
       topologyName = args[0];
     }
 
-//    return submit(topologyName, conf, builder);
+    //        return submit(topologyName, conf, builder);
 
-    LocalCluster cluster = new LocalCluster();
-
-//    try {
+    try (LocalCluster cluster = new LocalCluster()) {
       cluster.submitTopology(topologyName, conf, builder.createTopology());
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//    finally {
-//      cluster.shutdown();
-//    }
-
-    cluster.shutdown();
+      Utils.sleep(10000);
+      cluster.killTopology(topologyName);
+      cluster.shutdown();
+    }
 
     return 0;
   }

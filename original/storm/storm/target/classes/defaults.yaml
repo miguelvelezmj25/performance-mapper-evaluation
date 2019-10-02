@@ -22,10 +22,10 @@ java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib:/usr/lib64"
 
 ### storm.* configs are general configurations
 # the local dir is where jars are kept
-storm.local.dir: "storm-local"
+#storm.local.dir: "storm-local"
 storm.log4j2.conf.dir: "log4j2"
 storm.zookeeper.servers:
-    - "localhost"
+    - "127.0.0.1"
 storm.zookeeper.port: 2181
 storm.zookeeper.root: "/storm"
 storm.zookeeper.session.timeout: 20000
@@ -37,14 +37,15 @@ storm.zookeeper.auth.user: null
 storm.zookeeper.auth.password: null
 storm.exhibitor.port: 8080
 storm.exhibitor.poll.uripath: "/exhibitor/v1/cluster/list"
-storm.cluster.mode: "distributed" # can be distributed or local
+#storm.cluster.mode: "distributed" # can be distributed or local
+storm.cluster.mode: "local" # can be distributed or local
 storm.local.mode.zmq: false
 storm.thrift.transport: "org.apache.storm.client.security.auth.SimpleTransportPlugin"
 storm.thrift.socket.timeout.ms: 600000
-#storm.principal.tolocal: "org.apache.storm.security.auth.DefaultPrincipalToLocal"
-#storm.group.mapping.service: "org.apache.storm.security.auth.ShellBasedGroupsMapping"
+storm.principal.tolocal: "org.apache.storm.client.security.auth.DefaultPrincipalToLocal"
+storm.group.mapping.service: "org.apache.storm.client.security.auth.ShellBasedGroupsMapping"
 storm.group.mapping.service.params: null
-#storm.messaging.transport: "org.apache.storm.messaging.netty.Context"
+storm.messaging.transport: "org.apache.storm.messaging.netty.Context"
 storm.nimbus.retry.times: 5
 storm.nimbus.retry.interval.millis: 2000
 storm.nimbus.retry.intervalceiling.millis: 60000
@@ -54,16 +55,17 @@ storm.nimbus.zookeeper.acls.fixup: true
 storm.auth.simple-white-list.users: []
 storm.cluster.state.store: "org.apache.storm.client.cluster.ZKStateStorageFactory"
 storm.meta.serialization.delegate: "org.apache.storm.client.serialization.GzipThriftSerializationDelegate"
-#storm.codedistributor.class: "org.apache.storm.codedistributor.LocalFileSystemCodeDistributor"
+storm.codedistributor.class: "org.apache.storm.codedistributor.LocalFileSystemCodeDistributor"
 storm.workers.artifacts.dir: "workers-artifacts"
 storm.health.check.dir: "healthchecks"
 storm.health.check.timeout.ms: 5000
 storm.disable.symlinks: false
 
 ### nimbus.* configs are for the master
-nimbus.seeds : ["localhost"]
+nimbus.seeds : ["127.0.0.1"]
 nimbus.thrift.port: 6627
-nimbus.thrift.threads: 64
+#nimbus.thrift.threads: 64
+nimbus.thrift.threads: 1
 nimbus.thrift.max_buffer_size: 1048576
 nimbus.childopts: "-Xmx1024m"
 nimbus.task.timeout.secs: 30
@@ -74,16 +76,18 @@ nimbus.inbox.jar.expiration.secs: 3600
 nimbus.code.sync.freq.secs: 120
 nimbus.task.launch.secs: 120
 nimbus.file.copy.expiration.secs: 600
-#nimbus.topology.validator: "org.apache.storm.nimbus.DefaultTopologyValidator"
+nimbus.topology.validator: "org.apache.storm.server.nimbus.DefaultTopologyValidator"
 topology.min.replication.count: 1
 topology.max.replication.wait.time.sec: 60
 nimbus.credential.renewers.freq.secs: 600
 nimbus.queue.size: 100000
 scheduler.display.resource: false
-#nimbus.local.assignments.backend.class: "org.apache.storm.client.assignments.InMemoryAssignmentBackend"
-nimbus.assignments.service.threads: 10
-nimbus.assignments.service.thread.queue.size: 100
-#nimbus.worker.heartbeats.recovery.strategy.class: "org.apache.storm.nimbus.TimeOutWorkerHeartbeatsRecoveryStrategy"
+nimbus.local.assignments.backend.class: "org.apache.storm.client.assignments.InMemoryAssignmentBackend"
+#nimbus.assignments.service.threads: 10
+nimbus.assignments.service.threads: 1
+#nimbus.assignments.service.thread.queue.size: 100
+nimbus.assignments.service.thread.queue.size: 1
+nimbus.worker.heartbeats.recovery.strategy.class: "org.apache.storm.server.nimbus.TimeOutWorkerHeartbeatsRecoveryStrategy"
 nimbus.topology.blobstore.deletion.delay.ms: 300000
 
 ### ui.* configs are for the master
@@ -95,7 +99,7 @@ ui.filter: null
 ui.filter.params: null
 ui.users: null
 ui.header.buffer.bytes: 4096
-#ui.http.creds.plugin: org.apache.storm.security.auth.DefaultHttpCredentialsPlugin
+ui.http.creds.plugin: org.apache.storm.security.auth.DefaultHttpCredentialsPlugin
 ui.pagination: 20
 ui.disable.http.binding: true
 ui.disable.spout.lag.monitoring: true
@@ -113,18 +117,20 @@ logviewer.filter.params: null
 logs.users: null
 
 drpc.port: 3772
-drpc.worker.threads: 64
+#drpc.worker.threads: 64
+drpc.worker.threads: 1
 drpc.max_buffer_size: 1048576
 drpc.queue.size: 128
 drpc.invocations.port: 3773
-drpc.invocations.threads: 64
+#drpc.invocations.threads: 64
+drpc.invocations.threads: 1
 drpc.request.timeout.secs: 600
 drpc.childopts: "-Xmx768m"
 drpc.http.port: 3774
 drpc.https.port: -1
 drpc.https.keystore.password: ""
 drpc.https.keystore.type: "JKS"
-#drpc.http.creds.plugin: org.apache.storm.security.auth.DefaultHttpCredentialsPlugin
+drpc.http.creds.plugin: org.apache.storm.security.auth.DefaultHttpCredentialsPlugin
 drpc.authorizer.acl.filename: "drpc-auth-acl.yaml"
 drpc.authorizer.acl.strict: false
 drpc.disable.http.binding: true
@@ -134,17 +140,19 @@ transactional.zookeeper.servers: null
 transactional.zookeeper.port: null
 
 ## blobstore configs
-#supervisor.blobstore.class: "org.apache.storm.blobstore.NimbusBlobStore"
-supervisor.blobstore.download.thread.count: 5
+supervisor.blobstore.class: "org.apache.storm.blobstore.NimbusBlobStore"
+#supervisor.blobstore.download.thread.count: 5
+supervisor.blobstore.download.thread.count: 1
 supervisor.blobstore.download.max_retries: 3
 supervisor.localizer.cache.target.size.mb: 10240
 supervisor.localizer.cleanup.interval.ms: 30000
 
-#nimbus.blobstore.class: "org.apache.storm.blobstore.LocalFsBlobStore"
+nimbus.blobstore.class: "org.apache.storm.server.blobstore.LocalFsBlobStore"
 nimbus.blobstore.expiration.secs: 600
 
 storm.blobstore.inputstream.buffer.size.bytes: 65536
-#client.blobstore.class: "org.apache.storm.blobstore.NimbusBlobStore"
+storm.blobstore.dependency.jar.upload.chunk.size.bytes: 1048576
+client.blobstore.class: "org.apache.storm.blobstore.NimbusBlobStore"
 storm.blobstore.replication.factor: 3
 # For secure mode we would want to change this config to true
 storm.blobstore.acl.validation.enabled: false
@@ -182,7 +190,8 @@ supervisor.cpu.capacity: 400.0
 #Supervisor thrift config
 supervisor.thrift.port: 6628
 supervisor.queue.size: 128
-supervisor.thrift.threads: 16
+#supervisor.thrift.threads: 16
+supervisor.thrift.threads: 1
 supervisor.thrift.max_buffer_size: 1048576
 supervisor.thrift.socket.timeout.ms: 5000
 
@@ -241,7 +250,7 @@ storm.messaging.netty.socket.backlog: 500
 storm.messaging.netty.authentication: false
 
 # Default plugin to use for automatic network topology discovery
-#storm.network.topography.plugin: org.apache.storm.client.networktopography.DefaultRackDNSToSwitchMapping
+storm.network.topography.plugin: org.apache.storm.client.networktopography.DefaultRackDNSToSwitchMapping
 
 # default number of seconds group mapping service will cache user group
 storm.group.mapping.service.cache.duration.secs: 120
@@ -255,7 +264,7 @@ topology.eventlogger.executors: 0
 topology.tasks: null
 # maximum amount of time a message has to complete before it's considered failed
 topology.message.timeout.secs: 30
-#topology.multilang.serializer: "org.apache.storm.multilang.JsonSerializer"
+topology.multilang.serializer: "org.apache.storm.client.multilang.JsonSerializer"
 topology.shellbolt.max.pending: 100
 topology.skip.missing.kryo.registrations: false
 topology.max.task.parallelism: null
@@ -267,10 +276,11 @@ topology.fall.back.on.java.serialization: true
 topology.worker.childopts: null
 topology.worker.logwriter.childopts: "-Xmx64m"
 topology.tick.tuple.freq.secs: null
-topology.worker.shared.thread.pool.size: 4
+#topology.worker.shared.thread.pool.size: 4
+topology.worker.shared.thread.pool.size: 1
 
 # Spout Wait Strategy - employed when there is no data to produce
-#topology.spout.wait.strategy: "org.apache.storm.policy.WaitStrategyProgressive"
+topology.spout.wait.strategy: "org.apache.storm.client.policy.WaitStrategyProgressive"
 topology.spout.wait.park.microsec : 100          # park time for org.apache.storm.policy.WaitStrategyPark. Busy spins if set to 0.
 
 topology.spout.wait.progressive.level1.count: 0          # number of iterations to spend in level 1 [no sleep] of WaitStrategyProgressive, before progressing to level 2
@@ -278,7 +288,7 @@ topology.spout.wait.progressive.level2.count: 0          # number of iterations 
 topology.spout.wait.progressive.level3.sleep.millis: 1   # sleep duration for idling iterations in level 3 of WaitStrategyProgressive
 
 # Bolt Wait Strategy - employed when there is no data in its receive buffer to process
-#topology.bolt.wait.strategy : "org.apache.storm.policy.WaitStrategyProgressive"
+topology.bolt.wait.strategy : "org.apache.storm.client.policy.WaitStrategyProgressive"
 
 topology.bolt.wait.park.microsec : 100          # park time for org.apache.storm.policy.WaitStrategyPark. Busy spins if set to 0.
 
@@ -287,7 +297,7 @@ topology.bolt.wait.progressive.level2.count: 1000       # number of iterations t
 topology.bolt.wait.progressive.level3.sleep.millis: 1   # sleep duration for idling iterations in level 3 of WaitStrategyProgressive
 
 # BackPressure Wait Strategy - for any producer (spout/bolt/transfer thread) when the downstream Q is full
-#topology.backpressure.wait.strategy: "org.apache.storm.policy.WaitStrategyProgressive"
+topology.backpressure.wait.strategy: "org.apache.storm.client.policy.WaitStrategyProgressive"
 
 topology.backpressure.wait.park.microsec: 100          #  park time for org.apache.storm.policy.WaitStrategyPark. Busy spins if set to 0.
 
@@ -301,8 +311,8 @@ topology.executor.overflow.limit: 0    # max items in overflowQ of any bolt/spou
 
 topology.error.throttle.interval.secs: 10
 topology.max.error.report.per.interval: 5
-#topology.kryo.factory: "org.apache.storm.serialization.DefaultKryoFactory"
-#topology.tuple.serializer: "org.apache.storm.serialization.types.ListDelegateSerializer"
+topology.kryo.factory: "org.apache.storm.client.serialization.DefaultKryoFactory"
+topology.tuple.serializer: "org.apache.storm.client.serialization.types.ListDelegateSerializer"
 topology.trident.batch.emit.interval.millis: 500
 topology.testing.always.try.serialize: false
 topology.classpath: null
@@ -331,31 +341,40 @@ topology.component.resources.onheap.memory.mb: 128.0
 topology.component.resources.offheap.memory.mb: 0.0
 topology.component.cpu.pcore.percent: 10.0
 topology.worker.max.heap.size.mb: 768.0
-#topology.scheduler.strategy: "org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy"
-#resource.aware.scheduler.priority.strategy: "org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy"
+topology.scheduler.strategy: "org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy"
+resource.aware.scheduler.priority.strategy: "org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy"
+topology.ras.constraint.max.state.search: 10_000     # The maximum number of states that will be searched looking for a solution in the constraint solver strategy
+resource.aware.scheduler.constraint.max.state.search: 100_000 # Daemon limit on maximum number of states that will be searched looking for a solution in the constraint solver strategy
+topology.ras.one.executor.per.worker: false
+topology.ras.one.component.per.worker: false
 
 blacklist.scheduler.tolerance.time.secs: 300
 blacklist.scheduler.tolerance.count: 3
 blacklist.scheduler.resume.time.secs: 1800
-#blacklist.scheduler.reporter: "org.apache.storm.scheduler.blacklist.reporters.LogReporter"
-#blacklist.scheduler.strategy: "org.apache.storm.scheduler.blacklist.strategies.DefaultBlacklistStrategy"
+blacklist.scheduler.reporter: "org.apache.storm.server.scheduler.blacklist.reporters.LogReporter"
+blacklist.scheduler.strategy: "org.apache.storm.server.scheduler.blacklist.strategies.DefaultBlacklistStrategy"
+blacklist.scheduler.assume.supervisor.bad.based.on.bad.slot: true
 
 dev.zookeeper.path: "/tmp/dev-storm-zookeeper"
 
 pacemaker.servers: []
 pacemaker.port: 6699
-pacemaker.base.threads: 10
-pacemaker.max.threads: 50
-pacemaker.client.max.threads: 2
-pacemaker.thread.timeout: 10
+#pacemaker.base.threads: 10
+pacemaker.base.threads: 1
+#pacemaker.max.threads: 50
+pacemaker.max.threads: 1
+#pacemaker.client.max.threads: 2
+pacemaker.client.max.threads: 1
+#pacemaker.thread.timeout: 10
+pacemaker.thread.timeout: 1
 pacemaker.childopts: "-Xmx1024m"
 pacemaker.auth.method: "NONE"
 pacemaker.kerberos.users: []
 pacemaker.thrift.message.size.max: 10485760
 
 #default storm daemon metrics reporter plugins
-#storm.daemon.metrics.reporter.plugins:
-#     - "org.apache.storm.daemon.metrics.reporters.JmxPreparableReporter"
+storm.daemon.metrics.reporter.plugins:
+    - "org.apache.storm.server.daemon.metrics.reporters.JmxPreparableReporter"
 
 storm.metricstore.class: "org.apache.storm.server.metricstore.rocksdb.RocksDbStore"
 storm.metricprocessor.class: "org.apache.storm.server.metricstore.NimbusMetricProcessor"
@@ -367,8 +386,8 @@ storm.metricstore.rocksdb.retention_hours: 240
 # configuration of cluster metrics consumer
 storm.cluster.metrics.consumer.publish.interval.secs: 60
 
-#storm.resource.isolation.plugin: "org.apache.storm.container.cgroup.CgroupManager"
-# Also determines whether the unit tests for cgroup runs.  
+storm.resource.isolation.plugin: "org.apache.storm.container.cgroup.CgroupManager"
+# Also determines whether the unit tests for cgroup runs.
 # If storm.resource.isolation.plugin.enable is set to false the unit tests for cgroups will not run
 storm.resource.isolation.plugin.enable: false
 storm.cgroup.memory.enforcement.enable: false
@@ -393,11 +412,11 @@ storm.supervisor.medium.memory.grace.period.ms: 30000
 storm.worker.min.cpu.pcore.percent: 0.0
 
 storm.topology.classpath.beginning.enabled: false
-#worker.metrics:
-#    "CGroupMemory": "org.apache.storm.metric.cgroup.CGroupMemoryUsage"
-#    "CGroupMemoryLimit": "org.apache.storm.metric.cgroup.CGroupMemoryLimit"
-#    "CGroupCpu": "org.apache.storm.metric.cgroup.CGroupCpu"
-#    "CGroupCpuGuarantee": "org.apache.storm.metric.cgroup.CGroupCpuGuarantee"
+worker.metrics:
+    "CGroupMemory": "org.apache.storm.client.metric.cgroup.CGroupMemoryUsage"
+    "CGroupMemoryLimit": "org.apache.storm.client.metric.cgroup.CGroupMemoryLimit"
+    "CGroupCpu": "org.apache.storm.client.metric.cgroup.CGroupCpu"
+    "CGroupCpuGuarantee": "org.apache.storm.client.metric.cgroup.CGroupCpuGuarantee"
 
 # The number of buckets for running statistics
 num.stat.buckets: 20
