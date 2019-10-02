@@ -3,6 +3,7 @@ package counter.com.googlecode.pngtastic;
 import counter.com.googlecode.pngtastic.core.PngColorCounter;
 import counter.com.googlecode.pngtastic.core.PngException;
 import counter.com.googlecode.pngtastic.core.PngImage;
+
 import java.io.IOException;
 
 /**

@@ -1,12 +1,7 @@
 package counter.com.googlecode.pngtastic.core;
 
-import counter.com.googlecode.pngtastic.core.processing.PngByteArrayOutputStream;
-import counter.com.googlecode.pngtastic.core.processing.PngCompressionHandler;
-import counter.com.googlecode.pngtastic.core.processing.PngFilterHandler;
-import counter.com.googlecode.pngtastic.core.processing.PngInterlaceHandler;
-import counter.com.googlecode.pngtastic.core.processing.PngtasticCompressionHandler;
-import counter.com.googlecode.pngtastic.core.processing.PngtasticFilterHandler;
-import counter.com.googlecode.pngtastic.core.processing.PngtasticInterlaceHandler;
+import counter.com.googlecode.pngtastic.core.processing.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

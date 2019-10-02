@@ -20,9 +20,9 @@ public interface PngCompressionHandler {
    *     don't allow thread creation.
    * @return A byte array containing the compressed image data
    */
-  public byte[] deflate(
+  byte[] deflate(
       PngByteArrayOutputStream inflatedImageData, Integer compressionLevel, boolean concurrent)
       throws IOException;
 
-  public String encodeBytes(byte[] bytes);
+  String encodeBytes(byte[] bytes);
 }

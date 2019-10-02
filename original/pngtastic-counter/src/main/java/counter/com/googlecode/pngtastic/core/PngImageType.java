@@ -25,7 +25,7 @@ public enum PngImageType {
   private int colorType;
 
   /** */
-  private PngImageType(int colorType) {
+  PngImageType(int colorType) {
     this.colorType = colorType;
   }
 

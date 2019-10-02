@@ -102,14 +102,10 @@ public class PngPixel {
     }
 
     PngPixel other = (PngPixel) obj;
-    if (this.alpha != other.alpha
-        || this.blue != other.blue
-        || this.green != other.green
-        || this.red != other.red) {
-      return false;
-    }
-
-    return true;
+	  return this.alpha == other.alpha
+			  && this.blue == other.blue
+			  && this.green == other.green
+			  && this.red == other.red;
   }
 
   @Override

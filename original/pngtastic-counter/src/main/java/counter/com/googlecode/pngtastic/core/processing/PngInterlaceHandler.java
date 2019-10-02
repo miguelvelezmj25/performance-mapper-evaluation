@@ -18,8 +18,7 @@ public interface PngInterlaceHandler {
    * @param inflatedImageData The uncompressed image data, not interlaced
    * @return A list of scanlines, each row represented as a byte array
    */
-  public List<byte[]> interlace(
-      int width, int height, int sampleBitCount, byte[] inflatedImageData);
+  List<byte[]> interlace(int width, int height, int sampleBitCount, byte[] inflatedImageData);
 
   /**
    * Do png deinterlacing on the given data
@@ -30,6 +29,6 @@ public interface PngInterlaceHandler {
    * @param inflatedImageData The uncompressed image data, in interlaced form
    * @return A list of scanlines, each row represented as a byte array
    */
-  public List<byte[]> deInterlace(
+  List<byte[]> deInterlace(
       int width, int height, int sampleBitCount, PngByteArrayOutputStream inflatedImageData);
 }

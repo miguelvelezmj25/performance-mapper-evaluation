@@ -1,6 +1,7 @@
 package counter.com.googlecode.pngtastic.core;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.CRC32;
 
 /**
@@ -45,11 +46,7 @@ public class PngChunk {
 
   /** */
   public String getTypeString() {
-    try {
-      return new String(this.type, "UTF8");
-    } catch (UnsupportedEncodingException e) {
-      return "";
-    }
+	  return new String(this.type, StandardCharsets.UTF_8);
   }
 
   /** */

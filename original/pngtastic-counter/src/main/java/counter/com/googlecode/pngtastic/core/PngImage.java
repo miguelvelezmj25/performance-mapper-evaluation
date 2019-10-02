@@ -1,16 +1,6 @@
 package counter.com.googlecode.pngtastic.core;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,16 +11,66 @@ import java.util.List;
  */
 public class PngImage {
 
-  public static final long SIGNATURE = 0x89504e470d0a1a0aL;
   private final Logger log;
+
+  public static final long SIGNATURE = 0x89504e470d0a1a0aL;
+
   private String fileName;
+
+  public String getFileName() {
+    return this.fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
   private List<PngChunk> chunks = new ArrayList<>();
+
+  public List<PngChunk> getChunks() {
+    return this.chunks;
+  }
+
   private long width;
+
+  public long getWidth() {
+    return this.width;
+  }
+
   private long height;
+
+  public long getHeight() {
+    return this.height;
+  }
+
   private short bitDepth;
+
+  public short getBitDepth() {
+    return this.bitDepth;
+  }
+
   private short colorType;
+
+  public short getColorType() {
+    return this.colorType;
+  }
+
   private short interlace;
+
+  public short getInterlace() {
+    return this.interlace;
+  }
+
+  public void setInterlace(short interlace) {
+    this.interlace = interlace;
+  }
+
   private PngChunk palette;
+
+  public PngChunk getPalette() {
+    return palette;
+  }
+
   private PngImageType imageType;
 
   /** */
@@ -90,54 +130,6 @@ public class PngImage {
     } catch (IOException e) {
       throw new PngException("Error: " + e.getMessage(), e);
     }
-  }
-
-  /* */
-  private static void readSignature(DataInputStream ins) throws PngException, IOException {
-    long signature = ins.readLong();
-    if (signature != PngImage.SIGNATURE) {
-      throw new PngException("Bad png signature");
-    }
-  }
-
-  public String getFileName() {
-    return this.fileName;
-  }
-
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
-  }
-
-  public List<PngChunk> getChunks() {
-    return this.chunks;
-  }
-
-  public long getWidth() {
-    return this.width;
-  }
-
-  public long getHeight() {
-    return this.height;
-  }
-
-  public short getBitDepth() {
-    return this.bitDepth;
-  }
-
-  public short getColorType() {
-    return this.colorType;
-  }
-
-  public short getInterlace() {
-    return this.interlace;
-  }
-
-  public void setInterlace(short interlace) {
-    this.interlace = interlace;
-  }
-
-  public PngChunk getPalette() {
-    return palette;
   }
 
   /** */
@@ -255,5 +247,13 @@ public class PngImage {
     int i = ins.readInt();
     long crc = i & 0x00000000ffffffffL; // Make it unsigned.
     return crc;
+  }
+
+  /* */
+  private static void readSignature(DataInputStream ins) throws PngException, IOException {
+    long signature = ins.readLong();
+    if (signature != PngImage.SIGNATURE) {
+      throw new PngException("Bad png signature");
+    }
   }
 }

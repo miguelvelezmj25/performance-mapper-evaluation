@@ -2,6 +2,7 @@ package counter.com.googlecode.pngtastic.core.processing;
 
 import counter.com.googlecode.pngtastic.core.Logger;
 import counter.com.googlecode.pngtastic.core.PngException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +14,17 @@ import java.util.List;
 public class PngtasticInterlaceHandler implements PngInterlaceHandler {
 
   /** */
+  private final Logger log;
+
+  /** */
+  private PngFilterHandler pngFilterHandler;
+
+  /** */
   private static final int[] interlaceColumnFrequency = new int[] {8, 8, 4, 4, 2, 2, 1};
 
   private static final int[] interlaceColumnOffset = new int[] {0, 4, 0, 2, 0, 1, 0};
   private static final int[] interlaceRowFrequency = new int[] {8, 8, 8, 4, 4, 2, 2};
   private static final int[] interlaceRowOffset = new int[] {0, 0, 4, 0, 2, 0, 1};
-  /** */
-  private final Logger log;
-  /** */
-  private PngFilterHandler pngFilterHandler;
 
   /** */
   public PngtasticInterlaceHandler(Logger log, PngFilterHandler pngFilterHandler) {

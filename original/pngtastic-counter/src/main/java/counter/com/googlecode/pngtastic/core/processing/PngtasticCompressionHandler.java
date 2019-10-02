@@ -1,13 +1,10 @@
 package counter.com.googlecode.pngtastic.core.processing;
 
 import counter.com.googlecode.pngtastic.core.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -22,9 +19,10 @@ import java.util.zip.DeflaterOutputStream;
  */
 public class PngtasticCompressionHandler implements PngCompressionHandler {
 
+  private final Logger log;
+
   private static final List<Integer> compressionStrategies =
       Arrays.asList(Deflater.DEFAULT_STRATEGY, Deflater.FILTERED, Deflater.HUFFMAN_ONLY);
-  private final Logger log;
 
   /** */
   public PngtasticCompressionHandler(Logger log) {

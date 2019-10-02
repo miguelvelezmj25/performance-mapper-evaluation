@@ -1,8 +1,7 @@
 package counter.com.googlecode.pngtastic;
 
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
 import edu.cmu.cs.mvelezce.analysis.option.Source;
-import edu.cmu.cs.mvelezce.cc.Sinks;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +28,6 @@ public class Run {
   public static boolean LOGLEVEL;
 
   public static void main(String[] args) {
-    System.out.println("Original");
-    Sink.init();
     Map<String, String> options = new HashMap<>();
     int last = 0;
     for (int i = 0; i < args.length; i++) {
@@ -49,9 +46,13 @@ public class Run {
     String[] files = Arrays.copyOfRange(args, last, args.length);
 
     files = new String[1];
-    //        files[0] = System.getProperty("user.home") +
-    // "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/us.png";
-    files[0] = "./images/optimizer/us.png";
+    files[0] =
+        System.getProperty("user.home")
+            +
+            //
+//             "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/us.png";
+            "/Documents/Programming/Java/Projects/performance-mapper-evaluation/original/pngtastic-counter/images/optimizer/lena.png";
+    //    files[0] = "./images/optimizer/us.png";
 
     if (files.length == 0) {
       System.out.println("No files to process");
@@ -123,7 +124,5 @@ public class Run {
     }
 
     new PngtasticColorCounter(files, logLevel, distThreshold, freqThreshold, minAlpha, timeout);
-
-    Sinks.postProcessSinks("counter");
   }
 }

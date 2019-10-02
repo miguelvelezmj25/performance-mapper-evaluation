@@ -2,6 +2,7 @@ package counter.com.googlecode.pngtastic.core.processing;
 
 import counter.com.googlecode.pngtastic.core.PngException;
 import counter.com.googlecode.pngtastic.core.PngFilterType;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,10 @@ import java.util.Map;
 public interface PngFilterHandler {
 
   /** Apply the given filter type to the scanlines provided. */
-  public void applyFiltering(PngFilterType filterType, List<byte[]> scanlines, int sampleBitCount);
+  void applyFiltering(PngFilterType filterType, List<byte[]> scanlines, int sampleBitCount);
 
   /** Apply adaptive filtering as described in the png spec. */
-  public void applyAdaptiveFiltering(
+  void applyAdaptiveFiltering(
       PngByteArrayOutputStream inflatedImageData,
       List<byte[]> scanlines,
       Map<PngFilterType, List<byte[]>> filteredScanLines,
@@ -28,12 +29,12 @@ public interface PngFilterHandler {
    * Do filtering as described in the png spec: The scanline starts with a filter type byte, then
    * continues with the image data.
    */
-  public void filter(byte[] line, byte[] previousLine, int sampleBitCount) throws PngException;
+  void filter(byte[] line, byte[] previousLine, int sampleBitCount) throws PngException;
 
   /**
    * Do the opposite of PNG filtering:
    *
    * @see #filter(byte[], byte[], int)
    */
-  public void deFilter(byte[] line, byte[] previousLine, int sampleBitCount) throws PngException;
+  void deFilter(byte[] line, byte[] previousLine, int sampleBitCount) throws PngException;
 }

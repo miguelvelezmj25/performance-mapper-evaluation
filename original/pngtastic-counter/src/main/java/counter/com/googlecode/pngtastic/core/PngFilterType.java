@@ -3,8 +3,8 @@ package counter.com.googlecode.pngtastic.core;
 /**
  * Represents the available PNG filter types.
  *
- * @author rayvanderborght
  * @see <a href="http://www.w3.org/TR/PNG/#9Filters">Filtering</a>
+ * @author rayvanderborght
  */
 public enum PngFilterType {
   ADAPTIVE(-1), // NOTE: not a real filter type
@@ -17,20 +17,22 @@ public enum PngFilterType {
   /** */
   private byte value;
 
-  /* */
-  private PngFilterType() {}
+  public byte getValue() {
+    return this.value;
+  }
 
   /* */
-  private PngFilterType(int i) {
+  PngFilterType() {}
+
+  /* */
+  PngFilterType(int i) {
     this.value = (byte) i;
   }
 
   /** */
   public static PngFilterType forValue(byte value) {
     for (PngFilterType type : PngFilterType.values()) {
-      if (type.getValue() == value) {
-        return type;
-      }
+      if (type.getValue() == value) return type;
     }
     return NONE;
   }
@@ -38,9 +40,5 @@ public enum PngFilterType {
   /** */
   public static PngFilterType[] standardValues() {
     return new PngFilterType[] {NONE, SUB, UP, AVERAGE, PAETH};
-  }
-
-  public byte getValue() {
-    return this.value;
   }
 }
