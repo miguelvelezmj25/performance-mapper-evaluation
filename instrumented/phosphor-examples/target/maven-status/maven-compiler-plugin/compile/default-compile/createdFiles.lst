@@ -15,6 +15,7 @@ edu/cmu/cs/mvelezce/analysis/ImpossibleDynamicPerformanceMeasurement.class
 edu/cmu/cs/mvelezce/analysis/Subtraces5.class
 edu/cmu/cs/mvelezce/analysis/GuessANumber.class
 edu/cmu/cs/mvelezce/analysis/Example7.class
+edu/cmu/cs/mvelezce/analysis/IGenExample.class
 edu/cmu/cs/mvelezce/analysis/LightControlTracking.class
 edu/cmu/cs/mvelezce/analysis/SimpleExample2.class
 edu/cmu/cs/mvelezce/analysis/Example2.class
