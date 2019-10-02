@@ -1,5 +1,5 @@
 edu/cmu/cs/mvelezce/Example.class
 edu/cmu/cs/mvelezce/Options.class
-edu/cmu/cs/mvelezce/analysis/option/Sink.class
 edu/cmu/cs/mvelezce/analysis/option/Source.class
+edu/cmu/cs/mvelezce/analysis/option/Sink.class
 edu/cmu/cs/mvelezce/Workload.class
