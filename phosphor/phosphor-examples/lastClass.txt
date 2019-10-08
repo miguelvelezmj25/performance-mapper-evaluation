@@ -1,0 +1,114 @@
+// class version 52.0 (52)
+// access flags 0x21
+public class edu/cmu/cs/mvelezce/analysis/SimpleExample1 implements edu/columbia/cs/psl/phosphor/struct/TaintedWithObjTag {
+
+
+  @Ledu/columbia/cs/psl/phosphor/runtime/TaintInstrumented;() // invisible
+  // compiled from: SimpleExample1.java
+
+  // access flags 0x1
+  public <init>(Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;Ledu/columbia/cs/psl/phosphor/runtime/TaintSentinel;)V
+   L0
+   L1
+   L2
+    LINENUMBER 5 L2
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L3
+    LOCALVARIABLE this Ledu/cmu/cs/mvelezce/analysis/SimpleExample1; L2 L3 0
+   L4
+    LOCALVARIABLE phosphorJumpControlTag Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack; L0 L4 1
+   L5
+   L6
+   FRAME FULL [T edu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack T] [java/lang/Throwable]
+    ATHROW
+    MAXSTACK = 101
+    MAXLOCALS = 3
+
+  // access flags 0x9
+  public static main$$PHOSPHORTAGGED([Ljava/lang/String;Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;)V
+   L0
+    ACONST_NULL
+    ASTORE 2
+    TRYCATCHBLOCK L1 L2 L3 null
+   L1
+   L4
+   L5
+    NEW edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag
+    DUP
+    INVOKESPECIAL edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.<init> ()V
+    DUP
+    ALOAD 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.combineTagsOnObject (Ljava/lang/Object;Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;)V
+    ASTORE 3
+   L6
+   L7
+    LINENUMBER 8 L7
+    ALOAD 0
+    ICONST_0
+    AALOAD
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/RuntimeBoxUnboxPropogator.valueOfZ$$PHOSPHORTAGGED (Ljava/lang/String;)Ljava/lang/Boolean;
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/BoxedPrimitiveStoreWithObjTags.booleanValue (Ljava/lang/Boolean;)Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;
+    DUP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.taint : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.val : Z
+    ALOAD 1
+    ALOAD 3
+    INVOKESTATIC edu/cmu/cs/mvelezce/taints/Sources.A_0$$PHOSPHORTAGGED (Ledu/columbia/cs/psl/phosphor/runtime/Taint;ZLedu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;)Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;
+    DUP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.taint : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.val : Z
+    SWAP
+    ALOAD 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.combineTags (Ledu/columbia/cs/psl/phosphor/runtime/Taint;Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+   L8
+    ISTORE 4
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.copyTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 5
+   L9
+    LINENUMBER 9 L9
+    ALOAD 0
+    ICONST_1
+    AALOAD
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/RuntimeBoxUnboxPropogator.valueOfZ$$PHOSPHORTAGGED (Ljava/lang/String;)Ljava/lang/Boolean;
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/BoxedPrimitiveStoreWithObjTags.booleanValue (Ljava/lang/Boolean;)Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;
+    DUP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.taint : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.val : Z
+    ALOAD 1
+    ALOAD 3
+    INVOKESTATIC edu/cmu/cs/mvelezce/taints/Sources.B_1$$PHOSPHORTAGGED (Ledu/columbia/cs/psl/phosphor/runtime/Taint;ZLedu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;)Ledu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag;
+    DUP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.taint : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+    GETFIELD edu/columbia/cs/psl/phosphor/struct/TaintedBooleanWithObjTag.val : Z
+    SWAP
+    ALOAD 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.combineTags (Ledu/columbia/cs/psl/phosphor/runtime/Taint;Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+   L10
+    ISTORE 7
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.copyTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+   L11
+    LINENUMBER 11 L11
+    ALOAD 1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack.copyTag ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ICONST_0
+    SWAP
+    ALOAD 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.combineTags (Ledu/columbia/cs/psl/phosphor/runtime/Taint;Ledu/columbia/cs/psl/phosphor/struct/ControlTaintTagStack;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    SWAP
+   L12
+    ISTORE 8
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.copyTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 11
+   L13
+    LINENUMBER 13 L13
+    ALOAD 5
+    ILOAD 4
