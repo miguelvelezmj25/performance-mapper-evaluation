@@ -60,6 +60,7 @@ edu/cmu/cs/mvelezce/analysis/Subtraces.class
 edu/cmu/cs/mvelezce/analysis/ForExample.class
 edu/cmu/cs/mvelezce/analysis/OrContext5.class
 edu/cmu/cs/mvelezce/analysis/Align.class
+edu/cmu/cs/mvelezce/analysis/MultipleConstructors.class
 edu/cmu/cs/mvelezce/analysis/ExpensiveLoopExample.class
 edu/cmu/cs/mvelezce/TimerHelper.class
 edu/cmu/cs/mvelezce/implicit/Exceptions.class
@@ -76,6 +77,7 @@ edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
+edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.class
 edu/cmu/cs/mvelezce/implicit/Garage.class
 edu/cmu/cs/mvelezce/analysis/Subtraces4.class
 edu/cmu/cs/mvelezce/analysis/IfOr.class

@@ -37,10 +37,12 @@ edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/Subtraces6.class
 edu/cmu/cs/mvelezce/analysis/Nesting.class
 edu/cmu/cs/mvelezce/analysis/ThrowIf.class
+edu/cmu/cs/mvelezce/analysis/CannotExpandConstraintsDown.class
 edu/cmu/cs/mvelezce/analysis/OrContext.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample4.class
 edu/cmu/cs/mvelezce/analysis/Constructor.class
 edu/cmu/cs/mvelezce/implicit/Test.class
+edu/cmu/cs/mvelezce/analysis/CanExpandConstraintsDown.class
 edu/cmu/cs/mvelezce/analysis/FinallyBlock.class
 edu/cmu/cs/mvelezce/analysis/AssertTest2Example.class
 edu/cmu/cs/mvelezce/analysis/Example8.class
@@ -66,6 +68,7 @@ edu/cmu/cs/mvelezce/implicit/Exceptions.class
 edu/cmu/cs/mvelezce/implicit/Nested.class
 lang/Test.class
 edu/cmu/cs/mvelezce/analysis/Example9.class
+edu/cmu/cs/mvelezce/analysis/MultipleReturns.class
 edu/cmu/cs/mvelezce/analysis/TryCatchFinally.class
 edu/cmu/cs/mvelezce/analysis/Subtraces7.class
 edu/cmu/cs/mvelezce/analysis/TestPrintExample.class
@@ -76,6 +79,7 @@ edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
+edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.class
 edu/cmu/cs/mvelezce/implicit/Garage.class
 edu/cmu/cs/mvelezce/analysis/Subtraces4.class
 edu/cmu/cs/mvelezce/analysis/IfOr.class
