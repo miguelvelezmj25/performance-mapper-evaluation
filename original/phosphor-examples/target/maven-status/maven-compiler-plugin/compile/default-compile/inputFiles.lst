@@ -52,6 +52,7 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Nesting.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces6.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/FinallyBlock.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/MethodCall.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example7.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/taints/Test.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Diff.java
@@ -63,6 +64,7 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/SimpleExample2.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/WhileTrueNoReturn.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Constructor.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/StaticMethodCall.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext5.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example6.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/MultiFacets.java

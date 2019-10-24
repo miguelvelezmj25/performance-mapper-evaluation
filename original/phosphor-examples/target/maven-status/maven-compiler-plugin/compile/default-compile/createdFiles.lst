@@ -11,6 +11,7 @@ edu/cmu/cs/mvelezce/implicit/ControlStack.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext1.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample.class
 edu/cmu/cs/mvelezce/analysis/ImpossibleDynamicPerformanceMeasurement.class
+edu/cmu/cs/mvelezce/analysis/MethodCall.class
 edu/cmu/cs/mvelezce/analysis/Subtraces5.class
 edu/cmu/cs/mvelezce/analysis/GuessANumber.class
 edu/cmu/cs/mvelezce/analysis/Example7.class
@@ -78,6 +79,7 @@ edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
 edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.class
+edu/cmu/cs/mvelezce/analysis/StaticMethodCall.class
 edu/cmu/cs/mvelezce/implicit/Garage.class
 edu/cmu/cs/mvelezce/analysis/Subtraces4.class
 edu/cmu/cs/mvelezce/analysis/IfOr.class
