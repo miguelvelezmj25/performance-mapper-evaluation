@@ -9,6 +9,7 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/TimerHelper.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/StaticMethodCall.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CannotRemoveNestedRegions.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example8.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/TryCatchFinally.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.java

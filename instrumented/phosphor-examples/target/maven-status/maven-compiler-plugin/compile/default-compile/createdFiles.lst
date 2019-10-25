@@ -80,6 +80,7 @@ edu/cmu/cs/mvelezce/analysis/ThrowEnd.class
 edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
+edu/cmu/cs/mvelezce/analysis/CannotRemoveNestedRegions.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
 edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.class
 edu/cmu/cs/mvelezce/analysis/StaticMethodCall.class
