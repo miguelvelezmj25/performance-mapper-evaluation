@@ -45,6 +45,7 @@ edu/cmu/cs/mvelezce/analysis/Constructor.class
 edu/cmu/cs/mvelezce/implicit/Test.class
 edu/cmu/cs/mvelezce/analysis/CanExpandConstraintsDown.class
 edu/cmu/cs/mvelezce/analysis/FinallyBlock.class
+edu/cmu/cs/mvelezce/analysis/CanRemoveNestedConstraintsMultipleCallSites.class
 edu/cmu/cs/mvelezce/analysis/AssertTest2Example.class
 edu/cmu/cs/mvelezce/analysis/Example8.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
