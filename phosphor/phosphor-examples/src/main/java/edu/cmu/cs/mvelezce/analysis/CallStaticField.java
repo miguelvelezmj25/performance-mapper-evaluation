@@ -3,34 +3,36 @@ package edu.cmu.cs.mvelezce.analysis;
 import edu.cmu.cs.mvelezce.cc.Sinks;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
-public class MethodCall {
+public class CallStaticField {
+
+  static{
+    System.out.println();
+  }
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(MethodCall.class.getSimpleName());
+    Sinks.preProcessSinks(CallStaticField.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
     boolean B = Sources.B_1(Boolean.parseBoolean(args[1]));
 
-    new MethodCall().foo(A, B);
+    if (A) {
+      foo(B);
+    }
+
+    if (A) {
+      foo(B);
+    }
 
     Sinks.postProcessSinks();
   }
 
-  private void foo(boolean a, boolean b) {
-    moo();
-
+  private static void foo(boolean a) {
     if (a) {
-      bar(b);
+      bar();
     }
   }
 
-  private void moo() {
+  private static void bar() {
     System.out.println();
-  }
-
-  private void bar(boolean b) {
-    if (b) {
-      System.out.println();
-    }
   }
 }

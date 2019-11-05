@@ -57,6 +57,7 @@ edu/cmu/cs/mvelezce/analysis/For2Example.class
 edu/cmu/cs/mvelezce/analysis/Example5.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample5.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext.class
+edu/cmu/cs/mvelezce/cc/executor/CCTrivial.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample6.class
 edu/cmu/cs/mvelezce/RunningExample.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext3.class
@@ -68,6 +69,7 @@ edu/cmu/cs/mvelezce/analysis/ExpensiveLoopExample.class
 edu/cmu/cs/mvelezce/TimerHelper.class
 edu/cmu/cs/mvelezce/analysis/IfThrow.class
 edu/cmu/cs/mvelezce/implicit/Exceptions.class
+edu/cmu/cs/mvelezce/analysis/OverrideJREMethod.class
 edu/cmu/cs/mvelezce/implicit/Nested.class
 lang/Test.class
 edu/cmu/cs/mvelezce/analysis/Example9.class
