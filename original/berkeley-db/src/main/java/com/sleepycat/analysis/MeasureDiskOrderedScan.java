@@ -44,8 +44,8 @@ public class MeasureDiskOrderedScan {
   private boolean sequentialWrites = false;
   private Action action = Action.Populate;
   //  private int nRecords = 25 * 1000 * 1000;
-  //  private int nRecords = 500_000;
-  private int nRecords = 10;
+    private int nRecords = 500_000;
+//  private int nRecords = 10;
   private int keySize = 10;
   private int dataSize = 1000;
   private long lsnBatchSize = Long.MAX_VALUE;
