@@ -39,29 +39,29 @@ public class IntConfigParam extends ConfigParam {
      * Self validate. Check mins and maxs
      */
     private void validate(Integer value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         if (value != null) {
             if (min != null) {
                 if (value.compareTo(min) < 0) {
                     throw new IllegalArgumentException
-                        (DEBUG_NAME + ":" +
-                         " param " + name +
-                         " doesn't validate, " +
-                         value +
-                         " is less than min of "+
-                         min);
+                            (DEBUG_NAME + ":" +
+                                    " param " + name +
+                                    " doesn't validate, " +
+                                    value +
+                                    " is less than min of " +
+                                    min);
                 }
             }
             if (max != null) {
                 if (value.compareTo(max) > 0) {
                     throw new IllegalArgumentException
-                        (DEBUG_NAME + ":" +
-                         " param " + name +
-                         " doesn't validate, " +
-                         value +
-                         " is greater than max of " +
-                         max);
+                            (DEBUG_NAME + ":" +
+                                    " param " + name +
+                                    " doesn't validate, " +
+                                    value +
+                                    " is greater than max of " +
+                                    max);
                 }
             }
         }
@@ -69,13 +69,21 @@ public class IntConfigParam extends ConfigParam {
 
     @Override
     public void validateValue(String value)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
 
         try {
             validate(new Integer(value));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException
-                (DEBUG_NAME + ": " +  value + " not valid value for " + name);
+                    (DEBUG_NAME + ": " + value + " not valid value for " + name);
         }
+    }
+
+    public String getMin() {
+        return String.valueOf(min);
+    }
+
+    public String getMax() {
+        return String.valueOf(max);
     }
 }
