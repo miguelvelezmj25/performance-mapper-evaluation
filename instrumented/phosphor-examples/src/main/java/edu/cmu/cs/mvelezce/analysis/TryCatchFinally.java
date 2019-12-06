@@ -9,7 +9,14 @@ public class TryCatchFinally {
    */
   public static void main(String[] args) {
     try {
-      System.out.println("miguel");
+      System.out.println("entetring try");
+
+      if(args.length > 0) {
+        System.out.println("The array is not empty");
+      }
+      else {
+        System.out.println("The array is empty");
+      }
     }
     catch (Exception e) {
       System.out.println("Exception");

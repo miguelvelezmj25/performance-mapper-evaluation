@@ -23,6 +23,7 @@ edu/cmu/cs/mvelezce/analysis/Example2.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample3.class
 edu/cmu/cs/mvelezce/analysis/Sound.class
 edu/cmu/cs/mvelezce/analysis/BerkeleyDbStaticNewLabelBug.class
+edu/cmu/cs/mvelezce/analysis/CleanConstraintsIssue.class
 edu/cmu/cs/mvelezce/analysis/Subtraces3.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class
@@ -51,13 +52,13 @@ edu/cmu/cs/mvelezce/analysis/Example8.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample2.class
 edu/cmu/cs/mvelezce/analysis/OrContext4.class
+edu/cmu/cs/mvelezce/analysis/CleanConstraints.class
 edu/cmu/cs/mvelezce/analysis/Diff.class
 edu/cmu/cs/mvelezce/analysis/MultiFacets.class
 edu/cmu/cs/mvelezce/analysis/For2Example.class
 edu/cmu/cs/mvelezce/analysis/Example5.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample5.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext.class
-edu/cmu/cs/mvelezce/cc/executor/CCTrivial.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample6.class
 edu/cmu/cs/mvelezce/RunningExample.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext3.class
@@ -80,6 +81,7 @@ edu/cmu/cs/mvelezce/analysis/TestPrintExample.class
 edu/cmu/cs/mvelezce/analysis/IfAnd.class
 edu/cmu/cs/mvelezce/analysis/SimpleExample1.class
 edu/cmu/cs/mvelezce/analysis/ThrowEnd.class
+edu/cmu/cs/mvelezce/analysis/TryReturnCatch.class
 edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class

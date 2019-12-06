@@ -22,6 +22,7 @@ edu/cmu/cs/mvelezce/analysis/Example2.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample3.class
 edu/cmu/cs/mvelezce/analysis/Sound.class
 edu/cmu/cs/mvelezce/analysis/BerkeleyDbStaticNewLabelBug.class
+edu/cmu/cs/mvelezce/analysis/CleanConstraintsIssue.class
 edu/cmu/cs/mvelezce/analysis/Subtraces3.class
 edu/cmu/cs/mvelezce/analysis/Return2Example.class
 edu/cmu/cs/mvelezce/analysis/ProjectExample.class
@@ -48,6 +49,7 @@ edu/cmu/cs/mvelezce/analysis/Example8.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample2.class
 edu/cmu/cs/mvelezce/analysis/OrContext4.class
+edu/cmu/cs/mvelezce/analysis/CleanConstraints.class
 edu/cmu/cs/mvelezce/analysis/Diff.class
 edu/cmu/cs/mvelezce/analysis/MultiFacets.class
 edu/cmu/cs/mvelezce/analysis/For2Example.class

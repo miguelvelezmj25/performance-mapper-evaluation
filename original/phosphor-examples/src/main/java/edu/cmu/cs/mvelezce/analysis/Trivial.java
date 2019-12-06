@@ -6,17 +6,24 @@ public class Trivial {
     boolean A = Boolean.parseBoolean(args[0]);
     boolean B = Boolean.parseBoolean(args[1]);
 
-    if (A) {
-      int time = 1000;
-      System.out.println(time);
-      Thread.sleep(time);
-    }
+    foo();
+  }
 
-    if (B) {
-      int time = 2000;
-      System.out.println(time);
-      Thread.sleep(time);
-    }
+  private static void foo() throws InterruptedException {
+    // Start region
+    Thread.sleep(3000);
+    bar();
+    mow();
+    // End region
+  }
 
+  private static void mow() throws InterruptedException {
+    // Start region
+    Thread.sleep(2000);
+    // End region
+  }
+
+  private static void bar() throws InterruptedException {
+    Thread.sleep(1000);
   }
 }
