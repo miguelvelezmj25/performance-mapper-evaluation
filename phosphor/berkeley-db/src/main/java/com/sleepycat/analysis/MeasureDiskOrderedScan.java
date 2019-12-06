@@ -142,13 +142,18 @@ public class MeasureDiskOrderedScan {
     printArgs(args);
   }
 
-  public static void x(Object o) {
-    System.out.println(o);
+  public static void main(String[] args) {
+    try {
+      Sinks.preProcessSinks(MeasureDiskOrderedScan.class.getSimpleName());
+      run(args);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
+    Sinks.postProcessSinks();
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
-    Sinks.preProcessSinks(MeasureDiskOrderedScan.class.getSimpleName());
-
+  public static void run(String[] args) throws IOException {
     DUPLICATES = Sources.DUPLICATES_0(Boolean.parseBoolean(args[0]));
     SEQUENTIAL = Sources.SEQUENTIAL_1(Boolean.parseBoolean(args[1]));
     MAX_MEMORY = Sources.MAX_MEMORY_2(maxMemory(Boolean.parseBoolean(args[2])));
@@ -171,8 +176,6 @@ public class MeasureDiskOrderedScan {
             checkpointerBytesInterval(Boolean.parseBoolean(args[14])));
 
     new MeasureDiskOrderedScan(args).run();
-
-    Sinks.postProcessSinks();
   }
 
   private static Durability jeDurability(boolean option) {
