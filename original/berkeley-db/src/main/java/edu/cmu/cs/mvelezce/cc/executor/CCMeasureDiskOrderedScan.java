@@ -8,17 +8,16 @@ import java.io.IOException;
 
 public class CCMeasureDiskOrderedScan {
 
-    public static void main(String[] args) throws IOException {
-        long start = System.nanoTime();
-        MeasureDiskOrderedScan.main(args);
-        long end = System.nanoTime();
-        String time = (end - start) + "";
+  public static void main(String[] args) throws IOException, InterruptedException {
+    long start = System.nanoTime();
+    MeasureDiskOrderedScan.main(args);
+    long end = System.nanoTime();
+    String time = (end - start) + "";
 
-        File outputFile = new File("data.ser");
-        FileOutputStream fos = new FileOutputStream(outputFile);
-        fos.write(time.getBytes());
-        fos.flush();
-        fos.close();
-
-    }
+    File outputFile = new File("data.ser");
+    FileOutputStream fos = new FileOutputStream(outputFile);
+    fos.write(time.getBytes());
+    fos.flush();
+    fos.close();
+  }
 }
