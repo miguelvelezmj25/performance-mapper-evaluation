@@ -140,13 +140,16 @@ public class MeasureDiskOrderedScan {
     printArgs(args);
   }
 
-  public static void x(Object o) {
-    System.out.println(o);
+  public static void main(String[] args) {
+    try {
+      Thread.sleep(1500);
+      run(args);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
-    Thread.sleep(1500);
-
+  public static void run(String[] args) throws IOException {
     DUPLICATES = Boolean.parseBoolean(args[0]);
     SEQUENTIAL = Boolean.parseBoolean(args[1]);
     MAX_MEMORY = maxMemory(Boolean.parseBoolean(args[2]));
