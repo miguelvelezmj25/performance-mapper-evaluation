@@ -1259,6 +1259,7 @@ org/apache/lucene/core/analysis/tokenattributes/KeywordAttributeImpl.class
 org/apache/lucene/core/util/QueryBuilder.class
 org/apache/lucene/core/codecs/TermVectorsReader.class
 org/apache/lucene/core/store/ByteBufferGuard.class
+edu/cmu/cs/mvelezce/cc/executor/CCIndexFiles.class
 org/apache/lucene/core/codecs/lucene50/Lucene50CompoundReader.class
 org/apache/lucene/core/util/FilterIterator.class
 org/apache/lucene/core/codecs/compressing/CompressingTermVectorsReader$TVFields.class

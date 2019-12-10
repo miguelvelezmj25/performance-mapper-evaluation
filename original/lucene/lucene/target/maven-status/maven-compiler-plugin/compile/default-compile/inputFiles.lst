@@ -322,6 +322,7 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/index/MultiReader.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/search/similarities/TFIDFSimilarity.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/search/RegexpQuery.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/edu/cmu/cs/mvelezce/cc/executor/CCIndexFiles.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/document/RangeFieldQuery.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/search/FuzzyTermsEnum.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/src/main/java/org/apache/lucene/core/index/DocValues.java
