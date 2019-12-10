@@ -70,8 +70,8 @@ public class IndexFiles {
     MERGE_SCHEDULER = mergeScheduler(Boolean.parseBoolean(args[2]));
     COMMIT_ON_CLOSE = Boolean.parseBoolean(args[3]);
     CHECK_PENDING_FLUSH_UPDATE = Boolean.parseBoolean(args[4]);
-    READER_POOLING = Boolean.parseBoolean(args[2]);
-    MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[1]));
+    READER_POOLING = Boolean.parseBoolean(args[5]);
+    MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[6]));
 
     //        String usage =
     //                "java org.apache.lucene.demo.IndexFiles"
@@ -80,8 +80,9 @@ public class IndexFiles {
     //                        + "in INDEX_PATH that can be searched with SearchFiles";
 
     String indexPath = "index";
-    System.err.println("Determine dir to analyze");
-    String docsPath = "../files";
+    String docsPath =
+        System.getProperty("user.home")
+            + "/Documents/programming/java/projects/performance-mapper-evaluation/original/lucene/lucene/../files";
     //        boolean create = true;
 
     //        for (int i = 0; i < args.length; i++) {
@@ -263,7 +264,7 @@ public class IndexFiles {
 
       if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
         // New index, so we just add the document (no old document can be there):
-        System.out.println("adding " + file);
+//        System.out.println("adding " + file);
         writer.addDocument(doc);
       } else {
         // Existing index (an old copy of this document may have been indexed) so
