@@ -26,8 +26,6 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-import edu.cmu.cs.mvelezce.analysis.option.Sources;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -87,7 +85,7 @@ public class ScanLoops {
   private long endTime;
 
   public static void main(String args[]) {
-    Sink.init();
+//    Sink.init();
 
     try {
       Thread.sleep(1100);
@@ -95,12 +93,12 @@ public class ScanLoops {
       e.printStackTrace();
     }
 
-    ACTION = Sources.getOptionACTION(Boolean.valueOf(args[0]));
-    RECORDS = Sources.getOptionRECORDS(Boolean.valueOf(args[1]));
-    DATA = Sources.getOptionDATA(Boolean.valueOf(args[2]));
-    KEYSIZE = Sources.getOptionKEYSIZE(Boolean.valueOf(args[3]));
-    SEQUENTIAL = Sources.getOptionSEQUENTIAL(Boolean.valueOf(args[4]));
-    KEYSONLY = Sources.getOptionKEYSONLY(Boolean.valueOf(args[5]));
+//    ACTION = Sources.getOptionACTION(Boolean.valueOf(args[0]));
+//    RECORDS = Sources.getOptionRECORDS(Boolean.valueOf(args[1]));
+//    DATA = Sources.getOptionDATA(Boolean.valueOf(args[2]));
+//    KEYSIZE = Sources.getOptionKEYSIZE(Boolean.valueOf(args[3]));
+//    SEQUENTIAL = Sources.getOptionSEQUENTIAL(Boolean.valueOf(args[4]));
+//    KEYSONLY = Sources.getOptionKEYSONLY(Boolean.valueOf(args[5]));
 
     //        ACTION = Source.getOptionACTION(Boolean.valueOf(false));
     //        RECORDS = Source.getOptionRECORDS(Boolean.valueOf(false));

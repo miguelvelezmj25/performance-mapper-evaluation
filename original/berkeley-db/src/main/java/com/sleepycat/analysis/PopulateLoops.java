@@ -13,8 +13,6 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
-import edu.cmu.cs.mvelezce.analysis.option.Sink;
-import edu.cmu.cs.mvelezce.analysis.option.Sources;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -54,7 +52,6 @@ public class PopulateLoops {
   private long endTime;
 
   public static void main(String args[]) {
-    Sink.init();
 
     try {
       Thread.sleep(1100);
@@ -69,12 +66,12 @@ public class PopulateLoops {
     //        KEYSIZE = Source.getOptionKEYSIZE(Boolean.valueOf(args[4]));
     //        SEQUENTIAL = Source.getOptionSEQUENTIAL(Boolean.valueOf(args[5]));
 
-    ACTION = Sources.getOptionACTION(Boolean.valueOf(false));
-    RECORDS = Sources.getOptionRECORDS(Boolean.valueOf(false));
-    DATA = Sources.getOptionDATA(Boolean.valueOf(false));
-    DUPLICATES = Sources.getOptionDUPLICATES(Boolean.valueOf(false));
-    KEYSIZE = Sources.getOptionKEYSIZE(Boolean.valueOf(false));
-    SEQUENTIAL = Sources.getOptionSEQUENTIAL(Boolean.valueOf(false));
+//    ACTION = Sources.getOptionACTION(Boolean.valueOf(false));
+//    RECORDS = Sources.getOptionRECORDS(Boolean.valueOf(false));
+//    DATA = Sources.getOptionDATA(Boolean.valueOf(false));
+//    DUPLICATES = Sources.getOptionDUPLICATES(Boolean.valueOf(false));
+//    KEYSIZE = Sources.getOptionKEYSIZE(Boolean.valueOf(false));
+//    SEQUENTIAL = Sources.getOptionSEQUENTIAL(Boolean.valueOf(false));
 
     try {
       new PopulateLoops(args).run();

@@ -10,7 +10,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/Locker.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/SequenceStats.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/entry/LNLogEntry.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sink.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/bind/tuple/TupleBinding.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/KeyLocation.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/LongArrayStat.java
@@ -652,7 +651,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/SecondaryAssociation.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/subscription/ClientAuthMethod.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/jmx/plugin/package-info.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Sources.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/utilint/net/SSLMirrorAuthenticator.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/DatabaseException.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/CustomStats.java
@@ -844,7 +842,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/monitor/LeaveGroupEvent.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/txn/TxnEnd.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/Loggable.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Taint.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/collections/StoredValueSet.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/rep/MemberNotFoundException.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/collections/TransactionWorker.java
@@ -994,7 +991,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/bind/tuple/BigIntegerBinding.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/log/entry/INLogEntry.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/persist/impl/FieldInfo.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/edu/cmu/cs/mvelezce/analysis/option/Testing.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/tree/dupConvert/package-info.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/JEVersion.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/original/berkeley-db/src/main/java/com/sleepycat/je/utilint/TracerFormatter.java

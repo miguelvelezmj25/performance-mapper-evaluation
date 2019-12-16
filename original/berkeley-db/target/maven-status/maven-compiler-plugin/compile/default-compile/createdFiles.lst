@@ -109,7 +109,6 @@ com/sleepycat/je/utilint/StoppableThreadFactory.class
 com/sleepycat/je/utilint/PropUtil$IEEETimeUnit$3.class
 com/sleepycat/je/rep/impl/RepGroupProtocol$UpdateAddress.class
 com/sleepycat/collections/StoredList.class
-edu/cmu/cs/mvelezce/analysis/option/Sink.class
 com/sleepycat/je/dbi/GetMode.class
 com/sleepycat/je/dbi/DbTree.class
 com/sleepycat/je/JEVersion.class
@@ -825,7 +824,6 @@ com/sleepycat/je/rep/impl/networkRestore/Protocol$FileStart.class
 com/sleepycat/je/rep/InsufficientLogException$LogFileSource.class
 com/sleepycat/asm/AnnotationWriter.class
 com/sleepycat/je/txn/ThinLockImpl.class
-edu/cmu/cs/mvelezce/analysis/option/Taint.class
 com/sleepycat/analysis/MeasureDiskOrderedScan$1.class
 com/sleepycat/je/jmx/plugin/Stats$StatsTableModel.class
 com/sleepycat/je/rep/subscription/SubscriptionThread$ConnectionException.class
@@ -1019,7 +1017,6 @@ com/sleepycat/je/rep/impl/node/ElectionQuorum.class
 com/sleepycat/je/dbi/SortedLSNTreeWalker$TreeNodeProcessor.class
 com/sleepycat/je/util/verify/BtreeVerifier$FileSizeCache.class
 com/sleepycat/je/txn/LockManager$DeadlockChecker$CycleNode.class
-edu/cmu/cs/mvelezce/analysis/option/Sources.class
 com/sleepycat/je/log/FileManager$LogEndFileDescriptor.class
 com/sleepycat/je/rep/subscription/SubscriptionStatDefinition.class
 com/sleepycat/je/rep/stream/Protocol.class
@@ -1122,7 +1119,6 @@ com/sleepycat/je/log/entry/MatchpointLogEntry.class
 com/sleepycat/je/jmx/plugin/Stats$GraphFrame$1.class
 com/sleepycat/je/log/FSyncManager.class
 com/sleepycat/je/jmx/plugin/Stats$GraphFrame.class
-edu/cmu/cs/mvelezce/analysis/option/Testing.class
 com/sleepycat/je/rep/util/ldiff/LDiffUtil.class
 com/sleepycat/je/Database$1.class
 com/sleepycat/je/txn/LockManager$DeadlockChecker$CycleNodeComparator.class

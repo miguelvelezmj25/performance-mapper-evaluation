@@ -21,7 +21,7 @@ public class MeasureDiskOrderedScan {
   private static long MAX_MEMORY;
   private static boolean ENV_SHARED_CACHE;
   private static boolean REPLICATED;
-  private static boolean ENV_IS_LOCKING;
+  private static boolean ENV_IS_LOCKING; // throws exception
   private static CacheMode CACHE_MODE;
   private static boolean TEMPORARY;
   private static String JE_FILE_LEVEL;
@@ -31,6 +31,7 @@ public class MeasureDiskOrderedScan {
   private static Durability JE_DURABILITY;
   private static String ADLER32_CHUNK_SIZE;
   private static String CHECKPOINTER_BYTES_INTERVAL;
+  private static String LOCK_DEADLOCK_DETECT_DELAY;
   /* Options */
 
   private static boolean KEYSONLY;
@@ -155,7 +156,7 @@ public class MeasureDiskOrderedScan {
     MAX_MEMORY = maxMemory(Boolean.parseBoolean(args[2]));
     ENV_SHARED_CACHE = Boolean.parseBoolean(args[3]);
     REPLICATED = Boolean.parseBoolean(args[4]);
-    ENV_IS_LOCKING = Boolean.parseBoolean(args[5]);
+    ENV_IS_LOCKING = envIsLocking(Boolean.parseBoolean(args[5]));
     CACHE_MODE = cacheMode(Boolean.parseBoolean(args[6]));
     TEMPORARY = Boolean.parseBoolean(args[7]);
     JE_FILE_LEVEL = jeFileLevel(Boolean.parseBoolean(args[8]));
@@ -165,8 +166,21 @@ public class MeasureDiskOrderedScan {
     JE_DURABILITY = jeDurability(Boolean.parseBoolean(args[12]));
     ADLER32_CHUNK_SIZE = adler32ChunkSize(Boolean.parseBoolean(args[13]));
     CHECKPOINTER_BYTES_INTERVAL = checkpointerBytesInterval(Boolean.parseBoolean(args[14]));
+    LOCK_DEADLOCK_DETECT_DELAY = lockDeadlockDetectDelay(Boolean.parseBoolean(args[15]));
 
     new MeasureDiskOrderedScan(args).run();
+  }
+
+  private static String lockDeadlockDetectDelay(boolean option) {
+    if (option) {
+      return "1 min";
+    }
+
+    return EnvironmentParams.LOCK_DEADLOCK_DETECT_DELAY.getDefault();
+  }
+
+  private static boolean envIsLocking(boolean parseBoolean) {
+    return true;
   }
 
   private static Durability jeDurability(boolean option) {
@@ -332,6 +346,8 @@ public class MeasureDiskOrderedScan {
     envConfig.setConfigParam(EnvironmentConfig.ADLER32_CHUNK_SIZE, ADLER32_CHUNK_SIZE);
     envConfig.setConfigParam(
         EnvironmentConfig.CHECKPOINTER_BYTES_INTERVAL, CHECKPOINTER_BYTES_INTERVAL);
+    envConfig.setConfigParam(
+        EnvironmentConfig.LOCK_DEADLOCK_DETECT_DELAY, LOCK_DEADLOCK_DETECT_DELAY);
     /* Options */
 
     /* Daemons interfere with cache size measurements. */
