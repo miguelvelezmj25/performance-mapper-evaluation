@@ -3,7 +3,7 @@ package edu.cmu.cs.mvelezce.analysis;
 public class SimpleForExample2 {
 
   public static void main(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
+    boolean A = Boolean.parseBoolean(args[0]);
 
     int count = 1;
 

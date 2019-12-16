@@ -23,7 +23,7 @@
 ////  private static void simpleConditional_forFalseTaintInControlFlow() throws InterruptedException
 // {
 ////    System.out.println("Testing simpleConditional_forFalseTaintInControlFlow");
-////    boolean A = Sources.A_0(false);
+////    boolean A = false);
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
@@ -39,7 +39,7 @@
 ////  private static void simpleConditional_forTrueTaintInControlFlow() throws InterruptedException
 // {
 ////    System.out.println("Testing simpleConditional_forTrueTaintInControlFlow");
-////    boolean A = Sources.A_0(true);
+////    boolean A = true);
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
@@ -54,8 +54,8 @@
 ////
 ////  private static void simpleConditional_forMultipleTaints() throws InterruptedException {
 ////    System.out.println("Testing simpleConditional_forMultipleTaints");
-////    boolean A = Sources.A_0(true);
-////    boolean B = Sources.B_1(false);
+////    boolean A = true);
+////    boolean B = false);
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    if (A) {
@@ -80,7 +80,7 @@
 ////
 ////  private static void implicitFlow_forBranchNotTaken() throws InterruptedException {
 ////    System.out.println("Testing implicitFlow_forBranchNotTaken");
-////    boolean A = Sources.A_0(false);
+////    boolean A = false);
 ////    boolean x = false;
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
@@ -105,7 +105,7 @@
 ////
 ////  private static void implicitFlow_forBranchTaken() throws InterruptedException {
 ////    System.out.println("Testing implicitFlow_forBranchTaken");
-////    boolean A = Sources.A_0(true);
+////    boolean A = true);
 ////    boolean x = false;
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
@@ -132,7 +132,7 @@
 ////
 ////  private static void implicitFlow_forBranchTakenLoop() throws InterruptedException {
 ////    System.out.println("Testing implicitFlow_forBranchTakenLoop");
-////    boolean A = Sources.A_0(true);
+////    boolean A = true);
 ////    int l = 0;
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
@@ -161,8 +161,8 @@
 ////
 ////  private static void simpleNestedConditional_forBranchesTaken() throws InterruptedException {
 ////    System.out.println("Testing simpleNestedConditional_forBranchesTaken");
-////    boolean A = Sources.A_0(true);
-////    boolean B = Sources.B_1(true);
+////    boolean A = true);
+////    boolean B = true);
 ////
 ////    Taint taintOfA = MultiTainter.getTaint(A);
 ////    Taint taintOfB = null;

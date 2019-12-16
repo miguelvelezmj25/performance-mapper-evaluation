@@ -1,13 +1,11 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class GuessANumber {
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
+    boolean C = Boolean.parseBoolean(args[2]);
 
     int secret;
     int tries;
@@ -15,22 +13,19 @@ public class GuessANumber {
 
     if (A) {
       secret = 5;
-    }
-    else {
+    } else {
       secret = 10;
     }
 
     if (B) {
       tries = 1;
-    }
-    else {
+    } else {
       tries = 2;
     }
 
     if (C) {
       num = 5;
-    }
-    else {
+    } else {
       num = 0;
     }
 
@@ -43,18 +38,15 @@ public class GuessANumber {
       if (tries > 0 && i == secret) {
         tries = 0;
         System.out.println("You win!");
-      }
-      else {
+      } else {
         tries--;
         if (tries > 0) {
           System.out.println("Try again");
-        }
-        else {
+        } else {
           System.out.println("Game over!");
         }
       }
-    }
-    else {
+    } else {
       System.out.println("Out of range");
     }
   }

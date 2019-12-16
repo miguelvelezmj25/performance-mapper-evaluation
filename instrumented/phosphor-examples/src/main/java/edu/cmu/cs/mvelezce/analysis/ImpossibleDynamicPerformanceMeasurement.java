@@ -3,23 +3,21 @@ package edu.cmu.cs.mvelezce.analysis;
 public class ImpossibleDynamicPerformanceMeasurement {
 
   public static void main(String[] args) throws InterruptedException {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int x;
     int y;
 
     if (A) {
       x = 3;
-    }
-    else {
+    } else {
       x = 1;
     }
 
     if (B) {
       y = 4;
-    }
-    else {
+    } else {
       y = 2;
     }
 

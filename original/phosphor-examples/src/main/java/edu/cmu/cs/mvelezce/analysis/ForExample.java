@@ -1,12 +1,10 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class ForExample {
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int rounds = 1;
     int increment = 1;
@@ -25,17 +23,14 @@ public class ForExample {
       System.out.println(a * a == 16);
       if (B) {
         System.out.println(a == -4);
-      }
-      else {
+      } else {
         System.out.println(a == 4);
       }
-    }
-    else {
+    } else {
       System.out.println(a * a == 1);
       if (B) {
         System.out.println(a == -1);
-      }
-      else {
+      } else {
         System.out.println(a == 1);
       }
     }

@@ -24,5 +24,4 @@ public class CanRemoveNestedConstraintsMultipleCallSites {
   private static void bar() {
     System.out.println();
   }
-
 }

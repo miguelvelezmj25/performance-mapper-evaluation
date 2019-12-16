@@ -7,7 +7,7 @@ package edu.cmu.cs.mvelezce.analysis;
 public class BerkeleyDBIPDIndexBug {
 
   public static void main(String[] args) {
-    boolean x = Boolean.valueOf(args[0]);
+    boolean x = Boolean.parseBoolean(args[0]);
     String y = args[1];
     String z = args[2];
 

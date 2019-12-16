@@ -1,18 +1,15 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class ExpensiveLoopExample {
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
+    boolean A = Boolean.parseBoolean(args[0]);
 
     int x;
 
     if (A) {
       x = 100_000;
-    }
-    else {
+    } else {
       x = 10_000_000;
     }
 

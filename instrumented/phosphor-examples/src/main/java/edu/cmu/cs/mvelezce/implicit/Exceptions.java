@@ -14,8 +14,8 @@ public class Exceptions {
   }
 
   public static void main(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     Integer minAlpha;
     Integer timeout;
@@ -78,9 +78,9 @@ public class Exceptions {
       }
     }
 
-//    Taint taint = MultiTainter.getTaint(minAlpha);
-//    //    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
-//    taint = MultiTainter.getTaint(timeout);
-//    //    Sinks.sink(taint, "timeout", "timeout", 0);
+    //    Taint taint = MultiTainter.getTaint(minAlpha);
+    //    //    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
+    //    taint = MultiTainter.getTaint(timeout);
+    //    //    Sinks.sink(taint, "timeout", "timeout", 0);
   }
 }

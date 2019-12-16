@@ -30,7 +30,6 @@ public class Subtraces {
       System.out.println(time);
       Thread.sleep(time);
     }
-
   }
 
   private static void foo(boolean x) throws InterruptedException {

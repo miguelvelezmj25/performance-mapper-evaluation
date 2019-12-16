@@ -34,7 +34,6 @@ edu/cmu/cs/mvelezce/analysis/Implicit.class
 edu/cmu/cs/mvelezce/analysis/OrContext3.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue.class
 edu/cmu/cs/mvelezce/analysis/VariabilityContext2.class
-edu/cmu/cs/mvelezce/taints/Sources.class
 edu/cmu/cs/mvelezce/implicit/StringOps.class
 edu/cmu/cs/mvelezce/analysis/Subtraces6.class
 edu/cmu/cs/mvelezce/analysis/Nesting.class
@@ -43,7 +42,10 @@ edu/cmu/cs/mvelezce/analysis/OrContext.class
 edu/cmu/cs/mvelezce/analysis/SimpleForExample4.class
 edu/cmu/cs/mvelezce/analysis/Constructor.class
 edu/cmu/cs/mvelezce/implicit/Test.class
+edu/cmu/cs/mvelezce/analysis/ClassWithStaticFields.class
+edu/cmu/cs/mvelezce/analysis/CallStaticField.class
 edu/cmu/cs/mvelezce/analysis/FinallyBlock.class
+edu/cmu/cs/mvelezce/analysis/CanRemoveNestedConstraintsMultipleCallSites.class
 edu/cmu/cs/mvelezce/analysis/AssertTest2Example.class
 edu/cmu/cs/mvelezce/analysis/Example8.class
 edu/cmu/cs/mvelezce/analysis/Example1.class
@@ -67,6 +69,7 @@ edu/cmu/cs/mvelezce/analysis/MultipleConstructors.class
 edu/cmu/cs/mvelezce/analysis/ExpensiveLoopExample.class
 edu/cmu/cs/mvelezce/TimerHelper.class
 edu/cmu/cs/mvelezce/implicit/Exceptions.class
+edu/cmu/cs/mvelezce/analysis/OverrideJREMethod.class
 edu/cmu/cs/mvelezce/implicit/Nested.class
 lang/Test.class
 edu/cmu/cs/mvelezce/analysis/Example9.class
@@ -79,6 +82,7 @@ edu/cmu/cs/mvelezce/analysis/ThrowEnd.class
 edu/cmu/cs/mvelezce/analysis/Trivial.class
 edu/cmu/cs/mvelezce/analysis/Example6.class
 edu/cmu/cs/mvelezce/analysis/Implicit2.class
+edu/cmu/cs/mvelezce/analysis/CannotRemoveNestedRegions.class
 edu/cmu/cs/mvelezce/analysis/WhileTrue2.class
 edu/cmu/cs/mvelezce/analysis/ContextDataTaintsEqual.class
 edu/cmu/cs/mvelezce/analysis/StaticMethodCall.class

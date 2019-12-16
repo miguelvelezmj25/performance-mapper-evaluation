@@ -1,7 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class Test {
 
   public static void main(String[] args) {
@@ -14,7 +12,7 @@ public class Test {
   }
 
   //  public static void test() {
-  //    boolean A = Sources.A_0(true);
+  //    boolean A = true);
   //
   //    String name = "Miguel";
   //
@@ -37,7 +35,7 @@ public class Test {
 
   public static void testAllTypesOfComparisons() {
     System.out.println("\ntestAllTypesOfComparisons");
-    boolean A = Sources.A_0(true);
+    boolean A = true;
     String s1 = "example1";
 
     String s = null;
@@ -63,7 +61,7 @@ public class Test {
 
   public static void testBranchNotTaken() {
     System.out.println("\ntestBranchNotTaken");
-    boolean A = Sources.A_0(false);
+    boolean A = false;
     String s1 = "example2";
 
     String s = null;
@@ -89,8 +87,8 @@ public class Test {
 
   public static void testImplicitFlows() {
     System.out.println("\ntestImplicitFlows");
-    boolean A = Sources.A_0(true);
-    boolean B = Sources.B_1(true);
+    boolean A = true;
+    boolean B = true;
 
     boolean x = false;
     String s = "example3";
@@ -123,7 +121,7 @@ public class Test {
 
   public static void testFields1() {
     System.out.println("\ntestFields1");
-    boolean A = Sources.A_0(true);
+    boolean A = true;
 
     Car c = new Car("Ford", 2018, false);
 
@@ -151,7 +149,7 @@ public class Test {
 
   public static void testFields2() {
     System.out.println("\ntestFields2");
-    boolean A = Sources.A_0(true);
+    boolean A = true;
 
     Garage g = new Garage();
     Car c = new Car("Honda", 2018, false);

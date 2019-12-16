@@ -1,7 +1,5 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class Example5 {
 
   private static final int HTTP_UNAUTHORIZED = 401;
@@ -11,10 +9,10 @@ public class Example5 {
   private static String REQUEST_GET = "GET";
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
-    boolean C = Sources.C_2(Boolean.valueOf(args[2]));
-    boolean D = Sources.D_3(Boolean.valueOf(args[3]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
+    boolean C = Boolean.parseBoolean(args[2]);
+    boolean D = Boolean.parseBoolean(args[3]);
 
     if (B) {
       if (D) {

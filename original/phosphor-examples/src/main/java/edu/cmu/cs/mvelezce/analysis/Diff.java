@@ -10,19 +10,19 @@ public class Diff {
     int x = 2;
 
     System.out.println(x | 0);
-//    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-//
-//    int x = 0;
-//
-//    if(A) {
-//      x = 10_000_000;
-//    }
-//    else {
-//      x = 5_000_000;
-//    }
-//
-//    while(x > 0) {
-//      x--;
-//    }
+    //    boolean A = Boolean.parseBoolean(args[0]);
+    //
+    //    int x = 0;
+    //
+    //    if(A) {
+    //      x = 10_000_000;
+    //    }
+    //    else {
+    //      x = 5_000_000;
+    //    }
+    //
+    //    while(x > 0) {
+    //      x--;
+    //    }
   }
 }

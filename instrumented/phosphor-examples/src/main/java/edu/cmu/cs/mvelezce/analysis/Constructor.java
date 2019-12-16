@@ -1,17 +1,10 @@
 package edu.cmu.cs.mvelezce.analysis;
 
 public class Constructor {
-  static {
-    System.out.println();
-  }
-
-  public static void main(String[] args) {
-    new Constructor(args);
-  }
 
   private Constructor(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     if (A) {
       System.out.println();
@@ -20,5 +13,9 @@ public class Constructor {
     if (B) {
       System.out.println();
     }
+  }
+
+  public static void main(String[] args) {
+    new Constructor(args);
   }
 }

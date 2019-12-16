@@ -1,12 +1,10 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class SimpleExample1 {
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     boolean x = false;
 
@@ -30,8 +28,7 @@ public class SimpleExample1 {
 
     if (B) { // 5
       j = 5;
-    }
-    else {
+    } else {
       j = 2;
     }
 

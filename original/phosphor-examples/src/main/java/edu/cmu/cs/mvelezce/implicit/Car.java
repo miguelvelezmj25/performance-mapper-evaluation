@@ -45,9 +45,7 @@ public class Car {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    return o != null && getClass() == o.getClass();
 
     //    Car car = (Car) o;
     //
@@ -58,7 +56,6 @@ public class Car {
     //      return false;
     //    }
     //    return name.equals(car.name);
-    return true;
   }
 
   @Override

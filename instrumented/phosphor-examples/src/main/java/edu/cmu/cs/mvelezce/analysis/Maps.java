@@ -19,13 +19,13 @@ public class Maps {
     condition.removeAll(context);
     System.out.println();
 
-//    boolean A = Boolean.valueOf(args[0]);
-//    boolean B = Boolean.valueOf(args[1]);
-//
-//    Set<Boolean> booleans = new HashSet<>();
-//    booleans.add(A);
-//    booleans.add(B);
-//
-//    System.out.println();
+    //    boolean A = Boolean.parseBoolean(args[0]);
+    //    boolean B = Boolean.parseBoolean(args[1]);
+    //
+    //    Set<Boolean> booleans = new HashSet<>();
+    //    booleans.add(A);
+    //    booleans.add(B);
+    //
+    //    System.out.println();
   }
 }

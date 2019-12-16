@@ -1,8 +1,5 @@
 package edu.cmu.cs.mvelezce.implicit;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,8 +14,8 @@ public class Exceptions {
   }
 
   public static void main(String[] args) {
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     Integer minAlpha;
     Integer timeout;
@@ -81,9 +78,9 @@ public class Exceptions {
       }
     }
 
-    Taint taint = MultiTainter.getTaint(minAlpha);
-    //    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
-    taint = MultiTainter.getTaint(timeout);
-    //    Sinks.sink(taint, "timeout", "timeout", 0);
+    //    Taint taint = MultiTainter.getTaint(minAlpha);
+    //    //    Sinks.sink(taint, "minAlpha", "minAlpha", 0);
+    //    taint = MultiTainter.getTaint(timeout);
+    //    //    Sinks.sink(taint, "timeout", "timeout", 0);
   }
 }

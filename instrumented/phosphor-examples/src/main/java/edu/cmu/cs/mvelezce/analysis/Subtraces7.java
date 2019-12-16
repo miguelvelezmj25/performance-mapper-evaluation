@@ -3,8 +3,8 @@ package edu.cmu.cs.mvelezce.analysis;
 public class Subtraces7 {
 
   public static void main(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int x = 0;
 
@@ -12,7 +12,7 @@ public class Subtraces7 {
       x = 1;
     }
 
-    if(B) {
+    if (B) {
       x = 2;
     }
 

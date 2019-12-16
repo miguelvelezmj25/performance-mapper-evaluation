@@ -3,22 +3,20 @@ package edu.cmu.cs.mvelezce.analysis;
 public class Sound {
 
   public static void main(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int x = 0;
 
     if (A) {
       x = 1;
-    }
-    else {
+    } else {
       x = 2;
     }
 
     if (B) {
       x = x - 1;
-    }
-    else {
+    } else {
       x = x - 2;
     }
 

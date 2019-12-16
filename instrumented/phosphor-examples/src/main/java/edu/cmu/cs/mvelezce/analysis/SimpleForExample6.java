@@ -3,20 +3,19 @@ package edu.cmu.cs.mvelezce.analysis;
 public class SimpleForExample6 {
 
   public static void main(String[] args) {
-    boolean A = Boolean.valueOf(args[0]);
-    boolean B = Boolean.valueOf(args[1]);
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int rounds = 0;
 
     if (A) {
       rounds = 4;
-    }
-    else {
+    } else {
       rounds = 2;
     }
 
     for (int i = 0; i <= rounds; i++) {
-      if(i % 2 == 0) {
+      if (i % 2 == 0) {
         B = !B;
       }
 

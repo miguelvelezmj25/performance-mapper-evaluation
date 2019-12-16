@@ -10,8 +10,7 @@ public class TryCatchFinally {
   public static void main(String[] args) {
     try {
       System.out.println("miguel");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println("Exception");
       throw e;
     } finally {

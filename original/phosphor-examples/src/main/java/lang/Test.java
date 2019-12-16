@@ -1,7 +1,5 @@
 package lang;
 
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class Test {
 
   private final char value[];
@@ -15,7 +13,7 @@ public class Test {
   }
 
   public static void test() {
-    boolean A = Sources.A_0(true);
+    boolean A = true;
     Test s = new Test();
 
     if (A) {
@@ -26,7 +24,6 @@ public class Test {
     if (s.equals(s1)) {
       System.out.println("true");
     }
-
   }
 
   public void practice(int i, int j) {

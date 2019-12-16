@@ -1,22 +1,16 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class SimpleForExample6 {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(SimpleForExample6.class.getSimpleName());
-
-    boolean A = Sources.A_0(Boolean.valueOf(args[0]));
-    boolean B = Sources.B_1(Boolean.valueOf(args[1]));
+    boolean A = Boolean.parseBoolean(args[0]);
+    boolean B = Boolean.parseBoolean(args[1]);
 
     int rounds = 0;
 
     if (A) {
       rounds = 4;
-    }
-    else {
+    } else {
       rounds = 2;
     }
 

@@ -24,7 +24,6 @@ public class Test {
     if (s.equals(s1)) {
       System.out.println("true");
     }
-
   }
 
   public void practice(int i, int j) {

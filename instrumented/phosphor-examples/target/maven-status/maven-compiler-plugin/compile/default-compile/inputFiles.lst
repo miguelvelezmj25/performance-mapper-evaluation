@@ -1,6 +1,5 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Nesting.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/Exceptions.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CannotExpandConstraintsDown.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example7.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ThrowIf.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/Test.java
@@ -16,7 +15,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/SimpleExample1.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/AndContext.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CanExpandConstraintsDown.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/TaintUtils.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/debug/Debug.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/IfAnd.java
@@ -26,6 +24,7 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Implicit2.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext3.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/FinallyBlock.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ClassWithStaticFields.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/Loops.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/Nested.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext4.java
@@ -50,21 +49,21 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/inttag/Test.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/AssertTest2Example.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/IfOr2.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CallStaticField.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CleanConstraints.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ThrowEnd.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ProjectExample.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/GuessANumber.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/IGenExample.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/MultipleReturns.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces5.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces2.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/CanRemoveNestedConstraintsMultipleCallSites.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/inttag/SimpleConditionals.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example1.java
+/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/MultipleConstructors.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces6.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example2.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Subtraces7.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/BerkeleyDbTraceLoggingBug.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/LightControlTracking.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/ImpossibleDynamicPerformanceMeasurement.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Sound.java
@@ -90,8 +89,6 @@
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Example5.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/OrContext5.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/Constructor.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/TryReturnCatch.java
-/Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/IfThrow.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/TestPrintExample.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/analysis/SimpleForExample5.java
 /Users/mvelezce/Documents/programming/java/projects/performance-mapper-evaluation/instrumented/phosphor-examples/src/main/java/edu/cmu/cs/mvelezce/implicit/Simple.java
