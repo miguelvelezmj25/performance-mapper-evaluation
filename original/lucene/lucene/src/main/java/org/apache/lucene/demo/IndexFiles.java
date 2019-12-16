@@ -18,6 +18,9 @@ package org.apache.lucene.demo;
 
 import org.apache.lucene.core.analysis.Analyzer;
 import org.apache.lucene.core.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.core.codecs.Codec;
+import org.apache.lucene.core.codecs.lucene50.Lucene50StoredFieldsFormat;
+import org.apache.lucene.core.codecs.lucene70.Lucene70Codec;
 import org.apache.lucene.core.document.*;
 import org.apache.lucene.core.index.*;
 import org.apache.lucene.core.index.IndexWriterConfig.OpenMode;
@@ -48,9 +51,10 @@ public class IndexFiles {
   private static boolean CHECK_PENDING_FLUSH_UPDATE;
   private static boolean READER_POOLING;
   private static int MAX_BUFFERED_DOCS;
-  //  private static boolean CODEC;
-  //  private static boolean USE_COMPOUND_FILE;
-  //  private static boolean MAX_TOKEN_LENGTH;
+  private static Codec CODEC;
+  private static boolean USE_COMPOUND_FILE;
+  private static IndexDeletionPolicy INDEX_DELETION_POLICY;
+  private static int MAX_TOKEN_LENGTH;
 
   private IndexFiles() {}
 
@@ -59,7 +63,7 @@ public class IndexFiles {
       Thread.sleep(1500);
       run(args);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      System.out.println(e);
     }
   }
 
@@ -72,6 +76,10 @@ public class IndexFiles {
     CHECK_PENDING_FLUSH_UPDATE = Boolean.parseBoolean(args[4]);
     READER_POOLING = Boolean.parseBoolean(args[5]);
     MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[6]));
+    CODEC = codec(Boolean.parseBoolean(args[7]));
+    USE_COMPOUND_FILE = Boolean.parseBoolean(args[8]);
+    INDEX_DELETION_POLICY = indexDeletionPolicy(Boolean.parseBoolean(args[9]));
+    MAX_TOKEN_LENGTH = maxTokenLength(Boolean.parseBoolean(args[10]));
 
     //        String usage =
     //                "java org.apache.lucene.demo.IndexFiles"
@@ -117,6 +125,8 @@ public class IndexFiles {
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
       Analyzer analyzer = new StandardAnalyzer();
+      ((StandardAnalyzer) analyzer).setMaxTokenLength(MAX_TOKEN_LENGTH);
+
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
       //            if (create) {
@@ -142,6 +152,10 @@ public class IndexFiles {
       iwc.setCheckPendingFlushUpdate(CHECK_PENDING_FLUSH_UPDATE);
       iwc.setReaderPooling(READER_POOLING);
       iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
+      iwc.setCodec(CODEC);
+      iwc.setUseCompoundFile(USE_COMPOUND_FILE);
+      iwc.setIndexDeletionPolicy(INDEX_DELETION_POLICY);
+      //      iwc.setInfoStream(INFO_STREAM);
 
       IndexWriter writer = new IndexWriter(dir, iwc);
       indexDocs(writer, docDir);
@@ -152,7 +166,7 @@ public class IndexFiles {
       // worth it when your index is relatively static (ie
       // you're done adding documents to it):
       //
-      // writer.forceMerge(1);
+      //      writer.forceMerge(1);
 
       writer.close();
 
@@ -162,6 +176,30 @@ public class IndexFiles {
     } catch (IOException e) {
       System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
     }
+  }
+
+  private static int maxTokenLength(boolean option) {
+    if (option) {
+      return 10;
+    }
+
+    return StandardAnalyzer.DEFAULT_MAX_TOKEN_LENGTH;
+  }
+
+  private static IndexDeletionPolicy indexDeletionPolicy(boolean option) {
+    if (option) {
+      return NoDeletionPolicy.INSTANCE;
+    }
+
+    return new KeepOnlyLastCommitDeletionPolicy();
+  }
+
+  private static Codec codec(boolean option) {
+    if (option) {
+      return new Lucene70Codec(Lucene50StoredFieldsFormat.Mode.BEST_COMPRESSION);
+    }
+
+    return new Lucene70Codec();
   }
 
   private static double ramBufferSizeMB(boolean option) {
@@ -190,7 +228,7 @@ public class IndexFiles {
 
   private static int maxBufferedDocs(boolean option) {
     if (option) {
-      return 500;
+      return 2;
     }
 
     return IndexWriterConfig.DEFAULT_MAX_BUFFERED_DOCS;
@@ -264,7 +302,7 @@ public class IndexFiles {
 
       if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
         // New index, so we just add the document (no old document can be there):
-//        System.out.println("adding " + file);
+        //        System.out.println(Thread.currentThread().getName() + " adding " + file);
         writer.addDocument(doc);
       } else {
         // Existing index (an old copy of this document may have been indexed) so
