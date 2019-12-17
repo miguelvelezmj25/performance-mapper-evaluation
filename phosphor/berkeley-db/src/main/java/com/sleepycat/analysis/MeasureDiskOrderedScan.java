@@ -175,8 +175,19 @@ public class MeasureDiskOrderedScan {
     CHECKPOINTER_BYTES_INTERVAL =
         Sources.CHECKPOINTER_BYTES_INTERVAL_14(
             checkpointerBytesInterval(Boolean.parseBoolean(args[14])));
+    LOCK_DEADLOCK_DETECT_DELAY =
+        Sources.LOCK_DEADLOCK_DETECT_DELAY_15(
+            lockDeadlockDetectDelay(Boolean.parseBoolean(args[15])));
 
     new MeasureDiskOrderedScan(args).run();
+  }
+
+  private static String lockDeadlockDetectDelay(boolean option) {
+    if (option) {
+      return "1 min";
+    }
+
+    return EnvironmentParams.LOCK_DEADLOCK_DETECT_DELAY.getDefault();
   }
 
   private static boolean envIsLocking(boolean option) {

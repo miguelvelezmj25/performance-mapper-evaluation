@@ -102,6 +102,10 @@ public class Sources implements TaintedWithObjTag {
     return checkpointerBytesInterval;
   }
 
+  public static String LOCK_DEADLOCK_DETECT_DELAY_15(String lockDeadlockDetectDelay) {
+    return lockDeadlockDetectDelay;
+  }
+
   public static TaintedBooleanWithObjTag DUPLICATES_0$$PHOSPHORTAGGED(
       Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
     ret.val = option;
@@ -199,6 +203,12 @@ public class Sources implements TaintedWithObjTag {
       String checkpointerBytesInterval, ControlTaintTagStack ctrl) {
     ((TaintedWithObjTag) (Object) checkpointerBytesInterval).setPHOSPHOR_TAG(new Taint(14));
     return checkpointerBytesInterval;
+  }
+
+  public static String LOCK_DEADLOCK_DETECT_DELAY_15$$PHOSPHORTAGGED(
+          String lockDeadlockDetectDelay, ControlTaintTagStack ctrl) {
+    ((TaintedWithObjTag) (Object) lockDeadlockDetectDelay).setPHOSPHOR_TAG(new Taint(15));
+    return lockDeadlockDetectDelay;
   }
 
   @Override

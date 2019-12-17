@@ -179,7 +179,7 @@ public class MeasureDiskOrderedScan {
     return EnvironmentParams.LOCK_DEADLOCK_DETECT_DELAY.getDefault();
   }
 
-  private static boolean envIsLocking(boolean parseBoolean) {
+  private static boolean envIsLocking(boolean option) {
     return true;
   }
 

@@ -10,7 +10,7 @@ public class CCIndexFiles {
 
   public static void main(String[] args) throws IOException {
     long start = System.nanoTime();
-    IndexFiles.main(args);
+//    IndexFiles.main(args);
     long end = System.nanoTime();
     String time = (end - start) + "";
 

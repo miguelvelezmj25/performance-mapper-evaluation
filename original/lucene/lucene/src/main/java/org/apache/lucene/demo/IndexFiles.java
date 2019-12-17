@@ -24,8 +24,13 @@ import org.apache.lucene.core.codecs.lucene70.Lucene70Codec;
 import org.apache.lucene.core.document.*;
 import org.apache.lucene.core.index.*;
 import org.apache.lucene.core.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.core.search.IndexSearcher;
+import org.apache.lucene.core.search.Sort;
+import org.apache.lucene.core.search.similarities.ClassicSimilarity;
+import org.apache.lucene.core.search.similarities.Similarity;
 import org.apache.lucene.core.store.Directory;
 import org.apache.lucene.core.store.FSDirectory;
+import org.apache.lucene.core.util.InfoStream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,15 +60,23 @@ public class IndexFiles {
   private static boolean USE_COMPOUND_FILE;
   private static IndexDeletionPolicy INDEX_DELETION_POLICY;
   private static int MAX_TOKEN_LENGTH;
+  private static double MAX_CFS_SEGMENT_SIZE_MB;
+  private static double NO_CFS_RATIO;
+  private static IndexCommit INDEX_COMMIT; // throws exception
+  //  private static Sort INDEX_SORT; // throws exception
+  private static IndexWriter.IndexReaderWarmer MERGED_SEGMENT_WARMER;
+  private static int RAM_PER_THREAD_HARD_LIMIT;
+  private static Similarity SIMILARITY;
 
   private IndexFiles() {}
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     try {
       Thread.sleep(1500);
       run(args);
     } catch (Exception e) {
-      System.out.println(e);
+      //      System.out.println(e);
+      throw e;
     }
   }
 
@@ -80,6 +93,13 @@ public class IndexFiles {
     USE_COMPOUND_FILE = Boolean.parseBoolean(args[8]);
     INDEX_DELETION_POLICY = indexDeletionPolicy(Boolean.parseBoolean(args[9]));
     MAX_TOKEN_LENGTH = maxTokenLength(Boolean.parseBoolean(args[10]));
+    MAX_CFS_SEGMENT_SIZE_MB = maxCFSSegmentSizeMB(Boolean.parseBoolean(args[10]));
+    NO_CFS_RATIO = noCFSRatio(Boolean.parseBoolean(args[11]));
+    INDEX_COMMIT = indexCommit(Boolean.parseBoolean(args[12]));
+    MERGED_SEGMENT_WARMER = mergedSegmentWarmer(Boolean.parseBoolean(args[13]));
+    RAM_PER_THREAD_HARD_LIMIT = ramPerThreadHardLimit(Boolean.parseBoolean(args[14]));
+    SIMILARITY = similarity(Boolean.parseBoolean(args[15]));
+    //    INDEX_SORT = sort(Boolean.parseBoolean(args[13]));
 
     //        String usage =
     //                "java org.apache.lucene.demo.IndexFiles"
@@ -146,16 +166,26 @@ public class IndexFiles {
       // iwc.setRAMBufferSizeMB(256.0);
 
       iwc.setRAMBufferSizeMB(RAM_BUFFER_SIZE_MB);
-      iwc.setMergePolicy(MERGE_POLICY);
-      iwc.setMergeScheduler(MERGE_SCHEDULER);
       iwc.setCommitOnClose(COMMIT_ON_CLOSE);
       iwc.setCheckPendingFlushUpdate(CHECK_PENDING_FLUSH_UPDATE);
       iwc.setReaderPooling(READER_POOLING);
       iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
-      iwc.setCodec(CODEC);
       iwc.setUseCompoundFile(USE_COMPOUND_FILE);
       iwc.setIndexDeletionPolicy(INDEX_DELETION_POLICY);
-      //      iwc.setInfoStream(INFO_STREAM);
+      iwc.setCodec(CODEC);
+      iwc.setMergeScheduler(MERGE_SCHEDULER);
+
+      MERGE_POLICY.setMaxCFSSegmentSizeMB(MAX_CFS_SEGMENT_SIZE_MB);
+      MERGE_POLICY.setNoCFSRatio(NO_CFS_RATIO);
+
+      iwc.setMergePolicy(MERGE_POLICY);
+
+      iwc.setIndexCommit(INDEX_COMMIT);
+      iwc.setMergedSegmentWarmer(MERGED_SEGMENT_WARMER);
+      iwc.setRAMPerThreadHardLimitMB(RAM_PER_THREAD_HARD_LIMIT);
+      iwc.setSimilarity(SIMILARITY);
+
+      //      iwc.setIndexSort(INDEX_SORT);
 
       IndexWriter writer = new IndexWriter(dir, iwc);
       indexDocs(writer, docDir);
@@ -176,6 +206,54 @@ public class IndexFiles {
     } catch (IOException e) {
       System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
     }
+  }
+
+  private static Similarity similarity(boolean option) {
+    if (option) {
+      return new ClassicSimilarity();
+    }
+
+    return IndexSearcher.getDefaultSimilarity();
+  }
+
+  private static int ramPerThreadHardLimit(boolean option) {
+    if (option) {
+      return 1024;
+    }
+
+    return IndexWriterConfig.DEFAULT_RAM_PER_THREAD_HARD_LIMIT_MB;
+  }
+
+  private static IndexWriter.IndexReaderWarmer mergedSegmentWarmer(boolean option) {
+    if (option) {
+      return new SimpleMergedSegmentWarmer(InfoStream.NO_OUTPUT);
+    }
+
+    return null;
+  }
+
+  private static Sort sort(boolean option) {
+    return null;
+  }
+
+  private static IndexCommit indexCommit(boolean option) {
+    return null;
+  }
+
+  private static double noCFSRatio(boolean option) {
+    if (option) {
+      return 0.0;
+    }
+
+    return 1.0;
+  }
+
+  private static double maxCFSSegmentSizeMB(boolean option) {
+    if (option) {
+      return 1.0;
+    }
+
+    return Double.MAX_VALUE;
   }
 
   private static int maxTokenLength(boolean option) {
