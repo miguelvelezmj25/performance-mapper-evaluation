@@ -23,7 +23,7 @@ public class MeasureDiskOrderedScan {
   private static long MAX_MEMORY;
   private static boolean ENV_SHARED_CACHE;
   private static boolean REPLICATED;
-  private static boolean ENV_IS_LOCKING;
+  private static boolean ENV_IS_LOCKING; // throws exception
   private static CacheMode CACHE_MODE;
   private static boolean TEMPORARY;
   private static String JE_FILE_LEVEL;
@@ -33,6 +33,7 @@ public class MeasureDiskOrderedScan {
   private static Durability JE_DURABILITY;
   private static String ADLER32_CHUNK_SIZE;
   private static String CHECKPOINTER_BYTES_INTERVAL;
+  private static String LOCK_DEADLOCK_DETECT_DELAY;
   /* Options */
 
   private static boolean KEYSONLY;
@@ -159,7 +160,7 @@ public class MeasureDiskOrderedScan {
     MAX_MEMORY = Sources.MAX_MEMORY_2(maxMemory(Boolean.parseBoolean(args[2])));
     ENV_SHARED_CACHE = Sources.ENV_SHARED_CACHE_3(Boolean.parseBoolean(args[3]));
     REPLICATED = Sources.REPLICATED_4(Boolean.parseBoolean(args[4]));
-    ENV_IS_LOCKING = Sources.ENV_IS_LOCKING_5(Boolean.parseBoolean(args[5]));
+    ENV_IS_LOCKING = Sources.ENV_IS_LOCKING_5(envIsLocking(Boolean.parseBoolean(args[5])));
     CACHE_MODE = Sources.CACHE_MODE_6(cacheMode(Boolean.parseBoolean(args[6])));
     TEMPORARY = Sources.TEMPORARY_7(Boolean.parseBoolean(args[7]));
     JE_FILE_LEVEL = Sources.JE_FILE_LEVEL_8(jeFileLevel(Boolean.parseBoolean(args[8])));
@@ -176,6 +177,10 @@ public class MeasureDiskOrderedScan {
             checkpointerBytesInterval(Boolean.parseBoolean(args[14])));
 
     new MeasureDiskOrderedScan(args).run();
+  }
+
+  private static boolean envIsLocking(boolean option) {
+    return true;
   }
 
   private static Durability jeDurability(boolean option) {
