@@ -62,8 +62,10 @@ public class IndexFiles {
   private static int MAX_TOKEN_LENGTH;
   private static double MAX_CFS_SEGMENT_SIZE_MB;
   private static double NO_CFS_RATIO;
-  private static IndexCommit INDEX_COMMIT; // throws exception
-  private static IndexWriter.IndexReaderWarmer MERGED_SEGMENT_WARMER;
+  //  private static IndexCommit INDEX_COMMIT; // throws exception & setting it to null cannot track
+  // taints
+  //  private static IndexWriter.IndexReaderWarmer MERGED_SEGMENT_WARMER; // setting it to null
+  // cannot track taints
   private static int RAM_PER_THREAD_HARD_LIMIT;
   private static Similarity SIMILARITY;
   //  private static Sort INDEX_SORT; // throws exception
@@ -95,8 +97,8 @@ public class IndexFiles {
     MAX_TOKEN_LENGTH = maxTokenLength(Boolean.parseBoolean(args[10]));
     MAX_CFS_SEGMENT_SIZE_MB = maxCFSSegmentSizeMB(Boolean.parseBoolean(args[11]));
     NO_CFS_RATIO = noCFSRatio(Boolean.parseBoolean(args[12]));
-    INDEX_COMMIT = indexCommit(Boolean.parseBoolean(args[13]));
-    MERGED_SEGMENT_WARMER = mergedSegmentWarmer(Boolean.parseBoolean(args[14]));
+    //    INDEX_COMMIT = indexCommit(Boolean.parseBoolean(args[13]));
+    //    MERGED_SEGMENT_WARMER = mergedSegmentWarmer(Boolean.parseBoolean(args[14]));
     RAM_PER_THREAD_HARD_LIMIT = ramPerThreadHardLimit(Boolean.parseBoolean(args[15]));
     SIMILARITY = similarity(Boolean.parseBoolean(args[16]));
     //    INDEX_SORT = sort(Boolean.parseBoolean(args[13]));
@@ -180,11 +182,11 @@ public class IndexFiles {
 
       iwc.setMergePolicy(MERGE_POLICY);
 
-      iwc.setIndexCommit(INDEX_COMMIT);
-      iwc.setMergedSegmentWarmer(MERGED_SEGMENT_WARMER);
       iwc.setRAMPerThreadHardLimitMB(RAM_PER_THREAD_HARD_LIMIT);
       iwc.setSimilarity(SIMILARITY);
 
+      //      iwc.setIndexCommit(INDEX_COMMIT);
+      //      iwc.setMergedSegmentWarmer(MERGED_SEGMENT_WARMER);
       //      iwc.setIndexSort(INDEX_SORT);
 
       IndexWriter writer = new IndexWriter(dir, iwc);
