@@ -146,7 +146,7 @@ public class MeasureDiskOrderedScan {
       Thread.sleep(1500);
       run(args);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      System.out.println(e);
     }
   }
 
