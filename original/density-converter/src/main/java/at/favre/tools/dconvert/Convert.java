@@ -49,7 +49,7 @@ public final class Convert {
             Thread.sleep(1500);
             run(args);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(e);
         }
     }
 
@@ -61,7 +61,9 @@ public final class Convert {
         SCALE = scale(Boolean.parseBoolean(rawArgs[1]));
         analysisArgs.add(SCALE + "");
         analysisArgs.add(DASH + CLIInterpreter.SOURCE_ARG);
-        analysisArgs.add("./files/person.jpg");
+        analysisArgs.add(System.getProperty("user.home")
+                        + "/Documents/programming/java/projects/performance-mapper-evaluation/original/density-converter/files/person.jpg"
+        );
         SCALE_IS_HEIGHT_DP = Boolean.parseBoolean(rawArgs[2]);
 
         if(SCALE_IS_HEIGHT_DP) {
@@ -69,9 +71,7 @@ public final class Convert {
         }
 
         analysisArgs.add(DASH + CLIInterpreter.DST_ARG);
-        String dst = "./output";
-        analysisArgs.add(dst);
-        FileUtils.cleanDirectory(new File(dst));
+        analysisArgs.add("./output");
 
         analysisArgs.add(DASH + CLIInterpreter.COMPRESSION_QUALITY_ARG);
         COMPRESSION_QUALITY = compressionQuality(Boolean.parseBoolean(rawArgs[3]));
