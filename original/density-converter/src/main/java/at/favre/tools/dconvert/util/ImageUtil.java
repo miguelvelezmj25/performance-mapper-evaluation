@@ -40,7 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Main Util class containing all
+ * Convert Util class containing all
  */
 public final class ImageUtil {
 

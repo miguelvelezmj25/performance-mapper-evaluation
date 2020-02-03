@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Main GUI Class
+ * Convert GUI Class
  */
 public class GUI extends Application {
     static int MIN_HEIGHT = 860;

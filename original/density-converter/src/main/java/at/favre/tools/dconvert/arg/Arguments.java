@@ -32,8 +32,10 @@ public class Arguments implements Serializable {
 
     public static final float DEFAULT_SCALE = 3f;
     public static final float DEFAULT_COMPRESSION_QUALITY = 0.9f;
-    public static final int DEFAULT_THREAD_COUNT = 4;
-    public static final int MAX_THREAD_COUNT = 8;
+//    public static final int DEFAULT_THREAD_COUNT = 4;
+    public static final int DEFAULT_THREAD_COUNT = 1;
+//    public static final int MAX_THREAD_COUNT = 8;
+    public static final int MAX_THREAD_COUNT = 1;
     public static final RoundingHandler.Strategy DEFAULT_ROUNDING_STRATEGY = RoundingHandler.Strategy.ROUND_HALF_UP;
     public static final Set<EPlatform> DEFAULT_PLATFORM = new HashSet<>(Arrays.asList(EPlatform.ANDROID, EPlatform.IOS));
     public static final EOutputCompressionMode DEFAULT_OUT_COMPRESSION = EOutputCompressionMode.SAME_AS_INPUT_PREF_PNG;
