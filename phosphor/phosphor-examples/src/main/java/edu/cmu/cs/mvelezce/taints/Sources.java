@@ -1,62 +1,83 @@
 package edu.cmu.cs.mvelezce.taints;
 
+import edu.columbia.cs.psl.phosphor.control.ControlFlowStack;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import edu.columbia.cs.psl.phosphor.runtime.TaintInstrumented;
-import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
 import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 @TaintInstrumented
 public class Sources implements TaintedWithObjTag {
 
-  public Taint PHOSPHOR_TAG;
+  public Taint<Integer> PHOSPHOR_TAG;
 
   public static TaintedBooleanWithObjTag A_0$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(0);
+    ret.taint = Taint.withLabel(0);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag B_1$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(1);
+    ret.taint = Taint.withLabel(1);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag C_2$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(2);
+    ret.taint = Taint.withLabel(2);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag D_3$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(3);
+    ret.taint = Taint.withLabel(3);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag E_4$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(4);
+    ret.taint = Taint.withLabel(4);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag F_5$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(5);
+    ret.taint = Taint.withLabel(5);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag G_6$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(6);
+    ret.taint = Taint.withLabel(6);
     return ret;
   }
 

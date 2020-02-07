@@ -1,13 +1,13 @@
 package edu.cmu.cs.mvelezce;
 
 import edu.cmu.cs.mvelezce.analysis.Subtraces;
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class RunningExample {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(RunningExample.class.getSimpleName());
+    SinkManager.preProcessSinks(RunningExample.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.valueOf(args[0]));
     boolean B = Sources.B_1(Boolean.valueOf(args[1]));

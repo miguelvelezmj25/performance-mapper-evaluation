@@ -1,11 +1,11 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 
 public class BerkeleyDbStaticNewLabelBug {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(BerkeleyDbStaticNewLabelBug.class.getSimpleName());
+    SinkManager.preProcessSinks(BerkeleyDbStaticNewLabelBug.class.getSimpleName());
 
     final String vendor = System.getProperty("java.vendor");
     final String vmName = System.getProperty("java.vm.name");

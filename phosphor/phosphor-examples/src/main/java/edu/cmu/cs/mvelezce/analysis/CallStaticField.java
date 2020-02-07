@@ -1,6 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class CallStaticField {
@@ -10,7 +10,7 @@ public class CallStaticField {
   }
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(CallStaticField.class.getSimpleName());
+    SinkManager.preProcessSinks(CallStaticField.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
     boolean B = Sources.B_1(Boolean.parseBoolean(args[1]));
@@ -23,7 +23,7 @@ public class CallStaticField {
       foo(B);
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 
   private static void foo(boolean a) {

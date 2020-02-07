@@ -1,21 +1,21 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Trivial {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(Trivial.class.getSimpleName());
+    SinkManager.preProcessSinks(Trivial.class.getSimpleName());
 
     try {
-      Thread.sleep(1500);
+      //      Thread.sleep(1500);
       run(args);
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 
   public static void run(String[] args) throws InterruptedException {

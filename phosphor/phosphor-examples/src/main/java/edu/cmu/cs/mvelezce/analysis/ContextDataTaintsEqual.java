@@ -1,12 +1,12 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class ContextDataTaintsEqual {
 
   public static void main(String[] args) throws InterruptedException {
-    Sinks.preProcessSinks(ContextDataTaintsEqual.class.getSimpleName());
+    SinkManager.preProcessSinks(ContextDataTaintsEqual.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
 
@@ -16,6 +16,6 @@ public class ContextDataTaintsEqual {
       }
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 }

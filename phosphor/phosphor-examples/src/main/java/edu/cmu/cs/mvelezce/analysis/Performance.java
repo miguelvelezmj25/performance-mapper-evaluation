@@ -1,6 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class Performance {
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(Performance.class.getSimpleName());
+    SinkManager.preProcessSinks(Performance.class.getSimpleName());
 
     try {
       Thread.sleep(1500);
@@ -17,7 +17,7 @@ public class Performance {
       System.out.println(e.getMessage());
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 
   public static void run(String[] args) throws InterruptedException {

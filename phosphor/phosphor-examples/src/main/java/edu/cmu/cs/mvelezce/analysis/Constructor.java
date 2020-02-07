@@ -1,6 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class Constructor {
@@ -19,7 +19,7 @@ public class Constructor {
   }
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(Constructor.class.getSimpleName());
+    SinkManager.preProcessSinks(Constructor.class.getSimpleName());
 
     new Constructor(args);
   }

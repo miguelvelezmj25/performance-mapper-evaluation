@@ -1,6 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import edu.cmu.cs.mvelezce.taints.Sources;
 
 public class OverrideJREMethod {
@@ -12,7 +12,7 @@ public class OverrideJREMethod {
   }
 
   public static void main(String[] args) {
-    Sinks.preProcessSinks(OverrideJREMethod.class.getSimpleName());
+    SinkManager.preProcessSinks(OverrideJREMethod.class.getSimpleName());
 
     boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
 
@@ -20,7 +20,7 @@ public class OverrideJREMethod {
     o.implicitCall();
     o.explicitCall();
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 
   private void explicitCall() {

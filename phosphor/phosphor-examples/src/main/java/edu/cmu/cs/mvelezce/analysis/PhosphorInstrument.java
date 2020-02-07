@@ -1,11 +1,11 @@
 package edu.cmu.cs.mvelezce.analysis;
 
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 
 public class PhosphorInstrument {
 
   public static void main(String[] args) throws InterruptedException {
-    Sinks.preProcessSinks(PhosphorInstrument.class.getSimpleName());
+    SinkManager.preProcessSinks(PhosphorInstrument.class.getSimpleName());
 
     int x = Integer.parseInt(args[0]);
     int y = Integer.parseInt(args[1]);
@@ -50,6 +50,6 @@ public class PhosphorInstrument {
         System.out.println("Z");
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 }
