@@ -2,11 +2,12 @@ package edu.cmu.cs.mvelezce.analysis.option;
 
 import com.sleepycat.je.CacheMode;
 import com.sleepycat.je.Durability;
+import edu.columbia.cs.psl.phosphor.control.ControlFlowStack;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import edu.columbia.cs.psl.phosphor.runtime.TaintInstrumented;
-import edu.columbia.cs.psl.phosphor.struct.ControlTaintTagStack;
 import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedLongWithObjTag;
+import edu.columbia.cs.psl.phosphor.struct.TaintedReferenceWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 @TaintInstrumented
@@ -107,108 +108,160 @@ public class Sources implements TaintedWithObjTag {
   }
 
   public static TaintedBooleanWithObjTag DUPLICATES_0$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(0);
+    ret.taint = Taint.withLabel(0);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag SEQUENTIAL_1$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(1);
+    ret.taint = Taint.withLabel(1);
     return ret;
   }
 
   public static TaintedLongWithObjTag MAX_MEMORY_2$$PHOSPHORTAGGED(
-      Taint originalTag, long value, ControlTaintTagStack ctrl, TaintedLongWithObjTag ret) {
+      long value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedLongWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(2);
+    ret.taint = Taint.withLabel(2);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag ENV_SHARED_CACHE_3$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(3);
+    ret.taint = Taint.withLabel(3);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag REPLICATED_4$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(4);
+    ret.taint = Taint.withLabel(4);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag ENV_IS_LOCKING_5$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(5);
+    ret.taint = Taint.withLabel(5);
     return ret;
   }
 
-  public static CacheMode CACHE_MODE_6$$PHOSPHORTAGGED(
-      CacheMode cacheMode, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) cacheMode).setPHOSPHOR_TAG(new Taint(6));
-    return cacheMode;
+  public static TaintedReferenceWithObjTag CACHE_MODE_6$$PHOSPHORTAGGED(
+      CacheMode cacheMode,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = cacheMode;
+    ret.taint = Taint.withLabel(6);
+    return ret;
   }
 
   public static TaintedBooleanWithObjTag TEMPORARY_7$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(7);
+    ret.taint = Taint.withLabel(7);
     return ret;
   }
 
-  public static String JE_FILE_LEVEL_8$$PHOSPHORTAGGED(
-      String fileLoggingLevel, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) fileLoggingLevel).setPHOSPHOR_TAG(new Taint(8));
-    return fileLoggingLevel;
+  public static TaintedReferenceWithObjTag JE_FILE_LEVEL_8$$PHOSPHORTAGGED(
+      String fileLoggingLevel,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = fileLoggingLevel;
+    ret.taint = Taint.withLabel(8);
+    return ret;
   }
 
-  public static String ENV_BACKGROUND_READ_LIMIT_9$$PHOSPHORTAGGED(
-      String envBackgroundReadLimit, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) envBackgroundReadLimit).setPHOSPHOR_TAG(new Taint(9));
-    return envBackgroundReadLimit;
+  public static TaintedReferenceWithObjTag ENV_BACKGROUND_READ_LIMIT_9$$PHOSPHORTAGGED(
+      String envBackgroundReadLimit,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = envBackgroundReadLimit;
+    ret.taint = Taint.withLabel(9);
+    return ret;
   }
 
   public static TaintedBooleanWithObjTag LOCK_DEADLOCK_DETECT_10$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(10);
+    ret.taint = Taint.withLabel(10);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag TXN_SERIALIZABLE_ISOLATION_11$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(11);
+    ret.taint = Taint.withLabel(11);
     return ret;
   }
 
-  public static Durability JE_DURABILITY_12$$PHOSPHORTAGGED(
-      Durability jeDurability, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) jeDurability).setPHOSPHOR_TAG(new Taint(12));
-    return jeDurability;
+  public static TaintedReferenceWithObjTag JE_DURABILITY_12$$PHOSPHORTAGGED(
+      Durability jeDurability,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = jeDurability;
+    ret.taint = Taint.withLabel(12);
+    return ret;
   }
 
-  public static String ADLER32_CHUNK_SIZE_13$$PHOSPHORTAGGED(
-      String adler32ChunkSize, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) adler32ChunkSize).setPHOSPHOR_TAG(new Taint(13));
-    return adler32ChunkSize;
+  public static TaintedReferenceWithObjTag ADLER32_CHUNK_SIZE_13$$PHOSPHORTAGGED(
+      String adler32ChunkSize,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = adler32ChunkSize;
+    ret.taint = Taint.withLabel(13);
+    return ret;
   }
 
-  public static String CHECKPOINTER_BYTES_INTERVAL_14$$PHOSPHORTAGGED(
-      String checkpointerBytesInterval, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) checkpointerBytesInterval).setPHOSPHOR_TAG(new Taint(14));
-    return checkpointerBytesInterval;
+  public static TaintedReferenceWithObjTag CHECKPOINTER_BYTES_INTERVAL_14$$PHOSPHORTAGGED(
+      String checkpointerBytesInterval,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = checkpointerBytesInterval;
+    ret.taint = Taint.withLabel(14);
+    return ret;
   }
 
-  public static String LOCK_DEADLOCK_DETECT_DELAY_15$$PHOSPHORTAGGED(
-          String lockDeadlockDetectDelay, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) lockDeadlockDetectDelay).setPHOSPHOR_TAG(new Taint(15));
-    return lockDeadlockDetectDelay;
+  public static TaintedReferenceWithObjTag LOCK_DEADLOCK_DETECT_DELAY_15$$PHOSPHORTAGGED(
+      String lockDeadlockDetectDelay,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = lockDeadlockDetectDelay;
+    ret.taint = Taint.withLabel(15);
+    return ret;
   }
 
   @Override

@@ -5,7 +5,7 @@ import com.sleepycat.bind.tuple.TupleOutput;
 import com.sleepycat.je.*;
 import com.sleepycat.je.config.EnvironmentParams;
 import edu.cmu.cs.mvelezce.analysis.option.Sources;
-import edu.cmu.cs.mvelezce.cc.Sinks;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -145,13 +145,13 @@ public class MeasureDiskOrderedScan {
 
   public static void main(String[] args) {
     try {
-      Sinks.preProcessSinks(MeasureDiskOrderedScan.class.getSimpleName());
+      SinkManager.preProcessSinks(MeasureDiskOrderedScan.class.getSimpleName());
       run(args);
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
 
-    Sinks.postProcessSinks();
+    SinkManager.postProcessSinks();
   }
 
   public static void run(String[] args) throws IOException {
