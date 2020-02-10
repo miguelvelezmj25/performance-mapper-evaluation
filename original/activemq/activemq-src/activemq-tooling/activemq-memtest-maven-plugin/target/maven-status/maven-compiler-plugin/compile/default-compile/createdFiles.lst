@@ -1,7 +1,0 @@
-org/apache/activemq/tool/MemoryMonitoringTool.class
-org/apache/activemq/tool/MemProducer.class
-org/apache/activemq/maven/MemtestMojo.class
-org/apache/activemq/tool/MemConsumer.class
-org/apache/activemq/tool/MemMessageIdList.class
-org/apache/activemq/tool/ReportGenerator.class
-org/apache/activemq/tool/JMSMemtest.class
