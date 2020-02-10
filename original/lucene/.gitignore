@@ -158,6 +158,6 @@ $RECYCLE.BIN/
 *.lnk
 
 files/
-
+**/index
 
 # End of https://www.gitignore.io/api/macos,windows,linux,intellij+iml,maven

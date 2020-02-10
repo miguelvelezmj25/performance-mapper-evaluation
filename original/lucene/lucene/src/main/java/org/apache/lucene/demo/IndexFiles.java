@@ -52,14 +52,14 @@ public class IndexFiles {
   private static double RAM_BUFFER_SIZE_MB;
   private static MergePolicy MERGE_POLICY;
   private static MergeScheduler MERGE_SCHEDULER;
-  //  private static boolean COMMIT_ON_CLOSE; // slows down taint analysis
+  private static boolean COMMIT_ON_CLOSE; // slows down taint analysis
   private static boolean CHECK_PENDING_FLUSH_UPDATE;
   private static boolean READER_POOLING;
-  //  private static int MAX_BUFFERED_DOCS; // slows down taint analysis
+  private static int MAX_BUFFERED_DOCS; // slows down taint analysis
   private static Codec CODEC;
   private static boolean USE_COMPOUND_FILE;
   private static IndexDeletionPolicy INDEX_DELETION_POLICY;
-  //  private static int MAX_TOKEN_LENGTH; // slows down taint analysis
+  private static int MAX_TOKEN_LENGTH; // slows down taint analysis
   private static double MAX_CFS_SEGMENT_SIZE_MB;
   private static double NO_CFS_RATIO;
   //  private static IndexCommit INDEX_COMMIT; // throws exception & setting it to null cannot track
@@ -87,14 +87,14 @@ public class IndexFiles {
     RAM_BUFFER_SIZE_MB = ramBufferSizeMB(Boolean.parseBoolean(args[0]));
     MERGE_POLICY = mergePolicy(Boolean.parseBoolean(args[1]));
     MERGE_SCHEDULER = mergeScheduler(Boolean.parseBoolean(args[2]));
-    //    COMMIT_ON_CLOSE = Boolean.parseBoolean(args[3]);
+    COMMIT_ON_CLOSE = Boolean.parseBoolean(args[3]);
     CHECK_PENDING_FLUSH_UPDATE = Boolean.parseBoolean(args[4]);
     READER_POOLING = Boolean.parseBoolean(args[5]);
-    //    MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[6]));
+    MAX_BUFFERED_DOCS = maxBufferedDocs(Boolean.parseBoolean(args[6]));
     CODEC = codec(Boolean.parseBoolean(args[7]));
     USE_COMPOUND_FILE = Boolean.parseBoolean(args[8]);
     INDEX_DELETION_POLICY = indexDeletionPolicy(Boolean.parseBoolean(args[9]));
-    //    MAX_TOKEN_LENGTH = maxTokenLength(Boolean.parseBoolean(args[10]));
+    MAX_TOKEN_LENGTH = maxTokenLength(Boolean.parseBoolean(args[10]));
     MAX_CFS_SEGMENT_SIZE_MB = maxCFSSegmentSizeMB(Boolean.parseBoolean(args[11]));
     NO_CFS_RATIO = noCFSRatio(Boolean.parseBoolean(args[12]));
     //        INDEX_COMMIT = indexCommit(Boolean.parseBoolean(args[13]));
@@ -147,7 +147,7 @@ public class IndexFiles {
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
       Analyzer analyzer = new StandardAnalyzer();
-      //      ((StandardAnalyzer) analyzer).setMaxTokenLength(MAX_TOKEN_LENGTH);
+      ((StandardAnalyzer) analyzer).setMaxTokenLength(MAX_TOKEN_LENGTH);
 
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
@@ -168,10 +168,10 @@ public class IndexFiles {
       // iwc.setRAMBufferSizeMB(256.0);
 
       iwc.setRAMBufferSizeMB(RAM_BUFFER_SIZE_MB);
-      //      iwc.setCommitOnClose(COMMIT_ON_CLOSE);
+      iwc.setCommitOnClose(COMMIT_ON_CLOSE);
       iwc.setCheckPendingFlushUpdate(CHECK_PENDING_FLUSH_UPDATE);
       iwc.setReaderPooling(READER_POOLING);
-      //      iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
+      iwc.setMaxBufferedDocs(MAX_BUFFERED_DOCS);
       iwc.setUseCompoundFile(USE_COMPOUND_FILE);
       iwc.setIndexDeletionPolicy(INDEX_DELETION_POLICY);
       iwc.setCodec(CODEC);
