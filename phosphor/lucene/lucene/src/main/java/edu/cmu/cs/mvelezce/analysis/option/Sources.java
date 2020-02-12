@@ -1,5 +1,6 @@
 package edu.cmu.cs.mvelezce.analysis.option;
 
+import edu.columbia.cs.psl.phosphor.control.ControlFlowStack;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import edu.columbia.cs.psl.phosphor.runtime.TaintInstrumented;
 import edu.columbia.cs.psl.phosphor.struct.*;
@@ -83,114 +84,163 @@ public class Sources implements TaintedWithObjTag {
   }
 
   public static TaintedDoubleWithObjTag RAM_BUFFER_SIZE_MB_0$$PHOSPHORTAGGED(
-      Taint originalTag, double value, ControlTaintTagStack ctrl, TaintedDoubleWithObjTag ret) {
+      double value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedDoubleWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(0);
+    ret.taint = Taint.withLabel(0);
     return ret;
   }
 
-  public static MergePolicy MERGE_POLICY_1$$PHOSPHORTAGGED(
-      MergePolicy mergePolicy, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) mergePolicy).setPHOSPHOR_TAG(new Taint(1));
-    return mergePolicy;
+  public static TaintedReferenceWithObjTag MERGE_POLICY_1$$PHOSPHORTAGGED(
+      MergePolicy mergePolicy,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = mergePolicy;
+    ret.taint = Taint.withLabel(1);
+    return ret;
   }
 
-  public static MergeScheduler MERGE_SCHEDULER_2$$PHOSPHORTAGGED(
-      MergeScheduler mergeScheduler, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) mergeScheduler).setPHOSPHOR_TAG(new Taint(2));
-    return mergeScheduler;
+  public static TaintedReferenceWithObjTag MERGE_SCHEDULER_2$$PHOSPHORTAGGED(
+      MergeScheduler mergeScheduler,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = mergeScheduler;
+    ret.taint = Taint.withLabel(2);
+    return ret;
   }
 
   public static TaintedBooleanWithObjTag COMMIT_ON_CLOSE_3$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(3);
+    ret.taint = Taint.withLabel(3);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag CHECK_PENDING_FLUSH_UPDATE_4$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(4);
+    ret.taint = Taint.withLabel(4);
     return ret;
   }
 
   public static TaintedBooleanWithObjTag READER_POOLING_5$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(5);
+    ret.taint = Taint.withLabel(5);
     return ret;
   }
 
   public static TaintedIntWithObjTag MAX_BUFFERED_DOCS_6$$PHOSPHORTAGGED(
-      Taint originalTag, int value, ControlTaintTagStack ctrl, TaintedIntWithObjTag ret) {
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(6);
+    ret.taint = Taint.withLabel(6);
     return ret;
   }
 
-  public static Codec CODEC_7$$PHOSPHORTAGGED(Codec codec, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) codec).setPHOSPHOR_TAG(new Taint(7));
-    return codec;
+  public static TaintedReferenceWithObjTag CODEC_7$$PHOSPHORTAGGED(
+      Codec codec,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = codec;
+    ret.taint = Taint.withLabel(7);
+    return ret;
   }
 
   public static TaintedBooleanWithObjTag USE_COMPOUND_FILE_8$$PHOSPHORTAGGED(
-      Taint originalTag, boolean option, ControlTaintTagStack ctrl, TaintedBooleanWithObjTag ret) {
+      boolean option,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
     ret.val = option;
-    ret.taint = new Taint(8);
+    ret.taint = Taint.withLabel(8);
     return ret;
   }
 
-  public static IndexDeletionPolicy INDEX_DELETION_POLICY_9$$PHOSPHORTAGGED(
-      IndexDeletionPolicy indexDeletionPolicy, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) indexDeletionPolicy).setPHOSPHOR_TAG(new Taint(9));
-    return indexDeletionPolicy;
+  public static TaintedReferenceWithObjTag INDEX_DELETION_POLICY_9$$PHOSPHORTAGGED(
+      IndexDeletionPolicy indexDeletionPolicy,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = indexDeletionPolicy;
+    ret.taint = Taint.withLabel(8);
+    return ret;
   }
 
   public static TaintedIntWithObjTag MAX_TOKEN_LENGTH_10$$PHOSPHORTAGGED(
-      Taint originalTag, int value, ControlTaintTagStack ctrl, TaintedIntWithObjTag ret) {
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(10);
+    ret.taint = Taint.withLabel(10);
     return ret;
   }
 
   public static TaintedDoubleWithObjTag MAX_CFS_SEGMENT_SIZE_MB_11$$PHOSPHORTAGGED(
-      Taint originalTag, double value, ControlTaintTagStack ctrl, TaintedDoubleWithObjTag ret) {
+      double value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedDoubleWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(11);
+    ret.taint = Taint.withLabel(11);
     return ret;
   }
 
   public static TaintedDoubleWithObjTag NO_CFS_RATIO_12$$PHOSPHORTAGGED(
-      Taint originalTag, double value, ControlTaintTagStack ctrl, TaintedDoubleWithObjTag ret) {
+      double value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedDoubleWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(12);
+    ret.taint = Taint.withLabel(12);
     return ret;
   }
 
-  public static IndexCommit INDEX_COMMIT_13$$PHOSPHORTAGGED(
-      IndexCommit indexCommit, ControlTaintTagStack ctrl) {
-    //    ((TaintedWithObjTag) (Object) indexCommit).setPHOSPHOR_TAG(new Taint(13));
-    return indexCommit;
+  public static TaintedReferenceWithObjTag INDEX_COMMIT_13$$PHOSPHORTAGGED(
+      IndexCommit indexCommit,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    //    ((TaintedWithObjTag) (Object) indexCommit).setPHOSPHOR_TAG(Taint.withLabel(13));
+    return ret;
   }
 
-  public static IndexWriter.IndexReaderWarmer MERGED_SEGMENT_WARMER_14$$PHOSPHORTAGGED(
-      IndexWriter.IndexReaderWarmer indexReaderWarmer, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) indexReaderWarmer).setPHOSPHOR_TAG(new Taint(14));
-    return indexReaderWarmer;
+  public static TaintedReferenceWithObjTag MERGED_SEGMENT_WARMER_14$$PHOSPHORTAGGED(
+      IndexWriter.IndexReaderWarmer indexReaderWarmer,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = indexReaderWarmer;
+    ret.taint = Taint.withLabel(14);
+    return ret;
   }
 
   public static TaintedIntWithObjTag RAM_PER_THREAD_HARD_LIMIT_15$$PHOSPHORTAGGED(
-      Taint originalTag, int value, ControlTaintTagStack ctrl, TaintedIntWithObjTag ret) {
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
     ret.val = value;
-    ret.taint = new Taint(15);
+    ret.taint = Taint.withLabel(15);
     return ret;
   }
 
-  public static Similarity SIMILARITY_16$$PHOSPHORTAGGED(
-      Similarity similarity, ControlTaintTagStack ctrl) {
-    ((TaintedWithObjTag) (Object) similarity).setPHOSPHOR_TAG(new Taint(16));
-    return similarity;
+  public static TaintedReferenceWithObjTag SIMILARITY_16$$PHOSPHORTAGGED(
+      Similarity similarity,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedReferenceWithObjTag ret) {
+    ret.val = similarity;
+    ret.taint = Taint.withLabel(16);
+    return ret;
   }
 
   @Override

@@ -52,14 +52,14 @@ public class IndexFiles {
   private static double RAM_BUFFER_SIZE_MB;
   private static MergePolicy MERGE_POLICY;
   private static MergeScheduler MERGE_SCHEDULER;
-  private static boolean COMMIT_ON_CLOSE; // slows down taint analysis
+  private static boolean COMMIT_ON_CLOSE; // used to slow down taint analysis
   private static boolean CHECK_PENDING_FLUSH_UPDATE;
   private static boolean READER_POOLING;
-  private static int MAX_BUFFERED_DOCS; // slows down taint analysis
+  private static int MAX_BUFFERED_DOCS; // used to slow down taint analysis
   private static Codec CODEC;
   private static boolean USE_COMPOUND_FILE;
   private static IndexDeletionPolicy INDEX_DELETION_POLICY;
-  private static int MAX_TOKEN_LENGTH; // slows down taint analysis
+  private static int MAX_TOKEN_LENGTH; // used to slow down taint analysis
   private static double MAX_CFS_SEGMENT_SIZE_MB;
   private static double NO_CFS_RATIO;
   //  private static IndexCommit INDEX_COMMIT; // throws exception & setting it to null cannot track
