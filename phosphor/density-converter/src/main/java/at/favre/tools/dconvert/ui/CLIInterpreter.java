@@ -179,12 +179,12 @@ public final class CLIInterpreter {
             builder.skipExistingFiles(commandLine.hasOption(SKIP_EXISTING_ARG));
             builder.includeAndroidLdpiTvdpi(commandLine.hasOption("androidIncludeLdpiTvdpi"));
             builder.verboseLog(commandLine.hasOption(VERBOSE_ARG));
-//            builder.haltOnError(commandLine.hasOption("haltOnError"));
+            builder.haltOnError(commandLine.hasOption("haltOnError"));
             builder.createMipMapInsteadOfDrawableDir(commandLine.hasOption("androidMipmapInsteadOfDrawable"));
             builder.antiAliasing(commandLine.hasOption("antiAliasing"));
             builder.enablePngCrush(commandLine.hasOption("postProcessorPngCrush"));
             builder.postConvertWebp(commandLine.hasOption("postProcessorWebp"));
-//            builder.dryRun(commandLine.hasOption("dryRun"));
+            builder.dryRun(commandLine.hasOption("dryRun"));
             builder.enableMozJpeg(commandLine.hasOption("postProcessorMozJpeg"));
             builder.keepUnoptimizedFilesPostProcessor(commandLine.hasOption("keepOriginalPostProcessedFiles"));
             builder.iosCreateImagesetFolders(commandLine.hasOption("iosCreateImagesetFolders"));

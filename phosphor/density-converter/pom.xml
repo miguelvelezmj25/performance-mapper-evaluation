@@ -91,25 +91,25 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-<!--                    <compilerId>javac-with-errorprone</compilerId>-->
-<!--                    <forceJavacCompilerUse>true</forceJavacCompilerUse>-->
+                    <!--                    <compilerId>javac-with-errorprone</compilerId>-->
+                    <!--                    <forceJavacCompilerUse>true</forceJavacCompilerUse>-->
                     <source>8</source>
                     <target>8</target>
                 </configuration>
-<!--                <dependencies>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.codehaus.plexus</groupId>-->
-<!--                        <artifactId>plexus-compiler-javac-errorprone</artifactId>-->
-<!--                        <version>2.8.5</version>-->
-<!--                    </dependency>-->
-<!--                    &lt;!&ndash; override plexus-compiler-javac-errorprone's dependency on-->
-<!--                         Error Prone with the latest version &ndash;&gt;-->
-<!--                    <dependency>-->
-<!--                        <groupId>com.google.errorprone</groupId>-->
-<!--                        <artifactId>error_prone_core</artifactId>-->
-<!--                        <version>2.0.21</version>-->
-<!--                    </dependency>-->
-<!--                </dependencies>-->
+                <!--                <dependencies>-->
+                <!--                    <dependency>-->
+                <!--                        <groupId>org.codehaus.plexus</groupId>-->
+                <!--                        <artifactId>plexus-compiler-javac-errorprone</artifactId>-->
+                <!--                        <version>2.8.5</version>-->
+                <!--                    </dependency>-->
+                <!--                    &lt;!&ndash; override plexus-compiler-javac-errorprone's dependency on-->
+                <!--                         Error Prone with the latest version &ndash;&gt;-->
+                <!--                    <dependency>-->
+                <!--                        <groupId>com.google.errorprone</groupId>-->
+                <!--                        <artifactId>error_prone_core</artifactId>-->
+                <!--                        <version>2.0.21</version>-->
+                <!--                    </dependency>-->
+                <!--                </dependencies>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -261,21 +261,21 @@
         </dependency>
 
         <!-- hq image scaling -->
-<!--        <dependency>-->
-<!--            <groupId>org.imgscalr</groupId>-->
-<!--            <artifactId>imgscalr-lib</artifactId>-->
-<!--            <version>4.2</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>net.coobird</groupId>-->
-<!--            <artifactId>thumbnailator</artifactId>-->
-<!--            <version>0.4.8</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.mortennobel</groupId>-->
-<!--            <artifactId>java-image-scaling</artifactId>-->
-<!--            <version>0.8.6</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.imgscalr</groupId>-->
+        <!--            <artifactId>imgscalr-lib</artifactId>-->
+        <!--            <version>4.2</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>net.coobird</groupId>-->
+        <!--            <artifactId>thumbnailator</artifactId>-->
+        <!--            <version>0.4.8</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.mortennobel</groupId>-->
+        <!--            <artifactId>java-image-scaling</artifactId>-->
+        <!--            <version>0.8.6</version>-->
+        <!--        </dependency>-->
 
         <!-- native interop (for e.g. win) -->
         <dependency>
@@ -286,31 +286,31 @@
 
 
         <!-- supported reading/writing image types -->
-<!--        <dependency>-->
-<!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
-<!--            <artifactId>imageio-jpeg</artifactId>-->
-<!--            <version>${imageiodep.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
-<!--            <artifactId>imageio-tiff</artifactId>-->
-<!--            <version>${imageiodep.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
-<!--            <artifactId>imageio-psd</artifactId>-->
-<!--            <version>${imageiodep.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
-<!--            <artifactId>imageio-bmp</artifactId>-->
-<!--            <version>${imageiodep.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
-<!--            <artifactId>imageio-batik</artifactId> &lt;!&ndash; svg &ndash;&gt;-->
-<!--            <version>${imageiodep.version}</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
+        <!--            <artifactId>imageio-jpeg</artifactId>-->
+        <!--            <version>${imageiodep.version}</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
+        <!--            <artifactId>imageio-tiff</artifactId>-->
+        <!--            <version>${imageiodep.version}</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
+        <!--            <artifactId>imageio-psd</artifactId>-->
+        <!--            <version>${imageiodep.version}</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
+        <!--            <artifactId>imageio-bmp</artifactId>-->
+        <!--            <version>${imageiodep.version}</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.twelvemonkeys.imageio</groupId>-->
+        <!--            <artifactId>imageio-batik</artifactId> &lt;!&ndash; svg &ndash;&gt;-->
+        <!--            <version>${imageiodep.version}</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>jmagick</groupId>
             <artifactId>jmagick</artifactId>
@@ -375,6 +375,13 @@
             <artifactId>openjfx-monocle</artifactId>
             <version>8u76-b04</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>edu.gmu.swe.phosphor</groupId>
+            <artifactId>Phosphor</artifactId>
+            <version>0.0.5-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../../phosphor/Phosphor/target/Phosphor-0.0.5-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>

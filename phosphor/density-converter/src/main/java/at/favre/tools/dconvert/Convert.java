@@ -16,22 +16,21 @@
 
 package at.favre.tools.dconvert;
 
-import at.favre.tools.dconvert.arg.Arguments;
-import at.favre.tools.dconvert.arg.EScalingAlgorithm;
-import at.favre.tools.dconvert.ui.CLIInterpreter;
-import at.favre.tools.dconvert.ui.GUI;
+import at.favre.tools.dconvert.arg.*;
 import at.favre.tools.dconvert.util.MiscUtil;
+import edu.cmu.cs.mvelezce.analysis.option.Sources;
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Entry point of the app. Use arg -h to get help.
  */
 public final class Convert {
-
-    private static final String DASH = "-";
 
     private static float SCALE;
     private static boolean SCALE_IS_HEIGHT_DP;
@@ -60,141 +59,104 @@ public final class Convert {
     }
 
     public static void main(String[] args) {
+        SinkManager.preProcessSinks(Convert.class.getSimpleName());
+
         try {
-            Thread.sleep(1500);
             run(args);
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
+
+        SinkManager.postProcessSinks();
     }
 
-    public static void run(String[] rawArgs) throws IOException {
-        SCALE = scale(Boolean.parseBoolean(rawArgs[0]));
-        SCALE_IS_HEIGHT_DP = Boolean.parseBoolean(rawArgs[1]);
-        COMPRESSION_QUALITY = compressionQuality(Boolean.parseBoolean(rawArgs[2]));
-        OUT_COMPRESSION = outCompression(Boolean.parseBoolean(rawArgs[3]));
-        PLATFORM = platform(Boolean.parseBoolean(rawArgs[4]));
-        UPSCALING_ALGO = upScalingAlgo(Boolean.parseBoolean(rawArgs[5]));
-        DOWNSCALING_ALGO = downScalingAlgo(Boolean.parseBoolean(rawArgs[6]));
-        ROUNDING_MODE = roundingMode(Boolean.parseBoolean(rawArgs[7]));
-        SKIP_UPSCALING = Boolean.parseBoolean(rawArgs[8]);
-        SKIP_EXISTING = Boolean.parseBoolean(rawArgs[9]);
-        ANDROID_INCLUDE_LDPI_TVDPI = Boolean.parseBoolean(rawArgs[10]);
-        VERBOSE = Boolean.parseBoolean(rawArgs[11]);
-        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Boolean.parseBoolean(rawArgs[12]);
-        ANTI_ALIASING = Boolean.parseBoolean(rawArgs[13]);
-        POST_PROCESSOR_PNG_CRUSH = postProcess(Boolean.parseBoolean(rawArgs[14]));
-        POST_PROCESSOR_WEBP = postProcess(Boolean.parseBoolean(rawArgs[15]));
-        DRY_RUN = Boolean.parseBoolean(rawArgs[16]);
-        POST_PROCESSOR_MOZ_JPEG = postProcess(Boolean.parseBoolean(rawArgs[17]));
-        KEEP_ORIGINAL_POST_PROCESSED_FILES = Boolean.parseBoolean(rawArgs[18]);
-        IOS_CREATE_IMAGESET_FOLDERS = Boolean.parseBoolean(rawArgs[19]);
-        CLEAN = Boolean.parseBoolean(rawArgs[20]);
-        HALT_ON_ERROR = Boolean.parseBoolean(rawArgs[21]);
+    public static void run(String[] rawArgs) {
+        SCALE = Sources.SCALE_0(scale(Boolean.parseBoolean(rawArgs[0])));
+        SCALE_IS_HEIGHT_DP = Sources.SCALE_IS_HEIGHT_DP_1(Boolean.parseBoolean(rawArgs[1]));
+        COMPRESSION_QUALITY = Sources.COMPRESSION_QUALITY_2(compressionQuality(Boolean.parseBoolean(rawArgs[2])));
+        OUT_COMPRESSION = Sources.OUT_COMPRESSION_3(outCompression(Boolean.parseBoolean(rawArgs[3])));
+        PLATFORM = Sources.PLATFORM_4(platform(Boolean.parseBoolean(rawArgs[4])));
+        UPSCALING_ALGO = Sources.UPSCALING_ALGO_5(upScalingAlgo(Boolean.parseBoolean(rawArgs[5])));
+        DOWNSCALING_ALGO = Sources.DOWNSCALING_ALGO_6(downScalingAlgo(Boolean.parseBoolean(rawArgs[6])));
+        ROUNDING_MODE = Sources.ROUNDING_MODE_7(roundingMode(Boolean.parseBoolean(rawArgs[7])));
+        SKIP_UPSCALING = Sources.SKIP_UPSCALING_8(Boolean.parseBoolean(rawArgs[8]));
+        SKIP_EXISTING = Sources.SKIP_EXISTING_9(Boolean.parseBoolean(rawArgs[9]));
+        ANDROID_INCLUDE_LDPI_TVDPI = Sources.ANDROID_INCLUDE_LDPI_TVDPI_10(Boolean.parseBoolean(rawArgs[10]));
+        VERBOSE = Sources.VERBOSE_11(Boolean.parseBoolean(rawArgs[11]));
+        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Sources.ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE_12(Boolean.parseBoolean(rawArgs[12]));
+        ANTI_ALIASING = Sources.ANTI_ALIASING_13(Boolean.parseBoolean(rawArgs[13]));
+        POST_PROCESSOR_PNG_CRUSH = Sources.POST_PROCESSOR_PNG_CRUSH_14(postProcess(Boolean.parseBoolean(rawArgs[14])));
+        POST_PROCESSOR_WEBP = Sources.POST_PROCESSOR_WEBP_15(postProcess(Boolean.parseBoolean(rawArgs[15])));
+        DRY_RUN = Sources.DRY_RUN_16(Boolean.parseBoolean(rawArgs[16]));
+        POST_PROCESSOR_MOZ_JPEG = Sources.POST_PROCESSOR_MOZ_JPEG_17(postProcess(Boolean.parseBoolean(rawArgs[17])));
+        KEEP_ORIGINAL_POST_PROCESSED_FILES = Sources.KEEP_ORIGINAL_POST_PROCESSED_FILES_18(Boolean.parseBoolean(rawArgs[18]));
+        IOS_CREATE_IMAGESET_FOLDERS = Sources.IOS_CREATE_IMAGESET_FOLDERS_19(Boolean.parseBoolean(rawArgs[19]));
+        CLEAN = Sources.CLEAN_20(Boolean.parseBoolean(rawArgs[20]));
+        HALT_ON_ERROR = Sources.HALT_ON_ERROR_21(Boolean.parseBoolean(rawArgs[21]));
 
-        List<String> analysisArgs = new ArrayList<>();
+        File src = new File("./pictures/person.jpg");
+        File dst = new File("./output");
+        float scale = SCALE;
+        Set<EPlatform> platform = getPlatform(PLATFORM);
+        EOutputCompressionMode outputCompressionMode = getOutCompression(OUT_COMPRESSION);
+        EScaleMode scaleMode = scaleMode(false, SCALE_IS_HEIGHT_DP);
+        EScalingAlgorithm downScalingAlgorithm = EScalingAlgorithm.getByName(DOWNSCALING_ALGO);
+        EScalingAlgorithm upScalingAlgorithm = EScalingAlgorithm.getByName(UPSCALING_ALGO);
+        float compressionQuality = COMPRESSION_QUALITY;
+        boolean skipExistingFiles = SKIP_EXISTING;
+        boolean skipUpscaling = SKIP_UPSCALING;
+        boolean verboseLog = VERBOSE;
+        boolean includeAndroidLdpiTvdpi = ANDROID_INCLUDE_LDPI_TVDPI;
+        boolean haltOnError = HALT_ON_ERROR;
+        boolean createMipMapInsteadOfDrawableDir = ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE;
+        boolean iosCreateImagesetFolders = IOS_CREATE_IMAGESET_FOLDERS;
+        boolean enablePngCrush = POST_PROCESSOR_PNG_CRUSH;
+        boolean enableMozJpeg = POST_PROCESSOR_MOZ_JPEG;
+        boolean postConvertWebp = POST_PROCESSOR_WEBP;
+        boolean enableAntiAliasing = ANTI_ALIASING;
+        boolean dryRun = DRY_RUN;
+        boolean keepUnoptimizedFilesPostProcessor = KEEP_ORIGINAL_POST_PROCESSED_FILES;
+        RoundingHandler.Strategy roundingHandler = getRoundingHandler(ROUNDING_MODE);
+        boolean clearDirBeforeConvert = CLEAN;
 
-        analysisArgs.add(DASH + CLIInterpreter.SCALE_ARG);
-        analysisArgs.add(SCALE + "");
-
-        analysisArgs.add(DASH + CLIInterpreter.SOURCE_ARG);
-        analysisArgs.add("./pictures/person.jpg");
-
-        if(SCALE_IS_HEIGHT_DP) {
-            analysisArgs.add(DASH + CLIInterpreter.SCALE_IS_HEIGHT_DP_ARG);
-        }
-
-        analysisArgs.add(DASH + CLIInterpreter.DST_ARG);
-        analysisArgs.add("./output");
-
-        analysisArgs.add(DASH + CLIInterpreter.COMPRESSION_QUALITY_ARG);
-        analysisArgs.add(COMPRESSION_QUALITY + "");
-
-        analysisArgs.add(DASH + CLIInterpreter.OUT_COMPRESSION_ARG);
-        analysisArgs.add(OUT_COMPRESSION);
-
-        analysisArgs.add(DASH + CLIInterpreter.PLATFORM_ARG);
-        analysisArgs.add(PLATFORM);
-
-        analysisArgs.add(DASH + CLIInterpreter.UPSCALING_ALGO_ARG);
-        analysisArgs.add(UPSCALING_ALGO);
-
-        analysisArgs.add(DASH + CLIInterpreter.DOWNSCALING_ALGO_ARG);
-        analysisArgs.add(DOWNSCALING_ALGO);
-
-        analysisArgs.add(DASH + CLIInterpreter.ROUNDING_MODE_ARG);
-        analysisArgs.add(ROUNDING_MODE);
-
-        if(SKIP_UPSCALING) {
-            analysisArgs.add(DASH + "skipUpscaling");
-        }
-
-        if(SKIP_EXISTING) {
-            analysisArgs.add(DASH + CLIInterpreter.SKIP_EXISTING_ARG);
-        }
-
-        if(ANDROID_INCLUDE_LDPI_TVDPI) {
-            analysisArgs.add(DASH + "androidIncludeLdpiTvdpi");
-        }
-
-        if(VERBOSE) {
-            analysisArgs.add(DASH + CLIInterpreter.VERBOSE_ARG);
-        }
-
-        if(ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE) {
-            analysisArgs.add(DASH + "androidMipmapInsteadOfDrawable");
-        }
-
-        if(ANTI_ALIASING) {
-            analysisArgs.add(DASH + "antiAliasing");
-        }
-
-        if(POST_PROCESSOR_PNG_CRUSH) {
-            analysisArgs.add(DASH + "postProcessorPngCrush");
-        }
-
-        if(POST_PROCESSOR_WEBP) {
-            analysisArgs.add(DASH + "postProcessorWebp");
-        }
-
-        if(DRY_RUN) {
-            analysisArgs.add(DASH + "dryRun");
-        }
-
-        if(POST_PROCESSOR_MOZ_JPEG) {
-            analysisArgs.add(DASH + "postProcessorMozJpeg");
-        }
-
-        if(KEEP_ORIGINAL_POST_PROCESSED_FILES) {
-            analysisArgs.add(DASH + "keepOriginalPostProcessedFiles");
-        }
-
-        if(IOS_CREATE_IMAGESET_FOLDERS) {
-            analysisArgs.add(DASH + "iosCreateImagesetFolders");
-        }
-
-        if(CLEAN) {
-            analysisArgs.add(DASH + "clean");
-        }
-
-        if(HALT_ON_ERROR) {
-            analysisArgs.add(DASH + "haltOnError");
-        }
+        Arguments args = new Arguments(src, dst, scale, platform, outputCompressionMode,
+                scaleMode,
+                downScalingAlgorithm,
+                upScalingAlgorithm,
+                compressionQuality,
+                1,
+                skipExistingFiles,
+                skipUpscaling,
+                verboseLog,
+                includeAndroidLdpiTvdpi,
+                haltOnError,
+                createMipMapInsteadOfDrawableDir,
+                iosCreateImagesetFolders,
+                enablePngCrush,
+                enableMozJpeg,
+                postConvertWebp,
+                enableAntiAliasing,
+                dryRun,
+                keepUnoptimizedFilesPostProcessor,
+                roundingHandler,
+                false,
+                clearDirBeforeConvert
+        );
 
 //        if (rawArgs.length < 1) {
 //            new GUI().launchApp(rawArgs);
 //            return;
 //        }
-
-        Arguments args = CLIInterpreter.parse(analysisArgs.toArray(new String[0]));
-
-        if (args == null) {
-            return;
-        } else if (args == Arguments.START_GUI) {
-            System.out.println("start gui");
-            new GUI().launchApp(rawArgs);
-            return;
-        }
+//
+//        Arguments args = CLIInterpreter.parse(analysisArgs.toArray(new String[0]));
+//
+//        if (args == null) {
+//            return;
+//        } else if (args == Arguments.START_GUI) {
+//            System.out.println("start gui");
+//            new GUI().launchApp(rawArgs);
+//            return;
+//        }
 
         System.out.println("start converting " + args.filesToProcess.size() + " files");
 
@@ -236,12 +198,80 @@ public final class Convert {
         });
     }
 
+    private static RoundingHandler.Strategy getRoundingHandler(String roundingMode) {
+        switch (roundingMode) {
+            case "round":
+                return RoundingHandler.Strategy.ROUND_HALF_UP;
+            case "ceil":
+                return RoundingHandler.Strategy.CEIL;
+            case "floor":
+                return RoundingHandler.Strategy.FLOOR;
+            default:
+                throw new RuntimeException("unknown mode: " + roundingMode);
+        }
+    }
+
+    private static EScaleMode scaleMode(boolean dp, boolean scaleIsHeightDp) {
+        if (dp && scaleIsHeightDp) {
+            return EScaleMode.DP_HEIGHT;
+        } else if (dp && !scaleIsHeightDp) {
+            return EScaleMode.DP_WIDTH;
+        } else {
+            return EScaleMode.FACTOR;
+        }
+    }
+
+    private static EOutputCompressionMode getOutCompression(String outCompression) {
+        switch (outCompression) {
+            case "strict":
+                return EOutputCompressionMode.SAME_AS_INPUT_STRICT;
+            case "png":
+                return EOutputCompressionMode.AS_PNG;
+            case "jpg":
+                return EOutputCompressionMode.AS_JPG;
+            case "gif":
+                return EOutputCompressionMode.AS_GIF;
+            case "bmp":
+                return EOutputCompressionMode.AS_BMP;
+            case "png+jpg":
+                return EOutputCompressionMode.AS_JPG_AND_PNG;
+            default:
+                throw new RuntimeException("unknown compression type: " + outCompression);
+        }
+    }
+
+    private static Set<EPlatform> getPlatform(String platform) {
+        Set<EPlatform> platformSet = new HashSet<>();
+
+        switch (platform) {
+            case "all":
+                platformSet = EPlatform.getAll();
+                break;
+            case "android":
+                platformSet.add(EPlatform.ANDROID);
+                break;
+            case "ios":
+                platformSet.add(EPlatform.IOS);
+                break;
+            case "win":
+                platformSet.add(EPlatform.WINDOWS);
+                break;
+            case "web":
+                platformSet.add(EPlatform.WEB);
+                break;
+            default:
+                System.err.println("unknown mode: " + platform);
+        }
+
+        return platformSet;
+    }
+
     private static boolean postProcess(boolean option) {
         return false;
     }
 
     private static String roundingMode(boolean option) {
-        if(option) {
+        if (option) {
             return "ceil";
         }
 
@@ -249,7 +279,7 @@ public final class Convert {
     }
 
     private static String downScalingAlgo(boolean option) {
-        if(option) {
+        if (option) {
             return EScalingAlgorithm.LANCZOS3.getName();
         }
 
@@ -257,7 +287,7 @@ public final class Convert {
     }
 
     private static String upScalingAlgo(boolean option) {
-        if(option) {
+        if (option) {
             return EScalingAlgorithm.LANCZOS3.getName();
         }
 
@@ -265,7 +295,7 @@ public final class Convert {
     }
 
     private static String platform(boolean option) {
-        if(option) {
+        if (option) {
             return "ios";
         }
 
@@ -273,15 +303,15 @@ public final class Convert {
     }
 
     private static String outCompression(boolean option) {
-        if(option) {
-            return "png+jpg";
+        if (option) {
+            return "png";
         }
 
         return "jpg";
     }
 
     private static float compressionQuality(boolean option) {
-        if(option) {
+        if (option) {
             return 0.1f;
         }
 
@@ -289,7 +319,7 @@ public final class Convert {
     }
 
     private static float scale(boolean option) {
-        if(option) {
+        if (option) {
             return 1f;
         }
 
