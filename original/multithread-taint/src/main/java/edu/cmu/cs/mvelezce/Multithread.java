@@ -7,20 +7,22 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Multithread {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     boolean A = Boolean.parseBoolean(args[0]);
     boolean B = Boolean.parseBoolean(args[1]);
     boolean C = Boolean.parseBoolean(args[2]);
 
-    multipleCalss();
+    //    Thread.sleep(2000);
+
     singleCall(A, B, C);
+    multipleCalss();
   }
 
   private static void singleCall(boolean a, boolean b, boolean c) {
     ExecutorService executorService = Executors.newFixedThreadPool(3);
-    executorService.execute(new PrimeNumberChecker(a));
-    executorService.execute(new PrimeNumberChecker(b));
-    executorService.execute(new PrimeNumberChecker(c));
+    executorService.submit(new PrimeNumberChecker(a));
+    executorService.submit(new PrimeNumberChecker(b));
+    executorService.submit(new PrimeNumberChecker(c));
     executorService.shutdown();
 
     while (!executorService.isTerminated()) {

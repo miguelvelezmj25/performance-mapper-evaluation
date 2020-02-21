@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tree type="Hot Spots" threadSelection="All thread groups" threadStatus="Runnable" aggregationLevel="Methods" hotSpotCalculation="Self times" unprofiledClasses="Show separately">
+  <hotspot leaf="false" class="edu.cmu.cs.mvelezce.worker.PrimeNumberChecker" methodName="run" methodSignature="()V" time="106276494" count="0" lineNumber="-1" percent="99.9">
+    <node leaf="true" time="106276494" count="0" lineNumber="-1" percent="99.9" filtered="true"/>
+  </hotspot>
+  <hotspot leaf="false" class="edu.cmu.cs.mvelezce.Multithread" methodName="singleCall" methodSignature="(ZZZ)V" time="65475" count="0" lineNumber="-1" percent="0.1">
+    <node leaf="true" class="edu.cmu.cs.mvelezce.Multithread" methodName="main" methodSignature="([Ljava/lang/String;)V" time="65475" count="0" lineNumber="-1" percent="0.1"/>
+  </hotspot>
+</tree>

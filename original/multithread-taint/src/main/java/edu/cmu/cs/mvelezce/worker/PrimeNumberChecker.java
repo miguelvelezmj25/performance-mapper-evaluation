@@ -6,21 +6,24 @@ public class PrimeNumberChecker implements Runnable {
 
   public PrimeNumberChecker(boolean numberToCheck) {
     if (numberToCheck) {
-      this.maxNumberToCheck = 300_000;
-    } else {
       this.maxNumberToCheck = 800_000;
+    } else {
+      this.maxNumberToCheck = 300_000;
     }
   }
 
   @Override
   public void run() {
-    System.out.println(Thread.currentThread() + " started");
+    long start = System.nanoTime();
+    System.out.println(Thread.currentThread().getName() + " started");
 
     for (int numberToCheck = 1; numberToCheck <= this.maxNumberToCheck; numberToCheck++) {
       isPrime(numberToCheck);
     }
 
-    System.out.println(Thread.currentThread() + " done");
+    System.out.println(Thread.currentThread().getName() + " done");
+    long end = System.nanoTime();
+    System.out.println((end - start) / 1E9);
   }
 
   private void isPrime(int numberToCheck) {
