@@ -74,25 +74,46 @@ public final class Convert {
         COMPRESSION_QUALITY = compressionQuality(Boolean.parseBoolean(rawArgs[2]));
         OUT_COMPRESSION = outCompression(Boolean.parseBoolean(rawArgs[3]));
         PLATFORM = platform(Boolean.parseBoolean(rawArgs[4]));
-        UPSCALING_ALGO = upScalingAlgo(Boolean.parseBoolean(rawArgs[5]));
-        DOWNSCALING_ALGO = downScalingAlgo(Boolean.parseBoolean(rawArgs[6]));
-        ROUNDING_MODE = roundingMode(Boolean.parseBoolean(rawArgs[7]));
-        SKIP_UPSCALING = Boolean.parseBoolean(rawArgs[8]);
-        SKIP_EXISTING = Boolean.parseBoolean(rawArgs[9]);
-        ANDROID_INCLUDE_LDPI_TVDPI = Boolean.parseBoolean(rawArgs[10]);
-        VERBOSE = Boolean.parseBoolean(rawArgs[11]);
-        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Boolean.parseBoolean(rawArgs[12]);
-        ANTI_ALIASING = Boolean.parseBoolean(rawArgs[13]);
-        POST_PROCESSOR_PNG_CRUSH = Boolean.parseBoolean(rawArgs[14]);
-        POST_PROCESSOR_WEBP = Boolean.parseBoolean(rawArgs[15]);
-        DRY_RUN = Boolean.parseBoolean(rawArgs[16]);
-        POST_PROCESSOR_MOZ_JPEG = Boolean.parseBoolean(rawArgs[17]);
-        KEEP_ORIGINAL_POST_PROCESSED_FILES = Boolean.parseBoolean(rawArgs[18]);
-        IOS_CREATE_IMAGESET_FOLDERS = Boolean.parseBoolean(rawArgs[19]);
-        CLEAN = Boolean.parseBoolean(rawArgs[20]);
-        HALT_ON_ERROR = Boolean.parseBoolean(rawArgs[21]);
+//        UPSCALING_ALGO = upScalingAlgo(Boolean.parseBoolean(rawArgs[5]));
+//        DOWNSCALING_ALGO = downScalingAlgo(Boolean.parseBoolean(rawArgs[6]));
+//        ROUNDING_MODE = roundingMode(Boolean.parseBoolean(rawArgs[7]));
+//        SKIP_UPSCALING = Boolean.parseBoolean(rawArgs[8]);
+//        SKIP_EXISTING = Boolean.parseBoolean(rawArgs[9]);
+//        ANDROID_INCLUDE_LDPI_TVDPI = Boolean.parseBoolean(rawArgs[10]);
+//        VERBOSE = Boolean.parseBoolean(rawArgs[11]);
+//        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Boolean.parseBoolean(rawArgs[12]);
+//        ANTI_ALIASING = Boolean.parseBoolean(rawArgs[13]);
+//        POST_PROCESSOR_PNG_CRUSH = Boolean.parseBoolean(rawArgs[14]);
+//        POST_PROCESSOR_WEBP = Boolean.parseBoolean(rawArgs[15]);
+//        DRY_RUN = Boolean.parseBoolean(rawArgs[16]);
+//        POST_PROCESSOR_MOZ_JPEG = Boolean.parseBoolean(rawArgs[17]);
+//        KEEP_ORIGINAL_POST_PROCESSED_FILES = Boolean.parseBoolean(rawArgs[18]);
+//        IOS_CREATE_IMAGESET_FOLDERS = Boolean.parseBoolean(rawArgs[19]);
+//        CLEAN = Boolean.parseBoolean(rawArgs[20]);
+//        HALT_ON_ERROR = Boolean.parseBoolean(rawArgs[21]);
 
-        File src = new File("./pictures/person.jpg");
+        OUT_COMPRESSION = outCompression(false);
+        PLATFORM = platform(false);
+        UPSCALING_ALGO = upScalingAlgo(false);
+        DOWNSCALING_ALGO = downScalingAlgo(false);
+        ROUNDING_MODE = roundingMode(false);
+        SKIP_UPSCALING = false;
+        SKIP_EXISTING = false;
+        ANDROID_INCLUDE_LDPI_TVDPI = false;
+        VERBOSE = false;
+        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = false;
+        ANTI_ALIASING = false;
+        POST_PROCESSOR_PNG_CRUSH = false;
+        POST_PROCESSOR_WEBP = false;
+        DRY_RUN = false;
+        POST_PROCESSOR_MOZ_JPEG = false;
+        KEEP_ORIGINAL_POST_PROCESSED_FILES = false;
+        IOS_CREATE_IMAGESET_FOLDERS = false;
+        CLEAN = false;
+        HALT_ON_ERROR = false;
+
+        File src = new File(System.getProperty("user.home")
+                + "/Documents/programming/java/projects/performance-mapper-evaluation/original/density-converter/pictures/person.jpg");
         File dst = new File("./output");
         float scale = SCALE;
         Set<EPlatform> platform = getPlatform(PLATFORM);
@@ -310,7 +331,7 @@ public final class Convert {
 
     private static float compressionQuality(boolean option) {
         if (option) {
-            return 0.1f;
+            return 0.91f;
         }
 
         return Arguments.DEFAULT_COMPRESSION_QUALITY;
