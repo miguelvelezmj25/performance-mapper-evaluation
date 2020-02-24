@@ -4,6 +4,8 @@ import edu.cmu.cs.mvelezce.bench.c.BenchC;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.util.Properties;
 
 public class RunBenchC {
 
@@ -15,7 +17,14 @@ public class RunBenchC {
     Database db = Database.parse(DB_STRING, 1);
     System.out.println();
     System.out.println("Testing the performance of " + db.getName());
-    Connection conn = db.openNewConnection();
+
+    Properties prop = new Properties();
+    prop.put("user", "sa");
+    prop.put("password", "sa");
+    prop.put("FILE_LOCK", "FILE");
+
+    Connection conn = DriverManager.
+            getConnection("jdbc:h2:./data/test", prop);
     DatabaseMetaData meta = conn.getMetaData();
     System.out.println(
         " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
