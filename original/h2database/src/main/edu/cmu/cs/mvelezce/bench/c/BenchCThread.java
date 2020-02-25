@@ -36,7 +36,7 @@ public class BenchCThread {
     this.db = db;
     this.bench = bench;
     this.terminalId = terminal;
-    db.setAutoCommit(false);
+    db.setAutoCommit(db.getAutocommit());
     this.random = random;
     warehouseId = random.getInt(1, bench.warehouses);
   }

@@ -219,7 +219,8 @@ public class BenchC implements Bench {
     for (String sql : CREATE_SQL) {
       database.update(sql);
     }
-    database.setAutoCommit(false);
+
+    database.setAutoCommit(database.getAutocommit());
     loadItem();
     loadWarehouse();
     loadCustomer();
@@ -560,7 +561,7 @@ public class BenchC implements Bench {
   public void runTest() throws SQLException {
     database.start(this, "Transactions");
     database.openConnection();
-    for (int i = 0; i < 70; i++) {
+    for (int i = 0; i < 7; i++) {
       BenchCThread process = new BenchCThread(database, this, random, i);
       process.process();
     }

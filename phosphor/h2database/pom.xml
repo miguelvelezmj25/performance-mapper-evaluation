@@ -87,6 +87,13 @@
       <artifactId>jts-core</artifactId>
       <version>1.15.0</version>
     </dependency>
+    <dependency>
+      <groupId>edu.gmu.swe.phosphor</groupId>
+      <artifactId>Phosphor</artifactId>
+      <version>0.0.5-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/../../../phosphor/Phosphor/target/Phosphor-0.0.5-SNAPSHOT.jar</systemPath>
+    </dependency>
     <!-- END COMPILE DEPENDENCIES !-->
 
 

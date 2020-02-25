@@ -35,6 +35,7 @@ public class Database {
   private int totalTime;
   private int totalGCTime;
   private int threadCount;
+  private boolean autocommit;
 
   /**
    * Parse a database configuration and create a database object from it.
@@ -43,7 +44,7 @@ public class Database {
    * @param threadCount the number of threads to use
    * @return a new database object with the given settings
    */
-  static Database parse(String dbString, int threadCount) {
+  static Database parse(String dbString, int threadCount, boolean autocommit) {
     try {
       StringTokenizer tokenizer = new StringTokenizer(dbString, ",");
       Database db = new Database();
@@ -57,6 +58,7 @@ public class Database {
       if (tokenizer.hasMoreTokens()) {
         db.password = tokenizer.nextToken().trim();
       }
+      db.autocommit = autocommit;
       return db;
     } catch (Exception e) {
       System.out.println("Cannot load database " + dbString + " :" + e.toString());
@@ -71,6 +73,10 @@ public class Database {
    */
   String getName() {
     return name;
+  }
+
+  public boolean getAutocommit() {
+    return autocommit;
   }
 
   /**

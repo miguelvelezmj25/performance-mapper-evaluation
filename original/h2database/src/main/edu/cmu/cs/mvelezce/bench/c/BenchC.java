@@ -219,7 +219,8 @@ public class BenchC implements Bench {
     for (String sql : CREATE_SQL) {
       database.update(sql);
     }
-    database.setAutoCommit(false);
+
+    database.setAutoCommit(database.getAutocommit());
     loadItem();
     loadWarehouse();
     loadCustomer();
