@@ -194,7 +194,7 @@ public class Sources implements TaintedWithObjTag {
             ControlFlowStack ctrl,
             TaintedBooleanWithObjTag ret) {
         ret.val = option;
-        ret.taint = Taint.withLabel(8);
+        ret.taint = Taint.withLabel(9);
         return ret;
     }
 
