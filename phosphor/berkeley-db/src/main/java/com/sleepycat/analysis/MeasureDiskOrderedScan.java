@@ -357,6 +357,8 @@ public class MeasureDiskOrderedScan {
     envConfig.setConfigParam(EnvironmentConfig.ADLER32_CHUNK_SIZE, ADLER32_CHUNK_SIZE);
     envConfig.setConfigParam(
         EnvironmentConfig.CHECKPOINTER_BYTES_INTERVAL, CHECKPOINTER_BYTES_INTERVAL);
+    envConfig.setConfigParam(
+        EnvironmentConfig.LOCK_DEADLOCK_DETECT_DELAY, LOCK_DEADLOCK_DETECT_DELAY);
     /* Options */
 
     /* Daemons interfere with cache size measurements. */
