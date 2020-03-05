@@ -25,7 +25,17 @@ import org.h2.util.Utils;
  */
 public class DbSettings extends SettingsBase {
 
+    private static boolean MV_STORE;
+    private static int ANALYZE_AUTO;
+    private static boolean DEFRAG_ALWAYS;
+
     private static DbSettings defaultSettings;
+
+    public static void init(boolean mvStore, int analyzeAuto, boolean defragAlways) {
+        MV_STORE = mvStore;
+        ANALYZE_AUTO = analyzeAuto;
+        DEFRAG_ALWAYS = defragAlways;
+    }
 
     /**
      * The initial size of the hash table.
@@ -54,7 +64,8 @@ public class DbSettings extends SettingsBase {
      * starting the database. It is not run on local temporary tables, and
      * tables that have a trigger on SELECT.
      */
-    public final int analyzeAuto = get("ANALYZE_AUTO", 2000);
+//    public final int analyzeAuto = get("ANALYZE_AUTO", 2000);
+    public final int analyzeAuto = get("ANALYZE_AUTO", ANALYZE_AUTO);
 
     /**
      * Database setting <code>ANALYZE_SAMPLE</code> (default: 10000).<br />
@@ -115,7 +126,8 @@ public class DbSettings extends SettingsBase {
      * same as SHUTDOWN DEFRAG). If you execute SHUTDOWN COMPACT, then this
      * setting is ignored.
      */
-    public final boolean defragAlways = get("DEFRAG_ALWAYS", false);
+//    public final boolean defragAlways = get("DEFRAG_ALWAYS", false);
+    public final boolean defragAlways = get("DEFRAG_ALWAYS", DEFRAG_ALWAYS);
 
     /**
      * Database setting <code>DROP_RESTRICT</code> (default: true).<br />
@@ -317,7 +329,8 @@ public class DbSettings extends SettingsBase {
      * (default: true).<br />
      * Use the MVStore storage engine.
      */
-    public boolean mvStore = get("MV_STORE", true);
+//    public boolean mvStore = get("MV_STORE", true);
+    public boolean mvStore = get("MV_STORE", MV_STORE);
 
     /**
      * Database setting <code>COMPRESS</code>

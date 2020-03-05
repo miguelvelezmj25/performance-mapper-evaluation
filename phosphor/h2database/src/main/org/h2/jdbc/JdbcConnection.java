@@ -47,6 +47,7 @@ import org.h2.engine.SysProperties;
 import org.h2.message.DbException;
 import org.h2.message.TraceObject;
 import org.h2.result.ResultInterface;
+import org.h2.store.FileLockMethod;
 import org.h2.util.CloseWatcher;
 import org.h2.util.CurrentTimestamp;
 import org.h2.util.JdbcUtils;
@@ -150,6 +151,28 @@ public class JdbcConnection extends TraceObject implements Connection, JdbcConne
      */
     public JdbcConnection(String url, Properties info) throws SQLException {
         this(new ConnectionInfo(url, info), true);
+    }
+
+    public JdbcConnection(String url,
+                          Properties info,
+                          FileLockMethod fileLockMethod,
+                          String accessModeData,
+                          String cacheType,
+                          int cacheSize,
+                          boolean ifExists,
+                          boolean forbidCreation,
+                          boolean ignoreUnknownSettting) throws SQLException {
+        this(
+                new ConnectionInfo(url,
+                        info,
+                        fileLockMethod,
+                        accessModeData,
+                        cacheType,
+                        cacheSize,
+                        ifExists,
+                        forbidCreation,
+                        ignoreUnknownSettting
+                ), true);
     }
 
     /**

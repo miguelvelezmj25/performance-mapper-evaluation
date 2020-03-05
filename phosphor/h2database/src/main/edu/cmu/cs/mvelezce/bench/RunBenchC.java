@@ -4,11 +4,13 @@ import edu.cmu.cs.mvelezce.analysis.option.Sources;
 import edu.cmu.cs.mvelezce.bench.c.BenchC;
 import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
 import org.h2.engine.Constants;
+import org.h2.engine.DbSettings;
+import org.h2.jdbc.JdbcConnection;
+import org.h2.store.FileLock;
 import org.h2.store.FileLockMethod;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.util.Properties;
 
 public class RunBenchC {
@@ -18,16 +20,23 @@ public class RunBenchC {
   //  private static final int SIZE = 5000;
   private static final int SIZE = 5;
 
-  private static String FILE_LOCK;
+  private static FileLockMethod FILE_LOCK;
   private static boolean AUTOCOMMIT;
   private static String ACCESS_MODE_DATA;
   private static String CIPHER;
   private static String CACHE_TYPE;
   private static int CACHE_SIZE;
+  private static boolean MV_STORE;
+  private static int ANALYZE_AUTO;
+  private static boolean DEFRAG_ALWAYS;
+  private static boolean IF_EXISTS;
+  private static boolean FORBID_CREATION;
+  private static boolean IGNORE_UNKNWON_SETTING;
 
   public static void main(String[] args) {
+    SinkManager.preProcessSinks(RunBenchC.class.getSimpleName());
+
     try {
-      SinkManager.preProcessSinks(RunBenchC.class.getSimpleName());
       run(args);
     } catch (Exception e) {
       System.out.println(e);
@@ -43,6 +52,12 @@ public class RunBenchC {
     CIPHER = Sources.CIPHER_3(cipher(Boolean.parseBoolean(args[3])));
     CACHE_TYPE = Sources.CACHE_TYPE_4(cacheType(Boolean.parseBoolean(args[4])));
     CACHE_SIZE = Sources.CACHE_SIZE_5(cacheSize(Boolean.parseBoolean(args[5])));
+    MV_STORE = Sources.MV_STORE_6(Boolean.parseBoolean(args[6]));
+    ANALYZE_AUTO = Sources.ANALYZE_AUTO_7(analyzeAuto(Boolean.parseBoolean(args[7])));
+    DEFRAG_ALWAYS = Sources.DEFRAG_ALWAYS_8(Boolean.parseBoolean(args[8]));
+    IF_EXISTS = Sources.IF_EXISTS_9(Boolean.parseBoolean(args[9]));
+    FORBID_CREATION = Sources.FORBID_CREATION_10(Boolean.parseBoolean(args[10]));
+    IGNORE_UNKNWON_SETTING = Sources.IGNORE_UNKNWON_SETTING_11(Boolean.parseBoolean(args[11]));
 
     Database db = Database.parse(DB_STRING, 1, AUTOCOMMIT);
     System.out.println();
@@ -51,18 +66,29 @@ public class RunBenchC {
     Properties prop = new Properties();
     prop.put("user", "sa");
     prop.put("password", "sa");
-    prop.put("FILE_LOCK", FILE_LOCK);
-    prop.put("ACCESS_MODE_DATA", ACCESS_MODE_DATA);
-    prop.put("CACHE_TYPE", CACHE_TYPE);
-    prop.put("CACHE_SIZE", CACHE_SIZE + "");
+    prop.put("FILE_LOCK", fileLock(Boolean.parseBoolean(args[0])).name());
+    prop.put("ACCESS_MODE_DATA", accessModeData(Boolean.parseBoolean(args[2])));
+    prop.put("CACHE_TYPE", cacheType(Boolean.parseBoolean(args[4])));
+    prop.put("CACHE_SIZE", Integer.toString(cacheSize(Boolean.parseBoolean(args[5]))));
 
-    //            "IGNORE_UNKNOWN_SETTINGS",
-    //            "IFEXISTS", "INIT", "FORBID_CREATION", "PASSWORD", "RECOVER", "RECOVER_TEST",
+    //            "INIT", "PASSWORD", "RECOVER", "RECOVER_TEST",
     //            "USER", "AUTO_SERVER", "AUTO_SERVER_PORT", "NO_UPGRADE",
     //            "AUTO_RECONNECT", "OPEN_NEW", "PAGE_SIZE", "PASSWORD_HASH", "JMX",
     //            "SCOPE_GENERATED_KEYS", "AUTHREALM", "AUTHZPWD"
 
-    Connection conn = DriverManager.getConnection("jdbc:h2:./data/test", prop);
+    DbSettings.init(MV_STORE, ANALYZE_AUTO, DEFRAG_ALWAYS);
+
+    Connection conn =
+        new JdbcConnection(
+            "jdbc:h2:./data/test",
+            prop,
+            FILE_LOCK,
+            ACCESS_MODE_DATA,
+            CACHE_TYPE,
+            CACHE_SIZE,
+            IF_EXISTS,
+            FORBID_CREATION,
+            IGNORE_UNKNWON_SETTING);
     DatabaseMetaData meta = conn.getMetaData();
     System.out.println(
         " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
@@ -78,6 +104,14 @@ public class RunBenchC {
     db.log("Statements per second", "#", statPerSec);
     System.out.println("Statements per second: " + statPerSec);
     System.out.println("GC overhead: " + (100 * db.getTotalGCTime() / db.getTotalTime()) + "%");
+  }
+
+  private static int analyzeAuto(boolean option) {
+    if (option) {
+      return 0;
+    }
+
+    return 2000;
   }
 
   private static int cacheSize(boolean option) {
@@ -112,11 +146,11 @@ public class RunBenchC {
     return "rw";
   }
 
-  private static String fileLock(boolean option) {
+  private static FileLockMethod fileLock(boolean option) {
     if (option) {
-      return FileLockMethod.FILE.name();
+      return FileLock.getFileLockMethod(FileLockMethod.FILE.name());
     }
 
-    return FileLockMethod.NO.name();
+    return FileLock.getFileLockMethod(FileLockMethod.NO.name());
   }
 }

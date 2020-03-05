@@ -15,6 +15,7 @@ import org.h2.api.ErrorCode;
 import org.h2.command.dml.SetTypes;
 import org.h2.message.DbException;
 import org.h2.security.SHA256;
+import org.h2.store.FileLockMethod;
 import org.h2.store.fs.FilePathEncrypt;
 import org.h2.store.fs.FilePathRec;
 import org.h2.store.fs.FileUtils;
@@ -47,7 +48,16 @@ public class ConnectionInfo implements Cloneable {
     private boolean persistent;
     private boolean unnamed;
 
+
     private NetworkConnectionInfo networkConnectionInfo;
+
+    private FileLockMethod fileLockMethod;
+    private String accessModeData;
+    private String cacheType;
+    private int cacheSize;
+    private boolean ifExists;
+    private boolean forbidCreation;
+    private boolean ignoreUnknownSetting;
 
     /**
      * Create a connection info object.
@@ -59,6 +69,26 @@ public class ConnectionInfo implements Cloneable {
         this.name = name;
         this.url = Constants.START_URL + name;
         parseName();
+    }
+
+    public ConnectionInfo(String u,
+                          Properties info,
+                          FileLockMethod fileLockMethod,
+                          String accessModeData,
+                          String cacheType,
+                          int cacheSize,
+                          boolean ifExists,
+                          boolean forbidCreation,
+                          boolean ignoreUnknownSetting) {
+        this(u, info);
+
+        this.fileLockMethod = fileLockMethod;
+        this.accessModeData = accessModeData;
+        this.cacheType = cacheType;
+        this.cacheSize = cacheSize;
+        this.ifExists = ifExists;
+        this.forbidCreation = forbidCreation;
+        this.ignoreUnknownSetting = ignoreUnknownSetting;
     }
 
     /**
@@ -464,9 +494,13 @@ public class ConnectionInfo implements Cloneable {
      */
     String getProperty(String key) {
         Object value = prop.get(key);
-        if (!(value instanceof String)) {
+
+        if(value == null) {
             return null;
         }
+//        if (!(value instanceof String)) {
+//            return null;
+//        }
         return value.toString();
     }
 
@@ -691,5 +725,33 @@ public class ConnectionInfo implements Cloneable {
     public void cleanAuthenticationInfo() {
         removeProperty("AUTHREALM", false);
         removeProperty("AUTHZPWD", false);
+    }
+
+    public FileLockMethod getFileLockMethod() {
+        return this.fileLockMethod;
+    }
+
+    public String getAccessModeData() {
+        return accessModeData;
+    }
+
+    public String getCacheType() {
+        return cacheType;
+    }
+
+    public int getCacheSize() {
+        return cacheSize;
+    }
+
+    public boolean getIfExists() {
+        return ifExists;
+    }
+
+    public boolean getForbidCreation() {
+        return forbidCreation;
+    }
+
+    public boolean getIgnoreUnknownSetting() {
+        return ignoreUnknownSetting;
     }
 }

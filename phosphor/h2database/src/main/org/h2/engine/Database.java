@@ -248,24 +248,28 @@ public class Database implements DataHandler, CastDataProvider {
         this.databaseShortName = parseDatabaseShortName();
         this.maxLengthInplaceLob = Constants.DEFAULT_MAX_LENGTH_INPLACE_LOB;
         this.cipher = cipher;
-        this.accessModeData = StringUtils.toLowerEnglish(
-                ci.getProperty("ACCESS_MODE_DATA", "rw"));
+//        this.accessModeData = StringUtils.toLowerEnglish(
+//                ci.getProperty("ACCESS_MODE_DATA", "rw"));
+        this.accessModeData = ci.getAccessModeData();
         this.autoServerMode = ci.getProperty("AUTO_SERVER", false);
         this.autoServerPort = ci.getProperty("AUTO_SERVER_PORT", 0);
         int defaultCacheSize = Utils.scaleForAvailableMemory(
                 Constants.CACHE_SIZE_DEFAULT);
-        this.cacheSize =
-                ci.getProperty("CACHE_SIZE", defaultCacheSize);
+//        this.cacheSize =
+//                ci.getProperty("CACHE_SIZE", defaultCacheSize);
+        this.cacheSize = ci.getCacheSize();
         this.pageSize = ci.getProperty("PAGE_SIZE",
                 Constants.DEFAULT_PAGE_SIZE);
         if ("r".equals(accessModeData)) {
             readOnly = true;
         }
-        String lockMethodName = ci.getProperty("FILE_LOCK", null);
-        if (dbSettings.mvStore && lockMethodName == null) {
+//        String lockMethodName = ci.getProperty("FILE_LOCK", null);
+//        if (dbSettings.mvStore && lockMethodName == null) {
+        if (dbSettings.mvStore && false) {
             fileLockMethod = autoServerMode ? FileLockMethod.FILE : FileLockMethod.FS;
         } else {
-            fileLockMethod = FileLock.getFileLockMethod(lockMethodName);
+//            fileLockMethod = FileLock.getFileLockMethod(lockMethodName);
+            fileLockMethod = ci.getFileLockMethod();
         }
         this.databaseURL = ci.getURL();
         String listener = ci.removeProperty("DATABASE_EVENT_LISTENER", null);
@@ -294,8 +298,9 @@ public class Database implements DataHandler, CastDataProvider {
         int traceLevelSystemOut =
                 ci.getIntProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
                 TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
-        this.cacheType = StringUtils.toUpperEnglish(
-                ci.removeProperty("CACHE_TYPE", Constants.CACHE_TYPE_DEFAULT));
+//        this.cacheType = StringUtils.toUpperEnglish(
+//                ci.removeProperty("CACHE_TYPE", Constants.CACHE_TYPE_DEFAULT));
+        this.cacheType = ci.getCacheType();
         this.ignoreCatalogs = ci.getProperty("IGNORE_CATALOGS",
                 dbSettings.ignoreCatalogs);
         openDatabase(traceLevelFile, traceLevelSystemOut, closeAtVmShutdown, ci);

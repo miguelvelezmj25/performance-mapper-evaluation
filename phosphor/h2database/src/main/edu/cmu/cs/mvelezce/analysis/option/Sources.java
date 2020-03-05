@@ -7,18 +7,19 @@ import edu.columbia.cs.psl.phosphor.struct.TaintedBooleanWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedIntWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedReferenceWithObjTag;
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
+import org.h2.store.FileLockMethod;
 
 @TaintInstrumented
 public class Sources implements TaintedWithObjTag {
   // public class Sources {
   public Taint PHOSPHOR_TAG;
 
-  public static String FILE_LOCK_0(String value) {
+  public static FileLockMethod FILE_LOCK_0(FileLockMethod value) {
     return value;
   }
 
   public static TaintedReferenceWithObjTag FILE_LOCK_0$$PHOSPHORTAGGED(
-      String value,
+      FileLockMethod value,
       Taint<Integer> originalTag,
       ControlFlowStack ctrl,
       TaintedReferenceWithObjTag ret) {
@@ -91,6 +92,87 @@ public class Sources implements TaintedWithObjTag {
       int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
     ret.val = value;
     ret.taint = Taint.withLabel(5);
+    return ret;
+  }
+
+  public static boolean MV_STORE_6(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag MV_STORE_6$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(6);
+    return ret;
+  }
+
+  public static int ANALYZE_AUTO_7(int analyzeAuto) {
+    return analyzeAuto;
+  }
+
+  public static TaintedIntWithObjTag ANALYZE_AUTO_7$$PHOSPHORTAGGED(
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(7);
+    return ret;
+  }
+
+  public static boolean DEFRAG_ALWAYS_8(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag DEFRAG_ALWAYS_8$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(8);
+    return ret;
+  }
+
+  public static boolean IF_EXISTS_9(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag IF_EXISTS_9$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(9);
+    return ret;
+  }
+
+  public static boolean FORBID_CREATION_10(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag FORBID_CREATION_10$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(10);
+    return ret;
+  }
+
+  public static boolean IGNORE_UNKNWON_SETTING_11(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag IGNORE_UNKNWON_SETTING_11$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(11);
     return ret;
   }
 

@@ -180,10 +180,13 @@ public class Engine implements SessionFactory {
     }
 
     private synchronized Session openSession(ConnectionInfo ci) {
-        boolean ifExists = ci.removeProperty("IFEXISTS", false);
-        boolean forbidCreation = ci.removeProperty("FORBID_CREATION", false);
-        boolean ignoreUnknownSetting = ci.removeProperty(
-                "IGNORE_UNKNOWN_SETTINGS", false);
+//        boolean ifExists = ci.removeProperty("IFEXISTS", false);
+        boolean ifExists = ci.getIfExists();
+//        boolean forbidCreation = ci.removeProperty("FORBID_CREATION", false);
+        boolean forbidCreation = ci.getForbidCreation();
+//        boolean ignoreUnknownSetting = ci.removeProperty(
+//                "IGNORE_UNKNOWN_SETTINGS", false);
+        boolean ignoreUnknownSetting = ci.getIgnoreUnknownSetting();
         String cipher = ci.removeProperty("CIPHER", null);
         String init = ci.removeProperty("INIT", null);
         Session session;
