@@ -161,7 +161,8 @@ public class JdbcConnection extends TraceObject implements Connection, JdbcConne
                           int cacheSize,
                           boolean ifExists,
                           boolean forbidCreation,
-                          boolean ignoreUnknownSettting) throws SQLException {
+                          boolean ignoreUnknownSettting,
+                          int pageSize) throws SQLException {
         this(
                 new ConnectionInfo(url,
                         info,
@@ -171,7 +172,8 @@ public class JdbcConnection extends TraceObject implements Connection, JdbcConne
                         cacheSize,
                         ifExists,
                         forbidCreation,
-                        ignoreUnknownSettting
+                        ignoreUnknownSettting,
+                        pageSize
                 ), true);
     }
 

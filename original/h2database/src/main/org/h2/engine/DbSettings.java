@@ -28,13 +28,25 @@ public class DbSettings extends SettingsBase {
     private static boolean MV_STORE;
     private static int ANALYZE_AUTO;
     private static boolean DEFRAG_ALWAYS;
+    private static int ANALYZE_SAMPLE;
+    private static boolean COMPRESS;
+    private static boolean OPTIMIZE_DISTINCT;
 
     private static DbSettings defaultSettings;
 
-    public static void init(boolean mvStore, int analyzeAuto, boolean defragAlways) {
+    public static void init(boolean mvStore,
+                            int analyzeAuto,
+                            boolean defragAlways,
+                            int analyzeSample,
+                            boolean compress,
+                            boolean optimizeDistinct
+    ) {
         MV_STORE = mvStore;
         ANALYZE_AUTO = analyzeAuto;
         DEFRAG_ALWAYS = defragAlways;
+        ANALYZE_SAMPLE = analyzeSample;
+        COMPRESS = compress;
+        OPTIMIZE_DISTINCT = optimizeDistinct;
     }
 
     /**
@@ -71,7 +83,8 @@ public class DbSettings extends SettingsBase {
      * Database setting <code>ANALYZE_SAMPLE</code> (default: 10000).<br />
      * The default sample size when analyzing a table.
      */
-    public final int analyzeSample = get("ANALYZE_SAMPLE", 10_000);
+//    public final int analyzeSample = get("ANALYZE_SAMPLE", 10_000);
+    public final int analyzeSample = get("ANALYZE_SAMPLE", ANALYZE_SAMPLE);
 
     /**
      * Database setting <code>DATABASE_TO_LOWER</code> (default: false).<br />
@@ -205,7 +218,8 @@ public class DbSettings extends SettingsBase {
      * <li>The selectivity of the column is below 20 </li>
      * </ul>
      */
-    public final boolean optimizeDistinct = get("OPTIMIZE_DISTINCT", true);
+//    public final boolean optimizeDistinct = get("OPTIMIZE_DISTINCT", true);
+    public final boolean optimizeDistinct = get("OPTIMIZE_DISTINCT", OPTIMIZE_DISTINCT);
 
     /**
      * Database setting <code>OPTIMIZE_EVALUATABLE_SUBQUERIES</code> (default:
@@ -337,7 +351,8 @@ public class DbSettings extends SettingsBase {
      * (default: false).<br />
      * Compress data when storing.
      */
-    public final boolean compressData = get("COMPRESS", false);
+//    public final boolean compressData = get("COMPRESS", false);
+    public final boolean compressData = get("COMPRESS", COMPRESS);
 
     /**
      * Database setting <code>IGNORE_CATALOGS</code>
