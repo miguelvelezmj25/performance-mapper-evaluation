@@ -27,8 +27,8 @@ public class DbSettings extends SettingsBase {
 
     private static boolean MV_STORE;
     private static int ANALYZE_AUTO;
-    private static int ANALYZE_SAMPLE;
     private static boolean DEFRAG_ALWAYS;
+    private static int ANALYZE_SAMPLE;
     private static boolean COMPRESS;
     private static boolean OPTIMIZE_DISTINCT;
 

@@ -78,28 +78,26 @@ public class RunBenchC {
     prop.put("ACCESS_MODE_DATA", accessModeData(Boolean.parseBoolean(args[2])));
     prop.put("CACHE_TYPE", cacheType(Boolean.parseBoolean(args[4])));
     prop.put("CACHE_SIZE", Integer.toString(cacheSize(Boolean.parseBoolean(args[5]))));
-//    prop.put("IFEXISTS", Boolean.toString(Boolean.parseBoolean(args[9])));
-//    prop.put("FORBID_CREATION", Boolean.toString(Boolean.parseBoolean(args[10])));
-//    prop.put("IGNORE_UNKNOWN_SETTINGS", Boolean.toString(Boolean.parseBoolean(args[11])));
     prop.put("PAGE_SIZE", Integer.toString(pageSize(Boolean.parseBoolean(args[12]))));
 
-    DbSettings.init(MV_STORE, ANALYZE_AUTO, DEFRAG_ALWAYS, ANALYZE_SAMPLE, COMPRESS, OPTIMIZE_DISTINCT);
+    DbSettings.init(
+        MV_STORE, ANALYZE_AUTO, DEFRAG_ALWAYS, ANALYZE_SAMPLE, COMPRESS, OPTIMIZE_DISTINCT);
 
     Connection conn =
-            new JdbcConnection(
-                    "jdbc:h2:./data/test",
-                    prop,
-                    FILE_LOCK,
-                    ACCESS_MODE_DATA,
-                    CACHE_TYPE,
-                    CACHE_SIZE,
-                    IF_EXISTS,
-                    FORBID_CREATION,
-                    IGNORE_UNKNWON_SETTING,
-                    PAGE_SIZE);
+        new JdbcConnection(
+            "jdbc:h2:./data/test",
+            prop,
+            FILE_LOCK,
+            ACCESS_MODE_DATA,
+            CACHE_TYPE,
+            CACHE_SIZE,
+            IF_EXISTS,
+            FORBID_CREATION,
+            IGNORE_UNKNWON_SETTING,
+            PAGE_SIZE);
     DatabaseMetaData meta = conn.getMetaData();
     System.out.println(
-            " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
+        " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
 
     Bench bench = new BenchC();
     bench.init(db, SIZE);
@@ -115,15 +113,15 @@ public class RunBenchC {
   }
 
   private static int analyzeSample(boolean option) {
-    if(option) {
-      return 10;
+    if (option) {
+      return 100;
     }
 
-    return 1000;
+    return 10000;
   }
 
   private static int pageSize(boolean option) {
-    if(option) {
+    if (option) {
       return 1024;
     }
 

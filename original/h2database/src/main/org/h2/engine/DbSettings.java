@@ -27,8 +27,8 @@ public class DbSettings extends SettingsBase {
 
     private static boolean MV_STORE;
     private static int ANALYZE_AUTO;
-    private static int ANALYZE_SAMPLE;
     private static boolean DEFRAG_ALWAYS;
+    private static int ANALYZE_SAMPLE;
     private static boolean COMPRESS;
     private static boolean OPTIMIZE_DISTINCT;
 
@@ -40,7 +40,7 @@ public class DbSettings extends SettingsBase {
                             int analyzeSample,
                             boolean compress,
                             boolean optimizeDistinct
-                            ) {
+    ) {
         MV_STORE = mvStore;
         ANALYZE_AUTO = analyzeAuto;
         DEFRAG_ALWAYS = defragAlways;
