@@ -16,7 +16,7 @@ public class RunBenchC {
   private static final String URL = "jdbc:h2:./data/test";
   private static final String DB_STRING = "H2, org.h2.Driver, " + URL + ", sa, sa";
   //  private static final int SIZE = 50000;
-  private static final int SIZE = 5000;
+  private static final int SIZE = 100;
   //  private static final int SIZE = 5;
 
   private static FileLockMethod FILE_LOCK;
