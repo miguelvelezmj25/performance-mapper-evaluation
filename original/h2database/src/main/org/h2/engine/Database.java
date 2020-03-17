@@ -258,8 +258,7 @@ public class Database implements DataHandler, CastDataProvider {
 //        this.cacheSize =
 //                ci.getProperty("CACHE_SIZE", defaultCacheSize);
         this.cacheSize = ci.getCacheSize();
-        this.pageSize = ci.getProperty("PAGE_SIZE",
-                Constants.DEFAULT_PAGE_SIZE);
+        this.pageSize = ci.getPageSize();
         if ("r".equals(accessModeData)) {
             readOnly = true;
         }

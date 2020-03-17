@@ -58,6 +58,7 @@ public class ConnectionInfo implements Cloneable {
     private boolean ifExists;
     private boolean forbidCreation;
     private boolean ignoreUnknownSetting;
+    private int pageSize;
 
     /**
      * Create a connection info object.
@@ -79,7 +80,8 @@ public class ConnectionInfo implements Cloneable {
                           int cacheSize,
                           boolean ifExists,
                           boolean forbidCreation,
-                          boolean ignoreUnknownSetting) {
+                          boolean ignoreUnknownSetting,
+                          int pageSize) {
         this(u, info);
 
         this.fileLockMethod = fileLockMethod;
@@ -89,6 +91,7 @@ public class ConnectionInfo implements Cloneable {
         this.ifExists = ifExists;
         this.forbidCreation = forbidCreation;
         this.ignoreUnknownSetting = ignoreUnknownSetting;
+        this.pageSize = pageSize;
     }
 
     /**
@@ -753,5 +756,9 @@ public class ConnectionInfo implements Cloneable {
 
     public boolean getIgnoreUnknownSetting() {
         return ignoreUnknownSetting;
+    }
+
+    public int getPageSize() {
+        return pageSize;
     }
 }

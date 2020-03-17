@@ -115,8 +115,8 @@ public class Engine implements SessionFactory {
                             user = database.getAuthenticator().authenticate(authenticationInfo, database);
                         } catch (AuthenticationException authenticationError) {
                             database.getTrace(Trace.DATABASE).error(authenticationError,
-                                "an error occurred during authentication; user: \"" +
-                                ci.getUserName() + "\"");
+                                    "an error occurred during authentication; user: \"" +
+                                            ci.getUserName() + "\"");
                         }
                     }
                 }

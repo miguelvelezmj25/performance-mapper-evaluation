@@ -176,6 +176,56 @@ public class Sources implements TaintedWithObjTag {
     return ret;
   }
 
+  public static int PAGE_SIZE_12(int pageSize) {
+    return pageSize;
+  }
+
+  public static TaintedIntWithObjTag PAGE_SIZE_12$$PHOSPHORTAGGED(
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(12);
+    return ret;
+  }
+
+  public static int ANALYZE_SAMPLE_13(int analyzeSample) {
+    return analyzeSample;
+  }
+
+  public static TaintedIntWithObjTag ANALYZE_SAMPLE_13$$PHOSPHORTAGGED(
+      int value, Taint<Integer> originalTag, ControlFlowStack ctrl, TaintedIntWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(13);
+    return ret;
+  }
+
+  public static boolean COMPRESS_14(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag COMPRESS_14$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(14);
+    return ret;
+  }
+
+  public static boolean OPTIMIZE_DISTINCT_15(boolean option) {
+    return option;
+  }
+
+  public static TaintedBooleanWithObjTag OPTIMIZE_DISTINCT_15$$PHOSPHORTAGGED(
+      boolean value,
+      Taint<Integer> originalTag,
+      ControlFlowStack ctrl,
+      TaintedBooleanWithObjTag ret) {
+    ret.val = value;
+    ret.taint = Taint.withLabel(15);
+    return ret;
+  }
+
   @Override
   public Object getPHOSPHOR_TAG() {
     return this.PHOSPHOR_TAG;

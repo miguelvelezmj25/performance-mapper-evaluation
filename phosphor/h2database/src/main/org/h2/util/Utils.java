@@ -697,12 +697,12 @@ public class Utils {
             break;
         case 4:
             if (value.equalsIgnoreCase("true")) {
-                return defaultValue;
+                return true;
             }
             break;
         case 5:
             if (value.equalsIgnoreCase("false")) {
-                return defaultValue;
+                return false;
             }
         }
         if (throwException) {

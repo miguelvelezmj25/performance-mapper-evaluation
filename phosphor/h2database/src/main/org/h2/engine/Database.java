@@ -258,8 +258,7 @@ public class Database implements DataHandler, CastDataProvider {
 //        this.cacheSize =
 //                ci.getProperty("CACHE_SIZE", defaultCacheSize);
         this.cacheSize = ci.getCacheSize();
-        this.pageSize = ci.getProperty("PAGE_SIZE",
-                Constants.DEFAULT_PAGE_SIZE);
+        this.pageSize = ci.getPageSize();
         if ("r".equals(accessModeData)) {
             readOnly = true;
         }
@@ -294,10 +293,10 @@ public class Database implements DataHandler, CastDataProvider {
                 dbSettings.dbCloseOnExit;
         int traceLevelFile =
                 ci.getIntProperty(SetTypes.TRACE_LEVEL_FILE,
-                TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
+                        TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
         int traceLevelSystemOut =
                 ci.getIntProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
-                TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
+                        TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
 //        this.cacheType = StringUtils.toUpperEnglish(
 //                ci.removeProperty("CACHE_TYPE", Constants.CACHE_TYPE_DEFAULT));
         this.cacheType = ci.getCacheType();
@@ -307,7 +306,7 @@ public class Database implements DataHandler, CastDataProvider {
     }
 
     private void openDatabase(int traceLevelFile, int traceLevelSystemOut,
-            boolean closeAtVmShutdown, ConnectionInfo ci) {
+                              boolean closeAtVmShutdown, ConnectionInfo ci) {
         try {
             open(traceLevelFile, traceLevelSystemOut, ci);
             if (closeAtVmShutdown) {
@@ -607,9 +606,9 @@ public class Database implements DataHandler, CastDataProvider {
             if (existsData && (!existsPage && !existsMv)) {
                 throw DbException.get(
                         ErrorCode.FILE_VERSION_ERROR_1, "Old database: " +
-                        dataFileName +
-                        " - please convert the database " +
-                        "to a SQL script and re-create it.");
+                                dataFileName +
+                                " - please convert the database " +
+                                "to a SQL script and re-create it.");
             }
             if (existsPage && !FileUtils.canWrite(pageFileName)) {
                 readOnly = true;
@@ -643,9 +642,9 @@ public class Database implements DataHandler, CastDataProvider {
                         fileLockMethod == FileLockMethod.FS) {
                     throw DbException.getUnsupportedException(
                             "autoServerMode && (readOnly || " +
-                            "fileLockMethod == NO || " +
-                            "fileLockMethod == FS || " +
-                            "inMemory)");
+                                    "fileLockMethod == NO || " +
+                                    "fileLockMethod == FS || " +
+                                    "inMemory)");
                 }
             }
             String lockFileName = databaseName + Constants.SUFFIX_LOCK_FILE;
@@ -748,7 +747,7 @@ public class Database implements DataHandler, CastDataProvider {
         IndexColumn[] pkCols = IndexColumn.wrap(new Column[] { columnId });
         metaIdIndex = meta.addIndex(systemSession, "SYS_ID",
                 0, pkCols, IndexType.createPrimaryKey(
-                false, false), true, null);
+                        false, false), true, null);
         systemSession.commit(true);
         objectIds.set(0);
         Cursor cursor = metaIdIndex.find(systemSession, null, null);
@@ -930,7 +929,7 @@ public class Database implements DataHandler, CastDataProvider {
         synchronized (infoSchema) {
             if (!metaTablesInitialized) {
                 for (int type = 0, count = MetaTable.getMetaTableTypeCount();
-                        type < count; type++) {
+                     type < count; type++) {
                     MetaTable m = new MetaTable(infoSchema, -1 - type, type);
                     infoSchema.add(m);
                 }
@@ -1094,32 +1093,32 @@ public class Database implements DataHandler, CastDataProvider {
     private Map<String, DbObject> getMap(int type) {
         Map<String, ? extends DbObject> result;
         switch (type) {
-        case DbObject.USER:
-            result = users;
-            break;
-        case DbObject.SETTING:
-            result = settings;
-            break;
-        case DbObject.ROLE:
-            result = roles;
-            break;
-        case DbObject.RIGHT:
-            result = rights;
-            break;
-        case DbObject.SCHEMA:
-            result = schemas;
-            break;
-        case DbObject.DOMAIN:
-            result = domains;
-            break;
-        case DbObject.COMMENT:
-            result = comments;
-            break;
-        case DbObject.AGGREGATE:
-            result = aggregates;
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case DbObject.USER:
+                result = users;
+                break;
+            case DbObject.SETTING:
+                result = settings;
+                break;
+            case DbObject.ROLE:
+                result = roles;
+                break;
+            case DbObject.RIGHT:
+                result = rights;
+                break;
+            case DbObject.SCHEMA:
+                result = schemas;
+                break;
+            case DbObject.DOMAIN:
+                result = domains;
+                break;
+            case DbObject.COMMENT:
+                result = comments;
+                break;
+            case DbObject.AGGREGATE:
+                result = aggregates;
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         return (Map<String, DbObject>) result;
     }
@@ -1545,8 +1544,8 @@ public class Database implements DataHandler, CastDataProvider {
                 if (mvStore != null && !mvStore.isClosed()) {
                     boolean compactFully =
                             compactMode == CommandInterface.SHUTDOWN_COMPACT ||
-                            compactMode == CommandInterface.SHUTDOWN_DEFRAG ||
-                            getSettings().defragAlways;
+                                    compactMode == CommandInterface.SHUTDOWN_DEFRAG ||
+                                    getSettings().defragAlways;
                     store.close(compactFully ? -1 : dbSettings.maxCompactTime);
                 }
             }
@@ -1849,7 +1848,7 @@ public class Database implements DataHandler, CastDataProvider {
      * @param newName the new name
      */
     public synchronized void renameSchemaObject(Session session,
-            SchemaObject obj, String newName) {
+                                                SchemaObject obj, String newName) {
         checkWritingAllowed();
         obj.getSchema().rename(obj, newName);
         updateMetaAndFirstLevelChildren(session, obj);
@@ -1880,7 +1879,7 @@ public class Database implements DataHandler, CastDataProvider {
      * @param newName the new name
      */
     public synchronized void renameDatabaseObject(Session session,
-            DbObject obj, String newName) {
+                                                  DbObject obj, String newName) {
         checkWritingAllowed();
         int type = obj.getType();
         Map<String, DbObject> map = getMap(type);
@@ -1977,14 +1976,14 @@ public class Database implements DataHandler, CastDataProvider {
      */
     public Table getDependentTable(SchemaObject obj, Table except) {
         switch (obj.getType()) {
-        case DbObject.COMMENT:
-        case DbObject.CONSTRAINT:
-        case DbObject.INDEX:
-        case DbObject.RIGHT:
-        case DbObject.TRIGGER:
-        case DbObject.USER:
-            return null;
-        default:
+            case DbObject.COMMENT:
+            case DbObject.CONSTRAINT:
+            case DbObject.INDEX:
+            case DbObject.RIGHT:
+            case DbObject.TRIGGER:
+            case DbObject.USER:
+                return null;
+            default:
         }
         HashSet<DbObject> set = new HashSet<>();
         for (Table t : getAllTablesAndViews(false)) {
@@ -2009,7 +2008,7 @@ public class Database implements DataHandler, CastDataProvider {
      * @param obj the object to be removed
      */
     public void removeSchemaObject(Session session,
-            SchemaObject obj) {
+                                   SchemaObject obj) {
         int type = obj.getType();
         if (type == DbObject.TABLE_OR_VIEW) {
             Table table = (Table) obj;
@@ -2360,13 +2359,13 @@ public class Database implements DataHandler, CastDataProvider {
 
     public void setLockMode(int lockMode) {
         switch (lockMode) {
-        case Constants.LOCK_MODE_OFF:
-        case Constants.LOCK_MODE_READ_COMMITTED:
-        case Constants.LOCK_MODE_TABLE:
-        case Constants.LOCK_MODE_TABLE_GC:
-            break;
-        default:
-            throw DbException.getInvalidValueException("lock mode", lockMode);
+            case Constants.LOCK_MODE_OFF:
+            case Constants.LOCK_MODE_READ_COMMITTED:
+            case Constants.LOCK_MODE_TABLE:
+            case Constants.LOCK_MODE_TABLE_GC:
+                break;
+            default:
+                throw DbException.getInvalidValueException("lock mode", lockMode);
         }
         this.lockMode = lockMode;
     }
@@ -2626,7 +2625,7 @@ public class Database implements DataHandler, CastDataProvider {
      * @return the connection
      */
     public TableLinkConnection getLinkConnection(String driver, String url,
-            String user, String password) {
+                                                 String user, String password) {
         if (linkConnections == null) {
             linkConnections = new HashMap<>();
         }
@@ -2884,7 +2883,7 @@ public class Database implements DataHandler, CastDataProvider {
 
     @Override
     public int readLob(long lobId, byte[] hmac, long offset, byte[] buff,
-            int off, int length) {
+                       int off, int length) {
         throw DbException.throwInternalError();
     }
 

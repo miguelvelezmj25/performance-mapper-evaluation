@@ -32,6 +32,10 @@ public class RunBenchC {
   private static boolean IF_EXISTS;
   private static boolean FORBID_CREATION;
   private static boolean IGNORE_UNKNWON_SETTING;
+  private static int PAGE_SIZE;
+  private static int ANALYZE_SAMPLE;
+  private static boolean COMPRESS;
+  private static boolean OPTIMIZE_DISTINCT;
 
   public static void main(String[] args) {
     SinkManager.preProcessSinks(RunBenchC.class.getSimpleName());
@@ -58,6 +62,10 @@ public class RunBenchC {
     IF_EXISTS = Sources.IF_EXISTS_9(Boolean.parseBoolean(args[9]));
     FORBID_CREATION = Sources.FORBID_CREATION_10(Boolean.parseBoolean(args[10]));
     IGNORE_UNKNWON_SETTING = Sources.IGNORE_UNKNWON_SETTING_11(Boolean.parseBoolean(args[11]));
+    PAGE_SIZE = Sources.PAGE_SIZE_12(pageSize(Boolean.parseBoolean(args[12])));
+    ANALYZE_SAMPLE = Sources.ANALYZE_SAMPLE_13(analyzeSample(Boolean.parseBoolean(args[13])));
+    COMPRESS = Sources.COMPRESS_14(Boolean.parseBoolean(args[14]));
+    OPTIMIZE_DISTINCT = Sources.OPTIMIZE_DISTINCT_15(Boolean.parseBoolean(args[15]));
 
     Database db = Database.parse(DB_STRING, 1, AUTOCOMMIT);
     System.out.println();
@@ -70,28 +78,28 @@ public class RunBenchC {
     prop.put("ACCESS_MODE_DATA", accessModeData(Boolean.parseBoolean(args[2])));
     prop.put("CACHE_TYPE", cacheType(Boolean.parseBoolean(args[4])));
     prop.put("CACHE_SIZE", Integer.toString(cacheSize(Boolean.parseBoolean(args[5]))));
+//    prop.put("IFEXISTS", Boolean.toString(Boolean.parseBoolean(args[9])));
+//    prop.put("FORBID_CREATION", Boolean.toString(Boolean.parseBoolean(args[10])));
+//    prop.put("IGNORE_UNKNOWN_SETTINGS", Boolean.toString(Boolean.parseBoolean(args[11])));
+    prop.put("PAGE_SIZE", Integer.toString(pageSize(Boolean.parseBoolean(args[12]))));
 
-    //            "INIT", "PASSWORD", "RECOVER", "RECOVER_TEST",
-    //            "USER", "AUTO_SERVER", "AUTO_SERVER_PORT", "NO_UPGRADE",
-    //            "AUTO_RECONNECT", "OPEN_NEW", "PAGE_SIZE", "PASSWORD_HASH", "JMX",
-    //            "SCOPE_GENERATED_KEYS", "AUTHREALM", "AUTHZPWD"
-
-    DbSettings.init(MV_STORE, ANALYZE_AUTO, DEFRAG_ALWAYS);
+    DbSettings.init(MV_STORE, ANALYZE_AUTO, DEFRAG_ALWAYS, ANALYZE_SAMPLE, COMPRESS, OPTIMIZE_DISTINCT);
 
     Connection conn =
-        new JdbcConnection(
-            "jdbc:h2:./data/test",
-            prop,
-            FILE_LOCK,
-            ACCESS_MODE_DATA,
-            CACHE_TYPE,
-            CACHE_SIZE,
-            IF_EXISTS,
-            FORBID_CREATION,
-            IGNORE_UNKNWON_SETTING);
+            new JdbcConnection(
+                    "jdbc:h2:./data/test",
+                    prop,
+                    FILE_LOCK,
+                    ACCESS_MODE_DATA,
+                    CACHE_TYPE,
+                    CACHE_SIZE,
+                    IF_EXISTS,
+                    FORBID_CREATION,
+                    IGNORE_UNKNWON_SETTING,
+                    PAGE_SIZE);
     DatabaseMetaData meta = conn.getMetaData();
     System.out.println(
-        " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
+            " " + meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion());
 
     Bench bench = new BenchC();
     bench.init(db, SIZE);
@@ -104,6 +112,22 @@ public class RunBenchC {
     db.log("Statements per second", "#", statPerSec);
     System.out.println("Statements per second: " + statPerSec);
     System.out.println("GC overhead: " + (100 * db.getTotalGCTime() / db.getTotalTime()) + "%");
+  }
+
+  private static int analyzeSample(boolean option) {
+    if(option) {
+      return 10;
+    }
+
+    return 1000;
+  }
+
+  private static int pageSize(boolean option) {
+    if(option) {
+      return 1024;
+    }
+
+    return Constants.DEFAULT_PAGE_SIZE;
   }
 
   private static int analyzeAuto(boolean option) {
