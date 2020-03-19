@@ -140,9 +140,9 @@ public class RunBenchC {
   }
 
   private static String cacheType(boolean option) {
-    if (option) {
-      return "SOFT_LRU";
-    }
+    //    if (option) {
+    //      return "SOFT_LRU";
+    //    }
 
     return Constants.CACHE_TYPE_DEFAULT;
   }
@@ -156,11 +156,11 @@ public class RunBenchC {
   }
 
   private static String accessModeData(boolean option) {
-    if (option) {
-      return "rwd";
-    }
+    //    if (option) {
+    return "rwd";
+    //    }
 
-    return "rw";
+    //    return "rw";
   }
 
   private static FileLockMethod fileLock(boolean option) {
