@@ -86,8 +86,8 @@ public class RunBenchC {
             ACCESS_MODE_DATA,
             CACHE_TYPE,
             CACHE_SIZE,
-            IF_EXISTS,
-            FORBID_CREATION,
+            false,
+            false,
             IGNORE_UNKNWON_SETTING,
             PAGE_SIZE);
     DatabaseMetaData meta = conn.getMetaData();

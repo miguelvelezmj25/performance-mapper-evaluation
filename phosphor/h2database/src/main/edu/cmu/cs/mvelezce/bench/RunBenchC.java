@@ -91,8 +91,8 @@ public class RunBenchC {
             ACCESS_MODE_DATA,
             CACHE_TYPE,
             CACHE_SIZE,
-            IF_EXISTS,
-            FORBID_CREATION,
+            false,
+            false,
             IGNORE_UNKNWON_SETTING,
             PAGE_SIZE);
     DatabaseMetaData meta = conn.getMetaData();
@@ -145,9 +145,9 @@ public class RunBenchC {
   }
 
   private static String cacheType(boolean option) {
-    if (option) {
-      return "SOFT_LRU";
-    }
+    //    if (option) {
+    //      return "SOFT_LRU";
+    //    }
 
     return Constants.CACHE_TYPE_DEFAULT;
   }
@@ -161,11 +161,11 @@ public class RunBenchC {
   }
 
   private static String accessModeData(boolean option) {
-    if (option) {
-      return "rwd";
-    }
+    //    if (option) {
+    return "rwd";
+    //    }
 
-    return "rw";
+    //    return "rw";
   }
 
   private static FileLockMethod fileLock(boolean option) {
