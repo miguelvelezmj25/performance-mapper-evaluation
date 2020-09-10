@@ -16,11 +16,15 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Morten Nobel-Joergensen
  */
 public abstract class AdvancedResizeOp implements BufferedImageOp {
+	public static AtomicLong FIRE_COUNT = new AtomicLong(0);
+
 	public static enum UnsharpenMask{
 		None(0),
 		Soft(0.15f),
@@ -51,6 +55,7 @@ public abstract class AdvancedResizeOp implements BufferedImageOp {
 	}
 
 	protected void fireProgressChanged(float fraction){
+		FIRE_COUNT.incrementAndGet();
         for (ProgressListener progressListener:listeners){
             progressListener.notifyProgress(fraction);
         }

@@ -9,6 +9,7 @@ package com.mortennobel.imagescaling;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Based on work from Java Image Util ( http://schmidt.devlib.org/jiu/ )
@@ -20,6 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ResampleOp extends AdvancedResizeOp
 {
+	public static AtomicLong VERTICAL_COUNT = new AtomicLong(0);
+	public static AtomicLong HORIZONTAL_COUNT = new AtomicLong(0);
+
 	private final int MAX_CHANNEL_VALUE= 255;
 
 	private int nrChannels;
@@ -299,6 +303,7 @@ public class ResampleOp extends AdvancedResizeOp
 	}
 
     private void verticalFromWorkToDst(byte[][] workPixels, byte[] outPixels, int start, int delta) {
+		VERTICAL_COUNT.incrementAndGet();
 		if (nrChannels==1){
 			verticalFromWorkToDstGray(workPixels, outPixels, start,numberOfThreads);
 			return;
@@ -383,6 +388,7 @@ public class ResampleOp extends AdvancedResizeOp
      * @param workPixels
      */
     private void horizontallyFromSrcToWork(BufferedImage srcImg, byte[][] workPixels, int start, int delta) {
+    	HORIZONTAL_COUNT.incrementAndGet();
 		if (nrChannels==1){
 			horizontallyFromSrcToWorkGray(srcImg, workPixels, start, delta);
 			return;

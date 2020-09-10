@@ -17,9 +17,14 @@
 package at.favre.tools.dconvert;
 
 import at.favre.tools.dconvert.arg.*;
+import at.favre.tools.dconvert.converters.scaling.ImageHandler;
 import at.favre.tools.dconvert.ui.CLIInterpreter;
 import at.favre.tools.dconvert.ui.GUI;
 import at.favre.tools.dconvert.util.MiscUtil;
+import com.mortennobel.imagescaling.AdvancedResizeOp;
+import com.mortennobel.imagescaling.ResampleOp;
+import com.twelvemonkeys.io.FileUtil;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,36 +66,67 @@ public final class Convert {
 
     public static void main(String[] args) {
         try {
-            Thread.sleep(1500);
+            File output = new File("./output");
+            FileUtils.forceDelete(output);
+            FileUtils.forceMkdir(output);
             run(args);
         } catch (Exception e) {
             System.out.println(e);
         }
+
+        System.out.println("AdvancedResizeOp.FIRE_COUNT " + AdvancedResizeOp.FIRE_COUNT);
+        System.out.println("ResampleOp.VERTICAL_COUNT " + ResampleOp.VERTICAL_COUNT);
+        System.out.println("ResampleOp.HORIZONTAL_COUNT " + ResampleOp.HORIZONTAL_COUNT);
+        System.out.println("ImageHandler.COMPRESS_COUNT " + ImageHandler.COMPRESS_COUNT);
+        System.out.println("ImageHandler.SCALE_COUNT " + ImageHandler.SCALE_COUNT);
     }
 
     public static void run(String[] rawArgs) {
-        SCALE = scale(Boolean.parseBoolean(rawArgs[0]));
-        SCALE_IS_HEIGHT_DP = Boolean.parseBoolean(rawArgs[1]);
-        COMPRESSION_QUALITY = compressionQuality(Boolean.parseBoolean(rawArgs[2]));
-        OUT_COMPRESSION = outCompression(Boolean.parseBoolean(rawArgs[3]));
-        PLATFORM = platform(Boolean.parseBoolean(rawArgs[4]));
-        UPSCALING_ALGO = upScalingAlgo(Boolean.parseBoolean(rawArgs[5]));
-        DOWNSCALING_ALGO = downScalingAlgo(Boolean.parseBoolean(rawArgs[6]));
-        ROUNDING_MODE = roundingMode(Boolean.parseBoolean(rawArgs[7]));
-        SKIP_UPSCALING = Boolean.parseBoolean(rawArgs[8]);
-        SKIP_EXISTING = Boolean.parseBoolean(rawArgs[9]);
-        ANDROID_INCLUDE_LDPI_TVDPI = Boolean.parseBoolean(rawArgs[10]);
-        VERBOSE = Boolean.parseBoolean(rawArgs[11]);
-        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Boolean.parseBoolean(rawArgs[12]);
-        ANTI_ALIASING = Boolean.parseBoolean(rawArgs[13]);
-        POST_PROCESSOR_PNG_CRUSH = Boolean.parseBoolean(rawArgs[14]);
-        POST_PROCESSOR_WEBP = Boolean.parseBoolean(rawArgs[15]);
-        DRY_RUN = Boolean.parseBoolean(rawArgs[16]);
-        POST_PROCESSOR_MOZ_JPEG = Boolean.parseBoolean(rawArgs[17]);
-        KEEP_ORIGINAL_POST_PROCESSED_FILES = Boolean.parseBoolean(rawArgs[18]);
-        IOS_CREATE_IMAGESET_FOLDERS = Boolean.parseBoolean(rawArgs[19]);
-        CLEAN = Boolean.parseBoolean(rawArgs[20]);
-        HALT_ON_ERROR = Boolean.parseBoolean(rawArgs[21]);
+        SCALE = scale(true);
+        SCALE_IS_HEIGHT_DP = false;
+        COMPRESSION_QUALITY = compressionQuality(false);
+        OUT_COMPRESSION = outCompression(false);
+        PLATFORM = platform(true);
+        UPSCALING_ALGO = upScalingAlgo(false);
+        DOWNSCALING_ALGO = downScalingAlgo(false);
+        ROUNDING_MODE = roundingMode(false);
+        SKIP_UPSCALING = true;
+        SKIP_EXISTING = false;
+        ANDROID_INCLUDE_LDPI_TVDPI = false;
+        VERBOSE = false;
+        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = false;
+        ANTI_ALIASING = true;
+        POST_PROCESSOR_PNG_CRUSH = false;
+        POST_PROCESSOR_WEBP = false;
+        DRY_RUN = false;
+        POST_PROCESSOR_MOZ_JPEG = false;
+        KEEP_ORIGINAL_POST_PROCESSED_FILES = false;
+        IOS_CREATE_IMAGESET_FOLDERS = false;
+        CLEAN = false;
+        HALT_ON_ERROR = false;
+
+//        SCALE = scale(Boolean.parseBoolean(rawArgs[0]));
+//        SCALE_IS_HEIGHT_DP = Boolean.parseBoolean(rawArgs[1]);
+//        COMPRESSION_QUALITY = compressionQuality(Boolean.parseBoolean(rawArgs[2]));
+//        OUT_COMPRESSION = outCompression(Boolean.parseBoolean(rawArgs[3]));
+//        PLATFORM = platform(Boolean.parseBoolean(rawArgs[4]));
+//        UPSCALING_ALGO = upScalingAlgo(Boolean.parseBoolean(rawArgs[5]));
+//        DOWNSCALING_ALGO = downScalingAlgo(Boolean.parseBoolean(rawArgs[6]));
+//        ROUNDING_MODE = roundingMode(Boolean.parseBoolean(rawArgs[7]));
+//        SKIP_UPSCALING = Boolean.parseBoolean(rawArgs[8]);
+//        SKIP_EXISTING = Boolean.parseBoolean(rawArgs[9]);
+//        ANDROID_INCLUDE_LDPI_TVDPI = Boolean.parseBoolean(rawArgs[10]);
+//        VERBOSE = Boolean.parseBoolean(rawArgs[11]);
+//        ANDROID_MIPMAP_INSTEAD_OF_DRAWABLE = Boolean.parseBoolean(rawArgs[12]);
+//        ANTI_ALIASING = Boolean.parseBoolean(rawArgs[13]);
+//        POST_PROCESSOR_PNG_CRUSH = Boolean.parseBoolean(rawArgs[14]);
+//        POST_PROCESSOR_WEBP = Boolean.parseBoolean(rawArgs[15]);
+//        DRY_RUN = Boolean.parseBoolean(rawArgs[16]);
+//        POST_PROCESSOR_MOZ_JPEG = Boolean.parseBoolean(rawArgs[17]);
+//        KEEP_ORIGINAL_POST_PROCESSED_FILES = Boolean.parseBoolean(rawArgs[18]);
+//        IOS_CREATE_IMAGESET_FOLDERS = Boolean.parseBoolean(rawArgs[19]);
+//        CLEAN = Boolean.parseBoolean(rawArgs[20]);
+//        HALT_ON_ERROR = Boolean.parseBoolean(rawArgs[21]);
 
         File src = new File(System.getProperty("user.home")
                 + "/Documents/programming/java/projects/performance-mapper-evaluation/original/density-converter/pictures/person.jpg");

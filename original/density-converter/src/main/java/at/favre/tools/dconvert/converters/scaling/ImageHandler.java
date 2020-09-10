@@ -38,12 +38,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
  * Handles scaling and writing/compression images to disk
  */
 public class ImageHandler {
+    public static AtomicLong COMPRESS_COUNT = new AtomicLong(0);
+    public static AtomicLong SCALE_COUNT = new AtomicLong(0);
+
     private static final Color DEFAULT_COLOR = Color.white;
     public static final boolean TEST_MODE = false;
     public static final ConvolveOp OP_ANTIALIAS = new ConvolveOp(new Kernel(3, 3, new float[]{.0f, .08f, .0f, .08f, .68f, .08f, .0f, .08f, .0f}), ConvolveOp.EDGE_NO_OP, null);
@@ -101,6 +105,7 @@ public class ImageHandler {
     }
 
     private void compressJpeg(BufferedImage bufferedImage, CompoundDirectory exif, float quality, File targetFile) throws IOException {
+        COMPRESS_COUNT.incrementAndGet();
         ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
         ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
         jpgWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
@@ -135,7 +140,7 @@ public class ImageHandler {
     }
 
     private BufferedImage scale(ScaleAlgorithm scaleAlgorithm, BufferedImage imageToScale, int dWidth, int dHeight, ImageType.ECompression compression, Color background) {
-
+        SCALE_COUNT.incrementAndGet();
         BufferedImage scaledImage;
 
         if (dWidth == imageToScale.getWidth() && dHeight == imageToScale.getHeight()) {
