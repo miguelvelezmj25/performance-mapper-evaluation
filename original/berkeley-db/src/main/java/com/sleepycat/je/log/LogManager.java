@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.EnvironmentFailureException;
@@ -62,6 +63,7 @@ import com.sleepycat.je.utilint.VLSN;
  * the LWL).
  */
 public class LogManager {
+    public static AtomicLong COUNT_LOG = new AtomicLong(0);
 
     /* No-op loggable object. */
     private static final String DEBUG_NAME = LogManager.class.getName();
@@ -293,6 +295,7 @@ public class LogManager {
      */
     public LogItem log(LogParams params)
         throws DatabaseException {
+        COUNT_LOG.incrementAndGet();
 
         final LogItem item = new LogItem();
 

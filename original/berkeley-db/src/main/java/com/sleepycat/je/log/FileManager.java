@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.sleepycat.je.DatabaseException;
@@ -83,6 +84,9 @@ import com.sleepycat.je.utilint.StatGroup;
  * out LSNs.
  */
 public class FileManager {
+    public static AtomicLong COUNT_READ = new AtomicLong(0);
+    public static AtomicLong COUNT_WRITE = new AtomicLong(0);
+    public static AtomicLong COUNT_FORCE = new AtomicLong(0);
 
     public enum FileMode {
         READ_MODE("r", false),
@@ -1737,6 +1741,7 @@ public class FileManager {
                             long fileNum,
                             boolean flushWriteQueue)
         throws IOException, DatabaseException {
+        COUNT_WRITE.incrementAndGet();
 
         int totalBytesWritten = 0;
 
@@ -1931,6 +1936,7 @@ public class FileManager {
                                       long offset,
                                       long fileNum)
         throws IOException {
+        COUNT_READ.incrementAndGet();
 
         /*
          * Perform a RandomAccessFile read and update the buffer position.
@@ -3084,6 +3090,7 @@ public class FileManager {
          */
         private void force()
             throws DatabaseException, IOException {
+            COUNT_FORCE.incrementAndGet();
 
             /*
              * Get a local copy of the end of the log file descriptor, it could

@@ -4,6 +4,10 @@ import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 import com.sleepycat.je.*;
 import com.sleepycat.je.config.EnvironmentParams;
+import com.sleepycat.je.log.FileManager;
+import com.sleepycat.je.log.LogManager;
+import com.sleepycat.je.tree.IN;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -143,30 +147,56 @@ public class MeasureDiskOrderedScan {
 
   public static void main(String[] args) {
     try {
-      Thread.sleep(1500);
+      File output = new File("./tmp");
+      FileUtils.forceDelete(output);
+      FileUtils.forceMkdir(output);
       run(args);
     } catch (Exception e) {
       System.out.println(e);
     }
+    System.out.println("LogManager.COUNT_LOG " + LogManager.COUNT_LOG);
+    System.out.println("FileManager.COUNT_READ " + FileManager.COUNT_READ);
+    System.out.println("FileManager.COUNT_WRITE " + FileManager.COUNT_WRITE);
+    System.out.println("FileManager$LogEndFileDescriptor.COUNT_FORCE " + FileManager.COUNT_FORCE);
+    System.out.println("IN.COUNT_FIND " + IN.COUNT_FIND);
+    System.out.println("IN.COUNT_SERIALIZE " + IN.COUNT_SERIALIZE);
   }
 
   public static void run(String[] args) throws IOException {
-    DUPLICATES = Boolean.parseBoolean(args[0]);
-    SEQUENTIAL = Boolean.parseBoolean(args[1]);
-    MAX_MEMORY = maxMemory(Boolean.parseBoolean(args[2]));
-    ENV_SHARED_CACHE = Boolean.parseBoolean(args[3]);
-    REPLICATED = Boolean.parseBoolean(args[4]);
-    ENV_IS_LOCKING = envIsLocking(Boolean.parseBoolean(args[5]));
-    CACHE_MODE = cacheMode(Boolean.parseBoolean(args[6]));
-    TEMPORARY = Boolean.parseBoolean(args[7]);
-    JE_FILE_LEVEL = jeFileLevel(Boolean.parseBoolean(args[8]));
-    ENV_BACKGROUND_READ_LIMIT = envBackgroundReadLimit(Boolean.parseBoolean(args[9]));
-    LOCK_DEADLOCK_DETECT = Boolean.parseBoolean(args[10]);
-    TXN_SERIALIZABLE_ISOLATION = Boolean.parseBoolean(args[11]);
-    JE_DURABILITY = jeDurability(Boolean.parseBoolean(args[12]));
-    ADLER32_CHUNK_SIZE = adler32ChunkSize(Boolean.parseBoolean(args[13]));
-    CHECKPOINTER_BYTES_INTERVAL = checkpointerBytesInterval(Boolean.parseBoolean(args[14]));
-    LOCK_DEADLOCK_DETECT_DELAY = lockDeadlockDetectDelay(Boolean.parseBoolean(args[15]));
+//    DUPLICATES = Boolean.parseBoolean(args[0]);
+//    SEQUENTIAL = Boolean.parseBoolean(args[1]);
+//    MAX_MEMORY = maxMemory(Boolean.parseBoolean(args[2]));
+//    ENV_SHARED_CACHE = Boolean.parseBoolean(args[3]);
+//    REPLICATED = Boolean.parseBoolean(args[4]);
+//    ENV_IS_LOCKING = envIsLocking(Boolean.parseBoolean(args[5]));
+//    CACHE_MODE = cacheMode(Boolean.parseBoolean(args[6]));
+//    TEMPORARY = Boolean.parseBoolean(args[7]);
+//    JE_FILE_LEVEL = jeFileLevel(Boolean.parseBoolean(args[8]));
+//    ENV_BACKGROUND_READ_LIMIT = envBackgroundReadLimit(Boolean.parseBoolean(args[9]));
+//    LOCK_DEADLOCK_DETECT = Boolean.parseBoolean(args[10]);
+//    TXN_SERIALIZABLE_ISOLATION = Boolean.parseBoolean(args[11]);
+//    JE_DURABILITY = jeDurability(Boolean.parseBoolean(args[12]));
+//    ADLER32_CHUNK_SIZE = adler32ChunkSize(Boolean.parseBoolean(args[13]));
+//    CHECKPOINTER_BYTES_INTERVAL = checkpointerBytesInterval(Boolean.parseBoolean(args[14]));
+//    LOCK_DEADLOCK_DETECT_DELAY = lockDeadlockDetectDelay(Boolean.parseBoolean(args[15]));
+
+    TEMPORARY = false;
+    SEQUENTIAL = false;
+    MAX_MEMORY = maxMemory(false);
+    DUPLICATES = false;
+    CACHE_MODE = cacheMode(false);
+
+    ENV_SHARED_CACHE = false;
+    REPLICATED = false;
+    ENV_IS_LOCKING = envIsLocking(false);
+    JE_FILE_LEVEL = jeFileLevel(false);
+    ENV_BACKGROUND_READ_LIMIT = envBackgroundReadLimit(false);
+    LOCK_DEADLOCK_DETECT = false;
+    TXN_SERIALIZABLE_ISOLATION = false;
+    JE_DURABILITY = jeDurability(false);
+    ADLER32_CHUNK_SIZE = adler32ChunkSize(false);
+    CHECKPOINTER_BYTES_INTERVAL = checkpointerBytesInterval(false);
+    LOCK_DEADLOCK_DETECT_DELAY = lockDeadlockDetectDelay(false);
 
     new MeasureDiskOrderedScan(args).run();
   }

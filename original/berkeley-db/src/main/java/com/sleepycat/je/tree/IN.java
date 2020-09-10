@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -142,6 +143,9 @@ import com.sleepycat.je.utilint.VLSN;
  * set currently, this shouldn't have a noticeable performance impact.
  */
 public class IN extends Node implements Comparable<IN>, LatchContext {
+
+    public static AtomicLong COUNT_FIND = new AtomicLong(0);
+    public static AtomicLong COUNT_SERIALIZE = new AtomicLong(0);
 
     private static final String BEGIN_TAG = "<in>";
     private static final String END_TAG = "</in>";
@@ -3128,6 +3132,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
         boolean indicateIfDuplicate,
         boolean exact,
         Comparator<byte[]> comparator) {
+        COUNT_FIND.incrementAndGet();
 
         assert idKeyIsSlotKey();
 
@@ -5799,6 +5804,7 @@ public class IN extends Node implements Comparable<IN>, LatchContext {
     public final void serialize(ByteBuffer logBuffer,
                                 boolean deltasOnly,
                                 boolean clearDirtyBits) {
+        COUNT_SERIALIZE.incrementAndGet();
 
         assert(!deltasOnly || isBIN());
 
