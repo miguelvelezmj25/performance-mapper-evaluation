@@ -14,12 +14,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This utility class contains utility functions that use the file system
  * abstraction.
  */
 public class FileUtils {
+
+    public static AtomicLong COUNT_WRITE = new AtomicLong(0);
 
     /**
      * Checks if a file exists.
@@ -371,6 +374,7 @@ public class FileUtils {
      */
     public static void writeFully(FileChannel channel, ByteBuffer src)
             throws IOException {
+        COUNT_WRITE.incrementAndGet();
         do {
             channel.write(src);
         } while (src.remaining() > 0);

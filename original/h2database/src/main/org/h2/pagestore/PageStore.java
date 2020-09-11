@@ -12,6 +12,7 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.CRC32;
 
 import org.h2.api.ErrorCode;
@@ -81,6 +82,8 @@ import org.h2.value.ValueString;
  * Page 4 contains the meta table root page.
  */
 public class PageStore implements CacheWriter {
+
+    public static AtomicLong COUNT_COMPACT = new AtomicLong(0);
 
     // TODO test running out of disk space (using a special file system)
     // TODO unused pages should be freed once in a while
@@ -472,6 +475,7 @@ public class PageStore implements CacheWriter {
      * TransactionCommand.SHUTDOWN_COMPACT or TransactionCommand.SHUTDOWN_DEFRAG
      */
     public synchronized void compact(int compactMode) {
+        COUNT_COMPACT.incrementAndGet();
         if (!database.getSettings().pageStoreTrim) {
             return;
         }
