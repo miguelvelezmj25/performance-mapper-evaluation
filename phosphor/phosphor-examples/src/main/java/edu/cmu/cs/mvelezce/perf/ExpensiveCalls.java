@@ -3,7 +3,8 @@ package edu.cmu.cs.mvelezce.perf;
 public class ExpensiveCalls {
 
   public static void getFactors() {
-    int num = 500_000_000;
+    //    int num = 500_000_000;
+    int num = 5;
     while (num % 2 == 0) {
       num /= 2;
     }
