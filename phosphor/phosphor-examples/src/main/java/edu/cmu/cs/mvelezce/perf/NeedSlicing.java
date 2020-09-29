@@ -1,5 +1,8 @@
 package edu.cmu.cs.mvelezce.perf;
 
+import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
+import edu.cmu.cs.mvelezce.taints.Sources;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,8 +11,12 @@ public class NeedSlicing {
   private static final List<String> LIST = new ArrayList<>();
 
   public static void main(String[] args) {
-    boolean A = Boolean.parseBoolean(args[0]);
+    SinkManager.preProcessSinks(NeedSlicing.class.getSimpleName());
+
+    boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
     foo(A);
+
+    SinkManager.postProcessSinks();
   }
 
   private static void foo(boolean x) {
@@ -19,10 +26,12 @@ public class NeedSlicing {
 
   private static int boo(boolean x) {
     if (x) {
-      return 50_000_000;
+      //      return 50_000_000;
+      return 50;
     }
 
-    return 500_000_000;
+    //    return 500_000_000;
+    return 500;
   }
 
   private static void bar(int bound) {
