@@ -23,7 +23,7 @@ public class MultiplePaths {
   }
 
   private static void bar() {
-    for (int i = 0; i < 50_000_000; i++) {
+    for (int i = 0; i < 500_000_000; i++) {
       ExpensiveCalls.getFactors();
       checkProgress();
     }
