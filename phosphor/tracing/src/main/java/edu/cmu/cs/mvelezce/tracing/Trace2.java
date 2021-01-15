@@ -15,12 +15,12 @@ public class Trace2 {
   }
 
   private static void foo(boolean x) {
-    boolean y = moo(x);
-    bar(y);
+    int i = moo(x);
+    bar(i);
   }
 
-  private static void bar(boolean x) {
-    if (x) {
+  private static void bar(int i) {
+    if (i > 0) {
       //            Thread.sleep(5000);
       System.out.println("5 seconds");
     } else {
@@ -29,7 +29,11 @@ public class Trace2 {
     }
   }
 
-  private static boolean moo(boolean x) {
-    return x;
+  private static int moo(boolean x) {
+    if (x) {
+      return 1;
+    }
+
+    return 0;
   }
 }

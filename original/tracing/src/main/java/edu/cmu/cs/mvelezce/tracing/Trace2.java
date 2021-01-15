@@ -7,22 +7,26 @@ public class Trace2 {
     foo(A);
   }
 
-  private static void foo(boolean x) throws InterruptedException {
-    boolean y = moo(x);
-    bar(y);
+  private static void foo(boolean x) {
+    int i = moo(x);
+    bar(i);
   }
 
-  private static void bar(boolean x) throws InterruptedException {
-    if (x) {
-      Thread.sleep(5000);
+  private static void bar(int i) {
+    if (i > 0) {
+      //            Thread.sleep(5000);
       System.out.println("5 seconds");
     } else {
-      Thread.sleep(2000);
+      //            Thread.sleep(2000);
       System.out.println("2 seconds");
     }
   }
 
-  private static boolean moo(boolean x) {
-    return x;
+  private static int moo(boolean x) {
+    if (x) {
+      return 1;
+    }
+
+    return 0;
   }
 }
