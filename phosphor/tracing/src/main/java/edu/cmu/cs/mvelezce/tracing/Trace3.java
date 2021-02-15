@@ -1,15 +1,20 @@
 package edu.cmu.cs.mvelezce.tracing;
 
-public class Trace2 {
+import edu.cmu.cs.mvelezce.taints.Sources;
+
+public class Trace3 {
 
   public static void main(String[] args) {
-    boolean A = true;
-    foo(A);
+    boolean A = Sources.A_0(Boolean.parseBoolean(args[0]));
+    boolean B = Sources.B_1(Boolean.parseBoolean(args[1]));
+    foo(A, B);
   }
 
-  private static void foo(boolean x) {
+  private static void foo(boolean x, boolean y) {
     int i = moo(x);
-    bar(i);
+    if (y) {
+      bar(i);
+    }
     if (i > 0) {
       System.out.println("1 sec");
     }
@@ -27,11 +32,10 @@ public class Trace2 {
   }
 
   private static int moo(boolean x) {
-    System.out.println(x);
     if (x) {
-      return 5;
+      return 1;
     } else {
-      return 2;
+      return 0;
     }
   }
 }

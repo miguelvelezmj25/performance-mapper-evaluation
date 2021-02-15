@@ -1,19 +1,25 @@
 package edu.cmu.cs.mvelezce.tracing;
 
-import edu.cmu.cs.mvelezce.cc.control.sink.SinkManager;
-import edu.cmu.cs.mvelezce.taints.Sources;
-
 public class Trace1 {
 
   public static void main(String[] args) {
-    SinkManager.preProcessSinks(Trace1.class.getSimpleName());
-
-    boolean A = Sources.A_0(false);
+    boolean A = getOption(args);
+    int x = 0;
 
     if (A) {
-      System.out.println("Hello");
+      x = 2500;
+    } else {
+      x = 5000;
     }
 
-    SinkManager.postProcessSinks();
+    if (x > 2500) {
+      print(x);
+    }
   }
+
+  private static boolean getOption(String[] args) {
+    return args.length != 5;
+  }
+
+  private static void print(int x) {}
 }
